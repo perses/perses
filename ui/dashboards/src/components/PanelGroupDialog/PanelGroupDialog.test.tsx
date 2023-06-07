@@ -14,18 +14,19 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
-import { DashboardProvider } from '../../context';
+import { DashboardProvider, TemplateVariableProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { PanelGroupDialog } from './PanelGroupDialog';
-
 describe('Add Panel Group', () => {
   const renderDialog = () => {
     const { store, DashboardProviderSpy } = createDashboardProviderSpy();
 
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
-        <DashboardProviderSpy />
-        <PanelGroupDialog />
+        <TemplateVariableProvider>
+          <DashboardProviderSpy />
+          <PanelGroupDialog />
+        </TemplateVariableProvider>
       </DashboardProvider>
     );
 

@@ -17,6 +17,8 @@ import {
   useDatasourceClient,
   VariableOption,
   VariablePlugin,
+  parseTemplateVariables,
+  replaceTemplateVariables,
 } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
@@ -30,7 +32,6 @@ import {
   PrometheusClient,
   VectorData,
 } from '../model';
-import { parseTemplateVariables, replaceTemplateVariables } from '../utils';
 import { PromQLEditor } from '../components';
 import {
   PrometheusLabelNamesVariableOptions,

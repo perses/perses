@@ -33,6 +33,7 @@ export interface LegendItem {
    * columns when using a table legend.
    */
   data?: Record<string, unknown>;
+
   onClick?: MouseEventHandler<HTMLElement>;
 }
 

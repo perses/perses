@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Notice, TimeSeriesData } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, replaceTemplateVariables } from '@perses-dev/plugin-system';
 import { fromUnixTime } from 'date-fns';
 import {
   parseValueTuple,
@@ -22,7 +22,7 @@ import {
   getRangeStep,
   DEFAULT_PROM,
 } from '../../model';
-import { getFormattedPrometheusSeriesName, replaceTemplateVariables } from '../../utils';
+import { getFormattedPrometheusSeriesName } from '../../utils';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -50,6 +50,12 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   // Replace template variable placeholders in PromQL query
   let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
+
+  let seriesNameFormat = spec.series_name_format;
+  // if series name format is defined, replace template variable placeholders in series name format
+  if (seriesNameFormat) {
+    seriesNameFormat = replaceTemplateVariables(seriesNameFormat, context.variableState);
+  }
 
   // Get the datasource, using the default Prom Datasource if one isn't specified in the query
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
@@ -88,7 +94,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
       const { metric, values } = value;
 
       // Account for series_name_format from query editor when determining name to show in legend, tooltip, etc.
-      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, spec.series_name_format);
+      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
 
       return {
         name,

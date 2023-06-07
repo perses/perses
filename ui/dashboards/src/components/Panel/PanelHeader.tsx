@@ -18,8 +18,8 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopy from 'mdi-material-ui/ContentCopy';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
-
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
@@ -33,9 +33,19 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   };
 }
 
-export function PanelHeader({ id, title, description, editHandlers, sx, ...rest }: PanelHeaderProps) {
+export function PanelHeader({
+  id,
+  title: rawTitle,
+  description: rawDescription,
+  editHandlers,
+  sx,
+  ...rest
+}: PanelHeaderProps) {
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
+
+  const title = useReplaceVariablesInString(rawTitle) as string;
+  const description = useReplaceVariablesInString(rawDescription);
 
   let actions: CardHeaderProps['action'] = undefined;
   if (editHandlers !== undefined) {

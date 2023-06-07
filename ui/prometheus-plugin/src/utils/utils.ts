@@ -11,56 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isEmptyObject, VariableValue } from '@perses-dev/core';
-import { VariableStateMap } from '@perses-dev/plugin-system';
+import { isEmptyObject } from '@perses-dev/core';
 import { Metric } from '../model/api-types';
-
-export function replaceTemplateVariables(text: string, variableState: VariableStateMap): string {
-  const variables = parseTemplateVariables(text);
-  let finalText = text;
-  variables.forEach((v) => {
-    const variable = variableState[v];
-    if (variable && variable?.value) {
-      finalText = replaceTemplateVariable(finalText, v, variable?.value);
-    }
-  });
-
-  return finalText;
-}
-
-export function replaceTemplateVariable(text: string, varName: string, templateVariableValue: VariableValue) {
-  const variableTemplate = '$' + varName;
-  let replaceString = '';
-  if (Array.isArray(templateVariableValue)) {
-    replaceString = `(${templateVariableValue.join('|')})`; // regex style
-  }
-  if (typeof templateVariableValue === 'string') {
-    replaceString = templateVariableValue;
-  }
-
-  return text.replaceAll(variableTemplate, replaceString);
-}
-
-// TODO: Fix this lint error
-// eslint-disable-next-line no-useless-escape
-const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
-
-/**
- * Returns a list of template variables
- */
-export const parseTemplateVariables = (text: string) => {
-  const regex = TEMPLATE_VARIABLE_REGEX;
-  const matches = new Set<string>();
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match && match.length > 1 && match[1]) {
-      matches.add(match[1]);
-    }
-  }
-  // return unique matches
-  return Array.from(matches.values());
-};
 
 /**
  * Types for metric labels, used in series_name_format implementation
