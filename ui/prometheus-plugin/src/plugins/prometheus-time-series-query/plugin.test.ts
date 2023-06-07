@@ -1,6 +1,9 @@
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { PrometheusTimeSeriesQuery } from './';
 
+// TODO: This should be fixed globally in the test setup
+jest.mock('echarts/core');
+
 const stubTimeSeriesContext: TimeSeriesQueryContext = {
   datasourceStore: {
     getDatasource: jest.fn(),
