@@ -79,9 +79,7 @@ describe('PrometheusTimeSeriesQuery', () => {
     expect(variables).toEqual(['job', 'instance', 'foo']);
   });
 
-  it('should replace variables in legend formatter', async () => {
-    if (!PrometheusTimeSeriesQuery.dependsOn) throw new Error('dependsOn is not defined');
-
+  it('should replace variables in series_name_format', async () => {
     const ctx = createStubContext();
     ctx.variableState = {
       foo: {
