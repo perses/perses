@@ -51,6 +51,12 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
+  let seriesNameFormat = spec.series_name_format;
+  // if series name format is defined, replace template variable placeholders in series name format
+  if (seriesNameFormat) {
+    seriesNameFormat = replaceTemplateVariables(seriesNameFormat, context.variableState);
+  }
+
   // Get the datasource, using the default Prom Datasource if one isn't specified in the query
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
 
@@ -88,7 +94,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
       const { metric, values } = value;
 
       // Account for series_name_format from query editor when determining name to show in legend, tooltip, etc.
-      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, spec.series_name_format);
+      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
 
       return {
         name,
