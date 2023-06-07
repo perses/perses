@@ -17,6 +17,7 @@ export * from './definitions';
 export * from './display';
 export * from './http';
 export * from './layout';
+export * from './legend';
 export * from './notice';
 export * from './panels';
 export * from './query';

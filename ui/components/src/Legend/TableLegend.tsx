@@ -13,7 +13,7 @@
 
 import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
-import { LegendItem } from '../model';
+import { LegendItem } from './legend-model';
 
 export interface TableLegendProps {
   items: LegendItem[];

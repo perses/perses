@@ -13,7 +13,7 @@
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
-import { LegendItem } from './legend';
+import { LegendItem } from '../Legend';
 
 // adjust display when there are many time series to help with performance
 export const OPTIMIZED_MODE_SERIES_LIMIT = 1000;

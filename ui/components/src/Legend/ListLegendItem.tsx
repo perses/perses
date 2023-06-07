@@ -13,9 +13,9 @@
 
 import React, { forwardRef, useState } from 'react';
 import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
-import { LegendItem } from '../model';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
+import { LegendItem } from './legend-model';
 
 export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick'> {
   item: LegendItem;

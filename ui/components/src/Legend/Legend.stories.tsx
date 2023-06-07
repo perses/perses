@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Legend, LegendProps, legendModes } from '@perses-dev/components';
+import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 import { useState } from 'react';
 import { StorySection } from '@perses-dev/storybook';
+import { legendModes } from '@perses-dev/core';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];

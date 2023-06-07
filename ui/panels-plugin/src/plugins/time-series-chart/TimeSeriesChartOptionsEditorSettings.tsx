@@ -14,14 +14,13 @@
 import { Button } from '@mui/material';
 import { produce } from 'immer';
 import {
-  LegendOptionsEditor,
-  LegendOptionsEditorProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
   ThresholdsEditor,
   ThresholdsEditorProps,
 } from '@perses-dev/components';
+import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugin-system';
 import {
   TimeSeriesChartOptions,
   DEFAULT_VISUAL,

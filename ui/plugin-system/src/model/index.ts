@@ -13,6 +13,7 @@
 
 export * from './calculations';
 export * from './datasource';
+export * from './legend';
 export * from './panels';
 export * from './plugins';
 export * from './plugin-base';

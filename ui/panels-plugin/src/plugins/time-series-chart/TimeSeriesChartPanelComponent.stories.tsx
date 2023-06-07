@@ -29,7 +29,7 @@ import {
   StorySection,
 } from '@perses-dev/storybook';
 import { ComponentProps } from 'react';
-import { legendModes, legendPositions } from '@perses-dev/components';
+import { legendModes, legendPositions } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 
 type TimeSeriesChartProps = ComponentProps<typeof TimeSeriesChart.PanelComponent>;

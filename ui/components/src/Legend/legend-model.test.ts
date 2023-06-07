@@ -11,16 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendOptions, validateLegendSpec, isLegendItemVisuallySelected } from './legend';
-
-describe('validateLegendSpec', () => {
-  it('should check if a legend spec is valid', () => {
-    const invalidLegend = { position: 'bottom' };
-    expect(validateLegendSpec(invalidLegend as LegendOptions)).toEqual(false);
-    expect(validateLegendSpec({ position: 'Bottom' })).toEqual(true);
-    expect(validateLegendSpec(undefined)).toEqual(true);
-  });
-});
+import { isLegendItemVisuallySelected } from './legend-model';
 
 describe('isLegendItemVisuallySelected', () => {
   it('does not highlight the item when "ALL" selected', () => {
