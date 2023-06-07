@@ -153,7 +153,7 @@ export function getAggregationValues(
       lastNonNull = value;
 
       // Init at the first non-null value we see and then adjust based on the
-      // larger value.
+      // smaller value.
       if (typeof min === 'undefined') {
         min = value;
       } else {
