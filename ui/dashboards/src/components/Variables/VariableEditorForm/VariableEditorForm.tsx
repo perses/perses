@@ -296,7 +296,25 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   }
                   label="Allow All option"
                 />
-                <Typography variant="caption">Enables an option to include all variable values</Typography>
+                <Typography mb={1} variant="caption">
+                  Enables an option to include all variable values
+                </Typography>
+                {state.listVariableFields.allowAll && (
+                  <TextField
+                    label="Custom All Value"
+                    value={state.listVariableFields.customAllValue}
+                    onChange={(e) => {
+                      setState((draft) => {
+                        if (e.target.value) {
+                          draft.listVariableFields.customAllValue = e.target.value;
+                        } else {
+                          draft.listVariableFields.customAllValue = undefined;
+                        }
+                      });
+                    }}
+                    helperText="When All is selected, this value will be used"
+                  />
+                )}
               </Stack>
             </Stack>
           </>
