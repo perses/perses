@@ -77,13 +77,13 @@ function sanitizeHTML(html: string): string {
 
 export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
-    spec: { text: rawText },
+    spec: { text },
   } = props;
   const chartsTheme = useChartsTheme();
 
-  const text = useReplaceVariablesInString(rawText);
+  const textAfterVariableReplacement = useReplaceVariablesInString(text);
 
-  const html = useMemo(() => markdownToHTML(text ?? ''), [text]);
+  const html = useMemo(() => markdownToHTML(textAfterVariableReplacement ?? ''), [textAfterVariableReplacement]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
   return (
