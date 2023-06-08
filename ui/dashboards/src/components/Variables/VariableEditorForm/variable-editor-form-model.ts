@@ -26,12 +26,14 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
       kind: '',
       spec: {},
     },
+    customAllValue: undefined as string | undefined,
   };
   if (initialVariableDefinition.kind === 'ListVariable') {
     listVariableFields.allowMultiple = initialVariableDefinition.spec.allow_all_value ?? false;
     listVariableFields.allowAll = initialVariableDefinition.spec.allow_all_value ?? false;
     listVariableFields.capturing_regexp = initialVariableDefinition.spec.capturing_regexp;
     listVariableFields.plugin = initialVariableDefinition.spec.plugin;
+    listVariableFields.customAllValue = initialVariableDefinition.spec.custom_all_value;
   }
 
   return {
@@ -72,6 +74,7 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
         allow_all_value: state.listVariableFields.allowAll,
         capturing_regexp: state.listVariableFields.capturing_regexp,
         plugin: state.listVariableFields.plugin,
+        custom_all_value: state.listVariableFields.customAllValue,
       },
     };
   }

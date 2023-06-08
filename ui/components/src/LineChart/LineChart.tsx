@@ -75,6 +75,7 @@ export interface LineChartProps {
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
+  syncGroup?: string;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -89,6 +90,7 @@ export function LineChart({
   legend,
   tooltipConfig = { wrapLabels: true },
   noDataVariant = 'message',
+  syncGroup,
   onDataZoom,
   onDoubleClick,
   __experimentalEChartsOptionsOverride,
@@ -291,6 +293,7 @@ export function LineChart({
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
         _instance={chartRef}
+        syncGroup={syncGroup}
       />
     </Box>
   );
