@@ -13,7 +13,7 @@
 
 import { useMemo } from 'react';
 import { Box, Typography } from '@mui/material';
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';

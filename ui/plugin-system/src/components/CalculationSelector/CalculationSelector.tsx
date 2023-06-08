@@ -13,7 +13,7 @@
 
 import { TextField, Autocomplete } from '@mui/material';
 import { OptionsEditorControl } from '@perses-dev/components';
-import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '../../model/calculations';
+import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '@perses-dev/core';
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };
 const CALC_OPTIONS: AutocompleteCalculationOption[] = Object.entries(CALCULATIONS_CONFIG).map(([id, config]) => {
