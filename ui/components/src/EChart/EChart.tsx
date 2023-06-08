@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import { ECharts, EChartsCoreOption, init } from 'echarts/core';
+import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
 import { isEqual, debounce } from 'lodash-es';
 import { EChartsTheme } from '../model';
@@ -105,6 +105,7 @@ export interface EChartsProps<T> {
   sx?: SxProps<Theme>;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
+  syncGroup?: string;
   onChartInitialized?: (instance: ECharts) => void;
 }
 
@@ -115,6 +116,7 @@ export const EChart = React.memo(function EChart<T>({
   sx,
   onEvents,
   _instance,
+  syncGroup,
   onChartInitialized,
 }: EChartsProps<T>) {
   const initialOption = useRef<EChartsCoreOption>(option);
@@ -138,6 +140,13 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current = null;
     };
   }, [_instance, onChartInitialized, theme, renderer]);
+
+  // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
+  useEffect(() => {
+    if (!chartElement.current || !syncGroup) return;
+    chartElement.current.group = syncGroup;
+    connect([chartElement.current]); // more info: https://echarts.apache.org/en/api.html#echarts.connect
+  }, [syncGroup, chartElement]);
 
   // Update chart data when option changes
   useEffect(() => {
