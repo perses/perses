@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/internal-utils",
-  "version": "0.33.0",
+  "version": "0.34.0",
   "private": true,
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -10,6 +10,6 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "devDependencies": {
-    "@perses-dev/prometheus-plugin": "0.33.0"
+    "@perses-dev/prometheus-plugin": "0.34.0"
   }
 }
