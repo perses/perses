@@ -17,8 +17,15 @@ import { TableColumnConfig, getTableCellLayout, persesColumnsToTanstackColumns }
 const mockMuiTheme = createTheme({});
 
 describe('getTableCellLayout', () => {
-  test.each(['compact', 'standard'] as const)('gets layout for %s density', (density) => {
-    expect(getTableCellLayout(mockMuiTheme, density)).toMatchSnapshot();
+  describe.each(['compact', 'standard'] as const)('gets layout for %s density', (density) => {
+    test.each([
+      { name: 'first column', opts: { isFirstColumn: true } },
+      { name: 'center column', opts: {} },
+      { name: 'last column', opts: { isLastColumn: true } },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ])(`in $name`, ({ name, opts }) => {
+      expect(getTableCellLayout(mockMuiTheme, density, opts)).toMatchSnapshot();
+    });
   });
 });
 
@@ -63,12 +70,31 @@ describe('persesColumnToTanstackColumn', () => {
     );
   });
 
+  test('maps `align` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        align: 'center',
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          align: 'center',
+        },
+      })
+    );
+  });
+
   test('transforms perses columns to tanstack columns', () => {
     const persesColumns: Array<TableColumnConfig<MockTableData>> = [
       {
         accessorKey: 'label',
         header: 'Name',
         width: 'auto',
+        align: 'right',
       },
       {
         accessorKey: 'value',

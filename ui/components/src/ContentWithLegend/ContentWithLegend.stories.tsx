@@ -39,6 +39,12 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
       label: `${labelPrefix} ${i}`,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
+      data: {
+        index: i,
+        squared: Math.pow(i, 2),
+        cubed: Math.pow(i, 3),
+        description: `This is entry #${i}`,
+      },
     });
   }
   return data;
@@ -252,6 +258,48 @@ export const Children: Story = {
 export const NoLegend: Story = {
   args: {
     legendProps: undefined,
+  },
+};
+
+/**
+ * When laying out a legend with `mode` set to `table`, `position` set to `right`,
+ * and additional `tableProps.columns` defined, the width of the legend will be
+ * increased to account for column definitions with the `width` set to a numeric
+ * value.
+ */
+export const TableWithColumns: Story = {
+  args: {
+    legendProps: {
+      data: generateMockLegendData(10),
+      options: {
+        position: 'Right',
+        mode: 'Table',
+      },
+      selectedItems: {},
+      onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+      tableProps: {
+        columns: [
+          {
+            header: 'Index',
+            accessorKey: 'data.index',
+            align: 'center',
+            width: 50,
+          },
+          {
+            header: 'Squared',
+            accessorKey: 'data.squared',
+            align: 'right',
+            width: 60,
+          },
+          {
+            header: 'Cubed',
+            accessorKey: 'data.cubed',
+            align: 'right',
+            width: 70,
+          },
+        ],
+      },
+    },
   },
 };
 

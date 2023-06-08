@@ -17,7 +17,7 @@ import { ReactNode } from 'react';
 import { getLegendMode } from '@perses-dev/core';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
-import { TableLegend } from './TableLegend';
+import { TableLegend, TableLegendProps } from './TableLegend';
 import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
 
 export interface LegendProps {
@@ -38,6 +38,11 @@ export interface LegendProps {
    * Callback fired when the selected items in the legend changes.
    */
   onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
+
+  /**
+   * Props specific to legend with `mode` set to `table`.
+   */
+  tableProps?: Pick<TableLegendProps, 'columns'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -47,7 +52,15 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, selectedItems, onSelectedItemsChange }: LegendProps) {
+export function Legend({
+  width,
+  height,
+  options,
+  data,
+  selectedItems,
+  onSelectedItemsChange,
+  tableProps,
+}: LegendProps) {
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
@@ -101,7 +114,9 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
 
   let legendContent: ReactNode;
   if (mode === 'Table') {
-    legendContent = <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} />;
+    legendContent = (
+      <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} {...tableProps} />
+    );
   } else if (options.position === 'Right' || needsVirtualization) {
     legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
   } else {

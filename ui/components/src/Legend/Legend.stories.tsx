@@ -39,6 +39,12 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
       label: `${labelPrefix} ${i}`,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
+      data: {
+        index: i,
+        squared: Math.pow(i, 2),
+        cubed: Math.pow(i, 3),
+        description: `This is entry #${i}`,
+      },
     });
   }
   return data;
@@ -288,6 +294,62 @@ export const SelectedItems: StoryObj<LegendProps> = {
         </StorySection>
       </Stack>
     );
+  },
+};
+
+/**
+ * When the legend mode is set to `table`, you may define additional columns
+ * to display in the table after the selection checkboxes and the item label
+ * using the `tableProps.columns` property.
+ *
+ * A `LegendItem` may define additional information for columns in the `data`
+ * property and then use the `accessorKey` property of a column definition to
+ * reference it.
+ *
+ * See the stories for the `Table` component for additional examples related to
+ * defining table columns.
+ */
+export const TableColumns: Story = {
+  args: {
+    width: 400,
+    height: 200,
+    selectedItems: 'ALL',
+    data: generateMockLegendData(10),
+    options: { position: 'Bottom', mode: 'Table' },
+    tableProps: {
+      columns: [
+        {
+          header: 'Index',
+          accessorKey: 'data.index',
+          align: 'center',
+          width: 50,
+        },
+        {
+          header: 'Squared',
+          accessorKey: 'data.squared',
+          align: 'right',
+          width: 60,
+        },
+        {
+          header: 'Cubed',
+          accessorKey: 'data.cubed',
+          align: 'right',
+          width: 70,
+        },
+        {
+          header: 'Description',
+          accessorKey: 'data.description',
+        },
+      ],
+    },
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    data: {
+      table: {
+        disable: true,
+      },
+    },
   },
 };
 

@@ -36,7 +36,7 @@ export function ContentWithLegend({
   const { content, legend, margin } = getContentWithLegendLayout({
     width,
     height,
-    legendOptions: legendProps?.options,
+    legendProps,
     minChildrenHeight,
     minChildrenWidth,
     spacing,
