@@ -13,7 +13,7 @@
 
 import { produce } from 'immer';
 import { Switch, SwitchProps } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import {
   UnitSelector,
   UnitSelectorProps,
@@ -24,6 +24,7 @@ import {
   ThresholdsEditorProps,
   ThresholdsEditor,
 } from '@perses-dev/components';
+import { DEFAULT_CALCULATION } from '@perses-dev/core';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
 export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps) {
