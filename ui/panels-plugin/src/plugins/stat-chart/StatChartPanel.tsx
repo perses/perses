@@ -14,8 +14,8 @@
 import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import { TimeSeriesData } from '@perses-dev/core';
-import { useDataQueries, PanelProps, CalculationsMap, CalculationType } from '@perses-dev/plugin-system';
+import { TimeSeriesData, CalculationsMap, CalculationType } from '@perses-dev/core';
+import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
 
