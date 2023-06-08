@@ -26,7 +26,7 @@ describe('Panel Drawer', () => {
 
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
-        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
+        <TimeRangeProvider initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '30m' }}>
           <TemplateVariableProvider>
             <DashboardProviderSpy />
             <PanelDrawer />

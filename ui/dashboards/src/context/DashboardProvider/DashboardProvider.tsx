@@ -47,6 +47,7 @@ export interface DashboardStoreState
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
   duration: DurationString;
+  refreshInterval: DurationString;
   display?: Display;
 }
 
@@ -104,7 +105,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration },
+    spec: { display, duration, refreshInterval },
     metadata,
   } = dashboardResource;
 
@@ -137,9 +138,10 @@ function initStore(props: DashboardProviderProps) {
           metadata,
           display,
           duration,
+          refreshInterval,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration } }) => {
+          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration, refreshInterval } }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
@@ -148,6 +150,7 @@ function initStore(props: DashboardProviderProps) {
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
+              state.refreshInterval = refreshInterval;
             });
           },
         };

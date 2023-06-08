@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueries,
+  useQueryClient,
+  Query,
+  QueryCache,
+  QueryKey,
+  QueryObserverOptions,
+} from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap, useTemplateVariableValues } from './template-variables';
@@ -85,6 +93,7 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   return useQuery({
     enabled: queryEnabled,
     queryKey: queryKey,
+    refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
@@ -110,12 +119,13 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
   );
 
   return useQueries({
-    queries: definitions.map((definition, idx) => {
+    queries: definitions.map<QueryObserverOptions>((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
+        refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
         queryFn: async () => {
           // Keep options out of query key so we don't re-run queries because suggested step changes
           const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
@@ -132,7 +142,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
  * Build the time series query context object from data available at runtime
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  const { absoluteTimeRange, refreshKey } = useTimeRange();
+  const { absoluteTimeRange, refreshKey, refreshIntervalInMs } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -141,6 +151,7 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     variableState,
     datasourceStore,
     refreshKey,
+    refreshIntervalInMs: refreshIntervalInMs,
   };
 }
 

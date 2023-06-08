@@ -92,6 +92,8 @@ describe('TimeSeriesChartPanel', () => {
   // Helper to render the panel with some context set
   const renderPanel = () => {
     const mockTimeRangeContext = {
+      refreshIntervalInMs: 0,
+      setRefreshInterval: () => ({}),
       timeRange: TEST_TIME_RANGE,
       setTimeRange: () => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),

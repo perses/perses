@@ -24,15 +24,19 @@ export function useDashboard() {
     metadata,
     display,
     duration,
-  } = useDashboardStore(({ panels, panelGroups, panelGroupOrder, setDashboard, metadata, display, duration }) => ({
-    panels,
-    panelGroups,
-    panelGroupOrder,
-    setDashboard,
-    metadata,
-    display,
-    duration,
-  }));
+    refreshInterval,
+  } = useDashboardStore(
+    ({ panels, panelGroups, panelGroupOrder, setDashboard, metadata, display, duration, refreshInterval }) => ({
+      panels,
+      panelGroups,
+      panelGroupOrder,
+      setDashboard,
+      metadata,
+      display,
+      duration,
+      refreshInterval,
+    })
+  );
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
@@ -46,6 +50,7 @@ export function useDashboard() {
       layouts,
       variables,
       duration,
+      refreshInterval,
     },
   };
 

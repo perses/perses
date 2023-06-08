@@ -13,16 +13,12 @@
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
-import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
+import { TimeRangeValue, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeZone } from '../context/TimeZoneProvider';
+import { TimeOption } from '../model';
 import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
-
-export interface TimeOption {
-  value: RelativeTimeRange;
-  display: string;
-}
 
 interface TimeRangeSelectorProps {
   value: TimeRangeValue;

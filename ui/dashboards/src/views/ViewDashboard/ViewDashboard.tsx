@@ -13,7 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
-import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
+import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
   TemplateVariableProvider,
   DashboardProvider,
@@ -46,12 +46,18 @@ export function ViewDashboard(props: ViewDashboardProps) {
   } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? '1h';
+  const dashhboardRefreshInterval = spec.refreshInterval ?? '0s';
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
+  const initialRefreshInterval = useInitialRefreshInterval(dashhboardRefreshInterval);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
-        <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
+        <TimeRangeProvider
+          initialTimeRange={initialTimeRange}
+          initialRefreshInterval={initialRefreshInterval}
+          enabledURLParams={true}
+        >
           <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
             <Box
               sx={combineSx(

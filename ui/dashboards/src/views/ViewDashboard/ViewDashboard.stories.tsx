@@ -52,6 +52,7 @@ export const ViewEmptyState: Story = {
         version: 0,
       },
       spec: {
+        refreshInterval: '0s',
         duration: '1h',
         variables: [],
         layouts: [],
@@ -75,6 +76,7 @@ export const EditEmptyState: Story = {
       },
       spec: {
         duration: '1h',
+        refreshInterval: '0s',
         variables: [],
         layouts: [],
         panels: {},
@@ -102,6 +104,7 @@ export const CustomEmptyState: Story = {
       },
       spec: {
         duration: '1h',
+        refreshInterval: '0s',
         variables: [],
         layouts: [],
         panels: {},
