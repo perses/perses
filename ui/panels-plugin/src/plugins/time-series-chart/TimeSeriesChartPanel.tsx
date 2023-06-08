@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
 import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';

@@ -37,7 +37,7 @@
     "dompurify": "^2.4.0",
     "echarts": "npm:echarts-nightly@5.5.0-dev.20230517",
     "immer": "^9.0.15",
-    "lodash-es": "^4.17.21",
+    "lodash": "^4.17.21",
     "marked": "^4.2.12"
   },
   "peerDependencies": {

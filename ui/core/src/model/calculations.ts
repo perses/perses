@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { findLast, meanBy, sumBy } from 'lodash-es';
+import findLast from 'lodash/findLast';
+import meanBy from 'lodash/meanBy';
+import sumBy from 'lodash/sumBy';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
 // TODO: move this file and calculations.test.ts to @perses-dev/core
