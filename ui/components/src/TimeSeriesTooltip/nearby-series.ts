@@ -128,16 +128,16 @@ export function checkforNearbySeries(
       chart.dispatchAction({
         type: 'highlight',
         seriesIndex: emphasizedSeriesIndexes,
-        notBlur: false,
-        escapeConnect: true,
+        notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
       });
     } else {
       // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
       chart.dispatchAction({
         type: 'highlight',
         seriesIndex: nearbySeriesIndexes,
-        notBlur: true,
-        escapeConnect: true,
+        notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
       });
     }
   }
