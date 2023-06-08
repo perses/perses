@@ -112,6 +112,7 @@ export function useTemplateVariableStore() {
 
 function PluginProvider({ children }: { children: React.ReactNode }) {
   const originalValues = useTemplateVariableValues();
+  const definitions = useTemplateVariableDefinitions();
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -121,13 +122,20 @@ function PluginProvider({ children }: { children: React.ReactNode }) {
     // to include all options.
     Object.keys(originalValues).forEach((name) => {
       const v = { ...originalValues[name] } as VariableState;
+
       if (v.value === ALL_VALUE) {
-        v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+        const definition = definitions.find((d) => d.spec.name === name);
+        // If the variable is a list variable and has a custom all value, then use that value instead
+        if (definition?.kind === 'ListVariable' && definition.spec.custom_all_value) {
+          v.value = definition.spec.custom_all_value;
+        } else {
+          v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+        }
       }
       contextValues[name] = v;
     });
     return contextValues;
-  }, [originalValues]);
+  }, [originalValues, definitions]);
 
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
