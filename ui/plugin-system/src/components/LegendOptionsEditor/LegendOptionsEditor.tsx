@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Autocomplete, Switch, SwitchProps, TextField } from '@mui/material';
+import { Switch, SwitchProps } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition } from '@perses-dev/core';
-import { ErrorAlert, OptionsEditorControl } from '@perses-dev/components';
+import { ErrorAlert, OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
@@ -31,11 +31,11 @@ const POSITION_OPTIONS: LegendPositionOption[] = Object.entries(LEGEND_POSITIONS
   };
 });
 
-type LegendModeOption = LegendSingleSelectConfig & { id: LegendSpecOptions['mode'] };
+type LegendModeOption = LegendSingleSelectConfig & { id: Required<LegendSpecOptions>['mode'] };
 
 const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
   return {
-    id: id as LegendSpecOptions['mode'],
+    id: id as Required<LegendSpecOptions>['mode'],
     ...config,
   };
 });
@@ -84,35 +84,31 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
       <OptionsEditorControl
         label="Position"
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{
               ...legendPositionConfig,
               id: currentPosition,
             }}
             options={POSITION_OPTIONS}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => <TextField {...params} />}
             onChange={handleLegendPositionChange}
             disabled={value === undefined}
             disableClearable
-          ></Autocomplete>
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl
         label="Mode"
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{
               ...legendModeConfig,
               id: currentMode,
             }}
             options={MODE_OPTIONS}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => <TextField {...params} />}
             onChange={handleLegendModeChange}
             disabled={value === undefined}
             disableClearable
-          ></Autocomplete>
+          ></SettingsAutocomplete>
         }
       />
     </>

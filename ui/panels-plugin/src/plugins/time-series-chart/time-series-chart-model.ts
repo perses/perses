@@ -130,7 +130,9 @@ export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent opti
 export const STACK_CONFIG = {
   None: { label: 'None' },
   All: { label: 'All' },
-  Percent: { label: 'Percent' }, // temporarily disabled
+
+  // TODO: enable option after 'Percent' implemented
+  Percent: { label: 'Percent', disabled: true }, // temporarily disabled
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {

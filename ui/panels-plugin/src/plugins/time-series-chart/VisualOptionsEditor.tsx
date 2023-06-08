@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Autocomplete, Slider, Switch, TextField } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
+import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -88,15 +88,12 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       <OptionsEditorControl
         label={VISUAL_CONFIG.stack.label}
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{
               ...stackConfig,
               id: currentStack,
             }}
             options={STACK_OPTIONS}
-            getOptionDisabled={(option) => option.label === 'Percent'} // TODO: enable option after 'Percent' implemented
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
               const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
@@ -110,7 +107,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             }}
             disabled={value === undefined}
             disableClearable
-          ></Autocomplete>
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl

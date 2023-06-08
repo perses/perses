@@ -25,6 +25,7 @@ export * from './JSONEditor';
 export * from './Legend';
 export * from './LineChart';
 export * from './OptionsEditorLayout';
+export * from './SettingsAutocomplete';
 export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
