@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries, PersesChartsTheme } from '@perses-dev/components';
 import { Box, Stack, Skeleton, Typography } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '@perses-dev/core';
@@ -30,15 +30,17 @@ export function StatChartPanel(props: StatChartPanelProps) {
     contentDimensions,
   } = props;
 
-  const { queryResults, isLoading } = useDataQueries();
+  const { queryResults, isLoading, isFetching } = useDataQueries();
   const statChartData = useStatChartData(queryResults, calculation);
+  const isMultiSeries = statChartData.length > 1;
+
   const chartsTheme = useChartsTheme();
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
 
   if (contentDimensions === undefined) return null;
 
-  if (isLoading === true) {
+  if (isLoading || isFetching) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -50,24 +52,26 @@ export function StatChartPanel(props: StatChartPanelProps) {
     );
   }
 
-  // accounts for showing a separate chart for each time series
-  let chartWidth = contentDimensions.width / statChartData.length - SPACING;
-  if (chartWidth < MIN_WIDTH && statChartData.length > 1) {
-    // enables horizontal scroll when charts overflow outside of panel
+  // Calculates chart width
+  const spacing = SPACING * (statChartData.length - 1);
+  let chartWidth = (contentDimensions.width - spacing) / statChartData.length;
+  if (isMultiSeries && chartWidth < MIN_WIDTH) {
     chartWidth = MIN_WIDTH;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const noDataTextStyle = (chartsTheme.noDataOption.title as any).textStyle;
+
   return (
     <Stack
-      direction="row"
-      height="100%"
+      height={contentDimensions.height}
       width={contentDimensions.width}
       spacing={`${SPACING}px`}
-      justifyContent={statChartData.length > 1 ? 'left' : 'center'}
+      direction="row"
+      justifyContent={isMultiSeries ? 'left' : 'center'}
       alignItems="center"
       sx={{
-        // so scrollbar only shows when necessary
-        overflowX: statChartData.length > 1 ? 'scroll' : 'auto',
+        overflowX: isMultiSeries ? 'scroll' : 'auto',
       }}
     >
       {statChartData.length ? (
@@ -76,15 +80,15 @@ export function StatChartPanel(props: StatChartPanelProps) {
             key={index}
             width={chartWidth}
             height={contentDimensions.height}
-            label={series.label}
             data={series}
             unit={unit}
             color={getColorFromThresholds(chartsTheme, thresholds, series.calculatedValue)}
             sparkline={convertSparkline(chartsTheme, sparkline, thresholds, series.calculatedValue)}
+            showSeriesName={isMultiSeries}
           />
         ))
       ) : (
-        <Typography sx={{ ...chartsTheme.noDataOption?.title?.textStyle }}>No data</Typography>
+        <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
       )}
     </Stack>
   );
@@ -104,7 +108,7 @@ const useStatChartData = (
       for (const seriesData of result.data.series) {
         const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
         const series: GraphSeries = {
-          name: seriesData.formattedName,
+          name: seriesData.formattedName ?? '',
           values: seriesData.values,
         };
         statChartData.push({ calculatedValue, seriesData: series });
