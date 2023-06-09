@@ -2281,19 +2281,17 @@
     "metadata": {
       "name": "StatChartPanel",
       "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-01-27T00:35:26.333638Z",
-      "version": 8,
+      "updated_at": "2023-06-09T17:57:49.291171Z",
+      "version": 13,
       "project": "testing"
     },
     "spec": {
-      "duration": "6h",
       "panels": {
         "SimpleStat": {
           "kind": "Panel",
           "spec": {
             "display": {
-              "name": "Simple Stat",
-              "description": "Stat chart with a single value"
+              "name": "Multi-Series Stat with Sparkline"
             },
             "plugin": {
               "kind": "StatChart",
@@ -2313,7 +2311,102 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "prometheus_http_requests_total{instance=\"demo.do.prometheus.io:9090\",code!=\"200\"}"
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
+                      "series_name_format": "{{mode}} mode "
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "SimpleStat-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Multi-Series Stat without Sparkline"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "Mean",
+                "unit": {
+                  "abbreviate": false,
+                  "decimal_places": 2,
+                  "kind": "Decimal"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
+                      "series_name_format": "{{mode}} mode "
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "SingleStat": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Stat with Sparkline"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "LastNumber",
+                "sparkline": {},
+                "unit": {
+                  "kind": "Decimal"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) by (cpu)) * 100"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "SingleStat-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Single Stat without Sparkline"
+            },
+            "plugin": {
+              "kind": "StatChart",
+              "spec": {
+                "calculation": "LastNumber",
+                "unit": {
+                  "kind": "Decimal"
+                }
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "avg(node_load15{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) /  count(count(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\"}) by (cpu)) * 100"
                     }
                   }
                 }
@@ -2336,16 +2429,45 @@
               {
                 "x": 0,
                 "y": 0,
-                "width": 9,
+                "width": 5,
                 "height": 7,
                 "content": {
+                  "$ref": "#/spec/panels/SingleStat"
+                }
+              },
+              {
+                "x": 5,
+                "y": 0,
+                "width": 14,
+                "height": 7,
+                "content": {
+                  "$ref": "#/spec/panels/SingleStat-1"
+                }
+              },
+              {
+                "x": 0,
+                "y": 7,
+                "width": 24,
+                "height": 8,
+                "content": {
                   "$ref": "#/spec/panels/SimpleStat"
+                }
+              },
+              {
+                "x": 0,
+                "y": 15,
+                "width": 24,
+                "height": 8,
+                "content": {
+                  "$ref": "#/spec/panels/SimpleStat-1"
                 }
               }
             ]
           }
         }
-      ]
+      ],
+      "variables": [],
+      "duration": "6h"
     }
   },
   {
