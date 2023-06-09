@@ -66,7 +66,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
     const meanOption = screen.getByRole('option', {
-      name: 'Mean',
+      name: /Mean/,
     });
     userEvent.click(meanOption);
     expect(onChange).toHaveBeenCalledWith(
