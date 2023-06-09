@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
+import { Switch, SwitchProps } from '@mui/material';
 import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
 import { shouldAbbreviate } from '../model/units/utils';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
