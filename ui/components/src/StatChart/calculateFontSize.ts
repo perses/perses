@@ -2,6 +2,8 @@
  * Calculate an optimal font size given available space
  */
 
+import { useChartsTheme } from '../context/ChartsThemeProvider';
+
 interface CalculateFontSize {
   text: string;
   fontWeight: number;
@@ -13,25 +15,39 @@ interface CalculateFontSize {
 
 const DEFAULT_LINE_HEIGHT = 1.2;
 
-export const calculateFontSize = ({ text, fontWeight, width, height, lineHeight, maxSize }: CalculateFontSize) => {
-  const context = document.createElement('canvas').getContext('2d');
-  if (context === null) {
-    throw new Error('Canvas context is null');
-  }
+let canvasContext: CanvasRenderingContext2D | null;
 
-  const lineHeightRatio = lineHeight ?? DEFAULT_LINE_HEIGHT;
+function useCanvasContext() {
+  if (!canvasContext) {
+    canvasContext = document.createElement('canvas').getContext('2d');
+    if (canvasContext === null) {
+      throw new Error('Canvas context is null.');
+    }
+  }
+  return canvasContext;
+}
+
+/**
+ * Calculates the optimal font size given available space
+ */
+export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight, maxSize }: CalculateFontSize) {
+  const ctx = useCanvasContext();
+  const chartsTheme = useChartsTheme();
+
+  const textStyle = chartsTheme.echartsTheme.textStyle;
+  const fontSize = Number(textStyle?.fontSize) ?? 12;
+  const fontFamily = textStyle?.fontFamily ?? 'Lato';
 
   // set the font on the canvas context before measuring text
-  const fontStyle = `${fontWeight} 12px 'Inter'`;
-  context.font = fontStyle;
+  const fontStyle = `${fontWeight} ${fontSize}px ${fontFamily} ?? 'Lato'`;
+  ctx.font = fontStyle;
+  const textMetrics: TextMetrics = ctx.measureText(text);
 
-  const textMetrics: TextMetrics = context.measureText(text);
+  // calculate the optimal font size given the available width and height
+  const fontSizeBasedOnWidth = (width / textMetrics.width + 2) * fontSize;
+  const fontSizeBasedOnHeight = height / (lineHeight ?? DEFAULT_LINE_HEIGHT);
 
-  // how much bigger than 12px can we make it while staying within our width constraints
-  const fontSizeBasedOnWidth = (width / textMetrics.width + 2) * 12;
-  const fontSizeBasedOnHeight = height / lineHeightRatio;
-
-  // final fontSize
-  const optimalSize = Math.min(fontSizeBasedOnHeight, fontSizeBasedOnWidth);
-  return Math.min(optimalSize, maxSize ?? optimalSize);
-};
+  // return the smaller font size
+  const finalFontSize = Math.min(fontSizeBasedOnHeight, fontSizeBasedOnWidth);
+  return maxSize ? Math.min(finalFontSize, maxSize) : finalFontSize;
+}

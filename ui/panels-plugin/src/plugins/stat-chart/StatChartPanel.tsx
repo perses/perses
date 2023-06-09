@@ -19,7 +19,7 @@ import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plu
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
 
-const MIN_WIDTH = 150;
+const MIN_WIDTH = 100;
 const SPACING = 2;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;

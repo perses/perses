@@ -22,13 +22,14 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
-import { calculateFontSize } from './calculateFontSize';
+import { useOptimalFontSize } from './calculateFontSize';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
 const LINE_HEIGHT = 1.2;
 const SERIES_NAME_MAX_FONT_SIZE = 30;
-const SERIES_NAME_HEIGHT_RATIO = 0.125;
+const SERIES_NAME_FONT_WEIGHT = 400;
+const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
   calculatedValue?: number;
@@ -53,21 +54,26 @@ export function StatChart(props: StatChartProps) {
   const containerPadding = chartsTheme.container.padding.default;
 
   // calculate series name font size and height
-  let seriesNameFontSize = calculateFontSize({
+  let seriesNameFontSize = useOptimalFontSize({
     text: data?.seriesData?.name ?? '',
+    fontWeight: SERIES_NAME_FONT_WEIGHT,
     width,
-    height: height * SERIES_NAME_HEIGHT_RATIO,
+    height: height * 0.125, // assume series name will take 12.5% of available height
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
-    fontWeight: 400,
   });
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
   // calculate value font size and height
-  const valueFontSize = calculateFontSize({
+  const availableWidth = width - containerPadding * 2;
+  const availableHeight = height - seriesNameHeight;
+  const valueFontSize = useOptimalFontSize({
     text: formattedValue,
-    fontWeight: 700,
-    width: sparkline ? width : width * 0.5,
-    height: sparkline ? height * 0.25 : (height - seriesNameHeight) * 0.9,
+    fontWeight: VALUE_FONT_WEIGHT,
+    // without sparkline, use only 50% of the available width so it looks better for multiseries
+    width: sparkline ? availableWidth : availableWidth * 0.5,
+    // with sparkline, use only 25% of available height to leave room for chart
+    // without sparkline, value should take up 90% of available space
+    height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
   });
   const valueFontHeight = valueFontSize * LINE_HEIGHT;
 
@@ -169,10 +175,10 @@ const SeriesName = styled(Typography, {
 })<{ padding?: number; fontSize?: number; textAlignment?: string }>(({ theme, padding, fontSize }) => ({
   color: theme.palette.text.secondary,
   padding: `${padding}px`,
+  fontSize: `${fontSize}px`,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
-  fontSize: `${fontSize}px`,
 }));
 
 const Value = styled(Typography, {
