@@ -361,9 +361,7 @@ export class DashboardPage {
       const requestPostData = request.postDataJSON();
 
       const requestQuery = typeof requestPostData === 'object' ? requestPostData['query'] : undefined;
-      const mockQuery = queries.find((mockQueryConfig) => {
-        return mockQueryConfig.query === requestQuery;
-      });
+      const mockQuery = queries.find((mockQueryConfig) => mockQueryConfig.query === requestQuery);
 
       if (mockQuery) {
         // Found a config for mocking this query. Return the mock response.

@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * Calculate an optimal font size given available space
- */
-
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 
 interface CalculateFontSize {
