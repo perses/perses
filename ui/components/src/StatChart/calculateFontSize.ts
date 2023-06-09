@@ -37,7 +37,7 @@ function useCanvasContext() {
 }
 
 /**
- * Calculates the optimal font size given available space
+ * Find the optimal font size given available space
  */
 export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight, maxSize }: CalculateFontSize) {
   const ctx = useCanvasContext();
@@ -47,12 +47,13 @@ export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight
   const fontSize = Number(textStyle?.fontSize) ?? 12;
   const fontFamily = textStyle?.fontFamily ?? 'Lato';
 
-  // set the font on the canvas context before measuring text
+  // set the font on the canvas context
   const fontStyle = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.font = fontStyle;
+  // measure the width of the text with the given font style
   const textMetrics: TextMetrics = ctx.measureText(text);
 
-  // calculate the optimal font size given the available width and height
+  // check how much bigger we can make the font while staying within the width and height
   const fontSizeBasedOnWidth = (width / textMetrics.width) * fontSize;
   const fontSizeBasedOnHeight = height / (lineHeight ?? DEFAULT_LINE_HEIGHT);
 

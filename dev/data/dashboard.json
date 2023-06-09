@@ -2438,7 +2438,7 @@
               {
                 "x": 5,
                 "y": 0,
-                "width": 14,
+                "width": 5,
                 "height": 7,
                 "content": {
                   "$ref": "#/spec/panels/SingleStat-1"
