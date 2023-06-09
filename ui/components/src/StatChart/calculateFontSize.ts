@@ -39,12 +39,12 @@ export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight
   const fontFamily = textStyle?.fontFamily ?? 'Lato';
 
   // set the font on the canvas context before measuring text
-  const fontStyle = `${fontWeight} ${fontSize}px ${fontFamily} ?? 'Lato'`;
+  const fontStyle = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.font = fontStyle;
   const textMetrics: TextMetrics = ctx.measureText(text);
 
   // calculate the optimal font size given the available width and height
-  const fontSizeBasedOnWidth = (width / textMetrics.width + 2) * fontSize;
+  const fontSizeBasedOnWidth = (width / textMetrics.width) * fontSize;
   const fontSizeBasedOnHeight = height / (lineHeight ?? DEFAULT_LINE_HEIGHT);
 
   // return the smaller font size

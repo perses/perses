@@ -17,6 +17,10 @@ import { UnitOptions } from '../model';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 
+jest.mock('./calculateFontSize', () => ({
+  useOptimalFontSize: jest.fn().mockImplementation(() => 12),
+}));
+
 describe('StatChart', () => {
   const renderChart = (unit: UnitOptions) => {
     const contentDimensions = {
