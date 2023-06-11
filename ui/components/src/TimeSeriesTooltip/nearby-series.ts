@@ -12,13 +12,10 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { ScatterSeriesOption } from 'echarts/charts';
-import { TimeSeriesValueTuple } from '@perses-dev/core';
 import {
   formatValue,
   UnitOptions,
   EChartsDataFormat,
-  EChartsTimeSeries,
   TimeSeriesWithAnnotations,
   OPTIMIZED_MODE_SERIES_LIMIT,
   AnnotationSeriesData,
@@ -48,23 +45,15 @@ export interface NearbySeriesInfo {
 
 export type NearbySeriesArray = NearbySeriesInfo[];
 
-// export function isScatterSeries(series: EChartsTimeSeries): series is AnnotationSeries {
-//   return series.type === 'scatter';
-// }
-
 export function isScatterSeriesData(data: EChartsValues[] | AnnotationSeriesDatum[]): data is AnnotationSeriesData {
   if (data.length === 0) return false;
   const annotationSeriesData = data as AnnotationSeriesData;
-  // if (annotationSeriesData.length === 2) {
-  //   return true;
-  // }
   if (annotationSeriesData !== undefined) {
     if (annotationSeriesData[0] !== undefined) {
       return annotationSeriesData[0].value !== undefined;
     }
   }
   return false;
-  // return (data as AnnotationSeriesData)[0].value !== undefined;
 }
 
 export function isEChartsValue(value: unknown): value is EChartsValues {

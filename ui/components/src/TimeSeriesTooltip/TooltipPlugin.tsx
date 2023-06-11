@@ -30,17 +30,21 @@ export interface TooltipPluginProps {
 
 export interface TooltipPluginContentProps {
   tooltipOverride?: ReactElement;
-  series: NearbySeriesArray | null;
+  series?: NearbySeriesArray | null;
   cursorTransform: string;
 }
 
 export function TooltipPluginContent({ tooltipOverride, series, cursorTransform }: TooltipPluginContentProps) {
-  if (series === null || series.length === 0) {
+  console.log('TooltipPluginContent -> cursorTransform: ', cursorTransform);
+  // if (series === null || series.length === 0) {
+  if (!series || series.length === 0) {
     return null;
   }
 
   if (tooltipOverride) {
     // If consumer provides tooltip plugin content, inherit existing props but pass correct series and transform data
+    // return cloneElement(tooltipOverride, { series, cursorTransform });
+    console.log('TooltipPluginContent -> series: ', series);
     return cloneElement(tooltipOverride, { series, cursorTransform });
   }
 

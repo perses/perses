@@ -28,7 +28,7 @@ import {
   // AnnotationTooltip,
   LegendItem,
   EChartsTimeSeries,
-  TimeSeriesWithAnnotations,
+  getYAxes,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -120,8 +120,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    // TODO: cleanup figure out how to use EChartsDataFormat here
+    // // TODO: cleanup figure out how to use EChartsDataFormat here
     // const graphData: EChartsDataFormat = {
+    //   timeSeries: [], // TODO: define annotation structure
+    //   xAxis: [],
+    //   legendItems: [],
+    //   rangeMs: timeScale.endMs - timeScale.startMs,
+    // };
     const graphData = {
       timeSeries: [] as EChartsTimeSeries[], // TODO: define annotation structure
       xAxis: [] as number[],
@@ -293,7 +298,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               <LineChart
                 height={height}
                 data={graphData}
-                // yAxis={echartsYAxis}
+                yAxis={getYAxes(echartsYAxis)}
                 unit={unit}
                 grid={gridOverrides}
                 // tooltipConfig={{ wrapLabels: true, scatterTooltip: AnnotationTooltip }}

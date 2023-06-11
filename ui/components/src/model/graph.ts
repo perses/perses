@@ -12,9 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-// import { ComposeOption } from 'echarts';
-import { ScatterDataItemOption } from 'echarts/types/src/chart/scatter/ScatterSeries';
-import { OptionDataItem, OptionDataItemObject, OptionDataValue } from 'echarts/types/src/util/types';
+import { OptionDataItemObject } from 'echarts/types/src/util/types';
 import { LineSeriesOption, ScatterSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../';
 
@@ -48,13 +46,12 @@ export type EChartsDataFormat = {
   rangeMs?: number;
 };
 
-// export interface AnnotationSeries extends ScatterSeriesOption {
+// TODO: rename AnnotationSeries -> GroupedAnnotations
 export interface AnnotationSeries extends Omit<ScatterSeriesOption, 'data'> {
   data: AnnotationSeriesData;
   annotations?: unknown[];
 }
 
-// export interface AnnotationSeriesDatum extends ScatterDataItemOption {
 export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
   value: TimeSeriesValueTuple;
   categoryColor?: string;
@@ -63,5 +60,4 @@ export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesVa
   };
 }
 
-// export type AnnotationSeriesData = TimeSeriesValueTuple[];
 export type AnnotationSeriesData = AnnotationSeriesDatum[];

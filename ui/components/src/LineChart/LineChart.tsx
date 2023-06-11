@@ -44,7 +44,7 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import { enableDataZoom, getDateRange, getFormattedDate, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -68,8 +68,8 @@ export interface LineChartProps {
    */
   height: number;
   data: EChartsDataFormat;
-  // yAxis?: YAXisComponentOption;
   xAxis?: XAXisComponentOption[];
+  yAxis?: YAXisComponentOption[];
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
@@ -85,7 +85,7 @@ export interface LineChartProps {
 export function LineChart({
   height,
   data,
-  // yAxis, // TODO: add back
+  yAxis,
   xAxis,
   unit,
   grid,
@@ -155,9 +155,9 @@ export function LineChart({
 
     // when events are present increase padding above time series data so tooltip less likely to clash
     // const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%'; // TODO: play around with first value since ideal value depends on data
-    const eventsBoundaryOffset = annotationsPopulated ? '150%' : '10%';
+    const eventsBoundaryOffset = annotationsPopulated ? '90%' : '500%';
 
-    const yAxisPrimary: YAXisComponentOption = {
+    const yAxisFallback: YAXisComponentOption = {
       type: 'value',
       boundaryGap: [0, eventsBoundaryOffset],
       axisLabel: {
@@ -167,30 +167,7 @@ export function LineChart({
         },
       },
     };
-
-    // Allow support for secondary axis upon which annotations can be displayed.
-    // If no annotations are provided, this axis will not be displayed.
-    const yAxisSecondary: YAXisComponentOption = data.xAxisAlt
-      ? {
-          show: false,
-          type: 'value',
-          data: data.timeSeries.reduce<number[]>((accum, series, idx) => {
-            if (series.type === 'line') {
-              accum.push(idx);
-            }
-            return accum;
-          }, []),
-          axisTick: {
-            show: false,
-          },
-          axisLabel: {
-            show: true,
-          },
-          axisLine: {
-            show: false,
-          },
-        }
-      : {};
+    const yAxisCombined = yAxis === undefined ? [yAxisFallback] : yAxis;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -208,7 +185,7 @@ export function LineChart({
     const option: EChartsCoreOption = {
       series: data.timeSeries,
       xAxis: xAxis ?? [defaultXAxis],
-      yAxis: [...getYAxes(yAxisPrimary, unit), yAxisSecondary],
+      yAxis: yAxisCombined,
       animation: false,
       tooltip: {
         show: !annotationsPopulated, // hide axis pointer when events are present or else two dotted lines show
@@ -243,7 +220,18 @@ export function LineChart({
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, xAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [
+    data,
+    xAxis,
+    yAxis,
+    unit,
+    grid,
+    legend,
+    noDataOption,
+    timeZone,
+    __experimentalEChartsOptionsOverride,
+    noDataVariant,
+  ]);
 
   console.log('(perses) LineChart -> option: ', option);
   return (
