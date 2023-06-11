@@ -12,9 +12,12 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart } from '@perses-dev/components';
+import { LineChart, AnnotationTooltip, AnnotationTooltipProps } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Stack, Typography } from '@mui/material';
+import { tooltipPluginData, WITH_ANNOTATIONS_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
+// import tooltipPluginData from '../test-utils/tooltip-plugin-data.json';
+// import { EChartsDataFormat } from '../model';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -38,9 +41,9 @@ const meta: Meta<typeof LineChart> = {
       legendItems: [],
       rangeMs: 21600000,
     },
-    yAxis: {
-      show: true,
-    },
+    // yAxis: {
+    //   show: true,
+    // },
     unit: {
       kind: 'Decimal' as const,
       decimal_places: 2,
@@ -103,6 +106,79 @@ export const NoData: Story = {
             chart
           </Typography>
           <LineChart {...args} noDataVariant="chart" />
+        </div>
+      </Stack>
+    );
+  },
+};
+
+export function ExampleTooltipPlugin(props: AnnotationTooltipProps) {
+  return <AnnotationTooltip {...props} />;
+}
+
+export const WithAnnotations: Story = {
+  args: {
+    tooltipConfig: {
+      wrapLabels: true,
+      plugin: {
+        seriesTypeTrigger: 'scatter',
+        // tooltipOverride: <ExampleTooltipPlugin />,
+      },
+    },
+    data: tooltipPluginData,
+    grid: {
+      top: 30,
+      right: 20,
+      bottom: 10,
+      left: 20,
+    },
+    height: WITH_ANNOTATIONS_CHART_HEIGHT,
+    xAxis: [
+      {
+        show: true,
+        type: 'category',
+        data: [
+          1685966835000, 1685966850000, 1685966865000, 1685966880000, 1685966895000, 1685966910000, 1685966925000,
+          1685966940000,
+        ],
+        splitLine: {
+          show: false,
+        },
+      },
+      {
+        show: true,
+        type: 'category',
+        position: 'top',
+        data: [1685966835000, 1685966856000, 1685966877000, 1685966898000, 1685966919000],
+        axisLine: {
+          show: false,
+          lineStyle: {
+            opacity: 0,
+          },
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          show: false,
+        },
+        axisPointer: {
+          show: false,
+        },
+        splitLine: {
+          show: false,
+        },
+      },
+    ],
+  },
+  render: (args) => {
+    return (
+      <Stack>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            With Annotations
+          </Typography>
+          <LineChart {...args} noDataVariant="message" />
         </div>
       </Stack>
     );

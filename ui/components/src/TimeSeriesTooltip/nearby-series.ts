@@ -12,7 +12,19 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { ScatterSeriesOption } from 'echarts/charts';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
+import {
+  formatValue,
+  UnitOptions,
+  EChartsDataFormat,
+  EChartsTimeSeries,
+  TimeSeriesWithAnnotations,
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  AnnotationSeriesData,
+  EChartsValues,
+  AnnotationSeriesDatum,
+} from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -30,9 +42,35 @@ export interface NearbySeriesInfo {
   y: number;
   formattedY: string;
   isClosestToCursor: boolean;
+  seriesType?: 'line' | 'scatter';
+  annotations?: unknown[];
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
+
+// export function isScatterSeries(series: EChartsTimeSeries): series is AnnotationSeries {
+//   return series.type === 'scatter';
+// }
+
+// export function isScatterSeriesData(data: AnnotationSeriesData | EChartsValues[]): data is AnnotationSeriesData {
+export function isScatterSeriesData(data: EChartsValues[] | TimeSeriesValueTuple[]): data is AnnotationSeriesData {
+  if (data.length === 0) return false;
+  const annotationSeriesData = data as AnnotationSeriesData;
+  if (annotationSeriesData.length === 2) {
+    return true;
+  }
+  // if (annotationSeriesData !== undefined) {
+  //   if (annotationSeriesData[0] !== undefined) {
+  //     return annotationSeriesData[0].values !== undefined;
+  //   }
+  // }
+  return false;
+  // return (data as AnnotationSeriesData)[0].value !== undefined;
+}
+
+export function isEChartsValue(value: unknown): value is EChartsValues {
+  return typeof value === 'number' || value === null || value === '-';
+}
 
 /**
  * Returns formatted series data for the points that are close to the user's cursor
@@ -43,7 +81,8 @@ export function checkforNearbySeries(
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
-  unit?: UnitOptions
+  unit?: UnitOptions,
+  pointInGridEvents?: number[]
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -53,61 +92,132 @@ export function checkforNearbySeries(
     return currentNearbySeriesData;
   }
 
+  // TODO: update with changes from TimeSeriesTooltip/focused-series.ts#L59
+  // keep track of cursor relative to separate events x and y axis
+  const focusedEventsX = pointInGridEvents && Number.isFinite(pointInGridEvents[0]) ? pointInGridEvents[0] : null;
+  const focusedEventsY = pointInGridEvents && Number.isFinite(pointInGridEvents[1]) ? pointInGridEvents[1] : null;
+
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
   const totalSeries = data.timeSeries.length;
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
-      const currentSeries = data.timeSeries[seriesIdx];
+      const currentSeries: TimeSeriesWithAnnotations | undefined = data.timeSeries[seriesIdx];
+      // const currentSeries: TimeSeriesWithAnnotations = data.timeSeries[seriesIdx];
+      // const currentSeries = data.timeSeries[seriesIdx];
+      if (currentSeries === undefined || currentSeries.data === undefined) break;
       if (currentNearbySeriesData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
-      if (currentSeries !== undefined) {
-        const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        const markerColor = currentSeries.color ?? '#000';
-        if (Array.isArray(currentSeries.data)) {
-          for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
-            const xValue = data.xAxis[datumIdx] ?? 0;
-            const yValue = currentSeries.data[datumIdx];
-            // ensure null values not displayed in tooltip
-            if (yValue !== undefined && yValue !== null && cursorX === datumIdx) {
-              if (yValue !== '-' && cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
-                // show fewer bold series in tooltip when many total series
-                const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
-                const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
-                const isClosestToCursor = isWithinPercentageRange({
-                  valueToCheck: cursorY,
-                  baseValue: yValue,
-                  percentage: percentRangeToCheck,
-                });
-                if (isClosestToCursor) {
-                  emphasizedSeriesIndexes.push(seriesIdx);
-                } else {
-                  nonEmphasizedSeriesIndexes.push(seriesIdx);
-                  // ensure series not close to cursor are not highlighted
-                  if (chart?.dispatchAction !== undefined) {
-                    chart.dispatchAction({
-                      type: 'downplay',
-                      seriesIndex: seriesIdx,
-                    });
-                  }
-                }
 
-                // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                const formattedY = formatValue(yValue, unit);
-                currentNearbySeriesData.push({
-                  seriesIdx: seriesIdx,
-                  datumIdx: datumIdx,
-                  seriesName: currentSeriesName,
-                  date: xValueMilliSeconds,
-                  x: xValue,
-                  y: yValue,
-                  formattedY: formattedY,
-                  markerColor: markerColor.toString(),
-                  isClosestToCursor,
-                });
-                nearbySeriesIndexes.push(seriesIdx);
+      const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
+      const markerColor = currentSeries.color ?? '#000';
+
+      // TODO: can this be consolidated now that annotations are not part of TimeSeriesValueTuple?
+      if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
+        if (isScatterSeriesData(currentSeries.data)) {
+          if (currentSeries.data[0] !== undefined) {
+            // const currentSeriesDatum: AnnotationSeriesDatum = currentSeries.data[0];
+            const currentSeriesDatum: TimeSeriesValueTuple = currentSeries.data[0];
+            const xIndex = currentSeriesDatum[0];
+            if (focusedEventsX === xIndex && data.xAxisAlt) {
+              const xValue = data.xAxisAlt[xIndex] ?? 0;
+              const yValue = 0;
+              const formattedY = currentSeries.name?.toString() ?? '';
+              currentNearbySeriesData.push({
+                seriesType: currentSeries.type ?? 'line',
+                seriesIdx: seriesIdx,
+                datumIdx: xIndex,
+                seriesName: currentSeriesName,
+                date: xValue,
+                x: xValue,
+                y: yValue,
+                formattedY: formattedY,
+                markerColor: markerColor.toString(),
+                annotations: currentSeries.annotations,
+                isClosestToCursor: false,
+              });
+            }
+            // if (currentSeriesDatum.value === undefined) break;
+            // if (Array.isArray(currentSeriesDatum.value)) {
+            //   const xIndex = currentSeriesDatum.value[0]; // timestamp
+            //   if (xIndex === undefined) break;
+            //   if (focusedEventsX === xIndex && data.xAxisAlt) {
+            //     const xValue = data.xAxisAlt[xIndex] ?? 0;
+            //     const yValue = 0;
+            //     const formattedY = currentSeries.name?.toString() ?? '';
+            //     currentNearbySeriesData.push({
+            //       seriesType: currentSeries.type ?? 'line',
+            //       seriesIdx: seriesIdx,
+            //       datumIdx: xIndex,
+            //       seriesName: currentSeriesName,
+            //       date: xValue,
+            //       x: xValue,
+            //       y: yValue,
+            //       formattedY: formattedY,
+            //       markerColor: markerColor.toString(),
+            //       annotations: currentSeries.annotations,
+            //       isClosestToCursor: false,
+            //     });
+            //   }
+            // }
+          }
+        }
+      }
+
+      /**
+       * If data property is an array, it is NOT the object needed for scatter series. Instead,
+       * it is an EChartsValue[] and the default TooltipContent should show.
+       */
+      if (Array.isArray(currentSeries.data)) {
+        for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
+          const xValue = data.xAxis[datumIdx] ?? 0;
+          // const yValue = currentSeries.data[datumIdx];
+          const currentDatum = currentSeries.data[datumIdx];
+          if (!currentDatum) {
+            break;
+          }
+          // const yValue: EChartsValues = currentDatum !== '-' && !Array.isArray(currentDatum) && !isNaN(currentDatum) ? currentDatum : 0;
+          const yValue: EChartsValues = isEChartsValue(currentDatum) ? currentDatum : 0;
+
+          // ensure null values not displayed in tooltip
+          if (yValue !== undefined && yValue !== null && cursorX === datumIdx) {
+            if (yValue !== '-' && cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
+              // show fewer bold series in tooltip when many total series
+              const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
+              const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
+              const isClosestToCursor = isWithinPercentageRange({
+                valueToCheck: cursorY,
+                baseValue: yValue,
+                percentage: percentRangeToCheck,
+              });
+              if (isClosestToCursor) {
+                emphasizedSeriesIndexes.push(seriesIdx);
+              } else {
+                nonEmphasizedSeriesIndexes.push(seriesIdx);
+                // ensure series not close to cursor are not highlighted
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'downplay',
+                    seriesIndex: seriesIdx,
+                  });
+                }
               }
+
+              // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+              const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+              const formattedY = formatValue(yValue, unit);
+              currentNearbySeriesData.push({
+                seriesIdx: seriesIdx,
+                datumIdx: datumIdx,
+                seriesName: currentSeriesName,
+                date: xValueMilliSeconds,
+                x: xValue,
+                y: yValue,
+                formattedY: formattedY,
+                markerColor: markerColor.toString(),
+                isClosestToCursor,
+              });
+              nearbySeriesIndexes.push(seriesIdx);
             }
           }
         }
@@ -197,8 +307,9 @@ export function getNearbySeriesData({
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
+    const pointInGridEvents = chart.convertFromPixel({ xAxisIndex: 1, yAxisIndex: 1 }, pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit, pointInGridEvents);
     }
   }
 
