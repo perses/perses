@@ -52,18 +52,17 @@ export type NearbySeriesArray = NearbySeriesInfo[];
 //   return series.type === 'scatter';
 // }
 
-// export function isScatterSeriesData(data: AnnotationSeriesData | EChartsValues[]): data is AnnotationSeriesData {
-export function isScatterSeriesData(data: EChartsValues[] | TimeSeriesValueTuple[]): data is AnnotationSeriesData {
+export function isScatterSeriesData(data: EChartsValues[] | AnnotationSeriesDatum[]): data is AnnotationSeriesData {
   if (data.length === 0) return false;
   const annotationSeriesData = data as AnnotationSeriesData;
-  if (annotationSeriesData.length === 2) {
-    return true;
-  }
-  // if (annotationSeriesData !== undefined) {
-  //   if (annotationSeriesData[0] !== undefined) {
-  //     return annotationSeriesData[0].values !== undefined;
-  //   }
+  // if (annotationSeriesData.length === 2) {
+  //   return true;
   // }
+  if (annotationSeriesData !== undefined) {
+    if (annotationSeriesData[0] !== undefined) {
+      return annotationSeriesData[0].value !== undefined;
+    }
+  }
   return false;
   // return (data as AnnotationSeriesData)[0].value !== undefined;
 }
@@ -112,54 +111,38 @@ export function checkforNearbySeries(
       const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
       const markerColor = currentSeries.color ?? '#000';
 
-      // TODO: can this be consolidated now that annotations are not part of TimeSeriesValueTuple?
+      /**
+       * Scatter series is used for group annotations and shows with alternate tooltip content
+       * https://echarts.apache.org/en/option.html#series-scatter.data.value
+       * TODO: make extensible using tooltip plugin approach
+       */
       if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
         if (isScatterSeriesData(currentSeries.data)) {
           if (currentSeries.data[0] !== undefined) {
-            // const currentSeriesDatum: AnnotationSeriesDatum = currentSeries.data[0];
-            const currentSeriesDatum: TimeSeriesValueTuple = currentSeries.data[0];
-            const xIndex = currentSeriesDatum[0];
-            if (focusedEventsX === xIndex && data.xAxisAlt) {
-              const xValue = data.xAxisAlt[xIndex] ?? 0;
-              const yValue = 0;
-              const formattedY = currentSeries.name?.toString() ?? '';
-              currentNearbySeriesData.push({
-                seriesType: currentSeries.type ?? 'line',
-                seriesIdx: seriesIdx,
-                datumIdx: xIndex,
-                seriesName: currentSeriesName,
-                date: xValue,
-                x: xValue,
-                y: yValue,
-                formattedY: formattedY,
-                markerColor: markerColor.toString(),
-                annotations: currentSeries.annotations,
-                isClosestToCursor: false,
-              });
+            const currentSeriesDatum: AnnotationSeriesDatum = currentSeries.data[0];
+            if (currentSeriesDatum.value === undefined) break;
+            if (Array.isArray(currentSeriesDatum.value)) {
+              const xIndex = currentSeriesDatum.value[0]; // timestamp
+              if (xIndex === undefined) break;
+              if (focusedEventsX === xIndex && data.xAxisAlt) {
+                const xValue = data.xAxisAlt[xIndex] ?? 0;
+                const yValue = 0;
+                const formattedY = currentSeries.name?.toString() ?? '';
+                currentNearbySeriesData.push({
+                  seriesType: currentSeries.type ?? 'line',
+                  seriesIdx: seriesIdx,
+                  datumIdx: xIndex,
+                  seriesName: currentSeriesName,
+                  date: xValue,
+                  x: xValue,
+                  y: yValue,
+                  formattedY: formattedY,
+                  markerColor: markerColor.toString(),
+                  annotations: currentSeries.annotations,
+                  isClosestToCursor: false,
+                });
+              }
             }
-            // if (currentSeriesDatum.value === undefined) break;
-            // if (Array.isArray(currentSeriesDatum.value)) {
-            //   const xIndex = currentSeriesDatum.value[0]; // timestamp
-            //   if (xIndex === undefined) break;
-            //   if (focusedEventsX === xIndex && data.xAxisAlt) {
-            //     const xValue = data.xAxisAlt[xIndex] ?? 0;
-            //     const yValue = 0;
-            //     const formattedY = currentSeries.name?.toString() ?? '';
-            //     currentNearbySeriesData.push({
-            //       seriesType: currentSeries.type ?? 'line',
-            //       seriesIdx: seriesIdx,
-            //       datumIdx: xIndex,
-            //       seriesName: currentSeriesName,
-            //       date: xValue,
-            //       x: xValue,
-            //       y: yValue,
-            //       formattedY: formattedY,
-            //       markerColor: markerColor.toString(),
-            //       annotations: currentSeries.annotations,
-            //       isClosestToCursor: false,
-            //     });
-            //   }
-            // }
           }
         }
       }

@@ -14,6 +14,7 @@
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 // import { ComposeOption } from 'echarts';
 import { ScatterDataItemOption } from 'echarts/types/src/chart/scatter/ScatterSeries';
+import { OptionDataItem, OptionDataItemObject, OptionDataValue } from 'echarts/types/src/util/types';
 import { LineSeriesOption, ScatterSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../';
 
@@ -32,31 +33,13 @@ export interface GraphSeries {
 
 export type EChartsValues = number | null | '-';
 
-// export type LineSeriesData = LineSeriesOption['data'];
-// export type LineChartSupportedSeriesTypes = ComposeOption<LineSeriesOption | ScatterSeriesOption>;
-// // export interface EChartsTimeSeries extends LineChartSupportedSeriesTypes {
-// //   data?: EChartsValues[] | AnnotationSeries;
-// //   annotations?: unknown[];
-// // }
-
-// export type LineChartSupportedSeriesTypes = ComposeOption<LineSeriesOption | ScatterSeriesOption>;
-// export type LineChartSupportedSeriesTypes = ComposeOption<LineSeriesOption | ScatterSeriesOption>;
-
-export type TimeSeriesChartVisualModes = 'line' | 'scatter' | 'bar';
-
-// export interface EChartsTimeSeries extends LineChartSupportedSeriesTypes {
-// export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data' | 'type'> {
 export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
-  // data: EChartsValues[] | AnnotationSeriesData;
-  // type: TimeSeriesChartVisualModes;
-  // annotations?: unknown[];
 }
 
 export type TimeSeriesWithAnnotations = EChartsTimeSeries | AnnotationSeries;
 
 export type EChartsDataFormat = {
-  // timeSeries: EChartsTimeSeries[] | AnnotationSeries[];
   timeSeries: TimeSeriesWithAnnotations[];
   xAxis: number[];
   xAxisAlt?: number[]; // TODO: temporary axis for annotations, remove after TimeChart supersedes LineChart
@@ -71,12 +54,14 @@ export interface AnnotationSeries extends Omit<ScatterSeriesOption, 'data'> {
   annotations?: unknown[];
 }
 
-export interface AnnotationSeriesDatum extends ScatterDataItemOption {
+// export interface AnnotationSeriesDatum extends ScatterDataItemOption {
+export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
+  value: TimeSeriesValueTuple;
+  categoryColor?: string;
   itemStyle?: {
     color: string;
   };
 }
 
-export type AnnotationSeriesData = TimeSeriesValueTuple[];
-
-// export type AnnotationSeriesData = AnnotationSeriesDatum[];
+// export type AnnotationSeriesData = TimeSeriesValueTuple[];
+export type AnnotationSeriesData = AnnotationSeriesDatum[];
