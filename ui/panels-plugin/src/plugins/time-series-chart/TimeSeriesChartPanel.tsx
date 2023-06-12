@@ -13,7 +13,15 @@
 
 import { useMemo, useState } from 'react';
 import merge from 'lodash/merge';
-import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
+import {
+  useDeepMemo,
+  StepOptions,
+  getXValues,
+  getYValues,
+  TimeSeries,
+  DEFAULT_LEGEND,
+  getAggregationValues,
+} from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
   PanelProps,

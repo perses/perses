@@ -95,7 +95,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
   const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
 
   const currentValues = value?.values || [];
-  const legendValuesConfig = currentValues.map((item) => {
+  const legendValuesConfig: LegendValueOption[] = currentValues.map((item) => {
     return { ...LEGEND_VALUE_CONFIG[item], id: item };
   });
 
@@ -140,15 +140,16 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
         label="Values"
         description="Computed values ignore nulls."
         control={
-          <Autocomplete
-            multiple
+          // For some reason, the inferred option type doesn't always seem to work
+          // quite right when `multiple` is true. Explicitly setting the generics
+          // to work around this.
+          <SettingsAutocomplete<LegendValueOption, true, true>
+            multiple={true}
             disableCloseOnSelect
             disableClearable
             value={legendValuesConfig}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
             options={VALUE_OPTIONS}
             onChange={handleLegendValueChange}
-            renderInput={(params) => <TextField {...params} />}
             disabled={value === undefined || currentMode !== 'Table'}
             limitTags={1}
             ChipProps={{
