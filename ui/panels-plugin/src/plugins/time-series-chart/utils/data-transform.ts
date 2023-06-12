@@ -15,10 +15,12 @@ import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
-  EChartsTimeSeries,
   EChartsDataFormat,
   EChartsValues,
+  PersesLineSeries,
   PersesTimeSeries,
+  isEChartsValue,
+  isScatterSeriesData,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -60,10 +62,10 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
  */
 export function getLineSeries(
   formattedName: string,
-  data: EChartsTimeSeries['data'],
+  data: PersesLineSeries['data'],
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
-): EChartsTimeSeries {
+): PersesLineSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
@@ -118,9 +120,9 @@ export function getLineSeries(
  */
 export function getThresholdSeries(
   name: string,
-  data: EChartsTimeSeries['data'],
+  data: PersesLineSeries['data'],
   threshold: StepOptions
-): EChartsTimeSeries {
+): PersesLineSeries {
   return {
     type: 'line',
     name: name,
@@ -159,15 +161,18 @@ export function convertPercentThreshold(percent: number, data: PersesTimeSeries[
   return percentDecimal * total + adjustedMin;
 }
 
-// TODO: confirm this still works in thresholds editor
 function findMax(timeSeries: PersesTimeSeries[]) {
   let max = 0;
-  timeSeries.forEach((series) => {
-    series.data.forEach((value: EChartsValues) => {
-      if (typeof value === 'number' && value > max) {
-        max = value;
-      }
-    });
+  timeSeries.forEach((series: PersesTimeSeries) => {
+    if (!isScatterSeriesData(series.data)) {
+      series.data.forEach((value: EChartsValues) => {
+        if (isEChartsValue(value)) {
+          if (typeof value === 'number' && value > max) {
+            max = value;
+          }
+        }
+      });
+    }
   });
   return max;
 }

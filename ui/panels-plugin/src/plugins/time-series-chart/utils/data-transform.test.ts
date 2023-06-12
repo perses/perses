@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChartsTimeSeries } from '@perses-dev/components';
+import { PersesTimeSeries } from '@perses-dev/components';
 import { TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
 import { convertPercentThreshold, convertPanelYAxis, roundDown } from './data-transform';
 
 const MAX_VALUE = 120;
-const MOCK_ECHART_TIME_SERIES_DATA: EChartsTimeSeries[] = [
+const MOCK_ECHART_TIME_SERIES_DATA: PersesTimeSeries[] = [
   {
     data: [10, 30, 80, 50],
   },

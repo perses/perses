@@ -61,3 +61,18 @@ export interface ScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValue
 }
 
 export type ScatterSeriesData = ScatterSeriesDatum[];
+
+export function isScatterSeriesData(data: EChartsValues[] | ScatterSeriesDatum[]): data is ScatterSeriesData {
+  if (data.length === 0) return false;
+  const scatterSeriesData = data as ScatterSeriesData;
+  if (scatterSeriesData !== undefined) {
+    if (scatterSeriesData[0] !== undefined) {
+      return scatterSeriesData[0].value !== undefined;
+    }
+  }
+  return false;
+}
+
+export function isEChartsValue(value: unknown): value is EChartsValues {
+  return typeof value === 'number' || value === null || value === '-';
+}

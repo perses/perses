@@ -16,9 +16,10 @@ import {
   EChartsDataFormat,
   EChartsValues,
   formatValue,
+  isEChartsValue,
+  isScatterSeriesData,
   OPTIMIZED_MODE_SERIES_LIMIT,
   PersesTimeSeries,
-  ScatterSeriesData,
   ScatterSeriesDatum,
   UnitOptions,
 } from '../model';
@@ -44,21 +45,6 @@ export interface NearbySeriesInfo {
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
-
-export function isScatterSeriesData(data: EChartsValues[] | ScatterSeriesDatum[]): data is ScatterSeriesData {
-  if (data.length === 0) return false;
-  const scatterSeriesData = data as ScatterSeriesData;
-  if (scatterSeriesData !== undefined) {
-    if (scatterSeriesData[0] !== undefined) {
-      return scatterSeriesData[0].value !== undefined;
-    }
-  }
-  return false;
-}
-
-export function isEChartsValue(value: unknown): value is EChartsValues {
-  return typeof value === 'number' || value === null || value === '-';
-}
 
 /**
  * Returns formatted series data for the points that are close to the user's cursor

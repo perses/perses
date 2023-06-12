@@ -25,7 +25,6 @@ import {
   SelectedLegendItemState,
   ContentWithLegend,
   EChartsDataFormat,
-  EChartsTimeSeries,
   getYAxes,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -168,7 +167,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const seriesId = timeSeries.name + seriesIndex;
 
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries: EChartsTimeSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
+        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
