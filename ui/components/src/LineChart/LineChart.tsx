@@ -233,7 +233,6 @@ export function LineChart({
     noDataVariant,
   ]);
 
-  console.log('(perses) LineChart -> option: ', option);
   return (
     <Box
       sx={{ height }}

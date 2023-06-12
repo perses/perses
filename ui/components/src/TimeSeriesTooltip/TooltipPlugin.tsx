@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { ReactElement, cloneElement } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
-import { getTooltipStyles } from './utils';
 
 export type TooltipConfig = {
   wrapLabels: boolean;
@@ -30,46 +29,34 @@ export interface TooltipPluginProps {
 
 export interface TooltipPluginContentProps {
   tooltipOverride?: ReactElement;
-  series?: NearbySeriesArray | null;
-  cursorTransform: string;
+  nearbySeries?: NearbySeriesArray | null;
 }
 
-export function TooltipPluginContent({ tooltipOverride, series, cursorTransform }: TooltipPluginContentProps) {
-  console.log('TooltipPluginContent -> cursorTransform: ', cursorTransform);
-  // if (series === null || series.length === 0) {
-  if (!series || series.length === 0) {
+export function TooltipPluginContent({ tooltipOverride, nearbySeries }: TooltipPluginContentProps) {
+  if (!nearbySeries) {
     return null;
   }
 
   if (tooltipOverride) {
     // If consumer provides tooltip plugin content, inherit existing props but pass correct series and transform data
-    // return cloneElement(tooltipOverride, { series, cursorTransform });
-    console.log('TooltipPluginContent -> series: ', series);
-    return cloneElement(tooltipOverride, { series, cursorTransform });
+    return cloneElement(tooltipOverride, { nearbySeries });
   }
 
-  // Fallback to default scatter tooltip plugin
+  // Fallback to default tooltip plugin content
   return (
-    <Box
-      sx={(theme) => getTooltipStyles(theme)}
-      style={{
-        transform: cursorTransform,
-      }}
-    >
-      {series.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
+    <Box>
+      {nearbySeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
         if (datumIdx === null || seriesIdx === null) return null;
         const key = seriesIdx.toString() + datumIdx.toString();
-
         return (
           <Box key={key}>
-            <Typography>Default Scatter Tooltip</Typography>
             <SeriesInfo
               key={key}
               seriesName={seriesName}
               y={y}
               formattedY={formattedY}
               markerColor={markerColor}
-              totalSeries={series.length}
+              totalSeries={nearbySeries.length}
               wrapLabels={true}
               emphasizeText={isClosestToCursor}
             />

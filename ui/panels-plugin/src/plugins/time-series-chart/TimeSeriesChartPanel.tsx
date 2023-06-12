@@ -18,14 +18,12 @@ import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@p
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
-  EChartsDataFormat,
   LineChart,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
-  // AnnotationTooltip,
   LegendItem,
   EChartsTimeSeries,
   getYAxes,
@@ -120,7 +118,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    // // TODO: cleanup figure out how to use EChartsDataFormat here
+    // TODO: cleanup figure out how to use EChartsDataFormat here
     // const graphData: EChartsDataFormat = {
     //   timeSeries: [], // TODO: define annotation structure
     //   xAxis: [],
@@ -273,7 +271,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
-  console.log('(perses) TimeSeriesChartPanel -> graphData: ', graphData);
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
@@ -301,7 +298,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 yAxis={getYAxes(echartsYAxis)}
                 unit={unit}
                 grid={gridOverrides}
-                // tooltipConfig={{ wrapLabels: true, scatterTooltip: AnnotationTooltip }}
                 tooltipConfig={{ wrapLabels: true }}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}

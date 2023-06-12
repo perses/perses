@@ -72,20 +72,24 @@ export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
     return null;
   }
 
-  console.log('nearbySeries -> ', nearbySeries);
   // If the user has provided a custom tooltipPlugin check whether to render it instead of default TooltipContent
   if (tooltipPlugin && nearbySeries !== null) {
     // Use the tooltip plugin if nearby series are all match desired series type
     // Example: Show annotation tooltip content for nearby 'scatter' series
     const isActive = nearbySeries?.every((series) => series.seriesType === tooltipPlugin.seriesTypeTrigger);
-    console.log('isActive...');
     if (isActive) {
       return (
-        <TooltipPluginContent
-          tooltipOverride={tooltipPlugin.tooltipOverride}
-          series={nearbySeries}
-          cursorTransform={cursorTransform}
-        />
+        <Portal>
+          <Box
+            ref={tooltipRef}
+            sx={(theme) => getTooltipStyles(theme)}
+            style={{
+              transform: cursorTransform,
+            }}
+          >
+            <TooltipPluginContent tooltipOverride={tooltipPlugin.tooltipOverride} nearbySeries={nearbySeries} />
+          </Box>
+        </Portal>
       );
     }
   }
