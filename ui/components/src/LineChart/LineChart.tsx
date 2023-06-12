@@ -20,9 +20,11 @@ import type {
   LegendComponentOption,
   YAXisComponentOption,
   TooltipComponentOption,
+  XAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
-import { LineChart as EChartsLineChart } from 'echarts/charts';
+import { LineChart as EChartsLineChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
+import { LabelLayout } from 'echarts/features';
 import {
   GridComponent,
   DataZoomComponent,
@@ -35,17 +37,18 @@ import {
   LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChart, OnEventsType } from '../EChart';
+import { EChart, MouseEventsParameters, OnEventsType } from '../EChart';
 import { EChartsDataFormat } from '../model/graph';
-import { UnitOptions } from '../model/units';
+import { formatValue, UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
+import { TimeSeriesTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
 import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
+  EChartsScatterChart,
   GridComponent,
   DataZoomComponent,
   MarkAreaComponent,
@@ -56,12 +59,8 @@ use([
   TooltipComponent,
   LegendComponent,
   CanvasRenderer,
+  LabelLayout,
 ]);
-
-export type TooltipConfig = {
-  wrapLabels: boolean;
-  hidden?: boolean;
-};
 
 export interface LineChartProps {
   /**
@@ -69,15 +68,18 @@ export interface LineChartProps {
    */
   height: number;
   data: EChartsDataFormat;
-  yAxis?: YAXisComponentOption;
+  xAxis?: XAXisComponentOption[];
+  yAxis?: YAXisComponentOption[];
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  showCrosshair?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
+  onElementClick?: (e: MouseEventsParameters<unknown>, data: EChartsDataFormat) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
@@ -85,14 +87,17 @@ export function LineChart({
   height,
   data,
   yAxis,
+  xAxis,
   unit,
   grid,
   legend,
   tooltipConfig = { wrapLabels: true },
   noDataVariant = 'message',
   syncGroup,
+  showCrosshair = true,
   onDataZoom,
   onDoubleClick,
+  onElementClick,
   __experimentalEChartsOptionsOverride,
 }: LineChartProps) {
   const chartsTheme = useChartsTheme();
@@ -105,6 +110,30 @@ export function LineChart({
   const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
+    const clickHandler = onElementClick
+      ? {
+          click: (e: MouseEventsParameters<unknown>) => {
+            // Desired behavior is for clicking an icon element to not pin the tooltip.
+            // This allows the React onClick event to unpin the tooltip correctly.
+            setTooltipPinnedCoords({
+              page: {
+                x: 0,
+                y: 0,
+              },
+              client: {
+                x: 0,
+                y: 0,
+              },
+              plotCanvas: {
+                x: 0,
+                y: 0,
+              },
+              target: null,
+            });
+            return onElementClick(e, data);
+          },
+        }
+      : {};
     return {
       datazoom: (params) => {
         if (onDataZoom === undefined) {
@@ -129,9 +158,9 @@ export function LineChart({
           onDataZoom(zoomEvent);
         }
       },
-      // TODO: use legendselectchanged event to fix tooltip when legend selected
+      ...clickHandler,
     };
-  }, [data, onDataZoom, setTooltipPinnedCoords]);
+  }, [data, onDataZoom, onElementClick, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
@@ -146,34 +175,38 @@ export function LineChart({
     // empty array because a `null` value will throw an error.
     if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
+    const yAxisArr = yAxis === undefined ? getYAxes(yAxis, unit) : yAxis;
+
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
+
+    const defaultXAxis: XAXisComponentOption = {
+      type: 'category',
+      data: data.xAxis,
+      max: data.xAxisMax,
+      axisLabel: {
+        formatter: (value: string) => {
+          return getFormattedDate(Number(value) ?? 0, rangeMs, timeZone);
+        },
+      },
+    };
 
     const option: EChartsCoreOption = {
       series: data.timeSeries,
-      xAxis: {
-        type: 'category',
-        data: data.xAxis,
-        max: data.xAxisMax,
-        axisLabel: {
-          formatter: (value: number) => {
-            return getFormattedDate(value, rangeMs, timeZone);
-          },
-        },
-      },
-      yAxis: getYAxes(yAxis, unit),
+      xAxis: xAxis ?? [defaultXAxis],
+      yAxis: yAxisArr,
       animation: false,
       tooltip: {
-        show: true,
+        show: showCrosshair,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
-        type: 'line',
+        type: showCrosshair ? 'line' : 'none',
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
-        snap: true,
+        snap: false, // TODO: figure out why crosshair is still snapping to closest datapoint
       },
       toolbox: {
         feature: {
@@ -191,7 +224,20 @@ export function LineChart({
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [
+    data,
+    xAxis,
+    yAxis,
+    unit,
+    grid,
+    legend,
+    noDataOption,
+    timeZone,
+    noDataVariant,
+    showCrosshair,
+    __experimentalEChartsOptionsOverride,
+  ]);
+  console.log(option);
 
   return (
     <Box
@@ -282,6 +328,7 @@ export function LineChart({
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
             }}
+            tooltipPlugin={tooltipConfig.plugin}
           />
         )}
       <EChart

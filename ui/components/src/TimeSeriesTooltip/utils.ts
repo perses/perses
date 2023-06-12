@@ -11,7 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CursorCoordinates, CursorData, TOOLTIP_MAX_WIDTH, TOOLTIP_ADJUST_Y_POS_MULTIPLIER } from './tooltip-model';
+import { Theme } from '@mui/material';
+import {
+  CursorCoordinates,
+  CursorData,
+  TOOLTIP_MAX_WIDTH,
+  TOOLTIP_MAX_HEIGHT,
+  TOOLTIP_MIN_WIDTH,
+  TOOLTIP_ADJUST_Y_POS_MULTIPLIER,
+  TOOLTIP_BG_COLOR_FALLBACK,
+} from './tooltip-model';
 
 /**
  * Determine position of tooltip depending on chart dimensions and the number of focused series
@@ -53,4 +62,31 @@ export function assembleTransform(
   return mousePos.plotCanvas.x > xPosAdjustThreshold && x > TOOLTIP_MAX_WIDTH
     ? `translate3d(${x - cursorPaddingX}px, ${y}px, 0) translateX(-100%)`
     : `translate3d(${x + cursorPaddingX}px, ${y}px, 0)`;
+}
+
+/**
+ * Helper for tooltip positioning styles
+ */
+export function getTooltipStyles(theme: Theme) {
+  return {
+    minWidth: TOOLTIP_MIN_WIDTH,
+    maxWidth: TOOLTIP_MAX_WIDTH,
+    maxHeight: TOOLTIP_MAX_HEIGHT,
+    padding: 0,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
+    borderRadius: '6px',
+    color: '#fff',
+    fontSize: '11px',
+    visibility: 'visible',
+    opacity: 1,
+    transition: 'all 0.1s ease-out',
+    zIndex: theme.zIndex.drawer - 1,
+    overflow: 'hidden',
+    '&:hover': {
+      overflowY: 'auto',
+    },
+  };
 }

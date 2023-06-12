@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart } from '@perses-dev/components';
+import { LineChart, formatValue } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
-import { Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
+import { YAXisComponentOption } from 'echarts';
+import { tooltipPluginData, TOOLTIP_PLUGIN_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -37,9 +39,6 @@ const meta: Meta<typeof LineChart> = {
       xAxis: [1673784000000, 1673784060000, 1673784120000],
       legendItems: [],
       rangeMs: 21600000,
-    },
-    yAxis: {
-      show: true,
     },
     unit: {
       kind: 'Decimal' as const,
@@ -103,6 +102,109 @@ export const NoData: Story = {
             chart
           </Typography>
           <LineChart {...args} noDataVariant="chart" />
+        </div>
+      </Stack>
+    );
+  },
+};
+
+function ExampleTooltipPlugin() {
+  return (
+    <Box p={2}>
+      <Typography>Tooltip Plugin Content Override</Typography>
+    </Box>
+  );
+}
+
+const annotationsPopulated = true;
+const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%';
+
+const yAxisArr = [
+  {
+    type: 'value',
+    boundaryGap: [0, eventsBoundaryOffset],
+    axisLabel: {
+      showMaxLabel: !annotationsPopulated,
+      formatter: (value: number) => {
+        return formatValue(value, { kind: 'Decimal' });
+      },
+    },
+  },
+  {
+    show: true,
+    type: 'value',
+    data: tooltipPluginData.timeSeries.filter((series) => series.type === 'line').map((_, idx) => idx),
+    axisTick: { show: false },
+    axisLabel: { show: true },
+    axisLine: { show: false },
+  },
+] as YAXisComponentOption[];
+
+export const TooltipContentPlugin: Story = {
+  args: {
+    data: tooltipPluginData,
+    showCrosshair: false,
+    tooltipConfig: {
+      wrapLabels: true,
+      plugin: {
+        seriesTypeTrigger: 'scatter',
+        tooltipOverride: <ExampleTooltipPlugin />,
+      },
+    },
+    grid: {
+      top: 30,
+      right: 20,
+      bottom: 10,
+      left: 20,
+    },
+    height: TOOLTIP_PLUGIN_CHART_HEIGHT,
+    xAxis: [
+      {
+        show: true,
+        type: 'category',
+        data: [
+          1685966835000, 1685966850000, 1685966865000, 1685966880000, 1685966895000, 1685966910000, 1685966925000,
+          1685966940000,
+        ],
+        splitLine: {
+          show: false,
+        },
+      },
+      {
+        show: true,
+        type: 'category',
+        position: 'top',
+        data: [1685966835000, 1685966856000, 1685966877000, 1685966898000, 1685966919000],
+        axisLine: {
+          show: false,
+          lineStyle: {
+            opacity: 0,
+          },
+        },
+        axisTick: {
+          show: false,
+        },
+        axisLabel: {
+          show: false,
+        },
+        axisPointer: {
+          show: false,
+        },
+        splitLine: {
+          show: false,
+        },
+      },
+    ],
+    yAxis: yAxisArr,
+  },
+  render: (args) => {
+    return (
+      <Stack>
+        <div>
+          <Typography variant="h3" gutterBottom>
+            Tooltip Content Plugin
+          </Typography>
+          <LineChart {...args} noDataVariant="message" />
         </div>
       </Stack>
     );

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './TimeSeriesTooltip';
+export * from './TooltipPlugin';
 export * from './SeriesInfo';
 export * from './SeriesLabelsStack';
 export * from './SeriesMarker';

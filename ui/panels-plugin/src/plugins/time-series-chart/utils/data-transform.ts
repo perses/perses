@@ -67,7 +67,7 @@ export function getLineSeries(
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
-  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  let showPoints = data && data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'Always') {
     showPoints = true;
@@ -158,10 +158,11 @@ export function convertPercentThreshold(percent: number, data: EChartsTimeSeries
   return percentDecimal * total + adjustedMin;
 }
 
+// TODO: confirm this still works in thresholds editor
 function findMax(timeSeries: EChartsTimeSeries[]) {
   let max = 0;
   timeSeries.forEach((series) => {
-    series.data.forEach((value: EChartsValues) => {
+    series.data.forEach((value) => {
       if (typeof value === 'number' && value > max) {
         max = value;
       }
@@ -169,7 +170,6 @@ function findMax(timeSeries: EChartsTimeSeries[]) {
   });
   return max;
 }
-
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */

@@ -18,13 +18,15 @@ import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@p
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
-  EChartsDataFormat,
   LineChart,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
+  LegendItem,
+  EChartsTimeSeries,
+  getYAxes,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -116,10 +118,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    const graphData: EChartsDataFormat = {
-      timeSeries: [],
-      xAxis: [],
-      legendItems: [],
+    // TODO: cleanup figure out how to use EChartsDataFormat here
+    // const graphData: EChartsDataFormat = {
+    //   timeSeries: [], // TODO: define annotation structure
+    //   xAxis: [],
+    //   legendItems: [],
+    //   rangeMs: timeScale.endMs - timeScale.startMs,
+    // };
+    const graphData = {
+      timeSeries: [] as EChartsTimeSeries[], // TODO: define annotation structure
+      xAxis: [] as number[],
+      legendItems: [] as LegendItem[],
       rangeMs: timeScale.endMs - timeScale.startMs,
     };
     const xAxisData = [...getXValues(timeScale)];
@@ -166,7 +175,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const seriesId = timeSeries.name + seriesIndex;
 
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
+        const lineSeries: EChartsTimeSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
 
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
@@ -286,13 +295,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               <LineChart
                 height={height}
                 data={graphData}
-                yAxis={echartsYAxis}
+                yAxis={getYAxes(echartsYAxis)}
                 unit={unit}
                 grid={gridOverrides}
                 tooltipConfig={{ wrapLabels: true }}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}
-                //  Show an empty chart when there is no data because the user unselected all items in
+                // Show an empty chart when there is no data because the user unselected all items in
                 // the legend. Otherwise, show a "no data" message.
                 noDataVariant={
                   !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0

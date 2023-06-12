@@ -12,8 +12,12 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-import { LineSeriesOption } from 'echarts/charts';
-import { LegendItem } from '../Legend';
+import { OptionDataItemObject } from 'echarts/types/src/util/types';
+import { LineSeriesOption, ScatterSeriesOption } from 'echarts/charts';
+import { LegendItem } from '../';
+
+// TODO: use ComposeOption to fix tooltip type workarounds
+// export type ChartsOption = ComposeOption<TooltipComponentOption>;
 
 // adjust display when there are many time series to help with performance
 export const OPTIMIZED_MODE_SERIES_LIMIT = 1000;
@@ -32,10 +36,29 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
+export type TimeSeriesWithAnnotations = EChartsTimeSeries | AnnotationSeries;
+
 export type EChartsDataFormat = {
-  timeSeries: EChartsTimeSeries[];
+  timeSeries: TimeSeriesWithAnnotations[];
   xAxis: number[];
+  xAxisAlt?: number[]; // TODO: temporary axis for annotations, remove after TimeChart supersedes LineChart
   legendItems?: LegendItem[];
   xAxisMax?: number | string;
   rangeMs?: number;
 };
+
+// TODO: rename AnnotationSeries -> GroupedAnnotations
+export interface AnnotationSeries extends Omit<ScatterSeriesOption, 'data'> {
+  data: AnnotationSeriesData;
+  annotations?: unknown[];
+}
+
+export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
+  value: TimeSeriesValueTuple;
+  categoryColor?: string;
+  itemStyle?: {
+    color: string;
+  };
+}
+
+export type AnnotationSeriesData = AnnotationSeriesDatum[];
