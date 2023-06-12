@@ -93,20 +93,6 @@ export function PanelHeader({
         </InfoTooltip>
       </>
     );
-  } else if (description !== undefined) {
-    // If there aren't edit handlers and we have a description, show a button with a tooltip for the panel description
-    actions = (
-      <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
-        <HeaderIconButton aria-label="panel description" size="small">
-          <InformationOutlineIcon
-            aria-describedby="info-tooltip"
-            aria-hidden={false}
-            fontSize="inherit"
-            sx={{ color: (theme) => theme.palette.grey[700] }}
-          />
-        </HeaderIconButton>
-      </InfoTooltip>
-    );
   }
 
   return (
@@ -117,21 +103,36 @@ export function PanelHeader({
       aria-describedby={descriptionTooltipId}
       disableTypography
       title={
-        <Typography
-          id={titleElementId}
-          variant="subtitle1"
-          sx={{
-            // `minHeight` guarantees that the header has the correct height
-            // when there is no title (i.e. in the preview)
-            lineHeight: '24px',
-            minHeight: '24px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {title}
-        </Typography>
+        <Stack direction="row">
+          <Typography
+            id={titleElementId}
+            variant="subtitle1"
+            sx={{
+              // `minHeight` guarantees that the header has the correct height
+              // when there is no title (i.e. in the preview)
+              lineHeight: '24px',
+              minHeight: '24px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {title}
+          </Typography>
+          {/* Show the info tooltip when description is a non-empty string */}
+          {description !== undefined && description.trim().length > 0 && (
+            <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
+              <HeaderIconButton aria-label="panel description" size="small">
+                <InformationOutlineIcon
+                  aria-describedby="info-tooltip"
+                  aria-hidden={false}
+                  fontSize="inherit"
+                  sx={{ color: (theme) => theme.palette.text.secondary }}
+                />
+              </HeaderIconButton>
+            </InfoTooltip>
+          )}
+        </Stack>
       }
       action={
         <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
