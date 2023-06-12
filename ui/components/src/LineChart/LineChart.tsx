@@ -44,7 +44,7 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
-import { enableDataZoom, getDateRange, getFormattedDate, restoreChart, ZoomEventData } from './utils';
+import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,
@@ -76,6 +76,7 @@ export interface LineChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  showCrosshair?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   onElementClick?: (e: MouseEventsParameters<unknown>, data: EChartsDataFormat) => void;
@@ -93,6 +94,7 @@ export function LineChart({
   tooltipConfig = { wrapLabels: true },
   noDataVariant = 'message',
   syncGroup,
+  showCrosshair = true,
   onDataZoom,
   onDoubleClick,
   onElementClick,
@@ -158,7 +160,7 @@ export function LineChart({
       },
       ...clickHandler,
     };
-  }, [data, onDataZoom, onClick, setTooltipPinnedCoords]);
+  }, [data, onDataZoom, onElementClick, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
@@ -173,24 +175,7 @@ export function LineChart({
     // empty array because a `null` value will throw an error.
     if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
-    // annotations are plotted on hidden xAxis
-    const annotationsPopulated = data.xAxisAlt !== undefined && data.xAxisAlt.length > 0;
-
-    // when events are present increase padding above time series data so tooltip less likely to clash
-    const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%'; // TODO: play around with first value since ideal value depends on data
-
-    // TODO: determine ideal default yAxis, should annotation customizations always happen in parent
-    const yAxisFallback: YAXisComponentOption = {
-      type: 'value',
-      boundaryGap: [0, eventsBoundaryOffset],
-      axisLabel: {
-        showMaxLabel: !annotationsPopulated,
-        formatter: (value: number) => {
-          return formatValue(value, unit);
-        },
-      },
-    };
-    const yAxisCombined = yAxis === undefined ? [yAxisFallback] : yAxis;
+    const yAxisArr = yAxis === undefined ? getYAxes(yAxis, unit) : yAxis;
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
@@ -208,24 +193,20 @@ export function LineChart({
     const option: EChartsCoreOption = {
       series: data.timeSeries,
       xAxis: xAxis ?? [defaultXAxis],
-      yAxis: yAxisCombined,
+      yAxis: yAxisArr,
       animation: false,
       tooltip: {
-        show: !annotationsPopulated, // hide axis pointer when events are present or else two dotted lines show
+        show: showCrosshair,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
-        axisPointer: {
-          type: annotationsPopulated ? 'none' : 'line',
-          z: 0, // ensure point symbol shows on top of dashed line
-        },
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
-        type: 'line',
+        type: showCrosshair ? 'line' : 'none',
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
-        snap: true,
+        snap: false, // TODO: figure out why crosshair is still snapping to closest datapoint
       },
       toolbox: {
         feature: {
@@ -252,18 +233,16 @@ export function LineChart({
     legend,
     noDataOption,
     timeZone,
-    __experimentalEChartsOptionsOverride,
     noDataVariant,
+    showCrosshair,
+    __experimentalEChartsOptionsOverride,
   ]);
+  console.log(option);
 
   return (
     <Box
       sx={{ height }}
       onClick={(e) => {
-        console.log(e);
-        // if (e.event !== undefined) {
-        //   return;
-        // }
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {

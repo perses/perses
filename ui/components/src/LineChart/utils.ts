@@ -101,6 +101,9 @@ export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
         return formatValue(value, unit);
       },
     },
+    axisPointer: {
+      snap: false,
+    },
   };
   return [merge(Y_AXIS_DEFAULT, yAxis)];
 }

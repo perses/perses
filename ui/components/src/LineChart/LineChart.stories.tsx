@@ -142,6 +142,8 @@ const yAxisArr = [
 
 export const TooltipContentPlugin: Story = {
   args: {
+    data: tooltipPluginData,
+    showCrosshair: false,
     tooltipConfig: {
       wrapLabels: true,
       plugin: {
@@ -149,7 +151,6 @@ export const TooltipContentPlugin: Story = {
         tooltipOverride: <ExampleTooltipPlugin />,
       },
     },
-    data: tooltipPluginData,
     grid: {
       top: 30,
       right: 20,
