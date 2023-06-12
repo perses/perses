@@ -78,7 +78,7 @@ export interface LineChartProps {
   syncGroup?: string;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
-  onClick?: (e: MouseEventsParameters<unknown>, data: EChartsDataFormat) => void;
+  onElementClick?: (e: MouseEventsParameters<unknown>, data: EChartsDataFormat) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
@@ -95,7 +95,7 @@ export function LineChart({
   syncGroup,
   onDataZoom,
   onDoubleClick,
-  onClick,
+  onElementClick,
   __experimentalEChartsOptionsOverride,
 }: LineChartProps) {
   const chartsTheme = useChartsTheme();
@@ -108,7 +108,30 @@ export function LineChart({
   const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
-    const clickHandler = onClick ? { click: (e: MouseEventsParameters<unknown>) => onClick(e, data) } : {};
+    const clickHandler = onElementClick
+      ? {
+          click: (e: MouseEventsParameters<unknown>) => {
+            // Desired behavior is for clicking an icon element to not pin the tooltip.
+            // This allows the React onClick event to unpin the tooltip correctly.
+            setTooltipPinnedCoords({
+              page: {
+                x: 0,
+                y: 0,
+              },
+              client: {
+                x: 0,
+                y: 0,
+              },
+              plotCanvas: {
+                x: 0,
+                y: 0,
+              },
+              target: null,
+            });
+            return onElementClick(e, data);
+          },
+        }
+      : {};
     return {
       datazoom: (params) => {
         if (onDataZoom === undefined) {
@@ -154,9 +177,9 @@ export function LineChart({
     const annotationsPopulated = data.xAxisAlt !== undefined && data.xAxisAlt.length > 0;
 
     // when events are present increase padding above time series data so tooltip less likely to clash
-    // const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%'; // TODO: play around with first value since ideal value depends on data
-    const eventsBoundaryOffset = annotationsPopulated ? '90%' : '500%';
+    const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%'; // TODO: play around with first value since ideal value depends on data
 
+    // TODO: determine ideal default yAxis, should annotation customizations always happen in parent
     const yAxisFallback: YAXisComponentOption = {
       type: 'value',
       boundaryGap: [0, eventsBoundaryOffset],
@@ -237,6 +260,10 @@ export function LineChart({
     <Box
       sx={{ height }}
       onClick={(e) => {
+        console.log(e);
+        // if (e.event !== undefined) {
+        //   return;
+        // }
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
