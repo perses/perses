@@ -13,7 +13,7 @@
 
 import { UnitOptions, ThresholdColorPalette } from '@perses-dev/components';
 import { StepOptions, ThresholdOptions } from '@perses-dev/core';
-import { zip } from 'lodash-es';
+import zip from 'lodash/zip';
 
 export type GaugeColorStop = [number, string];
 

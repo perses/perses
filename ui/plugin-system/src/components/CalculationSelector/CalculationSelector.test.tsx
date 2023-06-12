@@ -36,7 +36,7 @@ describe('CalculationSelector', () => {
     const calcSelector = getCalculationSelector();
     userEvent.click(calcSelector);
     const sumOption = screen.getByRole('option', {
-      name: 'Sum',
+      name: /Sum/,
     });
     userEvent.click(sumOption);
 
@@ -54,7 +54,7 @@ describe('CalculationSelector', () => {
     userEvent.clear(calcSelector);
     userEvent.keyboard('first');
     screen.getByRole('option', {
-      name: 'First',
+      name: /First/,
     });
 
     userEvent.keyboard('{arrowup}{enter}');

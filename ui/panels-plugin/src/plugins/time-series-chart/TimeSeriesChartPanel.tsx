@@ -11,17 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo } from 'react';
-import { merge } from 'lodash-es';
-import {
-  useDeepMemo,
-  StepOptions,
-  getXValues,
-  getYValues,
-  TimeSeries,
-  DEFAULT_LEGEND,
-  getAggregationValues,
-} from '@perses-dev/core';
+import { useMemo, useState } from 'react';
+import merge from 'lodash/merge';
+import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
   PanelProps,

@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { findLast, meanBy, sumBy } from 'lodash-es';
+import findLast from 'lodash/findLast';
+import meanBy from 'lodash/meanBy';
+import sumBy from 'lodash/sumBy';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
 // TODO: move this file and calculations.test.ts to @perses-dev/core
@@ -27,22 +29,28 @@ export type CalculationType = keyof typeof CalculationsMap;
 
 export type CalculationConfig = {
   label: string;
+  description: string;
 };
 export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationConfig>> = {
   First: {
     label: 'First',
+    description: 'First value',
   },
   Last: {
     label: 'Last',
+    description: 'Last value',
   },
   LastNumber: {
     label: 'Last number',
+    description: 'Last numeric value',
   },
   Mean: {
     label: 'Mean',
+    description: 'Average value',
   },
   Sum: {
     label: 'Sum',
+    description: 'The sum of all values',
   },
 } as const;
 

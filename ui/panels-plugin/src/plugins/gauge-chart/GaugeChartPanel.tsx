@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { GaugeSeriesOption } from 'echarts';
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton, Stack } from '@mui/material';

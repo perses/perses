@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.34.0 / 2023-06-08
+
+- [FEATURE] Shared crosshair for all time series panels on a dashboard (#1228)
+- [FEATURE] Support variables in markdown (#1233)
+- [FEATURE] Resolve variables in prometheus legend formatter (#1231)
+- [FEATURE] Support variables in Panels and Panel Groups strings (title, description) (#1225)
+- [FEATURE] Respect custom all value in list variables (#1236)
+- [BUGFIX] lodash-es import fix (#1238)
+- [ENHANCEMENT] Table legend can include additional columns (#1230)
+- [ENHANCEMENT] Export from each core panel plugin barrel file (#1229)
+- [BREAKINGCHANGE] Move calculation model to `core` package (#1238)
+- [BREAKINGCHANGE] Reorg legend code to separate plugin spec & component concerns (#1223)
+
 ## 0.33.0 / 2023-06-06
 
 - [BUGFIX] Fix save dashboard console warning and saved duration checkbox (#1226)

@@ -14,7 +14,8 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
-import { isEqual, debounce } from 'lodash-es';
+import isEqual from 'lodash/isEqual';
+import debounce from 'lodash/debounce';
 import { EChartsTheme } from '../model';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
