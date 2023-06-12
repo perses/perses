@@ -99,12 +99,11 @@ describe('Panel', () => {
     expect(descriptionButton).not.toBeInTheDocument();
   });
 
-  it('does not show description in edit mode', () => {
-    renderPanel(undefined, {
-      onEditPanelClick: jest.fn(),
-      onDeletePanelClick: jest.fn(),
-      onDuplicatePanelClick: jest.fn(),
-    });
+  it('does not show description when description only contains whitespace', () => {
+    // Render a panel with an all whitespace description
+    const withoutDescription = createTestPanel();
+    withoutDescription.spec.display.description = '   ';
+    renderPanel(withoutDescription);
 
     const panel = getPanel();
     userEvent.hover(panel);
