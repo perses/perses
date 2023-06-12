@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, cloneElement } from 'react';
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
 
@@ -44,7 +44,8 @@ export function TooltipPluginContent({ tooltipOverride, nearbySeries }: TooltipP
 
   // Fallback to default tooltip plugin content
   return (
-    <Box>
+    <Box p={2}>
+      <Typography>Annotations</Typography>
       {nearbySeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
         if (datumIdx === null || seriesIdx === null) return null;
         const key = seriesIdx.toString() + datumIdx.toString();

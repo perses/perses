@@ -12,12 +12,11 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart, AnnotationTooltip, AnnotationTooltipProps } from '@perses-dev/components';
+import { LineChart, formatValue } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
-import { Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
+import { YAXisComponentOption } from 'echarts';
 import { tooltipPluginData, WITH_ANNOTATIONS_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
-// import tooltipPluginData from '../test-utils/tooltip-plugin-data.json';
-// import { EChartsDataFormat } from '../model';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -41,9 +40,6 @@ const meta: Meta<typeof LineChart> = {
       legendItems: [],
       rangeMs: 21600000,
     },
-    // yAxis: {
-    //   show: true,
-    // },
     unit: {
       kind: 'Decimal' as const,
       decimal_places: 2,
@@ -112,9 +108,37 @@ export const NoData: Story = {
   },
 };
 
-export function ExampleTooltipPlugin(props: AnnotationTooltipProps) {
-  return <AnnotationTooltip {...props} />;
+function ExampleTooltipPlugin() {
+  return (
+    <Box p={2}>
+      <Typography>Tooltip Plugin Content Override</Typography>
+    </Box>
+  );
 }
+
+const annotationsPopulated = true;
+const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%';
+
+const yAxisArr = [
+  {
+    type: 'value',
+    boundaryGap: [0, eventsBoundaryOffset],
+    axisLabel: {
+      showMaxLabel: !annotationsPopulated,
+      formatter: (value: number) => {
+        return formatValue(value, { kind: 'Decimal' });
+      },
+    },
+  },
+  {
+    show: true,
+    type: 'value',
+    data: tooltipPluginData.timeSeries.filter((series) => series.type === 'line').map((_, idx) => idx),
+    axisTick: { show: false },
+    axisLabel: { show: true },
+    axisLine: { show: false },
+  },
+] as YAXisComponentOption[];
 
 export const WithAnnotations: Story = {
   args: {
@@ -122,7 +146,7 @@ export const WithAnnotations: Story = {
       wrapLabels: true,
       plugin: {
         seriesTypeTrigger: 'scatter',
-        // tooltipOverride: <ExampleTooltipPlugin />,
+        tooltipOverride: <ExampleTooltipPlugin />,
       },
     },
     data: tooltipPluginData,
@@ -170,6 +194,7 @@ export const WithAnnotations: Story = {
         },
       },
     ],
+    yAxis: yAxisArr,
   },
   render: (args) => {
     return (
