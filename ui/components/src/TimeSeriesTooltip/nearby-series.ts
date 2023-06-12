@@ -13,14 +13,14 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import {
-  formatValue,
-  UnitOptions,
   EChartsDataFormat,
-  TimeSeriesWithAnnotations,
-  OPTIMIZED_MODE_SERIES_LIMIT,
-  AnnotationSeriesData,
   EChartsValues,
-  AnnotationSeriesDatum,
+  formatValue,
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  PersesTimeSeries,
+  ScatterSeriesData,
+  ScatterSeriesDatum,
+  UnitOptions,
 } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
@@ -45,12 +45,12 @@ export interface NearbySeriesInfo {
 
 export type NearbySeriesArray = NearbySeriesInfo[];
 
-export function isScatterSeriesData(data: EChartsValues[] | AnnotationSeriesDatum[]): data is AnnotationSeriesData {
+export function isScatterSeriesData(data: EChartsValues[] | ScatterSeriesDatum[]): data is ScatterSeriesData {
   if (data.length === 0) return false;
-  const annotationSeriesData = data as AnnotationSeriesData;
-  if (annotationSeriesData !== undefined) {
-    if (annotationSeriesData[0] !== undefined) {
-      return annotationSeriesData[0].value !== undefined;
+  const scatterSeriesData = data as ScatterSeriesData;
+  if (scatterSeriesData !== undefined) {
+    if (scatterSeriesData[0] !== undefined) {
+      return scatterSeriesData[0].value !== undefined;
     }
   }
   return false;
@@ -91,7 +91,7 @@ export function checkforNearbySeries(
   const totalSeries = data.timeSeries.length;
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
-      const currentSeries: TimeSeriesWithAnnotations | undefined = data.timeSeries[seriesIdx];
+      const currentSeries: PersesTimeSeries | undefined = data.timeSeries[seriesIdx];
       if (currentSeries === undefined || currentSeries.data === undefined) break;
       if (currentNearbySeriesData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
       const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
@@ -105,7 +105,7 @@ export function checkforNearbySeries(
       if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
         if (isScatterSeriesData(currentSeries.data)) {
           if (currentSeries.data[0] !== undefined) {
-            const currentSeriesDatum: AnnotationSeriesDatum = currentSeries.data[0];
+            const currentSeriesDatum: ScatterSeriesDatum = currentSeries.data[0];
             if (currentSeriesDatum.value === undefined) break;
             if (Array.isArray(currentSeriesDatum.value)) {
               const xIndex = currentSeriesDatum.value[0]; // timestamp

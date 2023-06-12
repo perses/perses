@@ -31,15 +31,15 @@ export interface GraphSeries {
 
 export type EChartsValues = number | null | '-';
 
-export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
+export interface PersesLineSeries extends Omit<LineSeriesOption, 'data'> {
   // TODO: support dataset and both category / time xAxis types
   data: EChartsValues[];
 }
 
-export type TimeSeriesWithAnnotations = EChartsTimeSeries | AnnotationSeries;
+export type PersesTimeSeries = PersesLineSeries | PersesScatterSeries;
 
 export type EChartsDataFormat = {
-  timeSeries: TimeSeriesWithAnnotations[];
+  timeSeries: PersesTimeSeries[];
   xAxis: number[];
   xAxisAlt?: number[]; // TODO: temporary axis for annotations, remove after TimeChart supersedes LineChart
   legendItems?: LegendItem[];
@@ -47,13 +47,12 @@ export type EChartsDataFormat = {
   rangeMs?: number;
 };
 
-// TODO: rename AnnotationSeries -> GroupedAnnotations
-export interface AnnotationSeries extends Omit<ScatterSeriesOption, 'data'> {
-  data: AnnotationSeriesData;
-  annotations?: unknown[];
+export interface PersesScatterSeries extends Omit<ScatterSeriesOption, 'data'> {
+  data: ScatterSeriesData;
+  annotations?: unknown[]; // TODO: finalize data model for single annotation and grouped annotations
 }
 
-export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
+export interface ScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
   value: TimeSeriesValueTuple;
   categoryColor?: string;
   itemStyle?: {
@@ -61,4 +60,4 @@ export interface AnnotationSeriesDatum extends OptionDataItemObject<TimeSeriesVa
   };
 }
 
-export type AnnotationSeriesData = AnnotationSeriesDatum[];
+export type ScatterSeriesData = ScatterSeriesDatum[];

@@ -24,7 +24,7 @@ import {
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
-  LegendItem,
+  EChartsDataFormat,
   EChartsTimeSeries,
   getYAxes,
 } from '@perses-dev/components';
@@ -118,17 +118,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    // TODO: cleanup figure out how to use EChartsDataFormat here
-    // const graphData: EChartsDataFormat = {
-    //   timeSeries: [], // TODO: define annotation structure
-    //   xAxis: [],
-    //   legendItems: [],
-    //   rangeMs: timeScale.endMs - timeScale.startMs,
-    // };
-    const graphData = {
-      timeSeries: [] as EChartsTimeSeries[], // TODO: define annotation structure
-      xAxis: [] as number[],
-      legendItems: [] as LegendItem[],
+    const graphData: EChartsDataFormat = {
+      timeSeries: [],
+      xAxis: [],
+      legendItems: [],
       rangeMs: timeScale.endMs - timeScale.startMs,
     };
     const xAxisData = [...getXValues(timeScale)];

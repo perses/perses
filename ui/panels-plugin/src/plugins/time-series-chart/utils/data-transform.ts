@@ -16,8 +16,9 @@ import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   EChartsTimeSeries,
-  EChartsValues,
   EChartsDataFormat,
+  EChartsValues,
+  PersesTimeSeries,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -150,7 +151,7 @@ export function getThresholdSeries(
  * Converts percent threshold into absolute step value
  * If max is undefined, use the max value from time series data as default
  */
-export function convertPercentThreshold(percent: number, data: EChartsTimeSeries[], max?: number, min?: number) {
+export function convertPercentThreshold(percent: number, data: PersesTimeSeries[], max?: number, min?: number) {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);
   const adjustedMin = min ?? 0;
@@ -159,10 +160,10 @@ export function convertPercentThreshold(percent: number, data: EChartsTimeSeries
 }
 
 // TODO: confirm this still works in thresholds editor
-function findMax(timeSeries: EChartsTimeSeries[]) {
+function findMax(timeSeries: PersesTimeSeries[]) {
   let max = 0;
   timeSeries.forEach((series) => {
-    series.data.forEach((value) => {
+    series.data.forEach((value: EChartsValues) => {
       if (typeof value === 'number' && value > max) {
         max = value;
       }

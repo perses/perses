@@ -237,7 +237,6 @@ export function LineChart({
     showCrosshair,
     __experimentalEChartsOptionsOverride,
   ]);
-  console.log(option);
 
   return (
     <Box

@@ -121,6 +121,7 @@ const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%';
 
 const yAxisArr = [
   {
+    show: true,
     type: 'value',
     boundaryGap: [0, eventsBoundaryOffset],
     axisLabel: {
@@ -131,7 +132,7 @@ const yAxisArr = [
     },
   },
   {
-    show: true,
+    show: false,
     type: 'value',
     data: tooltipPluginData.timeSeries.filter((series) => series.type === 'line').map((_, idx) => idx),
     axisTick: { show: false },
@@ -200,12 +201,7 @@ export const TooltipContentPlugin: Story = {
   render: (args) => {
     return (
       <Stack>
-        <div>
-          <Typography variant="h3" gutterBottom>
-            Tooltip Content Plugin
-          </Typography>
-          <LineChart {...args} noDataVariant="message" />
-        </div>
+        <LineChart {...args} noDataVariant="message" />
       </Stack>
     );
   },
