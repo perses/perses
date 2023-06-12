@@ -116,31 +116,6 @@ function ExampleTooltipPlugin() {
   );
 }
 
-const annotationsPopulated = true;
-const eventsBoundaryOffset = annotationsPopulated ? '50%' : '10%';
-
-const yAxisArr = [
-  {
-    show: true,
-    type: 'value',
-    boundaryGap: [0, eventsBoundaryOffset],
-    axisLabel: {
-      showMaxLabel: !annotationsPopulated,
-      formatter: (value: number) => {
-        return formatValue(value, { kind: 'Decimal' });
-      },
-    },
-  },
-  {
-    show: false,
-    type: 'value',
-    data: tooltipPluginData.timeSeries.filter((series) => series.type === 'line').map((_, idx) => idx),
-    axisTick: { show: false },
-    axisLabel: { show: true },
-    axisLine: { show: false },
-  },
-] as YAXisComponentOption[];
-
 export const TooltipContentPlugin: Story = {
   args: {
     data: tooltipPluginData,
@@ -196,7 +171,27 @@ export const TooltipContentPlugin: Story = {
         },
       },
     ],
-    yAxis: yAxisArr,
+    yAxis: [
+      {
+        show: true,
+        type: 'value',
+        boundaryGap: [0, '50%'],
+        axisLabel: {
+          showMaxLabel: false,
+          formatter: (value: number) => {
+            return formatValue(value, { kind: 'Decimal' });
+          },
+        },
+      },
+      {
+        show: false,
+        type: 'value',
+        data: tooltipPluginData.timeSeries.filter((series) => series.type === 'line').map((_, idx) => idx),
+        axisTick: { show: false },
+        axisLabel: { show: true },
+        axisLine: { show: false },
+      },
+    ] as YAXisComponentOption[],
   },
   render: (args) => {
     return (

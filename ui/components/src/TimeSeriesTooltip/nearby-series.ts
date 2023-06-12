@@ -41,7 +41,7 @@ export interface NearbySeriesInfo {
   formattedY: string;
   isClosestToCursor: boolean;
   seriesType?: 'line' | 'scatter';
-  annotations?: unknown[];
+  annotations?: unknown[]; // TODO: finalize data model for single annotation and grouped annotations
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
@@ -86,7 +86,7 @@ export function checkforNearbySeries(
       /**
        * Scatter series is used for group annotations and shows with alternate tooltip content
        * https://echarts.apache.org/en/option.html#series-scatter.data.value
-       * TODO: make extensible using tooltip plugin approach
+       * TODO: make extensible using tooltip plugin approach, finialize annotations data model
        */
       if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
         if (isScatterSeriesData(currentSeries.data)) {

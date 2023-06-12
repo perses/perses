@@ -45,7 +45,6 @@ export function TooltipPluginContent({ tooltipOverride, nearbySeries }: TooltipP
   // Fallback to default tooltip plugin content
   return (
     <Box p={2}>
-      <Typography>Annotations</Typography>
       {nearbySeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
         if (datumIdx === null || seriesIdx === null) return null;
         const key = seriesIdx.toString() + datumIdx.toString();

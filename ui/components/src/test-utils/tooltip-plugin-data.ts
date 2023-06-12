@@ -342,6 +342,7 @@ export const tooltipPluginData = {
       type: 'scatter',
       xAxisIndex: 1,
       yAxisIndex: 1,
+      // TODO: finalize data model for annotations, create mapping utils
       annotations: [
         {
           id: '0+alerts',
