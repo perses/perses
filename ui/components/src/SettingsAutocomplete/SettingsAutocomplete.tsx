@@ -82,6 +82,10 @@ export function SettingsAutocomplete<
     return option.label ?? option.id;
   };
 
+  // Note: this component currently is not virtualized because it is specific
+  // to being used for settings, which generally have a pretty small list of
+  // options. If this changes to include values with many options, virtualization
+  // should be added using react-virtuoso.
   return (
     <Autocomplete
       isOptionEqualToValue={(option, value) => option.id === value.id}
