@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TitleComponentOption } from 'echarts';
 import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
-import { Box, Stack, Skeleton, Typography } from '@mui/material';
+import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
@@ -59,8 +60,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     chartWidth = MIN_WIDTH;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const noDataTextStyle = (chartsTheme.noDataOption.title as any).textStyle;
+  const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
 
   return (
     <Stack
@@ -88,7 +88,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
           />
         ))
       ) : (
-        <Typography sx={{ ...noDataTextStyle }}>No data</Typography>
+        <Typography sx={{ ...noDataTextStyle } as SxProps}>No data</Typography>
       )}
     </Stack>
   );
