@@ -1,18 +1,17 @@
 import { EChartsDataFormat } from '../model';
 
-export const WITH_ANNOTATIONS_GRID = {
+export const TOOLTIP_PLUGIN_GRID = {
   left: 20,
   right: 20,
   bottom: 10,
   top: 30,
 };
 
-export const WITH_ANNOTATIONS_CHART_HEIGHT = 300;
+export const TOOLTIP_PLUGIN_CHART_HEIGHT = 300;
 
-export const WITH_ANNOTATIONS_LABEL_DISTANCE =
-  WITH_ANNOTATIONS_CHART_HEIGHT - 41 - WITH_ANNOTATIONS_GRID.top - WITH_ANNOTATIONS_GRID.bottom;
+export const TOOLTIP_PLUGIN_LABEL_DISTANCE =
+  TOOLTIP_PLUGIN_CHART_HEIGHT - 41 - TOOLTIP_PLUGIN_GRID.top - TOOLTIP_PLUGIN_GRID.bottom;
 
-// const tooltipPluginData: EChartsDataFormat = {
 export const tooltipPluginData = {
   timeSeries: [
     {
@@ -391,7 +390,7 @@ export const tooltipPluginData = {
         show: true,
         formatter: '',
         position: 'bottom',
-        distance: WITH_ANNOTATIONS_LABEL_DISTANCE,
+        distance: TOOLTIP_PLUGIN_LABEL_DISTANCE,
       },
     },
     {
@@ -461,7 +460,7 @@ export const tooltipPluginData = {
         show: true,
         formatter: '',
         position: 'bottom',
-        distance: WITH_ANNOTATIONS_LABEL_DISTANCE,
+        distance: TOOLTIP_PLUGIN_LABEL_DISTANCE,
       },
     },
     {
@@ -506,7 +505,7 @@ export const tooltipPluginData = {
         show: true,
         formatter: '',
         position: 'bottom',
-        distance: WITH_ANNOTATIONS_LABEL_DISTANCE,
+        distance: TOOLTIP_PLUGIN_LABEL_DISTANCE,
       },
     },
     {
@@ -561,7 +560,7 @@ export const tooltipPluginData = {
         show: true,
         formatter: '',
         position: 'bottom',
-        distance: WITH_ANNOTATIONS_LABEL_DISTANCE,
+        distance: TOOLTIP_PLUGIN_LABEL_DISTANCE,
       },
     },
     {
@@ -616,7 +615,7 @@ export const tooltipPluginData = {
         show: true,
         formatter: '',
         position: 'bottom',
-        distance: WITH_ANNOTATIONS_LABEL_DISTANCE,
+        distance: TOOLTIP_PLUGIN_LABEL_DISTANCE,
       },
     },
   ],

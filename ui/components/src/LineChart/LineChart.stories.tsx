@@ -16,7 +16,7 @@ import { LineChart, formatValue } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Box, Stack, Typography } from '@mui/material';
 import { YAXisComponentOption } from 'echarts';
-import { tooltipPluginData, WITH_ANNOTATIONS_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
+import { tooltipPluginData, TOOLTIP_PLUGIN_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -140,7 +140,7 @@ const yAxisArr = [
   },
 ] as YAXisComponentOption[];
 
-export const WithAnnotations: Story = {
+export const TooltipContentPlugin: Story = {
   args: {
     tooltipConfig: {
       wrapLabels: true,
@@ -156,7 +156,7 @@ export const WithAnnotations: Story = {
       bottom: 10,
       left: 20,
     },
-    height: WITH_ANNOTATIONS_CHART_HEIGHT,
+    height: TOOLTIP_PLUGIN_CHART_HEIGHT,
     xAxis: [
       {
         show: true,
@@ -201,7 +201,7 @@ export const WithAnnotations: Story = {
       <Stack>
         <div>
           <Typography variant="h3" gutterBottom>
-            With Annotations
+            Tooltip Content Plugin
           </Typography>
           <LineChart {...args} noDataVariant="message" />
         </div>
