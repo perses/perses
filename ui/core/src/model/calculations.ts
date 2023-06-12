@@ -29,22 +29,28 @@ export type CalculationType = keyof typeof CalculationsMap;
 
 export type CalculationConfig = {
   label: string;
+  description: string;
 };
 export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationConfig>> = {
   First: {
     label: 'First',
+    description: 'First value',
   },
   Last: {
     label: 'Last',
+    description: 'Last value',
   },
   LastNumber: {
     label: 'Last number',
+    description: 'Last numeric value',
   },
   Mean: {
     label: 'Mean',
+    description: 'Average value',
   },
   Sum: {
     label: 'Sum',
+    description: 'The sum of all values',
   },
 } as const;
 
