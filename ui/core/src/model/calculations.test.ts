@@ -17,11 +17,45 @@ import { CalculationsMap, CalculationType } from './calculations';
 interface CalculationTestCase {
   values: TimeSeriesValueTuple[];
   calculation: CalculationType;
-  expected: number | undefined;
+  expected: number | undefined | null;
 }
 
 describe('Time series calculation utils', () => {
   const tests: CalculationTestCase[] = [
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 99],
+      ],
+      calculation: 'FirstNumber',
+      expected: 100,
+    },
+    {
+      values: [
+        [1677386895000, null],
+        [1677386865000, 100],
+        [1677386880000, 200],
+      ],
+      calculation: 'FirstNumber',
+      expected: 100,
+    },
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 99],
+      ],
+      calculation: 'First',
+      expected: 100,
+    },
+    {
+      values: [
+        [1677386895000, null],
+        [1677386865000, 100],
+        [1677386880000, 200],
+      ],
+      calculation: 'First',
+      expected: null,
+    },
     {
       values: [
         [1677386865000, 100],
@@ -46,7 +80,15 @@ describe('Time series calculation utils', () => {
         [1677386895000, null],
       ],
       calculation: 'Last',
-      expected: NaN,
+      expected: null,
+    },
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 200],
+      ],
+      calculation: 'Last',
+      expected: 200,
     },
     {
       values: [
@@ -56,6 +98,35 @@ describe('Time series calculation utils', () => {
       ],
       calculation: 'Sum',
       expected: 600,
+    },
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 200],
+        [1677386880000, null],
+        [1677386895000, 300],
+      ],
+      calculation: 'Sum',
+      expected: 600,
+    },
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 200],
+        [1677386895000, 300],
+      ],
+      calculation: 'Mean',
+      expected: 200,
+    },
+    {
+      values: [
+        [1677386865000, 100],
+        [1677386880000, 200],
+        [1677386895000, 300],
+        [1677386895000, null],
+      ],
+      calculation: 'Mean',
+      expected: 200,
     },
   ];
   it.each(tests)('returns $expected when $values formatted as $calculation', (args: CalculationTestCase) => {
