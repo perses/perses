@@ -15,7 +15,6 @@ import findLast from 'lodash/findLast';
 import { default as lodashMean } from 'lodash/mean';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
-// TODO: move this file and calculations.test.ts to @perses-dev/core
 export const CalculationsMap = {
   First: first,
   Last: last,
