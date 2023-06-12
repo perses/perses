@@ -18,11 +18,9 @@ interface CalculateFontSize {
   fontWeight: number;
   width: number;
   height: number;
-  lineHeight?: number; // default is 1.2
+  lineHeight: number;
   maxSize?: number;
 }
-
-const DEFAULT_LINE_HEIGHT = 1.2;
 
 let canvasContext: CanvasRenderingContext2D | null;
 
@@ -55,7 +53,7 @@ export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight
 
   // check how much bigger we can make the font while staying within the width and height
   const fontSizeBasedOnWidth = (width / textMetrics.width) * fontSize;
-  const fontSizeBasedOnHeight = height / (lineHeight ?? DEFAULT_LINE_HEIGHT);
+  const fontSizeBasedOnHeight = height / lineHeight;
 
   // return the smaller font size
   const finalFontSize = Math.min(fontSizeBasedOnHeight, fontSizeBasedOnWidth);

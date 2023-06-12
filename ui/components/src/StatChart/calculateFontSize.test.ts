@@ -46,6 +46,7 @@ describe('useOptimalFontSize', () => {
       fontWeight: 400,
       width: 100,
       height: 600,
+      lineHeight: 1.2,
     });
 
     expect(result).toBe(12);
@@ -59,6 +60,7 @@ describe('useOptimalFontSize', () => {
       fontWeight: 400,
       width: 600,
       height: 48,
+      lineHeight: 1.2,
     });
 
     expect(result).toBe(40);
@@ -73,6 +75,7 @@ describe('useOptimalFontSize', () => {
       width: 200,
       height: 100,
       maxSize: 20,
+      lineHeight: 1.2,
     });
 
     expect(result).toBe(20);

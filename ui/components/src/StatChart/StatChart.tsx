@@ -59,6 +59,7 @@ export function StatChart(props: StatChartProps) {
     fontWeight: SERIES_NAME_FONT_WEIGHT,
     width,
     height: height * 0.125, // assume series name will take 12.5% of available height
+    lineHeight: LINE_HEIGHT,
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
   });
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
@@ -74,6 +75,7 @@ export function StatChart(props: StatChartProps) {
     // with sparkline, use only 25% of available height to leave room for chart
     // without sparkline, value should take up 90% of available space
     height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
+    lineHeight: LINE_HEIGHT,
   });
   const valueFontHeight = valueFontSize * LINE_HEIGHT;
 
