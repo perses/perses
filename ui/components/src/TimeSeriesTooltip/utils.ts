@@ -83,7 +83,7 @@ export function getTooltipStyles(theme: Theme) {
     visibility: 'visible',
     opacity: 1,
     transition: 'all 0.1s ease-out',
-    zIndex: theme.zIndex.tooltip,
+    zIndex: theme.zIndex.drawer - 1,
     overflow: 'hidden',
     '&:hover': {
       overflowY: 'auto',
