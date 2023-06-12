@@ -154,7 +154,7 @@ export function GaugeChart(props: GaugeChartProps) {
             formatter:
               data.value === null
                 ? // We use a different function when we *know* the value is null
-                  // at this level because the `formatter` function returns `NaN`
+                  // at this level because the `formatter` function argument is `NaN`
                   // when the value is `null`, making it difficult to differentiate
                   // `null` from a true `NaN` case.
                   () => 'null'
