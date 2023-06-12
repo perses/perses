@@ -119,7 +119,7 @@ export function PanelHeader({
           >
             {title}
           </Typography>
-          {/* Show the info tooltip when description is defined and doesn't only contain whitespace */}
+          {/* Show the info tooltip when description is defined and is not all whitespace */}
           {description !== undefined && description.trim().length > 0 && (
             <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
               <HeaderIconButton aria-label="panel description" size="small">
