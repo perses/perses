@@ -38,13 +38,3 @@ export interface TimeSeries {
 export interface TimeSeriesMetadata {
   notices?: Notice[];
 }
-
-// export const timeSeriesAggregationValues = [
-//   'AverageNonNull',
-//   'FirstNonNull',
-//   'LastNonNull',
-//   'Min',
-//   'Max',
-//   'Total',
-// ] as const;
-// export type TimeSeriesAggregationValue = (typeof timeSeriesAggregationValues)[number];

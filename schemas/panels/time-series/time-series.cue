@@ -17,7 +17,7 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#legend_value: #calculation
+#legend_value: common.#calculation
 
 #legend: {
 	position: "Bottom" | "Right"
