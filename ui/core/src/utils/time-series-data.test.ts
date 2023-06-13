@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeScale, TimeSeries, TimeSeriesData } from '../model';
-import { getXValues, getYValues, getCommonTimeScale, getAggregationValues } from './time-series-data';
+import { getXValues, getYValues, getCommonTimeScale } from './time-series-data';
 
 function getExpectedIntervals(timeScale: TimeScale): number {
   return Math.floor((timeScale.endMs - timeScale.startMs) / timeScale.stepMs) + 1;

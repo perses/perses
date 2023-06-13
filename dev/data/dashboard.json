@@ -3144,10 +3144,10 @@
                   "mode": "Table",
                   "position": "Bottom",
                   "values": [
-                    "AverageNonNull",
-                    "FirstNonNull",
+                    "Mean",
+                    "FirstNumber",
                     "Min",
-                    "LastNonNull",
+                    "LastNumber",
                     "Max",
                     "Total"
                   ]
@@ -3182,8 +3182,8 @@
                   "mode": "Table",
                   "position": "Right",
                   "values": [
-                    "AverageNonNull",
-                    "LastNonNull"
+                    "Mean",
+                    "LastNumber"
                   ]
                 }
               }

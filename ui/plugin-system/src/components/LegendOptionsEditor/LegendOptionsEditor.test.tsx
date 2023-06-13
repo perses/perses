@@ -79,27 +79,27 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
-      name: 'Total',
+      name: 'Sum',
     });
     userEvent.click(totalValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Total'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum'] });
   });
 
   it('should allow adding a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Total'] }, onChange);
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Sum'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const minValueOption = screen.getByRole('option', {
       name: 'Min',
     });
     userEvent.click(minValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Total', 'Min'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum', 'Min'] });
   });
 
   it('should allow removing a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Total', 'Min'] }, onChange);
+    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Sum', 'Min'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {

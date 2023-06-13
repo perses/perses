@@ -79,13 +79,13 @@ type CalculationValue = number | null | undefined;
 export function getCalculations<IncludeCalcs extends CalculationType[]>(
   values: TimeSeriesValueTuple[],
   includeCalculations: IncludeCalcs
-) {
-  const calculations: Record<
-    // This extract combined with the generics above keeps the key of the returned
-    // record to *just* the specified calculations.
-    Extract<CalculationType, IncludeCalcs[number]>,
-    CalculationValue
-  > = includeCalculations.reduce((initResult, calculation) => {
+): Record<
+  // This extract combined with the generics above keeps the key of the returned
+  // record to *just* the specified calculations.
+  Extract<CalculationType, IncludeCalcs[number]>,
+  CalculationValue
+> {
+  const calculations = includeCalculations.reduce((initResult, calculation) => {
     initResult[calculation] = undefined;
     return initResult;
   }, {} as Record<string, CalculationValue>);

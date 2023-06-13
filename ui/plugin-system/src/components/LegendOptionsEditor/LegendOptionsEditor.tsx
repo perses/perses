@@ -95,9 +95,13 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
   const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
 
   const currentValues = value?.values || [];
-  const legendValuesConfig: LegendValueOption[] = currentValues.map((item) => {
-    return { ...LEGEND_VALUE_CONFIG[item], id: item };
-  });
+  const legendValuesConfig = currentValues.reduce((result, item) => {
+    const config = LEGEND_VALUE_CONFIG[item];
+    if (config) {
+      result.push({ ...config, id: item });
+    }
+    return result;
+  }, [] as LegendValueOption[]);
 
   return (
     <>

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesAggregationValue, TimeSeriesData } from '../model';
+import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData } from '../model';
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;

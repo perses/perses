@@ -202,7 +202,7 @@ export const TableLegendWithValues: Story = {
       legend: {
         position: 'Bottom',
         mode: 'Table',
-        values: ['AverageNonNull', 'FirstNonNull', 'LastNonNull', 'Max', 'Min', 'Total'],
+        values: ['Mean', 'FirstNumber', 'LastNumber', 'Max', 'Min', 'Sum'],
       },
     },
   },
