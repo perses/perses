@@ -31,17 +31,23 @@ test.describe('Dashboard: Stat Chart Panel', () => {
     await happoPlaywright.finish();
   });
 
-  test(`displays single line as expected`, async ({ page, dashboardPage, mockNow }) => {
-    await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
+  [
+    'Single Stat with Sparkline',
+    'Single Stat without Sparkline',
+    'Multi-Series Stat with Sparkline',
+    'Multi-Series Stat without Sparkline',
+  ].forEach((panelName) => {
+    test(`displays ${panelName} as expected`, async ({ page, dashboardPage, mockNow }) => {
+      await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
+      await dashboardPage.forEachTheme(async (themeName) => {
+        const panel = dashboardPage.getPanelByName(panelName);
+        await panel.container.scrollIntoViewIfNeeded();
+        await panel.isLoaded();
 
-    await dashboardPage.forEachTheme(async (themeName) => {
-      const panel = dashboardPage.getPanelByName('Simple Stat');
-      await panel.isLoaded();
-      await waitForStableCanvas(panel.canvas);
-
-      await happoPlaywright.screenshot(page, panel.parent, {
-        component: 'Stat Chart Panel',
-        variant: `Single Stat [${themeName}]`,
+        await happoPlaywright.screenshot(page, panel.parent, {
+          component: 'Stat Chart Panel',
+          variant: `${panelName} [${themeName}]`,
+        });
       });
     });
   });
@@ -49,7 +55,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
   test('should be able to add and edit threshold', async ({ page, dashboardPage, mockNow }) => {
     await mockStatChartQueryRangeRequest(dashboardPage, mockNow);
     await dashboardPage.startEditing();
-    await dashboardPage.editPanel('Simple Stat', async (panelEditor) => {
+    await dashboardPage.editPanel('Single Stat with Sparkline', async (panelEditor) => {
       await panelEditor.selectTab('Settings');
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '5');
@@ -61,7 +67,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
       await colorInput.type('ed6bd4', { delay: 100 });
       await page.keyboard.press('Escape');
     });
-    const panel = dashboardPage.getPanelByName('Simple Stat');
+    const panel = dashboardPage.getPanelByName('Single Stat with Sparkline');
     await panel.isLoaded();
     await waitForStableCanvas(panel.canvas);
     await dashboardPage.forEachTheme(async (themeName) => {
@@ -78,7 +84,8 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
   await page.mockQueryRangeRequests({
     queries: [
       {
-        query: 'prometheus_http_requests_total{instance="demo.do.prometheus.io:9090",code!="200"}',
+        query:
+          'avg without (cpu)(rate(node_cpu_seconds_total{job="node",instance=~"demo.do.prometheus.io:9100",mode!="nice",mode!="steal",mode!="irq"}[5m]))',
         response: {
           status: 200,
           body: JSON.stringify(
@@ -86,9 +93,62 @@ async function mockStatChartQueryRangeRequest(page: DashboardPage, mockNow: numb
               metrics: [
                 {
                   metric: {
-                    code: '302',
-                    handler: '/',
-                    instance: 'demo.do.prometheus.io:9090',
+                    instance: 'demo.do.prometheus.io:9100',
+                    job: 'node',
+                    mode: 'idle',
+                  },
+                  value: '73',
+                },
+                {
+                  metric: {
+                    instance: 'demo.do.prometheus.io:9100',
+                    job: 'node',
+                    mode: 'iowait',
+                  },
+                  value: '88',
+                },
+                {
+                  metric: {
+                    instance: 'demo.do.prometheus.io:9100',
+                    job: 'node',
+                    mode: 'softirq',
+                  },
+                  value: '90',
+                },
+                {
+                  metric: {
+                    instance: 'demo.do.prometheus.io:9100',
+                    job: 'node',
+                    mode: 'system',
+                  },
+                  value: '65',
+                },
+                {
+                  metric: {
+                    instance: 'demo.do.prometheus.io:9100',
+                    job: 'node',
+                    mode: 'user',
+                  },
+                  value: '20',
+                },
+              ],
+              startTimeMs: mockNow - 6 * 60 * 60 * 1000,
+              endTimeMs: mockNow,
+            })
+          ),
+        },
+      },
+      {
+        query:
+          'avg(node_load15{job="node",instance=~"demo.do.prometheus.io:9100"}) /  count(count(node_cpu_seconds_total{job="node",instance=~"demo.do.prometheus.io:9100"}) by (cpu)) * 100',
+        response: {
+          status: 200,
+          body: JSON.stringify(
+            mockTimeSeriesResponseWithStableValue({
+              metrics: [
+                {
+                  metric: {
+                    instance: 'demo.do.prometheus.io:9100',
                   },
                   value: '8',
                 },

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
@@ -22,11 +22,14 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
+import { useOptimalFontSize } from './calculateFontSize';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-const MIN_VALUE_SIZE = 12;
-const MAX_VALUE_SIZE = 36;
+const LINE_HEIGHT = 1.2;
+const SERIES_NAME_MAX_FONT_SIZE = 30;
+const SERIES_NAME_FONT_WEIGHT = 400;
+const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
   calculatedValue?: number;
@@ -40,13 +43,44 @@ export interface StatChartProps {
   unit: UnitOptions;
   color?: string;
   sparkline?: LineSeriesOption;
+  showSeriesName?: boolean;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline } = props;
+  const { width, height, data, unit, color, sparkline, showSeriesName } = props;
   const chartsTheme = useChartsTheme();
-
   const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
+
+  const containerPadding = chartsTheme.container.padding.default;
+
+  // calculate series name font size and height
+  let seriesNameFontSize = useOptimalFontSize({
+    text: data?.seriesData?.name ?? '',
+    fontWeight: SERIES_NAME_FONT_WEIGHT,
+    width,
+    height: height * 0.125, // assume series name will take 12.5% of available height
+    lineHeight: LINE_HEIGHT,
+    maxSize: SERIES_NAME_MAX_FONT_SIZE,
+  });
+  const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
+
+  // calculate value font size and height
+  const availableWidth = width - containerPadding * 2;
+  const availableHeight = height - seriesNameHeight;
+  const valueFontSize = useOptimalFontSize({
+    text: formattedValue,
+    fontWeight: VALUE_FONT_WEIGHT,
+    // without sparkline, use only 50% of the available width so it looks better for multiseries
+    width: sparkline ? availableWidth : availableWidth * 0.5,
+    // with sparkline, use only 25% of available height to leave room for chart
+    // without sparkline, value should take up 90% of available space
+    height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
+    lineHeight: LINE_HEIGHT,
+  });
+  const valueFontHeight = valueFontSize * LINE_HEIGHT;
+
+  // make sure the series name font size is slightly smaller than value font size
+  seriesNameFontSize = Math.min(valueFontSize * 0.7, seriesNameFontSize);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
@@ -57,7 +91,8 @@ export function StatChart(props: StatChartProps) {
     if (sparkline !== undefined) {
       const lineSeries = {
         type: 'line',
-        data: [...series.values],
+        name: series.name,
+        data: series.values,
         zlevel: 1,
         symbol: 'none',
         animation: false,
@@ -104,13 +139,6 @@ export function StatChart(props: StatChartProps) {
     return option;
   }, [data, chartsTheme, sparkline]);
 
-  const isLargePanel = width > 250 && height > 180;
-  // adjusts fontSize depending on number of characters, clamp also used in fontSize attribute
-  const charactersAdjust = formattedValue.length;
-  const valueSize = isLargePanel === true ? MAX_VALUE_SIZE : Math.min(width, height) / charactersAdjust;
-
-  const containerPadding = `${chartsTheme.container.padding.default}px`;
-
   const textAlignment = sparkline ? 'auto' : 'center';
   const textStyles = {
     display: 'flex',
@@ -121,23 +149,19 @@ export function StatChart(props: StatChartProps) {
 
   return (
     <Box sx={{ height: '100%', width: '100%', ...textStyles }}>
-      <Typography
-        variant="h3"
-        sx={(theme) => ({
-          color: color ?? theme.palette.text.primary,
-          fontSize: `clamp(${MIN_VALUE_SIZE}px, ${valueSize}px, ${MAX_VALUE_SIZE}px)`,
-          padding: sparkline
-            ? `${containerPadding} ${containerPadding} 0 ${containerPadding}`
-            : ` 0 ${containerPadding}`,
-        })}
-      >
+      {showSeriesName && (
+        <SeriesName padding={containerPadding} fontSize={seriesNameFontSize}>
+          {data.seriesData?.name}
+        </SeriesName>
+      )}
+      <Value variant="h3" color={color} fontSize={valueFontSize} padding={containerPadding}>
         {formattedValue}
-      </Typography>
+      </Value>
       {sparkline !== undefined && (
         <EChart
           sx={{
             width: '100%',
-            height: '100%',
+            height: height - seriesNameHeight - valueFontHeight,
           }}
           option={option}
           theme={chartsTheme.echartsTheme}
@@ -147,3 +171,26 @@ export function StatChart(props: StatChartProps) {
     </Box>
   );
 }
+
+const SeriesName = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== 'padding' && prop !== 'fontSize',
+})<{ padding?: number; fontSize?: number; textAlignment?: string }>(({ theme, padding, fontSize }) => ({
+  color: theme.palette.text.secondary,
+  padding: `${padding}px`,
+  fontSize: `${fontSize}px`,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+}));
+
+const Value = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== 'color' && prop !== 'padding' && prop !== 'fontSize' && prop !== 'sparkline',
+})<{ color?: string; padding?: number; fontSize?: number; sparkline?: boolean }>(
+  ({ theme, color, padding, fontSize, sparkline }) => ({
+    color: color ?? theme.palette.text.primary,
+    fontSize: `${fontSize}px`,
+    padding: sparkline ? `${padding}px ${padding}px 0 ${padding}px` : ` 0 ${padding}px`,
+    whiteSpace: 'nowrap',
+    lineHeight: LINE_HEIGHT,
+  })
+);

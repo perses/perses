@@ -11,11 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption, GaugeSeriesOption } from 'echarts';
+import type {
+  EChartsOption,
+  BarSeriesOption,
+  LineSeriesOption,
+  GaugeSeriesOption,
+  TitleComponentOption,
+  ComposeOption,
+  XAXisComponentOption,
+  YAXisComponentOption,
+} from 'echarts';
 
 export interface PersesChartsTheme {
   echartsTheme: EChartsTheme;
-  noDataOption: EChartsCoreOption;
+  noDataOption: NoDataOption;
   sparkline: {
     width: number;
     color: string;
@@ -45,3 +54,5 @@ export interface ThresholdColorPalette {
   defaultColor: string;
   palette: string[];
 }
+
+export type NoDataOption = ComposeOption<TitleComponentOption | XAXisComponentOption | YAXisComponentOption>;
