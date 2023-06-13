@@ -25,7 +25,12 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     { "List" }
                 ][0]
                 values: [
+                    // TODO: figure out mappings in mapping.cuepart
                      if #panel.legend.current == true { "Last" },
+                     if #panel.legend.min == true { "Min" },
+                     if #panel.legend.max == true { "Max" },
+                     if #panel.legend.avg == true { "Mean" },
+                     if #panel.legend.total == true { "Sum" },
                 ]
             }
         }

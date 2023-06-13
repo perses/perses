@@ -77,7 +77,7 @@
               "legend": {
                 "position": "Bottom",
                 "mode": "Table",
-                "values": []
+                "values": ["Min", "Max", "Mean"]
               }
             }
           },
