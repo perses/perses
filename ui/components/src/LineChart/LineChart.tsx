@@ -155,7 +155,20 @@ export function LineChart({
         data: data.xAxis,
         max: data.xAxisMax,
         axisLabel: {
+          // https://echarts.apache.org/en/option.html#xAxis.axisLabel.interval
+          interval: 0, // Show all labels for every axis tick
+          // interval: (index: number, value: string) => {
+          //   console.log('INDEX: ', index);
+          //   console.log('VALUE: ', value);
+          //   // return 'auto';
+          //   return true;
+          // },
+          // interval: 1,
+          // interval: 2,
+          rotate: 0,
+          hideOverlap: true,
           formatter: (value: number) => {
+            // console.log('xAxis - axisLabel -> value: ', value);
             return getFormattedDate(value, rangeMs, timeZone);
           },
         },

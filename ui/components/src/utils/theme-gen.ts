@@ -70,7 +70,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         },
       },
       splitLine: {
-        show: true,
+        show: false,
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
