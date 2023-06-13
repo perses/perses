@@ -91,11 +91,14 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
   if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['30m']) {
     dateFormatOptions.second = 'numeric';
     dateFormatOptions.hour = undefined;
-  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['1d']) {
-    // dateFormatOptions.month = 'numeric';
-    // dateFormatOptions.day = 'numeric';
-    // dateFormatOptions.hour = undefined;
-    // dateFormatOptions.minute = undefined;
+  } else if (rangeMs < DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+    dateFormatOptions.hour = 'numeric';
+    dateFormatOptions.minute = 'numeric';
+  } else if (rangeMs === DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = 'numeric';
+    dateFormatOptions.hour = undefined;
+    dateFormatOptions.minute = undefined;
   } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['7d']) {
     dateFormatOptions.month = 'numeric';
     dateFormatOptions.day = 'numeric';
@@ -119,17 +122,31 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
 
   const timeParts = formattedDate.split(':');
 
-  if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['30m']) {
+  if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['15m']) {
+    const secondsString = timeParts[1]?.trim();
+    if (secondsString !== undefined) {
+      if (parseInt(secondsString) % 2 !== 0) {
+        return '';
+      }
+    }
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['30m']) {
     const secondsString = timeParts[1]?.trim();
     if (secondsString !== undefined) {
       if (parseInt(secondsString) % 30 !== 0) {
         return '';
       }
     }
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['1h']) {
+    const minutesString = timeParts[1]?.trim();
+    if (minutesString !== undefined) {
+      if (parseInt(minutesString) % 10 !== 0) {
+        return '';
+      }
+    }
   } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['6h']) {
     const minutesString = timeParts[1]?.trim();
     if (minutesString !== undefined) {
-      if (parseInt(minutesString) % 5 !== 0) {
+      if (parseInt(minutesString) % 30 !== 0) {
         return '';
       }
     }

@@ -147,6 +147,8 @@ export function LineChart({
 
   const { noDataOption } = chartsTheme;
 
+  const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
+
   const option: EChartsCoreOption = useMemo(() => {
     if (data.timeSeries === undefined) return {};
 
@@ -154,13 +156,14 @@ export function LineChart({
     // empty array because a `null` value will throw an error.
     if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
 
-    const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
-
+    // TODO: dynamic multiplier
     // const adjustedInterval = rangeMs * 0.01;
-    const adjustedInterval = 100;
-
-    // const interval = rangeMs > DURATION_TO_RANGE_MS_LOOKUP['1d'] ? 'auto' : 0;
-    const interval = rangeMs > DURATION_TO_RANGE_MS_LOOKUP['1d'] ? adjustedInterval : 0;
+    let interval: string | number = 0;
+    if (rangeMs === DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+      interval = 200;
+    } else if (rangeMs > DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+      interval = 'auto';
+    }
 
     const option: EChartsCoreOption = {
       series: data.timeSeries,
@@ -174,7 +177,6 @@ export function LineChart({
           rotate: 0,
           hideOverlap: true,
           formatter: (value: number) => {
-            // console.log('xAxis - axisLabel -> value: ', value);
             return getFormattedDate(value, rangeMs, timeZone);
           },
         },
@@ -210,7 +212,18 @@ export function LineChart({
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [
+    data,
+    rangeMs,
+    yAxis,
+    unit,
+    grid,
+    legend,
+    noDataOption,
+    timeZone,
+    __experimentalEChartsOptionsOverride,
+    noDataVariant,
+  ]);
 
   return (
     <Box
