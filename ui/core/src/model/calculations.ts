@@ -105,10 +105,10 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
     const value = tuple[1];
 
     if (i === 0 && 'First' in calculations) {
-      calculations['First'] = value;
+      calculations.First = value;
     }
     if (i === values.length - 1 && 'Last' in calculations) {
-      calculations['Last'] = value;
+      calculations.Last = value;
     }
 
     // Handling specific to non-null values.
@@ -118,32 +118,32 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
 
       if ('FirstNumber' in calculations && calculations.FirstNumber === undefined) {
         // Save the first number we see.
-        calculations['FirstNumber'] = value;
+        calculations.FirstNumber = value;
       }
 
       if ('LastNumber' in calculations) {
         // Keep setting the numbers we see, which will eventually be set to the
         // last number when finished iterating.
-        calculations['LastNumber'] = value;
+        calculations.LastNumber = value;
       }
 
       if ('Min' in calculations) {
         if (typeof calculations.Min !== 'number') {
           // Init the first time we see a number
-          calculations['Min'] = value;
+          calculations.Min = value;
         } else {
           // Use lowest value once initialized
-          calculations['Min'] = Math.min(calculations.Min, value);
+          calculations.Min = Math.min(calculations.Min, value);
         }
       }
 
       if ('Max' in calculations) {
         if (typeof calculations.Max !== 'number') {
           // Init the first time we see a number
-          calculations['Max'] = value;
+          calculations.Max = value;
         } else {
           // Use highest value once initialized
-          calculations['Max'] = Math.max(calculations.Max, value);
+          calculations.Max = Math.max(calculations.Max, value);
         }
       }
     }
@@ -151,11 +151,11 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
 
   // Set calculations that require iterating over all values.
   if (nonNullCount > 0 && 'Sum' in calculations) {
-    calculations['Sum'] = sum;
+    calculations.Sum = sum;
   }
 
   if (nonNullCount > 0 && 'Mean' in calculations) {
-    calculations['Mean'] = sum / nonNullCount;
+    calculations.Mean = sum / nonNullCount;
   }
 
   return calculations;
