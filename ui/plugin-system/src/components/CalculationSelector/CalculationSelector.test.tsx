@@ -54,7 +54,7 @@ describe('CalculationSelector', () => {
     userEvent.clear(calcSelector);
     userEvent.keyboard('first');
     screen.getByRole('option', {
-      name: /First number/,
+      name: /First #/,
     });
 
     userEvent.keyboard('{arrowup}{enter}');

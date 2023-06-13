@@ -79,7 +79,7 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
-      name: 'Sum',
+      name: /Sum/,
     });
     userEvent.click(totalValueOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum'] });
@@ -91,7 +91,7 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const minValueOption = screen.getByRole('option', {
-      name: 'Min',
+      name: /Min/,
     });
     userEvent.click(minValueOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum', 'Min'] });
@@ -103,7 +103,7 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
-      name: 'Total',
+      name: /Sum/,
     });
     userEvent.click(totalValueOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Min'] });
