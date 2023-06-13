@@ -238,13 +238,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
+  // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
     if (!legend?.values) {
       return [];
     }
-
-    // const legendValues = legend?.values || [];
-    // Translate the legend values into columns for the table legend.
 
     // Iterating the predefined list of possible values to retain a specific
     // intended order of values.
@@ -255,11 +253,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         columns.push({
           accessorKey: `data.${legendValue}`,
           header: legendConfig.label,
-          // TODO: evaluate making these dynamic to better account for the variability
-          // in space that numbers can take up. This requires revisiting the approach
-          // for the space the legend takes up with design, so starting with the original
-          // designs to get the core functionality out, and then we can tune the
-          // UI/UX in a follow-up.
+          // Intentionally hardcoding a column width to start based on discussions
+          // with design around keeping this simple to start. This may need
+          // revisiting in the future to handle edge cases with very large values.
           width: 72,
           align: 'right',
           cell: ({ getValue }) => {

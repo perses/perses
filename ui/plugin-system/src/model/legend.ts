@@ -25,10 +25,10 @@ import {
 // See the `core` package for common/shared legend model code and the
 // `components` package for legend model code specific to the Legend component.
 
-// These values are currently the same as the time series aggregation, but intentionally
-// creating separate variables/types to communicate that it is possible they will
-// diverge at some point in the future as the aggregation values may be used for
-// things besides legends.
+// Explicity listing the calculations we intend to use for legend values because
+// we want them ordered in a specific way, and it may be possible in the future
+// that we only use a subset of calculations for the legend because the calculations
+// are also used by other features.
 export const legendValues: CalculationType[] = [
   'Mean',
   'First',
