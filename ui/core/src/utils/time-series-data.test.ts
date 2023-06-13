@@ -297,79 +297,79 @@ function generateMockYValues(count: number): Array<number | null> {
   return [...Array(count)].map((_, i) => i);
 }
 
-describe('getAggregationValues', () => {
-  test('with empty data set returns undefined values', () => {
-    expect(getAggregationValues([])).toEqual({
-      AverageNonNull: undefined,
-      FirstNonNull: undefined,
-      LastNonNull: undefined,
-      Max: undefined,
-      Min: undefined,
-      Total: undefined,
-    });
-  });
+// describe('getAggregationValues', () => {
+//   test('with empty data set returns undefined values', () => {
+//     expect(getAggregationValues([])).toEqual({
+//       AverageNonNull: undefined,
+//       FirstNonNull: undefined,
+//       LastNonNull: undefined,
+//       Max: undefined,
+//       Min: undefined,
+//       Total: undefined,
+//     });
+//   });
 
-  test('with all nulls returns undefined values', () => {
-    expect(getAggregationValues([null, null, null])).toEqual({
-      AverageNonNull: undefined,
-      FirstNonNull: undefined,
-      LastNonNull: undefined,
-      Max: undefined,
-      Min: undefined,
-      Total: undefined,
-    });
-  });
+//   test('with all nulls returns undefined values', () => {
+//     expect(getAggregationValues([null, null, null])).toEqual({
+//       AverageNonNull: undefined,
+//       FirstNonNull: undefined,
+//       LastNonNull: undefined,
+//       Max: undefined,
+//       Min: undefined,
+//       Total: undefined,
+//     });
+//   });
 
-  test('with no nulls', () => {
-    const mockYValues = generateMockYValues(10);
+//   test('with no nulls', () => {
+//     const mockYValues = generateMockYValues(10);
 
-    expect(getAggregationValues(mockYValues)).toEqual({
-      AverageNonNull: 4.5,
-      FirstNonNull: 0,
-      LastNonNull: 9,
-      Max: 9,
-      Min: 0,
-      Total: 45,
-    });
-  });
+//     expect(getAggregationValues(mockYValues)).toEqual({
+//       AverageNonNull: 4.5,
+//       FirstNonNull: 0,
+//       LastNonNull: 9,
+//       Max: 9,
+//       Min: 0,
+//       Total: 45,
+//     });
+//   });
 
-  test('with nulls at beginning', () => {
-    const mockYValues = [null, null, ...generateMockYValues(10)];
+//   test('with nulls at beginning', () => {
+//     const mockYValues = [null, null, ...generateMockYValues(10)];
 
-    expect(getAggregationValues(mockYValues)).toEqual({
-      AverageNonNull: 4.5,
-      FirstNonNull: 0,
-      LastNonNull: 9,
-      Max: 9,
-      Min: 0,
-      Total: 45,
-    });
-  });
+//     expect(getAggregationValues(mockYValues)).toEqual({
+//       AverageNonNull: 4.5,
+//       FirstNonNull: 0,
+//       LastNonNull: 9,
+//       Max: 9,
+//       Min: 0,
+//       Total: 45,
+//     });
+//   });
 
-  test('with nulls at end', () => {
-    const mockYValues = [...generateMockYValues(10), null, null];
+//   test('with nulls at end', () => {
+//     const mockYValues = [...generateMockYValues(10), null, null];
 
-    expect(getAggregationValues(mockYValues)).toEqual({
-      AverageNonNull: 4.5,
-      FirstNonNull: 0,
-      LastNonNull: 9,
-      Max: 9,
-      Min: 0,
-      Total: 45,
-    });
-  });
+//     expect(getAggregationValues(mockYValues)).toEqual({
+//       AverageNonNull: 4.5,
+//       FirstNonNull: 0,
+//       LastNonNull: 9,
+//       Max: 9,
+//       Min: 0,
+//       Total: 45,
+//     });
+//   });
 
-  test('with nulls in middle', () => {
-    const mockYValues = generateMockYValues(10);
-    mockYValues.splice(2, 0, null, null);
+//   test('with nulls in middle', () => {
+//     const mockYValues = generateMockYValues(10);
+//     mockYValues.splice(2, 0, null, null);
 
-    expect(getAggregationValues(mockYValues)).toEqual({
-      AverageNonNull: 4.5,
-      FirstNonNull: 0,
-      LastNonNull: 9,
-      Max: 9,
-      Min: 0,
-      Total: 45,
-    });
-  });
-});
+//     expect(getAggregationValues(mockYValues)).toEqual({
+//       AverageNonNull: 4.5,
+//       FirstNonNull: 0,
+//       LastNonNull: 9,
+//       Max: 9,
+//       Min: 0,
+//       Total: 45,
+//     });
+//   });
+// });

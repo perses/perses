@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import {
+  CALCULATIONS_CONFIG,
+  CalculationType,
   LegendMode,
   LegendOptionsBase,
   LegendPositions,
   isValidLegendMode,
   isValidLegendPosition,
-  timeSeriesAggregationValues,
 } from '@perses-dev/core';
 
 // This file contains legend-related model code specific to panel plugin specs.
@@ -28,7 +29,16 @@ import {
 // creating separate variables/types to communicate that it is possible they will
 // diverge at some point in the future as the aggregation values may be used for
 // things besides legends.
-export const legendValues = timeSeriesAggregationValues;
+export const legendValues: CalculationType[] = [
+  'Mean',
+  'First',
+  'FirstNumber',
+  'Last',
+  'LastNumber',
+  'Min',
+  'Max',
+  'Sum',
+];
 export type LegendValue = (typeof legendValues)[number];
 
 // Note: explicitly defining different options for the legend spec and
@@ -40,6 +50,7 @@ export interface LegendSpecOptions extends LegendOptionsBase {
 
 export type LegendSingleSelectConfig = {
   label: string;
+  description?: string;
 };
 
 export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
@@ -52,26 +63,11 @@ export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectC
   Table: { label: 'Table' },
 };
 
-export const LEGEND_VALUE_CONFIG: Readonly<Record<LegendValue, LegendSingleSelectConfig>> = {
-  AverageNonNull: {
-    label: 'Average',
-  },
-  FirstNonNull: {
-    label: 'First',
-  },
-  LastNonNull: {
-    label: 'Last',
-  },
-  Min: {
-    label: 'Min',
-  },
-  Max: {
-    label: 'Max',
-  },
-  Total: {
-    label: 'Total',
-  },
-};
+export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {
+  config[value] = CALCULATIONS_CONFIG[value];
+
+  return config;
+}, {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>);
 
 export function validateLegendSpec(legend?: LegendOptionsBase) {
   if (legend === undefined) {

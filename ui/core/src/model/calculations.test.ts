@@ -12,13 +12,25 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-import { CalculationsMap, CalculationType } from './calculations';
+import { CalculationsMap, CalculationType, getCalculations } from './calculations';
 
 interface CalculationTestCase {
   values: TimeSeriesValueTuple[];
   calculation: CalculationType;
   expected: number | undefined | null;
 }
+
+// describe('getCalculations', () => {
+//   test('single calc', () => {
+//     const result = getCalculations(
+//       [
+//         [1677386865000, 100],
+//         [1677386880000, 99],
+//       ],
+//       ['First']
+//     );
+//   });
+// });
 
 describe('Time series calculation utils', () => {
   const tests: CalculationTestCase[] = [
@@ -127,6 +139,64 @@ describe('Time series calculation utils', () => {
       ],
       calculation: 'Mean',
       expected: 200,
+    },
+    {
+      values: [
+        [1677386865000, 300],
+        [1677386880000, 200],
+        [1677386895000, 500],
+      ],
+      calculation: 'Min',
+      expected: 200,
+    },
+    {
+      values: [
+        [1677386865000, null],
+        [1677386865000, 300],
+        [1677386880000, 150],
+        [1677386895000, 500],
+      ],
+      calculation: 'Min',
+      expected: 150,
+    },
+    {
+      values: [[1677386865000, null]],
+      calculation: 'Min',
+      expected: undefined,
+    },
+    {
+      values: [],
+      calculation: 'Min',
+      expected: undefined,
+    },
+    {
+      values: [
+        [1677386865000, 300],
+        [1677386880000, 200],
+        [1677386895000, 500],
+      ],
+      calculation: 'Max',
+      expected: 500,
+    },
+    {
+      values: [
+        [1677386865000, null],
+        [1677386865000, 300],
+        [1677386880000, 150],
+        [1677386895000, 550],
+      ],
+      calculation: 'Max',
+      expected: 550,
+    },
+    {
+      values: [[1677386865000, null]],
+      calculation: 'Max',
+      expected: undefined,
+    },
+    {
+      values: [],
+      calculation: 'Max',
+      expected: undefined,
     },
   ];
   it.each(tests)('returns $expected when $values formatted as $calculation', (args: CalculationTestCase) => {
