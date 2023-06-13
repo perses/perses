@@ -174,7 +174,6 @@ export function LineChart({
         axisLabel: {
           // https://echarts.apache.org/en/option.html#xAxis.axisLabel.interval
           interval,
-          rotate: 0,
           hideOverlap: true,
           formatter: (value: number) => {
             return getFormattedDate(value, rangeMs, timeZone);
