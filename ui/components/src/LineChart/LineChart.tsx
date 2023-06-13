@@ -42,7 +42,15 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import {
+  DURATION_TO_RANGE_MS_LOOKUP,
+  enableDataZoom,
+  getDateRange,
+  getFormattedDate,
+  getYAxes,
+  restoreChart,
+  ZoomEventData,
+} from './utils';
 
 use([
   EChartsLineChart,
@@ -148,6 +156,12 @@ export function LineChart({
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
+    // const adjustedInterval = rangeMs * 0.01;
+    const adjustedInterval = 100;
+
+    // const interval = rangeMs > DURATION_TO_RANGE_MS_LOOKUP['1d'] ? 'auto' : 0;
+    const interval = rangeMs > DURATION_TO_RANGE_MS_LOOKUP['1d'] ? adjustedInterval : 0;
+
     const option: EChartsCoreOption = {
       series: data.timeSeries,
       xAxis: {
@@ -156,15 +170,7 @@ export function LineChart({
         max: data.xAxisMax,
         axisLabel: {
           // https://echarts.apache.org/en/option.html#xAxis.axisLabel.interval
-          interval: 0, // Show all labels for every axis tick
-          // interval: (index: number, value: string) => {
-          //   console.log('INDEX: ', index);
-          //   console.log('VALUE: ', value);
-          //   // return 'auto';
-          //   return true;
-          // },
-          // interval: 1,
-          // interval: 2,
+          interval,
           rotate: 0,
           hideOverlap: true,
           formatter: (value: number) => {

@@ -14,9 +14,21 @@
 import merge from 'lodash/merge';
 import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { getHours, getMinutes, parse } from 'date-fns';
+import { getMinutes } from 'date-fns';
 import { formatValue, UnitOptions } from '../model';
 import { dateFormatOptionsWithTimeZone } from '../utils';
+
+export const DURATION_TO_RANGE_MS_LOOKUP = {
+  '5m': 300000,
+  '15m': 900000,
+  '30m': 1800000,
+  '1h': 3600000,
+  '6h': 21600000,
+  '12h': 43200000,
+  '1d': 86400000,
+  '7d': 604800000,
+  '14d': 1209600000,
+};
 
 export interface ZoomEventData {
   start: number;
@@ -53,17 +65,16 @@ export function restoreChart(chart: EChartsInstance) {
   });
 }
 
-const DURATION_TO_RANGE_MS_LOOKUP = {
-  '5m': 300000,
-  '15m': 900000,
-  '30m': 1800000,
-  '1h': 3600000,
-  '6h': 21600000,
-  '12h': 43200000,
-  '1d': 86400000,
-  '7d': 604800000,
-  '14d': 1209600000,
-};
+/**
+ * Calculate date range, used as a fallback when xAxis time range not passed as prop
+ */
+export function getDateRange(data: number[]) {
+  const defaultRange = 3600000; // hour in ms
+  if (data.length === 0) return defaultRange;
+  const lastDatum = data[data.length - 1];
+  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
+  return lastDatum - data[0];
+}
 
 /**
  * Calculate date range, used as a fallback when xAxis time range not passed as prop
@@ -80,155 +91,67 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
   if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['30m']) {
     dateFormatOptions.second = 'numeric';
     dateFormatOptions.hour = undefined;
-  } else if (rangeMs >= DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['1d']) {
+    // dateFormatOptions.month = 'numeric';
+    // dateFormatOptions.day = 'numeric';
+    // dateFormatOptions.hour = undefined;
+    // dateFormatOptions.minute = undefined;
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['7d']) {
     dateFormatOptions.month = 'numeric';
     dateFormatOptions.day = 'numeric';
+    dateFormatOptions.hour = undefined;
+    dateFormatOptions.minute = undefined;
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['14d']) {
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = 'numeric';
+    dateFormatOptions.hour = undefined;
+    dateFormatOptions.minute = undefined;
+  } else {
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = undefined;
+    dateFormatOptions.hour = undefined;
+    dateFormatOptions.minute = undefined;
   }
   const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
-  // console.log(dateFormatOptions);
+
   // remove comma when month / day present
   const formattedDate = DATE_FORMAT.format(value).replace(/, /g, ' ');
 
   const timeParts = formattedDate.split(':');
-  // console.log('timeParts.length ', timeParts.length);
-  console.log('rangeMs: ', rangeMs);
+
   if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['30m']) {
     const secondsString = timeParts[1]?.trim();
     if (secondsString !== undefined) {
       if (parseInt(secondsString) % 30 !== 0) {
-        console.log('secondsString... ', secondsString);
+        return '';
+      }
+    }
+  } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['6h']) {
+    const minutesString = timeParts[1]?.trim();
+    if (minutesString !== undefined) {
+      if (parseInt(minutesString) % 5 !== 0) {
         return '';
       }
     }
   } else if (rangeMs <= DURATION_TO_RANGE_MS_LOOKUP['1d']) {
     const minutesString = timeParts[1]?.trim();
     if (minutesString !== undefined) {
-      if (parseInt(minutesString) % 5 !== 0) {
-        console.log('minutesString... ', minutesString);
+      if (parseInt(minutesString) % 30 !== 0) {
         return '';
       }
     }
   }
-  // if (rangeMs <= dayMs) {
-  //   // const timeParts = formattedDate.split(':');
-  //   // console.log('timeParts.length ', timeParts.length);
-  //   if (timeParts.length === 3) {
-  //     const secondsString = timeParts[2]?.trim();
-  //     const minutesString = timeParts[1]?.trim();
 
-  //     if (secondsString && minutesString) {
-  //       if (parseInt(secondsString) % 5 !== 0) {
-  //         console.log('secondsString cleared... ', secondsString);
-  //         // return '';
-  //       } else if (parseInt(minutesString) % 5 !== 0) {
-  //         console.log('secondsString minutesString... ', minutesString);
-  //         return '';
-  //       }
-  //     }
-  //   } else if (timeParts.length === 2) {
-  //     const minutesString = timeParts[1]?.trim();
-  //     if (minutesString !== undefined) {
-  //       if (parseInt(minutesString) % 5 !== 0) {
-  //         console.log('secondsString minutesString... ', minutesString);
-  //         return '';
-  //       }
-  //     }
-  //   }
-  // }
-
-  // const minutesString = formattedDate.split(':')[1]?.trim();
-  // if (minutesString !== undefined) {
-  //   console.log('getFormattedDate -> minutesString: ', minutesString);
-  //   if (parseInt(minutesString) % 5 !== 0) {
-  //     return '';
-  //   }
-  // }
-
-  // const minutes = parseInt(minutesString);
-  // const isOddMinutes = minutes % 2 !== 0;
-
-  // const parsedDate = parse(formattedDate, 'yyyy-MM-dd HH:mm:ss', new Date());
-  // console.log('getFormattedDate -> parsedDate: ', parsedDate);
-
-  // console.log('getFormattedDate -> formattedDate: ', formattedDate);
   return formattedDate;
 }
 
-/*
- * Determines whether a Unix timestamp will have an odd number of minutes.
- */
-export function isOddMinutes(value: number): boolean {
-  const date = new Date(value);
-  const minutes = date.getMinutes();
-  return minutes % 2 !== 0;
-}
-
-/*
- * Determines whether xAxis is bucketed to human readable rounded values
- */
-export function isRoundedInterval(unixTimestamp: number, timeZone?: string): boolean {
-  // const date = toDate(unixTimestamp, { timeZone: timeZone });
-  const date = new Date(unixTimestamp * 1000);
-  const minutes = getMinutes(date);
-  console.log('isRoundedInterval -> minutes: ', minutes);
-  return minutes % 5 === 0;
-}
-
-// export function getDateRange(data: number[]) {
-//   const defaultRange = 3600000; // hour in ms
-//   if (data.length === 0) return defaultRange;
-//   const lastDatum = data[data.length - 1];
-//   if (data[0] === undefined || lastDatum === undefined) return defaultRange;
-//   return lastDatum - data[0];
-// }
-
 // /*
-//  * Determines time granularity for axis labels, defaults to hh:mm
+//  * Determines whether a Unix timestamp will have an odd number of minutes.
 //  */
-// export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
-//   const thirtyMinMs = 1800000;
-//   const hourMinMs = thirtyMinMs * 2;
-//   const dayMs = 86400000;
-
-//   // if (rangeMs <= hourMinMs) {
-//   //   console.log('Less than HOUR...');
-//   // }
-
-//   // if (isOddMinutes(value)) {
-//   //   console.log('getFormattedDate -> isOddMinutes... ', value);
-//   //   return '';
-//   // }
-
-//   // if (isOddHours(value)) {
-//   //   console.log('getFormattedDate -> isOddMinutes... ', value);
-//   //   return '';
-//   // }
-
-// //   if (!isRoundedInterval(value)) {
-// //     console.log('getFormattedDate -> isRoundedInterval... ', value);
-// //     return '';
-// //   }
-
-//   const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
-//     {
-//       hour: 'numeric',
-//       minute: 'numeric',
-//       hourCycle: 'h23',
-//     },
-//     timeZone
-//   );
-
-//   // Adjust formatting depending on time range to not show seconds
-//   if (rangeMs <= thirtyMinMs) {
-//     dateFormatOptions.second = 'numeric';
-//   } else if (rangeMs >= dayMs) {
-//     dateFormatOptions.month = 'numeric';
-//     dateFormatOptions.day = 'numeric';
-//   }
-//   const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
-//   // remove comma when month / day present
-//   const formattedDate = DATE_FORMAT.format(value).replace(/, /g, ' ');
-//   return formattedDate;
+// export function isOddMinutes(value: number): boolean {
+//   const date = new Date(value);
+//   const minutes = date.getMinutes();
+//   return minutes % 2 !== 0;
 // }
 
 // /*
@@ -238,27 +161,7 @@ export function isRoundedInterval(unixTimestamp: number, timeZone?: string): boo
 //   // const date = toDate(unixTimestamp, { timeZone: timeZone });
 //   const date = new Date(unixTimestamp * 1000);
 //   const minutes = getMinutes(date);
-//   console.log('isRoundedInterval -> minutes: ', minutes);
 //   return minutes % 5 === 0;
-// }
-
-// /*
-//  * Determines whether a Unix timestamp will have an odd number of minutes.
-//  * Useful for bucketing xAxis into whole increments.
-//  */
-// export function isOddMinutes(unixTimestamp: number): boolean {
-//   const date = new Date(unixTimestamp * 1000);
-//   const minutes = getMinutes(date);
-//   return minutes % 2 !== 0;
-// }
-
-// /*
-//  * Determines whether a Unix timestamp will have an odd number of hours.
-//  */
-// export function isOddHours(unixTimestamp: number): boolean {
-//   const date = new Date(unixTimestamp * 1000);
-//   const hours = getHours(date);
-//   return hours % 2 !== 0;
 // }
 
 /*
