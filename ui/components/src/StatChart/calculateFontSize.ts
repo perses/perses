@@ -24,7 +24,7 @@ interface CalculateFontSize {
 
 let canvasContext: CanvasRenderingContext2D | null;
 
-function useCanvasContext() {
+function getGlobalCanvasContext() {
   if (!canvasContext) {
     canvasContext = document.createElement('canvas').getContext('2d');
     if (canvasContext === null) {
@@ -38,7 +38,7 @@ function useCanvasContext() {
  * Find the optimal font size given available space
  */
 export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight, maxSize }: CalculateFontSize) {
-  const ctx = useCanvasContext();
+  const ctx = getGlobalCanvasContext();
   const chartsTheme = useChartsTheme();
 
   const textStyle = chartsTheme.echartsTheme.textStyle;
