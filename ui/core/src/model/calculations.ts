@@ -41,11 +41,11 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
     description: 'Last value',
   },
   FirstNumber: {
-    label: 'First number',
+    label: 'First #',
     description: 'First numeric value',
   },
   LastNumber: {
-    label: 'Last number',
+    label: 'Last #',
     description: 'Last numeric value',
   },
   Mean: {
