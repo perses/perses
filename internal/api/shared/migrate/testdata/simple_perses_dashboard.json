@@ -376,7 +376,16 @@
               "legend": {
                 "position": "Bottom",
                 "mode": "List",
-                "values": []
+                "values": [
+                  "Min",
+                  "Max",
+                  "First",
+                  "FirstNumber",
+                  "Last",
+                  "LastNumber",
+                  "Mean",
+                  "Sum"
+                ]
               },
               "thresholds": {
                 "steps": [

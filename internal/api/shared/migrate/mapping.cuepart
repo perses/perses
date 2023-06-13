@@ -19,14 +19,30 @@ import (
     }
     // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
     calc: {
+        // Values with a single potential mapping.
         first: "First"
         firstNotNull: "FirstNumber"
-        last: "Last"
         lastNotNull: "LastNumber"
-        mean: "Mean"
-        total: "Sum"
         min: "Min"
         max: "Max"
+
+        // Both keys can be used for "Last" depending on the version of grafana
+        // and how the calculation is being used (e.g. chart vs table legend
+        // value).
+        current: "Last"
+        last: "Last"
+
+        // Both keys can be used for "Mean" depending on the version of grafana
+        // and how the calculation is being used (e.g. chart vs table legend
+        // value).
+        avg: "Mean"
+        mean: "Mean"
+
+        // Both keys can be used for "Mean" depending on the version of grafana
+        // and how the calculation is being used (e.g. chart vs table legend
+        // value).
+        total: "Sum"
+        sum: "Sum"
     }
 }
 #defaultCalc: "Last"

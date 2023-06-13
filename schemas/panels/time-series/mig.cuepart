@@ -11,9 +11,9 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.options.legend.displayMode == "list" { "List" },
                     if #panel.options.legend.displayMode == "table" { "Table" },
                 ][0]
-                values: [
-                   
-                ]
+                values: [ for calc in #panel.options.legend.calcs {
+                    if (#mapping.calc[calc] != _|_) { #mapping.calc[calc] }
+                } ]
             }
             if #panel.type == "graph" {
                 position: [ // switch
