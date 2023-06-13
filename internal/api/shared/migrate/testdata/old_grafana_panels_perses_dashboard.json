@@ -76,7 +76,8 @@
             "spec": {
               "legend": {
                 "position": "Bottom",
-                "mode": "Table"
+                "mode": "Table",
+                "values": []
               }
             }
           },

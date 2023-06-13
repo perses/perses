@@ -11,7 +11,9 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.options.legend.displayMode == "list" { "List" },
                     if #panel.options.legend.displayMode == "table" { "Table" },
                 ][0]
-                values: []
+                values: [
+                   
+                ]
             }
             if #panel.type == "graph" {
                 position: [ // switch
@@ -22,7 +24,9 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
                     { "List" }
                 ][0]
-                values: []
+                values: [
+                     if #panel.legend.current == true { "Last" },
+                ]
             }
         }
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null

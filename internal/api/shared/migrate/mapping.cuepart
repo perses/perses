@@ -25,6 +25,8 @@ import (
         lastNotNull: "LastNumber"
         mean: "Mean"
         total: "Sum"
+        min: "Min"
+        max: "Max"
     }
 }
 #defaultCalc: "Last"

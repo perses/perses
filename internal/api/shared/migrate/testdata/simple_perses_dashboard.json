@@ -375,7 +375,8 @@
             "spec": {
               "legend": {
                 "position": "Bottom",
-                "mode": "List"
+                "mode": "List",
+                "values": []
               },
               "thresholds": {
                 "steps": [
@@ -422,7 +423,8 @@
             "spec": {
               "legend": {
                 "position": "Bottom",
-                "mode": "Table"
+                "mode": "Table",
+                "values": []
               },
               "thresholds": {
                 "steps": [
