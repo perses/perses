@@ -3,14 +3,14 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
     spec: {
         legend: {
             if #panel.type == "timeseries" {
-            	  position: [
-            	  	if #panel.options.legend.placement == "bottom" { "Bottom" },
-            	  	if #panel.options.legend.placement == "right" { "Right" },
-            	  ][0]
-                  mode: [
+                position: [
+                    if #panel.options.legend.placement == "bottom" { "Bottom" },
+                    if #panel.options.legend.placement == "right" { "Right" },
+                ][0]
+                mode: [
                     if #panel.options.legend.displayMode == "list" { "List" },
-            	  	if #panel.options.legend.displayMode == "table" { "Table" },
-                  ][0]
+                    if #panel.options.legend.displayMode == "table" { "Table" },
+                ][0]
             }
             if #panel.type == "graph" {
                 position: [ // switch
