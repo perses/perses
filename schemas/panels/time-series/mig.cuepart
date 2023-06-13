@@ -11,9 +11,9 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.options.legend.displayMode == "list" { "List" },
                     if #panel.options.legend.displayMode == "table" { "Table" },
                 ][0]
-                values: [ for calc in #panel.options.legend.calcs {
+                values: [ for calc in #panel.options.legend.calcs 
                     if (#mapping.calc[calc] != _|_) { #mapping.calc[calc] }
-                } ]
+                ]
             }
             if #panel.type == "graph" {
                 position: [ // switch
@@ -24,13 +24,15 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
                     { "List" }
                 ][0]
-                values: [
-                    // TODO: figure out mappings in mapping.cuepart
-                     if #panel.legend.current == true { "Last" },
-                     if #panel.legend.min == true { "Min" },
-                     if #panel.legend.max == true { "Max" },
-                     if #panel.legend.avg == true { "Mean" },
-                     if #panel.legend.total == true { "Sum" },
+                values: [ for oldCalc, newCalc in #mapping.calc  
+                    // Check if the mapping field is set on the legend.
+                    if (#panel.legend[oldCalc] != _|_)  
+                        // Check if the mapping field is true. This has to be
+                        // done inside the prior check to avoid cue throwing
+                        // undefined errors when the value is not present.
+                        if (#panel.legend[oldCalc] == true) {
+                            newCalc
+                        }
                 ]
             }
         }
