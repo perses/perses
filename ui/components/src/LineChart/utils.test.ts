@@ -13,6 +13,7 @@
 
 import { getFormattedDate } from './utils';
 
+// TODO: unit test and split up getFormattedDate into separate utils
 describe('getFormattedDate', () => {
   console.log(getFormattedDate);
 });

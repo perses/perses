@@ -77,7 +77,8 @@ export function getDateRange(data: number[]) {
 }
 
 /**
- * Calculate date range, used as a fallback when xAxis time range not passed as prop
+ * Get formatted date and return empty string if not bucketed for readability based on
+ * the dashboard's active time range
  */
 export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
   const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
