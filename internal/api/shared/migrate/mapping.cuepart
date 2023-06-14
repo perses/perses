@@ -20,7 +20,7 @@ import (
     // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
     calc: {
         first: "First"
-        firstNotNull: "First"
+        firstNotNull: "FirstNumber"
         last: "Last"
         lastNotNull: "LastNumber"
         mean: "Mean"

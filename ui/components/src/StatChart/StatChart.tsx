@@ -32,7 +32,7 @@ const SERIES_NAME_FONT_WEIGHT = 400;
 const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
-  calculatedValue?: number;
+  calculatedValue?: number | null;
   seriesData?: GraphSeries;
 }
 
@@ -49,7 +49,13 @@ export interface StatChartProps {
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, color, sparkline, showSeriesName } = props;
   const chartsTheme = useChartsTheme();
-  const formattedValue = data.calculatedValue === undefined ? '' : formatValue(data.calculatedValue, unit);
+
+  let formattedValue = '';
+  if (data.calculatedValue === null) {
+    formattedValue = 'null';
+  } else if (typeof data.calculatedValue === 'number') {
+    formattedValue = formatValue(data.calculatedValue, unit);
+  }
 
   const containerPadding = chartsTheme.container.padding.default;
 

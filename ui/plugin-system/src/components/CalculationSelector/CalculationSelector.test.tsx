@@ -45,7 +45,7 @@ describe('CalculationSelector', () => {
 
   it('can change the calculation using a keyboard', () => {
     const onChange = jest.fn();
-    renderCalculationSelector('First', onChange);
+    renderCalculationSelector('FirstNumber', onChange);
 
     const calcSelector = getCalculationSelector();
     userEvent.tab();
@@ -54,7 +54,7 @@ describe('CalculationSelector', () => {
     userEvent.clear(calcSelector);
     userEvent.keyboard('first');
     screen.getByRole('option', {
-      name: /First/,
+      name: /First number/,
     });
 
     userEvent.keyboard('{arrowup}{enter}');

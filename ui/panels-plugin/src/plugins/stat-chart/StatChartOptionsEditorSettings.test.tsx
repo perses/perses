@@ -66,12 +66,12 @@ describe('StatChartOptionsEditorSettings', () => {
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
     const firstOption = screen.getByRole('option', {
-      name: /First/,
+      name: /First number/,
     });
     userEvent.click(firstOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'First',
+        calculation: 'FirstNumber',
       })
     );
   });

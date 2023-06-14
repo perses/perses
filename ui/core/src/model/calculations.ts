@@ -12,14 +12,13 @@
 // limitations under the License.
 
 import findLast from 'lodash/findLast';
-import meanBy from 'lodash/meanBy';
-import sumBy from 'lodash/sumBy';
+import { default as lodashMean } from 'lodash/mean';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
-// TODO: move this file and calculations.test.ts to @perses-dev/core
 export const CalculationsMap = {
   First: first,
   Last: last,
+  FirstNumber: firstNumber,
   LastNumber: lastNumber,
   Mean: mean,
   Sum: sum,
@@ -40,13 +39,17 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
     label: 'Last',
     description: 'Last value',
   },
+  FirstNumber: {
+    label: 'First number',
+    description: 'First numeric value',
+  },
   LastNumber: {
     label: 'Last number',
     description: 'Last numeric value',
   },
   Mean: {
-    label: 'Mean',
-    description: 'Average value',
+    label: 'Average',
+    description: 'Average value excluding nulls',
   },
   Sum: {
     label: 'Sum',
@@ -56,38 +59,52 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
 
 export const DEFAULT_CALCULATION: CalculationType = 'Sum';
 
-function first(values: TimeSeriesValueTuple[]): number | undefined {
+type CalculationValue = number | null | undefined;
+
+function first(values: TimeSeriesValueTuple[]): CalculationValue {
   const tuple = values[0];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function last(values: TimeSeriesValueTuple[]): number | undefined {
+function last(values: TimeSeriesValueTuple[]): CalculationValue {
   if (values.length <= 0) return undefined;
 
   const tuple = values[values.length - 1];
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function lastNumber(values: TimeSeriesValueTuple[]): number | undefined {
-  const tuple = findLast(values, (tuple) => isNaN(getValue(tuple)) === false);
+function firstNumber(values: TimeSeriesValueTuple[]): CalculationValue {
+  const tuple = values.find((tuple) => typeof getValue(tuple) === 'number');
   return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function mean(values: TimeSeriesValueTuple[]): number | undefined {
-  if (values.length <= 0) return undefined;
-  return meanBy(values, getValue);
+function lastNumber(values: TimeSeriesValueTuple[]): CalculationValue {
+  const tuple = findLast(values, (tuple) => typeof getValue(tuple) === 'number');
+  return tuple === undefined ? undefined : getValue(tuple);
 }
 
-function sum(values: TimeSeriesValueTuple[]): number | undefined {
+function mean(values: TimeSeriesValueTuple[]): CalculationValue {
   if (values.length <= 0) return undefined;
-  return sumBy(values, getValue);
+  return lodashMean(getNonNullValues(values));
+}
+
+function sum(values: TimeSeriesValueTuple[]): CalculationValue {
+  if (values.length <= 0) return undefined;
+
+  return values.reduce((total, tupleValue) => {
+    const value = getValue(tupleValue);
+    if (typeof value === 'number') {
+      total += value;
+    }
+
+    return total;
+  }, 0);
+}
+
+function getNonNullValues(values: TimeSeriesValueTuple[]) {
+  return values.map(getValue).filter((value) => typeof value === 'number');
 }
 
 function getValue(valueTuple: TimeSeriesValueTuple) {
-  const value = valueTuple[1];
-  if (value !== null) {
-    return value;
-  }
-  // TODO: refactor utils so null can be returned and LastNotNull supported
-  return NaN;
+  return valueTuple[1];
 }
