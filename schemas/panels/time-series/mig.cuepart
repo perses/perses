@@ -25,14 +25,9 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     { "List" }
                 ][0]
                 values: [ for oldCalc, newCalc in #mapping.calc  
-                    // Check if the mapping field is set on the legend.
-                    if (#panel.legend[oldCalc] != _|_)  
-                        // Check if the mapping field is true. This has to be
-                        // done inside the prior check to avoid cue throwing
-                        // undefined errors when the value is not present.
-                        if (#panel.legend[oldCalc] == true) {
-                            newCalc
-                        }
+                    // Check if the mapping field is set on the legend and 
+                    // is true.
+                    if #panel.legend[oldCalc] != _|_ if #panel.legend[oldCalc] == true { newCalc }
                 ]
             }
         }
