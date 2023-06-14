@@ -30,6 +30,7 @@ export interface GraphSeries {
   values: TimeSeriesValueTuple[];
 }
 
+// dash can be used to in certain cases for empty data
 export type EChartsValues = number | null | '-';
 
 export interface PersesLineSeries extends Omit<LineSeriesOption, 'data'> {
@@ -49,7 +50,7 @@ export type PersesLineChartData = {
 };
 
 export interface PersesScatterSeries extends Omit<ScatterSeriesOption, 'data'> {
-  data: ScatterSeriesData;
+  data: PersesScatterSeriesData;
   annotations?: unknown[]; // TODO: finalize data model for single annotation and grouped annotations
 }
 
@@ -57,7 +58,7 @@ export type PersesYAxisComponentOptions = YAXisComponentOption;
 
 export type PersesXAxisComponentOptions = XAXisComponentOption;
 
-export interface ScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
+export interface PersesScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
   value: TimeSeriesValueTuple;
   categoryColor?: string;
   itemStyle?: {
@@ -65,15 +66,16 @@ export interface ScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValue
   };
 }
 
-export type ScatterSeriesData = ScatterSeriesDatum[];
+export type PersesScatterSeriesData = PersesScatterSeriesDatum[];
 
-export function isScatterSeriesData(data: EChartsValues[] | ScatterSeriesDatum[]): data is ScatterSeriesData {
+// https://echarts.apache.org/en/option.html#series-scatter.data
+export function isScatterSeriesData(
+  data: EChartsValues[] | PersesScatterSeriesDatum[]
+): data is PersesScatterSeriesData {
   if (data.length === 0) return false;
-  const scatterSeriesData = data as ScatterSeriesData;
-  if (scatterSeriesData !== undefined) {
-    if (scatterSeriesData[0] !== undefined) {
-      return scatterSeriesData[0].value !== undefined;
-    }
+  const scatterSeriesData = data as PersesScatterSeriesData;
+  if (scatterSeriesData !== undefined && scatterSeriesData[0] !== undefined) {
+    return scatterSeriesData[0].value !== undefined;
   }
   return false;
 }

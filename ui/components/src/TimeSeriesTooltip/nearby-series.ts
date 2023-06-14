@@ -20,7 +20,7 @@ import {
   isScatterSeriesData,
   OPTIMIZED_MODE_SERIES_LIMIT,
   PersesTimeSeries,
-  ScatterSeriesDatum,
+  PersesScatterSeriesDatum,
   UnitOptions,
 } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
@@ -91,7 +91,7 @@ export function checkforNearbySeries(
       if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
         if (isScatterSeriesData(currentSeries.data)) {
           if (currentSeries.data[0] !== undefined) {
-            const currentSeriesDatum: ScatterSeriesDatum = currentSeries.data[0];
+            const currentSeriesDatum: PersesScatterSeriesDatum = currentSeries.data[0];
             if (currentSeriesDatum.value === undefined) break;
             if (Array.isArray(currentSeriesDatum.value)) {
               const xIndex = currentSeriesDatum.value[0]; // timestamp
