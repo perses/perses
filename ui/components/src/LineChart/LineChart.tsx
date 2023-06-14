@@ -102,9 +102,6 @@ export function LineChart({
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const { timeZone } = useTimeZone();
-
-  console.log(yAxis);
-
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
 
@@ -223,7 +220,6 @@ export function LineChart({
     __experimentalEChartsOptionsOverride,
   ]);
 
-  console.log(option);
   return (
     <Box
       sx={{ height }}

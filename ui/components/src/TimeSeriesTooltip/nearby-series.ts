@@ -56,7 +56,7 @@ export function checkforNearbySeries(
   yBuffer: number,
   chart?: EChartsInstance,
   unit?: UnitOptions,
-  pointInGridEvents?: number[]
+  pointInGridAlt?: number[]
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -66,10 +66,9 @@ export function checkforNearbySeries(
     return currentNearbySeriesData;
   }
 
-  // TODO: update with changes from TimeSeriesTooltip/focused-series.ts#L59
-  // keep track of cursor relative to separate events x and y axis
-  const focusedEventsX = pointInGridEvents && Number.isFinite(pointInGridEvents[0]) ? pointInGridEvents[0] : null;
-  const focusedEventsY = pointInGridEvents && Number.isFinite(pointInGridEvents[1]) ? pointInGridEvents[1] : null;
+  // Keep track of cursor relative to separate x and y axis for annotations
+  const annotationsAxisX = pointInGridAlt && Number.isFinite(pointInGridAlt[0]) ? pointInGridAlt[0] : null;
+  const annotationsAxisY = pointInGridAlt && Number.isFinite(pointInGridAlt[1]) ? pointInGridAlt[1] : null;
 
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
@@ -88,7 +87,7 @@ export function checkforNearbySeries(
        * https://echarts.apache.org/en/option.html#series-scatter.data.value
        * TODO: make extensible using tooltip plugin approach, finialize annotations data model
        */
-      if (currentSeries.type === 'scatter' && focusedEventsX !== null && focusedEventsY !== null) {
+      if (currentSeries.type === 'scatter' && annotationsAxisX !== null && annotationsAxisY !== null) {
         if (isScatterSeriesData(currentSeries.data)) {
           if (currentSeries.data[0] !== undefined) {
             const currentSeriesDatum: PersesScatterSeriesDatum = currentSeries.data[0];
@@ -96,7 +95,7 @@ export function checkforNearbySeries(
             if (Array.isArray(currentSeriesDatum.value)) {
               const xIndex = currentSeriesDatum.value[0]; // timestamp
               if (xIndex === undefined) break;
-              if (focusedEventsX === xIndex && data.xAxisAlt) {
+              if (annotationsAxisX === xIndex && data.xAxisAlt) {
                 const xValue = data.xAxisAlt[xIndex] ?? 0;
                 const yValue = 0;
                 const formattedY = currentSeries.name?.toString() ?? '';
@@ -261,9 +260,9 @@ export function getNearbySeriesData({
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
-    const pointInGridEvents = chart.convertFromPixel({ xAxisIndex: 1, yAxisIndex: 1 }, pointInPixel);
+    const pointInGridAlt = chart.convertFromPixel({ xAxisIndex: 1, yAxisIndex: 1 }, pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit, pointInGridEvents);
+      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit, pointInGridAlt);
     }
   }
 
