@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChartsDataFormat, UnitOptions } from '../model';
+import { PersesLineChartData, UnitOptions } from '../model';
 import { checkforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
 describe('checkforNearbySeries', () => {
-  const chartData: EChartsDataFormat = {
+  const chartData: PersesLineChartData = {
     timeSeries: [
       {
         type: 'line',

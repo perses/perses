@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { YAXisComponentOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
-  EChartsDataFormat,
+  PersesLineChartData,
   EChartsValues,
   PersesLineSeries,
   PersesTimeSeries,
+  PersesYAxisComponentOptions,
   isEChartsValue,
   isScatterSeriesData,
 } from '@perses-dev/components';
@@ -37,7 +37,7 @@ import {
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
-export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
+export const EMPTY_GRAPH_DATA: PersesLineChartData = {
   timeSeries: [],
   xAxis: [],
   legendItems: [],
@@ -179,8 +179,8 @@ function findMax(timeSeries: PersesTimeSeries[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
-  const yAxis: YAXisComponentOption = {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): PersesYAxisComponentOptions {
+  const yAxis: PersesYAxisComponentOptions = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,
     max: inputAxis?.max,

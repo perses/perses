@@ -13,7 +13,7 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import {
-  EChartsDataFormat,
+  PersesLineChartData,
   EChartsValues,
   formatValue,
   isEChartsValue,
@@ -51,7 +51,7 @@ export type NearbySeriesArray = NearbySeriesInfo[];
  * Adjust yBuffer to increase or decrease number of series shown
  */
 export function checkforNearbySeries(
-  data: EChartsDataFormat,
+  data: PersesLineChartData,
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
@@ -223,7 +223,7 @@ export function getNearbySeriesData({
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
-  chartData: EChartsDataFormat;
+  chartData: PersesLineChartData;
   chart?: EChartsInstance;
   unit?: UnitOptions;
   showAllSeries?: boolean;

@@ -1,4 +1,4 @@
-import { EChartsDataFormat } from '../model';
+import { PersesLineChartData } from '../model';
 
 export const TOOLTIP_PLUGIN_GRID = {
   left: 20,
@@ -631,4 +631,4 @@ export const tooltipPluginData = {
     1686317700000, 1686317715000, 1686317730000, 1686317745000, 1686317760000, 1686317775000, 1686317790000,
   ],
   xAxisAlt: [1686316965000, 1686316995000, 1686317160000, 1686317325000, 1686317490000, 1686317655000],
-} as EChartsDataFormat;
+} as PersesLineChartData;

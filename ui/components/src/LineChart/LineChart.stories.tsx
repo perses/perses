@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart, formatValue } from '@perses-dev/components';
+import { LineChart, formatValue, PersesYAxisComponentOptions } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Box, Stack, Typography } from '@mui/material';
-import { YAXisComponentOption } from 'echarts';
 import { tooltipPluginData, TOOLTIP_PLUGIN_CHART_HEIGHT } from '../test-utils/tooltip-plugin-data';
 
 const meta: Meta<typeof LineChart> = {
@@ -191,7 +190,7 @@ export const TooltipContentPlugin: Story = {
         axisLabel: { show: true },
         axisLine: { show: false },
       },
-    ] as YAXisComponentOption[],
+    ] as PersesYAxisComponentOptions[],
   },
   render: (args) => {
     return (

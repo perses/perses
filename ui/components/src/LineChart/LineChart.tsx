@@ -18,9 +18,7 @@ import type {
   GridComponentOption,
   LineSeriesOption,
   LegendComponentOption,
-  YAXisComponentOption,
   TooltipComponentOption,
-  XAXisComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart, ScatterChart as EChartsScatterChart } from 'echarts/charts';
@@ -38,8 +36,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, MouseEventsParameters, OnEventsType } from '../EChart';
-import { EChartsDataFormat } from '../model/graph';
-import { formatValue, UnitOptions } from '../model/units';
+import { PersesLineChartData, PersesXAxisComponentOptions, PersesYAxisComponentOptions, UnitOptions } from '../model';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
@@ -67,9 +64,9 @@ export interface LineChartProps {
    * Height of the chart
    */
   height: number;
-  data: EChartsDataFormat;
-  xAxis?: XAXisComponentOption[];
-  yAxis?: YAXisComponentOption[];
+  data: PersesLineChartData;
+  xAxis?: PersesXAxisComponentOptions[];
+  yAxis?: PersesYAxisComponentOptions[];
   unit?: UnitOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
@@ -79,7 +76,7 @@ export interface LineChartProps {
   showCrosshair?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
-  onElementClick?: (e: MouseEventsParameters<unknown>, data: EChartsDataFormat) => void;
+  onElementClick?: (e: MouseEventsParameters<unknown>, data: PersesLineChartData) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
@@ -105,6 +102,8 @@ export function LineChart({
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const { timeZone } = useTimeZone();
+
+  console.log(yAxis);
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -179,7 +178,7 @@ export function LineChart({
 
     const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
 
-    const defaultXAxis: XAXisComponentOption = {
+    const defaultXAxis: PersesXAxisComponentOptions = {
       type: 'category',
       data: data.xAxis,
       max: data.xAxisMax,
@@ -238,6 +237,7 @@ export function LineChart({
     __experimentalEChartsOptionsOverride,
   ]);
 
+  console.log(option);
   return (
     <Box
       sx={{ height }}

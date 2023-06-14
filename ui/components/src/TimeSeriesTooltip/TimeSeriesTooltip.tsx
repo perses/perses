@@ -15,7 +15,7 @@ import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { memo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { EChartsDataFormat, UnitOptions } from '../model';
+import { PersesLineChartData, UnitOptions } from '../model';
 import { TooltipContent } from './TooltipContent';
 import { TooltipPluginContent, TooltipPluginProps } from './TooltipPlugin';
 import { TooltipHeader } from './TooltipHeader';
@@ -25,7 +25,7 @@ import { assembleTransform, getTooltipStyles } from './utils';
 
 export interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
-  chartData: EChartsDataFormat;
+  chartData: PersesLineChartData;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   tooltipPlugin?: TooltipPluginProps;

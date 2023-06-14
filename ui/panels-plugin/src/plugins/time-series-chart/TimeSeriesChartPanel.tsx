@@ -24,7 +24,7 @@ import {
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
-  EChartsDataFormat,
+  PersesLineChartData,
   getYAxes,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -117,7 +117,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    const graphData: EChartsDataFormat = {
+    const graphData: PersesLineChartData = {
       timeSeries: [],
       xAxis: [],
       legendItems: [],

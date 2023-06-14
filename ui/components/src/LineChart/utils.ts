@@ -12,9 +12,8 @@
 // limitations under the License.
 
 import merge from 'lodash/merge';
-import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions } from '../model';
+import { formatValue, PersesYAxisComponentOptions, UnitOptions } from '../model';
 import { dateFormatOptionsWithTimeZone } from '../utils';
 
 export interface ZoomEventData {
@@ -91,7 +90,7 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
 /*
  * Populate yAxis properties, returns an Array since multiple y axes will be supported in the future
  */
-export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
+export function getYAxes(yAxis?: PersesYAxisComponentOptions, unit?: UnitOptions) {
   // TODO: support alternate yAxis that shows on right side
   const Y_AXIS_DEFAULT = {
     type: 'value',

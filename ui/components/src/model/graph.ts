@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { OptionDataItemObject } from 'echarts/types/src/util/types';
 import { LineSeriesOption, ScatterSeriesOption } from 'echarts/charts';
@@ -38,7 +39,7 @@ export interface PersesLineSeries extends Omit<LineSeriesOption, 'data'> {
 
 export type PersesTimeSeries = PersesLineSeries | PersesScatterSeries;
 
-export type EChartsDataFormat = {
+export type PersesLineChartData = {
   timeSeries: PersesTimeSeries[];
   xAxis: number[];
   xAxisAlt?: number[]; // TODO: temporary axis for annotations, remove after TimeChart supersedes LineChart
@@ -51,6 +52,10 @@ export interface PersesScatterSeries extends Omit<ScatterSeriesOption, 'data'> {
   data: ScatterSeriesData;
   annotations?: unknown[]; // TODO: finalize data model for single annotation and grouped annotations
 }
+
+export type PersesYAxisComponentOptions = YAXisComponentOption;
+
+export type PersesXAxisComponentOptions = XAXisComponentOption;
 
 export interface ScatterSeriesDatum extends OptionDataItemObject<TimeSeriesValueTuple> {
   value: TimeSeriesValueTuple;
