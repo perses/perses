@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StatChart, StatChartData, useChartsTheme } from '@perses-dev/components';
-import { Box, Skeleton } from '@mui/material';
+import { TitleComponentOption } from 'echarts';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
+import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
-import { TimeSeriesData, CalculationsMap, CalculationType } from '@perses-dev/core';
-import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
+import { CalculationsMap, CalculationType } from '@perses-dev/core';
+import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
+
+const MIN_WIDTH = 100;
+const SPACING = 2;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
@@ -27,15 +31,17 @@ export function StatChartPanel(props: StatChartPanelProps) {
     contentDimensions,
   } = props;
 
-  const { queryResults, isLoading } = useDataQueries();
-  const chartData = useChartData(queryResults[0]?.data, calculation);
+  const { queryResults, isLoading, isFetching } = useDataQueries();
+  const statChartData = useStatChartData(queryResults, calculation);
+  const isMultiSeries = statChartData.length > 1;
+
   const chartsTheme = useChartsTheme();
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
 
   if (contentDimensions === undefined) return null;
 
-  if (isLoading === true) {
+  if (isLoading || isFetching) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
@@ -47,30 +53,67 @@ export function StatChartPanel(props: StatChartPanelProps) {
     );
   }
 
+  // Calculates chart width
+  const spacing = SPACING * (statChartData.length - 1);
+  let chartWidth = (contentDimensions.width - spacing) / statChartData.length;
+  if (isMultiSeries && chartWidth < MIN_WIDTH) {
+    chartWidth = MIN_WIDTH;
+  }
+
+  const noDataTextStyle = (chartsTheme.noDataOption.title as TitleComponentOption).textStyle;
+
   return (
-    <StatChart
-      width={contentDimensions.width}
+    <Stack
       height={contentDimensions.height}
-      data={chartData}
-      unit={unit}
-      color={getColorFromThresholds(chartsTheme, thresholds, chartData.calculatedValue)}
-      sparkline={convertSparkline(chartsTheme, sparkline, thresholds, chartData.calculatedValue)}
-    />
+      width={contentDimensions.width}
+      spacing={`${SPACING}px`}
+      direction="row"
+      justifyContent={isMultiSeries ? 'left' : 'center'}
+      alignItems="center"
+      sx={{
+        overflowX: isMultiSeries ? 'scroll' : 'auto',
+      }}
+    >
+      {statChartData.length ? (
+        statChartData.map((series, index) => (
+          <StatChart
+            key={index}
+            width={chartWidth}
+            height={contentDimensions.height}
+            data={series}
+            unit={unit}
+            color={getColorFromThresholds(chartsTheme, thresholds, series.calculatedValue)}
+            sparkline={convertSparkline(chartsTheme, sparkline, thresholds, series.calculatedValue)}
+            showSeriesName={isMultiSeries}
+          />
+        ))
+      ) : (
+        <Typography sx={{ ...noDataTextStyle } as SxProps}>No data</Typography>
+      )}
+    </Stack>
   );
 }
 
-const useChartData = (data: TimeSeriesData | undefined, calculation: CalculationType): StatChartData => {
+const useStatChartData = (
+  queryResults: UseDataQueryResults['queryResults'],
+  calculation: CalculationType
+): StatChartData[] => {
   return useMemo(() => {
-    const loadingData = {
-      calculatedValue: undefined,
-      seriesData: undefined,
-    };
-    if (data === undefined) return loadingData;
-
-    const seriesData = data.series[0];
     const calculate = CalculationsMap[calculation];
-    const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
+    const statChartData: StatChartData[] = [];
+    for (const result of queryResults) {
+      // Skip queries that are still loading or don't have data
+      if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
-    return { calculatedValue, seriesData };
-  }, [data, calculation]);
+      for (const seriesData of result.data.series) {
+        const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
+        const series: GraphSeries = {
+          name: seriesData.formattedName ?? '',
+          values: seriesData.values,
+        };
+        statChartData.push({ calculatedValue, seriesData: series });
+      }
+    }
+    return statChartData;
+  }, [queryResults, calculation]);
 };
