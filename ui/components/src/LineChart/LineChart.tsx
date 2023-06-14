@@ -40,7 +40,7 @@ import { PersesLineChartData, PersesXAxisComponentOptions, PersesYAxisComponentO
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
+import { CursorCoordinates, defaultCursorData } from '../TimeSeriesTooltip/tooltip-model';
 import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
@@ -109,26 +109,12 @@ export function LineChart({
   const [startX, setStartX] = useState(0);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
-    const clickHandler = onElementClick
+    const iconClickHandler = onElementClick
       ? {
           click: (e: MouseEventsParameters<unknown>) => {
             // Desired behavior is for clicking an icon element to not pin the tooltip.
             // This allows the React onClick event to unpin the tooltip correctly.
-            setTooltipPinnedCoords({
-              page: {
-                x: 0,
-                y: 0,
-              },
-              client: {
-                x: 0,
-                y: 0,
-              },
-              plotCanvas: {
-                x: 0,
-                y: 0,
-              },
-              target: null,
-            });
+            setTooltipPinnedCoords(defaultCursorData.coords);
             return onElementClick(e, data);
           },
         }
@@ -157,7 +143,7 @@ export function LineChart({
           onDataZoom(zoomEvent);
         }
       },
-      ...clickHandler,
+      ...iconClickHandler,
     };
   }, [data, onDataZoom, onElementClick, setTooltipPinnedCoords]);
 

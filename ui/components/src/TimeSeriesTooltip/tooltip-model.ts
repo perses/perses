@@ -37,13 +37,17 @@ export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   hour12: true,
 });
 
-export const defaultCursorData = {
+export const defaultCursorData: CursorData = {
   coords: {
-    plotCanvas: {
+    page: {
       x: 0,
       y: 0,
     },
-    zrender: {
+    client: {
+      x: 0,
+      y: 0,
+    },
+    plotCanvas: {
       x: 0,
       y: 0,
     },
