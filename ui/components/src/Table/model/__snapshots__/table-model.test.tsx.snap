@@ -62,6 +62,8 @@ Array [
     "maxSize": 0,
     "meta": Object {
       "align": "right",
+      "cellDescription": undefined,
+      "headerDescription": undefined,
     },
     "minSize": 0,
     "size": 0,
@@ -72,6 +74,8 @@ Array [
     "header": "Count",
     "meta": Object {
       "align": undefined,
+      "cellDescription": [Function],
+      "headerDescription": "The total number of values.",
     },
     "size": 120,
   },

@@ -253,6 +253,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         columns.push({
           accessorKey: `data.${legendValue}`,
           header: legendConfig.label,
+          headerDescription: legendConfig.description,
           // Intentionally hardcoding a column width to start based on discussions
           // with design around keeping this simple to start. This may need
           // revisiting in the future to handle edge cases with very large values.
@@ -260,12 +261,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           align: 'right',
           cell: ({ getValue }) => {
             const cellValue = getValue();
-            const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
-            // TODO: consider adding a prop to the Table component column def, so
-            // we can auto-title (or potentially auto-tooltip in the future)
-            // instead of scattering this span-with-title logic all over the place.
-            return <span title={formattedValue}>{formattedValue}</span>;
+            return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
           },
+          cellDescription: true,
         });
       }
 
