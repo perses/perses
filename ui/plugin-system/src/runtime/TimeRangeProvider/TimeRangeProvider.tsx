@@ -12,11 +12,18 @@
 // limitations under the License.
 
 import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
-import { AbsoluteTimeRange, isRelativeTimeRange, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
-import { useSetTimeRangeParams } from './query-params';
+import {
+  AbsoluteTimeRange,
+  DurationString,
+  isRelativeTimeRange,
+  TimeRangeValue,
+  toAbsoluteTimeRange,
+} from '@perses-dev/core';
+import { useSetRefreshIntervalParams, useSetTimeRangeParams } from './query-params';
 
 export interface TimeRangeProviderProps {
   initialTimeRange: TimeRangeValue;
+  initialRefreshInterval?: DurationString;
   enabledURLParams?: boolean;
   children?: React.ReactNode;
 }
@@ -27,6 +34,9 @@ export interface TimeRange {
   setTimeRange: (value: TimeRangeValue) => void;
   refresh: () => void;
   refreshKey: string;
+  refreshInterval?: DurationString;
+  refreshIntervalInMs: number;
+  setRefreshInterval: (value: DurationString) => void;
 }
 
 export const TimeRangeContext = createContext<TimeRange | undefined>(undefined);
@@ -43,17 +53,20 @@ export function useTimeRangeContext() {
  * Get and set the current resolved time range at runtime.
  */
 export function useTimeRange(): TimeRange {
-  const { timeRange, absoluteTimeRange, setTimeRange, refresh, refreshKey } = useTimeRangeContext();
-  return { timeRange, absoluteTimeRange, setTimeRange, refresh, refreshKey };
+  return useTimeRangeContext();
 }
 
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, enabledURLParams, children } = props;
+  const { initialTimeRange, initialRefreshInterval, enabledURLParams, children } = props;
 
   const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, enabledURLParams);
+  const { refreshInterval, setRefreshInterval, refreshIntervalInMs } = useSetRefreshIntervalParams(
+    initialRefreshInterval,
+    enabledURLParams
+  );
 
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -68,9 +81,12 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
       setTimeRange,
       absoluteTimeRange,
       refresh,
-      refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${refreshKey}`,
+      refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${refreshInterval}:${refreshKey}`,
+      refreshInterval,
+      refreshIntervalInMs,
+      setRefreshInterval,
     };
-  }, [timeRange, setTimeRange, refresh, refreshKey]);
+  }, [timeRange, setTimeRange, refresh, refreshKey, refreshInterval, refreshIntervalInMs, setRefreshInterval]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

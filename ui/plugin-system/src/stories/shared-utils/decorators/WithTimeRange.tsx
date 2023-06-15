@@ -35,7 +35,7 @@ export const WithTimeRange = (Story: StoryFn, context: StoryContext<unknown>) =>
   const props = parameter?.props;
 
   return (
-    <TimeRangeProvider initialTimeRange={{ pastDuration: '1h' }} {...props}>
+    <TimeRangeProvider initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '1h' }} {...props}>
       <Story />
     </TimeRangeProvider>
   );

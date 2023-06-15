@@ -38,6 +38,7 @@ test.describe('Dashboard: Defaults', () => {
     await dashboardPage.page
       .getByRole('button', {
         name: 'interval',
+        exact: true,
       })
       .click();
     await page.getByRole('option', { name: '5m' }).click();

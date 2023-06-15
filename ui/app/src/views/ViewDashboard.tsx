@@ -91,6 +91,7 @@ function ViewDashboard() {
             name: dashboardName,
           },
           duration: '5m',
+          refreshInterval: '0s',
           variables: [],
           layouts: [],
           panels: {},

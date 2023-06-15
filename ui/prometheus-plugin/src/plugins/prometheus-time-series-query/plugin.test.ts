@@ -57,6 +57,7 @@ const createStubContext = () => {
       listDatasourceMetadata: jest.fn(),
     },
     refreshKey: 'test',
+    refreshIntervalInMs: 0,
     timeRange: {
       end: new Date('01-01-2023'),
       start: new Date('01-02-2023'),

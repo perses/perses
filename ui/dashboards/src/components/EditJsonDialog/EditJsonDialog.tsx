@@ -31,7 +31,7 @@ export const EditJsonDialog = () => {
 
 const EditJsonDialogForm = () => {
   const { closeEditJsonDialog } = useEditJsonDialog();
-  const { setTimeRange } = useTimeRange();
+  const { setTimeRange, setRefreshInterval } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
   const [draftDashboard, setDraftDashboard] = useState(dashboard);
 
@@ -39,6 +39,7 @@ const EditJsonDialogForm = () => {
     e.preventDefault();
     setDashboard(draftDashboard);
     setTimeRange({ pastDuration: draftDashboard.spec.duration });
+    setRefreshInterval(draftDashboard.spec.refreshInterval);
     closeEditJsonDialog();
   };
 
