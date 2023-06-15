@@ -4,7 +4,7 @@
 
 - [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
 - [FEATURE] Support Multi-Series Stat Chart (#1241)
-- [FEATURE] : SettingsAutocomplete component (#1242)
+- [FEATURE] SettingsAutocomplete component (#1242)
 - [BUGFIX] Fix y axis label positioning (#1240)
 - [ENHANCEMENT] Update panel header info tooltips (#1247)
 - [ENHANCEMENT] Export prom variables types (#1248)
