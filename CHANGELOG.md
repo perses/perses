@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.35.0 / 2023-06-14
+
+- [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
+- [FEATURE] Support Multi-Series Stat Chart (#1241)
+- [FEATURE] SettingsAutocomplete component (#1242)
+- [BUGFIX] Fix y axis label positioning (#1240)
+- [ENHANCEMENT] Update panel header info tooltips (#1247)
+- [ENHANCEMENT] Export prom variables types (#1248)
+- [BREAKINGCHANGE] Improve calculations for gauge and stat charts (#1246)
+
 ## 0.34.0 / 2023-06-08
 
 - [FEATURE] Shared crosshair for all time series panels on a dashboard (#1228)
