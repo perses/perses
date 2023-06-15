@@ -11,10 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import merge from 'lodash/merge';
-import { useDeepMemo, StepOptions, getXValues, getYValues, TimeSeries, DEFAULT_LEGEND } from '@perses-dev/core';
-import { PanelProps, useDataQueries, useTimeRange, validateLegendSpec } from '@perses-dev/plugin-system';
+import {
+  useDeepMemo,
+  StepOptions,
+  getXValues,
+  getYValues,
+  TimeSeries,
+  DEFAULT_LEGEND,
+  getCalculations,
+} from '@perses-dev/core';
+import {
+  LEGEND_VALUE_CONFIG,
+  PanelProps,
+  useDataQueries,
+  useTimeRange,
+  validateLegendSpec,
+  legendValues,
+} from '@perses-dev/plugin-system';
 import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
@@ -25,6 +40,9 @@ import {
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
+  formatValue,
+  TableColumnConfig,
+  LegendItem,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -168,6 +186,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const yValues = getYValues(timeSeries, timeScale);
         const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
 
+        const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
+
         // When we initially load the chart, we want to show all series, but
         // DO NOT want to visualy highlight all the items in the legend.
         const isSelectAll = selectedLegendItems === 'ALL';
@@ -182,6 +202,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             color: seriesColor,
+            data: legendCalculations,
           });
         }
       }
@@ -216,6 +237,41 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       graphData,
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+
+  // Translate the legend values into columns for the table legend.
+  const legendColumns = useMemo(() => {
+    if (!legend?.values) {
+      return [];
+    }
+
+    // Iterating the predefined list of possible values to retain a specific
+    // intended order of values.
+    return legendValues.reduce((columns, legendValue) => {
+      const legendConfig = LEGEND_VALUE_CONFIG[legendValue];
+
+      if (legendConfig && legend?.values?.includes(legendValue)) {
+        columns.push({
+          accessorKey: `data.${legendValue}`,
+          header: legendConfig.label,
+          // Intentionally hardcoding a column width to start based on discussions
+          // with design around keeping this simple to start. This may need
+          // revisiting in the future to handle edge cases with very large values.
+          width: 72,
+          align: 'right',
+          cell: ({ getValue }) => {
+            const cellValue = getValue();
+            const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
+            // TODO: consider adding a prop to the Table component column def, so
+            // we can auto-title (or potentially auto-tooltip in the future)
+            // instead of scattering this span-with-title logic all over the place.
+            return <span title={formattedValue}>{formattedValue}</span>;
+          },
+        });
+      }
+
+      return columns;
+    }, [] as Array<TableColumnConfig<LegendItem>>);
+  }, [legend?.values, unit]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -276,6 +332,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             data: graphData.legendItems || [],
             selectedItems: selectedLegendItems,
             onSelectedItemsChange: setSelectedLegendItems,
+            tableProps: {
+              columns: legendColumns,
+            },
           }
         }
       >

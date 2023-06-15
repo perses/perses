@@ -3,14 +3,17 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
     spec: {
         legend: {
             if #panel.type == "timeseries" {
-            	  position: [
-            	  	if #panel.options.legend.placement == "bottom" { "Bottom" },
-            	  	if #panel.options.legend.placement == "right" { "Right" },
-            	  ][0]
-                  mode: [
+                position: [
+                    if #panel.options.legend.placement == "bottom" { "Bottom" },
+                    if #panel.options.legend.placement == "right" { "Right" },
+                ][0]
+                mode: [
                     if #panel.options.legend.displayMode == "list" { "List" },
-            	  	if #panel.options.legend.displayMode == "table" { "Table" },
-                  ][0]
+                    if #panel.options.legend.displayMode == "table" { "Table" },
+                ][0]
+                values: [ for calc in #panel.options.legend.calcs 
+                    if (#mapping.calc[calc] != _|_) { #mapping.calc[calc] }
+                ]
             }
             if #panel.type == "graph" {
                 position: [ // switch
@@ -21,6 +24,11 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
                     if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
                     { "List" }
                 ][0]
+                values: [ for oldCalc, newCalc in #mapping.calc  
+                    // Check if the mapping field is set on the legend and 
+                    // is true.
+                    if #panel.legend[oldCalc] != _|_ if #panel.legend[oldCalc] == true { newCalc }
+                ]
             }
         }
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null

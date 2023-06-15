@@ -17,9 +17,12 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
+#legend_value: common.#calculation
+
 #legend: {
 	position: "Bottom" | "Right"
 	mode?:    "List" | "Table"
+	values?: [...#legend_value]
 }
 
 #palette: {

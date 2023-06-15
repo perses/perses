@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import {
+  CALCULATIONS_CONFIG,
+  CalculationType,
   LegendMode,
   LegendOptionsBase,
   LegendPositions,
@@ -23,13 +25,32 @@ import {
 // See the `core` package for common/shared legend model code and the
 // `components` package for legend model code specific to the Legend component.
 
+// Explicity listing the calculations we intend to use for legend values because
+// we want them ordered in a specific way, and it may be possible in the future
+// that we only use a subset of calculations for the legend because the calculations
+// are also used by other features.
+export const legendValues: CalculationType[] = [
+  'Mean',
+  'First',
+  'FirstNumber',
+  'Last',
+  'LastNumber',
+  'Min',
+  'Max',
+  'Sum',
+];
+export type LegendValue = (typeof legendValues)[number];
+
 // Note: explicitly defining different options for the legend spec and
 // legend component that extend from some common options, so we can allow the
 // component and the spec to diverge in some upcoming work.
-export type LegendSpecOptions = LegendOptionsBase;
+export interface LegendSpecOptions extends LegendOptionsBase {
+  values?: LegendValue[];
+}
 
 export type LegendSingleSelectConfig = {
   label: string;
+  description?: string;
 };
 
 export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
@@ -41,6 +62,12 @@ export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectC
   List: { label: 'List' },
   Table: { label: 'Table' },
 };
+
+export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {
+  config[value] = CALCULATIONS_CONFIG[value];
+
+  return config;
+}, {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>);
 
 export function validateLegendSpec(legend?: LegendOptionsBase) {
   if (legend === undefined) {

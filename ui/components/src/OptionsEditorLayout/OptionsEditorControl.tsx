@@ -52,7 +52,7 @@ export const OptionsEditorControl = ({ label, control, description }: OptionsEdi
             </InfoTooltip>
           )}
         </Stack>
-        <Box sx={{ width: '150px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
+        <Box sx={{ width: '180px', textAlign: 'right' }}> {React.cloneElement(control, controlProps)}</Box>
       </Stack>
     </FormControl>
   );

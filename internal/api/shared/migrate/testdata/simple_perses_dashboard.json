@@ -375,7 +375,17 @@
             "spec": {
               "legend": {
                 "position": "Bottom",
-                "mode": "List"
+                "mode": "List",
+                "values": [
+                  "Min",
+                  "Max",
+                  "First",
+                  "FirstNumber",
+                  "Last",
+                  "LastNumber",
+                  "Mean",
+                  "Sum"
+                ]
               },
               "thresholds": {
                 "steps": [
@@ -422,7 +432,8 @@
             "spec": {
               "legend": {
                 "position": "Bottom",
-                "mode": "Table"
+                "mode": "Table",
+                "values": []
               },
               "thresholds": {
                 "steps": [

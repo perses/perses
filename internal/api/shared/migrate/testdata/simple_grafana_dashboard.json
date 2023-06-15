@@ -228,7 +228,16 @@
       "id": 2,
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "min",
+            "max",
+            "first",
+            "firstNotNull",
+            "last",
+            "lastNotNull",
+            "mean",
+            "sum"
+          ],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true

@@ -20,6 +20,8 @@ import {
   LegendSpecOptions,
   LegendSingleSelectConfig,
   validateLegendSpec,
+  LEGEND_VALUE_CONFIG,
+  LegendValue,
 } from '../../model';
 
 type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['position'] };
@@ -36,6 +38,14 @@ type LegendModeOption = LegendSingleSelectConfig & { id: Required<LegendSpecOpti
 const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
   return {
     id: id as Required<LegendSpecOptions>['mode'],
+    ...config,
+  };
+});
+
+type LegendValueOption = LegendSingleSelectConfig & { id: LegendValue };
+const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).map(([id, config]) => {
+  return {
+    id: id as LegendValue,
     ...config,
   };
 });
@@ -67,12 +77,31 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
+  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]) => {
+    onChange({
+      ...value,
+      position: currentPosition,
+      values: newValue.map((value) => {
+        return value.id;
+      }),
+    });
+  };
+
   const isValidLegend = validateLegendSpec(value);
   const currentPosition = getLegendPosition(value?.position);
   const legendPositionConfig = LEGEND_POSITIONS_CONFIG[currentPosition];
 
   const currentMode = getLegendMode(value?.mode);
   const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
+
+  const currentValues = value?.values || [];
+  const legendValuesConfig = currentValues.reduce((result, item) => {
+    const config = LEGEND_VALUE_CONFIG[item];
+    if (config) {
+      result.push({ ...config, id: item });
+    }
+    return result;
+  }, [] as LegendValueOption[]);
 
   return (
     <>
@@ -109,6 +138,28 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
             disabled={value === undefined}
             disableClearable
           ></SettingsAutocomplete>
+        }
+      />
+      <OptionsEditorControl
+        label="Values"
+        description="Computed values ignore nulls."
+        control={
+          // For some reason, the inferred option type doesn't always seem to work
+          // quite right when `multiple` is true. Explicitly setting the generics
+          // to work around this.
+          <SettingsAutocomplete<LegendValueOption, true, true>
+            multiple={true}
+            disableCloseOnSelect
+            disableClearable
+            value={legendValuesConfig}
+            options={VALUE_OPTIONS}
+            onChange={handleLegendValueChange}
+            disabled={value === undefined || currentMode !== 'Table'}
+            limitTags={1}
+            ChipProps={{
+              size: 'small',
+            }}
+          />
         }
       />
     </>
