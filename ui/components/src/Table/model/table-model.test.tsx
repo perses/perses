@@ -88,6 +88,42 @@ describe('persesColumnToTanstackColumn', () => {
     );
   });
 
+  test('maps `headerDescription` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        headerDescription: 'The name',
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          headerDescription: 'The name',
+        },
+      })
+    );
+  });
+
+  test('maps `cellDescription` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        cellDescription: true,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          cellDescription: true,
+        },
+      })
+    );
+  });
+
   test('transforms perses columns to tanstack columns', () => {
     const persesColumns: Array<TableColumnConfig<MockTableData>> = [
       {
@@ -99,8 +135,10 @@ describe('persesColumnToTanstackColumn', () => {
       {
         accessorKey: 'value',
         header: 'Count',
+        headerDescription: 'The total number of values.',
         width: 120,
         cell: (data) => <strong>{data.getValue()}</strong>,
+        cellDescription: (data) => `Desc for ${data.getValue()}`,
       },
     ];
     expect(persesColumnsToTanstackColumns(persesColumns)).toMatchSnapshot();

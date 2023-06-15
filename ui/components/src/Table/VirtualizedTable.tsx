@@ -129,6 +129,7 @@ export function VirtualizedTable<TableData>({
                           align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
+                          description={column.columnDef.meta?.headerDescription}
                           focusState={getFocusState(position)}
                           onFocusTrigger={() => keyboardNav.onCellFocus(position)}
                           isFirstColumn={i === 0}
@@ -159,6 +160,23 @@ export function VirtualizedTable<TableData>({
                   column: i,
                 };
 
+                const cellContext = cell.getContext();
+                const cellRenderFn = cell.column.columnDef.cell;
+                const cellContent = typeof cellRenderFn == 'function' ? cellRenderFn(cellContext) : null;
+
+                const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
+                let description: string | undefined = undefined;
+                if (typeof cellDescriptionDef === 'function') {
+                  // If the cell description is a function, set the value using
+                  // the function.
+                  description = cellDescriptionDef(cellContext);
+                } else if (cellDescriptionDef && typeof cellContent === 'string') {
+                  // If the cell description is `true` AND the cell content is
+                  // a string (and thus viable as a `title` attribute), use the
+                  // cell content.
+                  description = cellContent;
+                }
+
                 return (
                   <TableCell
                     key={cell.id}
@@ -169,8 +187,9 @@ export function VirtualizedTable<TableData>({
                     onFocusTrigger={() => keyboardNav.onCellFocus(position)}
                     isFirstColumn={i === 0}
                     isLastColumn={i === cells.length - 1}
+                    description={description}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cellContent}
                   </TableCell>
                 );
               })}

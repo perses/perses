@@ -15,18 +15,19 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, getAllByRole, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table } from './Table';
-import { TableProps } from './model/table-model';
+import { TableColumnConfig, TableProps } from './model/table-model';
 
 type MockTableData = {
   id: string;
   label: string;
   value: number;
+  color: string;
 };
 
 type RenderTableOpts = Partial<
   Pick<
     TableProps<MockTableData>,
-    'data' | 'height' | 'width' | 'checkboxSelection' | 'onRowSelectionChange' | 'rowSelection'
+    'data' | 'height' | 'width' | 'checkboxSelection' | 'onRowSelectionChange' | 'rowSelection' | 'columns'
   >
 >;
 
@@ -34,7 +35,7 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
   {
     accessorKey: 'label',
     header: 'Label',
-    cell: ({ getValue }) => <span title={getValue()}>{getValue()}</span>,
+    cell: ({ getValue }) => `Cell content for ${getValue()}`,
   },
   {
     accessorKey: 'value',
@@ -44,7 +45,9 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
   {
     accessorKey: 'color',
     header: 'Color',
+    headerDescription: 'Hex codes for colors',
     width: 100,
+    cell: ({ getValue }) => <div data-testid="wrapper">{getValue()}</div>,
   },
 ];
 
@@ -55,6 +58,7 @@ function generateMockTableData(count: number): MockTableData[] {
       id: `row${i}`,
       label: `my column has a label ${i} that may be ellipsized when it does not fit within the column`,
       value: i,
+      color: i.toString(16),
     });
   }
   return data;
@@ -71,12 +75,13 @@ const renderTable = ({
   checkboxSelection,
   rowSelection = {},
   onRowSelectionChange = jest.fn(),
+  columns = COLUMNS,
 }: RenderTableOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
       <Table
         data={data}
-        columns={COLUMNS}
+        columns={columns}
         height={height}
         width={width}
         checkboxSelection={checkboxSelection}
@@ -135,6 +140,27 @@ describe('Table', () => {
     });
   });
 
+  test('columns with heading descriptions include the description as a title attr', () => {
+    renderTable();
+    screen.getByRole('table');
+
+    const columnHeaders = screen.getAllByRole('columnheader');
+    columnHeaders.forEach((tableHeading, i) => {
+      const column = COLUMNS[i];
+
+      if (!column) {
+        // This is here to appease typescript
+        throw new Error('Missing column for table heading');
+      }
+
+      if (column.headerDescription) {
+        expect(tableHeading.firstChild).toHaveAttribute('title', column.headerDescription);
+      } else {
+        expect(tableHeading.firstChild).not.toHaveAttribute('title');
+      }
+    });
+  });
+
   test('renders all table rows when they will fit', () => {
     const headerRows = 1;
     const dataRows = 5;
@@ -169,40 +195,297 @@ describe('Table', () => {
     }
   });
 
-  test('renders table cell content based on accessor', () => {
-    const headerRows = 1;
-    const dataRows = 5;
-    const data = generateMockTableData(dataRows);
-    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+  describe('when column `cell` not defined', () => {
+    const columnWithoutCell = 1;
 
-    const tableRows = screen.getAllByRole('row');
-    expect(tableRows).toHaveLength(data.length + headerRows);
+    test('renders table cell content based on accessor', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
 
-    // Offset 1 to account for header row.
-    for (let i = 1; i <= dataRows; i++) {
-      const dataRow = data[i - 1];
-      const cell = getTableCellByIndex(i, 1);
-      expect(cell).toHaveTextContent(`${dataRow?.value}`);
-    }
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithoutCell);
+        expect(cell).toHaveTextContent(`${dataRow?.value}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell has a description based on accessor', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithoutCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).toHaveAttribute('title', `${dataRow?.value}`);
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithoutCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.value}`);
+        }
+      });
+    });
   });
 
-  test('renders table cell content based on a function', () => {
-    const headerRows = 1;
-    const dataRows = 5;
-    const data = generateMockTableData(dataRows);
-    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+  describe('when column `cell` is defined and returns a string', () => {
+    const columnWithCell = 0;
 
-    const tableRows = screen.getAllByRole('row');
-    expect(tableRows).toHaveLength(data.length + headerRows);
+    test('renders table cell content based on `cell` function', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
 
-    // Offset 1 to account for header row.
-    for (let i = 1; i <= dataRows; i++) {
-      const dataRow = data[i - 1];
-      const cell = getTableCellByIndex(i, 0);
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
 
-      within(cell).getByTitle(`${dataRow?.label}`);
-      expect(cell).toHaveTextContent(`${dataRow?.label}`);
-    }
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithCell);
+
+        expect(cell).toHaveTextContent(`Cell content for ${dataRow?.label}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell has a description based on `cell` function', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Cell content for ${dataRow?.label}`);
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.label}`);
+        }
+      });
+    });
+  });
+
+  describe('when column `cell` is defined and returns a non-string', () => {
+    const columnWithComplexCell = 2;
+
+    test('renders table cell content based on `cell` function', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithComplexCell);
+
+        within(cell).getByTestId('wrapper');
+        expect(cell).toHaveTextContent(`${dataRow?.color}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell does not have a description because the `cell` result cannot be put in a `title`', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithComplexCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithComplexCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.color}`);
+        }
+      });
+    });
   });
 
   describe('when checkboxes are enabled', () => {

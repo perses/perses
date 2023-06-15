@@ -42,6 +42,17 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   align?: TableCellAlignment;
 
   /**
+   * Additional information to be displayed when hovering over the cell. This
+   * may be the full cell value (e.g. to enable the user to see the full value
+   * if it is ellipsized to fit into the space) or some other descriptive text
+   * that is useful for the user.
+   *
+   * The hover behavior is currently managed with the `title` attribute, but this
+   * may be changed to a tooltip in the future.
+   */
+  description?: string;
+
+  /**
    * How the cell should behave related to focus.
    * - `trigger-focus`: the cell should be auto-focused when it renders.
    * - `focus-next`: the cell should have tabindex="0", so that it will be
@@ -62,6 +73,7 @@ export function TableCell({
   onFocusTrigger,
   isFirstColumn,
   isLastColumn,
+  description,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -127,6 +139,7 @@ export function TableCell({
           overflow: 'hidden',
           textOverflow: 'ellipsis',
         }}
+        title={description}
       >
         {children}
       </Box>
