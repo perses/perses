@@ -81,7 +81,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               display: 'flex',
               width: '100%',
               alignItems: 'start',
-              padding: (theme) => theme.spacing(1, 2, 2, 2),
+              padding: (theme) => theme.spacing(1, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -93,7 +93,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               />
             </ErrorBoundary>
             <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
-              <Stack direction="row" spacing={1} whiteSpace="nowrap">
+              <Stack direction="row" spacing={1} ml={1} mb={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <AddPanelButton />
                 <AddGroupButton />
