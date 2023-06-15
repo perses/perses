@@ -46,12 +46,17 @@ const DEFAULT_HEIGHT = '34px';
 interface TimeRangeControlsProps {
   // The controls look best at heights >= 28 pixels
   heightPx?: number;
-
-  // Whether to show the refresh button or not
-  showRefresh?: boolean;
+  showTimeRangeSelector?: boolean;
+  showRefreshButton?: boolean;
+  showRefreshInterval?: boolean;
 }
 
-export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeControlsProps) {
+export function TimeRangeControls({
+  heightPx,
+  showTimeRangeSelector = true,
+  showRefreshButton = true,
+  showRefreshInterval = true,
+}: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
   // TODO: Remove this since it couples to the dashboard context
   const dashboardDuration = useDashboardDuration();
@@ -71,20 +76,22 @@ export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeCon
 
   return (
     <Stack direction="row" spacing={1}>
-      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      {showRefresh && (
-        <>
-          <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
-            <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
-              <RefreshIcon />
-            </ToolbarIconButton>
-          </InfoTooltip>
-          <RefreshIntervalPicker
-            timeOptions={REFRESH_TIME_OPTIONS}
-            value={refreshInterval}
-            onChange={setRefreshInterval}
-          />
-        </>
+      {showTimeRangeSelector && (
+        <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
+      )}
+      {showRefreshButton && (
+        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
+            <RefreshIcon />
+          </ToolbarIconButton>
+        </InfoTooltip>
+      )}
+      {showRefreshInterval && (
+        <RefreshIntervalPicker
+          timeOptions={REFRESH_TIME_OPTIONS}
+          value={refreshInterval}
+          onChange={setRefreshInterval}
+        />
       )}
     </Stack>
   );
