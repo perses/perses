@@ -124,6 +124,39 @@ describe('persesColumnToTanstackColumn', () => {
     );
   });
 
+  test('defaults `enableSorting` to `false`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        width: 100,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        enableSorting: false,
+      })
+    );
+  });
+
+  test('can set `enableSorting` to `true`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        width: 100,
+        enableSorting: true,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        enableSorting: true,
+      })
+    );
+  });
+
   test('transforms perses columns to tanstack columns', () => {
     const persesColumns: Array<TableColumnConfig<MockTableData>> = [
       {

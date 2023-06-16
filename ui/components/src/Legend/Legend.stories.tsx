@@ -311,7 +311,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
  */
 export const TableColumns: Story = {
   args: {
-    width: 400,
+    width: 500,
     height: 200,
     selectedItems: 'ALL',
     data: generateMockLegendData(10),
@@ -322,19 +322,22 @@ export const TableColumns: Story = {
           header: 'Index',
           accessorKey: 'data.index',
           align: 'center',
-          width: 50,
+          width: 70,
+          enableSorting: true,
         },
         {
           header: 'Squared',
           accessorKey: 'data.squared',
           align: 'right',
-          width: 60,
+          width: 80,
+          enableSorting: true,
         },
         {
           header: 'Cubed',
           accessorKey: 'data.cubed',
           align: 'right',
-          width: 70,
+          enableSorting: true,
+          width: 80,
         },
         {
           header: 'Description',

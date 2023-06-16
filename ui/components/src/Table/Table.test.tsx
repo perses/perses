@@ -27,7 +27,15 @@ type MockTableData = {
 type RenderTableOpts = Partial<
   Pick<
     TableProps<MockTableData>,
-    'data' | 'height' | 'width' | 'checkboxSelection' | 'onRowSelectionChange' | 'rowSelection' | 'columns'
+    | 'data'
+    | 'height'
+    | 'width'
+    | 'checkboxSelection'
+    | 'onRowSelectionChange'
+    | 'rowSelection'
+    | 'columns'
+    | 'onSortingChange'
+    | 'sorting'
   >
 >;
 
@@ -41,6 +49,7 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
     accessorKey: 'value',
     header: 'Value',
     width: 100,
+    enableSorting: true,
   },
   {
     accessorKey: 'color',
@@ -48,6 +57,7 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
     headerDescription: 'Hex codes for colors',
     width: 100,
     cell: ({ getValue }) => <div data-testid="wrapper">{getValue()}</div>,
+    enableSorting: true,
   },
 ];
 
@@ -76,6 +86,8 @@ const renderTable = ({
   rowSelection = {},
   onRowSelectionChange = jest.fn(),
   columns = COLUMNS,
+  sorting,
+  onSortingChange = jest.fn(),
 }: RenderTableOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -87,6 +99,8 @@ const renderTable = ({
         checkboxSelection={checkboxSelection}
         rowSelection={rowSelection}
         onRowSelectionChange={onRowSelectionChange}
+        sorting={sorting}
+        onSortingChange={onSortingChange}
       />
     </VirtuosoMockContext.Provider>
   );
@@ -703,6 +717,251 @@ describe('Table', () => {
           ...allCheckboxRowSelection,
           '2': undefined,
         });
+      });
+    });
+  });
+
+  describe('when sorting is enabled for a column', () => {
+    // We use this column for most of the testing
+    const sortingColumn = 1;
+    // We use this column to validate what happens when clicking another sort.
+    const anotherSortingColumn = 2;
+
+    test('header is a clickable button', () => {
+      renderTable();
+      screen.getByRole('table');
+
+      const columnHeaders = screen.getAllByRole('columnheader');
+      columnHeaders.forEach((colHeader, i) => {
+        if (i === sortingColumn || i === anotherSortingColumn) {
+          within(colHeader).getByRole('button');
+        } else {
+          expect(within(colHeader).queryAllByRole('button')).toHaveLength(0);
+        }
+      });
+    });
+
+    describe('when column not currently sorted', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = undefined;
+
+      test('the column is not shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).not.toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows descending as next state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionDesc');
+      });
+
+      test('changes sorting to descending on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'value',
+          },
+        ]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
+      });
+    });
+
+    describe('when column is sorted descending', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = [
+        {
+          desc: true,
+          id: 'value',
+        },
+      ];
+
+      test('the column is shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows descending as current state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionDesc');
+      });
+
+      test('changes sorting to ascending on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: false,
+            id: 'value',
+          },
+        ]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
+      });
+    });
+
+    describe('when column is sorted ascending', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = [
+        {
+          desc: false,
+          id: 'value',
+        },
+      ];
+
+      test('the column is shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows ascending as current state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionAsc');
+      });
+
+      test('changes sorting to unsorted on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
       });
     });
   });

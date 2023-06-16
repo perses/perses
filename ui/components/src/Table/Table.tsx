@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useReactTable, getCoreRowModel, ColumnDef, RowSelectionState, OnChangeFn } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+  RowSelectionState,
+  OnChangeFn,
+  SortingState,
+  getSortedRowModel,
+} from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
@@ -34,9 +42,11 @@ export function Table<TableData>({
   density = 'standard',
   checkboxSelection,
   onRowSelectionChange,
+  onSortingChange,
   getCheckboxColor,
   getRowId = DEFAULT_GET_ROW_ID,
   rowSelection = {},
+  sorting = [],
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
@@ -45,6 +55,11 @@ export function Table<TableData>({
     const newRowSelection =
       typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
     onRowSelectionChange?.(newRowSelection);
+  };
+
+  const handleSortingChange: OnChangeFn<SortingState> = (sortingUpdater) => {
+    const newSorting = typeof sortingUpdater === 'function' ? sortingUpdater(sorting) : sortingUpdater;
+    onSortingChange?.(newSorting);
   };
 
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
@@ -75,6 +90,7 @@ export function Table<TableData>({
           />
         );
       },
+      enableSorting: false,
     };
   }, [density, getCheckboxColor, theme.palette.text.primary]);
 
@@ -93,10 +109,16 @@ export function Table<TableData>({
     columns: tableColumns,
     getRowId,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
+    onSortingChange: handleSortingChange,
+    // For now, defaulting to sort by descending first. We can expose the ability
+    // to customize it if/when we have use cases for it.
+    sortDescFirst: true,
     state: {
       rowSelection,
+      sorting,
     },
   });
 

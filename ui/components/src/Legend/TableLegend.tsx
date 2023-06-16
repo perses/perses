@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from './legend-model';
 
-export interface TableLegendProps {
+export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'sorting' | 'onSortingChange'> {
   items: LegendItem[];
   height: number;
   width: number;
@@ -28,6 +28,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   {
     accessorKey: 'label',
     header: 'Name',
+    enableSorting: true,
 
     // Starting with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
@@ -51,6 +52,8 @@ export function TableLegend({
   height,
   width,
   columns: additionalColumns = [],
+  sorting,
+  onSortingChange,
 }: TableLegendProps) {
   const rowSelection = useMemo(() => {
     return typeof initRowSelection !== 'string'
@@ -74,6 +77,8 @@ export function TableLegend({
       width={width}
       rowSelection={rowSelection}
       onRowSelectionChange={onSelectedItemsChange}
+      sorting={sorting}
+      onSortingChange={onSortingChange}
       data={items}
       columns={columns}
       density="compact"

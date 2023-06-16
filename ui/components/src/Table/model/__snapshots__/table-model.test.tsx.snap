@@ -58,6 +58,7 @@ exports[`persesColumnToTanstackColumn transforms perses columns to tanstack colu
 Array [
   Object {
     "accessorKey": "label",
+    "enableSorting": false,
     "header": "Name",
     "maxSize": 0,
     "meta": Object {
@@ -71,6 +72,7 @@ Array [
   Object {
     "accessorKey": "value",
     "cell": [Function],
+    "enableSorting": false,
     "header": "Count",
     "meta": Object {
       "align": undefined,

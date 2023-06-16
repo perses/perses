@@ -19,6 +19,7 @@ import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
+import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableProps } from './model/table-model';
@@ -122,9 +123,16 @@ export function VirtualizedTable<TableData>({
                         column: i,
                       };
 
+                      const isSorted = column.getIsSorted();
+                      const nextSorting = column.getNextSortingOrder();
+
                       return (
-                        <TableCell
+                        <TableHeaderCell
                           key={header.id}
+                          canSort={column.getCanSort()}
+                          onSort={column.getToggleSortingHandler()}
+                          sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
+                          nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
                           width={column.getSize() || 'auto'}
                           align={column.columnDef.meta?.align}
                           variant="head"
@@ -136,7 +144,7 @@ export function VirtualizedTable<TableData>({
                           isLastColumn={i === headers.length - 1}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
-                        </TableCell>
+                        </TableHeaderCell>
                       );
                     })}
                   </TableRow>
