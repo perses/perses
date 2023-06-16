@@ -30,6 +30,12 @@ const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
   return `${index}`;
 };
 
+// Setting these defaults one enables them to be consistent across renders instead
+// of being recreated every time, which can be important for perf because react
+// does not do deep equality checking for objects and arrays.
+const DEFAULT_ROW_SELECTION: NonNullable<TableProps<unknown>['rowSelection']> = {};
+const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
+
 /**
  * Component used to render tabular data in Perses use cases. This component is
  * **not** intended to be a general use data table for use cases unrelated to Perses.
@@ -45,8 +51,8 @@ export function Table<TableData>({
   onSortingChange,
   getCheckboxColor,
   getRowId = DEFAULT_GET_ROW_ID,
-  rowSelection = {},
-  sorting = [],
+  rowSelection = DEFAULT_ROW_SELECTION,
+  sorting = DEFAULT_SORTING,
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
