@@ -55,12 +55,30 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // how this state works.
 const UncontrolledLegendWrapper = (props: LegendProps) => {
   const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+  const [sorting, setSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
+
   const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
     action('onSelectedItemsChange')(newSelectedItems);
     setSelectedItems(newSelectedItems);
   };
 
-  return <LegendWrapper {...props} selectedItems={selectedItems} onSelectedItemsChange={handleSelectedItemsChange} />;
+  const handleSortingChange: NonNullable<LegendProps['tableProps']>['onSortingChange'] = (newSorting) => {
+    action('onSortingChange')(newSorting);
+    setSorting(newSorting);
+  };
+
+  return (
+    <LegendWrapper
+      {...props}
+      selectedItems={selectedItems}
+      onSelectedItemsChange={handleSelectedItemsChange}
+      tableProps={{
+        ...props.tableProps,
+        sorting,
+        onSortingChange: handleSortingChange,
+      }}
+    />
+  );
 };
 
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
