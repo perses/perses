@@ -42,7 +42,9 @@ export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' 
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
 
-    // Save dashboard if active timeRange from plugin-system is relative and different than currently saved
+    // Save dashboard
+    // - if active timeRange from plugin-system is relative and different from currently saved
+    // - or if the saved variables are different from currently saved
     if (isSavedDurationModified || isSavedVariableModified) {
       openSaveChangesConfirmationDialog({
         onSaveChanges: (saveDefaultTimeRange, saveDefaultVariables) => {

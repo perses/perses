@@ -13,7 +13,7 @@
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
+import { ExternalVariableDefinition, ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import {
@@ -23,7 +23,7 @@ import {
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
 } from '@perses-dev/core';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
 import AppBreadcrumbs from '../components/AppBreadcrumbs';
@@ -31,6 +31,8 @@ import { useIsReadonly } from '../model/config-client';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
 import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
+import { useVariableList } from '../model/project-client';
+import { buildExternalVariableDefinition } from '../utils/variables';
 
 /**
  * Generated a resource name valid for the API.
@@ -66,6 +68,15 @@ function ViewDashboard() {
   const { isLoading } = useDashboard(projectName, dashboardName);
   let { data } = useDashboard(projectName, dashboardName);
   const isReadonly = useIsReadonly();
+
+  // Collect the Project variables and setup external variables from it
+  // TODO: Once we'll implement global variables CRUD, we'll do the same with 'global' as source
+  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
+  const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(() => {
+    const result: ExternalVariableDefinition[] = [];
+    if (projectVars && projectVars.length > 0) result.push(buildExternalVariableDefinition('project', projectVars));
+    return result;
+  }, [projectVars]);
 
   const createDashboardMutation = useCreateDashboardMutation();
   const updateDashboardMutation = useUpdateDashboardMutation();
@@ -147,6 +158,7 @@ function ViewDashboard() {
   }, [actionRef, navigate, projectName]);
 
   if (isLoading) return null;
+  if (isLoadingProjectVars) return null;
 
   if (!data || data.spec === undefined || isReadonly === undefined) return null;
 
@@ -170,6 +182,7 @@ function ViewDashboard() {
             <DashboardView
               dashboardResource={data}
               datasourceApi={datasourceApi}
+              externalVariableDefinitions={externalVariableDefinitions}
               dashboardTitleComponent={
                 <AppBreadcrumbs dashboardName={getDashboardDisplayName(data)} projectName={data.metadata.project} />
               }
