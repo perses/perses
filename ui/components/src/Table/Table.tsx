@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useReactTable, getCoreRowModel, ColumnDef, RowSelectionState, OnChangeFn } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+  RowSelectionState,
+  OnChangeFn,
+  Row,
+  Table as TanstackTable,
+} from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
@@ -37,6 +45,7 @@ export function Table<TableData>({
   getCheckboxColor,
   getRowId = DEFAULT_GET_ROW_ID,
   rowSelection = {},
+  rowSelectionVariant = 'standard',
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
@@ -46,6 +55,40 @@ export function Table<TableData>({
       typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
     onRowSelectionChange?.(newRowSelection);
   };
+
+  const handleRowSelectionEvent = useCallback(
+    (table: TanstackTable<TableData>, row: Row<TableData>, isModified: boolean) => {
+      if (rowSelectionVariant === 'standard' || isModified) {
+        row.toggleSelected();
+      } else {
+        // Legend variant (when action not modified with shift/meta key).
+        // Note that this behavior needs to be kept in sync with behavior in
+        // the Legend component for list-based legends.
+        if (row.getIsSelected() && !table.getIsAllRowsSelected()) {
+          // Row was already selected. Revert to select all.
+          table.toggleAllRowsSelected();
+        } else {
+          // Focus the selected row.
+          onRowSelectionChange?.({
+            [row.id]: true,
+          });
+        }
+      }
+    },
+    [onRowSelectionChange, rowSelectionVariant]
+  );
+
+  const handleCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, table: TanstackTable<TableData>, row: Row<TableData>) => {
+      const nativePointerEvent =
+        e.nativeEvent && (e.nativeEvent instanceof MouseEvent || e.nativeEvent instanceof KeyboardEvent)
+          ? (e.nativeEvent as PointerEvent)
+          : undefined;
+      const isModifed = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
+      handleRowSelectionEvent(table, row, isModifed);
+    },
+    [handleRowSelectionEvent]
+  );
 
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
     return {
@@ -62,13 +105,13 @@ export function Table<TableData>({
           />
         );
       },
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
         return (
           <TableCheckbox
             checked={row.getIsSelected()}
             indeterminate={row.getIsSomeSelected()}
             onChange={(e) => {
-              row.getToggleSelectedHandler()(e);
+              handleCheckboxChange(e, table, row);
             }}
             color={getCheckboxColor?.(row.original)}
             density={density}
@@ -76,7 +119,7 @@ export function Table<TableData>({
         );
       },
     };
-  }, [density, getCheckboxColor, theme.palette.text.primary]);
+  }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
     const initTableColumns = persesColumnsToTanstackColumns(columns);
@@ -101,10 +144,12 @@ export function Table<TableData>({
   });
 
   const handleRowClick = useCallback(
-    (rowId: string) => {
-      table.getRow(rowId).toggleSelected();
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, rowId: string) => {
+      const row = table.getRow(rowId);
+      const isModifiedClick = e.metaKey || e.shiftKey;
+      handleRowSelectionEvent(table, row, isModifiedClick);
     },
-    [table]
+    [handleRowSelectionEvent, table]
   );
 
   return (

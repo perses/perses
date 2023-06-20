@@ -60,6 +60,19 @@ export interface TableProps<TableData> {
   checkboxSelection?: boolean;
 
   /**
+   * Determines the behavior of row selection.
+   *
+   * - `standard`: clicking a checkbox will toggle that rows's selected/unselected
+   *    state and will not impact other rows.
+   * - `legend`: clicking a checkbox will "focus" that row by selecting it and
+   *    unselecting other rows. Clicking a checkbox with a modifier key pressed,
+   *    will change this behavior to behave like `standard`.
+   *
+   * @default 'standard'
+   */
+  rowSelectionVariant?: 'standard' | 'legend';
+
+  /**
    * State of selected rows in the table when `checkboxSelection` is enabled.
    *
    * Selected row state is a controlled value that should be managed using a

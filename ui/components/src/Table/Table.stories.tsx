@@ -78,6 +78,7 @@ export default meta;
 type Story = StoryObj<typeof Table<MockTableData>>;
 
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+import { StorySection } from '@perses-dev/storybook';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -183,6 +184,10 @@ export const Density: Story = {
  * in the first column. The state of selected checkboxes is controlled using
  * the `rowSelection` and `onRowSelectionChanged` props. You may modify the
  * color of row checkboxes using the `getCheckboxColor` prop.
+ *
+ * The table has two variants of row selection behavior specified by `rowSelectionVariant`:
+ * - `standard`: clicking a checkbox will toggle that rows's selected/unselected state and will not impact other rows.
+ * - `legend`: clicking a checkbox will "focus" that row by selecting it and unselecting other rows. Clicking a checkbox with a modifier key pressed, will change this behavior to behave like `standard`.
  */
 export const CheckboxSelection: Story = {
   args: {
@@ -210,15 +215,50 @@ export const CheckboxSelection: Story = {
     },
   },
   render: (args) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [rowSelection, setRowSelection] = useState<TableProps<MockTableData>['rowSelection']>({});
+    const initSelection = args.data.reduce((result, item) => {
+      result[item.id] = true;
+      return result;
+    }, {} as NonNullable<TableProps<MockTableData>['rowSelection']>);
 
-    const handleRowSelectionChange: TableProps<MockTableData>['onRowSelectionChange'] = (newRowSelection) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [standardRowSelection, setStandardRowSelection] = useState<TableProps<MockTableData>['rowSelection']>({
+      ...initSelection,
+    });
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [legendRowSelection, setLegendRowSelection] = useState<TableProps<MockTableData>['rowSelection']>({
+      ...initSelection,
+    });
+
+    const handleStandardRowSelectionChange: TableProps<MockTableData>['onRowSelectionChange'] = (newRowSelection) => {
       action('onRowSelectionChange')(newRowSelection);
-      setRowSelection(newRowSelection);
+      setStandardRowSelection(newRowSelection);
     };
 
-    return <Table {...args} onRowSelectionChange={handleRowSelectionChange} rowSelection={rowSelection} />;
+    const handleLegendRowSelectionChange: TableProps<MockTableData>['onRowSelectionChange'] = (newRowSelection) => {
+      action('onRowSelectionChange')(newRowSelection);
+      setLegendRowSelection(newRowSelection);
+    };
+
+    return (
+      <Stack spacing={3}>
+        <StorySection title="standard" level="h3">
+          <Table
+            {...args}
+            rowSelectionVariant="standard"
+            onRowSelectionChange={handleStandardRowSelectionChange}
+            rowSelection={standardRowSelection}
+          />
+        </StorySection>
+        <StorySection title="legend" level="h3">
+          <Table
+            {...args}
+            rowSelectionVariant="legend"
+            onRowSelectionChange={handleLegendRowSelectionChange}
+            rowSelection={legendRowSelection}
+          />
+        </StorySection>
+      </Stack>
+    );
   },
 };
 

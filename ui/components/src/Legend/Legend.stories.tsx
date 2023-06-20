@@ -54,7 +54,7 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // story does not need to. Useful for stories that are not focused on explaining
 // how this state works.
 const UncontrolledLegendWrapper = (props: LegendProps) => {
-  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>(props.selectedItems || 'ALL');
   const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
     action('onSelectedItemsChange')(newSelectedItems);
     setSelectedItems(newSelectedItems);
@@ -260,7 +260,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -277,7 +277,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
