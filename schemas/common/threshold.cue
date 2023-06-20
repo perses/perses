@@ -20,7 +20,7 @@ package common
 }
 
 #thresholds: {
-	mode?:          "Percent" | "Absolute"
+	mode?:          "percent" | "absolute"
 	default_color?: string
 	steps?: [...#stepOption]
 }

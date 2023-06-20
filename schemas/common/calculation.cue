@@ -13,4 +13,4 @@
 
 package common
 
-#calculation: "First" | "Last" | "FirstNumber" | "LastNumber" | "Mean" | "Sum" | "Min" | "Max"
+#calculation: "first" | "last" | "first-number" | "last-number" | "mean" | "sum" | "min" | "max"
