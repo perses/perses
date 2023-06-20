@@ -129,8 +129,7 @@ export function VirtualizedTable<TableData>({
                       return (
                         <TableHeaderCell
                           key={header.id}
-                          canSort={column.getCanSort()}
-                          onSort={column.getToggleSortingHandler()}
+                          onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
                           sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
                           nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
                           width={column.getSize() || 'auto'}
