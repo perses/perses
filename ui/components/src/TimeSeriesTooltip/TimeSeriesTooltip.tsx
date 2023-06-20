@@ -96,7 +96,8 @@ export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
           visibility: 'visible',
           opacity: 1,
           transition: 'all 0.1s ease-out',
-          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip, // Ensure pinned tooltip shows behind sticky header
+          // Ensure pinned tooltip shows behind edit panel drawer and sticky header
+          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
           overflow: 'hidden',
           '&:hover': {
             overflowY: 'auto',
