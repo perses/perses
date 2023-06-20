@@ -46,9 +46,7 @@ export function ListLegend({ items, height, width, selectedItems, onLegendItemCl
             isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
             onClick={onLegendItemClick}
             sx={{
-              // Having an explicit width is important for the ellipsizing to
-              // work correctly. Subtract padding to simulate padding.
-              width: width,
+              width: '100%',
               wordBreak: 'break-word',
               overflow: 'hidden',
             }}
