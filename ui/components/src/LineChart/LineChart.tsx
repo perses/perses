@@ -42,7 +42,15 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import {
+  clearHighlightedSeries,
+  enableDataZoom,
+  getDateRange,
+  getFormattedDate,
+  getYAxes,
+  restoreChart,
+  ZoomEventData,
+} from './utils';
 
 use([
   EChartsLineChart,
@@ -249,6 +257,9 @@ export function LineChart({
       onMouseLeave={() => {
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
+        }
+        if (chartRef.current !== undefined) {
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
         }
       }}
       onMouseEnter={() => {
