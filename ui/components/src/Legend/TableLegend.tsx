@@ -85,6 +85,7 @@ export function TableLegend({
       getRowId={getRowId}
       getCheckboxColor={getCheckboxColor}
       checkboxSelection
+      rowSelectionVariant="legend"
     />
   );
 }

@@ -31,7 +31,7 @@ type TableCellPosition = {
 };
 
 export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> & {
-  onRowClick: (id: string) => void;
+  onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
   rows: Array<Row<TableData>>;
   columns: Array<Column<TableData, unknown>>;
   headers: Array<HeaderGroup<TableData>>;
@@ -94,7 +94,7 @@ export function VirtualizedTable<TableData>({
           return null;
         }
 
-        return <TableRow {...props} onClick={() => onRowClick(row.id)} density={density} />;
+        return <TableRow {...props} onClick={(e) => onRowClick(e, row.id)} density={density} />;
       },
       TableBody,
     };
