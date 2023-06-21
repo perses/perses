@@ -327,6 +327,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Making this small enough that the medium size doesn't get
         // responsive-handling-ed away when in the panel options editor.
         minChildrenHeight={50}
+        legendSize={legend?.size}
         legendProps={
           legend && {
             options: legend,
