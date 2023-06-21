@@ -49,7 +49,7 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
     description: 'Last numeric value',
   },
   Mean: {
-    label: 'Average',
+    label: 'Avg',
     description: 'Average value excluding nulls',
   },
   Sum: {

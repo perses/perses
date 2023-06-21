@@ -202,16 +202,6 @@ export function getNearbySeriesData({
     }
   }
 
-  // clear all highlighted series when cursor exits canvas
-  // https://echarts.apache.org/en/api.html#action.downplay
-  for (let i = 0; i < totalSeries; i++) {
-    if (chart?.dispatchAction !== undefined) {
-      chart.dispatchAction({
-        type: 'downplay',
-        seriesIndex: i,
-      });
-    }
-  }
   return [];
 }
 

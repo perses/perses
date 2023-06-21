@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
-import { LegendPositions, getLegendMode } from '@perses-dev/core';
+import { LegendPositions, getLegendMode, LegendSize } from '@perses-dev/core';
 import { LegendProps } from '../../Legend';
 import { getTableCellLayout } from '../../Table';
 
@@ -37,11 +37,20 @@ export interface ContentWithLegendProps {
    * to chart components.
    */
   children: React.ReactNode | (({ width, height }: Dimensions) => React.ReactNode);
+
+  /**
+   * Size used for the legend.
+   *
+   * @default 'Medium'
+   */
+  legendSize?: LegendSize;
+
   /**
    * Props to configure the legend. If not set, the content is rendered without
    * a legend.
    */
   legendProps?: Omit<LegendProps, 'width' | 'height'>;
+
   /**
    * Space to put between the children and the legend in pixels.
    */
@@ -79,14 +88,23 @@ export interface ContentWithLegendLayout {
   };
 }
 
-type LegendSizeConfig = Record<LegendPositions, number>;
+type LegendSizeConfig = Record<LegendSize, Record<LegendPositions, number>>;
 
 export const TABLE_LEGEND_SIZE: LegendSizeConfig = {
-  // 5 rows plus header. Value to be multiplied by row height in pixels.
-  Bottom: 6,
+  Medium: {
+    // 5 rows plus header. Value to be multiplied by row height in pixels.
+    Bottom: 6,
 
-  // Pixel value
-  Right: 250,
+    // Pixel value
+    Right: 250,
+  },
+  Small: {
+    // 3 rows plus header. Value to be multiplied by row height in pixels.
+    Bottom: 4,
+
+    // Pixel value
+    Right: 150,
+  },
 };
 
 const PANEL_HEIGHT_LG_BREAKPOINT = 300;
@@ -100,6 +118,7 @@ export function getContentWithLegendLayout({
   width,
   height,
   legendProps,
+  legendSize,
   minChildrenHeight,
   minChildrenWidth,
   spacing,
@@ -159,8 +178,11 @@ export function getContentWithLegendLayout({
       return total;
     }, 0);
 
-    legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE['Right'] + columnsWidth : width;
-    legendHeight = position === 'Bottom' ? TABLE_LEGEND_SIZE['Bottom'] * tableLayout.height : height;
+    legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE[legendSize]['Right'] + columnsWidth : width;
+
+    // Use the smaller of the size-based row count or the number of legend items + 1 for the header.
+    const rowsToShow = Math.min(TABLE_LEGEND_SIZE[legendSize]['Bottom'], legendProps.data.length + 1);
+    legendHeight = position === 'Bottom' ? rowsToShow * tableLayout.height : height;
   }
 
   const contentWidth = position === 'Right' ? width - legendWidth - spacing : width;

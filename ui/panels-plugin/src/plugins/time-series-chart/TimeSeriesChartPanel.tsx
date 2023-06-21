@@ -43,6 +43,7 @@ import {
   formatValue,
   TableColumnConfig,
   LegendItem,
+  LegendProps,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -114,6 +115,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const echartsYAxis = convertPanelYAxis(y_axis);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
+  const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
 
@@ -264,6 +266,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
           },
           cellDescription: true,
+          enableSorting: true,
         });
       }
 
@@ -324,6 +327,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Making this small enough that the medium size doesn't get
         // responsive-handling-ed away when in the panel options editor.
         minChildrenHeight={50}
+        legendSize={legend?.size}
         legendProps={
           legend && {
             options: legend,
@@ -332,6 +336,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
               columns: legendColumns,
+              sorting: legendSorting,
+              onSortingChange: setLegendSorting,
             },
           }
         }
