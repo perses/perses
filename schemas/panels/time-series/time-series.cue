@@ -20,8 +20,8 @@ import (
 #legend_value: common.#calculation
 
 #legend: {
-	position: "Bottom" | "Right"
-	mode?:    "List" | "Table"
+	position: "bottom" | "right"
+	mode?:    "list" | "table"
 	values?: [...#legend_value]
 }
 
@@ -32,10 +32,10 @@ import (
 #visual: {
 	line_width?:    number & >=0.25 & <=3
 	area_opacity?:  number & >=0 & <=1
-	show_points?:   "Auto" | "Always"
+	show_points?:   "auto" | "always"
 	palette?:       #palette
 	point_radius?:  number & >=0 & <=6
-	stack?:         "All" | "Percent" // TODO: Percent option is disabled until support is added
+	stack?:         "all" | "percent" // TODO: Percent option is disabled until support is added
 	connect_nulls?: bool
 }
 
