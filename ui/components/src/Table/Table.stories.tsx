@@ -18,23 +18,8 @@ import { Stack, Typography } from '@mui/material';
 import { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import { userEvent, within, waitFor } from '@storybook/testing-library';
-import {
-  red,
-  orange,
-  yellow,
-  green,
-  blue,
-  indigo,
-  purple,
-  red,
-  orange,
-  yellow,
-  green,
-  blue,
-  indigo,
-  purple,
-} from '@mui/material/colors';
-import { StorySection, StorySection } from '@perses-dev/storybook';
+import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
+import { StorySection } from '@perses-dev/storybook';
 
 type MockTableData = {
   id: string;
