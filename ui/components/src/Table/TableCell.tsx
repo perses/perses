@@ -91,7 +91,7 @@ export function TableCell({
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
-      'a[href], button, input, textarea, select, details'
+      'a[href], button, input, textarea, select, details,[role="button"]'
     );
     if (nestedFocusTarget) {
       // If the cell has a focusable child, focus it instead. Mostly used for
@@ -138,6 +138,11 @@ export function TableCell({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
+
+          // Need to inherit from the MUI cell because this manages some ordering
+          // that the `TableSortLabel` uses to determine the location of the icon
+          // in headers.
+          flexDirection: 'inherit',
         }}
         title={description}
       >

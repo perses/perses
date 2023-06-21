@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useReactTable, getCoreRowModel, ColumnDef, RowSelectionState, OnChangeFn } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+  RowSelectionState,
+  OnChangeFn,
+  SortingState,
+  getSortedRowModel,
+} from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
@@ -21,6 +29,12 @@ import { TableProps, persesColumnsToTanstackColumns } from './model/table-model'
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
   return `${index}`;
 };
+
+// Setting these defaults one enables them to be consistent across renders instead
+// of being recreated every time, which can be important for perf because react
+// does not do deep equality checking for objects and arrays.
+const DEFAULT_ROW_SELECTION: NonNullable<TableProps<unknown>['rowSelection']> = {};
+const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
 
 /**
  * Component used to render tabular data in Perses use cases. This component is
@@ -34,9 +48,11 @@ export function Table<TableData>({
   density = 'standard',
   checkboxSelection,
   onRowSelectionChange,
+  onSortingChange,
   getCheckboxColor,
   getRowId = DEFAULT_GET_ROW_ID,
-  rowSelection = {},
+  rowSelection = DEFAULT_ROW_SELECTION,
+  sorting = DEFAULT_SORTING,
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
@@ -45,6 +61,11 @@ export function Table<TableData>({
     const newRowSelection =
       typeof rowSelectionUpdater === 'function' ? rowSelectionUpdater(rowSelection) : rowSelectionUpdater;
     onRowSelectionChange?.(newRowSelection);
+  };
+
+  const handleSortingChange: OnChangeFn<SortingState> = (sortingUpdater) => {
+    const newSorting = typeof sortingUpdater === 'function' ? sortingUpdater(sorting) : sortingUpdater;
+    onSortingChange?.(newSorting);
   };
 
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
@@ -75,6 +96,7 @@ export function Table<TableData>({
           />
         );
       },
+      enableSorting: false,
     };
   }, [density, getCheckboxColor, theme.palette.text.primary]);
 
@@ -93,10 +115,16 @@ export function Table<TableData>({
     columns: tableColumns,
     getRowId,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
+    onSortingChange: handleSortingChange,
+    // For now, defaulting to sort by descending first. We can expose the ability
+    // to customize it if/when we have use cases for it.
+    sortDescFirst: true,
     state: {
       rowSelection,
+      sorting,
     },
   });
 
