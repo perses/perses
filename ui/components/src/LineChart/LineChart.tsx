@@ -97,7 +97,11 @@ type LineChartHandleFocusOpts = {
 };
 
 export type LineChartHandle = {
-  focus: (opts: LineChartHandleFocusOpts) => void;
+  /**
+   * Focuses the series associated with the specified options by highlighting
+   * only that series.
+   */
+  focusSeries: (opts: LineChartHandleFocusOpts) => void;
 };
 
 export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function LineChart(
@@ -130,7 +134,7 @@ export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function Li
     ref,
     () => {
       return {
-        focus({ id }: LineChartHandleFocusOpts) {
+        focusSeries({ id }: LineChartHandleFocusOpts) {
           if (!chartRef.current) {
             // No chart. Do nothing.
             return;
