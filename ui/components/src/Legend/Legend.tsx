@@ -15,7 +15,6 @@ import { Box } from '@mui/material';
 import { produce } from 'immer';
 import { ReactNode } from 'react';
 import { getLegendMode } from '@perses-dev/core';
-import { TableRowEventOpts } from '../Table/model/table-model';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 import { TableLegend, TableLegendProps } from './TableLegend';

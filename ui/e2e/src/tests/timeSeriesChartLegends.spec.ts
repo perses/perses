@@ -12,11 +12,8 @@
 // limitations under the License.
 
 import happoPlaywright from 'happo-playwright';
-import {
-  mockTimeSeriesResponseWithStableValue,
-  mockTimeSeriesResponseWithNullValues,
-} from '@perses-dev/internal-utils';
-import { test, expect } from '../fixtures/dashboardTest';
+import { mockTimeSeriesResponseWithStableValue } from '@perses-dev/internal-utils';
+import { test } from '../fixtures/dashboardTest';
 import { waitForStableCanvas } from '../utils';
 
 test.use({
