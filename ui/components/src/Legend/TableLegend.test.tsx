@@ -39,12 +39,16 @@ const MOCK_ITEMS: TableLegendProps['items'] = [
   },
 ];
 
-type RenderTableLegendOpts = Partial<Pick<TableLegendProps, 'selectedItems' | 'onSelectedItemsChange' | 'items'>>;
+type RenderTableLegendOpts = Partial<
+  Pick<TableLegendProps, 'selectedItems' | 'onSelectedItemsChange' | 'onItemMouseOver' | 'onItemMouseOut' | 'items'>
+>;
 
 const renderTableLegend = ({
   items = MOCK_ITEMS,
   selectedItems = 'ALL',
   onSelectedItemsChange = jest.fn(),
+  onItemMouseOver = jest.fn(),
+  onItemMouseOut = jest.fn(),
 }: RenderTableLegendOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -54,6 +58,8 @@ const renderTableLegend = ({
         width={400}
         selectedItems={selectedItems}
         onSelectedItemsChange={onSelectedItemsChange}
+        onItemMouseOver={onItemMouseOver}
+        onItemMouseOut={onItemMouseOut}
       />
     </VirtuosoMockContext.Provider>
   );
@@ -389,6 +395,59 @@ describe('TableLegend', () => {
         two: true,
         three: true,
       });
+    });
+  });
+
+  describe('on mouse over item', () => {
+    test('calls `onItemMouseOver` with event and item information', () => {
+      const mockOnItemMouseOver = jest.fn();
+      renderTableLegend({
+        onItemMouseOver: mockOnItemMouseOver,
+      });
+
+      const tableRows = screen.getAllByRole('row');
+      const itemToMouseOver = tableRows[2];
+      if (!itemToMouseOver) {
+        throw new Error('Cannot find legend item');
+      }
+
+      userEvent.hover(itemToMouseOver);
+
+      expect(mockOnItemMouseOver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: itemToMouseOver,
+        }),
+        {
+          id: 'two',
+          index: 1,
+        }
+      );
+    });
+  });
+
+  describe('on mouse out item', () => {
+    test('calls `onItemMouseOut` with event and item information', () => {
+      const mockOnItemMouseOut = jest.fn();
+      renderTableLegend({
+        onItemMouseOut: mockOnItemMouseOut,
+      });
+      const tableRows = screen.getAllByRole('row');
+      const itemToMouseOut = tableRows[2];
+      if (!itemToMouseOut) {
+        throw new Error('Cannot find legend item');
+      }
+
+      userEvent.unhover(itemToMouseOut);
+
+      expect(mockOnItemMouseOut).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: itemToMouseOut,
+        }),
+        {
+          id: 'two',
+          index: 1,
+        }
+      );
     });
   });
 });

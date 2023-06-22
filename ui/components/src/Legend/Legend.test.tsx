@@ -34,7 +34,9 @@ const mockItems = [
   },
 ];
 
-type RenderLegendOpts = Partial<Pick<LegendProps, 'onSelectedItemsChange' | 'selectedItems'>> & {
+type RenderLegendOpts = Partial<
+  Pick<LegendProps, 'onSelectedItemsChange' | 'selectedItems' | 'onItemMouseOver' | 'onItemMouseOut'>
+> & {
   position?: LegendProps['options']['position'];
 };
 
@@ -42,6 +44,8 @@ const renderLegend = ({
   onSelectedItemsChange = jest.fn(),
   selectedItems = 'ALL',
   position = 'Bottom',
+  onItemMouseOver = jest.fn(),
+  onItemMouseOut = jest.fn(),
 }: RenderLegendOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
@@ -54,6 +58,8 @@ const renderLegend = ({
         }}
         selectedItems={selectedItems}
         onSelectedItemsChange={onSelectedItemsChange}
+        onItemMouseOver={onItemMouseOver}
+        onItemMouseOut={onItemMouseOut}
       />
     </VirtuosoMockContext.Provider>
   );
@@ -190,6 +196,62 @@ describe('Legend', () => {
 
       userEvent.click(itemToClick);
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith('ALL');
+    });
+
+    describe('on mouse over item', () => {
+      test('calls `onItemMouseOver` with event and item information', () => {
+        const mockOnItemMouseOver = jest.fn();
+        renderLegend({
+          onItemMouseOver: mockOnItemMouseOver,
+          position,
+        });
+
+        const listItems = screen.getAllByRole('listitem');
+        const itemToMouseOver = listItems[2];
+        if (!itemToMouseOver) {
+          throw new Error('Cannot find legend item');
+        }
+
+        userEvent.hover(itemToMouseOver);
+
+        expect(mockOnItemMouseOver).toHaveBeenCalledWith(
+          expect.objectContaining({
+            target: itemToMouseOver,
+          }),
+          {
+            id: '3',
+            index: 2,
+          }
+        );
+      });
+    });
+
+    describe('on mouse out item', () => {
+      test('calls `onItemMouseOut` with event and item information', () => {
+        const mockOnItemMouseOut = jest.fn();
+        renderLegend({
+          onItemMouseOut: mockOnItemMouseOut,
+          position,
+        });
+
+        const listItems = screen.getAllByRole('listitem');
+        const itemToMouseOut = listItems[1];
+        if (!itemToMouseOut) {
+          throw new Error('Cannot find legend item');
+        }
+
+        userEvent.unhover(itemToMouseOut);
+
+        expect(mockOnItemMouseOut).toHaveBeenCalledWith(
+          expect.objectContaining({
+            target: itemToMouseOut,
+          }),
+          {
+            id: '2',
+            index: 1,
+          }
+        );
+      });
     });
   });
 });

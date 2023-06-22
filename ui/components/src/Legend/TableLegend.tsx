@@ -21,6 +21,8 @@ export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'sorting'
   width: number;
   selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
   onSelectedItemsChange: TableProps<LegendItem>['onRowSelectionChange'];
+  onItemMouseOver?: TableProps<LegendItem>['onRowMouseOver'];
+  onItemMouseOut?: TableProps<LegendItem>['onRowMouseOut'];
   columns?: TableProps<LegendItem>['columns'];
 }
 
@@ -49,6 +51,8 @@ export function TableLegend({
   items,
   selectedItems: initRowSelection,
   onSelectedItemsChange,
+  onItemMouseOver,
+  onItemMouseOut,
   height,
   width,
   columns: additionalColumns = [],
@@ -77,6 +81,8 @@ export function TableLegend({
       width={width}
       rowSelection={rowSelection}
       onRowSelectionChange={onSelectedItemsChange}
+      onRowMouseOver={onItemMouseOver}
+      onRowMouseOut={onItemMouseOut}
       sorting={sorting}
       onSortingChange={onSortingChange}
       data={items}

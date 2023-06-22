@@ -476,6 +476,28 @@ export const Sorting: StoryObj<typeof Table<MockTableSortData>> = {
 };
 
 /**
+ * The table includes the following callback props for rows in the table:
+ * - `onRowMouseOver`: mouse over the table row.
+ * - `onRowMouseOut`: mouse out the table row.
+ *
+ * Each callback includes the following arguments:
+ * - `e`: the event that triggered the callback.
+ * - `opts`: an object containing the `index` and `id` for the row.
+ */
+export const TableRowEvents: Story = {
+  args: {
+    data: generateMockTableData(10),
+    columns: COLUMNS,
+  },
+  parameters: {
+    // This story is functionally identical to several other ones and mostly
+    // exists as a place to hang documentation, so we don't need another
+    // screenshot for it.
+    happo: false,
+  },
+};
+
+/**
  * Currently, a table with no data shows the header with no rows. This UI may
  * change in the future.
  */

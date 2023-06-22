@@ -375,6 +375,58 @@ export const TableColumns: Story = {
 };
 
 /**
+ * The legend includes the following callback props for items in the legend:
+ * - `onItemMouseOver`: mouse over the legend item.
+ * - `onItemMouseOut`: mouse out the legend item.
+ *
+ * Each callback includes the following arguments:
+ * - `e`: the event that triggered the callback.
+ * - `opts`: an object containing the `index` and `id` for the legend item.
+ */
+export const LegendItemEvents: Story = {
+  args: {
+    selectedItems: 'ALL',
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    data: {
+      options: {
+        disable: true,
+      },
+    },
+  },
+  parameters: {
+    // This story is functionally identical to several other ones and mostly
+    // exists as a place to hang documentation, so we don't need another
+    // screenshot for it.
+    happo: false,
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendModes.map((mode) => {
+          return (
+            <StorySection key={mode} title={mode} level="h3">
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+            </StorySection>
+          );
+        })}
+      </Stack>
+    );
+  },
+};
+
+/**
  * When the legend is positioned on the right, items with long labels will be
  * displayed in full when there are a small number of items.
  *
