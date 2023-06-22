@@ -347,7 +347,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               onSortingChange: setLegendSorting,
             },
             onItemMouseOver: (e, { id }) => {
-              lineChartRef.current?.focusSeries({ id });
+              lineChartRef.current?.highlightSeries({ id });
+            },
+            onItemMouseOut: () => {
+              lineChartRef.current?.clearHighlightedSeries();
             },
           }
         }

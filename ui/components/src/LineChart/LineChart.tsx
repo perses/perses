@@ -98,10 +98,14 @@ type LineChartHandleFocusOpts = {
 
 export type LineChartHandle = {
   /**
-   * Focuses the series associated with the specified options by highlighting
-   * only that series.
+   * Highlight the series associated with the specified options.
    */
-  focusSeries: (opts: LineChartHandleFocusOpts) => void;
+  highlightSeries: (opts: LineChartHandleFocusOpts) => void;
+
+  /**
+   * Clear all highlighted series.
+   */
+  clearHighlightedSeries: () => void;
 };
 
 export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function LineChart(
@@ -134,14 +138,20 @@ export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function Li
     ref,
     () => {
       return {
-        focusSeries({ id }: LineChartHandleFocusOpts) {
+        highlightSeries({ id }: LineChartHandleFocusOpts) {
           if (!chartRef.current) {
             // No chart. Do nothing.
             return;
           }
 
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
           chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+        },
+        clearHighlightedSeries: () => {
+          if (!chartRef.current) {
+            // No chart. Do nothing.
+            return;
+          }
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
         },
       };
     },
