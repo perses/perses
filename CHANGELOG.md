@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.36.0 / 2023-06-23
+
+- [FEATURE] adding refresh interval (#1215)
+- [ENHANCEMENT] Highlight associated line on mouseover legend item (#1263)
+- [ENHANCEMENT] Table supports legend variation of selection behavior (#1261)
+- [ENHANCEMENT] Add size option for content with legend (#1254)
+- [ENHANCEMENT] Table columns can be sorted (#1253)
+- [ENHANCEMENT] Improve the responsive layout of the toolbar buttons (#1251)
+- [ENHANCEMENT] ability to specify descriptive text for table (#1252)
+- [BUGFIX] avoid unnecessary horizontal scroll with table & legend (#1260)
+- [BUGFIX] Highlighted series not always cleared when cursor moved quickly (#1259)
+- [BUGFIX] Ensure pinned tooltip shows behind modals / sticky header (#1258)
+- [BREAKINGCHANGE] Adjust props on TimeRangeControls to control each action (#1250)
+
 ## 0.35.0 / 2023-06-14
 
 - [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
