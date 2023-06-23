@@ -91,6 +91,7 @@ export function TimeRangeControls({
           timeOptions={REFRESH_TIME_OPTIONS}
           value={refreshInterval}
           onChange={setRefreshInterval}
+          height={height}
         />
       )}
     </Stack>

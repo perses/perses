@@ -19,17 +19,17 @@ interface RefreshIntervalPickerProps {
   timeOptions: TimeOption[];
   value?: DurationString;
   onChange: (value: DurationString) => void;
+  height?: string;
 }
 
 export function RefreshIntervalPicker(props: RefreshIntervalPickerProps) {
-  const { value, onChange, timeOptions } = props;
+  const { value, onChange, timeOptions, height } = props;
   const formattedValue = value;
   return (
     <FormControl>
       <Box>
         <Select
           id="refreshInterval"
-          size="small"
           value={formattedValue}
           onChange={(event) => {
             const duration = event.target.value as DurationString;
@@ -39,10 +39,7 @@ export function RefreshIntervalPicker(props: RefreshIntervalPickerProps) {
             'aria-label': `Select refresh interval. Currently set to ${formattedValue}`,
           }}
           sx={{
-            maxWidth: 70,
-            '.MuiInputBase-inputSizeSmall': {
-              paddingLeft: 1,
-            },
+            '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
           }}
         >
           {timeOptions.map((item, idx) => (
