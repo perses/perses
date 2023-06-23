@@ -27,7 +27,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { calculation, unit, sparkline, thresholds },
+    spec: { calculation, unit, sparkline, thresholds, fontSize },
     contentDimensions,
   } = props;
 
@@ -85,6 +85,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
             color={getColorFromThresholds(chartsTheme, thresholds, series.calculatedValue)}
             sparkline={convertSparkline(chartsTheme, sparkline, thresholds, series.calculatedValue)}
             showSeriesName={isMultiSeries}
+            fontSize={fontSize}
           />
         ))
       ) : (

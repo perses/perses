@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { CalculationType, Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions } from '@perses-dev/components';
+import { FontSizeOptions, UnitOptions } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
@@ -27,6 +27,7 @@ export interface StatChartOptions {
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
+  fontSize?: FontSizeOptions;
 }
 
 export interface StatChartSparklineOptions {
@@ -43,5 +44,6 @@ export function createInitialStatChartOptions(): StatChartOptions {
       kind: 'Decimal',
     },
     sparkline: {},
+    fontSize: 'Default',
   };
 }

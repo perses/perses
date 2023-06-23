@@ -22,6 +22,7 @@ import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
+import { FontSizeOptions } from '../FontSizeSelector';
 import { useOptimalFontSize } from './calculateFontSize';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -44,10 +45,11 @@ export interface StatChartProps {
   color?: string;
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
+  fontSize?: FontSizeOptions;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline, showSeriesName } = props;
+  const { width, height, data, unit, color, sparkline, showSeriesName, fontSize } = props;
   const chartsTheme = useChartsTheme();
 
   let formattedValue = '';
@@ -75,6 +77,8 @@ export function StatChart(props: StatChartProps) {
   const availableHeight = height - seriesNameHeight;
   const valueFontSize = useOptimalFontSize({
     text: formattedValue,
+    // override the font size if user selects it in the settings
+    fontSizeOverride: fontSize,
     fontWeight: VALUE_FONT_WEIGHT,
     // without sparkline, use only 50% of the available width so it looks better for multiseries
     width: sparkline ? availableWidth : availableWidth * 0.5,
