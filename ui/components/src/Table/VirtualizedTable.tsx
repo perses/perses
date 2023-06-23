@@ -19,6 +19,7 @@ import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
+import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableProps } from './model/table-model';
@@ -30,7 +31,7 @@ type TableCellPosition = {
 };
 
 export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> & {
-  onRowClick: (id: string) => void;
+  onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
   rows: Array<Row<TableData>>;
   columns: Array<Column<TableData, unknown>>;
   headers: Array<HeaderGroup<TableData>>;
@@ -93,7 +94,7 @@ export function VirtualizedTable<TableData>({
           return null;
         }
 
-        return <TableRow {...props} onClick={() => onRowClick(row.id)} density={density} />;
+        return <TableRow {...props} onClick={(e) => onRowClick(e, row.id)} density={density} />;
       },
       TableBody,
     };
@@ -122,20 +123,27 @@ export function VirtualizedTable<TableData>({
                         column: i,
                       };
 
+                      const isSorted = column.getIsSorted();
+                      const nextSorting = column.getNextSortingOrder();
+
                       return (
-                        <TableCell
+                        <TableHeaderCell
                           key={header.id}
+                          onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
+                          sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
+                          nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
                           width={column.getSize() || 'auto'}
                           align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
+                          description={column.columnDef.meta?.headerDescription}
                           focusState={getFocusState(position)}
                           onFocusTrigger={() => keyboardNav.onCellFocus(position)}
                           isFirstColumn={i === 0}
                           isLastColumn={i === headers.length - 1}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
-                        </TableCell>
+                        </TableHeaderCell>
                       );
                     })}
                   </TableRow>
@@ -159,6 +167,23 @@ export function VirtualizedTable<TableData>({
                   column: i,
                 };
 
+                const cellContext = cell.getContext();
+                const cellRenderFn = cell.column.columnDef.cell;
+                const cellContent = typeof cellRenderFn == 'function' ? cellRenderFn(cellContext) : null;
+
+                const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
+                let description: string | undefined = undefined;
+                if (typeof cellDescriptionDef === 'function') {
+                  // If the cell description is a function, set the value using
+                  // the function.
+                  description = cellDescriptionDef(cellContext);
+                } else if (cellDescriptionDef && typeof cellContent === 'string') {
+                  // If the cell description is `true` AND the cell content is
+                  // a string (and thus viable as a `title` attribute), use the
+                  // cell content.
+                  description = cellContent;
+                }
+
                 return (
                   <TableCell
                     key={cell.id}
@@ -169,8 +194,9 @@ export function VirtualizedTable<TableData>({
                     onFocusTrigger={() => keyboardNav.onCellFocus(position)}
                     isFirstColumn={i === 0}
                     isLastColumn={i === cells.length - 1}
+                    description={description}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cellContent}
                   </TableCell>
                 );
               })}

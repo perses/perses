@@ -42,7 +42,7 @@ export interface LegendProps {
   /**
    * Props specific to legend with `mode` set to `table`.
    */
-  tableProps?: Pick<TableLegendProps, 'columns'>;
+  tableProps?: Pick<TableLegendProps, 'columns' | 'onSortingChange' | 'sorting'>;
 }
 
 // When the number of items to display is above this number, it is likely to

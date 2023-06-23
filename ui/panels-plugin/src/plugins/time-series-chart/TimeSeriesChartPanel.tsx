@@ -43,6 +43,7 @@ import {
   formatValue,
   TableColumnConfig,
   LegendItem,
+  LegendProps,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -114,6 +115,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const echartsYAxis = convertPanelYAxis(y_axis);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
+  const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
 
@@ -253,6 +255,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         columns.push({
           accessorKey: `data.${legendValue}`,
           header: legendConfig.label,
+          headerDescription: legendConfig.description,
           // Intentionally hardcoding a column width to start based on discussions
           // with design around keeping this simple to start. This may need
           // revisiting in the future to handle edge cases with very large values.
@@ -260,12 +263,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           align: 'right',
           cell: ({ getValue }) => {
             const cellValue = getValue();
-            const formattedValue = typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
-            // TODO: consider adding a prop to the Table component column def, so
-            // we can auto-title (or potentially auto-tooltip in the future)
-            // instead of scattering this span-with-title logic all over the place.
-            return <span title={formattedValue}>{formattedValue}</span>;
+            return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
           },
+          cellDescription: true,
+          enableSorting: true,
         });
       }
 
@@ -326,6 +327,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Making this small enough that the medium size doesn't get
         // responsive-handling-ed away when in the panel options editor.
         minChildrenHeight={50}
+        legendSize={legend?.size}
         legendProps={
           legend && {
             options: legend,
@@ -334,6 +336,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
               columns: legendColumns,
+              sorting: legendSorting,
+              onSortingChange: setLegendSorting,
             },
           }
         }

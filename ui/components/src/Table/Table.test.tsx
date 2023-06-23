@@ -15,18 +15,28 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, getAllByRole, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { Table } from './Table';
-import { TableProps } from './model/table-model';
+import { TableColumnConfig, TableProps } from './model/table-model';
 
 type MockTableData = {
   id: string;
   label: string;
   value: number;
+  color: string;
 };
 
 type RenderTableOpts = Partial<
   Pick<
     TableProps<MockTableData>,
-    'data' | 'height' | 'width' | 'checkboxSelection' | 'onRowSelectionChange' | 'rowSelection'
+    | 'data'
+    | 'height'
+    | 'width'
+    | 'checkboxSelection'
+    | 'onRowSelectionChange'
+    | 'rowSelection'
+    | 'columns'
+    | 'rowSelectionVariant'
+    | 'onSortingChange'
+    | 'sorting'
   >
 >;
 
@@ -34,17 +44,21 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
   {
     accessorKey: 'label',
     header: 'Label',
-    cell: ({ getValue }) => <span title={getValue()}>{getValue()}</span>,
+    cell: ({ getValue }) => `Cell content for ${getValue()}`,
   },
   {
     accessorKey: 'value',
     header: 'Value',
     width: 100,
+    enableSorting: true,
   },
   {
     accessorKey: 'color',
     header: 'Color',
+    headerDescription: 'Hex codes for colors',
     width: 100,
+    cell: ({ getValue }) => <div data-testid="wrapper">{getValue()}</div>,
+    enableSorting: true,
   },
 ];
 
@@ -55,6 +69,7 @@ function generateMockTableData(count: number): MockTableData[] {
       id: `row${i}`,
       label: `my column has a label ${i} that may be ellipsized when it does not fit within the column`,
       value: i,
+      color: i.toString(16),
     });
   }
   return data;
@@ -71,17 +86,24 @@ const renderTable = ({
   checkboxSelection,
   rowSelection = {},
   onRowSelectionChange = jest.fn(),
+  columns = COLUMNS,
+  rowSelectionVariant,
+  sorting,
+  onSortingChange = jest.fn(),
 }: RenderTableOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
       <Table
         data={data}
-        columns={COLUMNS}
+        columns={columns}
         height={height}
         width={width}
         checkboxSelection={checkboxSelection}
         rowSelection={rowSelection}
         onRowSelectionChange={onRowSelectionChange}
+        rowSelectionVariant={rowSelectionVariant}
+        sorting={sorting}
+        onSortingChange={onSortingChange}
       />
     </VirtuosoMockContext.Provider>
   );
@@ -135,6 +157,27 @@ describe('Table', () => {
     });
   });
 
+  test('columns with heading descriptions include the description as a title attr', () => {
+    renderTable();
+    screen.getByRole('table');
+
+    const columnHeaders = screen.getAllByRole('columnheader');
+    columnHeaders.forEach((tableHeading, i) => {
+      const column = COLUMNS[i];
+
+      if (!column) {
+        // This is here to appease typescript
+        throw new Error('Missing column for table heading');
+      }
+
+      if (column.headerDescription) {
+        expect(tableHeading.firstChild).toHaveAttribute('title', column.headerDescription);
+      } else {
+        expect(tableHeading.firstChild).not.toHaveAttribute('title');
+      }
+    });
+  });
+
   test('renders all table rows when they will fit', () => {
     const headerRows = 1;
     const dataRows = 5;
@@ -169,40 +212,297 @@ describe('Table', () => {
     }
   });
 
-  test('renders table cell content based on accessor', () => {
-    const headerRows = 1;
-    const dataRows = 5;
-    const data = generateMockTableData(dataRows);
-    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+  describe('when column `cell` not defined', () => {
+    const columnWithoutCell = 1;
 
-    const tableRows = screen.getAllByRole('row');
-    expect(tableRows).toHaveLength(data.length + headerRows);
+    test('renders table cell content based on accessor', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
 
-    // Offset 1 to account for header row.
-    for (let i = 1; i <= dataRows; i++) {
-      const dataRow = data[i - 1];
-      const cell = getTableCellByIndex(i, 1);
-      expect(cell).toHaveTextContent(`${dataRow?.value}`);
-    }
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithoutCell);
+        expect(cell).toHaveTextContent(`${dataRow?.value}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell has a description based on accessor', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithoutCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).toHaveAttribute('title', `${dataRow?.value}`);
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithoutCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithoutCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.value}`);
+        }
+      });
+    });
   });
 
-  test('renders table cell content based on a function', () => {
-    const headerRows = 1;
-    const dataRows = 5;
-    const data = generateMockTableData(dataRows);
-    renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+  describe('when column `cell` is defined and returns a string', () => {
+    const columnWithCell = 0;
 
-    const tableRows = screen.getAllByRole('row');
-    expect(tableRows).toHaveLength(data.length + headerRows);
+    test('renders table cell content based on `cell` function', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
 
-    // Offset 1 to account for header row.
-    for (let i = 1; i <= dataRows; i++) {
-      const dataRow = data[i - 1];
-      const cell = getTableCellByIndex(i, 0);
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
 
-      within(cell).getByTitle(`${dataRow?.label}`);
-      expect(cell).toHaveTextContent(`${dataRow?.label}`);
-    }
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithCell);
+
+        expect(cell).toHaveTextContent(`Cell content for ${dataRow?.label}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell has a description based on `cell` function', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Cell content for ${dataRow?.label}`);
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.label}`);
+        }
+      });
+    });
+  });
+
+  describe('when column `cell` is defined and returns a non-string', () => {
+    const columnWithComplexCell = 2;
+
+    test('renders table cell content based on `cell` function', () => {
+      const headerRows = 1;
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+      const tableRows = screen.getAllByRole('row');
+      expect(tableRows).toHaveLength(data.length + headerRows);
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const dataRow = data[i - 1];
+        const cell = getTableCellByIndex(i, columnWithComplexCell);
+
+        within(cell).getByTestId('wrapper');
+        expect(cell).toHaveTextContent(`${dataRow?.color}`);
+      }
+    });
+
+    describe('when `cellDescription` not defined', () => {
+      test('table cell does not have a description', () => {
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is `true`', () => {
+      test('table cell does not have a description because the `cell` result cannot be put in a `title`', () => {
+        const columns = COLUMNS.map((col, i) => {
+          if (i === columnWithComplexCell) {
+            return {
+              ...col,
+              cellDescription: true,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).not.toHaveAttribute('title');
+        }
+      });
+    });
+
+    describe('when `cellDescription` is a function', () => {
+      test('table cell has a description based on the function', () => {
+        const columns: Array<TableColumnConfig<MockTableData>> = COLUMNS.map((col, i) => {
+          if (i === columnWithComplexCell) {
+            return {
+              ...col,
+              cellDescription: ({ getValue }) => `Description for ${getValue()}`,
+            };
+          }
+          return col;
+        });
+
+        const headerRows = 1;
+        const dataRows = 5;
+        const data = generateMockTableData(dataRows);
+        renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT, columns });
+
+        const tableRows = screen.getAllByRole('row');
+        expect(tableRows).toHaveLength(data.length + headerRows);
+
+        // Offset 1 to account for header row.
+        for (let i = 1; i <= dataRows; i++) {
+          const dataRow = data[i - 1];
+          const cell = getTableCellByIndex(i, columnWithComplexCell);
+          expect(cell.firstChild).toHaveAttribute('title', `Description for ${dataRow?.color}`);
+        }
+      });
+    });
   });
 
   describe('when checkboxes are enabled', () => {
@@ -290,53 +590,57 @@ describe('Table', () => {
         expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectAll);
       });
 
-      test('selects a single row on clicking that row', () => {
-        const mockOnRowSelectionChange = jest.fn();
-        renderTable({
-          data: data,
-          checkboxSelection: true,
-          onRowSelectionChange: mockOnRowSelectionChange,
-          rowSelection: noCheckboxRowSelection,
+      // Behavior shouldn't be different between variations in this case, so use an each.
+      describe.each(['standard', 'legend'] as const)('with "%s" row selection', (rowSelectionVariant) => {
+        test('selects a single row on clicking that row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: noCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
+
+          const table = screen.getByRole('table');
+          const rows = within(table).getAllByRole('row');
+
+          // Note this is index 1 of the content rows because the first row is
+          // the header.
+          const rowToClick = rows[2];
+          if (!rowToClick) {
+            throw new Error('Unable to find row');
+          }
+
+          userEvent.click(rowToClick);
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            '1': true,
+          });
         });
 
-        const table = screen.getByRole('table');
-        const rows = within(table).getAllByRole('row');
+        test('selects a single row on clicking the checkbox in the row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: noCheckboxRowSelection,
+          });
 
-        // Note this is index 1 of the content rows because the first row is
-        // the header.
-        const rowToClick = rows[2];
-        if (!rowToClick) {
-          throw new Error('Unable to find row');
-        }
+          const table = screen.getByRole('table');
+          const checkboxes = within(table).getAllByRole('checkbox');
 
-        userEvent.click(rowToClick);
-        expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
-          '1': true,
-        });
-      });
+          // Note this is index 2 of the content rows because the first row is
+          // the header.
+          const checkboxToClick = checkboxes[3];
+          if (!checkboxToClick) {
+            throw new Error('Unable to find checkbox');
+          }
 
-      test('selects a single row on clicking the checkbox in the row', () => {
-        const mockOnRowSelectionChange = jest.fn();
-        renderTable({
-          data: data,
-          checkboxSelection: true,
-          onRowSelectionChange: mockOnRowSelectionChange,
-          rowSelection: noCheckboxRowSelection,
-        });
-
-        const table = screen.getByRole('table');
-        const checkboxes = within(table).getAllByRole('checkbox');
-
-        // Note this is index 2 of the content rows because the first row is
-        // the header.
-        const checkboxToClick = checkboxes[3];
-        if (!checkboxToClick) {
-          throw new Error('Unable to find checkbox');
-        }
-
-        userEvent.click(checkboxToClick);
-        expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
-          '2': true,
+          userEvent.click(checkboxToClick);
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            '2': true,
+          });
         });
       });
     });
@@ -349,77 +653,416 @@ describe('Table', () => {
         '2': true,
       };
 
-      test('selects none after clicking header checkbox', () => {
-        const mockOnRowSelectionChange = jest.fn();
-        renderTable({
-          data: data,
-          checkboxSelection: true,
-          onRowSelectionChange: mockOnRowSelectionChange,
-          rowSelection: allCheckboxRowSelection,
+      // Able to test the standard and legend with modified together.
+      // Testing un-modified legend separately because it behaves differently.
+      describe.each([
+        ['standard', false],
+        ['legend', true],
+      ] as const)('with "%s" row selection (modifed: %p)', (rowSelectionVariant, isModifed) => {
+        test('selects none after clicking header checkbox', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
+
+          const table = screen.getByRole('table');
+          const checkboxes = within(table).getAllByRole('checkbox');
+          const firstCheckbox = checkboxes[0];
+          if (!firstCheckbox) {
+            throw new Error('Missing first checkbox');
+          }
+
+          userEvent.click(firstCheckbox, {
+            shiftKey: isModifed,
+          });
+          const expectedSelectNone = {};
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectNone);
         });
 
-        const table = screen.getByRole('table');
-        const checkboxes = within(table).getAllByRole('checkbox');
-        const firstCheckbox = checkboxes[0];
-        if (!firstCheckbox) {
-          throw new Error('Missing first checkbox');
-        }
+        test('unselects a row on clicking that row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
 
-        userEvent.click(firstCheckbox);
-        const expectedSelectNone = {};
-        expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectNone);
+          const table = screen.getByRole('table');
+          const rows = within(table).getAllByRole('row');
+
+          // Note this is index 1 of the content rows because the first row is
+          // the header.
+          const rowToClick = rows[2];
+          if (!rowToClick) {
+            throw new Error('Unable to find row');
+          }
+
+          userEvent.click(rowToClick, {
+            shiftKey: isModifed,
+          });
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            ...allCheckboxRowSelection,
+            '1': undefined,
+          });
+        });
+
+        test('unselects a row on clicking the checkbox in the row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
+
+          const table = screen.getByRole('table');
+          const checkboxes = within(table).getAllByRole('checkbox');
+
+          // Note this is index 2 of the content rows because the first row is
+          // the header.
+          const checkboxToClick = checkboxes[3];
+          if (!checkboxToClick) {
+            throw new Error('Unable to find checkbox');
+          }
+
+          userEvent.click(checkboxToClick, {
+            metaKey: isModifed,
+          });
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            ...allCheckboxRowSelection,
+            '2': undefined,
+          });
+        });
       });
 
-      test('unselects a row on clicking that row', () => {
-        const mockOnRowSelectionChange = jest.fn();
-        renderTable({
-          data: data,
-          checkboxSelection: true,
-          onRowSelectionChange: mockOnRowSelectionChange,
-          rowSelection: allCheckboxRowSelection,
+      describe('with "legend" row selection (modifed: false)', () => {
+        const rowSelectionVariant = 'legend' as const;
+
+        test('selects none after clicking header checkbox', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
+
+          const table = screen.getByRole('table');
+          const checkboxes = within(table).getAllByRole('checkbox');
+          const firstCheckbox = checkboxes[0];
+          if (!firstCheckbox) {
+            throw new Error('Missing first checkbox');
+          }
+
+          userEvent.click(firstCheckbox);
+          const expectedSelectNone = {};
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectNone);
         });
 
-        const table = screen.getByRole('table');
-        const rows = within(table).getAllByRole('row');
+        test('focuses a row on clicking that row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
 
-        // Note this is index 1 of the content rows because the first row is
-        // the header.
-        const rowToClick = rows[2];
-        if (!rowToClick) {
-          throw new Error('Unable to find row');
-        }
+          const table = screen.getByRole('table');
+          const rows = within(table).getAllByRole('row');
 
-        userEvent.click(rowToClick);
-        expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
-          ...allCheckboxRowSelection,
-          '1': undefined,
+          // Note this is index 1 of the content rows because the first row is
+          // the header.
+          const rowToClick = rows[2];
+          if (!rowToClick) {
+            throw new Error('Unable to find row');
+          }
+
+          userEvent.click(rowToClick);
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            '1': true,
+          });
+        });
+
+        test('focuses a row on clicking the checkbox in the row', () => {
+          const mockOnRowSelectionChange = jest.fn();
+          renderTable({
+            data: data,
+            checkboxSelection: true,
+            onRowSelectionChange: mockOnRowSelectionChange,
+            rowSelection: allCheckboxRowSelection,
+            rowSelectionVariant: rowSelectionVariant,
+          });
+
+          const table = screen.getByRole('table');
+          const checkboxes = within(table).getAllByRole('checkbox');
+
+          // Note this is index 2 of the content rows because the first row is
+          // the header.
+          const checkboxToClick = checkboxes[3];
+          if (!checkboxToClick) {
+            throw new Error('Unable to find checkbox');
+          }
+
+          userEvent.click(checkboxToClick);
+          expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
+            '2': true,
+          });
         });
       });
+    });
+  });
 
-      test('unselects a row on clicking the checkbox in the row', () => {
-        const mockOnRowSelectionChange = jest.fn();
-        renderTable({
-          data: data,
-          checkboxSelection: true,
-          onRowSelectionChange: mockOnRowSelectionChange,
-          rowSelection: allCheckboxRowSelection,
-        });
+  describe('when sorting is enabled for a column', () => {
+    // We use this column for most of the testing
+    const sortingColumn = 1;
+    // We use this column to validate what happens when clicking another sort.
+    const anotherSortingColumn = 2;
 
-        const table = screen.getByRole('table');
-        const checkboxes = within(table).getAllByRole('checkbox');
+    test('header is a clickable button', () => {
+      renderTable();
+      screen.getByRole('table');
 
-        // Note this is index 2 of the content rows because the first row is
-        // the header.
-        const checkboxToClick = checkboxes[3];
-        if (!checkboxToClick) {
-          throw new Error('Unable to find checkbox');
+      const columnHeaders = screen.getAllByRole('columnheader');
+      columnHeaders.forEach((colHeader, i) => {
+        if (i === sortingColumn || i === anotherSortingColumn) {
+          within(colHeader).getByRole('button');
+        } else {
+          expect(within(colHeader).queryAllByRole('button')).toHaveLength(0);
         }
+      });
+    });
 
-        userEvent.click(checkboxToClick);
-        expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
-          ...allCheckboxRowSelection,
-          '2': undefined,
+    describe('when column not currently sorted', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = undefined;
+
+      test('the column is not shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
         });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).not.toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows descending as next state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionDesc');
+      });
+
+      test('changes sorting to descending on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'value',
+          },
+        ]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
+      });
+    });
+
+    describe('when column is sorted descending', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = [
+        {
+          desc: true,
+          id: 'value',
+        },
+      ];
+
+      test('the column is shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows descending as current state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionDesc');
+      });
+
+      test('changes sorting to ascending on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: false,
+            id: 'value',
+          },
+        ]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
+      });
+    });
+
+    describe('when column is sorted ascending', () => {
+      const sortingState: TableProps<MockTableData>['sorting'] = [
+        {
+          desc: false,
+          id: 'value',
+        },
+      ];
+
+      test('the column is shown as "active"', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        expect(within(columnHeader).getByRole('button')).toHaveClass('Mui-active');
+      });
+
+      test('the direction icon shows ascending as current state', () => {
+        renderTable({
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        const icon = within(columnHeader).getByTestId('ArrowDownwardIcon');
+        expect(icon).toHaveClass('MuiTableSortLabel-iconDirectionAsc');
+      });
+
+      test('changes sorting to unsorted on clicking the header', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[sortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([]);
+      });
+
+      test('changes sorting to unsorted on clicking another sortable column', () => {
+        const mockOnSortingChange = jest.fn();
+        renderTable({
+          onSortingChange: mockOnSortingChange,
+          sorting: sortingState,
+        });
+        screen.getByRole('table');
+
+        const columnHeader = screen.getAllByRole('columnheader')[anotherSortingColumn];
+        if (!columnHeader) {
+          throw new Error('cannot find sortable header');
+        }
+        userEvent.click(within(columnHeader).getByRole('button'));
+        expect(mockOnSortingChange).toHaveBeenCalledWith([
+          {
+            desc: true,
+            id: 'color',
+          },
+        ]);
       });
     });
   });

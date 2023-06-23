@@ -47,8 +47,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   const { isEditMode } = useEditMode();
 
-  const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
@@ -81,7 +81,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               display: 'flex',
               width: '100%',
               alignItems: 'start',
-              padding: (theme) => theme.spacing(1, 2, 2, 2),
+              padding: (theme) => theme.spacing(1, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -92,31 +92,18 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                 }}
               />
             </ErrorBoundary>
-            {isBiggerThanMd ? (
-              // On bigger screens, make it one row
-              <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
+            <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
+              <Stack direction="row" spacing={1} ml={1} mb={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <AddPanelButton />
                 <AddGroupButton />
+              </Stack>
+              <Stack direction="row" spacing={1} ml={1} mb={1}>
                 <TimeRangeControls />
                 <DownloadButton />
                 <EditJsonButton />
               </Stack>
-            ) : (
-              // On smaller screens, make it two rows
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-                  <TimeRangeControls />
-                  <DownloadButton />
-                  <EditJsonButton />
-                </Stack>
-                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-                  <EditVariablesButton />
-                  <AddPanelButton />
-                  <AddGroupButton />
-                </Stack>
-              </Stack>
-            )}
+            </Stack>
           </Box>
         </Stack>
       ) : (

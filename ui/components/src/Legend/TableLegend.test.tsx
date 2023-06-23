@@ -121,7 +121,7 @@ describe('TableLegend', () => {
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
     });
 
-    test('unselects item on click associated checkbox', () => {
+    test('focuses item on click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -136,6 +136,29 @@ describe('TableLegend', () => {
       }
 
       userEvent.click(rowCheckbox);
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        two: true,
+      });
+    });
+
+    test('unselects item on modified click associated checkbox', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        shiftKey: true,
+      });
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -206,9 +229,30 @@ describe('TableLegend', () => {
         two: true,
       });
     });
+
+    test('selects item on modified click associated checkbox', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, { metaKey: true });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        two: true,
+      });
+    });
   });
 
-  describe('when some selected', () => {
+  describe('when one selected', () => {
     const selectedItems = {
       two: true,
     };
@@ -258,7 +302,7 @@ describe('TableLegend', () => {
       });
     });
 
-    test('selects item on click associated checkbox for unselected item', () => {
+    test('focuses item on click associated checkbox for unselected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -276,11 +320,55 @@ describe('TableLegend', () => {
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
+      });
+    });
+
+    test('selects item on modified click associated checkbox for unselected item', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[1];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        shiftKey: true,
+      });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        one: true,
         two: true,
       });
     });
 
-    test('imselects item on click associated checkbox for selected item', () => {
+    test('unselects item on modified click associated checkbox for selected item', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        metaKey: true,
+      });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
+    });
+
+    test('selects all on click associated checkbox for selected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -296,7 +384,11 @@ describe('TableLegend', () => {
 
       userEvent.click(rowCheckbox);
 
-      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        one: true,
+        two: true,
+        three: true,
+      });
     });
   });
 });

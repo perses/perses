@@ -42,6 +42,17 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   align?: TableCellAlignment;
 
   /**
+   * Additional information to be displayed when hovering over the cell. This
+   * may be the full cell value (e.g. to enable the user to see the full value
+   * if it is ellipsized to fit into the space) or some other descriptive text
+   * that is useful for the user.
+   *
+   * The hover behavior is currently managed with the `title` attribute, but this
+   * may be changed to a tooltip in the future.
+   */
+  description?: string;
+
+  /**
    * How the cell should behave related to focus.
    * - `trigger-focus`: the cell should be auto-focused when it renders.
    * - `focus-next`: the cell should have tabindex="0", so that it will be
@@ -62,6 +73,7 @@ export function TableCell({
   onFocusTrigger,
   isFirstColumn,
   isLastColumn,
+  description,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -79,7 +91,7 @@ export function TableCell({
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
-      'a[href], button, input, textarea, select, details'
+      'a[href], button, input, textarea, select, details,[role="button"]'
     );
     if (nestedFocusTarget) {
       // If the cell has a focusable child, focus it instead. Mostly used for
@@ -126,7 +138,13 @@ export function TableCell({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
+
+          // Need to inherit from the MUI cell because this manages some ordering
+          // that the `TableSortLabel` uses to determine the location of the icon
+          // in headers.
+          flexDirection: 'inherit',
         }}
+        title={description}
       >
         {children}
       </Box>

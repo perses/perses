@@ -53,7 +53,7 @@ export function TableCheckbox({ color, density, ...otherProps }: TableCheckboxPr
           background: color ? alpha(color, 0.5) : undefined,
         },
 
-        '& .MuiSvgIcon-root': { fontSize: isCompact ? 14 : 16 },
+        '& .MuiSvgIcon-root': { fontSize: isCompact ? 16 : 18 },
       }}
     />
   );

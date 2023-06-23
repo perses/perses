@@ -19,6 +19,8 @@ import {
   LegendPositions,
   isValidLegendMode,
   isValidLegendPosition,
+  LegendSize,
+  isValidLegendSize,
 } from '@perses-dev/core';
 
 // This file contains legend-related model code specific to panel plugin specs.
@@ -63,6 +65,11 @@ export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectC
   Table: { label: 'Table' },
 };
 
+export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectConfig>> = {
+  Small: { label: 'Small' },
+  Medium: { label: 'Medium' },
+};
+
 export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {
   config[value] = CALCULATIONS_CONFIG[value];
 
@@ -78,6 +85,9 @@ export function validateLegendSpec(legend?: LegendOptionsBase) {
     return false;
   }
   if (legend.mode && !isValidLegendMode(legend.mode)) {
+    return false;
+  }
+  if (legend.size && !isValidLegendSize(legend.size)) {
     return false;
   }
 
