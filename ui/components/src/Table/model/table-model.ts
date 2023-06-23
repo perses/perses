@@ -26,6 +26,18 @@ import { CSSProperties } from 'react';
 export type TableDensity = 'compact' | 'standard';
 export type SortDirection = 'asc' | 'desc' | undefined;
 
+export type TableRowEventOpts = {
+  /**
+   * Unique identifier for the row.
+   */
+  id: string;
+
+  /**
+   * Index of the row in the original data.
+   */
+  index: number;
+};
+
 export interface TableProps<TableData> {
   /**
    * Height of the table.
@@ -81,6 +93,16 @@ export interface TableProps<TableData> {
    * combination of this prop and `onRowSelectionChange`.
    */
   rowSelection?: RowSelectionState;
+
+  /**
+   * Callback fired when the mouse is moved over a table row.
+   */
+  onRowMouseOver?: (e: React.MouseEvent, opts: TableRowEventOpts) => void;
+
+  /**
+   * Callback fired when the mouse is moved out of a table row.
+   */
+  onRowMouseOut?: (e: React.MouseEvent, opts: TableRowEventOpts) => void;
 
   /**
    * State of the column sorting in the table.

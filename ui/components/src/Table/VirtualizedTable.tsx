@@ -22,7 +22,7 @@ import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableProps } from './model/table-model';
+import { TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
@@ -30,12 +30,13 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> & {
-  onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
-  rows: Array<Row<TableData>>;
-  columns: Array<Column<TableData, unknown>>;
-  headers: Array<HeaderGroup<TableData>>;
-};
+export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> &
+  Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
+    onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
+    rows: Array<Row<TableData>>;
+    columns: Array<Column<TableData, unknown>>;
+    headers: Array<HeaderGroup<TableData>>;
+  };
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
@@ -45,6 +46,8 @@ export function VirtualizedTable<TableData>({
   height,
   density,
   onRowClick,
+  onRowMouseOver,
+  onRowMouseOut,
   rows,
   columns,
   headers,
@@ -94,11 +97,25 @@ export function VirtualizedTable<TableData>({
           return null;
         }
 
-        return <TableRow {...props} onClick={(e) => onRowClick(e, row.id)} density={density} />;
+        const rowEventOpts: TableRowEventOpts = { id: row.id, index: row.index };
+
+        return (
+          <TableRow
+            {...props}
+            onClick={(e) => onRowClick(e, row.id)}
+            density={density}
+            onMouseOver={(e) => {
+              onRowMouseOver?.(e, rowEventOpts);
+            }}
+            onMouseOut={(e) => {
+              onRowMouseOut?.(e, rowEventOpts);
+            }}
+          />
+        );
       },
       TableBody,
     };
-  }, [density, keyboardNav.onTableKeyDown, onRowClick, rows, width]);
+  }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
 
   return (
     <Box sx={{ width, height }}>
