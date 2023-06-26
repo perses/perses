@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useRef, useState } from 'react';
-import { Box, Skeleton, useTheme } from '@mui/material';
+import { Box, Skeleton, Typography, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
@@ -79,7 +79,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const muiTheme = useTheme();
   const chartId = useId('time-series-panel');
 
-  const showLegacyChart = show_legacy_chart ?? true;
+  const showLegacyChart = show_legacy_chart ?? false;
 
   const lineChartRef = useRef<ChartHandle>(null);
 
@@ -128,7 +128,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { setTimeRange } = useTimeRange();
 
   // https://apache.github.io/echarts-handbook/en/concepts/dataset/
-  const timeChartData: TimeChartData = [];
+  let timeChartData: TimeChartData | null = [];
   const timeSeriesMapping: TimeChartSeriesMapping = [];
 
   // Populate series data based on query results
@@ -143,6 +143,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
+      timeChartData = null;
       return {
         graphData: EMPTY_GRAPH_DATA,
       };
@@ -235,7 +236,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
     graphData.xAxis = xAxisData;
 
-    // TODO (eunicorn): separate util for getThresholdSeries and adjust to work for TimeChart / dataset
+    // TODO: separate util for getThresholdSeries and adjust to work for TimeChart / dataset
     // if (thresholds && thresholds.steps) {}
 
     return {
@@ -309,6 +310,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (result.error) throw result.error;
     }
   }
+
+  // if (!showLegacyChart && timeChartData == null) {
+  //   return null;
+  // }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
@@ -390,11 +395,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   onDataZoom={handleDataZoom}
                   //  Show an empty chart when there is no data because the user unselected all items in
                   // the legend. Otherwise, show a "no data" message.
-                  noDataVariant={
-                    !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
-                      ? 'chart'
-                      : 'message'
-                  }
+                  // TODO: fix noDataVariant to work with new TimeChart types
+                  // noDataVariant={
+                  //   !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
+                  //     ? 'chart'
+                  //     : 'message'
+                  // }
                 />
               )}
             </Box>

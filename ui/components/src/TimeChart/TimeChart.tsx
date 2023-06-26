@@ -158,7 +158,8 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data === undefined) return {};
+    // TODO: fix loading state and noData variants
+    // if (data === undefined) return {};
 
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
