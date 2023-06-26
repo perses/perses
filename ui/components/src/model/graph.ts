@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import type { EChartsOption } from 'echarts';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
@@ -33,10 +32,9 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-// TODO: Continue to simplify TimeChart types
+// TODO: Continue to simplify TimeChart types, fix legend and thresholds
 export type TimeChartData = DatasetOption[];
-// export type TimeChartSeriesStyles = Array<EChartsOption['series']>;
-export type TimeChartSeriesStyles = LineSeriesOption[];
+export type TimeChartSeriesMapping = LineSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 
 // TODO: Rename to LegacyEChartsDataFormat

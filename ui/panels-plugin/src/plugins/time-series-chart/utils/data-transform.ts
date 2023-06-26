@@ -11,14 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption, YAXisComponentOption, LineSeriesOption } from 'echarts';
+import type { YAXisComponentOption } from 'echarts';
+import { LineSeriesOption } from 'echarts/charts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import {
-  OPTIMIZED_MODE_SERIES_LIMIT,
-  LegacyTimeSeries,
-  EChartsDataFormat,
-  TimeChartSeriesStyles,
-} from '@perses-dev/components';
+import { OPTIMIZED_MODE_SERIES_LIMIT, LegacyTimeSeries, EChartsDataFormat } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -68,7 +64,7 @@ export function getLineSeries(
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
-  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  let showPoints = data !== undefined && data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'Always') {
     showPoints = true;
@@ -121,7 +117,7 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
-): TimeChartSeriesStyles {
+): LineSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
@@ -131,7 +127,7 @@ export function getTimeSeries(
     showPoints = true;
   }
 
-  return {
+  const series: LineSeriesOption = {
     type: 'line',
     id: id,
     datasetId: seriesIndex,
@@ -167,6 +163,7 @@ export function getTimeSeries(
       },
     },
   };
+  return series;
 }
 
 /**

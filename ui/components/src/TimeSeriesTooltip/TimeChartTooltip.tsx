@@ -16,7 +16,7 @@ import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { UnitOptions } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
-import { TimeChartData, TimeChartSeriesStyles } from '../model';
+import { TimeChartData, TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
 import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
@@ -26,7 +26,7 @@ import { TooltipContent } from './TooltipContent';
 export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   data: TimeChartData;
-  seriesMapping: TimeChartSeriesStyles;
+  seriesMapping: TimeChartSeriesMapping;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;

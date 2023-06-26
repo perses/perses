@@ -47,6 +47,7 @@ import {
   useId,
   TimeChart,
   TimeChartData,
+  TimeChartSeriesMapping,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -128,9 +129,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   // https://apache.github.io/echarts-handbook/en/concepts/dataset/
   const timeChartData: TimeChartData = [];
+  const timeSeriesMapping: TimeChartSeriesMapping = [];
 
   // Populate series data based on query results
-  const { graphData } = useDeepMemo(() => {
+  const { graphData, timeScale } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
     if (isLoading || isFetching) {
@@ -204,9 +206,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const yValues = getYValues(timeSeries, timeScale);
 
-        const lineSeries = showLegacyChart
-          ? getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor)
-          : getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor);
+        // const lineSeries = showLegacyChart
+        //   ? getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor)
+        //   : getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor);
+        const lineSeries = getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor);
 
         const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
 
@@ -218,6 +221,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         if (showTimeSeries) {
           graphData.timeSeries.push(lineSeries);
+          timeSeriesMapping.push(getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor));
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
@@ -236,6 +240,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     return {
       graphData,
+      timeScale,
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
@@ -375,8 +380,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   ref={lineChartRef}
                   height={height}
                   data={timeChartData}
-                  seriesMapping={graphData.timeSeries}
-                  timeScale={graphData.timeScale}
+                  seriesMapping={timeSeriesMapping}
+                  timeScale={timeScale}
                   yAxis={echartsYAxis}
                   unit={unit}
                   grid={gridOverrides}

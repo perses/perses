@@ -36,7 +36,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesStyles } from '../model/graph';
+import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { clearHighlightedSeries, enableDataZoom, getYAxes, restoreChart, ZoomEventData } from '../utils';
 import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
@@ -58,8 +58,8 @@ use([
 export interface TimeChartProps {
   height: number;
   data: TimeChartData;
-  seriesMapping: TimeChartSeriesStyles;
-  timeScale: TimeScale;
+  seriesMapping: TimeChartSeriesMapping;
+  timeScale?: TimeScale;
   yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
@@ -76,7 +76,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     height,
     data,
     seriesMapping,
-    timeScale,
+    timeScale = { startMs: 1687753935000, endMs: 1687753950000 }, // TODO: define reasonable default timeScale / improve loading state
     yAxis,
     unit,
     grid,

@@ -14,7 +14,7 @@
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartData, TimeChartSeriesStyles } from '../model';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartData, TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -42,7 +42,7 @@ export type NearbySeriesArray = NearbySeriesInfo[];
  */
 export function checkforNearbyTimeSeries(
   data: TimeChartData,
-  seriesMapping: TimeChartSeriesStyles,
+  seriesMapping: TimeChartSeriesMapping,
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
@@ -259,7 +259,7 @@ export function getNearbySeriesData({
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
   data: TimeChartData;
-  seriesMapping: TimeChartSeriesStyles;
+  seriesMapping: TimeChartSeriesMapping;
   chart?: EChartsInstance;
   unit?: UnitOptions;
   showAllSeries?: boolean;
