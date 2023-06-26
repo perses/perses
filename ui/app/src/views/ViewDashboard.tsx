@@ -11,12 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
+import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
+import {
+  DashboardResource,
+  dashboardDisplayName,
+  dashboardExtendedDisplayName,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@perses-dev/core';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
@@ -90,8 +96,8 @@ function ViewDashboard() {
           display: {
             name: dashboardName,
           },
-          duration: '5m',
-          refreshInterval: '0s',
+          duration: DEFAULT_DASHBOARD_DURATION,
+          refreshInterval: DEFAULT_REFRESH_INTERVAL,
           variables: [],
           layouts: [],
           panels: {},

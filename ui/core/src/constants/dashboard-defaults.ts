@@ -11,5 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './dashboard-defaults';
-export * from './dialog';
+import { DurationString } from '../model';
+
+export const DEFAULT_DASHBOARD_DURATION: DurationString = '1h';
+
+export const DEFAULT_REFRESH_INTERVAL: DurationString = '0s';

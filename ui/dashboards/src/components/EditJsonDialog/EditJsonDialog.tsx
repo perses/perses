@@ -39,7 +39,7 @@ const EditJsonDialogForm = () => {
     e.preventDefault();
     setDashboard(draftDashboard);
     setTimeRange({ pastDuration: draftDashboard.spec.duration });
-    setRefreshInterval(draftDashboard.spec.refreshInterval);
+    setRefreshInterval(draftDashboard.spec.refreshInterval ?? '0s');
     closeEditJsonDialog();
   };
 
