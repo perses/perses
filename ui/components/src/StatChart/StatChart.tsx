@@ -22,7 +22,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
-import { FontSizeOptions } from '../FontSizeSelector';
+import { FontSizeOption } from '../FontSizeSelector';
 import { useOptimalFontSize } from './calculateFontSize';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -45,7 +45,7 @@ export interface StatChartProps {
   color?: string;
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
-  fontSize?: FontSizeOptions;
+  fontSize?: FontSizeOption;
 }
 
 export function StatChart(props: StatChartProps) {

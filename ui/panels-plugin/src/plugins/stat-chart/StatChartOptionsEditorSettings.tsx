@@ -25,7 +25,7 @@ import {
   ThresholdsEditor,
   FontSizeSelector,
   FontSizeSelectorProps,
-  FontSizeOptions,
+  FontSizeOption,
 } from '@perses-dev/components';
 import { DEFAULT_CALCULATION } from '@perses-dev/core';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
@@ -68,7 +68,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
-  const handleFontSizeChange: FontSizeSelectorProps['onChange'] = (fontSize: FontSizeOptions) => {
+  const handleFontSizeChange: FontSizeSelectorProps['onChange'] = (fontSize: FontSizeOption) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
         draft.fontSize = fontSize;

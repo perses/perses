@@ -34,15 +34,15 @@ const FONT_SIZE_OPTIONS = [
   '160',
   '192',
 ] as const;
-export type FontSizeOptions = (typeof FONT_SIZE_OPTIONS)[number];
+export type FontSizeOption = (typeof FONT_SIZE_OPTIONS)[number];
 
 export interface FontSizeSelectorProps {
-  value: FontSizeOptions;
-  onChange: (fontSize: FontSizeOptions) => void;
+  value: FontSizeOption;
+  onChange: (fontSize: FontSizeOption) => void;
 }
 
 export function FontSizeSelector({ value, onChange }: FontSizeSelectorProps) {
-  const handleFontSizeChange = (_: unknown, newValue: { id: FontSizeOptions; label: FontSizeOptions }) => {
+  const handleFontSizeChange = (_: unknown, newValue: { id: FontSizeOption; label: FontSizeOption }) => {
     onChange(newValue.id);
   };
 

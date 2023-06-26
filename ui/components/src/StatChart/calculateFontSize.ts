@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { FontSizeOptions } from '../FontSizeSelector';
+import { FontSizeOption } from '../FontSizeSelector';
 
 interface CalculateFontSize {
   text: string;
@@ -21,7 +21,7 @@ interface CalculateFontSize {
   height: number;
   lineHeight: number;
   maxSize?: number;
-  fontSizeOverride?: FontSizeOptions;
+  fontSizeOverride?: FontSizeOption;
 }
 
 let canvasContext: CanvasRenderingContext2D | null;
