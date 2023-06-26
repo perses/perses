@@ -20,7 +20,7 @@ import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboardDuration } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
-export const TIME_OPTIONS: TimeOption[] = [
+export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
   { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
   { value: { pastDuration: '30m' }, display: 'Last 30 minutes' },
@@ -32,7 +32,7 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
-export const REFRESH_TIME_OPTIONS: TimeOption[] = [
+export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
   { value: { pastDuration: '5s' }, display: '5s' },
   { value: { pastDuration: '10s' }, display: '10s' },
@@ -46,12 +46,19 @@ const DEFAULT_HEIGHT = '34px';
 interface TimeRangeControlsProps {
   // The controls look best at heights >= 28 pixels
   heightPx?: number;
-
-  // Whether to show the refresh button or not
-  showRefresh?: boolean;
+  showTimeRangeSelector?: boolean;
+  showRefreshButton?: boolean;
+  showRefreshInterval?: boolean;
+  timePresets?: TimeOption[];
 }
 
-export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeControlsProps) {
+export function TimeRangeControls({
+  heightPx,
+  showTimeRangeSelector = true,
+  showRefreshButton = true,
+  showRefreshInterval = true,
+  timePresets = DEFAULT_TIME_RANGE_OPTIONS,
+}: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
   // TODO: Remove this since it couples to the dashboard context
   const dashboardDuration = useDashboardDuration();
@@ -60,9 +67,9 @@ export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeCon
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
-  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === dashboardDuration)) {
+  if (!timePresets.some((option) => option.value.pastDuration === dashboardDuration)) {
     if (isDurationString(dashboardDuration)) {
-      TIME_OPTIONS.push({
+      timePresets.push({
         value: { pastDuration: dashboardDuration },
         display: `Last ${dashboardDuration}`,
       });
@@ -71,20 +78,23 @@ export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeCon
 
   return (
     <Stack direction="row" spacing={1}>
-      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      {showRefresh && (
-        <>
-          <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
-            <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
-              <RefreshIcon />
-            </ToolbarIconButton>
-          </InfoTooltip>
-          <RefreshIntervalPicker
-            timeOptions={REFRESH_TIME_OPTIONS}
-            value={refreshInterval}
-            onChange={setRefreshInterval}
-          />
-        </>
+      {showTimeRangeSelector && (
+        <DateTimeRangePicker timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
+      )}
+      {showRefreshButton && (
+        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
+            <RefreshIcon />
+          </ToolbarIconButton>
+        </InfoTooltip>
+      )}
+      {showRefreshInterval && (
+        <RefreshIntervalPicker
+          timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
+          value={refreshInterval}
+          onChange={setRefreshInterval}
+          height={height}
+        />
       )}
     </Stack>
   );

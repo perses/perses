@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { formatValue, UnitOptions } from '@perses-dev/core';
 import merge from 'lodash/merge';
 import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions } from '../model';
 import { dateFormatOptionsWithTimeZone } from '../utils';
 
 export interface ZoomEventData {

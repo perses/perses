@@ -36,6 +36,8 @@ type RenderTableOpts = Partial<
     | 'columns'
     | 'rowSelectionVariant'
     | 'onSortingChange'
+    | 'onRowMouseOver'
+    | 'onRowMouseOut'
     | 'sorting'
   >
 >;
@@ -90,6 +92,8 @@ const renderTable = ({
   rowSelectionVariant,
   sorting,
   onSortingChange = jest.fn(),
+  onRowMouseOver = jest.fn(),
+  onRowMouseOut = jest.fn(),
 }: RenderTableOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -101,6 +105,8 @@ const renderTable = ({
         checkboxSelection={checkboxSelection}
         rowSelection={rowSelection}
         onRowSelectionChange={onRowSelectionChange}
+        onRowMouseOver={onRowMouseOver}
+        onRowMouseOut={onRowMouseOut}
         rowSelectionVariant={rowSelectionVariant}
         sorting={sorting}
         onSortingChange={onSortingChange}
@@ -1064,6 +1070,58 @@ describe('Table', () => {
           },
         ]);
       });
+    });
+  });
+
+  describe('on mouse over row', () => {
+    test('calls `onRowMouseOver` with event and row information', () => {
+      const mockOnRowMouseOver = jest.fn();
+      renderTable({ onRowMouseOver: mockOnRowMouseOver });
+      screen.getByRole('table');
+
+      const tableRows = screen.getAllByRole('row');
+
+      const row1 = tableRows[HEADER_ROWS + 1];
+      if (!row1) {
+        throw new Error('Cound not find row.');
+      }
+
+      userEvent.hover(row1);
+      expect(mockOnRowMouseOver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: row1,
+        }),
+        {
+          id: '1',
+          index: 1,
+        }
+      );
+    });
+  });
+
+  describe('on mouse out row', () => {
+    test('calls `onRowMouseOut` with event and row information', () => {
+      const mockOnRowMouseOut = jest.fn();
+      renderTable({ onRowMouseOut: mockOnRowMouseOut });
+      screen.getByRole('table');
+
+      const tableRows = screen.getAllByRole('row');
+
+      const row2 = tableRows[HEADER_ROWS + 2];
+      if (!row2) {
+        throw new Error('Cound not find row.');
+      }
+
+      userEvent.unhover(row2);
+      expect(mockOnRowMouseOut).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: row2,
+        }),
+        {
+          id: '2',
+          index: 2,
+        }
+      );
     });
   });
 

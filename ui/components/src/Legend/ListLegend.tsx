@@ -21,6 +21,8 @@ export interface ListLegendProps {
   width: number;
   selectedItems: SelectedLegendItemState;
   onLegendItemClick: ListLegendItemProps['onClick'];
+  onItemMouseOver: ListLegendItemProps['onMouseOver'];
+  onItemMouseOut: ListLegendItemProps['onMouseOut'];
 }
 
 /**
@@ -29,7 +31,15 @@ export interface ListLegendProps {
  * large number of items because it is virtualized and easier to visually scan
  * large numbers of items when there is a single item per row.
  */
-export function ListLegend({ items, height, width, selectedItems, onLegendItemClick }: ListLegendProps) {
+export function ListLegend({
+  items,
+  height,
+  width,
+  selectedItems,
+  onLegendItemClick,
+  onItemMouseOver,
+  onItemMouseOut,
+}: ListLegendProps) {
   // show full labels on hover when there are many total series
   const truncateLabels = items.length > 5;
 
@@ -42,9 +52,12 @@ export function ListLegend({ items, height, width, selectedItems, onLegendItemCl
           <ListLegendItem
             key={item.id}
             item={item}
+            index={index}
             truncateLabel={truncateLabels}
             isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
             onClick={onLegendItemClick}
+            onMouseOver={onItemMouseOver}
+            onMouseOut={onItemMouseOut}
             sx={{
               width: '100%',
               wordBreak: 'break-word',

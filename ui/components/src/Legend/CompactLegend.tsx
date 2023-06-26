@@ -20,6 +20,8 @@ export interface CompactLegendProps {
   items: LegendItem[];
   selectedItems: SelectedLegendItemState;
   onLegendItemClick: ListLegendItemProps['onClick'];
+  onItemMouseOver: ListLegendItemProps['onMouseOver'];
+  onItemMouseOut: ListLegendItemProps['onMouseOut'];
 }
 
 /**
@@ -28,14 +30,24 @@ export interface CompactLegendProps {
  * number of items. The `ListLegend` is used for cases with large numbers of items
  * because it is virtualized.
  */
-export function CompactLegend({ height, items, selectedItems, onLegendItemClick }: CompactLegendProps) {
+export function CompactLegend({
+  height,
+  items,
+  selectedItems,
+  onLegendItemClick,
+  onItemMouseOver,
+  onItemMouseOut,
+}: CompactLegendProps) {
   return (
     <Box component="ul" sx={{ width: '100%', height, padding: [0, 1, 0, 0], overflowY: 'scroll', margin: 0 }}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <ListLegendItem
           key={item.id}
           item={item}
+          index={index}
           isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
+          onMouseOver={onItemMouseOver}
+          onMouseOut={onItemMouseOut}
           onClick={onLegendItemClick}
           sx={{
             width: 'auto',

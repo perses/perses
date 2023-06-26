@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { formatValue, UnitOptions } from '@perses-dev/core';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip

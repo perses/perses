@@ -3224,7 +3224,7 @@
             ]
           }
         },
-        "bottomlist-1": {
+        "rightlist": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -3253,7 +3253,7 @@
             ]
           }
         },
-        "bottomlist-2": {
+        "bottomtable": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -3268,10 +3268,9 @@
                   "values": [
                     "Mean",
                     "FirstNumber",
-                    "Min",
                     "LastNumber",
-                    "Max",
-                    "Sum"
+                    "Min",
+                    "Max"
                   ]
                 }
               }
@@ -3291,7 +3290,7 @@
             ]
           }
         },
-        "bottomlist-3": {
+        "righttable": {
           "kind": "Panel",
           "spec": {
             "display": {
@@ -3303,6 +3302,7 @@
                 "legend": {
                   "mode": "Table",
                   "position": "Right",
+                  "size": "Small",
                   "values": [
                     "Mean",
                     "LastNumber"
@@ -3340,37 +3340,37 @@
               {
                 "x": 0,
                 "y": 9,
-                "width": 12,
+                "width": 11,
                 "height": 8,
                 "content": {
                   "$ref": "#/spec/panels/bottomlist"
                 }
               },
               {
-                "x": 12,
+                "x": 11,
                 "y": 9,
-                "width": 12,
+                "width": 13,
                 "height": 8,
                 "content": {
-                  "$ref": "#/spec/panels/bottomlist-1"
+                  "$ref": "#/spec/panels/rightlist"
                 }
               },
               {
-                "x": 12,
+                "x": 11,
                 "y": 0,
-                "width": 12,
+                "width": 13,
                 "height": 9,
                 "content": {
-                  "$ref": "#/spec/panels/bottomlist-3"
+                  "$ref": "#/spec/panels/righttable"
                 }
               },
               {
                 "x": 0,
                 "y": 0,
-                "width": 12,
+                "width": 11,
                 "height": 9,
                 "content": {
-                  "$ref": "#/spec/panels/bottomlist-2"
+                  "$ref": "#/spec/panels/bottomtable"
                 }
               }
             ]
