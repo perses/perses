@@ -15,7 +15,6 @@ import { createContext, useContext, useMemo } from 'react';
 import { VariableName, VariableValue } from '@perses-dev/core';
 import { VariableOption } from '../model';
 import { parseTemplateVariables, replaceTemplateVariables } from '../utils';
-export const DEFAULT_ALL_VALUE = '$__all' as const;
 
 export type VariableState = {
   value: VariableValue;
