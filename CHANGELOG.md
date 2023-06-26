@@ -13,6 +13,8 @@
 - [BUGFIX] Highlighted series not always cleared when cursor moved quickly (#1259)
 - [BUGFIX] Ensure pinned tooltip shows behind modals / sticky header (#1258)
 - [BREAKINGCHANGE] Adjust props on TimeRangeControls to control each action (#1250)
+- [BREAKINGCHANGE] Move units types and utils to core to avoid unnecessary MUI coupling (#1265)
+- [BREAKINGCHANGE] Move DEFAULT_ALL_VALUE to core since plugin-system requires MUI (#1266)
 
 ## 0.35.0 / 2023-06-14
 
