@@ -17,16 +17,11 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { UnitOptions } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDatasetFormat } from '../model';
-import {
-  assembleTransform,
-  CursorCoordinates,
-  FALLBACK_CHART_WIDTH,
-  getNearbySeriesData,
-  getTooltipStyles,
-  TooltipContent,
-  TooltipHeader,
-  useMousePosition,
-} from './';
+import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
+import { assembleTransform, getTooltipStyles } from './utils';
+import { getNearbySeriesData } from './nearby-series';
+import { TooltipHeader } from './TooltipHeader';
+import { TooltipContent } from './TooltipContent';
 
 export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;

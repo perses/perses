@@ -42,6 +42,11 @@ export type EChartsDatasetFormat = {
   xAxisMax?: number | string;
   rangeMs?: number;
 };
+// export type TimeChartData = DatasetOption[];
+// export type EChartsDatasetFormat = {
+//   dataset: TimeChartData;
+//   legendItems?: LegendItem[];
+// };
 
 // TODO: Rename to LegacyEChartsDataFormat
 export type EChartsDataFormat = {

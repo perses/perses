@@ -288,7 +288,7 @@ export function getNearbySeriesData({
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
   const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
-  const totalSeries = chartData.timeSeries.length;
+  const totalSeries = chartData.dataset.length;
   const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {

@@ -117,10 +117,9 @@ export function getLineSeries(
  */
 export function getTimeSeries(
   id: string,
-  formattedName: string,
-  data: EChartsTimeSeries['data'],
-  visual: TimeSeriesChartVisualOptions,
   seriesIndex: number,
+  formattedName: string,
+  visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
 ): EChartsOption['series'] {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
