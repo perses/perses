@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useRef, useState } from 'react';
-import { Box, Skeleton, Typography, useTheme } from '@mui/material';
+import { Box, Skeleton, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {

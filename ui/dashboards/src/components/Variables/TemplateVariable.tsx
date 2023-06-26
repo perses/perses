@@ -13,8 +13,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
-import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
-import { DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
+import { DEFAULT_ALL_VALUE, ListVariableDefinition, VariableName, VariableValue } from '@perses-dev/core';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
 import { useListVariablePluginValues } from './variable-model';
 type TemplateVariableProps = {
