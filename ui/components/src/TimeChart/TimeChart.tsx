@@ -25,6 +25,7 @@ import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
 import {
   GridComponent,
+  DatasetComponent,
   DataZoomComponent,
   MarkAreaComponent,
   MarkLineComponent,
@@ -44,6 +45,7 @@ import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSerie
 use([
   EChartsLineChart,
   GridComponent,
+  DatasetComponent,
   DataZoomComponent,
   MarkAreaComponent,
   MarkLineComponent,

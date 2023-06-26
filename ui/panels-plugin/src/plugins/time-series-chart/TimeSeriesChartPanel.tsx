@@ -127,12 +127,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
-  // https://apache.github.io/echarts-handbook/en/concepts/dataset/
-  let timeChartData: TimeChartData | null = [];
-  const timeSeriesMapping: TimeChartSeriesMapping = [];
-
   // Populate series data based on query results
-  const { graphData, timeScale } = useDeepMemo(() => {
+  const { graphData, timeScale, timeChartData, timeSeriesMapping } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
     if (isLoading || isFetching) {
@@ -143,7 +139,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
-      timeChartData = null;
       return {
         graphData: EMPTY_GRAPH_DATA,
       };
@@ -156,6 +151,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       rangeMs: timeScale.endMs - timeScale.startMs,
     };
     const xAxisData = [...getXValues(timeScale)];
+
+    // Utilizes ECharts dataset so raw data is separate from series option style properties
+    // https://apache.github.io/echarts-handbook/en/concepts/dataset/
+    const timeChartData: TimeChartData | null = [];
+    const timeSeriesMapping: TimeChartSeriesMapping = [];
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
@@ -200,9 +200,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           totalSeries,
         });
 
-        // Used for repeating colors in Categorical palette
-        seriesIndex++;
-
         // We add a unique id for the chart to disambiguate items across charts
         // when there are multiple on the page.
         const seriesId = chartId + timeSeries.name + seriesIndex;
@@ -232,6 +229,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             data: legendCalculations,
           });
         }
+
+        // Used for repeating colors in Categorical palette
+        seriesIndex++;
       }
     }
     graphData.xAxis = xAxisData;
@@ -242,6 +242,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
       timeScale,
+      timeChartData,
+      timeSeriesMapping,
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
