@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { MouseEvent, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
+import { UnitOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -37,7 +38,6 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat } from '../model/graph';
-import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';

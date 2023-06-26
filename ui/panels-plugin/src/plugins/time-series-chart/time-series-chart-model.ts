@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions } from '@perses-dev/components';
+import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
