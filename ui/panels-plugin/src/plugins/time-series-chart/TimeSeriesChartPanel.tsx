@@ -36,7 +36,7 @@ import {
 import {
   EChartsDataFormat,
   LineChart,
-  LineChartHandle,
+  ChartHandle,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
@@ -78,7 +78,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const muiTheme = useTheme();
   const chartId = useId('time-series-panel');
 
-  const lineChartRef = useRef<LineChartHandle>(null);
+  const lineChartRef = useRef<ChartHandle>(null);
 
   // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
@@ -218,29 +218,30 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
     graphData.xAxis = xAxisData;
 
-    if (thresholds && thresholds.steps) {
-      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
-      // These are styled with predefined colors and a dashed style to look different than series from query results.
-      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
-      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
-      thresholds.steps.forEach((step: StepOptions, index: number) => {
-        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
-        const thresholdLineColor = step.color ?? stepPaletteColor;
-        const stepOption: StepOptions = {
-          color: thresholdLineColor,
-          value:
-            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-            thresholds.mode === 'Percent'
-              ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
-              : step.value,
-        };
-        const thresholdName = step.name ?? `Threshold ${index + 1} `;
-        // TODO: switch back to markLine once alternate tooltip created
-        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
-        const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
-        graphData.timeSeries.push(thresholdLineSeries);
-      });
-    }
+    // TODO: separate util for getThresholdSeries and adjust to work for TimeChart / dataset
+    // if (thresholds && thresholds.steps) {
+    //   // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+    //   // These are styled with predefined colors and a dashed style to look different than series from query results.
+    //   // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
+    //   const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
+    //   thresholds.steps.forEach((step: StepOptions, index: number) => {
+    //     const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
+    //     const thresholdLineColor = step.color ?? stepPaletteColor;
+    //     const stepOption: StepOptions = {
+    //       color: thresholdLineColor,
+    //       value:
+    //         // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+    //         thresholds.mode === 'Percent'
+    //           ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
+    //           : step.value,
+    //     };
+    //     const thresholdName = step.name ?? `Threshold ${index + 1} `;
+    //     // TODO: switch back to markLine once alternate tooltip created
+    //     const thresholdData = Array(xAxisData.length).fill(stepOption.value);
+    //     const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
+    //     graphData.timeSeries.push(thresholdLineSeries);
+    //   });
+    // }
 
     return {
       graphData,

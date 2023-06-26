@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { LineSeriesOption } from 'echarts/charts';
+import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
+import { EChartsDataFormat, EChartsDatasetFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -36,10 +37,104 @@ export interface NearbySeriesInfo {
 export type NearbySeriesArray = NearbySeriesInfo[];
 
 /**
- * Returns formatted series data for the points that are close to the user's cursor
+ * Returns formatted series data for the points that are close to the user's cursor.
+ * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
+ */
+export function checkforNearbyTimeSeries(
+  data: EChartsDatasetFormat,
+  pointInGrid: number[],
+  yBuffer: number,
+  chart?: EChartsInstance,
+  unit?: UnitOptions
+): NearbySeriesArray {
+  const currentNearbySeriesData: NearbySeriesArray = [];
+  const cursorX: number | null = pointInGrid[0] ?? null;
+  const cursorY: number | null = pointInGrid[1] ?? null;
+
+  if (cursorX === null || cursorY === null) return currentNearbySeriesData;
+  if (!Array.isArray(data.xAxis) || !Array.isArray(data.dataset)) return currentNearbySeriesData;
+
+  // TODO: better way to calc xBuffer for longer time ranges
+  const xBuffer = cursorX * 0.0005;
+  const nearbySeriesIndexes: number[] = [];
+  const emphasizedSeriesIndexes: number[] = [];
+  const nonEmphasizedSeriesIndexes: number[] = [];
+  const totalSeries = data.dataset.length;
+  for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
+    const currentSeries = data.timeSeries[seriesIdx];
+    if (currentSeries === undefined) break;
+    const lineSeries = currentSeries as LineSeriesOption;
+    const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
+    const markerColor = lineSeries.color ?? '#000';
+    if (Array.isArray(data.dataset)) {
+      for (let datumIdx = 0; datumIdx < data.dataset.length; datumIdx++) {
+        const currentDataset = data.dataset.length > 0 ? data.dataset[seriesIdx] : undefined;
+        if (currentDataset !== undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const currentDatasetSource: any = currentDataset.source ?? undefined;
+          // skip first row in dataset source since it is for column names, ex: ['timestamp', 'value']
+          if (currentDatasetSource !== undefined && datumIdx > 0) {
+            // TODO: fix types
+            const nearbyTimeSeries = currentDatasetSource[datumIdx] as unknown as TimeSeriesValueTuple;
+            if (nearbyTimeSeries === undefined) break;
+            const xValue = nearbyTimeSeries[0];
+            const yValue = nearbyTimeSeries[1];
+            // TODO: ensure null values not displayed in tooltip
+            if (yValue !== undefined && yValue !== null) {
+              if (cursorX < xValue + xBuffer && cursorX > xValue - xBuffer) {
+                if (cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
+                  // show fewer bold series in tooltip when many total series
+                  const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
+                  const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
+                  const isClosestToCursor = isWithinPercentageRange({
+                    valueToCheck: cursorY,
+                    baseValue: yValue,
+                    percentage: percentRangeToCheck,
+                  });
+                  if (isClosestToCursor) {
+                    emphasizedSeriesIndexes.push(seriesIdx);
+                  } else {
+                    nonEmphasizedSeriesIndexes.push(seriesIdx);
+                    // ensure series not close to cursor are not highlighted
+                    if (chart?.dispatchAction !== undefined) {
+                      chart.dispatchAction({
+                        type: 'downplay',
+                        seriesIndex: seriesIdx,
+                      });
+                    }
+                  }
+
+                  // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+                  const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+                  const formattedY = formatValue(yValue, unit);
+                  currentNearbySeriesData.push({
+                    seriesIdx: seriesIdx,
+                    datumIdx: datumIdx,
+                    seriesName: currentSeriesName,
+                    date: xValueMilliSeconds,
+                    x: xValue,
+                    y: yValue,
+                    formattedY: formattedY,
+                    markerColor: markerColor.toString(),
+                    isClosestToCursor,
+                  });
+                  nearbySeriesIndexes.push(seriesIdx);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return currentNearbySeriesData;
+}
+
+/**
+ * [DEPRECATED] Returns formatted series data for the points that are close to the user's cursor
  * Adjust yBuffer to increase or decrease number of series shown
  */
-export function checkforNearbySeries(
+export function legacyCheckforNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
@@ -160,6 +255,66 @@ export function getNearbySeriesData({
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
+  chartData: EChartsDatasetFormat;
+  chart?: EChartsInstance;
+  unit?: UnitOptions;
+  showAllSeries?: boolean;
+}) {
+  if (chart === undefined || mousePos === null) return [];
+
+  // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
+  let cursorTargetMatchesChart = false;
+  if (mousePos.target !== null) {
+    const currentParent = (<HTMLElement>mousePos.target).parentElement;
+    if (currentParent !== null) {
+      const currentGrandparent = currentParent.parentElement;
+      if (currentGrandparent !== null) {
+        const chartDom = chart.getDom();
+        if (chartDom === currentGrandparent) {
+          cursorTargetMatchesChart = true;
+        }
+      }
+    }
+  }
+
+  // allows moving cursor inside tooltip without it fading away
+  if (pinnedPos !== null) {
+    mousePos = pinnedPos;
+    cursorTargetMatchesChart = true;
+  }
+
+  if (cursorTargetMatchesChart === false) return [];
+
+  if (chart['_model'] === undefined) return [];
+  const chartModel = chart['_model'];
+  const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
+  const totalSeries = chartData.timeSeries.length;
+  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
+  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
+  if (chart.containPixel('grid', pointInPixel)) {
+    const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
+    if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
+      return checkforNearbyTimeSeries(chartData, pointInGrid, yBuffer, chart, unit);
+    }
+  }
+
+  return [];
+}
+
+/**
+ * [DEPRECATED] Uses mouse position to determine whether user is hovering over a chart canvas
+ * If yes, convert from pixel values to logical cartesian coordinates and return all nearby series
+ */
+export function legacyGetNearbySeriesData({
+  mousePos,
+  pinnedPos,
+  chartData,
+  chart,
+  unit,
+  showAllSeries = false,
+}: {
+  mousePos: CursorData['coords'];
+  pinnedPos: CursorCoordinates | null;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
   unit?: UnitOptions;
@@ -199,7 +354,7 @@ export function getNearbySeriesData({
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
     }
   }
 

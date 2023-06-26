@@ -13,7 +13,7 @@
 
 import merge from 'lodash/merge';
 import type { YAXisComponentOption } from 'echarts';
-import { UnitOptions } from '@perses-dev/core';
+import { formatValue, UnitOptions } from '@perses-dev/core';
 
 /*
  * Populate yAxis properties, returns an Array since multiple y axes will be supported in the future

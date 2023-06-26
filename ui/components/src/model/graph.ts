@@ -33,6 +33,7 @@ export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
+// TODO: Simplify TimeChart types
 export type EChartsDatasetFormat = {
   timeSeries: Array<EChartsOption['series']>;
   dataset?: EChartsOption['dataset'];
@@ -42,10 +43,30 @@ export type EChartsDatasetFormat = {
   rangeMs?: number;
 };
 
+// TODO: Rename to LegacyEChartsDataFormat
 export type EChartsDataFormat = {
   timeSeries: EChartsTimeSeries[];
   xAxis: number[];
   legendItems?: LegendItem[];
   xAxisMax?: number | string;
   rangeMs?: number;
+};
+
+// Intentionally making this an object to start because it is plausible we will
+// want to support focusing by other attributes (e.g. index, name) in the future,
+// and starting with an object will make adding them a non-breaking change.
+export type ChartHandleFocusOpts = {
+  id: string;
+};
+
+export type ChartHandle = {
+  /**
+   * Highlight the series associated with the specified options.
+   */
+  highlightSeries: (opts: ChartHandleFocusOpts) => void;
+
+  /**
+   * Clear all highlighted series.
+   */
+  clearHighlightedSeries: () => void;
 };

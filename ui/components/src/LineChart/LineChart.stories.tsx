@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart, LineChartHandle } from '@perses-dev/components';
+import { LineChart, ChartHandle } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
@@ -83,7 +83,7 @@ export const RefApi: Story = {
   },
   render: (args) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const lineChartRef = useRef<LineChartHandle>(null);
+    const lineChartRef = useRef<ChartHandle>(null);
 
     const handleOnClickHighlightSeries = () => {
       const highlightSeriesId = args.data.timeSeries[0]?.id;

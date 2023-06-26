@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TimeSeriesTooltip';
+export * from './LineChartTooltip';
 export * from './SeriesInfo';
 export * from './SeriesLabelsStack';
 export * from './SeriesMarker';
+export * from './TimeChartTooltip';
 export * from './TooltipContent';
 export * from './TooltipHeader';
 export * from './nearby-series';

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
+import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { UnitOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
@@ -37,11 +37,10 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat } from '../model/graph';
+import { EChartsDataFormat, ChartHandleFocusOpts, ChartHandle } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
+import { CursorCoordinates, LineChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
 import {
   clearHighlightedSeries,
   enableDataZoom,
@@ -66,15 +65,7 @@ use([
   CanvasRenderer,
 ]);
 
-export type TooltipConfig = {
-  wrapLabels: boolean;
-  hidden?: boolean;
-};
-
 export interface LineChartProps {
-  /**
-   * Height of the chart
-   */
   height: number;
   data: EChartsDataFormat;
   yAxis?: YAXisComponentOption;
@@ -89,26 +80,7 @@ export interface LineChartProps {
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-// Intentionally making this an object to start because it is plausible we will
-// want to support focusing by other attributes (e.g. index, name) in the future,
-// and starting with an object will make adding them a non-breaking change.
-type LineChartHandleFocusOpts = {
-  id: string;
-};
-
-export type LineChartHandle = {
-  /**
-   * Highlight the series associated with the specified options.
-   */
-  highlightSeries: (opts: LineChartHandleFocusOpts) => void;
-
-  /**
-   * Clear all highlighted series.
-   */
-  clearHighlightedSeries: () => void;
-};
-
-export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function LineChart(
+export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineChart(
   {
     height,
     data,
@@ -138,7 +110,7 @@ export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function Li
     ref,
     () => {
       return {
-        highlightSeries({ id }: LineChartHandleFocusOpts) {
+        highlightSeries({ id }: ChartHandleFocusOpts) {
           if (!chartRef.current) {
             // No chart. Do nothing.
             return;
@@ -330,7 +302,7 @@ export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function Li
       {showTooltip === true &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
-          <TimeSeriesTooltip
+          <LineChartTooltip
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
