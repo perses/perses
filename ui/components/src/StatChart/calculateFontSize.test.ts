@@ -80,4 +80,18 @@ describe('useOptimalFontSize', () => {
 
     expect(result).toBe(20);
   });
+
+  it('should return the font size override when provided', () => {
+    const result = useOptimalFontSize({
+      text: 'Sample Text',
+      fontWeight: 400,
+      width: 200,
+      height: 100,
+      maxSize: 20,
+      lineHeight: 1.2,
+      fontSizeOverride: '72',
+    });
+
+    expect(result).toBe(72);
+  });
 });
