@@ -3473,7 +3473,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "node_load15{instance=\"$instance\",job=\"$job\"}"
+                      "query": "node_scrape_collector_duration_seconds{instance=\"$instance\",job=\"$job\",collector!=\"systemd\"}"
                     }
                   }
                 }
@@ -3493,7 +3493,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "node_load15{instance=\"$instance\",job=\"$job\"}"
+                      "query": "node_scrape_collector_duration_seconds{instance=\"$instance\",job=\"$job\",collector!=\"systemd\"}"
                     }
                   }
                 }

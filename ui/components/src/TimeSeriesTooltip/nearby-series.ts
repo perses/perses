@@ -54,11 +54,12 @@ export function checkforNearbyTimeSeries(
   const cursorY: number | null = pointInGrid[1] ?? null;
 
   if (cursorX === null || cursorY === null) return currentNearbySeriesData;
-  // if (!Array.isArray(data.xAxis) || !Array.isArray(data.dataset)) return currentNearbySeriesData;
+
   if (!Array.isArray(data)) return currentNearbySeriesData;
 
   // TODO: better way to calc xBuffer for longer time ranges
-  const xBuffer = cursorX * 0.0005;
+  const xBuffer = cursorX * 0.005;
+
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
@@ -297,9 +298,7 @@ export function getNearbySeriesData({
   const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
   const totalSeries = data.length;
 
-  let yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-  // TODO: below multiplier used for debugging, need to fix yBuffer calc so not all yValues show as nearby series
-  yBuffer = yBuffer * 200;
+  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
