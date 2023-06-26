@@ -134,6 +134,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     if (isLoading || isFetching) {
       return {
         graphData: EMPTY_GRAPH_DATA,
+        timeChartData: [],
+        timeSeriesMapping: [],
       };
     }
 
@@ -141,6 +143,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     if (timeScale === undefined) {
       return {
         graphData: EMPTY_GRAPH_DATA,
+        timeChartData: [],
+        timeSeriesMapping: [],
       };
     }
 
@@ -176,7 +180,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries: TimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
-          return { graphData };
+          return { graphData, timeChartData: [], timeSeriesMapping: [] };
         }
 
         if (Array.isArray(timeChartData)) {

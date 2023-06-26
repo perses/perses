@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionSourceData } from 'echarts/types/dist/shared';
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
@@ -70,8 +70,8 @@ export function checkforNearbyTimeSeries(
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
     if (currentDataset == null) break;
 
-    const currentDatasetSource: OptionSourceData = currentDataset.source;
-    if (currentDatasetSource === undefined) break;
+    const currentDatasetSource: DatasetOption['source'] = currentDataset.source;
+    if (currentDatasetSource === undefined || !Array.isArray(currentDatasetSource)) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
     const markerColor = lineSeries.color ?? '#000';
@@ -79,8 +79,9 @@ export function checkforNearbyTimeSeries(
       for (let datumIdx = 0; datumIdx < currentDatasetSource.length; datumIdx++) {
         // skip first row in dataset source since it is for column names, ex: ['timestamp', 'value']
         if (datumIdx > 0) {
-          const nearbyTimeSeries = currentDatasetSource[datumIdx];
-          if (nearbyTimeSeries === undefined) break;
+          // TODO: use isTimeSeriesValueTuple to fix types
+          const nearbyTimeSeries = currentDatasetSource[datumIdx] as TimeSeriesValueTuple;
+          if (nearbyTimeSeries === undefined || !Array.isArray(nearbyTimeSeries)) break;
           const xValue = nearbyTimeSeries[0];
           const yValue = nearbyTimeSeries[1];
           // TODO: ensure null values not displayed in tooltip
