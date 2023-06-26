@@ -15,9 +15,9 @@ import type { EChartsOption, YAXisComponentOption, LineSeriesOption } from 'echa
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
-  EChartsTimeSeries,
-  EChartsValues,
+  LegacyTimeSeries,
   EChartsDataFormat,
+  TimeChartSeriesStyles,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -60,10 +60,10 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 export function getLineSeries(
   id: string,
   formattedName: string,
-  data: EChartsTimeSeries['data'],
+  data: LegacyTimeSeries['data'],
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
-): EChartsTimeSeries {
+): LegacyTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
@@ -121,12 +121,11 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
-): EChartsOption['series'] {
+): TimeChartSeriesStyles {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
-  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  let showPoints = false;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'Always') {
     showPoints = true;

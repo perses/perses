@@ -14,7 +14,7 @@
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, EChartsDatasetFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartData, TimeChartSeriesStyles } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -41,7 +41,8 @@ export type NearbySeriesArray = NearbySeriesInfo[];
  * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
  */
 export function checkforNearbyTimeSeries(
-  data: EChartsDatasetFormat,
+  data: TimeChartData,
+  seriesMapping: TimeChartSeriesStyles,
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
@@ -52,23 +53,24 @@ export function checkforNearbyTimeSeries(
   const cursorY: number | null = pointInGrid[1] ?? null;
 
   if (cursorX === null || cursorY === null) return currentNearbySeriesData;
-  if (!Array.isArray(data.xAxis) || !Array.isArray(data.dataset)) return currentNearbySeriesData;
+  // if (!Array.isArray(data.xAxis) || !Array.isArray(data.dataset)) return currentNearbySeriesData;
+  if (!Array.isArray(data)) return currentNearbySeriesData;
 
   // TODO: better way to calc xBuffer for longer time ranges
   const xBuffer = cursorX * 0.0005;
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
-  const totalSeries = data.dataset.length;
-  for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
-    const currentSeries = data.timeSeries[seriesIdx];
+  const totalSeries = data.length;
+  for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
+    const currentSeries = seriesMapping[seriesIdx];
     if (currentSeries === undefined) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
     const markerColor = lineSeries.color ?? '#000';
-    if (Array.isArray(data.dataset)) {
-      for (let datumIdx = 0; datumIdx < data.dataset.length; datumIdx++) {
-        const currentDataset = data.dataset.length > 0 ? data.dataset[seriesIdx] : undefined;
+    if (Array.isArray(data)) {
+      for (let datumIdx = 0; datumIdx < totalSeries; datumIdx++) {
+        const currentDataset = totalSeries > 0 ? data[seriesIdx] : undefined;
         if (currentDataset !== undefined) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const currentDatasetSource: any = currentDataset.source ?? undefined;
@@ -248,14 +250,16 @@ export function legacyCheckforNearbySeries(
 export function getNearbySeriesData({
   mousePos,
   pinnedPos,
-  chartData,
+  data,
+  seriesMapping,
   chart,
   unit,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
-  chartData: EChartsDatasetFormat;
+  data: TimeChartData;
+  seriesMapping: TimeChartSeriesStyles;
   chart?: EChartsInstance;
   unit?: UnitOptions;
   showAllSeries?: boolean;
@@ -288,13 +292,13 @@ export function getNearbySeriesData({
   if (chart['_model'] === undefined) return [];
   const chartModel = chart['_model'];
   const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
-  const totalSeries = chartData.dataset.length;
+  const totalSeries = data.length;
   const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbyTimeSeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
     }
   }
 

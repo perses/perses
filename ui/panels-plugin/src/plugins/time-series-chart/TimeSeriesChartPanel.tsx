@@ -17,7 +17,6 @@ import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
-  // StepOptions,
   getXValues,
   getYValues,
   TimeSeries,
@@ -47,6 +46,7 @@ import {
   LegendProps,
   useId,
   TimeChart,
+  TimeChartData,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -126,6 +126,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const { setTimeRange } = useTimeRange();
 
+  // https://apache.github.io/echarts-handbook/en/concepts/dataset/
+  const timeChartData: TimeChartData = [];
+
   // Populate series data based on query results
   const { graphData } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
@@ -172,6 +175,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         if (timeSeries === undefined) {
           return { graphData };
         }
+
+        timeChartData.push({
+          id: seriesIndex,
+          source: [['timestamp', 'value'], ...timeSeries.values],
+        });
 
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
@@ -363,10 +371,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   }
                 />
               ) : (
-                <LineChart
+                <TimeChart
                   ref={lineChartRef}
                   height={height}
-                  data={graphData}
+                  data={timeChartData}
+                  seriesMapping={graphData.timeSeries}
+                  timeScale={graphData.timeScale}
                   yAxis={echartsYAxis}
                   unit={unit}
                   grid={gridOverrides}

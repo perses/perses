@@ -16,7 +16,7 @@ import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { UnitOptions } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
-import { EChartsDatasetFormat } from '../model';
+import { TimeChartData, TimeChartSeriesStyles } from '../model';
 import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
 import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
@@ -25,7 +25,8 @@ import { TooltipContent } from './TooltipContent';
 
 export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
-  chartData: EChartsDatasetFormat;
+  data: TimeChartData;
+  seriesMapping: TimeChartSeriesStyles;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
@@ -34,7 +35,8 @@ export interface TimeChartTooltipProps {
 
 export const TimeChartTooltip = memo(function TimeChartTooltip({
   chartRef,
-  chartData,
+  data,
+  seriesMapping,
   wrapLabels,
   unit,
   onUnpinClick,
@@ -58,7 +60,8 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
     mousePos,
-    chartData,
+    data,
+    seriesMapping,
     pinnedPos,
     chart,
     unit,
@@ -68,7 +71,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     return null;
   }
 
-  const totalSeries = chartData.timeSeries.length;
+  const totalSeries = data.length;
 
   return (
     <Portal>

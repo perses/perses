@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption } from 'echarts';
+// import type { EChartsOption } from 'echarts';
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
@@ -28,29 +29,19 @@ export interface GraphSeries {
 
 export type EChartsValues = number | null | '-';
 
-export interface EChartsTimeSeries extends Omit<LineSeriesOption, 'data'> {
-  // TODO: support dataset and both category / time xAxis types
+export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-// TODO: Simplify TimeChart types
-export type EChartsDatasetFormat = {
-  timeSeries: Array<EChartsOption['series']>;
-  dataset?: EChartsOption['dataset'];
-  xAxis: number[];
-  legendItems?: LegendItem[];
-  xAxisMax?: number | string;
-  rangeMs?: number;
-};
-// export type TimeChartData = DatasetOption[];
-// export type EChartsDatasetFormat = {
-//   dataset: TimeChartData;
-//   legendItems?: LegendItem[];
-// };
+// TODO: Continue to simplify TimeChart types
+export type TimeChartData = DatasetOption[];
+// export type TimeChartSeriesStyles = Array<EChartsOption['series']>;
+export type TimeChartSeriesStyles = LineSeriesOption[];
+export type TimeChartLegendItems = LegendItem[];
 
 // TODO: Rename to LegacyEChartsDataFormat
 export type EChartsDataFormat = {
-  timeSeries: EChartsTimeSeries[];
+  timeSeries: LegacyTimeSeries[];
   xAxis: number[];
   legendItems?: LegendItem[];
   xAxisMax?: number | string;

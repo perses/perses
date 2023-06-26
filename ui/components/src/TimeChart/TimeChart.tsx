@@ -13,11 +13,11 @@
 
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
+import { TimeScale, UnitOptions } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
-  LegendComponentOption,
   YAXisComponentOption,
   TooltipComponentOption,
 } from 'echarts';
@@ -35,9 +35,8 @@ import {
   LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { UnitOptions } from '@perses-dev/core';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDatasetFormat, ChartHandleFocusOpts, ChartHandle, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
+import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesStyles } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { clearHighlightedSeries, enableDataZoom, getYAxes, restoreChart, ZoomEventData } from '../utils';
 import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
@@ -58,11 +57,12 @@ use([
 
 export interface TimeChartProps {
   height: number;
-  data: EChartsDatasetFormat;
+  data: TimeChartData;
+  seriesMapping: TimeChartSeriesStyles;
+  timeScale: TimeScale;
   yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
-  legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
@@ -75,10 +75,11 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   {
     height,
     data,
+    seriesMapping,
+    timeScale,
     yAxis,
     unit,
     grid,
-    legend,
     tooltipConfig = { wrapLabels: true },
     noDataVariant = 'message',
     syncGroup,
@@ -113,11 +114,11 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
             // No chart. Do nothing.
             return;
           }
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current, data.length);
         },
       };
     },
-    [data.timeSeries.length]
+    [data.length]
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -130,22 +131,23 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
-        const startIndex = params.batch[0].startValue ?? 0;
-        const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
-        const xAxisStartValue = data.xAxis[startIndex];
-        const xAxisEndValue = data.xAxis[endIndex];
+        console.log('TODO: fix data zoom to work with time axis', onDataZoom, data);
+        // const startIndex = params.batch[0].startValue ?? 0;
+        // const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
+        // const xAxisStartValue = data.xAxis[startIndex];
+        // const xAxisEndValue = data.xAxis[endIndex];
 
-        if (xAxisStartValue !== undefined && xAxisEndValue !== undefined) {
-          const zoomEvent: ZoomEventData = {
-            start: xAxisStartValue,
-            end: xAxisEndValue,
-            startIndex,
-            endIndex,
-          };
-          onDataZoom(zoomEvent);
-        }
+        // if (xAxisStartValue !== undefined && xAxisEndValue !== undefined) {
+        //   // TODO: fix zoom, need different zoom type for TimeChart vs. LineChart
+        //   const zoomEvent: ZoomEventData = {
+        //     start: xAxisStartValue,
+        //     end: xAxisEndValue,
+        //     startIndex,
+        //     endIndex,
+        //   };
+        //   onDataZoom(zoomEvent);
+        // }
       },
-      // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
   }, [data, onDataZoom, setTooltipPinnedCoords]);
 
@@ -156,43 +158,32 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.timeSeries === undefined) return {};
+    if (data === undefined) return {};
 
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
-    if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
-
-    // show symbols and axisPointer dashed line on hover
-    const isOptimizedMode = data.timeSeries.length > OPTIMIZED_MODE_SERIES_LIMIT;
-
-    // TODO: is rangeMs still needed
-    // const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
-
-    // TODO: pass timeScale.startMs and timeScale.endMs
-    const startTime = data.xAxis[0];
-    const endTime = data.xAxis[data.xAxis.length - 1];
+    if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
 
     const option: EChartsCoreOption = {
-      dataset: data.dataset,
-      series: data.timeSeries,
+      dataset: data,
+      series: seriesMapping,
       xAxis: {
         type: 'time',
         // TODO: fix timezones using this approach
         // - https://github.com/apache/echarts/issues/14453#issuecomment-800163920
-        min: startTime,
-        max: endTime,
+        min: timeScale.startMs,
+        max: timeScale.endMs,
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
-        show: !isOptimizedMode,
+        show: true,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
-        appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
-        type: isOptimizedMode ? 'none' : 'line',
+        type: 'line',
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
@@ -207,14 +198,23 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
         },
       },
       grid,
-      legend,
     };
 
     if (__experimentalEChartsOptionsOverride) {
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [
+    data,
+    seriesMapping,
+    timeScale,
+    yAxis,
+    unit,
+    grid,
+    noDataOption,
+    __experimentalEChartsOptionsOverride,
+    noDataVariant,
+  ]);
 
   return (
     <Box
@@ -274,7 +274,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current, data.length);
         }
       }}
       onMouseEnter={() => {
@@ -301,7 +301,8 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
             chartRef={chartRef}
-            chartData={data}
+            data={data}
+            seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
