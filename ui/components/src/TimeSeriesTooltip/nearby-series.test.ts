@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChartsDataFormat, UnitOptions } from '../model';
+import { UnitOptions } from '@perses-dev/core';
+import { EChartsDataFormat } from '../model';
 import { checkforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
 describe('checkforNearbySeries', () => {
