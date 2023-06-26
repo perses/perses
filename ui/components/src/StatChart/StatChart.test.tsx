@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
+import { UnitOptions } from '@perses-dev/core';
 import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
-import { UnitOptions } from '../model';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 

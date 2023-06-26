@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, Portal, Stack } from '@mui/material';
+import { UnitOptions } from '@perses-dev/core';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { memo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { EChartsDataFormat, UnitOptions } from '../model';
+import { EChartsDataFormat } from '../model';
 import { TooltipContent } from './TooltipContent';
 import { TooltipHeader } from './TooltipHeader';
 import { getNearbySeriesData } from './nearby-series';

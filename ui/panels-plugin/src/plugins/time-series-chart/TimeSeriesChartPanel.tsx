@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { useMemo, useRef, useState } from 'react';
+import { Box, Skeleton, useTheme } from '@mui/material';
+import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
@@ -21,6 +23,7 @@ import {
   TimeSeries,
   DEFAULT_LEGEND,
   getCalculations,
+  formatValue,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -30,8 +33,6 @@ import {
   validateLegendSpec,
   legendValues,
 } from '@perses-dev/plugin-system';
-import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   EChartsDataFormat,
   LineChart,
@@ -41,7 +42,6 @@ import {
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
-  formatValue,
   TableColumnConfig,
   LegendItem,
   LegendProps,

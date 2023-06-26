@@ -23,3 +23,8 @@ export interface ThresholdOptions {
   max?: number; // is this same as the max in GaugeChartOptions? can we remove?
   steps?: StepOptions[];
 }
+
+export interface ThresholdColorPalette {
+  defaultColor: string;
+  palette: string[];
+}

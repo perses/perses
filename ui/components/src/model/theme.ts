@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ThresholdColorPalette } from '@perses-dev/core';
 import type {
   EChartsOption,
   BarSeriesOption,
@@ -48,11 +49,6 @@ export interface EChartsTheme extends EChartsOption {
   bar?: BarSeriesOption;
   line?: LineSeriesOption;
   gauge?: GaugeSeriesOption;
-}
-
-export interface ThresholdColorPalette {
-  defaultColor: string;
-  palette: string[];
 }
 
 export type NoDataOption = ComposeOption<TitleComponentOption | XAXisComponentOption | YAXisComponentOption>;

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
+import { formatValue, UnitOptions } from '@perses-dev/core';
 import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
@@ -19,7 +20,6 @@ import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts'
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { formatValue, UnitOptions } from '../model/units';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
 import { useOptimalFontSize } from './calculateFontSize';
