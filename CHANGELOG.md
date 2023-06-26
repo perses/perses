@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.36.1 / 2023-06-26
+
+- [BUGFIX] Chart utils export formatter correctly
+- [BUGFIX] Refresh interval should be optional, fix defaults mismatch
+
 ## 0.36.0 / 2023-06-23
 
 - [FEATURE] Add dashboard refresh interval form control (#1215)
