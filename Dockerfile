@@ -1,4 +1,5 @@
 FROM alpine AS build-env
+RUN apk add --update --no-cache mailcap
 RUN mkdir /perses
 
 FROM gcr.io/distroless/static-debian11
@@ -14,6 +15,7 @@ COPY --chown=nobody:nobody schemas/                          /etc/perses/schemas
 COPY --chown=nobody:nobody cue.mod/                          /etc/perses/cue.mod/
 COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
 COPY --from=build-env --chown=nobody:nobody                  /perses /perses
+COPY --from=build-env --chown=nobody:nobody                  /etc/mime.types /etc/mime.types
 
 WORKDIR /perses
 

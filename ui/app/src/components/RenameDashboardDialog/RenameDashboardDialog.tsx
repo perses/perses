@@ -13,9 +13,8 @@
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
+import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
-import { useSnackbar } from '../../context/SnackbarProvider';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 
 export interface RenameDashboardDialogProps {
@@ -35,11 +34,11 @@ export interface RenameDashboardDialogProps {
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const [name, setName] = useState<string>();
-  const [error, setError] = useState<string>();
-
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
+
+  const [name, setName] = useState<string>();
+  const [error, setError] = useState<string>();
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);

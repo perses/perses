@@ -209,33 +209,45 @@ import (
 type dao struct {
 	{{ $package }}.DAO
 	client databaseModel.DAO
+	kind   v1.Kind
 }
 
 func NewDAO(persesDAO databaseModel.DAO) {{ $package }}.DAO {
 	return &dao{
 		client: persesDAO,
+		kind:   v1.Kind{{ $kind }},
 	}
 }
 
 func (d *dao) Create(entity *v1.{{ $kind }}) error {
-	key := entity.GenerateID()
-	return d.client.Create(key, entity)
+	return d.client.Create(entity)
 }
 
 func (d *dao) Update(entity *v1.{{ $kind }}) error {
-	key := entity.GenerateID()
-	return d.client.Upsert(key, entity)
+	return d.client.Upsert(entity)
 }
 
 func (d *dao) Delete({{- if $endpoint.IsProjectResource -}}project string,{{- end -}} name string) error {
-	key := v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}project,{{- end -}} name)
-	return d.client.Delete(key)
+{{ if $endpoint.IsProjectResource }}
+	return d.client.Delete(d.kind, v1.NewProjectMetadata(project, name))
+{{ else }}
+	return d.client.Delete(d.kind, v1.NewMetadata(name))
+{{ end }}
 }
 
+{{ if $endpoint.IsProjectResource }}
+func (d *dao) DeleteAll(project string) error {
+	return d.client.DeleteByQuery(&{{ $package }}.Query{Project: project})
+}
+{{ end }}
+
 func (d *dao) Get({{- if $endpoint.IsProjectResource -}}project string,{{- end -}} name string) (*v1.{{ $kind }}, error) {
-	key := v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}project,{{- end -}} name)
 	entity := &v1.{{ $kind }}{}
-	return entity, d.client.Get(key, entity)
+{{ if $endpoint.IsProjectResource -}}
+	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)
+{{ else }}
+	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
+{{- end }}
 }
 
 func (d *dao) List(q databaseModel.Query) ([]*v1.{{ $kind }}, error) {

@@ -22,7 +22,7 @@ type MatcherEditorProps = {
 
 export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
   return (
-    <Stack spacing={1}>
+    <Stack spacing={1} mb={2}>
       {matchers.map((matcher, index) => (
         <Box key={index} display="flex">
           <TextField

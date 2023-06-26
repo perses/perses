@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import { TextField } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import {
   UnitSelector,
@@ -24,7 +24,7 @@ import {
   OptionsEditorControl,
   ThresholdsEditor,
 } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
+import { DEFAULT_CALCULATION, ThresholdOptions } from '@perses-dev/core';
 import {
   GaugeChartOptions,
   DEFAULT_UNIT,

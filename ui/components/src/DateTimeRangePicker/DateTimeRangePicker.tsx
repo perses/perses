@@ -21,8 +21,9 @@ import {
   toAbsoluteTimeRange,
   TimeRangeValue,
 } from '@perses-dev/core';
+import { TimeOption } from '../model';
 import { AbsoluteTimePicker } from './AbsoluteTimePicker';
-import { TimeRangeSelector, TimeOption } from './TimeRangeSelector';
+import { TimeRangeSelector } from './TimeRangeSelector';
 
 interface DateTimeRangePickerProps {
   value: TimeRangeValue;

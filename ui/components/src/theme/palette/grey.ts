@@ -17,6 +17,7 @@ import { grey } from './colors/grey';
 export const greyOption = (mode: PaletteMode): PaletteOptions['grey'] => {
   return mode === 'light'
     ? {
+        50: grey[50],
         100: grey[100],
         200: grey[200],
         300: grey[300],
@@ -26,9 +27,11 @@ export const greyOption = (mode: PaletteMode): PaletteOptions['grey'] => {
         700: grey[700],
         800: grey[800],
         900: grey[900],
+        950: grey[950],
       }
     : // Reverse greys from darkest to lightest for Dark mode
       {
+        50: grey[950],
         100: grey[900],
         200: grey[800],
         300: grey[700],
@@ -38,5 +41,6 @@ export const greyOption = (mode: PaletteMode): PaletteOptions['grey'] => {
         700: grey[300],
         800: grey[200],
         900: grey[100],
+        950: grey[50],
       };
 };

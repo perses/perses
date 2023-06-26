@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { EChartsTimeSeries } from '@perses-dev/components';
-import { YAxisOptions } from '../time-series-chart-model';
-import { convertPercentThreshold, convertPanelYAxis } from './data-transform';
+import { TimeSeriesChartYAxisOptions } from '../time-series-chart-model';
+import { convertPercentThreshold, convertPanelYAxis, roundDown } from './data-transform';
 
 const MAX_VALUE = 120;
 const MOCK_ECHART_TIME_SERIES_DATA: EChartsTimeSeries[] = [
@@ -44,7 +44,7 @@ describe('convertPercentThreshold', () => {
 
 describe('convertPanelYAxis', () => {
   it('should convert a Perses y_axis spec to the ECharts equivalent', () => {
-    const persesAxis: YAxisOptions = {
+    const persesAxis: TimeSeriesChartYAxisOptions = {
       show: true,
       label: 'Axis Label',
       unit: {
@@ -57,5 +57,54 @@ describe('convertPanelYAxis', () => {
     const echartsAxis = convertPanelYAxis(persesAxis);
     // Axis label is handled outside of echarts since it is built with a custom React component.
     expect(echartsAxis).toEqual({ max: 1, min: 0.1, show: true });
+  });
+});
+
+const ROUND_DOWN_TESTS = [
+  {
+    value: -400305,
+    expected: -500000,
+  },
+  {
+    value: -633,
+    expected: -700,
+  },
+  {
+    value: -5.99,
+    expected: -6,
+  },
+  {
+    value: -0.123,
+    expected: -0.2,
+  },
+  {
+    value: -0.000543,
+    expected: -0.0006,
+  },
+  {
+    value: 0.000543,
+    expected: 0.0005,
+  },
+  {
+    value: 0.123,
+    expected: 0.1,
+  },
+  {
+    value: 5.99,
+    expected: 5,
+  },
+  {
+    value: 633,
+    expected: 600,
+  },
+  {
+    value: 400305,
+    expected: 400000,
+  },
+];
+
+describe('roundDown', () => {
+  it.each(ROUND_DOWN_TESTS)('returns $expected when the input is $value', ({ value, expected }) => {
+    expect(roundDown(value)).toEqual(expected);
   });
 });

@@ -11,18 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
-import { useDashboard, useEditMode } from '../../context';
+import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
-import { TemplateVariableList, EditVariablesButton } from '../Variables';
+import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
+import { SaveDashboardButton } from '../SaveDashboardButton';
+import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -31,7 +31,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
-  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onSave?: OnSaveDashboard;
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps) => {
@@ -45,35 +45,16 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     onSave,
   } = props;
 
-  const dashboard = useDashboard();
-  const { isEditMode, setEditMode } = useEditMode();
+  const { isEditMode } = useEditMode();
 
-  const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
-
-  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
+  const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
   ) : (
     <Typography variant="h2">{dashboardName}</Typography>
   );
-
-  const onSaveButtonClick = () => {
-    if (onSave !== undefined) {
-      setSavingDashboard(true);
-      onSave(dashboard.dashboard)
-        .then(() => {
-          setSavingDashboard(false);
-          setEditMode(false);
-        })
-        .catch(() => {
-          setSavingDashboard(false);
-        });
-    } else {
-      setEditMode(false);
-    }
-  };
 
   const testId = 'dashboard-toolbar';
 
@@ -89,9 +70,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <Button variant="contained" onClick={onSaveButtonClick} disabled={isReadonly || isSavingDashboard}>
-                Save
-              </Button>
+              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
               </Button>
@@ -102,43 +81,29 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               display: 'flex',
               width: '100%',
               alignItems: 'start',
-              padding: (theme) => theme.spacing(1, 2, 2, 2),
+              padding: (theme) => theme.spacing(1, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList
+              <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
-                  backgroundColor: ({ palette }) =>
-                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                  backgroundColor: ({ palette }) => palette.background.default,
                 }}
               />
             </ErrorBoundary>
-            {isBiggerThanMd ? (
-              // On bigger screens, make it one row
-              <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
+            <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
+              <Stack direction="row" spacing={1} ml={1} mb={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <AddPanelButton />
                 <AddGroupButton />
+              </Stack>
+              <Stack direction="row" spacing={1} ml={1} mb={1}>
                 <TimeRangeControls />
                 <DownloadButton />
                 <EditJsonButton />
               </Stack>
-            ) : (
-              // On smaller screens, make it two rows
-              <Stack spacing={1}>
-                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-                  <TimeRangeControls />
-                  <DownloadButton />
-                  <EditJsonButton />
-                </Stack>
-                <Stack direction="row" spacing={1} marginLeft="auto" sx={{ whiteSpace: 'nowrap' }}>
-                  <EditVariablesButton />
-                  <AddPanelButton />
-                  <AddGroupButton />
-                </Stack>
-              </Stack>
-            )}
+            </Stack>
           </Box>
         </Stack>
       ) : (
@@ -153,11 +118,10 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
           <Box paddingY={2}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <TemplateVariableList
+              <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
-                  backgroundColor: ({ palette }) =>
-                    palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+                  backgroundColor: ({ palette }) => palette.background.default,
                 }}
               />
             </ErrorBoundary>

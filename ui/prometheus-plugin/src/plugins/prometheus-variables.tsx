@@ -10,10 +10,29 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { VariablePlugin, VariableOption, OptionsEditorProps } from '@perses-dev/plugin-system';
-import { Stack, TextField } from '@mui/material';
-import { PrometheusClient, DEFAULT_PROM, getPrometheusTimeRange, MatrixData, VectorData } from '../model';
-import { replaceTemplateVariables, parseTemplateVariables } from '../utils';
+import {
+  DatasourceSelect,
+  DatasourceSelectProps,
+  OptionsEditorProps,
+  useDatasourceClient,
+  VariableOption,
+  VariablePlugin,
+  parseTemplateVariables,
+  replaceTemplateVariables,
+} from '@perses-dev/plugin-system';
+import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { produce } from 'immer';
+import {
+  DEFAULT_PROM,
+  getPrometheusTimeRange,
+  isDefaultPromSelector,
+  isPrometheusDatasourceSelector,
+  MatrixData,
+  PROM_DATASOURCE_KIND,
+  PrometheusClient,
+  VectorData,
+} from '../model';
+import { PromQLEditor } from '../components';
 import {
   PrometheusLabelNamesVariableOptions,
   PrometheusLabelValuesVariableOptions,
@@ -22,11 +41,39 @@ import {
 import { MatcherEditor } from './MatcherEditor';
 
 function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<PrometheusLabelValuesVariableOptions>) {
+  const { onChange, value } = props;
+  const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
+
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
+    if (isPrometheusDatasourceSelector(next)) {
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+        })
+      );
+      return;
+    }
+
+    throw new Error('Got unexpected non-Prometheus datasource selector');
+  };
+
   return (
-    <Stack spacing={1}>
+    <Stack spacing={2}>
+      <FormControl margin="dense">
+        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind="PrometheusDatasource"
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId="prom-datasource-label"
+          label="Prometheus Datasource"
+        />
+      </FormControl>
       <TextField
-        sx={{ mb: 1 }}
         label="Label Name"
+        required
         value={props.value.label_name}
         onChange={(e) => {
           props.onChange({ ...props.value, label_name: e.target.value });
@@ -43,8 +90,36 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
 }
 
 function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<PrometheusLabelNamesVariableOptions>) {
+  const { onChange, value } = props;
+  const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
+
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
+    if (isPrometheusDatasourceSelector(next)) {
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+        })
+      );
+      return;
+    }
+
+    throw new Error('Got unexpected non-Prometheus datasource selector');
+  };
+
   return (
-    <Stack spacing={1}>
+    <Stack spacing={2}>
+      <FormControl margin="dense">
+        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind="PrometheusDatasource"
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId="prom-datasource-label"
+          label="Prometheus Datasource"
+        />
+      </FormControl>
       <MatcherEditor
         matchers={props.value.matchers ?? []}
         onChange={(e) => {
@@ -56,18 +131,48 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
 }
 
 function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusPromQLVariableOptions>) {
+  const { onChange, value } = props;
+  const { datasource } = value;
+  const selectedDatasource = datasource ?? DEFAULT_PROM;
+
+  const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
+  const promURL = client?.options.datasourceUrl;
+
+  const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
+    if (isPrometheusDatasourceSelector(next)) {
+      onChange(
+        produce(value, (draft) => {
+          // If they're using the default, just omit the datasource prop (i.e. set to undefined)
+          draft.datasource = isDefaultPromSelector(next) ? undefined : next;
+        })
+      );
+      return;
+    }
+
+    throw new Error('Got unexpected non-Prometheus datasource selector');
+  };
+
   return (
-    <Stack spacing={1}>
-      <TextField
-        sx={{ mb: 1 }}
-        label="PromQL Expression"
-        value={props.value.expr}
-        onChange={(e) => {
-          props.onChange({ ...props.value, expr: e.target.value });
+    <Stack spacing={2}>
+      <FormControl margin="dense">
+        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind={PROM_DATASOURCE_KIND}
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId="prom-datasource-label"
+          label="Prometheus Datasource"
+        />
+      </FormControl>
+      <PromQLEditor
+        completeConfig={{ remote: { url: promURL } }}
+        value={value.expr}
+        onChange={(query) => {
+          props.onChange({ ...props.value, expr: query });
         }}
+        width="100%"
       />
       <TextField
-        sx={{ mb: 1 }}
         label="Label Name"
         value={props.value.label_name}
         onChange={(e) => {

@@ -13,8 +13,11 @@
 
 import numbro from 'numbro';
 
-import { DEFAULT_DECIMAL_PLACES } from './constants';
+import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
+import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
+
+const DEFAULT_NUMBRO_MANTISSA = 2;
 
 const bytesUnitKinds = ['Bytes'] as const;
 type BytesUnitKind = (typeof bytesUnitKinds)[number];
@@ -29,45 +32,47 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
-  // This uses units that are powers of 1000.
-  // In other words, 1KB = 1000 bytes.
+  // These units are powers of 1000.
+  // In other words, 1 KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
   },
 };
 
-export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
-  if (bytes === 0) return '0 bytes';
+export function formatBytes(bytes: number, options: BytesUnitOptions) {
+  const { abbreviate, decimal_places } = options;
 
-  decimal_places = decimal_places ?? DEFAULT_DECIMAL_PLACES;
-  // Avoids maximumFractionDigits value is out of range error. Possible values are 0 to 20.
-  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/NumberFormat/NumberFormat#minimumfractiondigits
-  if (decimal_places < 0) {
-    decimal_places = 0;
-  } else if (decimal_places > 20) {
-    decimal_places = 20;
-  }
-
-  const showFullNumber = abbreviate == false || bytes < 1000;
-
-  if (showFullNumber) {
-    const formatter = new Intl.NumberFormat('en-US', {
+  if (!shouldAbbreviate(abbreviate) || Math.abs(bytes) < 1000) {
+    const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
       unitDisplay: 'long',
-      maximumFractionDigits: decimal_places,
       useGrouping: true,
-    });
-    return formatter.format(bytes);
+    };
+
+    if (hasDecimalPlaces(decimal_places)) {
+      formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
+      formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+    } else {
+      // This can happen if bytes is between -1000 and 1000
+      if (shouldAbbreviate(abbreviate)) {
+        formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
+      }
+    }
+
+    return Intl.NumberFormat('en-US', formatterOptions).format(bytes);
   }
 
+  // numbro is able to add units like KB, MB, GB, etc. correctly
   return numbro(bytes).format({
     output: 'byte',
     base: 'decimal',
     spaceSeparated: true,
-    mantissa: decimal_places,
-    trimMantissa: true,
-    optionalMantissa: true,
+    mantissa: hasDecimalPlaces(decimal_places) ? decimal_places : DEFAULT_NUMBRO_MANTISSA,
+    // trimMantissa trims trailing 0s
+    trimMantissa: !hasDecimalPlaces(decimal_places),
+    // optionalMantissa excludes all the decimal places if they're all zeros
+    optionalMantissa: !hasDecimalPlaces(decimal_places),
   });
 }

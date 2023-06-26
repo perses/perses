@@ -56,6 +56,12 @@ func HandleError(err error) error {
 	if errors.Is(err, BadRequestError) {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+
+	if _, ok := err.(*echo.HTTPError); ok {
+		// the error is coming from the echo framework likely because the route doesn't exist.
+		// In this particular case, we shouldn't touch to the error and let it like that
+		return err
+	}
 	logrus.WithError(err).Error("unexpected error not handle")
 	return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
 }

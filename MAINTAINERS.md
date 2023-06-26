@@ -11,6 +11,7 @@ be found in [GOVERNANCE.md](GOVERNANCE.md).
 | Augustin Husson   | [nexucis](https://github.com/Nexucis)               | Amadeus IT Group |
 | Christine Donovan | [cndonovan](https://github.com/cndonovan)           | Chronosphere     |
 | Eunice Wong       | [eunicorn](https://github.com/eunicorn)             | Chronosphere     |
+| Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus IT Group |
 | Julie Pagano      | [juliepagano](https://github.com/juliepagano)       | Chronosphere     |
 | Luke Tillman      | [luketillman](https://github.com/LukeTillman)       | Chronosphere     |
 | Shan Aminzadeh    | [saminzadeh](https://github.com/saminzadeh)         | Chronoshpere     |

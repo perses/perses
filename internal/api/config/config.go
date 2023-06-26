@@ -17,6 +17,13 @@ import (
 	"github.com/perses/common/config"
 )
 
+type dashboardSelector struct {
+	// Project correspond to the name of the project (dashboard.metadata.project)
+	Project string `json:"project" yaml:"project"`
+	// Dashboard correspond to the name of the dashboard (dashboard.metadata.name)
+	Dashboard string `json:"dashboard" yaml:"dashboard"`
+}
+
 type Config struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
@@ -24,6 +31,10 @@ type Config struct {
 	Database Database `json:"database" yaml:"database"`
 	// Schemas contains the configuration to get access to the CUE schemas
 	Schemas Schemas `json:"schemas" yaml:"schemas"`
+	// ImportantDashboards contains important dashboard selectors
+	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
+	// Information contains markdown content to be display on the home page
+	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 }
 
 func Resolve(configFile string) (Config, error) {

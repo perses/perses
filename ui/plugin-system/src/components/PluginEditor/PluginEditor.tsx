@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box, FormControl, FormHelperText, InputLabel } from '@mui/material';
-import { PluginKindSelect } from '../PluginKindSelect/PluginKindSelect';
-import { PluginSpecEditor } from '../PluginSpecEditor/PluginSpecEditor';
+import { PluginKindSelect } from '../PluginKindSelect';
+import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
 
 /**

@@ -12,12 +12,16 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendItem } from '../model';
-import { ListLegendItem } from './ListLegendItem';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
 
-interface CompactLegendProps {
+export interface CompactLegendProps {
   height: number;
   items: LegendItem[];
+  selectedItems: SelectedLegendItemState;
+  onLegendItemClick: ListLegendItemProps['onClick'];
+  onItemMouseOver: ListLegendItemProps['onMouseOver'];
+  onItemMouseOut: ListLegendItemProps['onMouseOut'];
 }
 
 /**
@@ -26,13 +30,25 @@ interface CompactLegendProps {
  * number of items. The `ListLegend` is used for cases with large numbers of items
  * because it is virtualized.
  */
-export function CompactLegend({ height, items }: CompactLegendProps) {
+export function CompactLegend({
+  height,
+  items,
+  selectedItems,
+  onLegendItemClick,
+  onItemMouseOver,
+  onItemMouseOut,
+}: CompactLegendProps) {
   return (
     <Box component="ul" sx={{ width: '100%', height, padding: [0, 1, 0, 0], overflowY: 'scroll', margin: 0 }}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <ListLegendItem
           key={item.id}
           item={item}
+          index={index}
+          isVisuallySelected={isLegendItemVisuallySelected(item, selectedItems)}
+          onMouseOver={onItemMouseOver}
+          onMouseOut={onItemMouseOut}
+          onClick={onLegendItemClick}
           sx={{
             width: 'auto',
             float: 'left',

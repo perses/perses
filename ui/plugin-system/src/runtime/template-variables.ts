@@ -14,7 +14,7 @@
 import { createContext, useContext, useMemo } from 'react';
 import { VariableName, VariableValue } from '@perses-dev/core';
 import { VariableOption } from '../model';
-
+import { parseTemplateVariables, replaceTemplateVariables } from '../utils';
 export const DEFAULT_ALL_VALUE = '$__all' as const;
 
 export type VariableState = {
@@ -59,4 +59,12 @@ export function useTemplateVariableValues(names?: string[]) {
   }
 
   return values;
+}
+
+// Convenience hook for replacing template variables in a string
+export function useReplaceVariablesInString(str: string | undefined): string | undefined {
+  const variablesInString = str ? parseTemplateVariables(str) : [];
+  const variableValues = useTemplateVariableValues(variablesInString);
+  if (!str) return undefined;
+  return replaceTemplateVariables(str, variableValues);
 }

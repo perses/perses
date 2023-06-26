@@ -24,7 +24,7 @@ const DARK_MODE_PREFERENCE_KEY = 'PERSES_ENABLE_DARK_MODE';
 
 interface DarkModeContext {
   isDarkModeEnabled: boolean;
-  setDarkMode: (pref: boolean) => Promise<void>;
+  setDarkMode: (pref: boolean) => void;
 }
 
 export const DarkModeContext = createContext<DarkModeContext | undefined>(undefined);
@@ -35,18 +35,15 @@ export const DarkModeContext = createContext<DarkModeContext | undefined>(undefi
 export function DarkModeContextProvider(props: { children: React.ReactNode }) {
   const browserPrefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
-  const [isDarkModeEnabled] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
+  const [isDarkModeEnabled, setDarkMode] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
 
   // store the dark mode preference in local storage
   const darkModeContext: DarkModeContext = useMemo(
     () => ({
       isDarkModeEnabled,
-      setDarkMode: async (preference: boolean) => {
-        window.localStorage.setItem(DARK_MODE_PREFERENCE_KEY, preference.toString());
-        location.reload();
-      },
+      setDarkMode,
     }),
-    [isDarkModeEnabled]
+    [isDarkModeEnabled, setDarkMode]
   );
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);

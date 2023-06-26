@@ -22,7 +22,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/variable"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -105,8 +107,12 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+	case *globalvariable.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+	case *variable.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
@@ -137,8 +143,12 @@ func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+	case *globalvariable.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+	case *variable.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}

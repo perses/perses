@@ -127,7 +127,16 @@ const config: StorybookConfig = {
       ...pkgConfig.reduce((result, { pkg, directory }) => {
         return {
           ...result,
-          [pkg]: directory,
+
+          // We alias exact matches to validate top-level imports for exposed
+          // components and utilities while still supporting deeper references
+          // for non-exported, package-specific storybook utils.
+          // (e.g. we match `@perses-dev/plugin-system` but DO NOT match
+          // `@perses-dev/plugin-system/src/stories/shared-utils`).
+          // This helps us define provider/context decorators once in the
+          // packages that define the context, which makes it easier to share
+          // utils without hitting circular dependencies with turbo.
+          [`${pkg}$`]: directory,
         };
       }, {}),
     };

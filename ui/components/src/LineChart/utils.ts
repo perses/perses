@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { formatValue, UnitOptions } from '../model';
@@ -103,4 +103,19 @@ export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
     },
   };
   return [merge(Y_AXIS_DEFAULT, yAxis)];
+}
+
+/*
+ * Clear all highlighted series when cursor exits canvas
+ * https://echarts.apache.org/en/api.html#action.downplay
+ */
+export function clearHighlightedSeries(chart: EChartsInstance, totalSeries: number) {
+  if (chart.dispatchAction !== undefined) {
+    for (let i = 0; i < totalSeries; i++) {
+      chart.dispatchAction({
+        type: 'downplay',
+        seriesIndex: i,
+      });
+    }
+  }
 }

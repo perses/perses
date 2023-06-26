@@ -1,5 +1,114 @@
 # Changelog
 
+## 0.35.0 / 2023-06-14
+
+- [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
+- [FEATURE] Support Multi-Series Stat Chart (#1241)
+- [FEATURE] SettingsAutocomplete component (#1242)
+- [BUGFIX] Fix y axis label positioning (#1240)
+- [ENHANCEMENT] Update panel header info tooltips (#1247)
+- [ENHANCEMENT] Export prom variables types (#1248)
+- [BREAKINGCHANGE] Improve calculations for gauge and stat charts (#1246)
+
+## 0.34.0 / 2023-06-08
+
+- [FEATURE] Shared crosshair for all time series panels on a dashboard (#1228)
+- [FEATURE] Support variables in markdown (#1233)
+- [FEATURE] Resolve variables in prometheus legend formatter (#1231)
+- [FEATURE] Support variables in Panels and Panel Groups strings (title, description) (#1225)
+- [FEATURE] Respect custom all value in list variables (#1236)
+- [BUGFIX] lodash-es import fix (#1238)
+- [ENHANCEMENT] Table legend can include additional columns (#1230)
+- [ENHANCEMENT] Export from each core panel plugin barrel file (#1229)
+- [BREAKINGCHANGE] Move calculation model to `core` package (#1238)
+- [BREAKINGCHANGE] Reorg legend code to separate plugin spec & component concerns (#1223)
+
+## 0.33.0 / 2023-06-06
+
+- [BUGFIX] Fix save dashboard console warning and saved duration checkbox (#1226)
+- [BREAKINGCHANGE] Adjust MUI bg tokens to simplify theming (#1222)
+
+## 0.32.0 / 2023-06-05
+
+- [FEATURE] Table legend for time series chart panel (#1197)
+- [ENHANCEMENT] Tooltip sticky header and move show all toggle (#1202)
+- [ENHANCEMENT] Add table mode to legend component (#1193)
+- [ENHANCEMENT] Export SaveDashboardButton from dashboards package (#1203)
+- [ENHANCEMENT] Predefined point_radius ratio to simplify TimeSeriesChart visual editing (#1102)
+- [ENHANCEMENT] Set stat chart yaxis min (#1204)
+- [BUGFIX] Saving defaults error adjustments and account for Empty StaticListVariable (#1214)
+- [BUGFIX] Fix pin event to work on first click without hiding tooltip (#1202)
+- [BUGFIX] Avoiding screen reload on theme toggle (#1198)
+- [BREAKINGCHANGE] Save dashboard type change for embed gql users (#1210)
+- [BREAKINGCHANGE] Extract legend layout to reusable component (#1196)
+
+## 0.31.0 / 2023-05-26
+
+- [FEATURE] Revamp dashboard variables form (#1177)
+- [FEATURE] Tooltip bold multi series when close to cursor, add show all toggle (#1181)
+- [FEATURE] Add HTTP endpoint to manage global variable (#1162)
+- [FEATURE] Option to save default variable values and time range (#1165)
+- [ENHANCEMENT] Export types that are useful for working with core panels (#1189)
+- [ENHANCEMENT] Make the whole panel group clickable for toggle/expand (#1178)
+- [ENHANCEMENT] Refactor time series chart panel selection (#1175)
+- [ENHANCEMENT] Add `noDataVariant` to `LineChart` (#1176)
+- [ENHANCEMENT] Add experimental table component (#1191)
+- [BUGFIX] Line highlight on hover refactor using ECharts dispatch (#1112)
+- [BUGFIX] Fix pinned tooltip by removing onMouseLeave unpin (#1181)
+- [BREAKINGCHANGE] Move legend interactions to legend (#1179)
+- [BREAKINGCHANGE] Optional metadata, remove `unknown` DashboardResource type assertion (#1171)
+- [BREAKINGCHANGE] Add interfaces for each panel's definition (#1158)
+- [BREAKINGCHANGE] Use react-virtuoso for virtualization (#1160)
+
+## 0.30.0 / 2023-05-11
+
+- [FEATURE] Disable CRUD dialogs in readonly mode (#1129)
+- [FEATURE] Support ARM arch for binaries and docker (#1144)
+- [ENHANCEMENT] Adjust padding on stat chart so it is centered (#1154)
+- [ENHANCEMENT] Update formatting to use exact decimal places (#1152)
+- [ENHANCEMENT] Allow saving `duration` from JSON editor (#1149)
+- [ENHANCEMENT] Add timerange and refresh buttons on the sticky toolbar (#1145)
+- [ENHANCEMENT] Improve algorithm for picking y-axis minimum value (#1146)
+- [ENHANCEMENT] Make it possible to set decimal_places as undefined in UI (#1131)
+- [ENHANCEMENT] improve search in the home page (#1127)
+- [BUGFIX] fix time series tooltip vertical positioning (#1161)
+- [BUGFIX] Revert echarts wrapper defaults to fluid width and height (#1164)
+- [BUGFIX] fix date handling in tooltip (#1163)
+- [BUGFIX] Remove palette edit buttons after merge issue (#1150)
+- [BUGFIX] Fix favicon returning 500 inside container (#1148)
+- [BUGFIX] Fix empty label value and static list cue schema (#1139)
+- [BUGFIX] Prevent calendar icon from flipping over (#1142)
+- [BUGFIX] Fix dashboard creation dialog when there is one or less dashboards (#1140)
+- [BREAKINGCHANGE] useDefaultTimeRange hook renamed to useDashboardDuration (#1149)
+
+## 0.29.1 / 2023-05-02
+
+- [BUGFIX] Color generation adjustment to error hue cutoff
+
+## 0.29.0 / 2023-05-01
+
+- [FEATURE] Allow TLS configuration for mysql database (#1128)
+- [FEATURE] Landing page revamp (#1097)
+- [ENHANCEMENT] Allow echarts wrapper to default to fluid width and height (#1115)
+- [ENHANCEMENT] Add empty item in Project dropdown (#1130)
+- [ENHANCEMENT] Add help text and placeholder for series_name_format control (#1104)
+- [ENHANCEMENT] Use abbreviations for time units (#1125)
+- [ENHANCEMENT] Categorical palette as default, switch to generative based on total series (#1124)
+- [ENHANCEMENT] Auto generated color palette with contrast (#1088)
+- [ENHANCEMENT] Improve formatting for percent values (#1120)
+- [ENHANCEMENT] Center value when sparkline is undefined (#1101)
+- [ENHANCEMENT] Move time series panel reset button (#1103)
+- [BUGFIX] Series name formatter return empty string when no resolved label value (#1132)
+- [BUGFIX] Fix http method not allowed not handled (#1126)
+- [BREAKINGCHANGE] Make "TimeSeriesQuery" required in DefaultPluginKinds (#1123)
+
+## 0.28.0 / 2023-04-17
+
+- [FEATURE] Revamp project page (#1062)
+- [ENHANCEMENT] Highlight behavior slight improvement using opacity blur (#1107)
+- [ENHANCEMENT] Increase tooltip max height to fit more series w/o scrolling (#1111)
+- [BREAKINGCHANGE] Define queries in panel spec instead of panel plugin spec (#1032)
+
 ## 0.27.0 / 2023-04-12
 
 - [FEATURE] Categorical color palette support in time series panel spec (JSON only) (#1031)

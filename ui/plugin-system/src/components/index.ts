@@ -13,6 +13,7 @@
 
 export * from './CalculationSelector';
 export * from './DatasourceSelect';
+export * from './LegendOptionsEditor';
 export * from './OptionsEditorTabs';
 export * from './PanelSpecEditor';
 export * from './PluginEditor';

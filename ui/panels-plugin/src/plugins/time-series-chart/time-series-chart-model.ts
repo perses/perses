@@ -11,24 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Definition, ThresholdOptions } from '@perses-dev/core';
+import { UnitOptions } from '@perses-dev/components';
+import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
+
+/**
+ * The schema for a TimeSeriesChart panel.
+ */
+export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOptions> {
+  kind: 'TimeSeriesChart';
+}
 
 /**
  * The Options object supported by the TimeSeriesChartPanel plugin.
  */
 export interface TimeSeriesChartOptions {
-  legend?: LegendOptions;
-  y_axis?: YAxisOptions;
-  unit?: UnitOptions;
+  legend?: LegendSpecOptions;
+  y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
-  visual?: VisualOptions;
+  visual?: TimeSeriesChartVisualOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
 
-export interface YAxisOptions {
+export interface TimeSeriesChartYAxisOptions {
   show?: boolean;
   label?: string;
   unit?: UnitOptions;
@@ -36,16 +42,16 @@ export interface YAxisOptions {
   max?: number;
 }
 
-export interface PaletteOptions {
+export interface TimeSeriesChartPaletteOptions {
   kind: 'Auto' | 'Categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 
-export type VisualOptions = {
+export type TimeSeriesChartVisualOptions = {
   line_width?: number;
   area_opacity?: number;
   show_points?: 'Auto' | 'Always';
-  palette?: PaletteOptions;
+  palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;
   connect_nulls?: boolean;
@@ -53,19 +59,35 @@ export type VisualOptions = {
 
 export const DEFAULT_UNIT: UnitOptions = {
   kind: 'Decimal',
-  decimal_places: 2,
   abbreviate: true,
 };
 
-export const DEFAULT_LINE_WIDTH = 1.5;
+export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
+  show: true,
+  label: '',
+  unit: DEFAULT_UNIT,
+  min: undefined,
+  max: undefined,
+};
 
+export const Y_AXIS_CONFIG = {
+  show: { label: 'Show' },
+  label: { label: 'Label' },
+  unit: { label: 'Unit' },
+  min: { label: 'Min' },
+  max: { label: 'Max' },
+};
+
+export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;
 
-export const DEFAULT_POINT_RADIUS = 4;
+// How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.
+export const POINT_SIZE_OFFSET = 1.5;
+export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
 
 export const DEFAULT_CONNECT_NULLS = false;
 
-export const DEFAULT_VISUAL: VisualOptions = {
+export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   line_width: DEFAULT_LINE_WIDTH,
   area_opacity: DEFAULT_AREA_OPACITY,
   point_radius: DEFAULT_POINT_RADIUS,
@@ -102,29 +124,15 @@ export const VISUAL_CONFIG = {
   },
 };
 
-export const DEFAULT_Y_AXIS: YAxisOptions = {
-  show: true,
-  label: '',
-  unit: DEFAULT_UNIT,
-  min: undefined,
-  max: undefined,
-};
-
-export const Y_AXIS_CONFIG = {
-  show: { label: 'Show' },
-  label: { label: 'Label' },
-  unit: { label: 'Unit' },
-  min: { label: 'Min' },
-  max: { label: 'Max' },
-};
-
 // None is equivalent to undefined since stack is optional
 export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent option support
 
 export const STACK_CONFIG = {
   None: { label: 'None' },
   All: { label: 'All' },
-  Percent: { label: 'Percent' }, // temporarily disabled
+
+  // TODO: enable option after 'Percent' implemented
+  Percent: { label: 'Percent', disabled: true }, // temporarily disabled
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
@@ -134,11 +142,11 @@ export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => 
   };
 });
 
-export const PANEL_HEIGHT_LG_BREAKPOINT = 300;
-export const LEGEND_HEIGHT_SM = 40;
-export const LEGEND_HEIGHT_LG = 100;
-
-export const MIN_VALUE_PADDING_MULTIPLIER = 0.8;
+// Both of these constants help produce a value that is LESS THAN the initial value.
+// For positive values, we multiply by a number less than 1 to get this outcome.
+// For negative values, we multiply to a number greater than 1 to get this outcome.
+export const POSITIVE_MIN_VALUE_MULTIPLIER = 0.8;
+export const NEGATIVE_MIN_VALUE_MULTIPLIER = 1.2;
 
 /**
  * Creates an initial/empty options object for the TimeSeriesChartPanel.

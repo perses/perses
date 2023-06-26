@@ -11,91 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  parseTemplateVariables,
-  replaceTemplateVariable,
-  replaceTemplateVariables,
-  formatSeriesName,
-  getFormattedPrometheusSeriesName,
-  getUniqueKeyForPrometheusResult,
-} from './utils';
-
-describe('parseTemplateVariables()', () => {
-  const tests = [
-    {
-      text: 'hello $var1 world $var2',
-      variables: ['var1', 'var2'],
-    },
-  ];
-
-  tests.forEach(({ text, variables }) => {
-    it(`parses ${text}`, () => {
-      expect(parseTemplateVariables(text)).toEqual(variables);
-    });
-  });
-});
-
-describe('replaceTemplateVariable()', () => {
-  const tests = [
-    {
-      text: 'hello $var1',
-      varName: 'var1',
-      value: 'world',
-      expected: 'hello world',
-    },
-    {
-      text: 'hello $var1 $var1',
-      varName: 'var1',
-      value: 'world',
-      expected: 'hello world world',
-    },
-    {
-      text: 'hello $var1',
-      varName: 'var1',
-      value: ['world', 'w'],
-      expected: 'hello (world|w)',
-    },
-    {
-      text: 'hello $var1 $var1',
-      varName: 'var1',
-      value: ['world', 'w'],
-      expected: 'hello (world|w) (world|w)',
-    },
-  ];
-
-  tests.forEach(({ text, value, varName, expected }) => {
-    it(`replaces ${text} ${value}`, () => {
-      expect(replaceTemplateVariable(text, varName, value)).toEqual(expected);
-    });
-  });
-});
-
-describe('replaceTemplateVariables()', () => {
-  const tests = [
-    {
-      text: 'hello $var1 $var2',
-      state: {
-        var1: { value: 'world', loading: false },
-        var2: { value: 'world', loading: false },
-      },
-      expected: 'hello world world',
-    },
-    {
-      text: 'hello $var1 $var2',
-      state: {
-        var1: { value: 'world', loading: false },
-        var2: { value: ['a', 'b'], loading: false },
-      },
-      expected: 'hello world (a|b)',
-    },
-  ];
-
-  tests.forEach(({ text, state, expected }) => {
-    it(`replaces ${text} ${JSON.stringify(state)}`, () => {
-      expect(replaceTemplateVariables(text, state)).toEqual(expected);
-    });
-  });
-});
+import { Metric } from '../model/api-types';
+import { formatSeriesName, getFormattedPrometheusSeriesName, getUniqueKeyForPrometheusResult } from './utils';
 
 describe('formatSeriesName', () => {
   it('should resolve label name tokens to label values from query response', () => {
@@ -180,12 +97,38 @@ describe('getFormattedPrometheusSeriesName', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const series_name_format = 'custom example {{env}} {{instance}} {{node}}';
+    const series_name_format = 'custom example {{env}} {{instance}} {{job}}';
     const output = {
       formattedName: 'custom example demo demo.do.prometheus.io:9100 node',
       name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
     };
     expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should show an empty string when no corresponding label values returned', () => {
+    const query = 'test_query';
+    const metric = {
+      job: 'node',
+    };
+    const series_name_format = 'test{{fake}}';
+    const output = {
+      formattedName: 'test',
+      name: '{job="node"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+  });
+
+  it('should correctly handle invalid label value case', () => {
+    const query = 'test_query';
+    const metric = {
+      job: 99,
+    };
+    const series_name_format = 'job - {{job}}';
+    const output = {
+      formattedName: 'job - 99',
+      name: '{job="99"}',
+    };
+    expect(getFormattedPrometheusSeriesName(query, metric as unknown as Metric, series_name_format)).toEqual(output);
   });
 
   it('should show correct raw series name', () => {

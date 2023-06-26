@@ -20,7 +20,7 @@ export interface DrawerProps extends MuiDrawerProps {
   anchor?: 'left' | 'right';
 }
 
-const DRAWER_DEFAULT_WIDTH = 900;
+const DRAWER_DEFAULT_WIDTH = 1080;
 
 export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children, ...rest }: DrawerProps) => {
   return (

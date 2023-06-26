@@ -13,9 +13,8 @@
 
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
+import { Dialog, useSnackbar } from '@perses-dev/components';
 import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
-import { useSnackbar } from '../../context/SnackbarProvider';
 
 export interface AddProjectDialogProps {
   open: boolean;
@@ -26,12 +25,13 @@ export interface AddProjectDialogProps {
 /**
  * Dialog used to create a project.
  * @param props.open Define if the dialog should be opened or not.
- * @param props.closeDialog Provides the function to close itself.
- * @param props.onConfirm Action to perform when user confirmed.
+ * @param props.onClose Provides the function to close itself.
+ * @param props.onSuccess Action to perform when user confirmed.
  * @constructor
  */
 export const AddProjectDialog = (props: AddProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
+
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<string>('');
 

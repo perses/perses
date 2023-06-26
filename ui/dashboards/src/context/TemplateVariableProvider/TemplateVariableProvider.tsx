@@ -15,6 +15,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
+import produce from 'immer';
 
 import {
   TemplateVariableContext,
@@ -24,6 +25,7 @@ import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
 } from '@perses-dev/plugin-system';
 import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import { checkSavedDefaultVariableStatus } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';
 
@@ -34,6 +36,8 @@ type TemplateVariableStore = {
   setVariableOptions: (name: VariableName, options: VariableOption[]) => void;
   setVariableLoading: (name: VariableName, loading: boolean) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
+  setVariableDefaultValues: () => VariableDefinition[];
+  getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
 };
 
 const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
@@ -90,6 +94,8 @@ export function useTemplateVariableActions() {
       setVariableLoading: s.setVariableLoading,
       setVariableOptions: s.setVariableOptions,
       setVariableDefinitions: s.setVariableDefinitions,
+      setVariableDefaultValues: s.setVariableDefaultValues,
+      getSavedVariablesStatus: s.getSavedVariablesStatus,
     };
   });
 }
@@ -106,6 +112,7 @@ export function useTemplateVariableStore() {
 
 function PluginProvider({ children }: { children: React.ReactNode }) {
   const originalValues = useTemplateVariableValues();
+  const definitions = useTemplateVariableDefinitions();
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -115,13 +122,20 @@ function PluginProvider({ children }: { children: React.ReactNode }) {
     // to include all options.
     Object.keys(originalValues).forEach((name) => {
       const v = { ...originalValues[name] } as VariableState;
+
       if (v.value === ALL_VALUE) {
-        v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+        const definition = definitions.find((d) => d.spec.name === name);
+        // If the variable is a list variable and has a custom all value, then use that value instead
+        if (definition?.kind === 'ListVariable' && definition.spec.custom_all_value) {
+          v.value = definition.spec.custom_all_value;
+        } else {
+          v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
+        }
       }
       contextValues[name] = v;
     });
     return contextValues;
-  }, [originalValues]);
+  }, [originalValues, definitions]);
 
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
@@ -135,56 +149,112 @@ function createTemplateVariableSrvStore({ initialVariableDefinitions = [], query
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
   const store = createStore<TemplateVariableStore>()(
     devtools(
-      immer((set) => ({
+      immer((set, get) => ({
         variableState: hydrateTemplateVariableStates(initialVariableDefinitions, initialParams),
         variableDefinitions: initialVariableDefinitions,
         setVariableDefinitions(definitions: VariableDefinition[]) {
-          set((state) => {
-            state.variableDefinitions = definitions;
-            state.variableState = hydrateTemplateVariableStates(definitions, initialParams);
-          });
+          set(
+            (state) => {
+              state.variableDefinitions = definitions;
+              state.variableState = hydrateTemplateVariableStates(definitions, initialParams);
+            },
+            false,
+            '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
+          );
         },
         setVariableOptions(name, options) {
-          set((state) => {
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-            varState.options = options;
-          });
+          set(
+            (state) => {
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
+              }
+              varState.options = options;
+            },
+            false,
+            '[Variables] setVariableOptions'
+          );
         },
         setVariableLoading(name, loading) {
-          set((state) => {
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-            varState.loading = loading;
-          });
-        },
-
-        setVariableValue: (name, value) =>
-          set((state) => {
-            let val = value;
-            const varState = state.variableState[name];
-            if (!varState) {
-              return;
-            }
-
-            // Make sure there is only one all value
-            if (Array.isArray(val) && val.includes(ALL_VALUE)) {
-              if (val.at(-1) === ALL_VALUE) {
-                val = ALL_VALUE;
-              } else {
-                val = val.filter((v) => v !== ALL_VALUE);
+          set(
+            (state) => {
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
               }
-            }
-            if (queryParams) {
-              const setQueryParams = queryParams[1];
-              setQueryParams({ [getURLQueryParamName(name)]: val });
-            }
-            varState.value = val;
-          }),
+              varState.loading = loading;
+            },
+            false,
+            '[Variables] setVariableLoading'
+          );
+        },
+        setVariableValue: (name, value) =>
+          set(
+            (state) => {
+              let val = value;
+              const varState = state.variableState[name];
+              if (!varState) {
+                return;
+              }
+
+              // Make sure there is only one all value
+              if (Array.isArray(val) && val.includes(ALL_VALUE)) {
+                if (val.at(-1) === ALL_VALUE) {
+                  val = ALL_VALUE;
+                } else {
+                  val = val.filter((v) => v !== ALL_VALUE);
+                }
+              }
+              if (queryParams) {
+                const setQueryParams = queryParams[1];
+                setQueryParams({ [getURLQueryParamName(name)]: val });
+              }
+              varState.value = val;
+            },
+            false,
+            '[Variables] setVariableValue'
+          ),
+        setVariableDefaultValues: () => {
+          const variableDefinitions = get().variableDefinitions;
+          const variableState = get().variableState;
+          const updatedVariables = produce(variableDefinitions, (draft) => {
+            draft.forEach((variable, index) => {
+              if (variable.kind === 'ListVariable') {
+                const currentVariable = variableState[variable.spec.name];
+                if (currentVariable?.value !== undefined) {
+                  draft[index] = {
+                    kind: 'ListVariable',
+                    spec: produce(variable.spec, (specDraft) => {
+                      specDraft.default_value = currentVariable.value;
+                    }),
+                  };
+                }
+              } else if (variable.kind === 'TextVariable') {
+                const currentVariable = variableState[variable.spec.name];
+                const currentVariableValue = typeof currentVariable?.value === 'string' ? currentVariable.value : '';
+                if (currentVariable?.value !== undefined) {
+                  draft[index] = {
+                    kind: 'TextVariable',
+                    spec: produce(variable.spec, (specDraft) => {
+                      specDraft.value = currentVariableValue;
+                    }),
+                  };
+                }
+              }
+            });
+          });
+          set(
+            (state) => {
+              state.variableDefinitions = updatedVariables;
+            },
+            false,
+            '[Variables] setVariableDefaultValues'
+          );
+          return updatedVariables;
+        },
+        getSavedVariablesStatus: () => {
+          return checkSavedDefaultVariableStatus(get().variableDefinitions, get().variableState);
+        },
       }))
     )
   );

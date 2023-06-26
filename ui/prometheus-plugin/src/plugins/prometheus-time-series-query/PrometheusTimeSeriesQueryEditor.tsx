@@ -14,7 +14,13 @@
 import { produce } from 'immer';
 import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
 import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
-import { DEFAULT_PROM, isDefaultPromSelector, isPrometheusDatasourceSelector, PrometheusClient } from '../../model';
+import {
+  DEFAULT_PROM,
+  isDefaultPromSelector,
+  isPrometheusDatasourceSelector,
+  PROM_DATASOURCE_KIND,
+  PrometheusClient,
+} from '../../model';
 import { PromQLEditor } from '../../components';
 import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
 
@@ -49,6 +55,18 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   return (
     <Stack spacing={2}>
+      <FormControl margin="dense" fullWidth={false}>
+        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
+            maintain 17 compatibility somehow with a polyfill/shim? */}
+        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind={PROM_DATASOURCE_KIND}
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId="prom-datasource-label"
+          label="Prometheus Datasource"
+        />
+      </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
         value={query}
@@ -57,24 +75,13 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       />
       <TextField
         fullWidth
-        label="Series Name Format"
+        label="Legend Name"
+        placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
+        helperText="Set the name for each series in the legend and the tooltip."
         value={format ?? ''}
         onChange={(e) => handleFormatChange(e.target.value)}
         onBlur={handleFormatBlur}
-        margin="dense"
       />
-      <FormControl margin="dense" fullWidth={false}>
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-            maintain 17 compatibility somehow with a polyfill/shim? */}
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
-        <DatasourceSelect
-          datasourcePluginKind="PrometheusDatasource"
-          value={selectedDatasource}
-          onChange={handleDatasourceChange}
-          labelId="prom-datasource-label"
-          label="Prometheus Datasource"
-        />
-      </FormControl>
     </Stack>
   );
 }

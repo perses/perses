@@ -13,7 +13,12 @@
 
 import type { EChartsOption, YAXisComponentOption, LineSeriesOption } from 'echarts';
 import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT, EChartsTimeSeries, EChartsValues } from '@perses-dev/components';
+import {
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  EChartsTimeSeries,
+  EChartsValues,
+  EChartsDataFormat,
+} from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -21,18 +26,23 @@ import {
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
   DEFAULT_Y_AXIS,
-  MIN_VALUE_PADDING_MULTIPLIER,
-  VisualOptions,
-  YAxisOptions,
+  POSITIVE_MIN_VALUE_MULTIPLIER,
+  NEGATIVE_MIN_VALUE_MULTIPLIER,
+  TimeSeriesChartVisualOptions,
+  TimeSeriesChartYAxisOptions,
 } from '../time-series-chart-model';
 
 export type RunningQueriesState = ReturnType<typeof useTimeSeriesQueries>;
 
-export const EMPTY_GRAPH_DATA = {
+export const EMPTY_GRAPH_DATA: EChartsDataFormat = {
   timeSeries: [],
   xAxis: [],
   legendItems: [],
 };
+
+export const HIDE_DATAPOINTS_LIMIT = 70;
+
+export const BLUR_FADEOUT_OPACITY = 0.5;
 
 /**
  * Given a list of running queries, calculates a common time scale for use on
@@ -45,18 +55,87 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 }
 
 /**
- * Gets default ECharts line series option properties
+ * Gets ECharts line series option properties for legacy LineChart
  */
 export function getLineSeries(
+  id: string,
   formattedName: string,
-  visual: VisualOptions,
+  data: EChartsTimeSeries['data'],
+  visual: TimeSeriesChartVisualOptions,
+  paletteColor?: string
+): EChartsTimeSeries {
+  const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
+  const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
+  if (visual.show_points === 'Always') {
+    showPoints = true;
+  }
+
+  return {
+    type: 'line',
+    id: id,
+    name: formattedName,
+    data: data,
+    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    color: paletteColor,
+    stack: visual.stack === 'All' ? visual.stack : undefined,
+    sampling: 'lttb',
+    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    showSymbol: showPoints,
+    showAllSymbol: true,
+    symbolSize: pointRadius,
+    lineStyle: {
+      width: lineWidth,
+      opacity: 0.8,
+    },
+    areaStyle: {
+      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+    },
+    // https://echarts.apache.org/en/option.html#series-line.emphasis
+    emphasis: {
+      focus: 'series',
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      lineStyle: {
+        width: lineWidth + 1.5,
+        opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
+      },
+    },
+  };
+}
+
+/**
+ * Gets ECharts line series option properties for recommended TimeChart
+ */
+export function getTimeSeries(
+  id: string,
+  formattedName: string,
+  data: EChartsTimeSeries['data'],
+  visual: TimeSeriesChartVisualOptions,
   seriesIndex: number,
   paletteColor?: string
 ): EChartsOption['series'] {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
+  if (visual.show_points === 'Always') {
+    showPoints = true;
+  }
+
   return {
     type: 'line',
+    id: id,
     datasetId: seriesIndex,
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
@@ -64,25 +143,29 @@ export function getLineSeries(
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
-    showSymbol: visual.show_points === 'Always' ? true : false,
+    showSymbol: showPoints,
+    showAllSymbol: true,
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
+      opacity: 0.8,
     },
     areaStyle: {
       opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
     },
+    // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      blurScope: 'coordinateSystem',
       disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth,
+        width: lineWidth + 1.5,
+        opacity: 1,
       },
     },
     blur: {
       lineStyle: {
-        opacity: 0.6,
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -115,8 +198,14 @@ export function getThresholdSeries(
       width: 2,
     },
     emphasis: {
+      focus: 'series',
       lineStyle: {
         width: 2.5,
+      },
+    },
+    blur: {
+      lineStyle: {
+        opacity: BLUR_FADEOUT_OPACITY,
       },
     },
   };
@@ -151,31 +240,45 @@ function findMax(timeSeries: LineSeriesOption[]) {
 /**
  * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
  */
-export function convertPanelYAxis(inputAxis: YAxisOptions = {}): YAXisComponentOption {
+export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
     show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
     min: inputAxis?.min,
     max: inputAxis?.max,
   };
 
+  // Set the y-axis minimum relative to the data
   if (inputAxis?.min === undefined) {
-    // Sets minimum axis label relative to data instead of zero.
+    // https://echarts.apache.org/en/option.html#yAxis.min
     yAxis.min = (value) => {
-      // https://echarts.apache.org/en/option.html#yAxis.min
       if (value.min >= 0 && value.min <= 1) {
         // Helps with PercentDecimal units, or datasets that return 0 or 1 booleans
         return 0;
       }
 
+      // Note: We can tweak the MULTIPLIER constants if we want
+      // TODO: Experiment with using a padding that is based on the difference between max value and min value
       if (value.min > 0) {
-        // Allows for padding between origin and first series.
-        // Current value was chosen arbitrarily and will need to be adjusted.
-        return value.min * MIN_VALUE_PADDING_MULTIPLIER;
+        return roundDown(value.min * POSITIVE_MIN_VALUE_MULTIPLIER);
+      } else {
+        return roundDown(value.min * NEGATIVE_MIN_VALUE_MULTIPLIER);
       }
-
-      // No padding added since negative numbers for min throws it off.
-      return value.min;
     };
   }
+
   return yAxis;
+}
+
+/**
+ * Rounds down to nearest number with one significant digit.
+ *
+ * Examples:
+ * 1. 675 --> 600
+ * 2. 0.567 --> 0.5
+ * 3. -12 --> -20
+ */
+export function roundDown(num: number) {
+  const magnitude = Math.floor(Math.log10(Math.abs(num)));
+  const firstDigit = Math.floor(num / Math.pow(10, magnitude));
+  return firstDigit * Math.pow(10, magnitude);
 }

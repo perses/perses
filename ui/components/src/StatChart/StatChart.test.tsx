@@ -17,6 +17,10 @@ import { UnitOptions } from '../model';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 
+jest.mock('./calculateFontSize', () => ({
+  useOptimalFontSize: jest.fn().mockImplementation(() => 12),
+}));
+
 describe('StatChart', () => {
   const renderChart = (unit: UnitOptions) => {
     const contentDimensions = {
@@ -66,7 +70,7 @@ describe('StatChart', () => {
       kind: 'Seconds',
     };
     renderChart(unit);
-    expect(screen.getByText('7.73 seconds')).toBeInTheDocument();
+    expect(screen.getByText('7.73s')).toBeInTheDocument();
   });
 
   it('show value with months time unit formatting', () => {

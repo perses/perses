@@ -24,6 +24,7 @@ const testDashboard: DashboardResource = {
   },
   spec: {
     duration: '30m',
+    refreshInterval: '0s',
     variables: [
       {
         kind: 'TextVariable',

@@ -13,7 +13,7 @@
 
 import { DatasourceSelector } from '@perses-dev/core';
 
-const PROM_DATASOURCE_KIND = 'PrometheusDatasource' as const;
+export const PROM_DATASOURCE_KIND = 'PrometheusDatasource' as const;
 
 /**
  * DatasourceSelector for Prom Datasources.

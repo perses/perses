@@ -11,42 +11,63 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { merge } from 'lodash-es';
-import { useDeepMemo, StepOptions, getXValues } from '@perses-dev/core';
-import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
-import type { EChartsOption, GridComponentOption } from 'echarts';
+import { useMemo, useRef, useState } from 'react';
+import merge from 'lodash/merge';
+import {
+  useDeepMemo,
+  StepOptions,
+  getXValues,
+  getYValues,
+  TimeSeries,
+  DEFAULT_LEGEND,
+  getCalculations,
+} from '@perses-dev/core';
+import {
+  LEGEND_VALUE_CONFIG,
+  PanelProps,
+  useDataQueries,
+  useTimeRange,
+  validateLegendSpec,
+  legendValues,
+} from '@perses-dev/plugin-system';
+import type { GridComponentOption } from 'echarts';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import {
-  DEFAULT_LEGEND,
-  EChartsDatasetFormat,
-  validateLegendSpec,
-  Legend,
+  EChartsDataFormat,
   LineChart,
-  TimeChart,
+  LineChartHandle,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
+  SelectedLegendItemState,
+  ContentWithLegend,
+  formatValue,
+  TableColumnConfig,
+  LegendItem,
+  LegendProps,
+  useId,
 } from '@perses-dev/components';
-import {
-  TimeSeriesChartOptions,
-  DEFAULT_UNIT,
-  DEFAULT_VISUAL,
-  PANEL_HEIGHT_LG_BREAKPOINT,
-  LEGEND_HEIGHT_SM,
-  LEGEND_HEIGHT_LG,
-} from './time-series-chart-model';
+import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
   getLineSeries,
   getThresholdSeries,
   getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
-  // convertPercentThreshold,
+  convertPercentThreshold,
   convertPanelYAxis,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
 export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
+
+// Using an "ALL" value to handle the case on first loading the chart where we
+// want to select all, but do not want all of the legend items to be visually highlighted.
+// This helps us differentiate those cases more clearly instead of inferring it
+// based on the state of the data. This also helps us avoid some coding
+// complexity around initializing a full record for the initial load that would
+// currently require significantly more refactoring of this component.
+// TODO: simplify this if we switch the list-based legend UI to use checkboxes,
+// where we *would* want to visually select all items in this case.
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
@@ -55,6 +76,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
+  const chartId = useId('time-series-panel');
+
+  const lineChartRef = useRef<LineChartHandle>(null);
 
   // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
@@ -95,36 +119,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
 
-  const [selectedSeriesNames, setSelectedSeriesNames] = useState<string[]>([]);
+  const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
+  const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
-
-  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesName: string) => {
-    const isModifiedClick = e.metaKey || e.shiftKey;
-
-    setSelectedSeriesNames((current) => {
-      const isSelected = current.includes(seriesName);
-
-      // Clicks with modifier key can select multiple items.
-      if (isModifiedClick) {
-        if (isSelected) {
-          // Modified click on already selected item. Remove that item.
-          return current.filter((name) => name !== seriesName);
-        }
-
-        // Modified click on not-selected item. Add it.
-        return [...current, seriesName];
-      }
-
-      if (isSelected) {
-        // Clicked item was already selected. Unselect it.
-        return [];
-      }
-
-      // Select clicked item.
-      return [seriesName];
-    });
-  };
 
   // Populate series data based on query results
   const { graphData } = useDeepMemo(() => {
@@ -143,11 +141,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       };
     }
 
-    const dataset: EChartsOption['dataset'] = [];
-
-    const graphData: EChartsDatasetFormat = {
+    const graphData: EChartsDataFormat = {
       timeSeries: [],
-      dataset: dataset,
       xAxis: [],
       legendItems: [],
       rangeMs: timeScale.endMs - timeScale.startMs,
@@ -171,15 +166,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (let i = 0; i < result.data.series.length; i++) {
-        const timeSeries = result.data.series[i];
+        const timeSeries: TimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
           return { graphData };
         }
-
-        dataset.push({
-          id: seriesIndex,
-          source: [['timestamp', 'value'], ...timeSeries.values],
-        });
 
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
@@ -198,24 +188,34 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
-        const lineSeries = getLineSeries(formattedSeriesName, visual, seriesIndex, seriesColor);
+        // We add a unique id for the chart to disambiguate items across charts
+        // when there are multiple on the page.
+        const seriesId = chartId + timeSeries.name + seriesIndex;
 
-        const isSelected = selectedSeriesNames.includes(timeSeries.name);
-        if (!selectedSeriesNames.length || isSelected) {
+        const yValues = getYValues(timeSeries, timeScale);
+        const lineSeries = getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor);
+
+        const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
+
+        // When we initially load the chart, we want to show all series, but
+        // DO NOT want to visualy highlight all the items in the legend.
+        const isSelectAll = selectedLegendItems === 'ALL';
+        const isSelected = !isSelectAll && !!selectedLegendItems[seriesId];
+        const showTimeSeries = isSelected || isSelectAll;
+
+        if (showTimeSeries) {
           graphData.timeSeries.push(lineSeries);
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({
-            id: timeSeries.name + seriesIndex, // Avoids duplicate key console errors when there are duplicate series names
+            id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
-            isSelected,
             color: seriesColor,
-            onClick: (e) => onLegendItemClick(e, timeSeries.name),
+            data: legendCalculations,
           });
         }
       }
     }
-    graphData.dataset = dataset;
     graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
@@ -228,17 +228,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
-          value: step.value,
-          // TODO: fix threshold percent max calc
-          // value:
-          //   // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-          //   thresholds.mode === 'Percent'
-          //     ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
-          //     : step.value,
+          value:
+            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+            thresholds.mode === 'Percent'
+              ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min)
+              : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1} `;
         // TODO: switch back to markLine once alternate tooltip created
-        const thresholdLineSeries = getThresholdSeries(thresholdName, stepOption, timeScale.startMs, timeScale.endMs);
+        const thresholdData = Array(xAxisData.length).fill(stepOption.value);
+        const thresholdLineSeries = getThresholdSeries(thresholdName, thresholdData, stepOption);
         graphData.timeSeries.push(thresholdLineSeries);
       });
     }
@@ -246,7 +245,41 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     return {
       graphData,
     };
-  }, [queryResults, thresholds, selectedSeriesNames, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+
+  // Translate the legend values into columns for the table legend.
+  const legendColumns = useMemo(() => {
+    if (!legend?.values) {
+      return [];
+    }
+
+    // Iterating the predefined list of possible values to retain a specific
+    // intended order of values.
+    return legendValues.reduce((columns, legendValue) => {
+      const legendConfig = LEGEND_VALUE_CONFIG[legendValue];
+
+      if (legendConfig && legend?.values?.includes(legendValue)) {
+        columns.push({
+          accessorKey: `data.${legendValue}`,
+          header: legendConfig.label,
+          headerDescription: legendConfig.description,
+          // Intentionally hardcoding a column width to start based on discussions
+          // with design around keeping this simple to start. This may need
+          // revisiting in the future to handle edge cases with very large values.
+          width: 72,
+          align: 'right',
+          cell: ({ getValue }) => {
+            const cellValue = getValue();
+            return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
+          },
+          cellDescription: true,
+          enableSorting: true,
+        });
+      }
+
+      return columns;
+    }, [] as Array<TableColumnConfig<LegendItem>>);
+  }, [legend?.values, unit]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -280,22 +313,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  const legendWidth = legend && legend.position === 'Right' ? 200 : adjustedContentDimensions.width;
-
-  // TODO: account for number of time series returned when adjusting legend spacing
-  let legendHeight = LEGEND_HEIGHT_SM;
-  if (legend && legend.position === 'Right') {
-    legendHeight = contentDimensions?.height || adjustedContentDimensions.height;
-  } else if (adjustedContentDimensions.height >= PANEL_HEIGHT_LG_BREAKPOINT) {
-    legendHeight = LEGEND_HEIGHT_LG;
-  }
-
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
     left: !echartsYAxis.show ? 0 : gridLeft,
-    right: legend && legend.position === 'Right' ? legendWidth : 20,
-    bottom: legend && legend.position === 'Bottom' ? legendHeight : 0,
+    right: 20,
+    bottom: 0,
   };
 
   const handleDataZoom = (event: ZoomEventData) => {
@@ -304,22 +327,60 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   return (
-    <Box sx={{ padding: `${contentPadding}px`, position: 'relative' }}>
-      {y_axis && y_axis.show && y_axis.label && (
-        <YAxisLabel name={y_axis.label} height={adjustedContentDimensions.height} />
-      )}
-      <TimeChart
+    <Box sx={{ padding: `${contentPadding}px` }}>
+      <ContentWithLegend
+        width={adjustedContentDimensions.width}
         height={adjustedContentDimensions.height}
-        data={graphData}
-        yAxis={echartsYAxis}
-        unit={unit}
-        grid={gridOverrides}
-        tooltipConfig={{ wrapLabels: true }}
-        onDataZoom={handleDataZoom}
-      />
-      {legend && graphData.legendItems && (
-        <Legend width={legendWidth} height={legendHeight} options={legend} data={graphData.legendItems} />
-      )}
+        // Making this small enough that the medium size doesn't get
+        // responsive-handling-ed away when in the panel options editor.
+        minChildrenHeight={50}
+        legendSize={legend?.size}
+        legendProps={
+          legend && {
+            options: legend,
+            data: graphData.legendItems || [],
+            selectedItems: selectedLegendItems,
+            onSelectedItemsChange: setSelectedLegendItems,
+            tableProps: {
+              columns: legendColumns,
+              sorting: legendSorting,
+              onSortingChange: setLegendSorting,
+            },
+            onItemMouseOver: (e, { id }) => {
+              lineChartRef.current?.highlightSeries({ id });
+            },
+            onItemMouseOut: () => {
+              lineChartRef.current?.clearHighlightedSeries();
+            },
+          }
+        }
+      >
+        {({ height, width }) => {
+          return (
+            <Box sx={{ height, width }}>
+              {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={height} />}
+              <LineChart
+                ref={lineChartRef}
+                height={height}
+                data={graphData}
+                yAxis={echartsYAxis}
+                unit={unit}
+                grid={gridOverrides}
+                tooltipConfig={{ wrapLabels: true }}
+                syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
+                onDataZoom={handleDataZoom}
+                //  Show an empty chart when there is no data because the user unselected all items in
+                // the legend. Otherwise, show a "no data" message.
+                noDataVariant={
+                  !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
+                    ? 'chart'
+                    : 'message'
+                }
+              />
+            </Box>
+          );
+        }}
+      </ContentWithLegend>
     </Box>
   );
 }

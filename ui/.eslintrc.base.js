@@ -56,18 +56,18 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/array-type': [
-      'warn',
+      'error',
       {
         default: 'array-simple',
       },
     ],
-    'import/order': 'warn',
+    'import/order': 'error',
     // you must disable the base rule as it can report incorrect errors
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': ['error'],
 
     'react/prop-types': 'off',
-    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/exhaustive-deps': 'error',
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
 

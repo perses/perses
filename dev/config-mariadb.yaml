@@ -1,3 +1,5 @@
+readonly: false
+
 database:
   sql:
     user: "user"
@@ -14,4 +16,14 @@ schemas:
   variables_path: "schemas/variables"
   interval: "5m"
 
-readonly: false
+important_dashboards:
+  - project: "perses"
+    dashboard: "Demo"
+  - project: "testing"
+    dashboard: "DuplicatePanels"
+  - project: "Unknown"
+    dashboard: "Dashboard"
+
+information: |-
+  # Hello World
+  ## MariaDB Database setup

@@ -27,7 +27,9 @@ const (
 	KindDatasource       Kind = "Datasource"
 	KindFolder           Kind = "Folder"
 	KindGlobalDatasource Kind = "GlobalDatasource"
+	KindGlobalVariable   Kind = "GlobalVariable"
 	KindProject          Kind = "Project"
+	KindVariable         Kind = "Variable"
 )
 
 var KindMap = map[Kind]bool{
@@ -35,7 +37,9 @@ var KindMap = map[Kind]bool{
 	KindDatasource:       true,
 	KindFolder:           true,
 	KindGlobalDatasource: true,
+	KindGlobalVariable:   true,
 	KindProject:          true,
+	KindVariable:         true,
 }
 
 var PluralKindMap = map[Kind]string{
@@ -43,7 +47,9 @@ var PluralKindMap = map[Kind]string{
 	KindDatasource:       "datasources",
 	KindFolder:           "folders",
 	KindGlobalDatasource: "globaldatasources",
+	KindGlobalVariable:   "globalvariables",
 	KindProject:          "projects",
+	KindVariable:         "variables",
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
@@ -93,8 +99,12 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Folder{}, nil
 	case KindGlobalDatasource:
 		return &GlobalDatasource{}, nil
+	case KindGlobalVariable:
+		return &GlobalVariable{}, nil
 	case KindProject:
 		return &Project{}, nil
+	case KindVariable:
+		return &Variable{}, nil
 	default:
 		return nil, fmt.Errorf("%q has no associated struct", kind)
 	}

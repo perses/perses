@@ -22,7 +22,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/variable"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -66,8 +68,14 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 	case *globaldatasource.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalDatasource)
 		prefix = qt.NamePrefix
+	case *globalvariable.Query:
+		pathFolder = d.generateResourceQuery(v1.KindGlobalVariable)
+		prefix = qt.NamePrefix
 	case *project.Query:
 		pathFolder = d.generateResourceQuery(v1.KindProject)
+		prefix = qt.NamePrefix
+	case *variable.Query:
+		pathFolder = d.generateProjectResourceQuery(v1.KindVariable, qt.Project)
 		prefix = qt.NamePrefix
 	default:
 		return "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)

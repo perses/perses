@@ -15,6 +15,12 @@ import { StoryFn, StoryContext } from '@storybook/react';
 import { DatasourceStoreProvider, DatasourceStoreProviderProps } from '@perses-dev/dashboards';
 import { defaultDatasourceProps } from '../../test';
 
+declare module '@storybook/react' {
+  interface Parameters {
+    withDatasourceStore?: WithDatasourceStoreParameter;
+  }
+}
+
 export type WithDatasourceStoreParameter = {
   props: Partial<DatasourceStoreProviderProps>;
 };

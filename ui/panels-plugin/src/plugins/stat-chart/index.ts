@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './StatChart';
+export type { StatChartDefinition, StatChartOptions, StatChartSparklineOptions } from './stat-chart-model';

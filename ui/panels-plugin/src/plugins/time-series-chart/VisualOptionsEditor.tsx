@@ -11,39 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Autocomplete, Slider, Switch, TextField, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { OptionsEditorControl, OptionsEditorGroup } from '@perses-dev/components';
+import { Slider, Switch } from '@mui/material';
+import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
   DEFAULT_LINE_WIDTH,
   DEFAULT_POINT_RADIUS,
+  POINT_SIZE_OFFSET,
   STACK_CONFIG,
   StackOptions,
   STACK_OPTIONS,
   VISUAL_CONFIG,
-  VisualOptions,
+  TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
 
 export interface VisualOptionsEditorProps {
-  value: VisualOptions;
-  onChange: (visual: VisualOptions) => void;
+  value: TimeSeriesChartVisualOptions;
+  onChange: (visual: TimeSeriesChartVisualOptions) => void;
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  const handlePointRadiusChange = (_: Event, sliderValue: number | number[]) => {
-    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      point_radius: newValue,
-    });
-  };
-
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
+    const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
     onChange({
       ...value,
       line_width: newValue,
+      point_radius: symbolSize,
     });
   };
 
@@ -60,21 +55,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
 
   return (
     <OptionsEditorGroup title="Visual">
-      <OptionsEditorControl
-        label={VISUAL_CONFIG.point_radius.label}
-        control={
-          <Slider
-            data-testid={VISUAL_CONFIG.point_radius.testId}
-            value={value.point_radius ?? DEFAULT_POINT_RADIUS}
-            valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.point_radius.step}
-            marks
-            min={VISUAL_CONFIG.point_radius.min}
-            max={VISUAL_CONFIG.point_radius.max}
-            onChange={handlePointRadiusChange}
-          />
-        }
-      />
       <OptionsEditorControl
         label={VISUAL_CONFIG.line_width.label}
         control={
@@ -106,40 +86,16 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         }
       />
       <OptionsEditorControl
-        label={'Palette'}
-        control={
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            value={value.palette?.kind ?? 'Auto'}
-            onChange={(__, newValue) => {
-              const palette: VisualOptions['palette'] =
-                newValue === 'Categorical' ? { kind: 'Categorical' } : undefined;
-              onChange({
-                ...value,
-                palette,
-              });
-            }}
-          >
-            <ToggleButton value="Auto">Auto</ToggleButton>
-            <ToggleButton value="Categorical">Categorical</ToggleButton>
-          </ToggleButtonGroup>
-        }
-      />
-      <OptionsEditorControl
         label={VISUAL_CONFIG.stack.label}
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{
               ...stackConfig,
               id: currentStack,
             }}
             options={STACK_OPTIONS}
-            getOptionDisabled={(option) => option.label === 'Percent'} // TODO: enable option after 'Percent' implemented
-            isOptionEqualToValue={(option, value) => option.id === value.id}
-            renderInput={(params) => <TextField {...params} />}
             onChange={(__, newValue) => {
-              const updatedValue: VisualOptions = {
+              const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
                 stack: newValue.id === 'None' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
               };
@@ -151,7 +107,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             }}
             disabled={value === undefined}
             disableClearable
-          ></Autocomplete>
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl

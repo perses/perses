@@ -13,9 +13,9 @@
 
 export interface Metadata {
   name: string;
-  created_at: string;
-  updated_at: string;
-  version: number;
+  created_at?: string;
+  updated_at?: string;
+  version?: number;
 }
 
 export interface ProjectMetadata extends Metadata {

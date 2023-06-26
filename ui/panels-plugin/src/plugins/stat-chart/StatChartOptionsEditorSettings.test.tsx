@@ -37,7 +37,7 @@ describe('StatChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const unitSelector = screen.getByRole('combobox', { name: 'Units' });
+    const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     userEvent.click(unitSelector);
     const percentOption = screen.getByRole('option', {
       name: 'Percent (0-100)',
@@ -66,12 +66,12 @@ describe('StatChartOptionsEditorSettings', () => {
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
     const firstOption = screen.getByRole('option', {
-      name: 'First',
+      name: /First \*/,
     });
     userEvent.click(firstOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'First',
+        calculation: 'FirstNumber',
       })
     );
   });

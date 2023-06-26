@@ -11,6 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Definition } from '@perses-dev/core';
+
+/**
+ * The schema for a Markdown panel.
+ */
+export interface MarkdownPanelDefinition extends Definition<MarkdownPanelOptions> {
+  kind: 'Markdown';
+}
+
 export interface MarkdownPanelOptions {
   text: string;
 }

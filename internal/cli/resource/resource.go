@@ -62,9 +62,27 @@ var resources = []resource{
 		},
 	},
 	{
+		kind:      modelV1.KindGlobalVariable,
+		shortTerm: "gv",
+		aliases: []string{
+			"globalVariables",
+			"gvar",
+			"gvars",
+			"gvs",
+		},
+	},
+	{
 		kind: modelV1.KindProject,
 		aliases: []string{
 			"projects",
+		},
+	},
+	{
+		kind:      modelV1.KindVariable,
+		shortTerm: "var",
+		aliases: []string{
+			"variables",
+			"vars",
 		},
 	},
 }
@@ -83,7 +101,7 @@ func HandleSuccessMessage(writer io.Writer, kind modelV1.Kind, project string, g
 // Returns false otherwise.
 func IsGlobal(kind modelV1.Kind) bool {
 	switch kind {
-	case modelV1.KindProject, modelV1.KindGlobalDatasource:
+	case modelV1.KindProject, modelV1.KindGlobalDatasource, modelV1.KindGlobalVariable:
 		return true
 	default:
 		return false

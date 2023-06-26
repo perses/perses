@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getTableCellLayout gets layout for compact density in center column 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 4px 4px 4px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for compact density in first column 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 4px 4px 8px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for compact density in last column 1`] = `
+Object {
+  "fontSize": "0.875rem",
+  "height": 9.43,
+  "lineHeight": 1.43,
+  "padding": "4px 8px 4px 4px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in center column 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 10px 8px 10px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in first column 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 10px 8px 16px",
+}
+`;
+
+exports[`getTableCellLayout gets layout for standard density in last column 1`] = `
+Object {
+  "fontSize": "1rem",
+  "height": 17.5,
+  "lineHeight": 1.5,
+  "padding": "8px 16px 8px 10px",
+}
+`;
+
+exports[`persesColumnToTanstackColumn transforms perses columns to tanstack columns 1`] = `
+Array [
+  Object {
+    "accessorKey": "label",
+    "enableSorting": false,
+    "header": "Name",
+    "maxSize": 0,
+    "meta": Object {
+      "align": "right",
+      "cellDescription": undefined,
+      "headerDescription": undefined,
+    },
+    "minSize": 0,
+    "size": 0,
+  },
+  Object {
+    "accessorKey": "value",
+    "cell": [Function],
+    "enableSorting": false,
+    "header": "Count",
+    "meta": Object {
+      "align": undefined,
+      "cellDescription": [Function],
+      "headerDescription": "The total number of values.",
+    },
+    "size": 120,
+  },
+]
+`;

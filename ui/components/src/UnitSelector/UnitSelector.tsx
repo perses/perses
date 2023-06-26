@@ -10,16 +10,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
-import {
-  UnitOptions,
-  UNIT_CONFIG,
-  DEFAULT_DECIMAL_PLACES,
-  UnitConfig,
-  isUnitWithDecimalPlaces,
-  isUnitWithAbbreviate,
-} from '../model';
+import { Switch, SwitchProps } from '@mui/material';
+import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
+import { shouldAbbreviate } from '../model/units/utils';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
+import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
 export interface UnitSelectorProps {
   value: UnitOptions;
@@ -37,7 +32,18 @@ const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
   })
   .filter((config) => !config.disableSelectorOption);
 
-const DECIMAL_OPTIONS = [0, 1, 2, 3, 4];
+const DECIMAL_PLACES_OPTIONS = [
+  { id: 'default', label: 'Default', decimal_places: undefined },
+  { id: '0', label: '0', decimal_places: 0 },
+  { id: '1', label: '1', decimal_places: 1 },
+  { id: '2', label: '2', decimal_places: 2 },
+  { id: '3', label: '3', decimal_places: 3 },
+  { id: '4', label: '4', decimal_places: 4 },
+];
+
+function getOptionByDecimalPlaces(decimal_places?: number) {
+  return DECIMAL_PLACES_OPTIONS.find((o) => o.decimal_places === decimal_places);
+}
 
 export function UnitSelector({ value, onChange }: UnitSelectorProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
@@ -49,11 +55,11 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
     });
   };
 
-  const handleDecimalChange = (_: unknown, newValue: number) => {
+  const handleDecimalPlacesChange = (_: unknown, { decimal_places }: { decimal_places: number | undefined }) => {
     if (hasDecimalPlaces) {
       onChange({
         ...value,
-        decimal_places: newValue,
+        decimal_places: decimal_places,
       });
     }
   };
@@ -75,47 +81,35 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
         label="Abbreviate"
         control={
           <Switch
-            checked={hasAbbreviate ? !!value.abbreviate : false}
+            checked={hasAbbreviate ? shouldAbbreviate(value.abbreviate) : false}
             onChange={handleAbbreviateChange}
             disabled={!hasAbbreviate}
           />
         }
       />
       <OptionsEditorControl
-        label="Units"
+        label="Unit"
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{ id: value.kind, ...kindConfig }}
             options={KIND_OPTIONS}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
             groupBy={(option) => option.group}
-            renderInput={(params) => <TextField {...params} />}
-            renderOption={(renderOptsProps, option) => {
-              // Custom option needed to get some increased left padding to make
-              // the items more distinct from the group label.
-              return (
-                <li {...renderOptsProps}>
-                  <Box paddingLeft={(theme) => theme.spacing(1)}>{option.label}</Box>
-                </li>
-              );
-            }}
             onChange={handleKindChange}
             disableClearable
-          ></Autocomplete>
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl
-        label="Decimal"
+        label="Decimals"
         control={
-          <Autocomplete
-            value={hasDecimalPlaces ? value.decimal_places ?? DEFAULT_DECIMAL_PLACES : 0}
-            options={DECIMAL_OPTIONS}
-            getOptionLabel={(option) => `${option}`}
-            renderInput={(params) => <TextField {...params} />}
-            onChange={handleDecimalChange}
+          <SettingsAutocomplete
+            value={getOptionByDecimalPlaces(value.decimal_places)}
+            options={DECIMAL_PLACES_OPTIONS}
+            getOptionLabel={(o) => o.label}
+            onChange={handleDecimalPlacesChange}
             disabled={!hasDecimalPlaces}
             disableClearable
-          ></Autocomplete>
+          />
         }
       />
     </>

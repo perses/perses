@@ -13,14 +13,14 @@
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
-import { DateTimeRangePicker, InfoTooltip, TimeOption } from '@perses-dev/components';
+import { DateTimeRangePicker, RefreshIntervalPicker, InfoTooltip, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isDurationString } from '@perses-dev/core';
 import { TOOLTIP_TEXT } from '../../constants';
-import { useDefaultTimeRange } from '../../context';
+import { useDashboardDuration } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 
-export const TIME_OPTIONS: TimeOption[] = [
+export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
   { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
   { value: { pastDuration: '30m' }, display: 'Last 30 minutes' },
@@ -32,43 +32,69 @@ export const TIME_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '14d' }, display: 'Last 14 days' },
 ];
 
+export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
+  { value: { pastDuration: '0s' }, display: 'Off' },
+  { value: { pastDuration: '5s' }, display: '5s' },
+  { value: { pastDuration: '10s' }, display: '10s' },
+  { value: { pastDuration: '15s' }, display: '15s' },
+  { value: { pastDuration: '30s' }, display: '30s' },
+  { value: { pastDuration: '60s' }, display: '1m' },
+];
+
 const DEFAULT_HEIGHT = '34px';
 
 interface TimeRangeControlsProps {
   // The controls look best at heights >= 28 pixels
   heightPx?: number;
-
-  // Whether to show the refresh button or not
-  showRefresh?: boolean;
+  showTimeRangeSelector?: boolean;
+  showRefreshButton?: boolean;
+  showRefreshInterval?: boolean;
+  timePresets?: TimeOption[];
 }
 
-export function TimeRangeControls({ heightPx, showRefresh = true }: TimeRangeControlsProps) {
-  const { timeRange, setTimeRange, refresh } = useTimeRange();
+export function TimeRangeControls({
+  heightPx,
+  showTimeRangeSelector = true,
+  showRefreshButton = true,
+  showRefreshInterval = true,
+  timePresets = DEFAULT_TIME_RANGE_OPTIONS,
+}: TimeRangeControlsProps) {
+  const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
   // TODO: Remove this since it couples to the dashboard context
-  const defaultTimeRange = useDefaultTimeRange();
+  const dashboardDuration = useDashboardDuration();
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
   // add time shortcut if one does not match duration from dashboard JSON
-  if (!TIME_OPTIONS.some((option) => option.value.pastDuration === defaultTimeRange.pastDuration)) {
-    if (isDurationString(defaultTimeRange.pastDuration)) {
-      TIME_OPTIONS.push({
-        value: { pastDuration: defaultTimeRange.pastDuration },
-        display: `Last ${defaultTimeRange.pastDuration}`,
+  if (!timePresets.some((option) => option.value.pastDuration === dashboardDuration)) {
+    if (isDurationString(dashboardDuration)) {
+      timePresets.push({
+        value: { pastDuration: dashboardDuration },
+        display: `Last ${dashboardDuration}`,
       });
     }
   }
 
   return (
     <Stack direction="row" spacing={1}>
-      <DateTimeRangePicker timeOptions={TIME_OPTIONS} value={timeRange} onChange={setTimeRange} height={height} />
-      {showRefresh && (
+      {showTimeRangeSelector && (
+        <DateTimeRangePicker timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
+      )}
+      {showRefreshButton && (
         <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
           <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
             <RefreshIcon />
           </ToolbarIconButton>
         </InfoTooltip>
+      )}
+      {showRefreshInterval && (
+        <RefreshIntervalPicker
+          timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
+          value={refreshInterval}
+          onChange={setRefreshInterval}
+          height={height}
+        />
       )}
     </Stack>
   );

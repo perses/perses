@@ -13,6 +13,8 @@
 
 import { Page } from '@playwright/test';
 
+const importantDashboardListId = 'important-dashboard-list';
+
 /**
  * The Perses App home page.
  */
@@ -37,7 +39,7 @@ export class AppHomePage {
 
     await this.showDashboardList(projectName);
     const navigationPromise = this.page.waitForNavigation();
-    await this.clickDashboardItem(dashboardName);
+    await this.clickDashboardItem(projectName, dashboardName);
     await navigationPromise;
   }
 
@@ -66,10 +68,29 @@ export class AppHomePage {
     await projectLink.click();
   }
 
-  async clickDashboardItem(dashboardName: string) {
-    const dashboardButton = this.page.locator('//div[contains(@class, "MuiDataGrid-root")]').getByText(dashboardName, {
+  async clickDashboardItem(projectName: string, dashboardName: string) {
+    const dashboardButton = this.page.locator(`#${projectName}-dashboard-list`).getByText(dashboardName, {
       exact: true,
     });
     await dashboardButton.click();
+  }
+
+  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
+    const dashboardButton = this.page
+      .locator(`#${importantDashboardListId}`)
+      .getByRole('row', { name: `${projectName} ${dashboardName}` });
+    await dashboardButton.click();
+  }
+
+  async clickRecentDashboardItem(projectName: string, dashboardName: string) {
+    const dashboardButton = this.page.getByRole('button', {
+      name: `${dashboardName} ${projectName}`,
+    });
+
+    await dashboardButton.click();
+  }
+
+  async searchDashboardOrProject(search: string) {
+    await this.page.getByLabel('Search a Project or a Dashboard').fill(search);
   }
 }

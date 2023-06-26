@@ -12,24 +12,48 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { LegendOptions, LegendItem } from '../model';
-import { ListLegend, ListLegendProps } from './ListLegend';
+import { produce } from 'immer';
+import { ReactNode } from 'react';
+import { getLegendMode } from '@perses-dev/core';
+import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
+import { TableLegend, TableLegendProps } from './TableLegend';
+import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
+import { ListLegendItemProps } from './ListLegendItem';
 
 export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
-  options: LegendOptions;
+  options: LegendComponentOptions;
 
   /**
-   * Additional props that will be passed to the list variation of the legend
-   * that is used when:
-   * - The legend is positioned on the right.
-   * - The legend has a large number of items to display and requires virtualization
-   *   to render performantly.
+   * State of selected items in the legend.
+   *
+   * Selected legend item state is a controlled value that should be managed using a
+   * combination of this prop and `onSelectedChange`.
    */
-  listProps?: Pick<ListLegendProps, 'initialRowHeight'>;
+  selectedItems: SelectedLegendItemState;
+
+  /**
+   * Callback fired when the selected items in the legend changes.
+   */
+  onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
+
+  /**
+   * Callback fired when the mouse is moved over a legend item.
+   */
+  onItemMouseOver?: ListLegendItemProps['onMouseOver'];
+
+  /**
+   * Callback fired when the mouse is moved out of a legend item.
+   */
+  onItemMouseOut?: ListLegendItemProps['onMouseOut'];
+
+  /**
+   * Props specific to legend with `mode` set to `table`.
+   */
+  tableProps?: Pick<TableLegendProps, 'columns' | 'onSortingChange' | 'sorting'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -39,7 +63,81 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, listProps }: LegendProps) {
+export function Legend({
+  width,
+  height,
+  options,
+  data,
+  selectedItems,
+  onSelectedItemsChange,
+  onItemMouseOver,
+  onItemMouseOut,
+  tableProps,
+}: LegendProps) {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
+    const isModifiedClick = e.metaKey || e.shiftKey;
+
+    const newSelected = produce(selectedItems, (draft) => {
+      if (draft === 'ALL') {
+        return {
+          [seriesId]: true,
+        };
+      }
+
+      const isSelected = !!draft[seriesId];
+
+      // Clicks with modifier key can select multiple items.
+      if (isModifiedClick) {
+        if (isSelected) {
+          // Modified click on already selected item. Remove that item.
+          delete draft[seriesId];
+        } else {
+          // Modified click on not-selected item. Add it.
+          draft[seriesId] = true;
+        }
+        return draft;
+      }
+
+      if (isSelected) {
+        // Clicked item was already selected. Unselect it and return to
+        // ALL state.
+        return 'ALL' as const;
+      }
+
+      // Select clicked item.
+      return { [seriesId]: true };
+    });
+    onSelectedItemsChange(newSelected);
+  };
+
+  const mode = getLegendMode(options.mode);
+
+  // The bottom legend is displayed as a list when the number of items is too
+  // large and requires virtualization. Otherwise, it is rendered more compactly.
+  // We do not need this check for the right-side legend because it is always
+  // a virtualized list.
+  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+
+  const commonLegendProps = {
+    height,
+    items: data,
+    selectedItems,
+    onLegendItemClick,
+    onItemMouseOver,
+    onItemMouseOut,
+  };
+
+  let legendContent: ReactNode;
+  if (mode === 'Table') {
+    legendContent = (
+      <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} {...tableProps} />
+    );
+  } else if (options.position === 'Right' || needsVirtualization) {
+    legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
+  } else {
+    legendContent = <CompactLegend {...commonLegendProps} onLegendItemClick={onLegendItemClick} />;
+  }
+
   if (options.position === 'Right') {
     return (
       <Box
@@ -51,16 +149,12 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
           right: 0,
         }}
       >
-        <ListLegend items={data} width={width} height={height} {...listProps} />
+        {legendContent}
       </Box>
     );
   }
 
-  // The bottom legend is displayed as a list when the number of items is too
-  // large and requires virtualization. Otherwise, it is rendered more compactly.
-  // We do not need this check for the right-side legend because it is always
-  // a virtualized list.
-  const needsVirtualization = data.length >= NEED_VIRTUALIZATION_LIMIT;
+  // Position bottom
   return (
     <Box
       sx={{
@@ -70,11 +164,7 @@ export function Legend({ width, height, options, data, listProps }: LegendProps)
         bottom: 0,
       }}
     >
-      {needsVirtualization ? (
-        <ListLegend items={data} width={width} height={height} {...listProps} />
-      ) : (
-        <CompactLegend items={data} height={height} />
-      )}
+      {legendContent}
     </Box>
   );
 }

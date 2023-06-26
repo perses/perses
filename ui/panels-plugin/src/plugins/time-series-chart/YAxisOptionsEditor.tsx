@@ -13,11 +13,11 @@
 
 import { Switch, TextField } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, UnitSelector } from '@perses-dev/components';
-import { DEFAULT_UNIT, DEFAULT_Y_AXIS, YAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
+import { DEFAULT_UNIT, DEFAULT_Y_AXIS, TimeSeriesChartYAxisOptions, Y_AXIS_CONFIG } from './time-series-chart-model';
 
 export interface YAxisOptionsEditorProps {
-  value: YAxisOptions;
-  onChange: (yAxis: YAxisOptions) => void;
+  value: TimeSeriesChartYAxisOptions;
+  onChange: (yAxis: TimeSeriesChartYAxisOptions) => void;
 }
 
 export function YAxisOptionsEditor({ value, onChange }: YAxisOptionsEditorProps) {

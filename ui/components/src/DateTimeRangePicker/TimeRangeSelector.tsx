@@ -13,16 +13,12 @@
 
 import { MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
-import { TimeRangeValue, RelativeTimeRange, isRelativeTimeRange } from '@perses-dev/core';
+import { TimeRangeValue, isRelativeTimeRange } from '@perses-dev/core';
 import { useTimeZone } from '../context/TimeZoneProvider';
+import { TimeOption } from '../model';
 import { formatAbsoluteRange } from './utils';
 
 const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
-
-export interface TimeOption {
-  value: RelativeTimeRange;
-  display: string;
-}
 
 interface TimeRangeSelectorProps {
   value: TimeRangeValue;
@@ -47,8 +43,14 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
         'aria-label': `Select time range. Currently set to ${formattedValue}`,
       }}
       sx={{
+        // `transform: none` prevents calendar icon from flipping over when menu is open
         '.MuiSelect-icon': {
           marginTop: '1px',
+          transform: 'none',
+        },
+        // paddingRight creates more space for the calendar icon (it's a bigger icon)
+        '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': {
+          paddingRight: '36px',
         },
         '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
       }}

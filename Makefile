@@ -124,12 +124,12 @@ assets-compress:
 
 ## Cross build binaries for all platforms (Use "make build" in development)
 .PHONY: cross-build
-cross-build: ## Cross build binaries for all platforms (Use "make build" in development)
-	goreleaser release --snapshot --rm-dist --parallelism ${GORELEASER_PARALLEL}
+cross-build: generate-goreleaser ## Cross build binaries for all platforms (Use "make build" in development)
+	goreleaser release --snapshot --clean --parallelism ${GORELEASER_PARALLEL}
 
 .PHONY: cross-release
-cross-release:
-	goreleaser release --rm-dist --parallelism ${GORELEASER_PARALLEL} --release-notes EXTRACTED_CHANGELOG.md
+cross-release: generate-goreleaser
+	goreleaser release --clean --parallelism ${GORELEASER_PARALLEL} --release-notes EXTRACTED_CHANGELOG.md
 
 .PHONY: build
 build: build-ui build-api build-cli
@@ -159,6 +159,10 @@ extract-changelog:
 .PHONY: generate-changelog
 generate-changelog:
 	$(GO) run ./scripts/generate-changelog/generate-changelog.go --version="${VERSION}"
+
+.PHONY: generate-goreleaser
+generate-goreleaser:
+	$(GO) run ./scripts/generate-goreleaser/generate-goreleaser.go
 
 .PHONY: clean
 clean:

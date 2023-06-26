@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
-import { ECharts, EChartsCoreOption, init } from 'echarts/core';
+import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
-import { isEqual, debounce } from 'lodash-es';
+import isEqual from 'lodash/isEqual';
+import debounce from 'lodash/debounce';
 import { EChartsTheme } from '../model';
 
 // see docs for info about each property: https://echarts.apache.org/en/api.html#events
@@ -105,6 +106,7 @@ export interface EChartsProps<T> {
   sx?: SxProps<Theme>;
   onEvents?: OnEventsType<T>;
   _instance?: React.MutableRefObject<ECharts | undefined>;
+  syncGroup?: string;
   onChartInitialized?: (instance: ECharts) => void;
 }
 
@@ -115,6 +117,7 @@ export const EChart = React.memo(function EChart<T>({
   sx,
   onEvents,
   _instance,
+  syncGroup,
   onChartInitialized,
 }: EChartsProps<T>) {
   const initialOption = useRef<EChartsCoreOption>(option);
@@ -138,6 +141,13 @@ export const EChart = React.memo(function EChart<T>({
       chartElement.current = null;
     };
   }, [_instance, onChartInitialized, theme, renderer]);
+
+  // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
+  useEffect(() => {
+    if (!chartElement.current || !syncGroup) return;
+    chartElement.current.group = syncGroup;
+    connect([chartElement.current]); // more info: https://echarts.apache.org/en/api.html#echarts.connect
+  }, [syncGroup, chartElement]);
 
   // Update chart data when option changes
   useEffect(() => {
@@ -174,11 +184,23 @@ export const EChart = React.memo(function EChart<T>({
     };
   }, [onEvents]);
 
+  // TODO: re-evaluate how this is triggered. It's technically working right
+  // now because the sx prop is an object that gets re-created, but that also
+  // means it runs unnecessarily some of the time and theoretically might
+  // not run in some other cases. Maybe it should use a resize observer?
   useEffect(() => {
-    const updateSize = debounce(() => {
-      if (!chartElement.current) return;
-      chartElement.current.resize();
-    }, 200);
+    // TODO: fix this debouncing. This likely isn't working as intended because
+    // the debounced function is re-created every time this useEffect is called.
+    const updateSize = debounce(
+      () => {
+        if (!chartElement.current) return;
+        chartElement.current.resize();
+      },
+      200,
+      {
+        leading: true,
+      }
+    );
     updateSize();
   }, [sx]);
 

@@ -12,13 +12,15 @@
 // limitations under the License.
 
 import { useNavigate } from 'react-router-dom';
-import { Box, Stack, Typography, Button, Card } from '@mui/material';
+import { Box, Stack, Typography, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ViewDashboard from 'mdi-material-ui/ViewDashboard';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { DashboardSelector } from '@perses-dev/core';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 
 interface ProjectDashboardsProps {
   projectName: string;
@@ -31,11 +33,13 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
 
-  const { data } = useDashboardList(props.projectName);
+  const { data, isLoading } = useDashboardList(props.projectName);
 
-  const handleDashboardCreation = function (name: string) {
-    navigate(`/projects/${props.projectName}/dashboards/${name}/create`);
-  };
+  const handleDashboardCreation = useCallback(
+    (dashboardSelector: DashboardSelector) =>
+      navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`),
+    [navigate]
+  );
 
   return (
     <Box id={props.id}>
@@ -44,19 +48,31 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
           <ViewDashboard />
           <Typography variant="h3">Dashboards</Typography>
         </Stack>
-        <Button variant="contained" size="small" onClick={() => setOpenCreateDashboardDialogState(true)}>
-          Add Dashboard
-        </Button>
+        <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setOpenCreateDashboardDialogState(true)} />
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
-          <DashboardList dashboardList={data || []} hideToolbar={props.hideToolbar} />
+          <DashboardList
+            dashboardList={data || []}
+            hideToolbar={props.hideToolbar}
+            isLoading={isLoading}
+            initialState={{
+              columns: {
+                columnVisibilityModel: {
+                  id: false,
+                  project: false,
+                  version: false,
+                },
+              },
+            }}
+          />
         </Card>
       </ErrorBoundary>
       <CreateDashboardDialog
         open={openCreateDashboardDialogState}
+        projectOptions={[props.projectName]}
         onClose={() => setOpenCreateDashboardDialogState(false)}
-        onSuccess={(name: string) => handleDashboardCreation(name)}
+        onSuccess={handleDashboardCreation}
       />
     </Box>
   );

@@ -37,6 +37,8 @@ func (e *Endpoint) RegisterRoutes(g *echo.Group) {
 	g.POST(fmt.Sprintf("%s/%s", path, shared.PathDashboard), e.ValidateDashboard)
 	g.POST(fmt.Sprintf("%s/%s", path, shared.PathDatasource), e.ValidateDatasource)
 	g.POST(fmt.Sprintf("%s/%s", path, shared.PathGlobalDatasource), e.ValidateGlobalDatasource)
+	g.POST(fmt.Sprintf("%s/%s", path, shared.PathVariable), e.ValidateVariable)
+	g.POST(fmt.Sprintf("%s/%s", path, shared.PathGlobalVariable), e.ValidateGlobalVariable)
 }
 
 func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
@@ -56,6 +58,28 @@ func (e *Endpoint) ValidateDatasource(ctx echo.Context) error {
 
 func (e *Endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
 	return validateDatasource(&v1.GlobalDatasource{}, e.sch, ctx)
+}
+
+func (e *Endpoint) ValidateVariable(ctx echo.Context) error {
+	entity := &v1.Variable{}
+	if err := ctx.Bind(entity); err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	if err := e.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	return ctx.NoContent(http.StatusOK)
+}
+
+func (e *Endpoint) ValidateGlobalVariable(ctx echo.Context) error {
+	entity := &v1.GlobalVariable{}
+	if err := ctx.Bind(entity); err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	if err := e.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	return ctx.NoContent(http.StatusOK)
 }
 
 func validateDatasource[T v1.DatasourceInterface](entity T, sch schemas.Schemas, ctx echo.Context) error {

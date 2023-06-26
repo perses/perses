@@ -15,15 +15,15 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { renderWithContext } from '../../test';
+import { TemplateVariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
-
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
     kind: 'Panel',
     spec: {
       display: {
-        name: 'Fake Panel Title',
-        description: 'This is a fake panel',
+        name: 'Fake Panel Title - $foo',
+        description: 'This is a fake panel - $foo',
       },
       plugin: {
         kind: 'TimeSeriesChart',
@@ -37,11 +37,25 @@ describe('Panel', () => {
   const renderPanel = (definition?: PanelDefinition, editHandlers?: PanelProps['editHandlers']) => {
     definition ??= createTestPanel();
 
-    renderWithContext(<Panel definition={definition} editHandlers={editHandlers} />);
+    renderWithContext(
+      <TemplateVariableProvider
+        initialVariableDefinitions={[
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'foo',
+              value: 'bar ',
+            },
+          },
+        ]}
+      >
+        <Panel definition={definition} editHandlers={editHandlers} />
+      </TemplateVariableProvider>
+    );
   };
 
   // Helper to get the panel once rendered
-  const getPanel = () => screen.getByRole('region', { name: 'Fake Panel Title' });
+  const getPanel = () => screen.getByRole('region', { name: 'Fake Panel Title - bar' });
 
   it('should render panel', async () => {
     renderPanel();
@@ -70,7 +84,7 @@ describe('Panel', () => {
     // Can hover to see panel description in tooltip
     userEvent.hover(descriptionButton);
     const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent('This is a fake panel');
+    expect(tooltip).toHaveTextContent('This is a fake panel - bar');
   });
 
   it('does not show description when panel does not have one', () => {
@@ -85,12 +99,11 @@ describe('Panel', () => {
     expect(descriptionButton).not.toBeInTheDocument();
   });
 
-  it('does not show description in edit mode', () => {
-    renderPanel(undefined, {
-      onEditPanelClick: jest.fn(),
-      onDeletePanelClick: jest.fn(),
-      onDuplicatePanelClick: jest.fn(),
-    });
+  it('does not show description when description only contains whitespace', () => {
+    // Render a panel with an all whitespace description
+    const withoutDescription = createTestPanel();
+    withoutDescription.spec.display.description = '   ';
+    renderPanel(withoutDescription);
 
     const panel = getPanel();
     userEvent.hover(panel);

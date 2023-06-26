@@ -22,6 +22,8 @@ type ValidateInterface interface {
 	Dashboard(entity *v1.Dashboard) error
 	Datasource(entity *v1.Datasource) error
 	GlobalDatasource(entity *v1.GlobalDatasource) error
+	Variable(entity *v1.Variable) error
+	GlobalVariable(entity *v1.GlobalVariable) error
 }
 
 type validate struct {
@@ -53,6 +55,23 @@ func (c *validate) GlobalDatasource(entity *v1.GlobalDatasource) error {
 	return c.client.Post().
 		APIVersion("").
 		Resource("validate/globaldatasources").
+		Body(entity).
+		Do().
+		Error()
+}
+
+func (c *validate) Variable(entity *v1.Variable) error {
+	return c.client.Post().
+		APIVersion("").
+		Resource("validate/variables").
+		Body(entity).
+		Do().
+		Error()
+}
+func (c *validate) GlobalVariable(entity *v1.GlobalVariable) error {
+	return c.client.Post().
+		APIVersion("").
+		Resource("validate/globalvariables").
 		Body(entity).
 		Do().
 		Error()

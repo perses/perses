@@ -25,8 +25,10 @@ type ClientInterface interface {
 	Datasource(project string) DatasourceInterface
 	Folder(project string) FolderInterface
 	GlobalDatasource() GlobalDatasourceInterface
+	GlobalVariable() GlobalVariableInterface
 	Health() HealthInterface
 	Project() ProjectInterface
+	Variable(project string) VariableInterface
 }
 
 type client struct {
@@ -60,12 +62,20 @@ func (c *client) GlobalDatasource() GlobalDatasourceInterface {
 	return newGlobalDatasource(c.restClient)
 }
 
+func (c *client) GlobalVariable() GlobalVariableInterface {
+	return newGlobalVariable(c.restClient)
+}
+
 func (c *client) Health() HealthInterface {
 	return newHealth(c.restClient)
 }
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
+}
+
+func (c *client) Variable(project string) VariableInterface {
+	return newVariable(c.restClient, project)
 }
 
 type query struct {

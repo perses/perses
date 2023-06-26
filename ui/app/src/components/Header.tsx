@@ -30,8 +30,8 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import { MouseEvent, useState } from 'react';
-import { useProjectQuery } from '../model/project-client';
-import { useSnackbar } from '../context/SnackbarProvider';
+import { useSnackbar } from '@perses-dev/components';
+import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { PersesLogo } from './PersesLogo';
 
@@ -40,7 +40,7 @@ const ITEM_HEIGHT = 48;
 function ProjectMenu(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useProjectQuery({ onError: exceptionSnackbar });
+  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -87,29 +87,41 @@ function ProjectMenu(): JSX.Element {
           },
         }}
       >
-        {data.map((project, index) => {
-          return (
-            <MenuItem
-              key={index}
-              onClick={() => {
-                setAnchorEl(null);
-                navigate(`/projects/${project.metadata.name}`);
-              }}
-            >
-              <Typography
-                variant="inherit"
-                noWrap
-                sx={{
-                  '&:hover': {
-                    overflow: 'visible',
-                  },
+        {data.length ? (
+          data.map((project, index) => {
+            return (
+              <MenuItem
+                key={index}
+                onClick={() => {
+                  setAnchorEl(null);
+                  navigate(`/projects/${project.metadata.name}`);
                 }}
               >
-                {project.metadata.name}
-              </Typography>
-            </MenuItem>
-          );
-        })}
+                <Typography
+                  variant="inherit"
+                  noWrap
+                  sx={{
+                    '&:hover': {
+                      overflow: 'visible',
+                    },
+                  }}
+                >
+                  {project.metadata.name}
+                </Typography>
+              </MenuItem>
+            );
+          })
+        ) : (
+          <MenuItem key="empty">
+            <Typography
+              sx={{
+                fontStyle: 'italic',
+              }}
+            >
+              Empty
+            </Typography>
+          </MenuItem>
+        )}
       </Menu>
     </Box>
   );
@@ -119,9 +131,9 @@ export default function Header(): JSX.Element {
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
-  const handleDarkModeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
-      await setDarkMode(e.target.checked);
+      setDarkMode(e.target.checked);
     } catch (e) {
       exceptionSnackbar(e);
     }

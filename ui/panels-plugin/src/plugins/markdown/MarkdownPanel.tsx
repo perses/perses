@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
-import { PanelProps } from '@perses-dev/plugin-system';
+import { PanelProps, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
@@ -81,7 +81,9 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   } = props;
   const chartsTheme = useChartsTheme();
 
-  const html = useMemo(() => markdownToHTML(text), [text]);
+  const textAfterVariableReplacement = useReplaceVariablesInString(text);
+
+  const html = useMemo(() => markdownToHTML(textAfterVariableReplacement ?? ''), [textAfterVariableReplacement]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
   return (

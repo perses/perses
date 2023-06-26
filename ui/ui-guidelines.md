@@ -26,6 +26,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
   - Icons: [mdi-material-ui](https://github.com/TeamWertarbyte/mdi-material-ui) (see [Material Design icons for a view of available icons](https://pictogrammers.com/library/mdi/))
   - Charts: [echarts](https://echarts.apache.org/)
   - Grid layout: [react-grid-layout](https://github.com/react-grid-layout/react-grid-layout)
+  - Virtualization: [react-virtuoso](https://virtuoso.dev/)
 - Utilities
   - State management: [zustand](https://github.com/pmndrs/zustand), [immer](https://immerjs.github.io/immer/)
   - Data fetching: [react-query](https://tanstack.com/query)
@@ -36,7 +37,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
   - Math: [math.js](https://mathjs.org/)
   - Color utils: [react-colorful](https://github.com/omgovich/react-colorful)
   - XSS util: [dompurify](https://github.com/cure53/DOMPurify)
-  - Other: [use-resize-observer](https://github.com/ZeeCoder/use-resize-observer), [lodash-es](https://lodash.com/), [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
+  - Other: [use-resize-observer](https://github.com/ZeeCoder/use-resize-observer), [lodash](https://lodash.com/), [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
 - Testing tools
   - Unit/integration testing for components & utilities: [Jest](https://jestjs.io/), [React Testing library](https://testing-library.com/docs/react-testing-library/intro/)
   - Browser testing: [Playwright](https://playwright.dev/)
@@ -105,8 +106,9 @@ are reflected in how the packages are organized. There is some variability from 
 
 ### All packages
 
-- Eslint enforces certain style and correctness rules, these can be ignored on a case
-  by case basis but usually are intended to help you avoid common JS pitfalls
+- Eslint enforces certain style and correctness rules to help avoid common coding pitfalls and maintain consistency.
+  - Exceptions can be made on a case-by-case basis using `eslint-disable-next-line` and a comment that communicates the reason for the exception.
+  - We prefer `error` (instead of `warn`) for eslint rules because it makes it easier to catch and enforce linting issues.
 - Typescript is used to provide a stronger guarantee of correctness across the
   application. Please avoid using escape hatches like `any`, prefer using `unknown`
   and type narrowing instead.

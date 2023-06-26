@@ -50,21 +50,21 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
 
   test.describe('Thresholds', () => {
     test('should be able to add absolute threshold', async ({ page, dashboardPage, mockNow }) => {
+      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+
+      await dashboardPage.startEditing();
+      await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
+        await panelEditor.selectTab('Settings');
+        await panelEditor.addThreshold();
+        await panelEditor.editThreshold('T2', '40');
+        await panelEditor.addThreshold();
+      });
+      const panel = dashboardPage.getPanelByName('Single Gauge');
+      await panel.isLoaded();
+      // Wait for gauge animation to finish before taking a screenshot.
+      await waitForStableCanvas(panel.canvas);
+
       await dashboardPage.forEachTheme(async (themeName) => {
-        await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-
-        await dashboardPage.startEditing();
-        await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
-          await panelEditor.selectTab('Settings');
-          await panelEditor.addThreshold();
-          await panelEditor.editThreshold('T2', '40');
-          await panelEditor.addThreshold();
-        });
-        const panel = dashboardPage.getPanelByName('Single Gauge');
-        await panel.isLoaded();
-        // Wait for gauge animation to finish before taking a screenshot.
-        await waitForStableCanvas(panel.canvas);
-
         await happoPlaywright.screenshot(page, panel.parent, {
           component: 'Gauge Chart Panel',
           variant: `Single Gauge with Absolute Thresholds [${themeName}]`,
@@ -73,20 +73,19 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
     });
 
     test('should be able to add percent threshold', async ({ page, dashboardPage, mockNow }) => {
+      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+      await dashboardPage.startEditing();
+      await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
+        await panelEditor.selectTab('Settings');
+        await panelEditor.toggleThresholdModes('Percent');
+        await panelEditor.editThreshold('T1', '50');
+        await panelEditor.container.getByLabel('Max').fill('200');
+      });
+      const panel = dashboardPage.getPanelByName('Single Gauge');
+      await panel.isLoaded();
+      // Wait for gauge animation to finish before taking a screenshot.
+      await waitForStableCanvas(panel.canvas);
       await dashboardPage.forEachTheme(async (themeName) => {
-        await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-        await dashboardPage.startEditing();
-        await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
-          await panelEditor.selectTab('Settings');
-          await panelEditor.toggleThresholdModes('Percent');
-          await panelEditor.editThreshold('T1', '50');
-          await panelEditor.container.getByLabel('Max').fill('200');
-        });
-        const panel = dashboardPage.getPanelByName('Single Gauge');
-        await panel.isLoaded();
-        // Wait for gauge animation to finish before taking a screenshot.
-        await waitForStableCanvas(panel.canvas);
-
         await happoPlaywright.screenshot(page, panel.parent, {
           component: 'Gauge Chart Panel',
           variant: `Single Gauge with Percent Thresholds [${themeName}]`,
@@ -109,24 +108,23 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
     });
 
     test('should be able to change threshold color to purple', async ({ page, dashboardPage, mockNow }) => {
+      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+      await dashboardPage.startEditing();
+      await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
+        await panelEditor.selectTab('Settings');
+        await panelEditor.openThresholdColorPicker('T1');
+        const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+        await colorPicker.isVisible();
+        const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
+        await colorInput.clear();
+        await colorInput.type('8457c2', { delay: 100 });
+        await page.keyboard.press('Escape');
+      });
+      const panel = dashboardPage.getPanelByName('Single Gauge');
+      await panel.isLoaded();
+      // Wait for gauge animation to finish before taking a screenshot.
+      await waitForStableCanvas(panel.canvas);
       await dashboardPage.forEachTheme(async (themeName) => {
-        await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-        await dashboardPage.startEditing();
-        await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
-          await panelEditor.selectTab('Settings');
-          await panelEditor.openThresholdColorPicker('T1');
-          const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
-          await colorPicker.isVisible();
-          const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
-          await colorInput.clear();
-          await colorInput.type('8457c2', { delay: 100 });
-          await page.keyboard.press('Escape');
-        });
-        const panel = dashboardPage.getPanelByName('Single Gauge');
-        await panel.isLoaded();
-        // Wait for gauge animation to finish before taking a screenshot.
-        await waitForStableCanvas(panel.canvas);
-
         await happoPlaywright.screenshot(page, panel.parent, {
           component: 'Gauge Chart Panel',
           variant: `Single Gauge with Purple Threshold [${themeName}]`,
@@ -135,24 +133,23 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
     });
 
     test('should be able to change default threshold color', async ({ page, dashboardPage, mockNow }) => {
+      await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
+      await dashboardPage.startEditing();
+      await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
+        await panelEditor.selectTab('Settings');
+        await panelEditor.openThresholdColorPicker('default');
+        const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+        await colorPicker.isVisible();
+        const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
+        await colorInput.clear();
+        await colorInput.type('e3abab', { delay: 100 });
+        await page.keyboard.press('Escape');
+      });
+      const panel = dashboardPage.getPanelByName('Single Gauge');
+      await panel.isLoaded();
+      // Wait for gauge animation to finish before taking a screenshot.
+      await waitForStableCanvas(panel.canvas);
       await dashboardPage.forEachTheme(async (themeName) => {
-        await mockGaugeChartQueryRangeRequest(dashboardPage, mockNow);
-        await dashboardPage.startEditing();
-        await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
-          await panelEditor.selectTab('Settings');
-          await panelEditor.openThresholdColorPicker('default');
-          const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
-          await colorPicker.isVisible();
-          const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
-          await colorInput.clear();
-          await colorInput.type('e3abab', { delay: 100 });
-          await page.keyboard.press('Escape');
-        });
-        const panel = dashboardPage.getPanelByName('Single Gauge');
-        await panel.isLoaded();
-        // Wait for gauge animation to finish before taking a screenshot.
-        await waitForStableCanvas(panel.canvas);
-
         await happoPlaywright.screenshot(page, panel.parent, {
           component: 'Gauge Chart Panel',
           variant: `Single Gauge with New Default Threshold Color [${themeName}]`,

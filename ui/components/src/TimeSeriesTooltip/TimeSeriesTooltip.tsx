@@ -11,69 +11,93 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState } from 'react';
-import { Box, Portal } from '@mui/material';
+import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
+import { memo, useState } from 'react';
+import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat, UnitOptions } from '../model';
-import { getFocusedSeriesData } from './focused-series';
-import { CursorCoordinates, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH, useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
+import { TooltipHeader } from './TooltipHeader';
+import { getNearbySeriesData } from './nearby-series';
+import {
+  CursorCoordinates,
+  FALLBACK_CHART_WIDTH,
+  TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_MAX_HEIGHT,
+  TOOLTIP_MAX_WIDTH,
+  TOOLTIP_MIN_WIDTH,
+  useMousePosition,
+} from './tooltip-model';
 import { assembleTransform } from './utils';
 
-interface TimeSeriesTooltipProps {
+export interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
-  pinTooltip: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
+  onUnpinClick?: () => void;
+  pinnedPos: CursorCoordinates | null;
 }
 
-export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
+export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
   chartRef,
   chartData,
   wrapLabels,
-  pinTooltip,
   unit,
+  onUnpinClick,
+  pinnedPos,
 }: TimeSeriesTooltipProps) {
-  const [pinnedPos, setPinnedPos] = useState<CursorCoordinates | null>(null);
+  const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
+  const { height, width, ref: tooltipRef } = useResizeObserver();
+
+  const isTooltipPinned = pinnedPos !== null;
 
   if (mousePos === null || mousePos.target === null) return null;
 
-  // ensure user is hovering over a chart before checking for nearby series
+  // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
-  const chartWidth = chart?.getWidth() ?? 750;
-  const chartHeight = chart?.getHeight() ?? 230;
-  const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
+  const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
-  if (focusedSeries.length === 0) {
+  // Get series nearby the cursor and pass into tooltip content children.
+  const nearbySeries = getNearbySeriesData({
+    mousePos,
+    chartData,
+    pinnedPos,
+    chart,
+    unit,
+    showAllSeries,
+  });
+  if (nearbySeries.length === 0) {
     return null;
   }
 
-  if (pinTooltip === true && pinnedPos === null) {
-    setPinnedPos(mousePos);
-  }
+  const totalSeries = chartData.timeSeries.length;
 
   return (
     <Portal>
       <Box
+        ref={tooltipRef}
         sx={(theme) => ({
+          minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
           maxHeight: TOOLTIP_MAX_HEIGHT,
+          padding: 0,
           position: 'absolute',
           top: 0,
           left: 0,
-          backgroundColor: '#2E313E', // TODO: use colors from theme, separate styles for dark mode
+          backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
           borderRadius: '6px',
           color: '#fff',
           fontSize: '11px',
           visibility: 'visible',
           opacity: 1,
           transition: 'all 0.1s ease-out',
-          zIndex: theme.zIndex.tooltip,
+          // Ensure pinned tooltip shows behind edit panel drawer and sticky header
+          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
           overflow: 'hidden',
           '&:hover': {
             overflowY: 'auto',
@@ -83,7 +107,17 @@ export const TimeSeriesTooltip = React.memo(function TimeSeriesTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
+        <Stack spacing={0.5}>
+          <TooltipHeader
+            nearbySeries={nearbySeries}
+            totalSeries={totalSeries}
+            isTooltipPinned={isTooltipPinned}
+            showAllSeries={showAllSeries}
+            onShowAllClick={(checked) => setShowAllSeries(checked)}
+            onUnpinClick={onUnpinClick}
+          />
+          <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
+        </Stack>
       </Box>
     </Portal>
   );

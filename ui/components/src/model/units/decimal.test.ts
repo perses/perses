@@ -12,23 +12,61 @@
 // limitations under the License.
 
 import { formatValue } from './units';
-import { UnitTestCase } from './units.test';
+import { UnitTestCase } from './types';
 
 const DECIMAL_TESTS: UnitTestCase[] = [
   {
-    value: -10,
+    value: -4444,
     unit: { kind: 'Decimal' },
-    expected: '-10',
+    expected: '-4.44K',
   },
-  // Note: The default for decimal_places is 2. This can be changed if we want.
+  {
+    value: -4444,
+    unit: { kind: 'Decimal', abbreviate: false },
+    expected: '-4,444',
+  },
+  {
+    value: -4444,
+    unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
+    expected: '-4,444.0000',
+  },
+  {
+    value: -4444,
+    unit: { kind: 'Decimal', abbreviate: true },
+    expected: '-4.44K',
+  },
+  {
+    value: -4444,
+    unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
+    expected: '-4.4440K',
+  },
   {
     value: -0.123456789,
     unit: { kind: 'Decimal' },
-    expected: '-0.12',
+    expected: '-0.123',
+  },
+  {
+    value: -0.123456789,
+    unit: { kind: 'Decimal', abbreviate: false },
+    expected: '-0.123',
+  },
+  {
+    value: -0.123456789,
+    unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
+    expected: '-0.1235',
+  },
+  {
+    value: -0.123456789,
+    unit: { kind: 'Decimal', abbreviate: true },
+    expected: '-0.123',
+  },
+  {
+    value: -0.123456789,
+    unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
+    expected: '-0.1235',
   },
   { value: 0, unit: { kind: 'Decimal' }, expected: '0' },
   { value: 1, unit: { kind: 'Decimal' }, expected: '1' },
-
   {
     value: 10,
     unit: { kind: 'Decimal' },
@@ -42,7 +80,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 10,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '10',
+    expected: '10.0000',
   },
   {
     value: 10,
@@ -52,36 +90,31 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 10,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '10',
+    expected: '10.0000',
   },
   {
     value: 10.123456,
     unit: { kind: 'Decimal' },
-    expected: '10.12',
-  },
-  {
-    value: 10.123456,
-    unit: { kind: 'Decimal', decimal_places: 0 },
-    expected: '10',
-  },
-  {
-    value: 10.123456,
-    unit: { kind: 'Decimal', decimal_places: 1 },
     expected: '10.1',
   },
   {
     value: 10.123456,
-    unit: { kind: 'Decimal', decimal_places: 2 },
-    expected: '10.12',
-  },
-  {
-    value: 10.123456,
-    unit: { kind: 'Decimal', decimal_places: 3 },
+    unit: { kind: 'Decimal', abbreviate: false },
     expected: '10.123',
   },
   {
     value: 10.123456,
-    unit: { kind: 'Decimal', decimal_places: 4 },
+    unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
+    expected: '10.1235',
+  },
+  {
+    value: 10.123456,
+    unit: { kind: 'Decimal', abbreviate: true },
+    expected: '10.1',
+  },
+  {
+    value: 10.123456,
+    unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
     expected: '10.1235',
   },
   {
@@ -97,7 +130,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 1000,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '1,000',
+    expected: '1,000.0000',
   },
   {
     value: 1000,
@@ -107,7 +140,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 1000,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '1K',
+    expected: '1.0000K',
   },
   {
     value: 4444,
@@ -122,7 +155,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 4444,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '4,444',
+    expected: '4,444.0000',
   },
   {
     value: 4444,
@@ -132,7 +165,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 4444,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '4.444K',
+    expected: '4.4440K',
   },
   {
     value: 100000,
@@ -147,7 +180,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 100000,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '100,000',
+    expected: '100,000.0000',
   },
   {
     value: 100000,
@@ -157,12 +190,12 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 100000,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '100K',
+    expected: '100.0000K',
   },
   {
     value: 666666,
     unit: { kind: 'Decimal' },
-    expected: '666.67K',
+    expected: '667K',
   },
   {
     value: 666666,
@@ -172,17 +205,17 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 666666,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '666,666',
+    expected: '666,666.0000',
   },
   {
     value: 666666,
     unit: { kind: 'Decimal', abbreviate: true },
-    expected: '666.67K',
+    expected: '667K',
   },
   {
     value: 666666,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '666.666K',
+    expected: '666.6660K',
   },
   {
     value: 10000000,
@@ -197,7 +230,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 10000000,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '10,000,000',
+    expected: '10,000,000.0000',
   },
   {
     value: 10000000,
@@ -207,12 +240,12 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 10000000,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '10M',
+    expected: '10.0000M',
   },
   {
     value: 88888888,
     unit: { kind: 'Decimal' },
-    expected: '88.89M',
+    expected: '88.9M',
   },
   {
     value: 88888888,
@@ -222,12 +255,12 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 88888888,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '88,888,888',
+    expected: '88,888,888.0000',
   },
   {
     value: 88888888,
     unit: { kind: 'Decimal', abbreviate: true },
-    expected: '88.89M',
+    expected: '88.9M',
   },
   {
     value: 88888888,
@@ -247,7 +280,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 1000000000,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '1,000,000,000',
+    expected: '1,000,000,000.0000',
   },
   {
     value: 1000000000,
@@ -257,7 +290,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 1000000000,
     unit: { kind: 'Decimal', abbreviate: true, decimal_places: 4 },
-    expected: '1B',
+    expected: '1.0000B',
   },
   {
     value: 1010101010,
@@ -272,7 +305,7 @@ const DECIMAL_TESTS: UnitTestCase[] = [
   {
     value: 1010101010,
     unit: { kind: 'Decimal', abbreviate: false, decimal_places: 4 },
-    expected: '1,010,101,010',
+    expected: '1,010,101,010.0000',
   },
   {
     value: 1010101010,

@@ -11,10 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GaugeChart } from './plugins/gauge-chart';
-import { TimeSeriesChart } from './plugins/time-series-chart';
-import { Markdown } from './plugins/markdown';
-import { StatChart } from './plugins/stat-chart';
-
-// Just export the plugins under the same name as the kinds they handle from the plugin.json
-export { TimeSeriesChart, GaugeChart, StatChart, Markdown };
+export * from './plugins/time-series-chart';
+export * from './plugins/gauge-chart';
+export * from './plugins/stat-chart';
+export * from './plugins/markdown';

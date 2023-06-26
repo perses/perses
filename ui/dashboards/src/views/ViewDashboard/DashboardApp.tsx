@@ -25,15 +25,15 @@ import {
   DeletePanelDialog,
   EmptyDashboardProps,
   EditJsonDialog,
+  SaveChangesConfirmationDialog,
 } from '../../components';
-import { useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
+import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 
 export interface DashboardAppProps {
   emptyDashboardProps?: Partial<EmptyDashboardProps>;
   dashboardResource: DashboardResource;
   dashboardTitleComponent?: JSX.Element;
-
-  onSave?: (entity: DashboardResource) => Promise<DashboardResource>;
+  onSave?: OnSaveDashboard;
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
@@ -123,6 +123,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <DeletePanelDialog />
         <DiscardChangesConfirmationDialog />
         <EditJsonDialog />
+        <SaveChangesConfirmationDialog />
       </Box>
     </Box>
   );
