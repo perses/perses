@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './axis';
+export * from './chart-actions';
 export * from './combine-sx';
-export * from './theme-gen';
 export * from './component-ids';
 export * from './format';
+export * from './theme-gen';

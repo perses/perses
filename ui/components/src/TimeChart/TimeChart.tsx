@@ -39,8 +39,8 @@ import { EChart, OnEventsType } from '../EChart';
 import { EChartsDatasetFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model/graph';
 import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { enableDataZoom, getYAxes, restoreChart, ZoomEventData } from '../utils/chart-actions';
 import { TimeChartTooltip } from './Tooltip/TimeChartTooltip';
-import { enableDataZoom, getYAxes, restoreChart, ZoomEventData } from './utils';
 
 use([
   EChartsLineChart,

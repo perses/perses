@@ -45,3 +45,28 @@ export function formatWithTimeZone(date: Date, formatString: string, timeZone?: 
     return formatInTimeZone(date, lowerTimeZone === 'utc' ? 'UTC' : timeZone, formatString);
   }
 }
+
+/*
+ * Determines time granularity for axis labels, defaults to hh:mm
+ */
+export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
+  const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
+    {
+      hour: 'numeric',
+      minute: 'numeric',
+      hourCycle: 'h23',
+    },
+    timeZone
+  );
+  const thirtyMinMs = 1800000;
+  const dayMs = 86400000;
+  if (rangeMs <= thirtyMinMs) {
+    dateFormatOptions.second = 'numeric';
+  } else if (rangeMs >= dayMs) {
+    dateFormatOptions.month = 'numeric';
+    dateFormatOptions.day = 'numeric';
+  }
+  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
+  // remove comma when month / day present
+  return DATE_FORMAT.format(value).replace(/, /g, ' ');
+}

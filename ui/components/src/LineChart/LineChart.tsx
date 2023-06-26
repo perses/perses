@@ -50,7 +50,7 @@ import {
   getYAxes,
   restoreChart,
   ZoomEventData,
-} from './utils';
+} from '../utils';
 
 use([
   EChartsLineChart,

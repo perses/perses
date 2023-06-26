@@ -18,12 +18,12 @@ import { EChartsDatasetFormat, UnitOptions } from '../../model';
 import {
   assembleTransform,
   CursorCoordinates,
+  getNearbySeriesData,
   TooltipContent,
   TOOLTIP_MAX_HEIGHT,
   TOOLTIP_MAX_WIDTH,
   useMousePosition,
 } from '../../TimeSeriesTooltip';
-import { getFocusedSeriesData } from './focused-series';
 
 interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
@@ -49,12 +49,12 @@ export const TimeChartTooltip = React.memo(function TimeChartTooltip({
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
-  const focusedSeries = getFocusedSeriesData(mousePos, chartData, pinnedPos, chart, unit);
+  const nearbySeries = getNearbySeriesData(mousePos, pinnedPos, chartData, chart, unit);
   const chartWidth = chart?.getWidth() ?? 750;
   const chartHeight = chart?.getHeight() ?? 230;
-  const cursorTransform = assembleTransform(mousePos, focusedSeries.length, chartWidth, chartHeight, pinnedPos);
+  const cursorTransform = assembleTransform(mousePos, nearbySeries.length, chartWidth, chartHeight, pinnedPos);
 
-  if (focusedSeries.length === 0) {
+  if (nearbySeries.length === 0) {
     return null;
   }
 
@@ -88,7 +88,7 @@ export const TimeChartTooltip = React.memo(function TimeChartTooltip({
           transform: cursorTransform,
         }}
       >
-        <TooltipContent focusedSeries={focusedSeries} wrapLabels={wrapLabels} />
+        <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
       </Box>
     </Portal>
   );

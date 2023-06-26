@@ -11,36 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { formatValue, UnitOptions, EChartsDatasetFormat } from '../../model';
-import { CursorData, TOOLTIP_DATE_FORMAT, TOOLTIP_MAX_ITEMS } from '../../TimeSeriesTooltip';
-
-export interface FocusedSeriesInfo {
-  seriesIdx: number | null;
-  datumIdx: number | null;
-  seriesName: string;
-  date: string;
-  markerColor: string;
-  x: number;
-  y: number;
-  formattedY: string;
-}
-
-export type FocusedSeriesArray = FocusedSeriesInfo[];
+import { NearbySeriesArray, TOOLTIP_DATE_FORMAT } from '../../TimeSeriesTooltip';
 
 /**
- * Returns formatted series data for the points that are close to the user's cursor
- * Adjust yBuffer to increase or decrease number of series shown
+ * Returns formatted series data for the points that are close to the user's cursor.
+ * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
  */
-export function getNearbySeries(
+export function checkforNearbyTimeSeries(
   data: EChartsDatasetFormat,
   pointInGrid: number[],
   yBuffer: number,
   unit?: UnitOptions
-): FocusedSeriesArray {
-  const currentFocusedData: FocusedSeriesArray = [];
+): NearbySeriesArray {
+  const currentFocusedData: NearbySeriesArray = [];
   const focusedX: number | null = pointInGrid[0] ?? null;
   const focusedY: number | null = pointInGrid[1] ?? null;
 
@@ -53,7 +39,7 @@ export function getNearbySeries(
     const xBuffer = focusedX * 0.0005;
     for (let seriesIdx = 0; seriesIdx < data.timeSeries.length; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
-      if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
+      // if (currentFocusedData.length >= TOOLTIP_MAX_ITEMS) break;
       if (currentSeries !== undefined) {
         const lineSeries = currentSeries as LineSeriesOption;
         const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
@@ -103,61 +89,4 @@ export function getNearbySeries(
     }
   }
   return currentFocusedData;
-}
-
-/**
- * Uses mouse position to determine whether user is hovering over a chart canvas
- * If yes, convert from pixel values to logical cartesian coordinates and return all focused series
- */
-export function getFocusedSeriesData(
-  mousePos: CursorData['coords'],
-  chartData: EChartsDatasetFormat,
-  pinnedPos: CursorData['coords'],
-  chart?: EChartsInstance,
-  unit?: UnitOptions
-) {
-  if (chart === undefined || mousePos === null) return [];
-
-  if (chartData.timeSeries === undefined) return [];
-
-  // prevents multiple tooltips showing from adjacent charts
-  let cursorTargetMatchesChart = false;
-  if (mousePos.target !== null) {
-    const currentParent = (<HTMLElement>mousePos.target).parentElement;
-    if (currentParent !== null) {
-      const currentGrandparent = currentParent.parentElement;
-      if (currentGrandparent !== null) {
-        const chartDom = chart.getDom();
-        if (chartDom === currentGrandparent) {
-          cursorTargetMatchesChart = true;
-        }
-      }
-    }
-  }
-
-  // allows moving cursor inside tooltip
-  if (pinnedPos !== null) {
-    mousePos = pinnedPos;
-    cursorTargetMatchesChart = true;
-  }
-
-  if (cursorTargetMatchesChart === false) return [];
-
-  if (chart['_model'] === undefined) return [];
-  const chartModel = chart['_model'];
-  const yAxisInterval = chartModel.getComponent('yAxis').axis.scale._interval;
-
-  // tooltip trigger area gets smaller with more series, increase yAxisInterval multiplier to expand nearby series range
-  // const seriesNum = chartData.timeSeries.length;
-  // const yBuffer = seriesNum > TOOLTIP_MAX_ITEMS ? yAxisInterval * 0.5 : yAxisInterval * 5;
-  const yBuffer = yAxisInterval * 2; // TODO: add back dynamic nearby range
-
-  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
-  if (chart.containPixel('grid', pointInPixel)) {
-    const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
-    if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return getNearbySeries(chartData, pointInGrid, yBuffer, unit);
-    }
-  }
-  return [];
 }
