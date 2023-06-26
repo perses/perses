@@ -30,9 +30,10 @@ function Router() {
         <Routes>
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
+          <Route path="/projects/:projectName" element={<ViewProject />} />
+          <Route path="/projects/:projectName/:tab" element={<ViewProject />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
           <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
-          <Route path="/projects/:projectName" element={<ViewProject />} />
           <Route path="/" element={<HomeView />} />
         </Routes>
       </Suspense>

@@ -11,10 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '../model';
+import { DashboardResource, VariableResource } from '../model';
 
 export function dashboardDisplayName(dashboard: DashboardResource) {
-  return dashboard.spec.display?.name || dashboard.metadata.name;
+  return dashboard.spec.display?.name ?? dashboard.metadata.name;
+}
+
+export function variableDisplayName(variable: VariableResource) {
+  return variable.spec.spec.display?.name ?? variable.metadata.name;
 }
 
 export function dashboardExtendedDisplayName(dashboard: DashboardResource) {
@@ -22,4 +26,11 @@ export function dashboardExtendedDisplayName(dashboard: DashboardResource) {
     return `${dashboard.spec.display.name} (ID: ${dashboard.metadata.name})`;
   }
   return dashboard.metadata.name;
+}
+
+export function variableExtendedDisplayName(variable: VariableResource) {
+  if (variable.spec.spec.display?.name) {
+    return `${variable.spec.spec.display.name} (ID: ${variable.metadata.name})`;
+  }
+  return variable.metadata.name;
 }

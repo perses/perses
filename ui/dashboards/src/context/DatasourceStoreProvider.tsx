@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useMemo } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -30,9 +30,10 @@ import {
 } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
-  dashboardResource: DashboardResource;
+  dashboardResource?: DashboardResource;
+  projectName?: string;
   datasourceApi: DatasourceApi;
-  children?: React.ReactNode;
+  children?: ReactNode;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
@@ -56,23 +57,27 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
-  const { dashboardResource, datasourceApi, onCreate, children } = props;
-  const { project } = dashboardResource.metadata;
+  const { dashboardResource, projectName, datasourceApi, onCreate, children } = props;
+  const project = dashboardResource?.metadata.project ?? projectName;
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   const findDatasource = useEvent(async (selector: DatasourceSelector) => {
     // Try to find it in dashboard spec
-    const { datasources } = dashboardResource.spec;
-    const dashboardDatasource = findDashboardDatasource(datasources, selector);
-    if (dashboardDatasource !== undefined) {
-      return { spec: dashboardDatasource, proxyUrl: undefined };
+    if (dashboardResource) {
+      const { datasources } = dashboardResource.spec;
+      const dashboardDatasource = findDashboardDatasource(datasources, selector);
+      if (dashboardDatasource !== undefined) {
+        return { spec: dashboardDatasource, proxyUrl: undefined };
+      }
     }
 
-    // Try to find it at the project level as a Datasource resource
-    const datasource = await datasourceApi.getDatasource(project, selector);
-    if (datasource !== undefined) {
-      return { spec: datasource.resource.spec, proxyUrl: datasource.proxyUrl };
+    if (project) {
+      // Try to find it at the project level as a Datasource resource
+      const datasource = await datasourceApi.getDatasource(project, selector);
+      if (datasource !== undefined) {
+        return { spec: datasource.resource.spec, proxyUrl: datasource.proxyUrl };
+      }
     }
 
     // Try to find it at the global level as a GlobalDatasource resource
@@ -112,7 +117,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const listDatasourceMetadata = useEvent(async (datasourcePluginKind: string): Promise<DatasourceMetadata[]> => {
     const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
       listPluginMetadata('Datasource'),
-      datasourceApi.listDatasources(project, datasourcePluginKind),
+      project ? datasourceApi.listDatasources(project, datasourcePluginKind) : [],
       datasourceApi.listGlobalDatasources(datasourcePluginKind),
     ]);
 
@@ -126,18 +131,20 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     const { results, addResult } = buildListDatasourceMetadataResults(datasourcePluginMetadata.display.name);
 
     // Start with dashboard datasources that have highest precedence
-    if (dashboardResource.spec.datasources !== undefined) {
-      for (const selectorName in dashboardResource.spec.datasources) {
-        const spec = dashboardResource.spec.datasources[selectorName];
-        if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
-        addResult(spec, selectorName);
+    if (dashboardResource) {
+      if (dashboardResource.spec.datasources !== undefined) {
+        for (const selectorName in dashboardResource.spec.datasources) {
+          const spec = dashboardResource.spec.datasources[selectorName];
+          if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
+          addResult(spec, selectorName);
+        }
       }
-    }
 
-    // Now look at project-level datasources
-    for (const datasource of datasources) {
-      const selectorName = datasource.metadata.name;
-      addResult(datasource.spec, selectorName);
+      // Now look at project-level datasources
+      for (const datasource of datasources) {
+        const selectorName = datasource.metadata.name;
+        addResult(datasource.spec, selectorName);
+      }
     }
 
     // And finally global datasources

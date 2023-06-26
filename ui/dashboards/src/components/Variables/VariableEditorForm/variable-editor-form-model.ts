@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, TextVariableDefinition, Display } from '@perses-dev/core';
+import { Display, TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
 
 export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const textVariableFields = {
@@ -40,7 +40,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
     name: initialVariableDefinition.spec.name,
     title: initialVariableDefinition.spec.display?.name,
     kind: initialVariableDefinition.kind,
-    description: '',
+    description: initialVariableDefinition.spec.display?.description,
     listVariableFields,
     textVariableFields,
   };
@@ -49,9 +49,17 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
 export type VariableEditorState = ReturnType<typeof getInitialState>;
 
 export function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
-  const { name, title, kind } = state;
+  const { name, title, kind, description } = state;
 
-  const display: Display | undefined = title ? { name: title } : undefined;
+  let display: Display | undefined = title ? { name: title } : undefined;
+  if (description) {
+    if (display) {
+      display.description = description;
+    } else {
+      // Name is mandatory if you want to add a description, autofilled by the metadata name if undefined
+      display = { name: name, description: description };
+    }
+  }
 
   if (kind === 'TextVariable') {
     return {

@@ -47,4 +47,21 @@ test.describe('ProjectView', () => {
     await projectPage.goto(project);
     await projectPage.navigateToDashboardFromRecentDashboards(project, 'Demo');
   });
+
+  test('can change current tab', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    const variablesNavigationPromise = page.waitForNavigation();
+    await projectPage.clickTab('Variables');
+    await variablesNavigationPromise;
+
+    const datasourcesNavigationPromise = page.waitForNavigation();
+    await projectPage.clickTab('Datasources');
+    await datasourcesNavigationPromise;
+
+    const dashboardsNavigationPromise = page.waitForNavigation();
+    await projectPage.clickTab('Dashboards');
+    await dashboardsNavigationPromise;
+  });
 });

@@ -11,22 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './calculations';
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './display';
-export * from './http';
-export * from './layout';
-export * from './legend';
-export * from './notice';
-export * from './panels';
-export * from './project';
-export * from './query';
-export * from './resource';
-export * from './thresholds';
-export * from './time';
-export * from './time-series-data';
-export * from './time-series-queries';
-export * from './units';
-export * from './variables';
+export * from './CreateDashboardDialog';
+export * from './CreateProjectDialog';
+export * from './DeleteDashboardDialog';
+export * from './DeleteProjectDialog';
+export * from './DeleteVariableDialog';
+export * from './RenameDashboardDialog';

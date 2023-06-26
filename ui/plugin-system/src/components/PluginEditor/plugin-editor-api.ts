@@ -28,6 +28,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   pluginType: PluginType;
   pluginKindLabel: string;
   value: Definition<UnknownSpec>;
+  isReadonly?: boolean;
   onChange: (next: Definition<UnknownSpec>) => void;
 }
 

@@ -61,6 +61,9 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
             label="Values"
             placeholder="Values"
             helperText='Type new value then press "Enter" to add.'
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
           />
         )}
       />

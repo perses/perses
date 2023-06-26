@@ -19,8 +19,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
-import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
+import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
 import { useIsReadonly } from '../../model/config-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
@@ -163,7 +162,7 @@ export function DashboardList(props: DashboardListProperties) {
       ></DashboardDataGrid>
       <Box>
         {targetedDashboard && (
-          <Box>
+          <>
             <RenameDashboardDialog
               open={isRenameDashboardDialogStateOpened}
               onClose={() => setRenameDashboardDialogStateOpened(false)}
@@ -174,7 +173,7 @@ export function DashboardList(props: DashboardListProperties) {
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
               dashboard={targetedDashboard}
             />
-          </Box>
+          </>
         )}
       </Box>
     </Stack>

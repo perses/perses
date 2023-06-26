@@ -16,7 +16,7 @@ import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { useDeleteProjectMutation } from '../../model/project-client';
 
-export interface DeleteProjectDialogProps {
+interface DeleteProjectDialogProps {
   name: string;
   open: boolean;
   onClose: DispatchWithoutAction;

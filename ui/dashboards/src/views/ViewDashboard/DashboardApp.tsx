@@ -20,7 +20,7 @@ import {
   Dashboard,
   PanelGroupDialog,
   DeletePanelGroupDialog,
-  DiscardChangesConfirmationDialog,
+  DashboardDiscardChangesConfirmationDialog,
   DashboardToolbar,
   DeletePanelDialog,
   EmptyDashboardProps,
@@ -121,7 +121,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
-        <DiscardChangesConfirmationDialog />
+        <DashboardDiscardChangesConfirmationDialog />
         <EditJsonDialog />
         <SaveChangesConfirmationDialog />
       </Box>

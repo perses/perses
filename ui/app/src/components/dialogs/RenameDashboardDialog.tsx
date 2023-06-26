@@ -17,7 +17,7 @@ import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 
-export interface RenameDashboardDialogProps {
+interface RenameDashboardDialogProps {
   dashboard: DashboardResource;
   open: boolean;
   onClose: DispatchWithoutAction;

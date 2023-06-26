@@ -39,6 +39,24 @@ export class AppProjectPage {
     await this.page.goto(`/projects/${projectName}`);
   }
 
+  async gotoDashboardsTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Dashboards');
+    await navigationPromise;
+  }
+
+  async gotoVariablesTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Variables');
+    await navigationPromise;
+  }
+
+  async gotoDatasourcesTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Datasources');
+    await navigationPromise;
+  }
+
   async createDashboard(name: string) {
     await this.addDashboardButton.click();
 
@@ -74,6 +92,13 @@ export class AppProjectPage {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickDashboardItemInList(dashboardName, recentDashboardListId);
     await navigationPromise;
+  }
+
+  async clickTab(tabLabel: string) {
+    const tab = this.page.getByRole('tab').getByText(tabLabel, {
+      exact: false,
+    });
+    await tab.click();
   }
 
   async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {

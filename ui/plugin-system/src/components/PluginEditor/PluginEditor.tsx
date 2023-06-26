@@ -26,7 +26,7 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  */
 export function PluginEditor(props: PluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, pluginType, pluginKindLabel, onChange: _, ...others } = props;
+  const { value, pluginType, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
@@ -38,11 +38,18 @@ export function PluginEditor(props: PluginEditorProps) {
           label={pluginKindLabel}
           pluginType={pluginType}
           value={pendingKind !== '' ? pendingKind : value.kind}
+          readOnly={isReadonly}
           onChange={onKindChange}
         />
         <FormHelperText>{error?.message ?? ''}</FormHelperText>
       </FormControl>
-      <PluginSpecEditor pluginType={pluginType} pluginKind={value.kind} value={value.spec} onChange={onSpecChange} />
+      <PluginSpecEditor
+        pluginType={pluginType}
+        pluginKind={value.kind}
+        value={value.spec}
+        onChange={onSpecChange}
+        isReadonly={isReadonly}
+      />
     </Box>
   );
 }
