@@ -289,7 +289,7 @@ export function getNearbySeriesData({
 
   if (cursorTargetMatchesChart === false) return [];
 
-  if (chart['_model'] === undefined) return [];
+  if (chart['_model'] === undefined || data === null) return [];
   const chartModel = chart['_model'];
   const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
   const totalSeries = data.length;

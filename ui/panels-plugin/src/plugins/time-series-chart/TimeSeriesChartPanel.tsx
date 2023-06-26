@@ -179,10 +179,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           return { graphData };
         }
 
-        timeChartData.push({
-          id: seriesIndex,
-          source: [['timestamp', 'value'], ...timeSeries.values],
-        });
+        if (Array.isArray(timeChartData)) {
+          timeChartData.push({
+            id: seriesIndex,
+            source: [['timestamp', 'value'], ...timeSeries.values],
+          });
+        }
 
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
@@ -207,11 +209,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         const yValues = getYValues(timeSeries, timeScale);
 
-        // const lineSeries = showLegacyChart
-        //   ? getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor)
-        //   : getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor);
-        const lineSeries = getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor);
-
         const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
 
         // When we initially load the chart, we want to show all series, but
@@ -221,8 +218,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
-          graphData.timeSeries.push(lineSeries);
-          timeSeriesMapping.push(getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor));
+          if (showLegacyChart) {
+            graphData.timeSeries.push(getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor));
+          } else {
+            timeSeriesMapping.push(getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor));
+          }
         }
         if (legend && graphData.legendItems) {
           graphData.legendItems.push({

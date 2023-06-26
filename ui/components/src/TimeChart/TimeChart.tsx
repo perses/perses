@@ -97,6 +97,8 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   const [startX, setStartX] = useState(0);
   // const { timeZone } = useTimeZone(); // TODO: fix timeZone using ECharts time axis min / max workaround
 
+  const totalSeries = data?.length ?? 0;
+
   useImperativeHandle(
     ref,
     () => {
@@ -114,11 +116,11 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
             // No chart. Do nothing.
             return;
           }
-          clearHighlightedSeries(chartRef.current, data.length);
+          clearHighlightedSeries(chartRef.current, totalSeries);
         },
       };
     },
-    [data.length]
+    [totalSeries]
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -275,7 +277,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, data.length);
+          clearHighlightedSeries(chartRef.current, totalSeries);
         }
       }}
       onMouseEnter={() => {

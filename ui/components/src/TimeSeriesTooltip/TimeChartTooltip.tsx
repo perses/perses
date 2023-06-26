@@ -48,7 +48,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   const isTooltipPinned = pinnedPos !== null;
 
-  if (mousePos === null || mousePos.target === null) return null;
+  if (mousePos === null || mousePos.target === null || data === null) return null;
 
   // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;

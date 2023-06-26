@@ -33,7 +33,7 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
 }
 
 // TODO: Continue to simplify TimeChart types, fix legend and thresholds
-export type TimeChartData = DatasetOption[];
+export type TimeChartData = DatasetOption[] | null;
 export type TimeChartSeriesMapping = LineSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 
