@@ -105,7 +105,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration, refreshInterval },
+    spec: { display, duration, refresh_interval },
     metadata,
   } = dashboardResource;
 
@@ -138,10 +138,13 @@ function initStore(props: DashboardProviderProps) {
           metadata,
           display,
           duration,
-          refreshInterval,
+          refreshInterval: refresh_interval,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration, refreshInterval } }) => {
+          setDashboard: ({
+            metadata,
+            spec: { display, panels = {}, layouts = [], duration, refresh_interval = '0s' },
+          }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
@@ -150,7 +153,7 @@ function initStore(props: DashboardProviderProps) {
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
-              state.refreshInterval = refreshInterval;
+              state.refreshInterval = refresh_interval;
             });
           },
         };

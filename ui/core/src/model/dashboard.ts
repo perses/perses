@@ -29,7 +29,7 @@ export interface DashboardSpec {
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   duration: DurationString;
-  refreshInterval: DurationString;
+  refresh_interval?: DurationString;
   variables: VariableDefinition[];
   layouts: LayoutDefinition[];
   panels: Record<string, PanelDefinition>;
