@@ -44,6 +44,5 @@ export function createInitialStatChartOptions(): StatChartOptions {
       kind: 'Decimal',
     },
     sparkline: {},
-    fontSize: 'Default',
   };
 }
