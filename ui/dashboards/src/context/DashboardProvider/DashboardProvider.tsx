@@ -17,7 +17,13 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, Display, ProjectMetadata, DurationString } from '@perses-dev/core';
+import {
+  DashboardResource,
+  Display,
+  ProjectMetadata,
+  DurationString,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -105,7 +111,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration, refreshInterval },
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL },
     metadata,
   } = dashboardResource;
 
@@ -150,7 +156,7 @@ function initStore(props: DashboardProviderProps) {
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
-              state.refreshInterval = refreshInterval;
+              state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
             });
           },
         };
