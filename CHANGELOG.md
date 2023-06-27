@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.36.2 / 2023-06-27
+
+- [BUGFIX] Fix useTimeSeriesQueries return type (#1273)
+
 ## 0.36.1 / 2023-06-26
 
 - [BUGFIX] Chart utils export formatter correctly
