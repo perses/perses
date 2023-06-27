@@ -11,15 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  useQuery,
-  useQueries,
-  useQueryClient,
-  Query,
-  QueryCache,
-  QueryKey,
-  QueryObserverOptions,
-} from '@tanstack/react-query';
+import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap, useTemplateVariableValues } from './template-variables';
