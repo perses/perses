@@ -71,7 +71,7 @@ export function checkforNearbyTimeSeries(
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
     if (currentDataset == null) break;
 
-    const currentDatasetSource: DatasetOption['source'] = currentDataset.source;
+    const currentDatasetSource: DatasetOption['source'] = currentDataset.values;
     if (currentDatasetSource === undefined || !Array.isArray(currentDatasetSource)) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';

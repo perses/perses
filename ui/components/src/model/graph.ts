@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasetOption } from 'echarts/types/dist/shared';
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
@@ -24,6 +23,7 @@ export type UnixTimeMs = number;
 export interface GraphSeries {
   name: string;
   values: TimeSeriesValueTuple[];
+  id?: string;
 }
 
 export type EChartsValues = number | null | '-';
@@ -32,8 +32,13 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
+export interface TimeSeries {
+  id: string;
+  values: TimeSeriesValueTuple[];
+}
+
 // TODO: Continue to simplify TimeChart types, fix legend and thresholds
-export type TimeChartData = DatasetOption[] | null;
+export type TimeChartData = TimeSeries[] | null;
 export type TimeChartSeriesMapping = LineSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 

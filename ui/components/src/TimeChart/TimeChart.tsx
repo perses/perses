@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
+import { utcToZonedTime } from 'date-fns-tz';
 import { TimeScale, UnitOptions } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
@@ -41,6 +43,7 @@ import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesMappin
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { clearHighlightedSeries, enableDataZoom, getYAxes, restoreChart, ZoomEventData } from '../utils';
 import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
+import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
   EChartsLineChart,
@@ -97,8 +100,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  // const { timeZone } = useTimeZone(); // TODO: fix timeZone using ECharts time axis min / max workaround
-
+  const { timeZone } = useTimeZone();
   const totalSeries = data?.length ?? 0;
 
   useImperativeHandle(
@@ -169,15 +171,22 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     // empty array because a `null` value will throw an error.
     if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
 
+    const dataset: DatasetOption[] = [];
+    const isLocalTimeZone = timeZone === 'local';
+    data.map((d) => {
+      const values = d.values.map((value) => {
+        return [isLocalTimeZone ? value[0] : utcToZonedTime(value[0], timeZone), value[1]];
+      });
+      dataset.push({ id: d.id, source: [['timestamp', 'value'], ...values] });
+    });
+
     const option: EChartsCoreOption = {
-      dataset: data,
+      dataset: dataset,
       series: seriesMapping,
       xAxis: {
         type: 'time',
-        // TODO: fix timezones using this approach
-        // - https://github.com/apache/echarts/issues/14453#issuecomment-800163920
-        min: timeScale.startMs,
-        max: timeScale.endMs,
+        min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
+        max: isLocalTimeZone ? timeScale.endMs : utcToZonedTime(timeScale.endMs, timeZone),
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,
@@ -219,6 +228,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     noDataOption,
     __experimentalEChartsOptionsOverride,
     noDataVariant,
+    timeZone,
   ]);
 
   return (

@@ -185,8 +185,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         if (Array.isArray(timeChartData)) {
           timeChartData.push({
-            id: seriesIndex,
-            source: [['timestamp', 'value'], ...timeSeries.values],
+            id: `${seriesIndex}`,
+            values: [...timeSeries.values],
           });
         }
 
