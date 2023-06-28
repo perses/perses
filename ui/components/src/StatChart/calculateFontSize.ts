@@ -52,7 +52,7 @@ export function useOptimalFontSize({
   const chartsTheme = useChartsTheme();
 
   // if user has selected a font size in the settings, use it instead of calculating the optimal size
-  if (fontSizeOverride && fontSizeOverride !== 'Default') {
+  if (fontSizeOverride !== undefined) {
     return Number(fontSizeOverride);
   }
 
