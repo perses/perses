@@ -89,7 +89,7 @@ describe('useOptimalFontSize', () => {
       height: 100,
       maxSize: 20,
       lineHeight: 1.2,
-      fontSizeOverride: '72',
+      fontSizeOverride: 72,
     });
 
     expect(result).toBe(72);
