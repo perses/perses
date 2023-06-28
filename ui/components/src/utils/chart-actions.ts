@@ -16,8 +16,8 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 export interface ZoomEventData {
   start: number;
   end: number;
-  startIndex: number;
-  endIndex: number;
+  startIndex?: number;
+  endIndex?: number;
 }
 
 /**

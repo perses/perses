@@ -84,7 +84,7 @@ export function getFormattedAxisLabel(rangeMs: number) {
 
   // more than 2 years
   if (rangeMs > yearMs * 2) {
-    return '{yyyy}\n{MMM}';
+    return '{MMM} {yyyy}';
   }
 
   // between 5 days to 6 months

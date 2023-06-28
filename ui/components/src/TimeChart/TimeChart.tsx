@@ -144,25 +144,18 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
-        console.log('TODO: fix data zoom to work with time axis', onDataZoom, data);
-        // const startIndex = params.batch[0].startValue ?? 0;
-        // const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
-        // const xAxisStartValue = data.xAxis[startIndex];
-        // const xAxisEndValue = data.xAxis[endIndex];
-
-        // if (xAxisStartValue !== undefined && xAxisEndValue !== undefined) {
-        //   // TODO: fix zoom, need different zoom type for TimeChart vs. LineChart
-        //   const zoomEvent: ZoomEventData = {
-        //     start: xAxisStartValue,
-        //     end: xAxisEndValue,
-        //     startIndex,
-        //     endIndex,
-        //   };
-        //   onDataZoom(zoomEvent);
-        // }
+        const xAxisStartValue = params.batch[0].startValue;
+        const xAxisEndValue = params.batch[0].endValue;
+        if (xAxisStartValue !== undefined && xAxisEndValue !== undefined) {
+          const zoomEvent: ZoomEventData = {
+            start: xAxisStartValue,
+            end: xAxisEndValue,
+          };
+          onDataZoom(zoomEvent);
+        }
       },
     };
-  }, [data, onDataZoom, setTooltipPinnedCoords]);
+  }, [onDataZoom, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
