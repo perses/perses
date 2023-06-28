@@ -41,7 +41,14 @@ import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { clearHighlightedSeries, enableDataZoom, getYAxes, restoreChart, ZoomEventData } from '../utils';
+import {
+  clearHighlightedSeries,
+  enableDataZoom,
+  getFormattedAxisLabel,
+  getYAxes,
+  restoreChart,
+  ZoomEventData,
+} from '../utils';
 import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 
@@ -187,6 +194,10 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
         type: 'time',
         min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
         max: isLocalTimeZone ? timeScale.endMs : utcToZonedTime(timeScale.endMs, timeZone),
+        axisLabel: {
+          hideOverlap: true,
+          formatter: getFormattedAxisLabel(timeScale.endMs - timeScale.startMs),
+        },
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,

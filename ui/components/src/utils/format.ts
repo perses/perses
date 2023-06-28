@@ -70,3 +70,36 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
   // remove comma when month / day present
   return DATE_FORMAT.format(value).replace(/, /g, ' ');
 }
+
+// https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
+export function getFormattedAxisLabel(rangeMs: number) {
+  const dayMs = 86400000;
+  const monthMs = 2629440000;
+  const yearMs = 31536000000;
+
+  // more than 5 years
+  if (rangeMs > yearMs * 5) {
+    return '{yyyy}';
+  }
+
+  // more than 2 years
+  if (rangeMs > yearMs * 2) {
+    return '{yyyy}\n{MMM}';
+  }
+
+  // between 5 days to 6 months
+  if (rangeMs > dayMs * 5 && rangeMs < monthMs * 6) {
+    return '{MM}/{dd}'; // 12/01
+  }
+
+  // between 2 and 5 days
+  if (rangeMs > dayMs * 2 && rangeMs <= dayMs * 5) {
+    return '{MM}/{dd} {HH}:{mm}'; // 12/01 12:30
+  }
+
+  return {
+    year: '{yearStyle|{yyyy}}\n{monthStyle|{MMM}}',
+    month: '{MMM}', // Jan, Feb, ...
+    day: '{MM}/{dd}',
+  };
+}
