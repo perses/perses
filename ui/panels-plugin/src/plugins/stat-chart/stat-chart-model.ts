@@ -27,7 +27,7 @@ export interface StatChartOptions {
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
-  fontSize?: FontSizeOption;
+  value_font_size?: FontSizeOption;
 }
 
 export interface StatChartSparklineOptions {

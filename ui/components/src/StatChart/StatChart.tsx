@@ -45,11 +45,11 @@ export interface StatChartProps {
   color?: string;
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
-  fontSize?: FontSizeOption;
+  valueFontSize?: FontSizeOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline, showSeriesName, fontSize } = props;
+  const { width, height, data, unit, color, sparkline, showSeriesName, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
 
   let formattedValue = '';
@@ -75,10 +75,10 @@ export function StatChart(props: StatChartProps) {
   // calculate value font size and height
   const availableWidth = width - containerPadding * 2;
   const availableHeight = height - seriesNameHeight;
-  const valueFontSize = useOptimalFontSize({
+  const optimalValueFontSize = useOptimalFontSize({
     text: formattedValue,
     // override the font size if user selects it in the settings
-    fontSizeOverride: fontSize,
+    fontSizeOverride: valueFontSize,
     fontWeight: VALUE_FONT_WEIGHT,
     // without sparkline, use only 50% of the available width so it looks better for multiseries
     width: sparkline ? availableWidth : availableWidth * 0.5,
@@ -87,10 +87,10 @@ export function StatChart(props: StatChartProps) {
     height: sparkline ? availableHeight * 0.25 : availableHeight * 0.9,
     lineHeight: LINE_HEIGHT,
   });
-  const valueFontHeight = valueFontSize * LINE_HEIGHT;
+  const valueFontHeight = optimalValueFontSize * LINE_HEIGHT;
 
   // make sure the series name font size is slightly smaller than value font size
-  seriesNameFontSize = Math.min(valueFontSize * 0.7, seriesNameFontSize);
+  seriesNameFontSize = Math.min(optimalValueFontSize * 0.7, seriesNameFontSize);
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data.seriesData === undefined) return chartsTheme.noDataOption;
@@ -164,7 +164,7 @@ export function StatChart(props: StatChartProps) {
           {data.seriesData?.name}
         </SeriesName>
       )}
-      <Value variant="h3" color={color} fontSize={valueFontSize} padding={containerPadding}>
+      <Value variant="h3" color={color} fontSize={optimalValueFontSize} padding={containerPadding}>
         {formattedValue}
       </Value>
       {sparkline !== undefined && (

@@ -15,26 +15,27 @@ import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
 const FONT_SIZE_OPTIONS = [
-  'Default',
-  '12',
-  '14',
-  '16',
-  '20',
-  '24',
-  '28',
-  '32',
-  '36',
-  '40',
-  '48',
-  '56',
-  '64',
-  '72',
-  '96',
-  '128',
-  '160',
-  '192',
-] as const;
-export type FontSizeOption = (typeof FONT_SIZE_OPTIONS)[number];
+  { id: 'default', label: 'Default', value: undefined },
+  { id: '12', label: '12', value: 12 },
+  { id: '14', label: '14', value: 14 },
+  { id: '16', label: '16', value: 16 },
+  { id: '20', label: '20', value: 20 },
+  { id: '24', label: '24', value: 24 },
+  { id: '28', label: '28', value: 28 },
+  { id: '32', label: '32', value: 32 },
+  { id: '36', label: '36', value: 36 },
+  { id: '40', label: '40', value: 40 },
+  { id: '48', label: '48', value: 48 },
+  { id: '56', label: '56', value: 56 },
+  { id: '64', label: '64', value: 64 },
+  { id: '72', label: '72', value: 72 },
+  { id: '96', label: '96', value: 96 },
+  { id: '128', label: '128', value: 128 },
+  { id: '160', label: '160', value: 160 },
+  { id: '192', label: '192', value: 192 },
+];
+
+export type FontSizeOption = number | undefined;
 
 export interface FontSizeSelectorProps {
   value: FontSizeOption;
@@ -42,8 +43,8 @@ export interface FontSizeSelectorProps {
 }
 
 export function FontSizeSelector({ value, onChange }: FontSizeSelectorProps) {
-  const handleFontSizeChange = (_: unknown, newValue: { id: FontSizeOption; label: FontSizeOption }) => {
-    onChange(newValue.id);
+  const handleFontSizeChange = (_: unknown, { value }: { value: FontSizeOption }) => {
+    onChange(value);
   };
 
   return (
@@ -51,8 +52,8 @@ export function FontSizeSelector({ value, onChange }: FontSizeSelectorProps) {
       label="Font Size"
       control={
         <SettingsAutocomplete
-          value={{ id: value, label: value }}
-          options={FONT_SIZE_OPTIONS.map((fontSize) => ({ id: fontSize, label: fontSize }))}
+          value={FONT_SIZE_OPTIONS.find((o) => o.value === value)}
+          options={FONT_SIZE_OPTIONS}
           getOptionLabel={(o) => o.label}
           onChange={handleFontSizeChange}
           disableClearable
