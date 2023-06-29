@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, Page } from '@playwright/test';
+import { VariableEditor } from './VariableEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
 const recentDashboardListId = 'recent-dashboard-list';
@@ -25,14 +26,23 @@ export class AppProjectPage {
   readonly addDashboardButton: Locator;
   readonly createDashboardDialog: Locator;
 
+  readonly variableEditor: Locator;
+  readonly addVariableButton: Locator;
+
+  readonly variableList: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
     this.addDashboardButton = page.getByRole('button', { name: 'Add Dashboard' });
-
     this.createDashboardDialog = page.getByRole('dialog', {
       name: 'Create Dashboard',
     });
+
+    this.addVariableButton = page.getByRole('button', { name: 'Add Variable' });
+    this.variableEditor = page.getByTestId('variable-editor');
+
+    this.variableList = page.locator('#project-variable-list');
   }
 
   async goto(projectName: string) {
@@ -106,5 +116,15 @@ export class AppProjectPage {
       exact: true,
     });
     await dashboardButton.click();
+  }
+
+  async startCreatingVariables() {
+    await this.addVariableButton.click();
+    const variableEditor = this.getVariableEditor();
+    await variableEditor.isVisible();
+  }
+
+  getVariableEditor() {
+    return new VariableEditor(this.variableEditor);
   }
 }

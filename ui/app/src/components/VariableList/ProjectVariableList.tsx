@@ -19,9 +19,8 @@ import { IconButton, Stack, Tooltip } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { useSnackbar } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/dashboards';
 import { useIsReadonly } from '../../model/config-client';
 import { DeleteVariableDialog } from '../dialogs';
 import { useUpdateVariableMutation } from '../../model/project-client';
@@ -233,15 +232,15 @@ export function ProjectVariableList(props: VariableListProperties) {
           <VariableFormDrawer
             variable={targetedVariable}
             isOpen={isViewVariableFormStateOpened}
-            isReadonly={true}
             onClose={() => setViewVariableFormStateOpened(false)}
+            action="read"
           />
           <VariableFormDrawer
             variable={targetedVariable}
             isOpen={isEditVariableFormStateOpened}
             onChange={handleVariableUpdate}
             onClose={handleVariableFormDiscard}
-            isCreating={false}
+            action="update"
           />
           <DeleteVariableDialog
             open={isDeleteVariableDialogStateOpened}

@@ -13,7 +13,7 @@
 
 import { VariableDefinition, VariableResource } from '@perses-dev/core';
 import React, { DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
-import { DatasourceStoreProvider, TemplateVariableProvider, VariableEditForm } from '@perses-dev/dashboards';
+import { Action, DatasourceStoreProvider, TemplateVariableProvider, VariableEditForm } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry, TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
@@ -25,12 +25,11 @@ interface VariableFormDrawerProps {
   onChange?: (variable: VariableResource) => void;
   onClose: DispatchWithoutAction;
   projectName?: string;
-  isCreating?: boolean;
-  isReadonly?: boolean;
+  action: Action;
 }
 
 export function VariableFormDrawer(props: VariableFormDrawerProps) {
-  const { variable, isOpen, onChange, onClose, projectName, isCreating, isReadonly } = props;
+  const { variable, isOpen, onChange, onClose, projectName, action } = props;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {
@@ -53,16 +52,10 @@ export function VariableFormDrawer(props: VariableFormDrawerProps) {
     }
   };
 
-  const title = useMemo(() => {
-    if (isReadonly) return 'View Variable';
-    if (isCreating) return 'Create Variable';
-    return 'Edit Variable';
-  }, [isCreating, isReadonly]);
-
   const initialTimeRange = useInitialTimeRange('1h');
 
   return (
-    <Drawer isOpen={isOpen} onClose={onClose}>
+    <Drawer isOpen={isOpen} onClose={onClose} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
           pluginLoader={bundledPluginLoader}
@@ -78,10 +71,7 @@ export function VariableFormDrawer(props: VariableFormDrawerProps) {
                   initialVariableDefinition={variableDef}
                   onChange={handleChange}
                   onCancel={onClose}
-                  isNameReadonly={!isCreating}
-                  isReadonly={isReadonly}
-                  saveButtonLabel={isCreating ? 'Create' : 'Edit'}
-                  title={title}
+                  action={action}
                 />
               </TemplateVariableProvider>
             </TimeRangeProvider>

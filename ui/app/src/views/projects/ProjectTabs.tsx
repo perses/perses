@@ -102,7 +102,7 @@ function TabButton(props: TabButtonProps) {
             isOpen={openCreateVariableDrawerState}
             onChange={handleVariableCreation}
             onClose={() => setOpenCreateVariableDrawerState(false)}
-            isCreating={true}
+            action="create"
           />
         </>
       );

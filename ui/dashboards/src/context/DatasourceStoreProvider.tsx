@@ -58,7 +58,7 @@ export interface DatasourceApi {
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const { dashboardResource, projectName, datasourceApi, onCreate, children } = props;
-  const project = dashboardResource?.metadata.project ?? projectName;
+  const project = projectName ?? dashboardResource?.metadata.project;
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
@@ -131,20 +131,18 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     const { results, addResult } = buildListDatasourceMetadataResults(datasourcePluginMetadata.display.name);
 
     // Start with dashboard datasources that have highest precedence
-    if (dashboardResource) {
-      if (dashboardResource.spec.datasources !== undefined) {
-        for (const selectorName in dashboardResource.spec.datasources) {
-          const spec = dashboardResource.spec.datasources[selectorName];
-          if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
-          addResult(spec, selectorName);
-        }
+    if (dashboardResource?.spec.datasources) {
+      for (const selectorName in dashboardResource.spec.datasources) {
+        const spec = dashboardResource.spec.datasources[selectorName];
+        if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
+        addResult(spec, selectorName);
       }
+    }
 
-      // Now look at project-level datasources
-      for (const datasource of datasources) {
-        const selectorName = datasource.metadata.name;
-        addResult(datasource.spec, selectorName);
-      }
+    // Now look at project-level datasources
+    for (const datasource of datasources) {
+      const selectorName = datasource.metadata.name;
+      addResult(datasource.spec, selectorName);
     }
 
     // And finally global datasources

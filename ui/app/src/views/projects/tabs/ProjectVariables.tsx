@@ -33,7 +33,6 @@ export function ProjectVariables(props: ProjectVariablesProps) {
 
   const { data, isLoading } = useVariableList(projectName);
 
-  // TODO: datagrid utils? + UI tests + improve providers for preview + fix checkbox
   return (
     <Card id={id}>
       <ProjectVariableList

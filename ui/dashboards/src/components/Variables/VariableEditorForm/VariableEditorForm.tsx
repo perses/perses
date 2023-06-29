@@ -59,26 +59,17 @@ function FallbackPreview() {
   return <div>Error previewing values</div>;
 }
 
+export type Action = 'create' | 'read' | 'update';
+
 interface VariableEditFormProps {
   initialVariableDefinition: VariableDefinition;
   onChange: (def: VariableDefinition) => void;
   onCancel: () => void;
-  isNameReadonly?: boolean;
-  isReadonly?: boolean;
-  saveButtonLabel?: string;
-  title?: string;
+  action?: Action;
 }
 
 export function VariableEditForm(props: VariableEditFormProps) {
-  const {
-    initialVariableDefinition,
-    onChange,
-    onCancel,
-    isNameReadonly = false,
-    isReadonly = false,
-    saveButtonLabel = 'Update',
-    title = 'Edit Variables',
-  } = props;
+  const { initialVariableDefinition, onChange, onCancel, action = 'update' } = props;
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
   const validation = useMemo(() => getValidation(state), [state]);
 
@@ -97,6 +88,13 @@ export function VariableEditForm(props: VariableEditFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewKey]);
 
+  const title = useMemo(() => {
+    if (action === 'read') return 'View Variable';
+    if (action === 'create') return 'Create Variable';
+    if (action === 'update') return 'Edit Variable';
+    return '';
+  }, [action]);
+
   return (
     <>
       <Box
@@ -109,7 +107,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
       >
         <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {isReadonly ? (
+          {action === 'read' ? (
             <Button
               color="secondary"
               variant="outlined"
@@ -128,7 +126,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   onChange(getVariableDefinitionFromState(state));
                 }}
               >
-                {saveButtonLabel}
+                {action === 'create' ? 'Create' : 'Update'}
               </Button>
               <Button
                 color="secondary"
@@ -154,7 +152,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
               value={state.name}
               helperText={validation.name}
               InputProps={{
-                readOnly: isNameReadonly || isReadonly,
+                readOnly: action === 'update' || action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {
@@ -169,7 +167,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
               label="Display Label"
               value={state.title || ''}
               InputProps={{
-                readOnly: isReadonly,
+                readOnly: action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {
@@ -184,7 +182,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
               label="Description"
               value={state.description}
               InputProps={{
-                readOnly: isReadonly,
+                readOnly: action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {
@@ -201,7 +199,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                 id="variable-type-select"
                 label="Type"
                 value={state.kind}
-                readOnly={isReadonly}
+                readOnly={action === 'read'}
                 onChange={(v) => {
                   setState((draft) => {
                     draft.kind = v.target.value as VariableEditorState['kind'];
@@ -233,7 +231,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                 label="Value"
                 value={state.textVariableFields.value}
                 InputProps={{
-                  readOnly: isReadonly,
+                  readOnly: action === 'read',
                 }}
                 onChange={(v) => {
                   setState((draft) => {
@@ -272,7 +270,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   pluginType="Variable"
                   pluginKindLabel="Source"
                   value={state.listVariableFields.plugin}
-                  isReadonly={isReadonly}
+                  isReadonly={action === 'read'}
                   onChange={(val) => {
                     setState((draft) => {
                       draft.listVariableFields.plugin = val;
@@ -286,7 +284,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   label="Capturing Regexp Filter"
                   value={state.listVariableFields.capturing_regexp || ''}
                   InputProps={{
-                    readOnly: isReadonly,
+                    readOnly: action === 'read',
                   }}
                   onChange={(e) => {
                     setState((draft) => {
@@ -314,9 +312,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   control={
                     <Switch
                       checked={state.listVariableFields.allowMultiple}
-                      readOnly={isReadonly}
+                      readOnly={action === 'read'}
                       onChange={(e) => {
-                        if (isReadonly) return; // ReadOnly prop is not blocking user interaction...
+                        if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                         setState((draft) => {
                           draft.listVariableFields.allowMultiple = e.target.checked;
                         });
@@ -332,9 +330,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   control={
                     <Switch
                       checked={state.listVariableFields.allowAll}
-                      readOnly={isReadonly}
+                      readOnly={action === 'read'}
                       onChange={(e) => {
-                        if (isReadonly) return; // ReadOnly prop is not blocking user interaction...
+                        if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                         setState((draft) => {
                           draft.listVariableFields.allowAll = e.target.checked;
                         });
@@ -351,7 +349,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                     label="Custom All Value"
                     value={state.listVariableFields.customAllValue}
                     InputProps={{
-                      readOnly: isReadonly,
+                      readOnly: action === 'read',
                     }}
                     onChange={(e) => {
                       setState((draft) => {

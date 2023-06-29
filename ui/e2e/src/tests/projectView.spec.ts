@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import happoPlaywright from 'happo-playwright';
 import { AppProjectPage, DashboardPage } from '../pages';
 
@@ -63,5 +63,22 @@ test.describe('ProjectView', () => {
     const dashboardsNavigationPromise = page.waitForNavigation();
     await projectPage.clickTab('Dashboards');
     await dashboardsNavigationPromise;
+  });
+
+  test('can create a variable', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.gotoVariablesTab();
+
+    await projectPage.addVariableButton.click();
+    const variableEditor = projectPage.getVariableEditor();
+    await variableEditor.setName('list_var');
+    await variableEditor.setDisplayLabel('List Var');
+    await variableEditor.selectType('list');
+    await variableEditor.selectSource('Custom List');
+    await variableEditor.createButton.click();
+
+    await expect(projectPage.variableList).toContainText('$list_var');
   });
 });

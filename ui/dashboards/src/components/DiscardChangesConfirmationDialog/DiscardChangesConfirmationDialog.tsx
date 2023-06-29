@@ -11,35 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button } from '@mui/material';
-import { Dialog } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { useDiscardChangesConfirmationDialog } from '../../context';
-
-interface DiscardChangesConfirmationDialogProps {
-  description: string;
-  isOpen: boolean;
-  onCancel: () => void;
-  onDiscardChanges: () => void;
-}
-
-export const DiscardChangesConfirmationDialog = (props: DiscardChangesConfirmationDialogProps) => {
-  const { description, isOpen, onCancel, onDiscardChanges } = props;
-
-  return (
-    <Dialog open={isOpen} aria-labelledby="discard-dialog">
-      <Dialog.Header>Discard Changes</Dialog.Header>
-      <Dialog.Content>{description}</Dialog.Content>
-      <Dialog.Actions>
-        <Button variant="contained" onClick={onDiscardChanges}>
-          Discard Changes
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={onCancel}>
-          Cancel
-        </Button>
-      </Dialog.Actions>
-    </Dialog>
-  );
-};
 
 export const DashboardDiscardChangesConfirmationDialog = () => {
   const { discardChangesConfirmationDialog: dialog } = useDiscardChangesConfirmationDialog();
