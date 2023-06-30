@@ -139,14 +139,41 @@ export function checkforNearbyTimeSeries(
                 isClosestToCursor,
               });
               nearbySeriesIndexes.push(seriesIdx);
-              break;
             }
           }
         }
       }
     }
   }
-  // console.log({ currentNearbySeriesData });
+
+  if (chart?.dispatchAction !== undefined) {
+    // Clears emphasis state of all lines that are not emphasized.
+    // Emphasized is a subset of just the nearby series that are closest to cursor.
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: nonEmphasizedSeriesIndexes,
+    });
+
+    // https://echarts.apache.org/en/api.html#action.highlight
+    if (emphasizedSeriesIndexes.length > 0) {
+      // Fadeout opacity of all series not closest to cursor.
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: emphasizedSeriesIndexes,
+        notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+      });
+    } else {
+      // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: nearbySeriesIndexes,
+        notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+      });
+    }
+  }
+
   return currentNearbySeriesData;
 }
 
