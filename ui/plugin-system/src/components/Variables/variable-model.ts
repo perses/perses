@@ -12,15 +12,15 @@
 // limitations under the License.
 
 import { ListVariableDefinition } from '@perses-dev/core';
+import { useQuery } from '@tanstack/react-query';
+import { VariableOption } from '../../model';
 import {
   useDatasourceStore,
   usePlugin,
   useTemplateVariableValues,
   useTimeRange,
-  VariableOption,
   VariableStateMap,
-} from '@perses-dev/plugin-system';
-import { useQuery } from '@tanstack/react-query';
+} from '../../runtime';
 
 export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
   const result: VariableOption[] = [];

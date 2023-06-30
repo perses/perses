@@ -14,6 +14,4 @@
 export * from './EditVariablesButton';
 export * from './TemplateVariable';
 export * from './VariableEditor';
-export * from './VariableEditorForm';
 export * from './VariableList';
-export * from './variable-model';

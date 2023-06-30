@@ -29,11 +29,11 @@ import {
   Select,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
-import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-import { ErrorBoundary } from '@perses-dev/components';
 
+import { ErrorBoundary } from '@perses-dev/components/dist/ErrorBoundary';
 import { VARIABLE_TYPES } from '../variable-model';
+import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 

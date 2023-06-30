@@ -13,9 +13,15 @@
 
 import { VariableDefinition, VariableResource } from '@perses-dev/core';
 import React, { DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
-import { Action, DatasourceStoreProvider, TemplateVariableProvider, VariableEditForm } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry, TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
+import {
+  Action,
+  PluginRegistry,
+  TimeRangeProvider,
+  useInitialTimeRange,
+  VariableEditForm,
+} from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 

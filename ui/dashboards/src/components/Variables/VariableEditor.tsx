@@ -35,9 +35,8 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
+import { Action, VariableEditForm, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { useDiscardChangesConfirmationDialog } from '../../context';
-import { Action, VariableEditForm } from './VariableEditorForm';
-import { VARIABLE_TYPES } from './variable-model';
 
 function getVariableLabelByKind(kind: string) {
   return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
