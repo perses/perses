@@ -177,7 +177,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
       const values = d.values.map((value) => {
         return [isLocalTimeZone ? value[0] : utcToZonedTime(value[0], timeZone), value[1]];
       });
-      dataset.push({ id: d.id, source: [['timestamp', 'value'], ...values] });
+      dataset.push({ id: d.id, source: [...values], dimensions: ['time', 'value'] });
     });
 
     const option: EChartsCoreOption = {

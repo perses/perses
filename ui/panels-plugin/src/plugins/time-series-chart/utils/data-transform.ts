@@ -133,7 +133,7 @@ export function getTimeSeries(
   const series: LineSeriesOption = {
     type: 'line',
     id: id,
-    datasetId: seriesIndex,
+    datasetIndex: seriesIndex,
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
@@ -174,19 +174,13 @@ export function getTimeSeries(
  * markLine cannot be used since it does not update yAxis max / min
  * and threshold data needs to show in the tooltip
  */
-export function getThresholdSeries(
-  name: string,
-  threshold: StepOptions,
-  minTime: number,
-  maxTime: number
-): LineSeriesOption {
+export function getThresholdSeries(name: string, threshold: StepOptions, seriesIndex: number): LineSeriesOption {
   return {
     type: 'line',
     name: name,
-    data: [
-      [minTime, threshold.value],
-      [maxTime, threshold.value],
-    ],
+    id: name,
+    datasetId: name,
+    datasetIndex: seriesIndex,
     color: threshold.color,
     label: {
       show: false,

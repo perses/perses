@@ -23,6 +23,7 @@ import {
   DEFAULT_LEGEND,
   getCalculations,
   formatValue,
+  StepOptions,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -56,6 +57,7 @@ import {
   getCommonTimeScaleForQueries,
   EMPTY_GRAPH_DATA,
   convertPanelYAxis,
+  getThresholdSeries,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
@@ -104,7 +106,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       }
     : undefined;
 
-  // const { thresholds: thresholdsColors } = useChartsTheme();
+  const { thresholds: thresholdsColors } = useChartsTheme();
 
   // populate default 'position' and other future properties
   const legend =
@@ -152,7 +154,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       timeSeries: [],
       xAxis: [],
       legendItems: [],
-      rangeMs: timeScale.endMs - timeScale.startMs,
+      rangeMs: timeScale.rangeMs,
     };
     const xAxisData = [...getXValues(timeScale)];
 
@@ -242,8 +244,41 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
     graphData.xAxis = xAxisData;
 
-    // TODO: separate util for getThresholdSeries and adjust to work for TimeChart / dataset
-    // if (thresholds && thresholds.steps) {}
+    // TODO: Percent threshold
+    if (thresholds && thresholds.steps) {
+      // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
+      // These are styled with predefined colors and a dashed style to look different than series from query results.
+      // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
+      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
+      thresholds.steps.forEach((step: StepOptions, index: number) => {
+        const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
+        const thresholdLineColor = step.color ?? stepPaletteColor;
+        const stepOption: StepOptions = {
+          color: thresholdLineColor,
+          value:
+            // // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+            // thresholds.mode === 'Percent'
+            //   ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min) : step.value,
+            step.value,
+        };
+        const thresholdName = step.name ?? `Threshold ${index + 1}`;
+
+        // generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 30s
+        const thresholdTimeValueTuple = [];
+        let currentTimestamp = timeScale.startMs;
+        while (currentTimestamp <= timeScale.endMs) {
+          thresholdTimeValueTuple.push([currentTimestamp, step.value]);
+          currentTimestamp += 1000 * 30;
+        }
+
+        timeChartData.push({
+          id: thresholdName,
+          values: thresholdTimeValueTuple,
+        });
+        timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex)); // TO DO FIX THRESHOLD SERIES INDEX
+        seriesIndex++;
+      });
+    }
 
     return {
       graphData,
