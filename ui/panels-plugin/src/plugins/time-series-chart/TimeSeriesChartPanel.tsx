@@ -222,7 +222,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           if (showLegacyChart) {
             graphData.timeSeries.push(getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor));
           } else {
-            timeSeriesMapping.push(getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, seriesColor));
+            timeSeriesMapping.push(
+              getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, timeScale, seriesColor)
+            );
           }
         }
         if (legend && graphData.legendItems) {

@@ -116,12 +116,15 @@ export function getTimeSeries(
   seriesIndex: number,
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
+  timeScale: TimeScale,
   paletteColor?: string
 ): LineSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
-  let showPoints = false;
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  const minuteMs = 60000;
+  let showPoints = timeScale.rangeMs <= minuteMs * 15;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'Always') {
     showPoints = true;

@@ -189,7 +189,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
         max: isLocalTimeZone ? timeScale.endMs : utcToZonedTime(timeScale.endMs, timeZone),
         axisLabel: {
           hideOverlap: true,
-          formatter: getFormattedAxisLabel(timeScale.endMs - timeScale.startMs),
+          formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
         },
       },
       yAxis: getYAxes(yAxis, unit),

@@ -104,6 +104,7 @@ export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>
 
   const startMs = timeRange.start.valueOf();
   const endMs = timeRange.end.valueOf();
+  const rangeMs = endMs - startMs;
 
-  return { startMs, endMs, stepMs };
+  return { startMs, endMs, stepMs, rangeMs };
 }
