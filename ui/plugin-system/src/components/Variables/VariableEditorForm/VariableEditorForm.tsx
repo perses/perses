@@ -30,8 +30,7 @@ import {
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-
-import { ErrorBoundary } from '@perses-dev/components/dist/ErrorBoundary';
+import { ErrorBoundary } from '@perses-dev/components';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';

@@ -55,15 +55,13 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         options={[]}
         freeSolo
         clearOnBlur
+        readOnly={props.isReadonly}
         renderInput={(params) => (
           <TextField
             {...params}
             label="Values"
             placeholder="Values"
             helperText='Type new value then press "Enter" to add.'
-            InputProps={{
-              readOnly: props.isReadonly,
-            }}
           />
         )}
       />
