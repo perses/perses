@@ -13,24 +13,44 @@
 
 import { DashboardResource, VariableResource } from '../model';
 
-export function dashboardDisplayName(dashboard: DashboardResource) {
+/**
+ * If the dashboard has a display name, return the dashboard display name
+ * Else, only return the dashboard name
+ * @param dashboard
+ */
+export function getDashboardDisplayName(dashboard: DashboardResource) {
   return dashboard.spec.display?.name ?? dashboard.metadata.name;
 }
 
-export function variableDisplayName(variable: VariableResource) {
+/**
+ * If the variable has a display name, return the variable display name
+ * Else, only return the variable name
+ * @param variable Project or Global variable
+ */
+export function getVariableDisplayName(variable: VariableResource) {
   return variable.spec.spec.display?.name ?? variable.metadata.name;
 }
 
-export function dashboardExtendedDisplayName(dashboard: DashboardResource) {
+/**
+ * If the dashboard has a display name, return the dashboard display name and the dashboard name
+ * Else, only return the dashboard name
+ * @param dashboard
+ */
+export function getDashboardExtendedDisplayName(dashboard: DashboardResource) {
   if (dashboard.spec.display?.name) {
-    return `${dashboard.spec.display.name} (ID: ${dashboard.metadata.name})`;
+    return `${dashboard.spec.display.name} (Name: ${dashboard.metadata.name})`;
   }
   return dashboard.metadata.name;
 }
 
-export function variableExtendedDisplayName(variable: VariableResource) {
+/**
+ * If the variable has a display name, return the variable display name and the variable name
+ * Else, only return the variable name
+ * @param variable Project or Global variable
+ */
+export function getVariableExtendedDisplayName(variable: VariableResource) {
   if (variable.spec.spec.display?.name) {
-    return `${variable.spec.spec.display.name} (ID: ${variable.metadata.name})`;
+    return `${variable.spec.spec.display.name} (Name: ${variable.metadata.name})`;
   }
   return variable.metadata.name;
 }

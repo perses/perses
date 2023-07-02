@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { variableDisplayName, variableExtendedDisplayName, VariableResource } from '@perses-dev/core';
+import { getVariableDisplayName, getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -62,7 +62,7 @@ export function ProjectVariableList(props: VariableListProperties) {
         ({
           project: variable.metadata.project,
           name: variable.metadata.name,
-          displayName: variableDisplayName(variable),
+          displayName: getVariableDisplayName(variable),
           description: variable.spec.spec.display?.description,
           type: variable.spec.kind,
           version: variable.metadata.version,
@@ -106,7 +106,7 @@ export function ProjectVariableList(props: VariableListProperties) {
     (variable: VariableResource) => {
       updateVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${variableExtendedDisplayName(updatedVariable)} have been successfully updated`);
+          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully updated`);
           setEditVariableFormStateOpened(false);
         },
         onError: (err) => {

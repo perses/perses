@@ -15,7 +15,7 @@ import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
-import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
+import { getDashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 
 export interface DeleteDashboardDialogProps {
@@ -41,7 +41,7 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
   const handleSubmit = useCallback(() => {
     return deleteDashboardMutation.mutate(dashboard, {
       onSuccess: (deletedDashboard: DashboardResource) => {
-        successSnackbar(`Dashboard ${dashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+        successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
         onClose();
         if (onSuccess) {
           onSuccess(dashboard);
@@ -58,8 +58,8 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
     <Dialog open={open} onClose={onClose}>
       <Dialog.Header>Delete Dashboard</Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the dashboard {dashboardExtendedDisplayName(dashboard)}? This action cannot be
-        undone.
+        Are you sure you want to delete the dashboard {getDashboardExtendedDisplayName(dashboard)}? This action cannot
+        be undone.
       </Dialog.Content>
       <Dialog.Actions>
         <Button variant="contained" type="submit" onClick={handleSubmit}>

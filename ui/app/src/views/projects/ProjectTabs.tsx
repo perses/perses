@@ -16,7 +16,7 @@ import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import VariableBoxIcon from 'mdi-material-ui/VariableBox';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import { DashboardSelector, variableExtendedDisplayName, VariableResource } from '@perses-dev/core';
+import { DashboardSelector, getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
@@ -51,7 +51,7 @@ function TabButton(props: TabButtonProps) {
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${variableExtendedDisplayName(updatedVariable)} have been successfully created`);
+          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`);
           setOpenCreateVariableDrawerState(false);
         },
         onError: (err) => {
@@ -156,13 +156,13 @@ interface DashboardVariableTabsProps {
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
 
-  const naviguate = useNavigate();
+  const navigate = useNavigate();
 
   const [value, setValue] = useState((initialTab ?? dashboardTabIndex).toLowerCase());
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);
-    naviguate(`/projects/${projectName}/${newTabIndex}`);
+    navigate(`/projects/${projectName}/${newTabIndex}`);
   };
 
   return (

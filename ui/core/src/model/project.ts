@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata } from '@perses-dev/core';
+import { Metadata } from './resource';
 
 export interface ProjectResource {
   kind: 'Project';

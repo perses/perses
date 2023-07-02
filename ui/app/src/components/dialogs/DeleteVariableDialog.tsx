@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { variableExtendedDisplayName, VariableResource } from '@perses-dev/core';
+import { getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { Button } from '@mui/material';
@@ -40,7 +40,7 @@ export function DeleteVariableDialog(props: DeleteVariableDialogProps) {
   const handleSubmit = useCallback(() => {
     return deleteVariableMutation.mutate(variable, {
       onSuccess: (deletedVariable: VariableResource) => {
-        successSnackbar(`Variable ${variableExtendedDisplayName(deletedVariable)} was successfully deleted`);
+        successSnackbar(`Variable ${getVariableExtendedDisplayName(deletedVariable)} was successfully deleted`);
         onClose();
         if (onSuccess) {
           onSuccess(variable);
@@ -57,7 +57,7 @@ export function DeleteVariableDialog(props: DeleteVariableDialogProps) {
     <Dialog open={open} onClose={onClose}>
       <Dialog.Header>Delete Variable</Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the variable {variableExtendedDisplayName(variable)}? This action cannot be
+        Are you sure you want to delete the variable {getVariableExtendedDisplayName(variable)}? This action cannot be
         undone.
       </Dialog.Content>
       <Dialog.Actions>

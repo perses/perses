@@ -18,8 +18,8 @@ import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import {
   DashboardResource,
-  dashboardDisplayName,
-  dashboardExtendedDisplayName,
+  getDashboardDisplayName,
+  getDashboardExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
 } from '@perses-dev/core';
@@ -82,7 +82,7 @@ function ViewDashboard() {
     if (data !== undefined) {
       // Dashboard already exists in the API, the user is redirected to the existing dashboard
       actionRef.current = undefined;
-      warningSnackbar(`Dashboard ${dashboardDisplayName(data)} already exists`);
+      warningSnackbar(`Dashboard ${getDashboardDisplayName(data)} already exists`);
       navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
     } else {
       data = {
@@ -113,7 +113,7 @@ function ViewDashboard() {
         return createDashboardMutation.mutateAsync(data, {
           onSuccess: (createdDashboard: DashboardResource) => {
             actionRef.current = undefined;
-            successSnackbar(`Dashboard ${dashboardDisplayName(createdDashboard)} has been successfully created`);
+            successSnackbar(`Dashboard ${getDashboardDisplayName(createdDashboard)} has been successfully created`);
             navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
             return createdDashboard;
           },
@@ -126,7 +126,9 @@ function ViewDashboard() {
 
       return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
-          successSnackbar(`Dashboard ${dashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
+          successSnackbar(
+            `Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`
+          );
           return updatedDashboard;
         },
         onError: (err) => {
@@ -170,7 +172,7 @@ function ViewDashboard() {
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
                 <DashboardBreadcrumbs
-                  dashboardName={dashboardDisplayName(data)}
+                  dashboardName={getDashboardDisplayName(data)}
                   dashboardProject={data.metadata.project}
                 />
               }

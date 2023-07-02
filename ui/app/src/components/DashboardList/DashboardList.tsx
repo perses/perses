@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { dashboardDisplayName, DashboardResource } from '@perses-dev/core';
+import { getDashboardDisplayName, DashboardResource } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -57,7 +57,7 @@ export function DashboardList(props: DashboardListProperties) {
         ({
           project: dashboard.metadata.project,
           name: dashboard.metadata.name,
-          displayName: dashboardDisplayName(dashboard),
+          displayName: getDashboardDisplayName(dashboard),
           version: dashboard.metadata.version,
           createdAt: dashboard.metadata.created_at,
           updatedAt: dashboard.metadata.updated_at,
