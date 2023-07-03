@@ -114,7 +114,7 @@ export function useCreateVariableMutation(projectName: string) {
 }
 
 /**
- * Used to get a dashboard in the API.
+ * Used to get a (project) variable in the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useVariable(projectName: string, name: string) {
@@ -124,7 +124,7 @@ export function useVariable(projectName: string, name: string) {
 }
 
 /**
- * Used to get dashboards in the API.
+ * Used to get (project) variables in the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useVariableList(projectName: string) {
