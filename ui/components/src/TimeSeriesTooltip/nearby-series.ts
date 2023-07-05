@@ -13,8 +13,8 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
-import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeSeries, TimeChartSeriesMapping } from '../model';
+import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip

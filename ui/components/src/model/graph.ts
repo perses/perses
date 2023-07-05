@@ -49,7 +49,8 @@ export type EChartsDataFormat = {
 // want to support focusing by other attributes (e.g. index, name) in the future,
 // and starting with an object will make adding them a non-breaking change.
 export type ChartHandleFocusOpts = {
-  name: string;
+  id?: string; // LineChart uses id
+  name?: string; // TimeChart uses name
 };
 
 export type ChartHandle = {

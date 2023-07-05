@@ -14,9 +14,9 @@
 import { memo, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { UnitOptions } from '@perses-dev/core';
+import { UnitOptions, TimeSeries } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
-import { TimeSeries, TimeChartSeriesMapping } from '../model';
+import { TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
 import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
