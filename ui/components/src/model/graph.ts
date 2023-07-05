@@ -38,7 +38,6 @@ export interface TimeSeries {
 }
 
 // TODO: Continue to simplify TimeChart types, fix legend and thresholds
-export type TimeChartData = TimeSeries[] | null;
 export type TimeChartSeriesMapping = LineSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 

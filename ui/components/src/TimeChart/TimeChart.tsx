@@ -39,7 +39,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartHandleFocusOpts, ChartHandle, TimeChartData, TimeChartSeriesMapping } from '../model/graph';
+import { ChartHandleFocusOpts, ChartHandle, TimeSeries, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
@@ -69,7 +69,7 @@ use([
 
 export interface TimeChartProps {
   height: number;
-  data: TimeChartData;
+  data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
   timeScale?: TimeScale;
   yAxis?: YAXisComponentOption;

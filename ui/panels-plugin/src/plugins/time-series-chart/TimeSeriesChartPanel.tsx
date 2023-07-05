@@ -19,11 +19,12 @@ import {
   useDeepMemo,
   getXValues,
   getYValues,
-  TimeSeries,
   DEFAULT_LEGEND,
   getCalculations,
   formatValue,
   StepOptions,
+  TimeSeries as CoreTimeSeries,
+  TimeSeriesValueTuple,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -47,7 +48,7 @@ import {
   LegendProps,
   useId,
   TimeChart,
-  TimeChartData,
+  TimeSeries,
   TimeChartSeriesMapping,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -119,7 +120,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
-
   // convert Perses dashboard format to be ECharts compatible
   const echartsYAxis = convertPanelYAxis(y_axis);
 
@@ -159,7 +159,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     // Utilizes ECharts dataset so raw data is separate from series option style properties
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
-    const timeChartData: TimeChartData | null = [];
+    const timeChartData: TimeSeries[] = [];
     const timeSeriesMapping: TimeChartSeriesMapping = [];
 
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
@@ -179,7 +179,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (let i = 0; i < result.data.series.length; i++) {
-        const timeSeries: TimeSeries | undefined = result.data.series[i];
+        const timeSeries: CoreTimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
           return { graphData, timeChartData: [], timeSeriesMapping: [] };
         }
@@ -268,7 +268,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdName = step.name ?? `Threshold ${index + 1}`;
 
         // generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 30s
-        const thresholdTimeValueTuple = [];
+        const thresholdTimeValueTuple: TimeSeriesValueTuple[] = [];
         let currentTimestamp = timeScale.startMs;
         while (currentTimestamp <= timeScale.endMs) {
           thresholdTimeValueTuple.push([currentTimestamp, stepOption.value]);

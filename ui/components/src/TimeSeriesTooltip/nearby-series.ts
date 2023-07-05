@@ -14,7 +14,7 @@
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartData, TimeChartSeriesMapping } from '../model';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeSeries, TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -41,7 +41,7 @@ export type NearbySeriesArray = NearbySeriesInfo[];
  * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
  */
 export function checkforNearbyTimeSeries(
-  data: TimeChartData,
+  data: TimeSeries[],
   seriesMapping: TimeChartSeriesMapping,
   pointInGrid: number[],
   yBuffer: number,
@@ -92,7 +92,7 @@ export function checkforNearbyTimeSeries(
     const markerColor = lineSeries.color ?? '#000';
     if (Array.isArray(data)) {
       for (let datumIdx = 0; datumIdx < currentDatasetValues.length; datumIdx++) {
-        const nearbyTimeSeries: TimeSeriesValueTuple = currentDatasetValues[datumIdx];
+        const nearbyTimeSeries = currentDatasetValues[datumIdx];
         if (nearbyTimeSeries === undefined || !Array.isArray(nearbyTimeSeries)) break;
 
         const xValue = nearbyTimeSeries[0];
@@ -303,7 +303,7 @@ export function getNearbySeriesData({
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
-  data: TimeChartData;
+  data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
   chart?: EChartsInstance;
   unit?: UnitOptions;
@@ -343,8 +343,7 @@ export function getNearbySeriesData({
 
   const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
   if (chart.containPixel('grid', pointInPixel)) {
-    const pointInGrid: TimeSeriesValueTuple = chart.convertFromPixel('grid', pointInPixel);
-    // console.log({ pointInGrid });
+    const pointInGrid: number[] = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
       return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
     }

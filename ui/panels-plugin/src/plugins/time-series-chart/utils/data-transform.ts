@@ -18,7 +18,8 @@ import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
   EChartsDataFormat,
-  TimeChartData,
+  EChartsValues,
+  TimeSeries,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -214,7 +215,7 @@ export function getThresholdSeries(name: string, threshold: StepOptions, seriesI
  */
 export function convertPercentThreshold(
   percent: number,
-  data: LineSeriesOption[] | TimeChartData[],
+  data: LegacyTimeSeries[] | TimeSeries[],
   max?: number,
   min?: number
 ) {
@@ -225,10 +226,10 @@ export function convertPercentThreshold(
   return percentDecimal * total + adjustedMin;
 }
 
-function findMax(data: LineSeriesOption[] | TimeChartData[]) {
+function findMax(data: LegacyTimeSeries[] | TimeSeries[]) {
   let max = 0;
-  if (data.length && data[0] !== undefined && data[0].values) {
-    (data as TimeChartData[]).forEach((series) => {
+  if (data.length && data[0] !== undefined && (data as TimeSeries[])[0]?.values) {
+    (data as TimeSeries[]).forEach((series) => {
       series.values.forEach((valueTuple: TimeSeriesValueTuple) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const [_, value] = valueTuple;
@@ -238,9 +239,9 @@ function findMax(data: LineSeriesOption[] | TimeChartData[]) {
       });
     });
   } else {
-    (data as LineSeriesOption[]).forEach((series) => {
+    (data as LegacyTimeSeries[]).forEach((series) => {
       if (series.data !== undefined) {
-        series.data.forEach((value) => {
+        series.data.forEach((value: EChartsValues) => {
           if (typeof value === 'number' && value > max) {
             max = value;
           }
