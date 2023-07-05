@@ -13,8 +13,13 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption } from 'echarts/charts';
-import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
-import { OPTIMIZED_MODE_SERIES_LIMIT, LegacyTimeSeries, EChartsDataFormat } from '@perses-dev/components';
+import { StepOptions, TimeScale, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
+import {
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  LegacyTimeSeries,
+  EChartsDataFormat,
+  TimeChartData,
+} from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
   DEFAULT_AREA_OPACITY,
@@ -207,7 +212,12 @@ export function getThresholdSeries(name: string, threshold: StepOptions, seriesI
  * Converts percent threshold into absolute step value
  * If max is undefined, use the max value from time series data as default
  */
-export function convertPercentThreshold(percent: number, data: LineSeriesOption[], max?: number, min?: number) {
+export function convertPercentThreshold(
+  percent: number,
+  data: LineSeriesOption[] | TimeChartData[],
+  max?: number,
+  min?: number
+) {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);
   const adjustedMin = min ?? 0;
@@ -215,17 +225,29 @@ export function convertPercentThreshold(percent: number, data: LineSeriesOption[
   return percentDecimal * total + adjustedMin;
 }
 
-function findMax(timeSeries: LineSeriesOption[]) {
+function findMax(data: LineSeriesOption[] | TimeChartData[]) {
   let max = 0;
-  timeSeries.forEach((series) => {
-    if (series.data !== undefined) {
-      series.data.forEach((value) => {
+  if (data.length && data[0] !== undefined && data[0].values) {
+    (data as TimeChartData[]).forEach((series) => {
+      series.values.forEach((valueTuple: TimeSeriesValueTuple) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_, value] = valueTuple;
         if (typeof value === 'number' && value > max) {
           max = value;
         }
       });
-    }
-  });
+    });
+  } else {
+    (data as LineSeriesOption[]).forEach((series) => {
+      if (series.data !== undefined) {
+        series.data.forEach((value) => {
+          if (typeof value === 'number' && value > max) {
+            max = value;
+          }
+        });
+      }
+    });
+  }
   return max;
 }
 

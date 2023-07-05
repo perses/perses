@@ -58,6 +58,7 @@ import {
   EMPTY_GRAPH_DATA,
   convertPanelYAxis,
   getThresholdSeries,
+  convertPercentThreshold,
 } from './utils/data-transform';
 import { getSeriesColor } from './utils/palette-gen';
 
@@ -105,8 +106,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         height: contentDimensions.height - contentPadding * 2,
       }
     : undefined;
-
-  const { thresholds: thresholdsColors } = useChartsTheme();
 
   // populate default 'position' and other future properties
   const legend =
@@ -244,11 +243,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
     graphData.xAxis = xAxisData;
 
-    // TODO: Percent threshold
     if (thresholds && thresholds.steps) {
       // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
       // These are styled with predefined colors and a dashed style to look different than series from query results.
       // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
+      const thresholdsColors = chartsTheme.thresholds;
       const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
         const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
@@ -257,9 +256,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           color: thresholdLineColor,
           value:
             // // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-            // thresholds.mode === 'Percent'
-            //   ? convertPercentThreshold(step.value, graphData.timeSeries, y_axis?.max, y_axis?.min) : step.value,
-            step.value,
+            thresholds.mode === 'Percent'
+              ? convertPercentThreshold(
+                  step.value,
+                  showLegacyChart ? graphData.timeSeries : timeChartData,
+                  y_axis?.max,
+                  y_axis?.min
+                )
+              : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1}`;
 
@@ -267,7 +271,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const thresholdTimeValueTuple = [];
         let currentTimestamp = timeScale.startMs;
         while (currentTimestamp <= timeScale.endMs) {
-          thresholdTimeValueTuple.push([currentTimestamp, step.value]);
+          thresholdTimeValueTuple.push([currentTimestamp, stepOption.value]);
           currentTimestamp += 1000 * 30;
         }
 
@@ -275,7 +279,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           id: thresholdName,
           values: thresholdTimeValueTuple,
         });
-        timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex)); // TO DO FIX THRESHOLD SERIES INDEX
+        timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex));
         seriesIndex++;
       });
     }

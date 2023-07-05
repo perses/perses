@@ -84,6 +84,41 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         },
       },
     },
+    timeAxis: {
+      show: true,
+      axisLabel: {
+        show: true,
+        color: primaryTextColor,
+        margin: 15,
+      },
+      axisTick: {
+        show: false,
+        length: 6,
+        lineStyle: {
+          color: muiTheme.palette.grey[600],
+        },
+      },
+      axisLine: {
+        show: true,
+        lineStyle: {
+          color: muiTheme.palette.grey[600],
+        },
+      },
+      splitLine: {
+        show: true,
+        lineStyle: {
+          width: 0.5,
+          color: muiTheme.palette.grey[300],
+          opacity: 0.6,
+        },
+      },
+      splitArea: {
+        show: false,
+        areaStyle: {
+          color: [muiTheme.palette.grey[300]],
+        },
+      },
+    },
     valueAxis: {
       show: true,
       axisLabel: {
