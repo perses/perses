@@ -16,6 +16,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 export interface ZoomEventData {
   start: number;
   end: number;
+  // TODO: remove startIndex and endIndex once LineChart is deprecated
   startIndex?: number;
   endIndex?: number;
 }

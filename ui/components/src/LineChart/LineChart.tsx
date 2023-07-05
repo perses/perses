@@ -40,7 +40,7 @@ import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat, ChartHandleFocusOpts, ChartHandle } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { CursorCoordinates, LineChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
-// import { useTimeZone } from '../context/TimeZoneProvider';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
@@ -101,7 +101,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
-  // const { timeZone } = useTimeZone();
+  const { timeZone } = useTimeZone();
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -182,7 +182,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
         max: data.xAxisMax,
         axisLabel: {
           formatter: (value: number) => {
-            return getFormattedDate(value, rangeMs, 'America/Los_Angeles');
+            return getFormattedDate(value, rangeMs, timeZone);
           },
         },
       },
@@ -217,7 +217,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
 
   return (
     <Box
