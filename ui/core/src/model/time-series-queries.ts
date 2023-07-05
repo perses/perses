@@ -17,9 +17,7 @@ import { UnixTimeMs } from './time';
 
 export type TimeSeriesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TimeSeriesQuery', PluginSpec>;
 
-// TODO: fix null for graphite to work with dataset
-export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number];
-// export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
 
 export function isTimeSeriesValueTuple(data: TimeSeriesValueTuple): data is TimeSeriesValueTuple {
   if (data.length !== 2) return false;

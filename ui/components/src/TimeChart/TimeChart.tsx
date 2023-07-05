@@ -171,11 +171,14 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     // empty array because a `null` value will throw an error.
     if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
 
+    // Utilizes ECharts dataset so raw data is separate from series option style properties
+    // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const dataset: DatasetOption[] = [];
     const isLocalTimeZone = timeZone === 'local';
     data.map((d) => {
-      const values = d.values.map((value) => {
-        return [isLocalTimeZone ? value[0] : utcToZonedTime(value[0], timeZone), value[1]];
+      const values = d.values.map(([timestamp, value]) => {
+        const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
+        return [isLocalTimeZone ? timestamp : utcToZonedTime(timestamp, timeZone), val];
       });
       dataset.push({ id: d.id, source: [...values], dimensions: ['time', 'value'] });
     });
