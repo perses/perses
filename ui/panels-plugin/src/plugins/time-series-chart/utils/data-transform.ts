@@ -13,13 +13,12 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption } from 'echarts/charts';
-import { StepOptions, TimeScale, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
+import { StepOptions, TimeScale, TimeSeries, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
   EChartsDataFormat,
   EChartsValues,
-  TimeSeries,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {

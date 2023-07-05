@@ -32,11 +32,6 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-export interface TimeSeries {
-  id: string;
-  values: TimeSeriesValueTuple[];
-}
-
 // TODO: Continue to simplify TimeChart types, fix legend and thresholds
 export type TimeChartSeriesMapping = LineSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
@@ -54,7 +49,7 @@ export type EChartsDataFormat = {
 // want to support focusing by other attributes (e.g. index, name) in the future,
 // and starting with an object will make adding them a non-breaking change.
 export type ChartHandleFocusOpts = {
-  id: string;
+  name: string;
 };
 
 export type ChartHandle = {

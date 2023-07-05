@@ -24,14 +24,29 @@ const meta: Meta<typeof TimeChart> = {
     height: 200,
     data: [
       {
-        id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
         values: [
           [1673784000000, 1],
           [1673784060000, 2],
           [1673784120000, null],
-          [1673784240000, null],
+          [1673784180000, null],
+          [1673784240000, 4],
+          [1673784300000, 1],
           [1673784360000, 2],
-          [1673784480000, 3],
+          [1673784420000, 3],
+        ],
+      },
+      {
+        name: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        values: [
+          [1673784000000, 8],
+          [1673784060000, 6],
+          [1673784120000, 10],
+          [1673784180000, 9],
+          [1673784240000, 7],
+          [1673784300000, 8],
+          [1673784360000, 12],
+          [1673784420000, 10],
         ],
       },
     ],
@@ -40,7 +55,7 @@ const meta: Meta<typeof TimeChart> = {
         type: 'line',
         id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
         datasetIndex: 0,
-        name: 'test',
+        name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
         connectNulls: false,
         color: 'hsla(158782136,50%,50%,0.8)',
         sampling: 'lttb',
@@ -58,13 +73,29 @@ const meta: Meta<typeof TimeChart> = {
           },
         },
       },
+      {
+        type: 'line',
+        id: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        datasetIndex: 1,
+        name: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        connectNulls: false,
+        color: 'hsla(240,50%,50%,0.8)',
+        sampling: 'lttb',
+        progressiveThreshold: 1000,
+        symbolSize: 4,
+        lineStyle: {
+          width: 1.5,
+          opacity: 0.8,
+        },
+        emphasis: {
+          focus: 'series',
+          lineStyle: {
+            width: 2.5,
+            opacity: 1,
+          },
+        },
+      },
     ],
-    timeScale: {
-      startMs: 1673784000000,
-      endMs: 1673784480000,
-      stepMs: 1,
-      rangeMs: 480000,
-    },
     yAxis: {
       show: true,
     },
@@ -110,13 +141,13 @@ export const RefApi: Story = {
     const lineChartRef = useRef<ChartHandle>(null);
 
     const handleOnClickHighlightSeries = () => {
-      const highlightSeriesId = args.data[0]?.id;
+      const highlightSeriesId = args.data[0]?.name;
       if (!highlightSeriesId || !lineChartRef.current) {
         return;
       }
 
       const highlightSeriesOpts = {
-        id: `${highlightSeriesId}`,
+        name: `${highlightSeriesId}`,
       };
 
       action('highlightSeries')(highlightSeriesOpts);

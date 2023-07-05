@@ -15,7 +15,7 @@ import { DatasetOption } from 'echarts/types/dist/shared';
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import { utcToZonedTime } from 'date-fns-tz';
-import { TimeScale, UnitOptions } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -39,7 +39,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartHandleFocusOpts, ChartHandle, TimeSeries, TimeChartSeriesMapping } from '../model/graph';
+import { ChartHandleFocusOpts, ChartHandle, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
@@ -88,7 +88,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     height,
     data,
     seriesMapping,
-    timeScale = { startMs: 1687753935000, endMs: 1687753950000 }, // TODO: define reasonable default timeScale / improve loading state
+    timeScale: timeScaleProp,
     yAxis,
     unit,
     grid,
@@ -110,17 +110,35 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
   const { timeZone } = useTimeZone();
   const totalSeries = data?.length ?? 0;
 
+  let timeScale: TimeScale;
+  if (timeScaleProp === undefined) {
+    const commonTimeScale = getCommonTimeScale(data);
+    if (commonTimeScale === undefined) {
+      // set default to past 5 years
+      const today = new Date();
+      const pastDate = new Date(today);
+      pastDate.setFullYear(today.getFullYear() - 5);
+      const todayMs = today.getTime();
+      const pastDateMs = pastDate.getTime();
+      timeScale = { startMs: pastDateMs, endMs: todayMs, stepMs: 1, rangeMs: todayMs - pastDateMs };
+    } else {
+      timeScale = commonTimeScale;
+    }
+  } else {
+    timeScale = timeScaleProp;
+  }
+
   useImperativeHandle(
     ref,
     () => {
       return {
-        highlightSeries({ id }: ChartHandleFocusOpts) {
+        highlightSeries({ name }: ChartHandleFocusOpts) {
           if (!chartRef.current) {
             // No chart. Do nothing.
             return;
           }
 
-          chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+          chartRef.current.dispatchAction({ type: 'highlight', seriesId: name });
         },
         clearHighlightedSeries: () => {
           if (!chartRef.current) {
@@ -175,12 +193,12 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const dataset: DatasetOption[] = [];
     const isLocalTimeZone = timeZone === 'local';
-    data.map((d) => {
+    data.map((d, index) => {
       const values = d.values.map(([timestamp, value]) => {
         const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
         return [isLocalTimeZone ? timestamp : utcToZonedTime(timestamp, timeZone), val];
       });
-      dataset.push({ id: d.id, source: [...values], dimensions: ['time', 'value'] });
+      dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
 
     const option: EChartsCoreOption = {

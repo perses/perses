@@ -23,7 +23,7 @@ import {
   getCalculations,
   formatValue,
   StepOptions,
-  TimeSeries as CoreTimeSeries,
+  TimeSeries,
   TimeSeriesValueTuple,
 } from '@perses-dev/core';
 import {
@@ -48,7 +48,6 @@ import {
   LegendProps,
   useId,
   TimeChart,
-  TimeSeries,
   TimeChartSeriesMapping,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
@@ -181,20 +180,20 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (let i = 0; i < result.data.series.length; i++) {
-        const timeSeries: CoreTimeSeries | undefined = result.data.series[i];
+        const timeSeries: TimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
           return { graphData, timeChartData: [], timeSeriesMapping: [], legendItems: [] };
         }
 
+        // Format is determined by series_name_format in query spec
+        const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
+
         if (Array.isArray(timeChartData)) {
           timeChartData.push({
-            id: `${seriesIndex}`,
+            name: formattedSeriesName,
             values: [...timeSeries.values],
           });
         }
-
-        // Format is determined by series_name_format in query spec
-        const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
@@ -278,7 +277,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         }
 
         timeChartData.push({
-          id: thresholdName,
+          name: thresholdName,
           values: thresholdTimeValueTuple,
         });
         timeSeriesMapping.push(getThresholdSeries(thresholdName, stepOption, seriesIndex));
@@ -399,7 +398,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               onSortingChange: setLegendSorting,
             },
             onItemMouseOver: (e, { id }) => {
-              lineChartRef.current?.highlightSeries({ id });
+              lineChartRef.current?.highlightSeries({ name: id });
             },
             onItemMouseOut: () => {
               lineChartRef.current?.clearHighlightedSeries();
