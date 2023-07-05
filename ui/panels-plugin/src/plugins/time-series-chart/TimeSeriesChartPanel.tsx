@@ -129,7 +129,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { setTimeRange } = useTimeRange();
 
   // Populate series data based on query results
-  const { graphData, timeScale, timeChartData, timeSeriesMapping } = useDeepMemo(() => {
+  const { graphData, timeScale, timeChartData, timeSeriesMapping, legendItems } = useDeepMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
     if (isLoading || isFetching) {
@@ -157,6 +157,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     };
     const xAxisData = [...getXValues(timeScale)];
 
+    const legendItems: LegendItem[] = [];
+
     // Utilizes ECharts dataset so raw data is separate from series option style properties
     // https://apache.github.io/echarts-handbook/en/concepts/dataset/
     const timeChartData: TimeSeries[] = [];
@@ -181,7 +183,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries: CoreTimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
-          return { graphData, timeChartData: [], timeSeriesMapping: [] };
+          return { graphData, timeChartData: [], timeSeriesMapping: [], legendItems: [] };
         }
 
         if (Array.isArray(timeChartData)) {
@@ -228,8 +230,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             );
           }
         }
-        if (legend && graphData.legendItems) {
-          graphData.legendItems.push({
+        if (legend && legendItems) {
+          legendItems.push({
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
             label: formattedSeriesName,
             color: seriesColor,
@@ -289,6 +291,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       timeScale,
       timeChartData,
       timeSeriesMapping,
+      legendItems,
     };
   }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
 
@@ -387,7 +390,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         legendProps={
           legend && {
             options: legend,
-            data: graphData.legendItems || [],
+            data: legendItems || [],
             selectedItems: selectedLegendItems,
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
@@ -422,9 +425,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   //  Show an empty chart when there is no data because the user unselected all items in
                   // the legend. Otherwise, show a "no data" message.
                   noDataVariant={
-                    !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
-                      ? 'chart'
-                      : 'message'
+                    !graphData.timeSeries.length && legendItems && legendItems.length > 0 ? 'chart' : 'message'
                   }
                 />
               ) : (
@@ -443,11 +444,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   //  Show an empty chart when there is no data because the user unselected all items in
                   // the legend. Otherwise, show a "no data" message.
                   // TODO: fix noDataVariant to work with new TimeChart types
-                  // noDataVariant={
-                  //   !graphData.timeSeries.length && graphData.legendItems && graphData.legendItems.length > 0
-                  //     ? 'chart'
-                  //     : 'message'
-                  // }
+                  noDataVariant={!timeChartData.length && legendItems && legendItems.length > 0 ? 'chart' : 'message'}
                 />
               )}
             </Box>
