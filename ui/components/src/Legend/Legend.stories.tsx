@@ -129,7 +129,7 @@ const meta: Meta<typeof Legend> = {
     height: 100,
     data: generateMockLegendData(5),
     options: {
-      position: 'Bottom',
+      position: 'bottom',
       mode: 'List',
     },
     selectedItems: 'ALL',
@@ -171,11 +171,11 @@ export const Position: Story = {
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <StorySection title="Right" level="h3">
+        <StorySection title="right" level="h3">
           <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} />
         </StorySection>
-        <StorySection title="Bottom" level="h3">
-          <LegendWrapper {...args} width={500} height={100} options={{ position: 'Bottom' }} />
+        <StorySection title="bottom" level="h3">
+          <LegendWrapper {...args} width={500} height={100} options={{ position: 'bottom' }} />
         </StorySection>
       </Stack>
     );
@@ -333,7 +333,7 @@ export const TableColumns: Story = {
     height: 200,
     selectedItems: 'ALL',
     data: generateMockLegendData(10),
-    options: { position: 'Bottom', mode: 'Table' },
+    options: { position: 'bottom', mode: 'Table' },
     tableProps: {
       columns: [
         {
@@ -562,7 +562,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
                     {...args}
                     width={500}
                     height={100}
-                    options={{ position: 'Bottom', mode }}
+                    options={{ position: 'bottom', mode }}
                     data={generateMockLegendData(args.legendItemsCount)}
                   />
                 </StorySection>

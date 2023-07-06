@@ -181,16 +181,16 @@ export function getContentWithLegendLayout({
     legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE[legendSize]['Right'] + columnsWidth : width;
 
     // Use the smaller of the size-based row count or the number of legend items + 1 for the header.
-    const rowsToShow = Math.min(TABLE_LEGEND_SIZE[legendSize]['Bottom'], legendProps.data.length + 1);
-    legendHeight = position === 'Bottom' ? rowsToShow * tableLayout.height : height;
+    const rowsToShow = Math.min(TABLE_LEGEND_SIZE[legendSize]['bottom'], legendProps.data.length + 1);
+    legendHeight = position === 'bottom' ? rowsToShow * tableLayout.height : height;
   }
 
   const contentWidth = position === 'Right' ? width - legendWidth - spacing : width;
-  const contentHeight = position === 'Bottom' ? height - legendHeight - spacing : height;
+  const contentHeight = position === 'bottom' ? height - legendHeight - spacing : height;
 
   if (
     (position === 'Right' && contentWidth < minChildrenWidth) ||
-    (position === 'Bottom' && contentHeight < minChildrenHeight)
+    (position === 'bottom' && contentHeight < minChildrenHeight)
   ) {
     // Legend does not fit. Just show the content.
     return noLegendLayout;
@@ -208,7 +208,7 @@ export function getContentWithLegendLayout({
     },
     margin: {
       right: position === 'Right' ? spacing : 0,
-      bottom: position === 'Bottom' ? spacing : 0,
+      bottom: position === 'bottom' ? spacing : 0,
     },
   };
 }

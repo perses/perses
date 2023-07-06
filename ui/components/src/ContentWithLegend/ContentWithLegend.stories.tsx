@@ -376,7 +376,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
+                  position: 'bottom',
                   mode: 'List',
                 },
                 selectedItems: {},
@@ -394,7 +394,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
+                  position: 'bottom',
                   mode: 'List',
                 },
                 selectedItems: {},
@@ -408,7 +408,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
+                  position: 'bottom',
                   mode: 'List',
                 },
                 selectedItems: {},
@@ -426,7 +426,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(2),
                 options: {
-                  position: 'Bottom',
+                  position: 'bottom',
                   mode: 'Table',
                   size: 'Small',
                 },
@@ -441,7 +441,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
+                  position: 'bottom',
                   mode: 'Table',
                   size: 'Small',
                 },

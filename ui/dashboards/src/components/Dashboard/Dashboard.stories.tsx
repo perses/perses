@@ -349,7 +349,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              legend: { position: 'Bottom' },
+              legend: { position: 'bottom' },
             },
           },
           queries: [
@@ -407,7 +407,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              legend: { position: 'Bottom' },
+              legend: { position: 'bottom' },
             },
           },
           queries: [

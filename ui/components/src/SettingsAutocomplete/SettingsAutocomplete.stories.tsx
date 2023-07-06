@@ -55,7 +55,7 @@ export const OptionWithLabel: Story = {
       },
       {
         id: 'bottom',
-        label: 'Bottom',
+        label: 'bottom',
       },
       {
         id: 'left',
@@ -88,7 +88,7 @@ export const Value: StoryObj<SettingsAutocompleteProps<SettingsAutocompleteOptio
       },
       {
         id: 'bottom',
-        label: 'Bottom',
+        label: 'bottom',
       },
       {
         id: 'left',

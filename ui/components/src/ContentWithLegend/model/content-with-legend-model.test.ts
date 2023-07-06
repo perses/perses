@@ -175,7 +175,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Bottom',
+                position: 'bottom',
                 mode: mode,
               },
               data: [],
@@ -213,7 +213,7 @@ describe('getContentWithLegendLayout', () => {
           minChildrenHeight: 0,
           legendProps: {
             options: {
-              position: 'Bottom',
+              position: 'bottom',
               mode: mode,
             },
             data: [],
@@ -250,7 +250,7 @@ describe('getContentWithLegendLayout', () => {
           minChildrenHeight: 100,
           legendProps: {
             options: {
-              position: 'Bottom',
+              position: 'bottom',
               mode: mode,
             },
             data: [],
@@ -336,7 +336,7 @@ describe('getContentWithLegendLayout', () => {
         minChildrenHeight: 0,
         legendProps: {
           options: {
-            position: 'Bottom',
+            position: 'bottom',
             mode: 'Table',
           },
           data: [
@@ -364,7 +364,7 @@ describe('getContentWithLegendLayout', () => {
       });
 
       const layout = getContentWithLegendLayout(layoutOpts);
-      expect(layout.legend.height).toBeLessThan(TABLE_LEGEND_SIZE['Medium']['Bottom'] * MOCK_TABLE_CELL_HEIGHT);
+      expect(layout.legend.height).toBeLessThan(TABLE_LEGEND_SIZE['Medium']['bottom'] * MOCK_TABLE_CELL_HEIGHT);
 
       // Height is for 3 rows because there are 2 legend items + 1 header row.
       expect(layout.legend.height).toEqual(3 * MOCK_TABLE_CELL_HEIGHT);
