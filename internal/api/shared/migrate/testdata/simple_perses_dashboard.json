@@ -17,8 +17,8 @@
         "kind": "ListVariable",
         "spec": {
           "name": "listVar",
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -38,8 +38,8 @@
         "kind": "ListVariable",
         "spec": {
           "name": "firstNames",
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -57,8 +57,8 @@
             "description": "Label values, 1rst flavor",
             "hidden": false
           },
-          "allow_all_value": true,
-          "allow_multiple": false,
+          "allowAllValue": true,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -77,8 +77,8 @@
             "description": "Label values, 2nd flavor",
             "hidden": false
           },
-          "allow_all_value": true,
-          "allow_multiple": false,
+          "allowAllValue": true,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -97,8 +97,8 @@
             "description": "Label values, 3rd flavor",
             "hidden": false
           },
-          "allow_all_value": true,
-          "allow_multiple": false,
+          "allowAllValue": true,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -117,8 +117,8 @@
             "description": "Label values, 4th flavor",
             "hidden": false
           },
-          "allow_all_value": true,
-          "allow_multiple": false,
+          "allowAllValue": true,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -137,8 +137,8 @@
             "description": "ad hoc filter",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -167,8 +167,8 @@
             "description": "adHocFilter",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -181,8 +181,8 @@
         "kind": "ListVariable",
         "spec": {
           "name": "LabelNamesTest",
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelNamesVariable",
             "spec": {
@@ -200,8 +200,8 @@
             "description": "variable using query_result clause",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -220,8 +220,8 @@
             "description": "query result var for volatile series (relies $__range global var)",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -240,8 +240,8 @@
             "description": "query result var with no <aggr> by clause",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {

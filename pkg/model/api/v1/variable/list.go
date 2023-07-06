@@ -30,7 +30,7 @@ func (v *DefaultValue) UnmarshalJSON(data []byte) error {
 	var slice []string
 	if unmarshalStringErr := json.Unmarshal(data, &s); unmarshalStringErr != nil {
 		if unmarshalSliceErr := json.Unmarshal(data, &slice); unmarshalSliceErr != nil {
-			return fmt.Errorf("unable to unmarshal default_value. Only string or array of string can be used")
+			return fmt.Errorf("unable to unmarshal defaultValue. Only string or array of string can be used")
 		}
 	}
 	v.SingleValue = s
@@ -43,7 +43,7 @@ func (v *DefaultValue) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var slice []string
 	if unmarshalStringErr := unmarshal(&s); unmarshalStringErr != nil {
 		if unmarshalSliceErr := unmarshal(&slice); unmarshalSliceErr != nil {
-			return fmt.Errorf("unable to unmarshal default_value. Only string or array of string can be used")
+			return fmt.Errorf("unable to unmarshal defaultValue. Only string or array of string can be used")
 		}
 	}
 	v.SingleValue = s
@@ -67,23 +67,23 @@ func (v *DefaultValue) MarshalYAML() (interface{}, error) {
 
 type ListSpec struct {
 	Display       *Display      `json:"display,omitempty" yaml:"display,omitempty"`
-	DefaultValue  *DefaultValue `json:"default_value,omitempty" yaml:"default_value,omitempty"`
-	AllowAllValue bool          `json:"allow_all_value" yaml:"allow_all_value"`
-	AllowMultiple bool          `json:"allow_multiple" yaml:"allow_multiple"`
+	DefaultValue  *DefaultValue `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
+	AllowAllValue bool          `json:"allowAllValue" yaml:"allowAllValue"`
+	AllowMultiple bool          `json:"allowMultiple" yaml:"allowMultiple"`
 	// CustomAllValue is a custom value that will be used if AllowAllValue is true and if then `all` is selected
-	CustomAllValue string `json:"custom_all_value,omitempty" yaml:"custom_all_value,omitempty"`
+	CustomAllValue string `json:"customAllValue,omitempty" yaml:"customAllValue,omitempty"`
 	// CapturingRegexp is the regexp used to catch and filter the result of the query.
 	// If empty, then nothing is filtered. That's the equivalent of setting CapturingRegexp with (.*)
-	CapturingRegexp string        `json:"capturing_regexp,omitempty" yaml:"capturing_regexp,omitempty"`
+	CapturingRegexp string        `json:"capturingRegexp,omitempty" yaml:"capturingRegexp,omitempty"`
 	Plugin          common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 func (v *ListSpec) Validate() error {
 	if len(v.CustomAllValue) > 0 && !v.AllowAllValue {
-		return fmt.Errorf("custom_all_value cannot be set if allow_all_value is not set to true")
+		return fmt.Errorf("customAllValue cannot be set if allowAllValue is not set to true")
 	}
 	if v.DefaultValue != nil && len(v.DefaultValue.SliceValues) > 0 && !v.AllowMultiple {
-		return fmt.Errorf("you can not use a list of default values if allow_multiple is set to false")
+		return fmt.Errorf("you can not use a list of default values if allowMultiple is set to false")
 	}
 
 	return nil

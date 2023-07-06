@@ -242,8 +242,8 @@ func TestMarshalDashboard(t *testing.T) {
       {
         "kind": "ListVariable",
         "spec": {
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelNamesVariable",
             "spec": {
@@ -258,8 +258,8 @@ func TestMarshalDashboard(t *testing.T) {
       {
         "kind": "ListVariable",
         "spec": {
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {

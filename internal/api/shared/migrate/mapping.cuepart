@@ -84,9 +84,9 @@ spec: {
                         }
                     }
                 }
-                allow_all_value: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
-                allow_multiple: *grafanaVar.multi | false       // the default value tackles the case of variables of type `interval` that don't have such field
-                // default_value: nothing to map to this field
+                allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
+                allowMultiple: *grafanaVar.multi | false       // the default value tackles the case of variables of type `interval` that don't have such field
+                // defaultValue: nothing to map to this field
                 #var: grafanaVar
                 plugin: [ // switch
                     %(conditional_variables)

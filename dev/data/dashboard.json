@@ -31,8 +31,8 @@
           "kind": "ListVariable",
           "spec": {
             "name": "job",
-            "allow_multiple": false,
-            "allow_all_value": false,
+            "allowMultiple": false,
+            "allowAllValue": false,
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -45,8 +45,8 @@
           "kind": "ListVariable",
           "spec": {
             "name": "instance",
-            "allow_multiple": false,
-            "allow_all_value": false,
+            "allowMultiple": false,
+            "allowAllValue": false,
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -782,9 +782,9 @@
           "kind": "ListVariable",
           "spec": {
             "name": "job",
-            "allow_multiple": false,
-            "allow_all_value": true,
-            "default_value": "node",
+            "allowMultiple": false,
+            "allowAllValue": true,
+            "defaultValue": "node",
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -797,9 +797,9 @@
           "kind": "ListVariable",
           "spec": {
             "name": "instance",
-            "allow_multiple": false,
-            "allow_all_value": false,
-            "default_value": "demo.do.prometheus.io:9100",
+            "allowMultiple": false,
+            "allowAllValue": false,
+            "defaultValue": "demo.do.prometheus.io:9100",
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -3008,8 +3008,8 @@
           "kind": "ListVariable",
           "spec": {
             "name": "interval",
-            "allow_multiple": false,
-            "allow_all_value": false,
+            "allowMultiple": false,
+            "allowAllValue": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
@@ -3032,9 +3032,9 @@
           "spec": {
             "name": "NewListVariable",
             "display": { "name": "Test display name", "hidden": false },
-            "default_value": "second value",
-            "allow_all_value": true,
-            "allow_multiple": false,
+            "defaultValue": "second value",
+            "allowAllValue": true,
+            "allowMultiple": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
@@ -3110,8 +3110,8 @@
           "kind": "ListVariable",
           "spec": {
             "name": "interval",
-            "allow_multiple": false,
-            "allow_all_value": false,
+            "allowMultiple": false,
+            "allowAllValue": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
@@ -3134,9 +3134,9 @@
           "spec": {
             "name": "NewListVariable",
             "display": { "name": "Test display name", "hidden": false },
-            "default_value": "second value",
-            "allow_all_value": true,
-            "allow_multiple": false,
+            "defaultValue": "second value",
+            "allowAllValue": true,
+            "allowMultiple": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
@@ -3279,14 +3279,14 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "table",
-                  "position": "bottom",
+                  "mode": "Table",
+                  "position": "Bottom",
                   "values": [
-                    "mean",
-                    "first-number",
-                    "last-number",
-                    "min",
-                    "max"
+                    "Mean",
+                    "FirstNumber",
+                    "LastNumber",
+                    "Min",
+                    "Max"
                   ]
                 }
               }
@@ -3316,10 +3316,13 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "table",
-                  "position": "right",
-                  "size": "small",
-                  "values": ["mean", "last-number"]
+                  "mode": "Table",
+                  "position": "Right",
+                  "size": "Small",
+                  "values": [
+                    "Mean",
+                    "LastNumber"
+                  ]
                 }
               }
             },
