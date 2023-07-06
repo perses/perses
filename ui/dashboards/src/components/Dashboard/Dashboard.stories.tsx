@@ -297,7 +297,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              visual: { connect_nulls: true, show_points: 'Always' },
+              visual: { connect_nulls: true, show_points: 'always' },
             },
           },
           queries: [

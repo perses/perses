@@ -49,7 +49,7 @@ export interface TimeSeriesChartPaletteOptions {
 export type TimeSeriesChartVisualOptions = {
   line_width?: number;
   area_opacity?: number;
-  show_points?: 'Auto' | 'Always';
+  show_points?: 'auto' | 'always';
   palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;

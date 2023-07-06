@@ -70,7 +70,7 @@ export function getLineSeries(
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'Always') {
+  if (visual.show_points === 'always') {
     showPoints = true;
   }
 
