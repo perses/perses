@@ -19,7 +19,7 @@
 export const legendPositions = ['bottom', 'Right'] as const;
 export type LegendPositions = (typeof legendPositions)[number];
 
-export const legendModes = ['List', 'Table'] as const;
+export const legendModes = ['list', 'table'] as const;
 export type LegendMode = (typeof legendModes)[number];
 
 export const legendSizes = ['Small', 'Medium'] as const;
@@ -46,7 +46,7 @@ export function isValidLegendSize(size: LegendSize) {
 
 export const DEFAULT_LEGEND: Required<LegendOptionsBase> = {
   position: 'bottom',
-  mode: 'List',
+  mode: 'list',
   size: 'Medium',
 };
 

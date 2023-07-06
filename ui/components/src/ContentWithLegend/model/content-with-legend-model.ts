@@ -153,7 +153,7 @@ export function getContentWithLegendLayout({
   let legendWidth;
   let legendHeight;
 
-  if (mode === 'List') {
+  if (mode === 'list') {
     // TODO: normalize list to share similar height options as the table
     // when we add more size options.
     legendWidth = position === 'Right' ? 200 : width;

@@ -128,7 +128,7 @@ export function Legend({
   };
 
   let legendContent: ReactNode;
-  if (mode === 'Table') {
+  if (mode === 'table') {
     legendContent = (
       <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} {...tableProps} />
     );

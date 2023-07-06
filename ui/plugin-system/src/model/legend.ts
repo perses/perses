@@ -61,8 +61,8 @@ export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSin
 };
 
 export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {
-  List: { label: 'List' },
-  Table: { label: 'Table' },
+  List: { label: 'list' },
+  Table: { label: 'table' },
 };
 
 export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectConfig>> = {

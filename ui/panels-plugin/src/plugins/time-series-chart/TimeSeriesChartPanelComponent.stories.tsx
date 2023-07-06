@@ -201,7 +201,7 @@ export const TableLegendWithValues: Story = {
     spec: {
       legend: {
         position: 'bottom',
-        mode: 'Table',
+        mode: 'table',
         values: ['Mean', 'FirstNumber', 'LastNumber', 'Max', 'Min', 'Sum'],
       },
     },

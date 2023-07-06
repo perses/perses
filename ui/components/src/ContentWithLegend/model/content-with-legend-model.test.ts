@@ -286,7 +286,7 @@ describe('getContentWithLegendLayout', () => {
       legendProps: {
         options: {
           position: 'Right',
-          mode: 'Table',
+          mode: 'table',
         },
         tableProps: {
           columns: [
@@ -337,7 +337,7 @@ describe('getContentWithLegendLayout', () => {
         legendProps: {
           options: {
             position: 'bottom',
-            mode: 'Table',
+            mode: 'table',
           },
           data: [
             {

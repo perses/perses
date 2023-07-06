@@ -130,7 +130,7 @@ const meta: Meta<typeof Legend> = {
     data: generateMockLegendData(5),
     options: {
       position: 'bottom',
-      mode: 'List',
+      mode: 'list',
     },
     selectedItems: 'ALL',
   },
@@ -333,7 +333,7 @@ export const TableColumns: Story = {
     height: 200,
     selectedItems: 'ALL',
     data: generateMockLegendData(10),
-    options: { position: 'bottom', mode: 'Table' },
+    options: { position: 'bottom', mode: 'table' },
     tableProps: {
       columns: [
         {
