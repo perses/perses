@@ -23,19 +23,19 @@ import { EChart } from '../EChart';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
-export interface BarGaugeChartData {
+export interface BarChartData {
   label: string;
   value: number | null | undefined;
 }
 
-export interface BarGaugeChartProps {
+export interface BarChartProps {
   width: number;
   height: number;
-  data: BarGaugeChartData[] | null | undefined;
+  data: BarChartData[] | null | undefined;
   unit: UnitOptions;
 }
 
-export function BarGaugeChart(props: BarGaugeChartProps) {
+export function BarChart(props: BarChartProps) {
   const { width, height, data, unit } = props;
   const chartsTheme = useChartsTheme();
   const theme = useTheme();
@@ -43,7 +43,7 @@ export function BarGaugeChart(props: BarGaugeChartProps) {
   const option: EChartsCoreOption = useMemo(() => {
     if (data == null) return chartsTheme.noDataOption;
 
-    const source: Array<Array<BarGaugeChartData['label'] | BarGaugeChartData['value']>> = [];
+    const source: Array<Array<BarChartData['label'] | BarChartData['value']>> = [];
     data.map((d) => {
       source.push([d.label, d.value]);
     });

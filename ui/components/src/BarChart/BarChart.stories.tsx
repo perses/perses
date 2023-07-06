@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { BarGaugeChart, BarGaugeChartData } from '@perses-dev/components';
+import { BarChart, BarChartData } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 
-const DEFAULT_DATA: BarGaugeChartData[] = [
+const DEFAULT_DATA: BarChartData[] = [
   {
     label: 'pool_sb1 Quota',
     value: 2256,
@@ -42,8 +42,8 @@ const DEFAULT_DATA: BarGaugeChartData[] = [
   },
 ];
 
-const meta: Meta<typeof BarGaugeChart> = {
-  component: BarGaugeChart,
+const meta: Meta<typeof BarChart> = {
+  component: BarChart,
   parameters: {
     happo: {
       beforeScreenshot: async () => {
@@ -55,7 +55,7 @@ const meta: Meta<typeof BarGaugeChart> = {
 
 export default meta;
 
-type Story = StoryObj<typeof BarGaugeChart>;
+type Story = StoryObj<typeof BarChart>;
 
 export const Primary: Story = {
   args: {
