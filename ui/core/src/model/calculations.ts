@@ -14,14 +14,14 @@
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
 export const CalculationsMap = {
-  First: first,
-  Last: last,
-  FirstNumber: firstNumber,
-  LastNumber: lastNumber,
-  Mean: mean,
-  Sum: sum,
-  Min: min,
-  Max: max,
+  first: first,
+  last: last,
+  'first-number': firstNumber,
+  'last-number': lastNumber,
+  mean: mean,
+  sum: sum,
+  min: min,
+  max: max,
 };
 
 export type CalculationType = keyof typeof CalculationsMap;
@@ -32,41 +32,41 @@ export type CalculationConfig = {
 };
 
 export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationConfig>> = {
-  First: {
+  first: {
     label: 'First',
     description: 'First value',
   },
-  Last: {
+  last: {
     label: 'Last',
     description: 'Last value',
   },
-  FirstNumber: {
+  'first-number': {
     label: 'First *',
     description: 'First numeric value',
   },
-  LastNumber: {
+  'last-number': {
     label: 'Last *',
     description: 'Last numeric value',
   },
-  Mean: {
+  mean: {
     label: 'Avg',
     description: 'Average value excluding nulls',
   },
-  Sum: {
+  sum: {
     label: 'Sum',
     description: 'The sum of all values',
   },
-  Min: {
+  min: {
     label: 'Min',
     description: 'Minimum value',
   },
-  Max: {
+  max: {
     label: 'Max',
     description: 'Maximum value',
   },
 } as const;
 
-export const DEFAULT_CALCULATION: CalculationType = 'Sum';
+export const DEFAULT_CALCULATION: CalculationType = 'sum';
 
 type CalculationValue = number | null | undefined;
 
@@ -116,15 +116,15 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
       nonNullCount += 1;
       sum += value;
 
-      if ('FirstNumber' in calculations && calculations.FirstNumber === undefined) {
+      if ('first-number' in calculations && calculations.FirstNumber === undefined) {
         // Save the first number we see.
         calculations.FirstNumber = value;
       }
 
-      if ('LastNumber' in calculations) {
+      if ('last-number' in calculations) {
         // Keep setting the numbers we see, which will eventually be set to the
         // last number when finished iterating.
-        calculations.LastNumber = value;
+        calculations.last-number = value;
       }
 
       if ('Min' in calculations) {
@@ -182,11 +182,11 @@ function last(values: TimeSeriesValueTuple[]): CalculationValue {
 }
 
 function firstNumber(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'FirstNumber');
+  return getCalculation(values, 'first-number');
 }
 
 function lastNumber(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'LastNumber');
+  return getCalculation(values, 'last-number');
 }
 
 function mean(values: TimeSeriesValueTuple[]): CalculationValue {

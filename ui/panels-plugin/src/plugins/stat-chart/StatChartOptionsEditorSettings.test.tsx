@@ -71,7 +71,7 @@ describe('StatChartOptionsEditorSettings', () => {
     userEvent.click(firstOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'FirstNumber',
+        calculation: 'first-number',
       })
     );
   });

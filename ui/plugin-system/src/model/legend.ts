@@ -34,9 +34,9 @@ import {
 export const legendValues: CalculationType[] = [
   'Mean',
   'First',
-  'FirstNumber',
+  'first-number',
   'Last',
-  'LastNumber',
+  'last-number',
   'Min',
   'Max',
   'Sum',

@@ -87,7 +87,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
           kind: 'Decimal',
         },
         max: 1,
-        calculation: 'LastNumber',
+        calculation: 'last-number',
       },
       onChange
     );
