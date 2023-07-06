@@ -54,9 +54,9 @@
         "kind": "ListVariable",
         "spec": {
           "name": "interval",
-          "default_value": "5m",
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "defaultValue": "5m",
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -82,9 +82,9 @@
             "name": "Test display name",
             "hidden": false
           },
-          "default_value": "second value",
-          "allow_all_value": true,
-          "allow_multiple": false,
+          "defaultValue": "second value",
+          "allowAllValue": true,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {

@@ -21,7 +21,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const listVariableFields = {
     allowMultiple: false,
     allowAll: false,
-    capturing_regexp: undefined as string | undefined,
+    capturingRegexp: undefined as string | undefined,
     plugin: {
       kind: '',
       spec: {},
@@ -29,11 +29,11 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
     customAllValue: undefined as string | undefined,
   };
   if (initialVariableDefinition.kind === 'ListVariable') {
-    listVariableFields.allowMultiple = initialVariableDefinition.spec.allow_all_value ?? false;
-    listVariableFields.allowAll = initialVariableDefinition.spec.allow_all_value ?? false;
-    listVariableFields.capturing_regexp = initialVariableDefinition.spec.capturing_regexp;
+    listVariableFields.allowMultiple = initialVariableDefinition.spec.allowAllValue ?? false;
+    listVariableFields.allowAll = initialVariableDefinition.spec.allowAllValue ?? false;
+    listVariableFields.capturingRegexp = initialVariableDefinition.spec.capturingRegexp;
     listVariableFields.plugin = initialVariableDefinition.spec.plugin;
-    listVariableFields.customAllValue = initialVariableDefinition.spec.custom_all_value;
+    listVariableFields.customAllValue = initialVariableDefinition.spec.customAllValue;
   }
 
   return {
@@ -78,11 +78,11 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
       spec: {
         name,
         display,
-        allow_multiple: state.listVariableFields.allowMultiple,
-        allow_all_value: state.listVariableFields.allowAll,
-        capturing_regexp: state.listVariableFields.capturing_regexp,
+        allowMultiple: state.listVariableFields.allowMultiple,
+        allowAllValue: state.listVariableFields.allowAll,
+        capturingRegexp: state.listVariableFields.capturingRegexp,
         plugin: state.listVariableFields.plugin,
-        custom_all_value: state.listVariableFields.customAllValue,
+        customAllValue: state.listVariableFields.customAllValue,
       },
     };
   }

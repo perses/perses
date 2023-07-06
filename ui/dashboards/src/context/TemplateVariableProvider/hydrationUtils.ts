@@ -29,12 +29,12 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
       break;
     case 'ListVariable':
       varState.options = [];
-      varState.value = initialValue ?? variable.spec.default_value ?? null;
-      // TODO: smarter fallbacks for default_value when allow_all_value is true
+      varState.value = initialValue ?? variable.spec.defaultValue ?? null;
+      // TODO: smarter fallbacks for defaultValue when allowAllValue is true
       if (varState.options.length > 0 && !varState.value) {
         const firstOptionValue = varState.options[0]?.value ?? null;
         if (firstOptionValue !== null) {
-          varState.value = variable.spec.allow_multiple ? [firstOptionValue] : firstOptionValue;
+          varState.value = variable.spec.allowMultiple ? [firstOptionValue] : firstOptionValue;
         }
       }
 

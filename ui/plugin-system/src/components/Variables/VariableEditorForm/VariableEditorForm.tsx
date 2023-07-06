@@ -302,7 +302,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               <Stack>
                 <TextField
                   label="Capturing Regexp Filter"
-                  value={state.listVariableFields.capturing_regexp || ''}
+                  value={state.listVariableFields.capturingRegexp || ''}
                   InputProps={{
                     readOnly: action === 'read',
                   }}
@@ -310,9 +310,9 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     setState((draft) => {
                       if (e.target.value) {
                         // TODO: do a better fix, if empty string => it should skip the filter
-                        draft.listVariableFields.capturing_regexp = e.target.value;
+                        draft.listVariableFields.capturingRegexp = e.target.value;
                       } else {
-                        draft.listVariableFields.capturing_regexp = undefined;
+                        draft.listVariableFields.capturingRegexp = undefined;
                       }
                     });
                   }}

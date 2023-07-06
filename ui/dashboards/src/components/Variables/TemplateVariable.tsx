@@ -57,8 +57,8 @@ export function useListVariableState(
   // viewOptions are the options used in the view only (options + All if allowed)
   viewOptions: VariableOption[];
 } {
-  const allowMultiple = spec?.allow_multiple === true;
-  const allowAllValue = spec?.allow_all_value === true;
+  const allowMultiple = spec?.allowMultiple === true;
+  const allowAllValue = spec?.allowAllvalue === true;
   const loading = useMemo(() => variablesOptionsQuery.isFetching || false, [variablesOptionsQuery]);
   const options = variablesOptionsQuery.data;
 

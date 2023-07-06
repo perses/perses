@@ -169,8 +169,8 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
       if (v.value === ALL_VALUE) {
         const definition = findVariableDefinitionByName(name, definitions, externalDefinitions);
         // If the variable is a list variable and has a custom all value, then use that value instead
-        if (definition?.kind === 'ListVariable' && definition.spec.custom_all_value) {
-          v.value = definition.spec.custom_all_value;
+        if (definition?.kind === 'ListVariable' && definition.spec.customAllValue) {
+          v.value = definition.spec.customAllValue;
         } else {
           v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
         }
@@ -349,7 +349,7 @@ function createTemplateVariableSrvStore({
                   draft[index] = {
                     kind: 'ListVariable',
                     spec: produce(variable.spec, (specDraft) => {
-                      specDraft.default_value = currentVariable.value;
+                      specDraft.defaultValue = currentVariable.value;
                     }),
                   };
                 }

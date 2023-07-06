@@ -25,7 +25,7 @@ export function checkSavedDefaultVariableStatus(definitions: VariableDefinition[
     const name = savedVariable.spec.name;
     if (savedVariable.kind === 'ListVariable') {
       const currentVariable = varState.get({ name });
-      if (currentVariable?.value !== null && currentVariable?.value !== savedVariable.spec.default_value) {
+      if (currentVariable?.value !== null && currentVariable?.value !== savedVariable.spec.defaultValue) {
         modifiedVariableNames.push(name);
         isSavedVariableModified = true;
       }

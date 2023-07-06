@@ -26,9 +26,9 @@ describe('hydrateTemplateVariableStates', () => {
             name: 'Instance',
             hidden: false,
           },
-          allow_all_value: true,
-          allow_multiple: true,
-          default_value: ['$__all'],
+          allowAllValue: true,
+          allowMultiple: true,
+          defaultValue: ['$__all'],
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
