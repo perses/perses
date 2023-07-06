@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { CalculationType, Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { FontSizeOption } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
@@ -26,6 +27,7 @@ export interface StatChartOptions {
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
+  value_font_size?: FontSizeOption;
 }
 
 export interface StatChartSparklineOptions {

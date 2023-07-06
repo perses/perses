@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { FontSizeOption } from '../FontSizeSelector';
 
 interface CalculateFontSize {
   text: string;
@@ -20,6 +21,7 @@ interface CalculateFontSize {
   height: number;
   lineHeight: number;
   maxSize?: number;
+  fontSizeOverride?: FontSizeOption;
 }
 
 let canvasContext: CanvasRenderingContext2D | null;
@@ -37,9 +39,22 @@ function getGlobalCanvasContext() {
 /**
  * Find the optimal font size given available space
  */
-export function useOptimalFontSize({ text, fontWeight, width, height, lineHeight, maxSize }: CalculateFontSize) {
+export function useOptimalFontSize({
+  text,
+  fontWeight,
+  width,
+  height,
+  lineHeight,
+  maxSize,
+  fontSizeOverride,
+}: CalculateFontSize) {
   const ctx = getGlobalCanvasContext();
   const chartsTheme = useChartsTheme();
+
+  // if user has selected a font size in the settings, use it instead of calculating the optimal size
+  if (fontSizeOverride !== undefined) {
+    return Number(fontSizeOverride);
+  }
 
   const textStyle = chartsTheme.echartsTheme.textStyle;
   const fontSize = Number(textStyle?.fontSize) ?? 12;
