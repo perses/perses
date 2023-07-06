@@ -33,7 +33,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Decimal',
         },
-        calculation: 'First',
+        calculation: 'first',
       },
       onChange
     );
@@ -59,7 +59,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Days',
         },
-        calculation: 'First',
+        calculation: 'first',
       },
       onChange
     );
@@ -71,7 +71,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
     userEvent.click(meanOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'Mean',
+        calculation: 'mean',
       })
     );
   });

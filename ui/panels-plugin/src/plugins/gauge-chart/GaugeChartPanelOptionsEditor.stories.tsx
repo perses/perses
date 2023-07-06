@@ -65,7 +65,7 @@ const meta: Meta<typeof PanelOptionsEditorWrapper> = {
         plugin: {
           kind: 'GaugeChart',
           spec: {
-            calculation: 'First',
+            calculation: 'first',
           },
         },
       },

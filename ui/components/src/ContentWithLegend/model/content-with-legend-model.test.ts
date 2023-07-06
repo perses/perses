@@ -354,7 +354,7 @@ describe('getContentWithLegendLayout', () => {
           selectedItems: 'ALL',
           onSelectedItemsChange: jest.fn(),
         },
-        legendSize: 'Medium',
+        legendSize: 'medium',
         theme: mockMuiTheme,
       };
 

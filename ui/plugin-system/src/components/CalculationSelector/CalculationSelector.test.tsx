@@ -31,7 +31,7 @@ describe('CalculationSelector', () => {
 
   it('can change the calculation by clicking', () => {
     const onChange = jest.fn();
-    renderCalculationSelector('Last', onChange);
+    renderCalculationSelector('last', onChange);
 
     const calcSelector = getCalculationSelector();
     userEvent.click(calcSelector);
@@ -40,7 +40,7 @@ describe('CalculationSelector', () => {
     });
     userEvent.click(sumOption);
 
-    expect(onChange).toHaveBeenCalledWith('Sum');
+    expect(onChange).toHaveBeenCalledWith('sum');
   });
 
   it('can change the calculation using a keyboard', () => {
@@ -59,6 +59,6 @@ describe('CalculationSelector', () => {
 
     userEvent.keyboard('{arrowup}{enter}');
 
-    expect(onChange).toHaveBeenCalledWith('First');
+    expect(onChange).toHaveBeenCalledWith('first');
   });
 });

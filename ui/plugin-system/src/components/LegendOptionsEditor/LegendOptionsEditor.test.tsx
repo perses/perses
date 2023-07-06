@@ -67,7 +67,7 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendModeSelector()).toBeEnabled();
     userEvent.click(getLegendModeSelector());
     const tableModeOption = screen.getByRole('option', {
-      name: 'table',
+      name: 'Table',
     });
     userEvent.click(tableModeOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table' });
@@ -82,31 +82,31 @@ describe('LegendOptionsEditor', () => {
       name: /Sum/,
     });
     userEvent.click(totalValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['Sum'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['sum'] });
   });
 
   it('should allow adding a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['Sum'] }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const minValueOption = screen.getByRole('option', {
       name: /Min/,
     });
     userEvent.click(minValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['Sum', 'Min'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['sum', 'min'] });
   });
 
   it('should allow removing a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['Sum', 'Min'] }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum', 'min'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
       name: /Sum/,
     });
     userEvent.click(totalValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['Min'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['min'] });
   });
 
   describe('when legend mode is "list"', () => {

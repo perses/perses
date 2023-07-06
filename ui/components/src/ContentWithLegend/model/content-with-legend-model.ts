@@ -41,7 +41,7 @@ export interface ContentWithLegendProps {
   /**
    * Size used for the legend.
    *
-   * @default 'Medium'
+   * @default 'medium'
    */
   legendSize?: LegendSize;
 
