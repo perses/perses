@@ -120,7 +120,7 @@
                   "unit": { "kind": "Decimal" }
                 },
                 "legend": {
-                  "position": "Right"
+                  "position": "right"
                 }
               }
             },
@@ -148,7 +148,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 },
                 "y_axis": {
                   "show": true,
@@ -225,7 +225,7 @@
                   "unit": { "kind": "Decimal", "decimal_places": 2 }
                 },
                 "legend": {
-                  "position": "Right"
+                  "position": "right"
                 }
               }
             },
@@ -256,7 +256,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Right"
+                  "position": "right"
                 },
                 "y_axis": {
                   "unit": { "kind": "PercentDecimal", "decimal_places": 1 }
@@ -309,7 +309,7 @@
                   }
                 },
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 },
                 "thresholds": {
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
@@ -918,7 +918,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 },
                 "y_axis": {
                   "show": true,
@@ -1049,7 +1049,7 @@
                   "unit": { "kind": "PercentDecimal", "decimal_places": 0 }
                 },
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 },
                 "thresholds": {
                   "steps": [{ "value": 0.01 }, { "value": 0.02 }]
@@ -1969,7 +1969,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 }
               }
             },
@@ -2003,7 +2003,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Right"
+                  "position": "right"
                 }
               }
             },
@@ -2036,7 +2036,7 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "legend": { "position": "Bottom" }
+                "legend": { "position": "bottom" }
               }
             },
             "queries": [
@@ -3205,7 +3205,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Bottom"
+                  "position": "bottom"
                 }
               }
             },
@@ -3234,7 +3234,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "position": "Right"
+                  "position": "right"
                 }
               }
             },
@@ -3263,15 +3263,9 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "Table",
-                  "position": "Bottom",
-                  "values": [
-                    "Mean",
-                    "FirstNumber",
-                    "LastNumber",
-                    "Min",
-                    "Max"
-                  ]
+                  "mode": "table",
+                  "position": "bottom",
+                  "values": ["Mean", "FirstNumber", "LastNumber", "Min", "Max"]
                 }
               }
             },
@@ -3300,13 +3294,10 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "Table",
-                  "position": "Right",
+                  "mode": "table",
+                  "position": "right",
                   "size": "Small",
-                  "values": [
-                    "Mean",
-                    "LastNumber"
-                  ]
+                  "values": ["Mean", "LastNumber"]
                 }
               }
             },

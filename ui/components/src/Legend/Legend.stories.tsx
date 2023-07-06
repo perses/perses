@@ -536,7 +536,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <StorySection title="Position: right" level="h3">
+        <StorySection title="position: right" level="h3">
           <Stack spacing={1} direction="row" flexWrap="wrap">
             {legendModes.map((mode) => {
               return (
@@ -553,7 +553,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
             })}
           </Stack>
         </StorySection>
-        <StorySection title="Position: bottom" level="h3">
+        <StorySection title="position: bottom" level="h3">
           <Stack spacing={1} direction="row" flexWrap="wrap">
             {legendModes.map((mode) => {
               return (
