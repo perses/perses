@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
@@ -45,8 +46,8 @@ export function ViewDashboard(props: ViewDashboardProps) {
     ...others
   } = props;
   const { spec } = dashboardResource;
-  const dashboardDuration = spec.duration ?? '1h';
-  const dashhboardRefreshInterval = spec.refreshInterval ?? '0s';
+  const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
+  const dashhboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashhboardRefreshInterval);
 

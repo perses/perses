@@ -19,6 +19,7 @@ import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
 import { TableLegend, TableLegendProps } from './TableLegend';
 import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
+import { ListLegendItemProps } from './ListLegendItem';
 
 export interface LegendProps {
   width: number;
@@ -40,9 +41,19 @@ export interface LegendProps {
   onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
 
   /**
+   * Callback fired when the mouse is moved over a legend item.
+   */
+  onItemMouseOver?: ListLegendItemProps['onMouseOver'];
+
+  /**
+   * Callback fired when the mouse is moved out of a legend item.
+   */
+  onItemMouseOut?: ListLegendItemProps['onMouseOut'];
+
+  /**
    * Props specific to legend with `mode` set to `table`.
    */
-  tableProps?: Pick<TableLegendProps, 'columns'>;
+  tableProps?: Pick<TableLegendProps, 'columns' | 'onSortingChange' | 'sorting'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -59,6 +70,8 @@ export function Legend({
   data,
   selectedItems,
   onSelectedItemsChange,
+  onItemMouseOver,
+  onItemMouseOut,
   tableProps,
 }: LegendProps) {
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
@@ -110,6 +123,8 @@ export function Legend({
     items: data,
     selectedItems,
     onLegendItemClick,
+    onItemMouseOver,
+    onItemMouseOut,
   };
 
   let legendContent: ReactNode;

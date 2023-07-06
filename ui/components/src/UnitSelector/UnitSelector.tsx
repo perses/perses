@@ -11,8 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { Switch, SwitchProps } from '@mui/material';
-import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
-import { shouldAbbreviate } from '../model/units/utils';
+import {
+  shouldAbbreviate,
+  UnitOptions,
+  UNIT_CONFIG,
+  UnitConfig,
+  isUnitWithDecimalPlaces,
+  isUnitWithAbbreviate,
+} from '@perses-dev/core';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 

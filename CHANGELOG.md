@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.36.2 / 2023-06-27
+
+- [BUGFIX] Fix useTimeSeriesQueries return type (#1273)
+
+## 0.36.1 / 2023-06-26
+
+- [BUGFIX] Chart utils export formatter correctly
+- [BUGFIX] Refresh interval should be optional, fix defaults mismatch
+
+## 0.36.0 / 2023-06-23
+
+- [FEATURE] Add dashboard refresh interval form control (#1215)
+- [ENHANCEMENT] Highlight associated line on mouseover legend item (#1263)
+- [ENHANCEMENT] Table supports legend variation of selection behavior (#1261)
+- [ENHANCEMENT] Add size option for content with legend (#1254)
+- [ENHANCEMENT] Table columns can be sorted (#1253)
+- [ENHANCEMENT] Improve the responsive layout of the toolbar buttons (#1251)
+- [ENHANCEMENT] Ability to specify descriptive text for table (#1252)
+- [BUGFIX] Avoid unnecessary horizontal scroll with table & legend (#1260)
+- [BUGFIX] Highlighted series not always cleared when cursor moved quickly (#1259)
+- [BUGFIX] Ensure pinned tooltip shows behind modals / sticky header (#1258)
+- [BREAKINGCHANGE] Adjust props on TimeRangeControls to control each action (#1250)
+- [BREAKINGCHANGE] Move units types and utils to core to avoid unnecessary MUI coupling (#1265)
+- [BREAKINGCHANGE] Move DEFAULT_ALL_VALUE to core since plugin-system requires MUI (#1266)
+
+## 0.35.0 / 2023-06-14
+
+- [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
+- [FEATURE] Support Multi-Series Stat Chart (#1241)
+- [FEATURE] SettingsAutocomplete component (#1242)
+- [BUGFIX] Fix y axis label positioning (#1240)
+- [ENHANCEMENT] Update panel header info tooltips (#1247)
+- [ENHANCEMENT] Export prom variables types (#1248)
+- [BREAKINGCHANGE] Improve calculations for gauge and stat charts (#1246)
+
 ## 0.34.0 / 2023-06-08
 
 - [FEATURE] Shared crosshair for all time series panels on a dashboard (#1228)

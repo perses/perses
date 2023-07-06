@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Switch, SwitchProps } from '@mui/material';
-import { DEFAULT_LEGEND, getLegendMode, getLegendPosition } from '@perses-dev/core';
+import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
 import { ErrorAlert, OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
 import {
   LEGEND_MODE_CONFIG,
@@ -22,6 +22,7 @@ import {
   validateLegendSpec,
   LEGEND_VALUE_CONFIG,
   LegendValue,
+  LEGEND_SIZE_CONFIG,
 } from '../../model';
 
 type LegendPositionOption = LegendSingleSelectConfig & { id: LegendSpecOptions['position'] };
@@ -38,6 +39,15 @@ type LegendModeOption = LegendSingleSelectConfig & { id: Required<LegendSpecOpti
 const MODE_OPTIONS: LegendModeOption[] = Object.entries(LEGEND_MODE_CONFIG).map(([id, config]) => {
   return {
     id: id as Required<LegendSpecOptions>['mode'],
+    ...config,
+  };
+});
+
+type LegendSizeOption = LegendSingleSelectConfig & { id: Required<LegendSpecOptions>['size'] };
+
+const SIZE_OPTIONS: LegendSizeOption[] = Object.entries(LEGEND_SIZE_CONFIG).map(([id, config]) => {
+  return {
+    id: id as Required<LegendSpecOptions>['size'],
     ...config,
   };
 });
@@ -77,6 +87,14 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
+  const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption) => {
+    onChange({
+      ...value,
+      position: currentPosition,
+      size: newValue.id,
+    });
+  };
+
   const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]) => {
     onChange({
       ...value,
@@ -93,6 +111,9 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
 
   const currentMode = getLegendMode(value?.mode);
   const legendModeConfig = LEGEND_MODE_CONFIG[currentMode];
+
+  const currentSize = getLegendSize(value?.size);
+  const legendSizeConfig = LEGEND_SIZE_CONFIG[currentSize];
 
   const currentValues = value?.values || [];
   const legendValuesConfig = currentValues.reduce((result, item) => {
@@ -141,8 +162,24 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
         }
       />
       <OptionsEditorControl
+        label="Size"
+        control={
+          <SettingsAutocomplete
+            value={{
+              ...legendSizeConfig,
+              id: currentSize,
+            }}
+            options={SIZE_OPTIONS}
+            onChange={handleLegendSizeChange}
+            // TODO: enable sizes for list mode when we normalize the layout of
+            // lists to more closely match tables.
+            disabled={value === undefined || currentMode !== 'Table'}
+            disableClearable
+          ></SettingsAutocomplete>
+        }
+      />
+      <OptionsEditorControl
         label="Values"
-        description="Computed values ignore nulls."
         control={
           // For some reason, the inferred option type doesn't always seem to work
           // quite right when `multiple` is true. Explicitly setting the generics

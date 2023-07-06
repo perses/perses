@@ -11,7 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { Box, Skeleton, useTheme } from '@mui/material';
+import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
@@ -21,6 +23,7 @@ import {
   TimeSeries,
   DEFAULT_LEGEND,
   getCalculations,
+  formatValue,
 } from '@perses-dev/core';
 import {
   LEGEND_VALUE_CONFIG,
@@ -30,19 +33,19 @@ import {
   validateLegendSpec,
   legendValues,
 } from '@perses-dev/plugin-system';
-import type { GridComponentOption } from 'echarts';
-import { Box, Skeleton, useTheme } from '@mui/material';
 import {
   EChartsDataFormat,
   LineChart,
+  LineChartHandle,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
   SelectedLegendItemState,
   ContentWithLegend,
-  formatValue,
   TableColumnConfig,
   LegendItem,
+  LegendProps,
+  useId,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -73,6 +76,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
+  const chartId = useId('time-series-panel');
+
+  const lineChartRef = useRef<LineChartHandle>(null);
 
   // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
@@ -114,6 +120,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const echartsYAxis = convertPanelYAxis(y_axis);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
+  const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
   const { setTimeRange } = useTimeRange();
 
@@ -181,10 +188,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Used for repeating colors in Categorical palette
         seriesIndex++;
 
-        const seriesId = timeSeries.name + seriesIndex;
+        // We add a unique id for the chart to disambiguate items across charts
+        // when there are multiple on the page.
+        const seriesId = chartId + timeSeries.name + seriesIndex;
 
         const yValues = getYValues(timeSeries, timeScale);
-        const lineSeries = getLineSeries(formattedSeriesName, yValues, visual, seriesColor);
+        const lineSeries = getLineSeries(seriesId, formattedSeriesName, yValues, visual, seriesColor);
 
         const legendCalculations = legend?.values ? getCalculations(timeSeries.values, legend.values) : undefined;
 
@@ -264,6 +273,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
           },
           cellDescription: true,
+          enableSorting: true,
         });
       }
 
@@ -324,6 +334,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Making this small enough that the medium size doesn't get
         // responsive-handling-ed away when in the panel options editor.
         minChildrenHeight={50}
+        legendSize={legend?.size}
         legendProps={
           legend && {
             options: legend,
@@ -332,6 +343,14 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             onSelectedItemsChange: setSelectedLegendItems,
             tableProps: {
               columns: legendColumns,
+              sorting: legendSorting,
+              onSortingChange: setLegendSorting,
+            },
+            onItemMouseOver: (e, { id }) => {
+              lineChartRef.current?.highlightSeries({ id });
+            },
+            onItemMouseOut: () => {
+              lineChartRef.current?.clearHighlightedSeries();
             },
           }
         }
@@ -341,6 +360,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             <Box sx={{ height, width }}>
               {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={height} />}
               <LineChart
+                ref={lineChartRef}
                 height={height}
                 data={graphData}
                 yAxis={echartsYAxis}

@@ -19,10 +19,24 @@ import {
   CoreOptions,
   RowData,
   RowSelectionState,
+  SortingState,
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
 export type TableDensity = 'compact' | 'standard';
+export type SortDirection = 'asc' | 'desc' | undefined;
+
+export type TableRowEventOpts = {
+  /**
+   * Unique identifier for the row.
+   */
+  id: string;
+
+  /**
+   * Index of the row in the original data.
+   */
+  index: number;
+};
 
 export interface TableProps<TableData> {
   /**
@@ -60,6 +74,19 @@ export interface TableProps<TableData> {
   checkboxSelection?: boolean;
 
   /**
+   * Determines the behavior of row selection.
+   *
+   * - `standard`: clicking a checkbox will toggle that rows's selected/unselected
+   *    state and will not impact other rows.
+   * - `legend`: clicking a checkbox will "focus" that row by selecting it and
+   *    unselecting other rows. Clicking a checkbox with a modifier key pressed,
+   *    will change this behavior to behave like `standard`.
+   *
+   * @default 'standard'
+   */
+  rowSelectionVariant?: 'standard' | 'legend';
+
+  /**
    * State of selected rows in the table when `checkboxSelection` is enabled.
    *
    * Selected row state is a controlled value that should be managed using a
@@ -68,9 +95,32 @@ export interface TableProps<TableData> {
   rowSelection?: RowSelectionState;
 
   /**
+   * Callback fired when the mouse is moved over a table row.
+   */
+  onRowMouseOver?: (e: React.MouseEvent, opts: TableRowEventOpts) => void;
+
+  /**
+   * Callback fired when the mouse is moved out of a table row.
+   */
+  onRowMouseOut?: (e: React.MouseEvent, opts: TableRowEventOpts) => void;
+
+  /**
+   * State of the column sorting in the table.
+   *
+   * The column sorting is a controlled value that should be managed using a
+   * combination fo this prop and `onSortingChange`.
+   */
+  sorting?: SortingState;
+
+  /**
    * Callback fired when the selected rows in the table changes.
    */
   onRowSelectionChange?: (rowSelection: RowSelectionState) => void;
+
+  /**
+   * Callback fired when the table sorting changes.
+   */
+  onSortingChange?: (sorting: SortingState) => void;
 
   /**
    * Function used to determine the unique identifier used for each row. This
@@ -171,28 +221,11 @@ export interface TableColumnConfig<TableData>
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell'> {
+  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn'> {
   /**
    * Text to display in the header for the column.
    */
   header: string;
-
-  /**
-   * Text to display when hovering over the header text. This can be useful for
-   * providing additional information about the column when you want to keep the
-   * header text relatively short to manage the column width.
-   */
-  headerDescription?: string;
-
-  // Tanstack Table does not support an "auto" value to naturally size to fit
-  // the space in a table. Adding a custom setting to manage this ourselves.
-  /**
-   * Width of the column when rendered in a table. It should be a number in pixels
-   * or "auto" to allow the table to automatically adjust the width to fill
-   * space.
-   * @default 'auto'
-   */
-  width?: number | 'auto';
 
   /**
    * Alignment of the content in the cell.
@@ -210,6 +243,29 @@ export interface TableColumnConfig<TableData>
   // `any` needed for same reason as no-explicit-any higher up in this type.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cellDescription?: ((props: CellContext<TableData, any>) => string) | boolean | undefined;
+
+  /**
+   * When `true`, the column will be sortable.
+   * @default false
+   */
+  enableSorting?: boolean;
+
+  /**
+   * Text to display when hovering over the header text. This can be useful for
+   * providing additional information about the column when you want to keep the
+   * header text relatively short to manage the column width.
+   */
+  headerDescription?: string;
+
+  // Tanstack Table does not support an "auto" value to naturally size to fit
+  // the space in a table. Adding a custom setting to manage this ourselves.
+  /**
+   * Width of the column when rendered in a table. It should be a number in pixels
+   * or "auto" to allow the table to automatically adjust the width to fill
+   * space.
+   * @default 'auto'
+   */
+  width?: number | 'auto';
 }
 
 /**
@@ -217,7 +273,7 @@ export interface TableColumnConfig<TableData>
  */
 export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableColumnConfig<TableData>>) {
   const tableCols: Array<ColumnDef<TableData>> = columns.map(
-    ({ width, align, headerDescription, cellDescription, ...otherProps }) => {
+    ({ width, align, headerDescription, cellDescription, enableSorting, ...otherProps }) => {
       // Tanstack Table does not support an "auto" value to naturally size to fit
       // the space in a table. We translate our custom "auto" setting to 0 size
       // for these columns, so it is easy to fall back to auto when rendering.
@@ -239,6 +295,9 @@ export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableCo
       const result = {
         ...otherProps,
         ...sizeProps,
+
+        // Default sorting to false, so it is very explicitly set per column.
+        enableSorting: !!enableSorting,
 
         // Open-ended store for extra metadata in TanStack Table, so you can bake
         // in your own features.

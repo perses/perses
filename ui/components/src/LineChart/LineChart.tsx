@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useMemo, useRef, useState } from 'react';
+import React, { MouseEvent, useImperativeHandle, useMemo, useRef, useState, forwardRef } from 'react';
+import { UnitOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -37,12 +38,19 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat } from '../model/graph';
-import { UnitOptions } from '../model/units';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import {
+  clearHighlightedSeries,
+  enableDataZoom,
+  getDateRange,
+  getFormattedDate,
+  getYAxes,
+  restoreChart,
+  ZoomEventData,
+} from './utils';
 
 use([
   EChartsLineChart,
@@ -81,20 +89,42 @@ export interface LineChartProps {
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export function LineChart({
-  height,
-  data,
-  yAxis,
-  unit,
-  grid,
-  legend,
-  tooltipConfig = { wrapLabels: true },
-  noDataVariant = 'message',
-  syncGroup,
-  onDataZoom,
-  onDoubleClick,
-  __experimentalEChartsOptionsOverride,
-}: LineChartProps) {
+// Intentionally making this an object to start because it is plausible we will
+// want to support focusing by other attributes (e.g. index, name) in the future,
+// and starting with an object will make adding them a non-breaking change.
+type LineChartHandleFocusOpts = {
+  id: string;
+};
+
+export type LineChartHandle = {
+  /**
+   * Highlight the series associated with the specified options.
+   */
+  highlightSeries: (opts: LineChartHandleFocusOpts) => void;
+
+  /**
+   * Clear all highlighted series.
+   */
+  clearHighlightedSeries: () => void;
+};
+
+export const LineChart = forwardRef<LineChartHandle, LineChartProps>(function LineChart(
+  {
+    height,
+    data,
+    yAxis,
+    unit,
+    grid,
+    legend,
+    tooltipConfig = { wrapLabels: true },
+    noDataVariant = 'message',
+    syncGroup,
+    onDataZoom,
+    onDoubleClick,
+    __experimentalEChartsOptionsOverride,
+  },
+  ref
+) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -103,6 +133,30 @@ export function LineChart({
 
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        highlightSeries({ id }: LineChartHandleFocusOpts) {
+          if (!chartRef.current) {
+            // No chart. Do nothing.
+            return;
+          }
+
+          chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+        },
+        clearHighlightedSeries: () => {
+          if (!chartRef.current) {
+            // No chart. Do nothing.
+            return;
+          }
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+        },
+      };
+    },
+    [data.timeSeries.length]
+  );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -250,6 +304,9 @@ export function LineChart({
         if (tooltipPinnedCoords === null) {
           setShowTooltip(false);
         }
+        if (chartRef.current !== undefined) {
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+        }
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
@@ -297,4 +354,4 @@ export function LineChart({
       />
     </Box>
   );
-}
+});

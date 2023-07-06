@@ -11,21 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './calculations';
-export * from './dashboard';
-export * from './datasource';
-export * from './definitions';
-export * from './display';
-export * from './http';
-export * from './layout';
-export * from './legend';
-export * from './notice';
-export * from './panels';
-export * from './query';
-export * from './resource';
-export * from './thresholds';
-export * from './time';
-export * from './time-series-data';
-export * from './time-series-queries';
-export * from './units';
-export * from './variables';
+import { DurationString } from '../model';
+
+export const DEFAULT_DASHBOARD_DURATION: DurationString = '1h';
+
+export const DEFAULT_REFRESH_INTERVAL: DurationString = '0s';

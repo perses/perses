@@ -15,12 +15,14 @@ import { useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from './legend-model';
 
-export interface TableLegendProps {
+export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'sorting' | 'onSortingChange'> {
   items: LegendItem[];
   height: number;
   width: number;
   selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
   onSelectedItemsChange: TableProps<LegendItem>['onRowSelectionChange'];
+  onItemMouseOver?: TableProps<LegendItem>['onRowMouseOver'];
+  onItemMouseOut?: TableProps<LegendItem>['onRowMouseOut'];
   columns?: TableProps<LegendItem>['columns'];
 }
 
@@ -28,6 +30,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
   {
     accessorKey: 'label',
     header: 'Name',
+    enableSorting: true,
 
     // Starting with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
@@ -48,9 +51,13 @@ export function TableLegend({
   items,
   selectedItems: initRowSelection,
   onSelectedItemsChange,
+  onItemMouseOver,
+  onItemMouseOut,
   height,
   width,
   columns: additionalColumns = [],
+  sorting,
+  onSortingChange,
 }: TableLegendProps) {
   const rowSelection = useMemo(() => {
     return typeof initRowSelection !== 'string'
@@ -74,12 +81,17 @@ export function TableLegend({
       width={width}
       rowSelection={rowSelection}
       onRowSelectionChange={onSelectedItemsChange}
+      onRowMouseOver={onItemMouseOver}
+      onRowMouseOut={onItemMouseOut}
+      sorting={sorting}
+      onSortingChange={onSortingChange}
       data={items}
       columns={columns}
       density="compact"
       getRowId={getRowId}
       getCheckboxColor={getCheckboxColor}
       checkboxSelection
+      rowSelectionVariant="legend"
     />
   );
 }

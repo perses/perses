@@ -16,15 +16,8 @@ import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import produce from 'immer';
-
-import {
-  TemplateVariableContext,
-  VariableStateMap,
-  VariableState,
-  VariableOption,
-  DEFAULT_ALL_VALUE as ALL_VALUE,
-} from '@perses-dev/plugin-system';
-import { VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import { TemplateVariableContext, VariableStateMap, VariableState, VariableOption } from '@perses-dev/plugin-system';
+import { DEFAULT_ALL_VALUE as ALL_VALUE, VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { useVariableQueryParams, getInitalValuesFromQueryParameters, getURLQueryParamName } from './query-params';

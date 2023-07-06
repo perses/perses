@@ -18,7 +18,7 @@ import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/
 import { Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { StorySection } from '@perses-dev/storybook';
 import { useState } from 'react';
-import { LegendPositions, legendModes, legendPositions } from '@perses-dev/core';
+import { LegendPositions, legendModes, legendPositions, legendSizes } from '@perses-dev/core';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -133,6 +133,47 @@ export const Position: Story = {
                   onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
                 }}
               />
+            </StorySection>
+          );
+        })}
+      </Stack>
+    );
+  },
+};
+
+/**
+ * The amount of space the legend takes up is determined by the `legendSize`.
+ */
+export const LegendSize: Story = {
+  args: {},
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendSizes.map((size) => {
+          return (
+            <StorySection key={size} title={size} level="h3">
+              <Stack spacing={1} direction="row">
+                {legendPositions.map((position) => {
+                  return (
+                    <StorySection key={position} title={position} level="h4">
+                      <ContentWithLegend
+                        {...args}
+                        legendSize={size}
+                        legendProps={{
+                          data: generateMockLegendData(10),
+                          options: {
+                            position,
+                            mode: 'Table',
+                          },
+                          selectedItems: {},
+                          onSelectedItemsChange: (newSelectedItems) =>
+                            action('onSelectedItemsChange')(newSelectedItems),
+                        }}
+                      />
+                    </StorySection>
+                  );
+                })}
+              </Stack>
             </StorySection>
           );
         })}
@@ -369,6 +410,40 @@ export const Responsive: Story = {
                 options: {
                   position: 'Bottom',
                   mode: 'List',
+                },
+                selectedItems: {},
+                onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+              }}
+            />
+          </Stack>
+        </StorySection>
+        <StorySection title="size of bottom table legend will be shorter if the items do not fill the space" level="h3">
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            <ContentWithLegend
+              {...args}
+              width={400}
+              height={400}
+              legendProps={{
+                data: generateMockLegendData(2),
+                options: {
+                  position: 'Bottom',
+                  mode: 'Table',
+                  size: 'Small',
+                },
+                selectedItems: {},
+                onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+              }}
+            />
+            <ContentWithLegend
+              {...args}
+              width={400}
+              height={400}
+              legendProps={{
+                data: generateMockLegendData(10),
+                options: {
+                  position: 'Bottom',
+                  mode: 'Table',
+                  size: 'Small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),

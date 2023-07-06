@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions, EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { formatValue, UnitOptions } from '@perses-dev/core';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -202,16 +203,6 @@ export function getNearbySeriesData({
     }
   }
 
-  // clear all highlighted series when cursor exits canvas
-  // https://echarts.apache.org/en/api.html#action.downplay
-  for (let i = 0; i < totalSeries; i++) {
-    if (chart?.dispatchAction !== undefined) {
-      chart.dispatchAction({
-        type: 'downplay',
-        seriesIndex: i,
-      });
-    }
-  }
   return [];
 }
 

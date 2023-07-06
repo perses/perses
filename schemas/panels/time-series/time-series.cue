@@ -22,6 +22,7 @@ import (
 #legend: {
 	position: "bottom" | "right"
 	mode?:    "list" | "table"
+	size?:    "small" | "medium"
 	values?: [...#legend_value]
 }
 

@@ -47,3 +47,5 @@ export interface ListVariableSpec<PluginSpec> extends VariableSpec {
 }
 
 export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
+
+export const DEFAULT_ALL_VALUE = '$__all' as const;

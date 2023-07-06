@@ -39,12 +39,16 @@ const MOCK_ITEMS: TableLegendProps['items'] = [
   },
 ];
 
-type RenderTableLegendOpts = Partial<Pick<TableLegendProps, 'selectedItems' | 'onSelectedItemsChange' | 'items'>>;
+type RenderTableLegendOpts = Partial<
+  Pick<TableLegendProps, 'selectedItems' | 'onSelectedItemsChange' | 'onItemMouseOver' | 'onItemMouseOut' | 'items'>
+>;
 
 const renderTableLegend = ({
   items = MOCK_ITEMS,
   selectedItems = 'ALL',
   onSelectedItemsChange = jest.fn(),
+  onItemMouseOver = jest.fn(),
+  onItemMouseOut = jest.fn(),
 }: RenderTableLegendOpts = {}) => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -54,6 +58,8 @@ const renderTableLegend = ({
         width={400}
         selectedItems={selectedItems}
         onSelectedItemsChange={onSelectedItemsChange}
+        onItemMouseOver={onItemMouseOver}
+        onItemMouseOut={onItemMouseOut}
       />
     </VirtuosoMockContext.Provider>
   );
@@ -121,7 +127,7 @@ describe('TableLegend', () => {
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
     });
 
-    test('unselects item on click associated checkbox', () => {
+    test('focuses item on click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -136,6 +142,29 @@ describe('TableLegend', () => {
       }
 
       userEvent.click(rowCheckbox);
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        two: true,
+      });
+    });
+
+    test('unselects item on modified click associated checkbox', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        shiftKey: true,
+      });
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -206,9 +235,30 @@ describe('TableLegend', () => {
         two: true,
       });
     });
+
+    test('selects item on modified click associated checkbox', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, { metaKey: true });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        two: true,
+      });
+    });
   });
 
-  describe('when some selected', () => {
+  describe('when one selected', () => {
     const selectedItems = {
       two: true,
     };
@@ -258,7 +308,7 @@ describe('TableLegend', () => {
       });
     });
 
-    test('selects item on click associated checkbox for unselected item', () => {
+    test('focuses item on click associated checkbox for unselected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -276,11 +326,55 @@ describe('TableLegend', () => {
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
+      });
+    });
+
+    test('selects item on modified click associated checkbox for unselected item', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[1];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        shiftKey: true,
+      });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        one: true,
         two: true,
       });
     });
 
-    test('imselects item on click associated checkbox for selected item', () => {
+    test('unselects item on modified click associated checkbox for selected item', () => {
+      const mockOnSelectedItemsChange = jest.fn();
+      renderTableLegend({
+        selectedItems,
+        onSelectedItemsChange: mockOnSelectedItemsChange,
+      });
+
+      const table = screen.getByRole('table');
+      const rowCheckbox = within(table).getAllByRole('checkbox')[2];
+
+      if (!rowCheckbox) {
+        throw new Error(`Missing checkbox for row.`);
+      }
+
+      userEvent.click(rowCheckbox, {
+        metaKey: true,
+      });
+
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
+    });
+
+    test('selects all on click associated checkbox for selected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
       renderTableLegend({
         selectedItems,
@@ -296,7 +390,64 @@ describe('TableLegend', () => {
 
       userEvent.click(rowCheckbox);
 
-      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
+      expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
+        one: true,
+        two: true,
+        three: true,
+      });
+    });
+  });
+
+  describe('on mouse over item', () => {
+    test('calls `onItemMouseOver` with event and item information', () => {
+      const mockOnItemMouseOver = jest.fn();
+      renderTableLegend({
+        onItemMouseOver: mockOnItemMouseOver,
+      });
+
+      const tableRows = screen.getAllByRole('row');
+      const itemToMouseOver = tableRows[2];
+      if (!itemToMouseOver) {
+        throw new Error('Cannot find legend item');
+      }
+
+      userEvent.hover(itemToMouseOver);
+
+      expect(mockOnItemMouseOver).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: itemToMouseOver,
+        }),
+        {
+          id: 'two',
+          index: 1,
+        }
+      );
+    });
+  });
+
+  describe('on mouse out item', () => {
+    test('calls `onItemMouseOut` with event and item information', () => {
+      const mockOnItemMouseOut = jest.fn();
+      renderTableLegend({
+        onItemMouseOut: mockOnItemMouseOut,
+      });
+      const tableRows = screen.getAllByRole('row');
+      const itemToMouseOut = tableRows[2];
+      if (!itemToMouseOut) {
+        throw new Error('Cannot find legend item');
+      }
+
+      userEvent.unhover(itemToMouseOut);
+
+      expect(mockOnItemMouseOut).toHaveBeenCalledWith(
+        expect.objectContaining({
+          target: itemToMouseOut,
+        }),
+        {
+          id: 'two',
+          index: 1,
+        }
+      );
     });
   });
 });

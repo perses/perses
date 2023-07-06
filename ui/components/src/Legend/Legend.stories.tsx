@@ -54,13 +54,31 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // story does not need to. Useful for stories that are not focused on explaining
 // how this state works.
 const UncontrolledLegendWrapper = (props: LegendProps) => {
-  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>(props.selectedItems);
+  const [sorting, setSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
+
   const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
     action('onSelectedItemsChange')(newSelectedItems);
     setSelectedItems(newSelectedItems);
   };
 
-  return <LegendWrapper {...props} selectedItems={selectedItems} onSelectedItemsChange={handleSelectedItemsChange} />;
+  const handleSortingChange: NonNullable<LegendProps['tableProps']>['onSortingChange'] = (newSorting) => {
+    action('onSortingChange')(newSorting);
+    setSorting(newSorting);
+  };
+
+  return (
+    <LegendWrapper
+      {...props}
+      selectedItems={selectedItems}
+      onSelectedItemsChange={handleSelectedItemsChange}
+      tableProps={{
+        ...props.tableProps,
+        sorting,
+        onSortingChange: handleSortingChange,
+      }}
+    />
+  );
 };
 
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
@@ -260,7 +278,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -277,7 +295,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -311,7 +329,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
  */
 export const TableColumns: Story = {
   args: {
-    width: 400,
+    width: 500,
     height: 200,
     selectedItems: 'ALL',
     data: generateMockLegendData(10),
@@ -322,19 +340,22 @@ export const TableColumns: Story = {
           header: 'Index',
           accessorKey: 'data.index',
           align: 'center',
-          width: 50,
+          width: 70,
+          enableSorting: true,
         },
         {
           header: 'Squared',
           accessorKey: 'data.squared',
           align: 'right',
-          width: 60,
+          width: 80,
+          enableSorting: true,
         },
         {
           header: 'Cubed',
           accessorKey: 'data.cubed',
           align: 'right',
-          width: 70,
+          enableSorting: true,
+          width: 80,
         },
         {
           header: 'Description',
@@ -350,6 +371,58 @@ export const TableColumns: Story = {
         disable: true,
       },
     },
+  },
+};
+
+/**
+ * The legend includes the following callback props for items in the legend:
+ * - `onItemMouseOver`: mouse over the legend item.
+ * - `onItemMouseOut`: mouse out the legend item.
+ *
+ * Each callback includes the following arguments:
+ * - `e`: the event that triggered the callback.
+ * - `opts`: an object containing the `index` and `id` for the legend item.
+ */
+export const LegendItemEvents: Story = {
+  args: {
+    selectedItems: 'ALL',
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    data: {
+      options: {
+        disable: true,
+      },
+    },
+  },
+  parameters: {
+    // This story is functionally identical to several other ones and mostly
+    // exists as a place to hang documentation, so we don't need another
+    // screenshot for it.
+    happo: false,
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendModes.map((mode) => {
+          return (
+            <StorySection key={mode} title={mode} level="h3">
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+            </StorySection>
+          );
+        })}
+      </Stack>
+    );
   },
 };
 

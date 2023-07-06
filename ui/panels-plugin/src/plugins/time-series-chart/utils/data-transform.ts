@@ -58,6 +58,7 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
  * Gets default ECharts line series option properties
  */
 export function getLineSeries(
+  id: string,
   formattedName: string,
   data: EChartsTimeSeries['data'],
   visual: TimeSeriesChartVisualOptions,
@@ -75,6 +76,7 @@ export function getLineSeries(
 
   return {
     type: 'line',
+    id: id,
     name: formattedName,
     data: data,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
