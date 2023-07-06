@@ -89,14 +89,7 @@ export function BarChart(props: BarChartProps) {
         },
       },
     };
-  }, [
-    data,
-    chartsTheme.noDataOption,
-    theme.palette.designSystem.blue,
-    theme.palette.background.tooltip,
-    theme.palette.text.primary,
-    unit,
-  ]);
+  }, [data, chartsTheme, theme, unit]);
 
   return (
     <EChart
