@@ -32,14 +32,14 @@ import {
 // that we only use a subset of calculations for the legend because the calculations
 // are also used by other features.
 export const legendValues: CalculationType[] = [
-  'Mean',
-  'First',
+  'mean',
+  'first',
   'first-number',
-  'Last',
+  'last',
   'last-number',
-  'Min',
-  'Max',
-  'Sum',
+  'min',
+  'max',
+  'sum',
 ];
 export type LegendValue = (typeof legendValues)[number];
 

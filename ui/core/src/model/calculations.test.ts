@@ -278,8 +278,8 @@ describe('getCalculations', () => {
     ];
     const calculations = getCalculations(values, ['first', 'last']);
     expect(Object.keys(calculations)).toEqual(['first', 'last']);
-    expect(calculations.First).toEqual(300);
-    expect(calculations.Last).toEqual(500);
+    expect(calculations.first).toEqual(300);
+    expect(calculations.last).toEqual(500);
   });
 
   test('can include all calculations', () => {

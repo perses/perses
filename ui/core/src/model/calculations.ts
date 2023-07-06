@@ -99,16 +99,16 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
   // in a single iteration of the data to minimize the performance impact of
   // generating multiple calculations for large timeseries values. This is
   // less optimized for certain single calculations when done in isolation (e.g.
-  // `Last`), but will be more performant in the more expensive cases where
+  // `last`), but will be more performant in the more expensive cases where
   // multiple values are being used (e.g. table legend).
   values.forEach((tuple, i) => {
     const value = tuple[1];
 
-    if (i === 0 && 'First' in calculations) {
-      calculations.First = value;
+    if (i === 0 && 'first' in calculations) {
+      calculations.first = value;
     }
-    if (i === values.length - 1 && 'Last' in calculations) {
-      calculations.Last = value;
+    if (i === values.length - 1 && 'last' in calculations) {
+      calculations.last = value;
     }
 
     // Handling specific to non-null values.
@@ -116,46 +116,46 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
       nonNullCount += 1;
       sum += value;
 
-      if ('first-number' in calculations && calculations.FirstNumber === undefined) {
+      if ('first-number' in calculations && calculations['first-number'] === undefined) {
         // Save the first number we see.
-        calculations.FirstNumber = value;
+        calculations['first-number'] = value;
       }
 
       if ('last-number' in calculations) {
         // Keep setting the numbers we see, which will eventually be set to the
         // last number when finished iterating.
-        calculations.last-number = value;
+        calculations['last-number'] = value;
       }
 
-      if ('Min' in calculations) {
-        if (typeof calculations.Min !== 'number') {
+      if ('min' in calculations) {
+        if (typeof calculations.min !== 'number') {
           // Init the first time we see a number
-          calculations.Min = value;
+          calculations.min = value;
         } else {
           // Use lowest value once initialized
-          calculations.Min = Math.min(calculations.Min, value);
+          calculations.min = Math.min(calculations.min, value);
         }
       }
 
-      if ('Max' in calculations) {
-        if (typeof calculations.Max !== 'number') {
+      if ('max' in calculations) {
+        if (typeof calculations.max !== 'number') {
           // Init the first time we see a number
-          calculations.Max = value;
+          calculations.max = value;
         } else {
           // Use highest value once initialized
-          calculations.Max = Math.max(calculations.Max, value);
+          calculations.max = Math.max(calculations.max, value);
         }
       }
     }
   });
 
   // Set calculations that require iterating over all values.
-  if (nonNullCount > 0 && 'Sum' in calculations) {
-    calculations.Sum = sum;
+  if (nonNullCount > 0 && 'sum' in calculations) {
+    calculations.sum = sum;
   }
 
-  if (nonNullCount > 0 && 'Mean' in calculations) {
-    calculations.Mean = sum / nonNullCount;
+  if (nonNullCount > 0 && 'mean' in calculations) {
+    calculations.mean = sum / nonNullCount;
   }
 
   return calculations;
@@ -174,11 +174,11 @@ export function getCalculation(values: TimeSeriesValueTuple[], calculation: Calc
 }
 
 function first(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'First');
+  return getCalculation(values, 'first');
 }
 
 function last(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'Last');
+  return getCalculation(values, 'last');
 }
 
 function firstNumber(values: TimeSeriesValueTuple[]): CalculationValue {
@@ -190,17 +190,17 @@ function lastNumber(values: TimeSeriesValueTuple[]): CalculationValue {
 }
 
 function mean(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'Mean');
+  return getCalculation(values, 'mean');
 }
 
 function sum(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'Sum');
+  return getCalculation(values, 'sum');
 }
 
 function min(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'Min');
+  return getCalculation(values, 'min');
 }
 
 function max(values: TimeSeriesValueTuple[]): CalculationValue {
-  return getCalculation(values, 'Max');
+  return getCalculation(values, 'max');
 }
