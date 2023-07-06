@@ -132,13 +132,13 @@ export function Legend({
     legendContent = (
       <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} {...tableProps} />
     );
-  } else if (options.position === 'Right' || needsVirtualization) {
+  } else if (options.position === 'right' || needsVirtualization) {
     legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
   } else {
     legendContent = <CompactLegend {...commonLegendProps} onLegendItemClick={onLegendItemClick} />;
   }
 
-  if (options.position === 'Right') {
+  if (options.position === 'right') {
     return (
       <Box
         sx={{

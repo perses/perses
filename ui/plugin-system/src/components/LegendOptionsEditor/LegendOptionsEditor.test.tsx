@@ -55,10 +55,10 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendPositionSelector()).toBeEnabled();
     userEvent.click(getLegendPositionSelector());
     const positionRightOption = screen.getByRole('option', {
-      name: 'Right',
+      name: 'right',
     });
     userEvent.click(positionRightOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Right' });
+    expect(onChange).toHaveBeenCalledWith({ position: 'right' });
   });
 
   it('should allow changing legend mode', () => {

@@ -57,7 +57,7 @@ export type LegendSingleSelectConfig = {
 
 export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
   Bottom: { label: 'bottom' },
-  Right: { label: 'Right' },
+  Right: { label: 'right' },
 };
 
 export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {

@@ -66,7 +66,7 @@ const renderLegend = ({
 };
 
 describe('Legend', () => {
-  describe.each(['Right', 'bottom'] as const)('positioned %s', (position) => {
+  describe.each(['right', 'bottom'] as const)('positioned %s', (position) => {
     test('renders items in a list', () => {
       renderLegend({ position });
 

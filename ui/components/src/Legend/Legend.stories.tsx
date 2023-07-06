@@ -103,8 +103,8 @@ const LegendWrapper = (props: LegendProps) => {
 
         // Accounting for border sizes to fit nicely within the box without
         // changing the box-sizing.
-        width: (position === 'Right' ? props.width + 100 : props.width) + borderWidth * 2,
-        height: (position === 'Right' ? props.height : props.height + 100) + borderWidth * 2,
+        width: (position === 'right' ? props.width + 100 : props.width) + borderWidth * 2,
+        height: (position === 'right' ? props.height : props.height + 100) + borderWidth * 2,
       }}
     >
       <Legend {...props} />
@@ -172,7 +172,7 @@ export const Position: Story = {
     return (
       <Stack spacing={3}>
         <StorySection title="right" level="h3">
-          <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} />
+          <LegendWrapper {...args} width={400} height={200} options={{ position: 'right' }} />
         </StorySection>
         <StorySection title="bottom" level="h3">
           <LegendWrapper {...args} width={500} height={100} options={{ position: 'bottom' }} />
@@ -214,7 +214,7 @@ export const Mode: Story = {
         {legendModes.map((mode) => {
           return (
             <StorySection key={mode} title={mode} level="h3">
-              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'right', mode }} />
             </StorySection>
           );
         })}
@@ -282,7 +282,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     selectedItems="ALL"
                   />
                 </StorySection>
@@ -299,7 +299,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     selectedItems={{
                       '1': true,
                       '3': true,
@@ -417,7 +417,7 @@ export const LegendItemEvents: Story = {
         {legendModes.map((mode) => {
           return (
             <StorySection key={mode} title={mode} level="h3">
-              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'right', mode }} />
             </StorySection>
           );
         })}
@@ -462,7 +462,7 @@ export const RightWithLongLabels: Story = {
                 <StorySection key={mode} title={mode} level="h4">
                   <UncontrolledLegendWrapper
                     {...args}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(4, labelPrefix)}
                   />
                 </StorySection>
@@ -477,7 +477,7 @@ export const RightWithLongLabels: Story = {
                 <StorySection key={mode} title={mode} level="h4">
                   <UncontrolledLegendWrapper
                     {...args}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(1000, labelPrefix)}
                   />
                 </StorySection>
@@ -545,7 +545,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(args.legendItemsCount)}
                   />
                 </StorySection>

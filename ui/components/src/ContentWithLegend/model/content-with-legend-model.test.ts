@@ -66,7 +66,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -103,7 +103,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -140,7 +140,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -285,7 +285,7 @@ describe('getContentWithLegendLayout', () => {
       minChildrenHeight: 0,
       legendProps: {
         options: {
-          position: 'Right',
+          position: 'right',
           mode: 'table',
         },
         tableProps: {
@@ -322,7 +322,7 @@ describe('getContentWithLegendLayout', () => {
 
     test('legend width accounts for columns', () => {
       const layout = getContentWithLegendLayout(layoutOpts);
-      expect(layout.legend.width).toEqual(TABLE_LEGEND_SIZE[size]['Right'] + 50);
+      expect(layout.legend.width).toEqual(TABLE_LEGEND_SIZE[size]['right'] + 50);
     });
   });
 

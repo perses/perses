@@ -91,7 +91,7 @@ const meta: Meta<typeof ContentWithLegend> = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
+        position: 'right',
         mode: 'list',
       },
       selectedItems: {},
@@ -235,7 +235,7 @@ export const Children: Story = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
+        position: 'right',
         mode: 'list',
       },
       selectedItems: {},
@@ -313,7 +313,7 @@ export const TableWithColumns: Story = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
+        position: 'right',
         mode: 'table',
       },
       selectedItems: {},
@@ -363,7 +363,7 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Right',
+                  position: 'right',
                   mode: 'list',
                 },
                 selectedItems: {},
@@ -460,7 +460,7 @@ export const ChangingPosition: Story = {
   args: {},
   render: (args) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [position, setPosition] = useState<LegendPositions>('Right');
+    const [position, setPosition] = useState<LegendPositions>('right');
 
     return (
       <Stack spacing={1}>

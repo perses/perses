@@ -59,7 +59,7 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
   },
   spec: {
     legend: {
-      position: 'Right',
+      position: 'right',
     },
     y_axis: {
       unit: { kind: 'Decimal', decimal_places: 2 },

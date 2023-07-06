@@ -156,11 +156,11 @@ export function getContentWithLegendLayout({
   if (mode === 'list') {
     // TODO: normalize list to share similar height options as the table
     // when we add more size options.
-    legendWidth = position === 'Right' ? 200 : width;
+    legendWidth = position === 'right' ? 200 : width;
 
     // TODO: account for number of legend items returned when adjusting legend spacing
     legendHeight = LEGEND_HEIGHT_SM;
-    if (position === 'Right') {
+    if (position === 'right') {
       legendHeight = height;
     } else if (height >= PANEL_HEIGHT_LG_BREAKPOINT) {
       legendHeight = LEGEND_HEIGHT_LG;
@@ -178,18 +178,18 @@ export function getContentWithLegendLayout({
       return total;
     }, 0);
 
-    legendWidth = position === 'Right' ? TABLE_LEGEND_SIZE[legendSize]['Right'] + columnsWidth : width;
+    legendWidth = position === 'right' ? TABLE_LEGEND_SIZE[legendSize]['right'] + columnsWidth : width;
 
     // Use the smaller of the size-based row count or the number of legend items + 1 for the header.
     const rowsToShow = Math.min(TABLE_LEGEND_SIZE[legendSize]['bottom'], legendProps.data.length + 1);
     legendHeight = position === 'bottom' ? rowsToShow * tableLayout.height : height;
   }
 
-  const contentWidth = position === 'Right' ? width - legendWidth - spacing : width;
+  const contentWidth = position === 'right' ? width - legendWidth - spacing : width;
   const contentHeight = position === 'bottom' ? height - legendHeight - spacing : height;
 
   if (
-    (position === 'Right' && contentWidth < minChildrenWidth) ||
+    (position === 'right' && contentWidth < minChildrenWidth) ||
     (position === 'bottom' && contentHeight < minChildrenHeight)
   ) {
     // Legend does not fit. Just show the content.
@@ -207,7 +207,7 @@ export function getContentWithLegendLayout({
       height: contentHeight,
     },
     margin: {
-      right: position === 'Right' ? spacing : 0,
+      right: position === 'right' ? spacing : 0,
       bottom: position === 'bottom' ? spacing : 0,
     },
   };

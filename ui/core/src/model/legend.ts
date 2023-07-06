@@ -16,7 +16,7 @@
 // component and the  `plugin-system` package for legend model code specific to
 // panel plugin specs.
 
-export const legendPositions = ['bottom', 'Right'] as const;
+export const legendPositions = ['bottom', 'right'] as const;
 export type LegendPositions = (typeof legendPositions)[number];
 
 export const legendModes = ['list', 'table'] as const;
