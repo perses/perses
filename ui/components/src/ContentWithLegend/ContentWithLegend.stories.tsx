@@ -428,7 +428,7 @@ export const Responsive: Story = {
                 options: {
                   position: 'bottom',
                   mode: 'table',
-                  size: 'Small',
+                  size: 'small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -443,7 +443,7 @@ export const Responsive: Story = {
                 options: {
                   position: 'bottom',
                   mode: 'table',
-                  size: 'Small',
+                  size: 'small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),

@@ -56,18 +56,18 @@ export type LegendSingleSelectConfig = {
 };
 
 export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
-  Bottom: { label: 'bottom' },
-  Right: { label: 'right' },
+  bottom: { label: 'Bottom' },
+  right: { label: 'Right' },
 };
 
 export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {
-  List: { label: 'list' },
-  Table: { label: 'table' },
+  list: { label: 'List' },
+  table: { label: 'Table' },
 };
 
 export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectConfig>> = {
-  Small: { label: 'Small' },
-  Medium: { label: 'Medium' },
+  small: { label: 'Small' },
+  medium: { label: 'Medium' },
 };
 
 export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {

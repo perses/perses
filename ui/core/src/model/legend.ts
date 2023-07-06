@@ -22,7 +22,7 @@ export type LegendPositions = (typeof legendPositions)[number];
 export const legendModes = ['list', 'table'] as const;
 export type LegendMode = (typeof legendModes)[number];
 
-export const legendSizes = ['Small', 'Medium'] as const;
+export const legendSizes = ['small', 'medium'] as const;
 export type LegendSize = (typeof legendSizes)[number];
 
 // Common legend options used across some UI components and panel specifications
@@ -47,7 +47,7 @@ export function isValidLegendSize(size: LegendSize) {
 export const DEFAULT_LEGEND: Required<LegendOptionsBase> = {
   position: 'bottom',
   mode: 'list',
-  size: 'Medium',
+  size: 'medium',
 };
 
 export function getLegendPosition(position?: LegendPositions) {

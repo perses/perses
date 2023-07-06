@@ -91,19 +91,19 @@ export interface ContentWithLegendLayout {
 type LegendSizeConfig = Record<LegendSize, Record<LegendPositions, number>>;
 
 export const TABLE_LEGEND_SIZE: LegendSizeConfig = {
-  Medium: {
+  medium: {
     // 5 rows plus header. Value to be multiplied by row height in pixels.
-    Bottom: 6,
+    bottom: 6,
 
     // Pixel value
-    Right: 250,
+    right: 250,
   },
-  Small: {
+  small: {
     // 3 rows plus header. Value to be multiplied by row height in pixels.
-    Bottom: 4,
+    bottom: 4,
 
     // Pixel value
-    Right: 150,
+    right: 150,
   },
 };
 
