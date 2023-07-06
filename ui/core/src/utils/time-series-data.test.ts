@@ -217,6 +217,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: singleTimeSeries.timeRange?.start.getTime(),
       endMs: singleTimeSeries.timeRange?.end.getTime(),
+      rangeMs: -43200000,
       stepMs: singleTimeSeries.stepMs,
     });
   });
@@ -255,6 +256,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: minTime.getTime(),
       endMs: maxTime.getTime(),
+      rangeMs: 604800000,
       stepMs: 3600,
     });
   });
@@ -287,6 +289,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: timeRange.start.getTime(),
       endMs: timeRange.end.getTime(),
+      rangeMs: 780000,
       stepMs: 1200,
     });
   });
