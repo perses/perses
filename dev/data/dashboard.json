@@ -342,7 +342,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "PercentDecimal" },
                 "thresholds": {
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
@@ -372,7 +372,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "unit": {
                   "kind": "Decimal",
                   "decimal_places": 1,
@@ -405,7 +405,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "Percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
@@ -435,7 +435,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "Percent" }
               }
             },
@@ -464,7 +464,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "Bytes", "decimal_places": 1 }
               }
             },
@@ -490,7 +490,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Sum",
+                "calculation": "sum",
                 "unit": {
                   "kind": "Decimal",
                   "decimal_places": 2,
@@ -524,7 +524,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "unit": { "kind": "Percent" }
               }
             },
@@ -553,7 +553,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "Percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
@@ -583,7 +583,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
                 "thresholds": {
                   "steps": [
@@ -621,7 +621,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": { "kind": "Bytes" },
                 "max": 95000000,
                 "thresholds": {
@@ -1081,7 +1081,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "unit": {
                   "kind": "Decimal",
                   "decimal_places": 1,
@@ -1114,7 +1114,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "Percent"
                 }
@@ -1145,7 +1145,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "Bytes",
                   "decimal_places": 1
@@ -1176,7 +1176,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Sum",
+                "calculation": "sum",
                 "unit": {
                   "kind": "Decimal",
                   "decimal_places": 2,
@@ -1214,7 +1214,7 @@
               "kind": "StatChart",
               "spec": {
                 "sparkline": {},
-                "calculation": "Mean",
+                "calculation": "mean",
                 "unit": {
                   "kind": "Percent"
                 }
@@ -1245,7 +1245,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "Percent"
                 },
@@ -1286,7 +1286,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "PercentDecimal",
                   "decimal_places": 1
@@ -1329,7 +1329,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "Decimal"
                 },
@@ -2221,7 +2221,7 @@
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "thresholds": {
                   "steps": [
                     {
@@ -2296,7 +2296,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "sparkline": {},
                 "unit": {
                   "abbreviate": false,
@@ -2329,7 +2329,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "Mean",
+                "calculation": "mean",
                 "unit": {
                   "abbreviate": false,
                   "decimal_places": 2,
@@ -2362,7 +2362,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "sparkline": {},
                 "unit": {
                   "kind": "Decimal"
@@ -2393,7 +2393,7 @@
             "plugin": {
               "kind": "StatChart",
               "spec": {
-                "calculation": "LastNumber",
+                "calculation": "last-number",
                 "unit": {
                   "kind": "Decimal"
                 }
@@ -3265,7 +3265,13 @@
                 "legend": {
                   "mode": "table",
                   "position": "bottom",
-                  "values": ["Mean", "FirstNumber", "LastNumber", "Min", "Max"]
+                  "values": [
+                    "mean",
+                    "first-number",
+                    "last-number",
+                    "min",
+                    "max"
+                  ]
                 }
               }
             },
@@ -3297,7 +3303,7 @@
                   "mode": "table",
                   "position": "right",
                   "size": "Small",
-                  "values": ["Mean", "LastNumber"]
+                  "values": ["mean", "last-number"]
                 }
               }
             },
