@@ -55,7 +55,7 @@ describe('LegendOptionsEditor', () => {
     expect(getLegendPositionSelector()).toBeEnabled();
     userEvent.click(getLegendPositionSelector());
     const positionRightOption = screen.getByRole('option', {
-      name: 'right',
+      name: 'Right',
     });
     userEvent.click(positionRightOption);
     expect(onChange).toHaveBeenCalledWith({ position: 'right' });
