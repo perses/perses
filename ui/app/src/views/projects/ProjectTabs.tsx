@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tab, Tabs, Typography } from '@mui/material';
+import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import VariableBoxIcon from 'mdi-material-ui/VariableBox';
@@ -132,11 +132,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`project-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ paddingTop: 2 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
+      {value === index && <Box sx={{ paddingTop: 2 }}>{children}</Box>}
     </div>
   );
 }
