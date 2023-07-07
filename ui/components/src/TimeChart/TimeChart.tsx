@@ -134,7 +134,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       return {
         highlightSeries({ name }: ChartInstanceFocusOpts) {
           if (!chartRef.current) {
-            // No chart. Do nothing.
+            // when chart undef, do not highlight series when hovering over legend
             return;
           }
 
@@ -142,7 +142,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         },
         clearHighlightedSeries: () => {
           if (!chartRef.current) {
-            // No chart. Do nothing.
+            // when chart undef, do not clear highlight series
             return;
           }
           clearHighlightedSeries(chartRef.current, totalSeries);
