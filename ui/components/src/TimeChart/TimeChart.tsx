@@ -39,7 +39,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartHandleFocusOpts, ChartHandle, TimeChartSeriesMapping } from '../model/graph';
+import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
@@ -83,7 +83,7 @@ export interface TimeChartProps {
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeChart(
+export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function TimeChart(
   {
     height,
     data,
@@ -132,7 +132,7 @@ export const TimeChart = forwardRef<ChartHandle, TimeChartProps>(function TimeCh
     ref,
     () => {
       return {
-        highlightSeries({ name }: ChartHandleFocusOpts) {
+        highlightSeries({ name }: ChartInstanceFocusOpts) {
           if (!chartRef.current) {
             // No chart. Do nothing.
             return;

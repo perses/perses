@@ -48,16 +48,16 @@ export type EChartsDataFormat = {
 // Intentionally making this an object to start because it is plausible we will
 // want to support focusing by other attributes (e.g. index, name) in the future,
 // and starting with an object will make adding them a non-breaking change.
-export type ChartHandleFocusOpts = {
+export type ChartInstanceFocusOpts = {
   id?: string; // LineChart uses id
   name?: string; // TimeChart uses name
 };
 
-export type ChartHandle = {
+export type ChartInstance = {
   /**
    * Highlight the series associated with the specified options.
    */
-  highlightSeries: (opts: ChartHandleFocusOpts) => void;
+  highlightSeries: (opts: ChartInstanceFocusOpts) => void;
 
   /**
    * Clear all highlighted series.

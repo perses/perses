@@ -37,7 +37,7 @@ import {
 import {
   EChartsDataFormat,
   LineChart,
-  ChartHandle,
+  ChartInstance,
   YAxisLabel,
   ZoomEventData,
   useChartsTheme,
@@ -84,7 +84,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const showLegacyChart = show_legacy_chart ?? false;
 
-  const lineChartRef = useRef<ChartHandle>(null);
+  const lineChartRef = useRef<ChartInstance>(null);
 
   // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.

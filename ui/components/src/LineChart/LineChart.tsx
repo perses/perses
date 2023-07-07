@@ -37,7 +37,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat, ChartHandleFocusOpts, ChartHandle } from '../model/graph';
+import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { CursorCoordinates, LineChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
@@ -80,7 +80,7 @@ export interface LineChartProps {
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineChart(
+export const LineChart = forwardRef<ChartInstance, LineChartProps>(function LineChart(
   {
     height,
     data,
@@ -110,7 +110,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
     ref,
     () => {
       return {
-        highlightSeries({ id }: ChartHandleFocusOpts) {
+        highlightSeries({ id }: ChartInstanceFocusOpts) {
           if (!chartRef.current) {
             // when chart undef, do not highlight series when hovering over legend
             return;
