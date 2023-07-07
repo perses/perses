@@ -84,7 +84,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const showLegacyChart = show_legacy_chart ?? false;
 
-  const lineChartRef = useRef<ChartInstance>(null);
+  const chartRef = useRef<ChartInstance>(null);
 
   // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
@@ -394,10 +394,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               onSortingChange: setLegendSorting,
             },
             onItemMouseOver: (e, { id }) => {
-              lineChartRef.current?.highlightSeries({ name: id });
+              chartRef.current?.highlightSeries({ name: id });
             },
             onItemMouseOut: () => {
-              lineChartRef.current?.clearHighlightedSeries();
+              chartRef.current?.clearHighlightedSeries();
             },
           }
         }
@@ -408,7 +408,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
               {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={height} />}
               {showLegacyChart ? (
                 <LineChart
-                  ref={lineChartRef}
+                  ref={chartRef}
                   height={height}
                   data={graphData}
                   yAxis={echartsYAxis}
@@ -425,7 +425,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 />
               ) : (
                 <TimeChart
-                  ref={lineChartRef}
+                  ref={chartRef}
                   height={height}
                   data={timeChartData}
                   seriesMapping={timeSeriesMapping}
