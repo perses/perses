@@ -73,9 +73,9 @@ export function checkforNearbyTimeSeries(
 
     const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
 
+    // TODO: look into optimizations to reduce number of for loops
     for (const [timestamp] of currentDatasetValues) {
       const distance = Math.abs(timestamp - cursorX);
-
       if (distance < closestDistance) {
         closestTimestamp = timestamp;
         closestDistance = distance;
@@ -96,7 +96,6 @@ export function checkforNearbyTimeSeries(
 
         // TODO: ensure null values not displayed in tooltip
         if (yValue !== undefined && yValue !== null) {
-          // if (cursorX < xValue + xBuffer && cursorX > xValue - xBuffer) {
           if (closestTimestamp === xValue) {
             if (cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
               // show fewer bold series in tooltip when many total series
@@ -111,7 +110,7 @@ export function checkforNearbyTimeSeries(
                 emphasizedSeriesIndexes.push(seriesIdx);
               } else {
                 nonEmphasizedSeriesIndexes.push(seriesIdx);
-                // ensure series not close to cursor are not highlighted
+                // ensure series far away from cursor are not highlighted
                 if (chart?.dispatchAction !== undefined) {
                   chart.dispatchAction({
                     type: 'downplay',
@@ -119,9 +118,6 @@ export function checkforNearbyTimeSeries(
                   });
                 }
               }
-
-              // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-              // const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
               const formattedY = formatValue(yValue, unit);
               currentNearbySeriesData.push({
                 seriesIdx: seriesIdx,
