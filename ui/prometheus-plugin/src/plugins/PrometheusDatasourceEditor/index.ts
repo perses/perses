@@ -11,28 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
-
-interface TabPanelProps {
-  children: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-export function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  const isActive = value === index;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={!isActive}
-      id={`options-editor-tabpanel-${index}`}
-      aria-labelledby={`options-editor-tab-${index}`}
-      {...other}
-    >
-      {isActive && <Box mt={2}>{children}</Box>}
-    </div>
-  );
-}
+export * from './PrometheusDatasourceEditor';
+export * from './types';

@@ -81,4 +81,21 @@ test.describe('ProjectView', () => {
 
     await expect(projectPage.variableList).toContainText('$list_var');
   });
+
+  test('can create a datasource', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.gotoDatasourcesTab();
+
+    await projectPage.addDatasourceButton.click();
+    const datasourceEditor = projectPage.getDatasourceEditor();
+    await datasourceEditor.setName('my_ds');
+    await datasourceEditor.setDisplayLabel('My personal datasource');
+    await datasourceEditor.setDescription('This is a datasource for personal use');
+    await datasourceEditor.selectDefault('no');
+    await datasourceEditor.createButton.click();
+
+    await expect(projectPage.datasourceList).toContainText('my_ds');
+  });
 });

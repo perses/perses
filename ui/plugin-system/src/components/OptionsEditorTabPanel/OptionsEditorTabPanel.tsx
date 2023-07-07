@@ -11,15 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './CalculationSelector';
-export * from './DatasourceSelect';
-export * from './LegendOptionsEditor';
-export * from './OptionsEditorRadios';
-export * from './OptionsEditorTabs';
-export * from './PanelSpecEditor';
-export * from './PluginEditor';
-export * from './PluginKindSelect';
-export * from './PluginRegistry';
-export * from './PluginSpecEditor';
-export * from './TimeSeriesQueryEditor';
-export * from './Variables';
+import { Box } from '@mui/material';
+
+interface OptionsEditorTabPanelProps {
+  children: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+export function OptionsEditorTabPanel(props: OptionsEditorTabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  const isActive = value === index;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={!isActive}
+      id={`options-editor-tabpanel-${index}`}
+      aria-labelledby={`options-editor-tab-${index}`}
+      {...other}
+    >
+      {isActive && <Box mt={2}>{children}</Box>}
+    </div>
+  );
+}

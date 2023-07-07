@@ -16,15 +16,23 @@ import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import { DashboardSelector, getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
+import {
+  getDatasourceDisplayName,
+  getVariableExtendedDisplayName,
+  DashboardSelector,
+  Datasource,
+  VariableResource,
+} from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
-import { useCreateVariableMutation } from '../../model/project-client';
+import { useCreateVariableMutation, useCreateDatasourceMutation } from '../../model/project-client';
+import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
+import { ProjectDatasources } from './tabs/ProjectDatasources';
 
 const dashboardTabIndex = 'dashboards';
 const variablesTabIndex = 'variables';
@@ -38,10 +46,12 @@ interface TabButtonProps {
 function TabButton(props: TabButtonProps) {
   const navigate = useNavigate();
   const createVariableMutation = useCreateVariableMutation(props.projectName);
+  const createDatasourceMutation = useCreateDatasourceMutation(props.projectName);
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
   const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
+  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceFormStateOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
@@ -61,6 +71,22 @@ function TabButton(props: TabButtonProps) {
       });
     },
     [exceptionSnackbar, successSnackbar, createVariableMutation]
+  );
+
+  const handleDatasourceCreation = useCallback(
+    (datasource: Datasource) => {
+      createDatasourceMutation.mutate(datasource, {
+        onSuccess: (createdDatasource: Datasource) => {
+          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          setCreateDatasourceFormStateOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
   );
 
   switch (props.index) {
@@ -108,7 +134,34 @@ function TabButton(props: TabButtonProps) {
       );
     case datasourcesTabIndex:
       return (
-        <CRUDButton text="Add Datasource" variant="contained" onClick={() => setOpenCreateDashboardDialogState(true)} />
+        <>
+          <CRUDButton
+            text="Add Datasource"
+            variant="contained"
+            onClick={() => setCreateDatasourceFormStateOpened(true)}
+          />
+          <DatasourceDrawer
+            datasource={{
+              kind: 'Datasource',
+              metadata: {
+                name: 'NewDatasource',
+                project: props.projectName,
+              },
+              spec: {
+                default: false,
+                plugin: {
+                  // TODO: find a way to avoid assuming that the PrometheusDatasource plugin is installed
+                  kind: 'PrometheusDatasource',
+                  spec: {},
+                },
+              },
+            }}
+            isOpen={isCreateDatasourceDrawerStateOpened}
+            saveAction="Create"
+            onSave={handleDatasourceCreation}
+            onClose={() => setCreateDatasourceFormStateOpened(false)}
+          />
+        </>
       );
     default:
       return <></>;
@@ -200,7 +253,9 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index="variables">
         <ProjectVariables projectName={projectName} id="project-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index="datasources"></TabPanel>
+      <TabPanel value={value} index="datasources">
+        <ProjectDatasources projectName={projectName} id="project-datasource-list" />
+      </TabPanel>
     </Box>
   );
 }

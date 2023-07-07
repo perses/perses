@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Locator, Page } from '@playwright/test';
+import { DatasourceEditor } from './DatasourceEditor';
 import { VariableEditor } from './VariableEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
@@ -28,8 +29,11 @@ export class AppProjectPage {
 
   readonly variableEditor: Locator;
   readonly addVariableButton: Locator;
-
   readonly variableList: Locator;
+
+  readonly datasourceEditor: Locator;
+  readonly addDatasourceButton: Locator;
+  readonly datasourceList: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -41,8 +45,11 @@ export class AppProjectPage {
 
     this.addVariableButton = page.getByRole('button', { name: 'Add Variable' });
     this.variableEditor = page.getByTestId('variable-editor');
-
     this.variableList = page.locator('#project-variable-list');
+
+    this.addDatasourceButton = page.getByRole('button', { name: 'Add Datasource' });
+    this.datasourceEditor = page.getByTestId('datasource-editor');
+    this.datasourceList = page.locator('#project-datasource-list');
   }
 
   async goto(projectName: string) {
@@ -126,5 +133,15 @@ export class AppProjectPage {
 
   getVariableEditor() {
     return new VariableEditor(this.variableEditor);
+  }
+
+  async startCreatingDatasources() {
+    await this.addDatasourceButton.click();
+    const datasourceEditor = this.getDatasourceEditor();
+    await datasourceEditor.isVisible();
+  }
+
+  getDatasourceEditor() {
+    return new DatasourceEditor(this.datasourceEditor);
   }
 }
