@@ -112,7 +112,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
       return {
         highlightSeries({ id }: ChartHandleFocusOpts) {
           if (!chartRef.current) {
-            // No chart. Do nothing.
+            // when chart undef, do not highlight series when hovering over legend
             return;
           }
 
@@ -120,7 +120,7 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
         },
         clearHighlightedSeries: () => {
           if (!chartRef.current) {
-            // No chart. Do nothing.
+            // when chart undef, do not clear highlight series
             return;
           }
           clearHighlightedSeries(chartRef.current, data.timeSeries.length);
@@ -155,7 +155,6 @@ export const LineChart = forwardRef<ChartHandle, LineChartProps>(function LineCh
           onDataZoom(zoomEvent);
         }
       },
-      // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
   }, [data, onDataZoom, setTooltipPinnedCoords]);
 

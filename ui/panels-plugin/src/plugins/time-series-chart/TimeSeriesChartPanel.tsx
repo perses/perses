@@ -256,7 +256,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const stepOption: StepOptions = {
           color: thresholdLineColor,
           value:
-            // // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
             thresholds.mode === 'Percent'
               ? convertPercentThreshold(
                   step.value,
@@ -360,10 +360,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
   }
 
-  // if (!showLegacyChart && timeChartData == null) {
-  //   return null;
-  // }
-
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
   const gridLeft = y_axis && y_axis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
@@ -442,7 +438,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                   onDataZoom={handleDataZoom}
                   //  Show an empty chart when there is no data because the user unselected all items in
                   // the legend. Otherwise, show a "no data" message.
-                  // TODO: fix noDataVariant to work with new TimeChart types
                   noDataVariant={!timeChartData.length && legendItems && legendItems.length > 0 ? 'chart' : 'message'}
                 />
               )}

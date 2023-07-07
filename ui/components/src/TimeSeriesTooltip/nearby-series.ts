@@ -55,10 +55,6 @@ export function checkforNearbyTimeSeries(
   if (cursorX === null || cursorY === null) return currentNearbySeriesData;
 
   if (!Array.isArray(data)) return currentNearbySeriesData;
-
-  // TODO: better way to calc xBuffer for longer time ranges
-  // const xBuffer = cursorX * 0.0000005;
-
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
