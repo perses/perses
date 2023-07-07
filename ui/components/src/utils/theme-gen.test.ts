@@ -144,6 +144,43 @@ describe('generateChartsTheme', () => {
             "fontFamily": "\\"Roboto\\", \\"Helvetica\\", \\"Arial\\", sans-serif",
             "fontSize": 12,
           },
+          "timeAxis": Object {
+            "axisLabel": Object {
+              "color": "rgba(0, 0, 0, 0.87)",
+              "margin": 15,
+              "show": true,
+            },
+            "axisLine": Object {
+              "lineStyle": Object {
+                "color": "#757575",
+              },
+              "show": true,
+            },
+            "axisTick": Object {
+              "length": 6,
+              "lineStyle": Object {
+                "color": "#757575",
+              },
+              "show": false,
+            },
+            "show": true,
+            "splitArea": Object {
+              "areaStyle": Object {
+                "color": Array [
+                  "#e0e0e0",
+                ],
+              },
+              "show": false,
+            },
+            "splitLine": Object {
+              "lineStyle": Object {
+                "color": "#e0e0e0",
+                "opacity": 0.6,
+                "width": 0.5,
+              },
+              "show": true,
+            },
+          },
           "title": Object {
             "show": false,
           },

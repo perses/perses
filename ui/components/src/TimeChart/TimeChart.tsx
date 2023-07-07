@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { UnitOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
+import { utcToZonedTime } from 'date-fns-tz';
+import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
   LineSeriesOption,
-  LegendComponentOption,
   YAXisComponentOption,
   TooltipComponentOption,
 } from 'echarts';
@@ -26,6 +27,7 @@ import { ECharts as EChartsInstance, use } from 'echarts/core';
 import { LineChart as EChartsLineChart } from 'echarts/charts';
 import {
   GridComponent,
+  DatasetComponent,
   DataZoomComponent,
   MarkAreaComponent,
   MarkLineComponent,
@@ -33,27 +35,26 @@ import {
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
-  LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
+import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { CursorCoordinates, LineChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
-import { useTimeZone } from '../context/TimeZoneProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
-  getDateRange,
-  getFormattedDate,
+  getFormattedAxisLabel,
   getYAxes,
   restoreChart,
   ZoomEventData,
 } from '../utils';
+import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
+import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
   EChartsLineChart,
   GridComponent,
+  DatasetComponent,
   DataZoomComponent,
   MarkAreaComponent,
   MarkLineComponent,
@@ -61,17 +62,17 @@ use([
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
-  LegendComponent,
   CanvasRenderer,
 ]);
 
-export interface LineChartProps {
+export interface TimeChartProps {
   height: number;
-  data: EChartsDataFormat;
+  data: TimeSeries[];
+  seriesMapping: TimeChartSeriesMapping;
+  timeScale?: TimeScale;
   yAxis?: YAXisComponentOption;
   unit?: UnitOptions;
   grid?: GridComponentOption;
-  legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
@@ -80,14 +81,15 @@ export interface LineChartProps {
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export const LineChart = forwardRef<ChartInstance, LineChartProps>(function LineChart(
+export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function TimeChart(
   {
     height,
     data,
+    seriesMapping,
+    timeScale: timeScaleProp,
     yAxis,
     unit,
     grid,
-    legend,
     tooltipConfig = { wrapLabels: true },
     noDataVariant = 'message',
     syncGroup,
@@ -101,33 +103,51 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
-  const { timeZone } = useTimeZone();
-
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
+  const { timeZone } = useTimeZone();
+  const totalSeries = data?.length ?? 0;
+
+  let timeScale: TimeScale;
+  if (timeScaleProp === undefined) {
+    const commonTimeScale = getCommonTimeScale(data);
+    if (commonTimeScale === undefined) {
+      // set default to past 5 years
+      const today = new Date();
+      const pastDate = new Date(today);
+      pastDate.setFullYear(today.getFullYear() - 5);
+      const todayMs = today.getTime();
+      const pastDateMs = pastDate.getTime();
+      timeScale = { startMs: pastDateMs, endMs: todayMs, stepMs: 1, rangeMs: todayMs - pastDateMs };
+    } else {
+      timeScale = commonTimeScale;
+    }
+  } else {
+    timeScale = timeScaleProp;
+  }
 
   useImperativeHandle(
     ref,
     () => {
       return {
-        highlightSeries({ id }: ChartInstanceFocusOpts) {
+        highlightSeries({ name }: ChartInstanceFocusOpts) {
           if (!chartRef.current) {
             // when chart undef, do not highlight series when hovering over legend
             return;
           }
 
-          chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+          chartRef.current.dispatchAction({ type: 'highlight', seriesId: name });
         },
         clearHighlightedSeries: () => {
           if (!chartRef.current) {
             // when chart undef, do not clear highlight series
             return;
           }
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current, totalSeries);
         },
       };
     },
-    [data.timeSeries.length]
+    [totalSeries]
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -140,23 +160,18 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
-        const startIndex = params.batch[0].startValue ?? 0;
-        const endIndex = params.batch[0].endValue ?? data.xAxis.length - 1;
-        const xAxisStartValue = data.xAxis[startIndex];
-        const xAxisEndValue = data.xAxis[endIndex];
-
+        const xAxisStartValue = params.batch[0].startValue;
+        const xAxisEndValue = params.batch[0].endValue;
         if (xAxisStartValue !== undefined && xAxisEndValue !== undefined) {
           const zoomEvent: ZoomEventData = {
             start: xAxisStartValue,
             end: xAxisEndValue,
-            startIndex,
-            endIndex,
           };
           onDataZoom(zoomEvent);
         }
       },
     };
-  }, [data, onDataZoom, setTooltipPinnedCoords]);
+  }, [onDataZoom, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
@@ -165,24 +180,35 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data.timeSeries === undefined) return {};
+    // TODO: fix loading state and noData variants
+    // if (data === undefined) return {};
 
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
-    if (data.timeSeries === null || (data.timeSeries.length === 0 && noDataVariant === 'message')) return noDataOption;
+    if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
 
-    const rangeMs = data.rangeMs ?? getDateRange(data.xAxis);
+    // Utilizes ECharts dataset so raw data is separate from series option style properties
+    // https://apache.github.io/echarts-handbook/en/concepts/dataset/
+    const dataset: DatasetOption[] = [];
+    const isLocalTimeZone = timeZone === 'local';
+    data.map((d, index) => {
+      const values = d.values.map(([timestamp, value]) => {
+        const val: string | number = value === null ? '-' : value; // echarts use '-' to represent null data
+        return [isLocalTimeZone ? timestamp : utcToZonedTime(timestamp, timeZone), val];
+      });
+      dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
+    });
 
     const option: EChartsCoreOption = {
-      series: data.timeSeries,
+      dataset: dataset,
+      series: seriesMapping,
       xAxis: {
-        type: 'category',
-        data: data.xAxis,
-        max: data.xAxisMax,
+        type: 'time',
+        min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
+        max: isLocalTimeZone ? timeScale.endMs : utcToZonedTime(timeScale.endMs, timeZone),
         axisLabel: {
-          formatter: (value: number) => {
-            return getFormattedDate(value, rangeMs, timeZone);
-          },
+          hideOverlap: true,
+          formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
         },
       },
       yAxis: getYAxes(yAxis, unit),
@@ -209,14 +235,24 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
         },
       },
       grid,
-      legend,
     };
 
     if (__experimentalEChartsOptionsOverride) {
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [
+    data,
+    seriesMapping,
+    timeScale,
+    yAxis,
+    unit,
+    grid,
+    noDataOption,
+    __experimentalEChartsOptionsOverride,
+    noDataVariant,
+    timeZone,
+  ]);
 
   return (
     <Box
@@ -276,7 +312,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current, totalSeries);
         }
       }}
       onMouseEnter={() => {
@@ -301,15 +337,13 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
       {showTooltip === true &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
-          <LineChartTooltip
+          <TimeChartTooltip
             chartRef={chartRef}
-            chartData={data}
+            data={data}
+            seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
-            onUnpinClick={() => {
-              setTooltipPinnedCoords(null);
-            }}
           />
         )}
       <EChart

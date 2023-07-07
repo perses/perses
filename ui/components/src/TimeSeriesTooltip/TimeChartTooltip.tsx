@@ -11,50 +11,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Portal, Stack } from '@mui/material';
-import { UnitOptions } from '@perses-dev/core';
-import { ECharts as EChartsInstance } from 'echarts/core';
 import { memo, useState } from 'react';
+import { Box, Portal, Stack } from '@mui/material';
+import { ECharts as EChartsInstance } from 'echarts/core';
+import { UnitOptions, TimeSeries } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
-import { EChartsDataFormat } from '../model';
-import { TooltipContent } from './TooltipContent';
-import { TooltipHeader } from './TooltipHeader';
+import { TimeChartSeriesMapping } from '../model';
+import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
+import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
-import {
-  CursorCoordinates,
-  FALLBACK_CHART_WIDTH,
-  TOOLTIP_BG_COLOR_FALLBACK,
-  TOOLTIP_MAX_HEIGHT,
-  TOOLTIP_MAX_WIDTH,
-  TOOLTIP_MIN_WIDTH,
-  useMousePosition,
-} from './tooltip-model';
-import { assembleTransform } from './utils';
+import { TooltipHeader } from './TooltipHeader';
+import { TooltipContent } from './TooltipContent';
 
-export interface TimeSeriesTooltipProps {
+export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
-  chartData: EChartsDataFormat;
+  data: TimeSeries[];
+  seriesMapping: TimeChartSeriesMapping;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
   pinnedPos: CursorCoordinates | null;
 }
 
-export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
+export const TimeChartTooltip = memo(function TimeChartTooltip({
   chartRef,
-  chartData,
+  data,
+  seriesMapping,
   wrapLabels,
   unit,
   onUnpinClick,
   pinnedPos,
-}: TimeSeriesTooltipProps) {
+}: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
   const isTooltipPinned = pinnedPos !== null;
 
-  if (mousePos === null || mousePos.target === null) return null;
+  if (mousePos === null || mousePos.target === null || data === null) return null;
 
   // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
@@ -66,7 +60,8 @@ export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
     mousePos,
-    chartData,
+    data,
+    seriesMapping,
     pinnedPos,
     chart,
     unit,
@@ -76,34 +71,13 @@ export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
     return null;
   }
 
-  const totalSeries = chartData.timeSeries.length;
+  const totalSeries = data.length;
 
   return (
     <Portal>
       <Box
         ref={tooltipRef}
-        sx={(theme) => ({
-          minWidth: TOOLTIP_MIN_WIDTH,
-          maxWidth: TOOLTIP_MAX_WIDTH,
-          maxHeight: TOOLTIP_MAX_HEIGHT,
-          padding: 0,
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
-          borderRadius: '6px',
-          color: '#fff',
-          fontSize: '11px',
-          visibility: 'visible',
-          opacity: 1,
-          transition: 'all 0.1s ease-out',
-          // Ensure pinned tooltip shows behind edit panel drawer and sticky header
-          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
-          overflow: 'hidden',
-          '&:hover': {
-            overflowY: 'auto',
-          },
-        })}
+        sx={(theme) => getTooltipStyles(theme, pinnedPos)}
         style={{
           transform: cursorTransform,
         }}

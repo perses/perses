@@ -19,6 +19,7 @@ export interface TimeScale {
   startMs: number;
   endMs: number;
   stepMs: number;
+  rangeMs: number;
 }
 
 export interface TimeSeriesData {

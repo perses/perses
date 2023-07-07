@@ -13,9 +13,9 @@
 
 import { UnitOptions } from '@perses-dev/core';
 import { EChartsDataFormat } from '../model';
-import { checkforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
+import { legacyCheckforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
-describe('checkforNearbySeries', () => {
+describe('legacyCheckforNearbySeries', () => {
   const chartData: EChartsDataFormat = {
     timeSeries: [
       {
@@ -64,7 +64,9 @@ describe('checkforNearbySeries', () => {
       kind: 'Decimal',
       decimal_places: 2,
     };
-    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(nearbySeriesOutput);
+    expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(
+      nearbySeriesOutput
+    );
   });
 
   it('should return series values formatted as a percent', () => {
@@ -76,7 +78,7 @@ describe('checkforNearbySeries', () => {
       kind: 'PercentDecimal',
       decimal_places: 0,
     };
-    expect(checkforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
+    expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
       percentFormattedOutput
     );
   });

@@ -3265,13 +3265,7 @@
                 "legend": {
                   "mode": "Table",
                   "position": "Bottom",
-                  "values": [
-                    "Mean",
-                    "FirstNumber",
-                    "LastNumber",
-                    "Min",
-                    "Max"
-                  ]
+                  "values": ["Mean", "FirstNumber", "LastNumber", "Min", "Max"]
                 }
               }
             },
@@ -3303,10 +3297,7 @@
                   "mode": "Table",
                   "position": "Right",
                   "size": "Small",
-                  "values": [
-                    "Mean",
-                    "LastNumber"
-                  ]
+                  "values": ["Mean", "LastNumber"]
                 }
               }
             },
@@ -3372,6 +3363,192 @@
                 "content": {
                   "$ref": "#/spec/panels/bottomtable"
                 }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "TimeChart_vs_LineChart",
+      "created_at": "2023-06-26T04:12:56.538904Z",
+      "updated_at": "2023-06-26T13:54:13.926109Z",
+      "version": 3,
+      "project": "perses"
+    },
+    "spec": {
+      "display": { "name": "TimeChart vs LineChart" },
+      "duration": "30m",
+      "variables": [
+        { "kind": "TextVariable", "spec": { "value": "node", "name": "job" } },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "name": "instance",
+            "allow_multiple": false,
+            "allow_all_value": false,
+            "default_value": "demo.do.prometheus.io:9100",
+            "plugin": {
+              "kind": "PrometheusLabelValuesVariable",
+              "spec": {
+                "label_name": "instance",
+                "matchers": ["up{job=~\"$job\"}"]
+              }
+            }
+          }
+        },
+        {
+          "kind": "ListVariable",
+          "spec": {
+            "default_value": "1m",
+            "allow_all_value": false,
+            "allow_multiple": false,
+            "plugin": {
+              "kind": "StaticListVariable",
+              "spec": { "values": ["1m", "5m"] }
+            },
+            "name": "interval"
+          }
+        }
+      ],
+      "panels": {
+        "LineChart": {
+          "kind": "Panel",
+          "spec": {
+            "display": { "name": "LineChart" },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": { "show_legacy_chart": true }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_memory_MemFree_bytes{instance=\"$instance\",job=\"$job\"}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "TimeChart": {
+          "kind": "Panel",
+          "spec": {
+            "display": { "name": "TimeChart" },
+            "plugin": { "kind": "TimeSeriesChart", "spec": {} },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_memory_MemFree_bytes{instance=\"$instance\",job=\"$job\"}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "LineChartAlt": {
+          "kind": "Panel",
+          "spec": {
+            "display": { "name": "LineChart Alt" },
+            "plugin": {
+              "kind": "TimeSeriesChart",
+              "spec": { "show_legacy_chart": true }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_scrape_collector_duration_seconds{instance=\"$instance\",job=\"$job\",collector!=\"systemd\"}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "TimeChartAlt": {
+          "kind": "Panel",
+          "spec": {
+            "display": { "name": "TimeChart Alt" },
+            "plugin": { "kind": "TimeSeriesChart", "spec": {} },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "node_scrape_collector_duration_seconds{instance=\"$instance\",job=\"$job\",collector!=\"systemd\"}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "TimeChart Group",
+              "collapse": { "open": true }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/TimeChart" }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/TimeChartAlt" }
+              }
+            ]
+          }
+        },
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "LineChart Group",
+              "collapse": { "open": true }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/LineChart" }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": { "$ref": "#/spec/panels/LineChartAlt" }
               }
             ]
           }

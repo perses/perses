@@ -130,3 +130,8 @@ export const useMousePosition = (): CursorData['coords'] => {
 
   return coords;
 };
+
+export type TooltipConfig = {
+  wrapLabels: boolean;
+  hidden?: boolean;
+};

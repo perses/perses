@@ -30,6 +30,7 @@ export * from './SettingsAutocomplete';
 export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
+export * from './TimeChart';
 export * from './TimeSeriesTooltip';
 export * from './UnitSelector';
 export * from './YAxisLabel';
