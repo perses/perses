@@ -31,7 +31,7 @@ export interface BarChartData {
 export interface BarChartProps {
   width: number;
   height: number;
-  data: BarChartData[] | null | undefined;
+  data: BarChartData[] | null;
   unit: UnitOptions;
 }
 
