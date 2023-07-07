@@ -73,7 +73,8 @@ export function checkforNearbyTimeSeries(
 
     const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
 
-    // TODO: look into optimizations to reduce number of for loops
+    // Determine closestTimestamp before checking whether it is equal to xValue. Consolidating
+    // with second currentDatasetValues loop below would result in duplicate nearby series
     for (const [timestamp] of currentDatasetValues) {
       const distance = Math.abs(timestamp - cursorX);
       if (distance < closestDistance) {
