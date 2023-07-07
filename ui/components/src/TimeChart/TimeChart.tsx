@@ -35,7 +35,6 @@ import {
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
-  LegendComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
@@ -63,7 +62,6 @@ use([
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,
-  LegendComponent,
   CanvasRenderer,
 ]);
 
