@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.37.0 / 2023-07-07
+
+- [FEATURE] Time series chart rewritten for intuitive x axis bucketing, improved render perf (#1268)
+- [ENHANCEMENT] Add ability to select font size for stat chart (#1269)
+
 ## 0.36.2 / 2023-06-27
 
 - [BUGFIX] Fix useTimeSeriesQueries return type (#1273)
