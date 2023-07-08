@@ -46,7 +46,7 @@ describe('TooltipHeader', () => {
     renderComponent(tooltipContent);
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('13:53:00')).toBeInTheDocument();
-    expect(screen.getByText('Click to Pin')).toBeInTheDocument();
+    expect(screen.getByText('Click chart to Pin')).toBeInTheDocument();
   });
 
   it('should display with unpin text', () => {
