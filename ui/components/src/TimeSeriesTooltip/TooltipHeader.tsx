@@ -65,6 +65,8 @@ export const TooltipHeader = memo(function TooltipHeader({
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
   const showAllSeriesToggle = totalSeries > 5;
 
+  const pinTooltipHelpText = isTooltipPinned ? 'Click to Unpin' : 'Click chart to pin';
+
   return (
     <Box
       sx={(theme) => ({
@@ -118,7 +120,7 @@ export const TooltipHeader = memo(function TooltipHeader({
                 verticalAlign: 'middle',
               }}
             >
-              Click to {isTooltipPinned ? 'Unpin' : 'Pin'}
+              {pinTooltipHelpText}
             </Typography>
             {isTooltipPinned ? (
               <Pin
