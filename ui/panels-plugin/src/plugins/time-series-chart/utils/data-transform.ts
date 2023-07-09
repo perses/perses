@@ -82,7 +82,7 @@ export function getLineSeries(
     data: data,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'All' ? visual.stack : undefined,
+    stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,
@@ -142,7 +142,7 @@ export function getTimeSeries(
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'All' ? visual.stack : undefined, // TODO: convert stack to kebab-case
+    stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,
