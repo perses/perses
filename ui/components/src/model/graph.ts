@@ -38,7 +38,8 @@ export type TimeChartSeriesMapping = LineSeriesOption[];
 
 export type TimeChartLegendItems = LegendItem[];
 
-// Deprecated type used on legacy LineChart
+// [DEPRECATED] used for legacy LineChart 'category' axis.
+// May delete in future when embed users migrate to TimeChart.
 export type EChartsDataFormat = {
   timeSeries: LegacyTimeSeries[];
   xAxis: number[];
