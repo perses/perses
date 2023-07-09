@@ -2107,7 +2107,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "visual": {
-                  "show_points": "Always",
+                  "show_points": "always",
                   "connect_nulls": true
                 }
               }
