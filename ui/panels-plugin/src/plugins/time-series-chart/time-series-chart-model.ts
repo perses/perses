@@ -51,7 +51,8 @@ export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
   line_width?: number;
   area_opacity?: number;
-  show_points?: 'Auto' | 'Always'; // TODO: lowercase as part of kebab-case migration
+  // TODO: change to lowercase as part of kebab-case migration in PR #1262
+  show_points?: 'Auto' | 'Always';
   palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;

@@ -27,6 +27,7 @@
       ]
     },
     "visual": {
+      "display": "line",
       "line_width": 2,
       "point_radius": 3
     }
