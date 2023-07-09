@@ -263,7 +263,7 @@
           "plugin": {
             "kind": "StatChart",
             "spec": {
-              "calculation": "LastNumber",
+              "calculation": "last-number",
               "thresholds": {
                 "steps": [
                   {
@@ -307,7 +307,7 @@
           "plugin": {
             "kind": "GaugeChart",
             "spec": {
-              "calculation": "LastNumber",
+              "calculation": "last-number",
               "thresholds": {
                 "steps": [
                   {
@@ -355,8 +355,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom",
-                "mode": "List",
+                "position": "bottom",
+                "mode": "list",
                 "values": [
                   "min",
                   "max",
