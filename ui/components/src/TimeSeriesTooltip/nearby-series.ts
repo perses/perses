@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, UnitOptions } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT } from '../model';
+import { LineSeriesOption } from 'echarts/charts';
+import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -36,10 +37,144 @@ export interface NearbySeriesInfo {
 export type NearbySeriesArray = NearbySeriesInfo[];
 
 /**
- * Returns formatted series data for the points that are close to the user's cursor
+ * Returns formatted series data for the points that are close to the user's cursor.
+ * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
+ */
+export function checkforNearbyTimeSeries(
+  data: TimeSeries[],
+  seriesMapping: TimeChartSeriesMapping,
+  pointInGrid: number[],
+  yBuffer: number,
+  chart?: EChartsInstance,
+  unit?: UnitOptions
+): NearbySeriesArray {
+  const currentNearbySeriesData: NearbySeriesArray = [];
+  const cursorX: number | null = pointInGrid[0] ?? null;
+  const cursorY: number | null = pointInGrid[1] ?? null;
+
+  if (cursorX === null || cursorY === null) return currentNearbySeriesData;
+
+  if (!Array.isArray(data)) return currentNearbySeriesData;
+  const nearbySeriesIndexes: number[] = [];
+  const emphasizedSeriesIndexes: number[] = [];
+  const nonEmphasizedSeriesIndexes: number[] = [];
+  const totalSeries = data.length;
+
+  let closestTimestamp = null;
+  let closestDistance = Infinity;
+
+  // find the timestamp with data that is closest to cursorX
+  for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
+    const currentSeries = seriesMapping[seriesIdx];
+    if (currentSeries === undefined) break;
+
+    const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
+    if (currentDataset == null) break;
+
+    const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
+
+    // Determine closestTimestamp before checking whether it is equal to xValue. Consolidating
+    // with second currentDatasetValues loop below would result in duplicate nearby series
+    for (const [timestamp] of currentDatasetValues) {
+      const distance = Math.abs(timestamp - cursorX);
+      if (distance < closestDistance) {
+        closestTimestamp = timestamp;
+        closestDistance = distance;
+      }
+    }
+
+    if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;
+    const lineSeries = currentSeries as LineSeriesOption;
+    const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
+    const markerColor = lineSeries.color ?? '#000';
+    if (Array.isArray(data)) {
+      for (let datumIdx = 0; datumIdx < currentDatasetValues.length; datumIdx++) {
+        const nearbyTimeSeries = currentDatasetValues[datumIdx];
+        if (nearbyTimeSeries === undefined || !Array.isArray(nearbyTimeSeries)) break;
+
+        const xValue = nearbyTimeSeries[0];
+        const yValue = nearbyTimeSeries[1];
+
+        // TODO: ensure null values not displayed in tooltip
+        if (yValue !== undefined && yValue !== null) {
+          if (closestTimestamp === xValue) {
+            if (cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
+              // show fewer bold series in tooltip when many total series
+              const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
+              const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
+              const isClosestToCursor = isWithinPercentageRange({
+                valueToCheck: cursorY,
+                baseValue: yValue,
+                percentage: percentRangeToCheck,
+              });
+              if (isClosestToCursor) {
+                emphasizedSeriesIndexes.push(seriesIdx);
+              } else {
+                nonEmphasizedSeriesIndexes.push(seriesIdx);
+                // ensure series far away from cursor are not highlighted
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'downplay',
+                    seriesIndex: seriesIdx,
+                  });
+                }
+              }
+              const formattedY = formatValue(yValue, unit);
+              currentNearbySeriesData.push({
+                seriesIdx: seriesIdx,
+                datumIdx: datumIdx,
+                seriesName: currentSeriesName,
+                date: closestTimestamp,
+                x: xValue,
+                y: yValue,
+                formattedY: formattedY,
+                markerColor: markerColor.toString(),
+                isClosestToCursor,
+              });
+              nearbySeriesIndexes.push(seriesIdx);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (chart?.dispatchAction !== undefined) {
+    // Clears emphasis state of all lines that are not emphasized.
+    // Emphasized is a subset of just the nearby series that are closest to cursor.
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: nonEmphasizedSeriesIndexes,
+    });
+
+    // https://echarts.apache.org/en/api.html#action.highlight
+    if (emphasizedSeriesIndexes.length > 0) {
+      // Fadeout opacity of all series not closest to cursor.
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: emphasizedSeriesIndexes,
+        notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+      });
+    } else {
+      // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
+      chart.dispatchAction({
+        type: 'highlight',
+        seriesIndex: nearbySeriesIndexes,
+        notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
+        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+      });
+    }
+  }
+
+  return currentNearbySeriesData;
+}
+
+/**
+ * [DEPRECATED] Returns formatted series data for the points that are close to the user's cursor
  * Adjust yBuffer to increase or decrease number of series shown
  */
-export function checkforNearbySeries(
+export function legacyCheckforNearbySeries(
   data: EChartsDataFormat,
   pointInGrid: number[],
   yBuffer: number,
@@ -153,6 +288,70 @@ export function checkforNearbySeries(
 export function getNearbySeriesData({
   mousePos,
   pinnedPos,
+  data,
+  seriesMapping,
+  chart,
+  unit,
+  showAllSeries = false,
+}: {
+  mousePos: CursorData['coords'];
+  pinnedPos: CursorCoordinates | null;
+  data: TimeSeries[];
+  seriesMapping: TimeChartSeriesMapping;
+  chart?: EChartsInstance;
+  unit?: UnitOptions;
+  showAllSeries?: boolean;
+}) {
+  if (chart === undefined || mousePos === null) return [];
+
+  // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
+  let cursorTargetMatchesChart = false;
+  if (mousePos.target !== null) {
+    const currentParent = (<HTMLElement>mousePos.target).parentElement;
+    if (currentParent !== null) {
+      const currentGrandparent = currentParent.parentElement;
+      if (currentGrandparent !== null) {
+        const chartDom = chart.getDom();
+        if (chartDom === currentGrandparent) {
+          cursorTargetMatchesChart = true;
+        }
+      }
+    }
+  }
+
+  // allows moving cursor inside tooltip without it fading away
+  if (pinnedPos !== null) {
+    mousePos = pinnedPos;
+    cursorTargetMatchesChart = true;
+  }
+
+  if (cursorTargetMatchesChart === false) return [];
+
+  if (chart['_model'] === undefined || data === null) return [];
+  const chartModel = chart['_model'];
+  const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
+  const totalSeries = data.length;
+
+  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
+
+  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
+  if (chart.containPixel('grid', pointInPixel)) {
+    const pointInGrid: number[] = chart.convertFromPixel('grid', pointInPixel);
+    if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
+      return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
+    }
+  }
+
+  return [];
+}
+
+/**
+ * [DEPRECATED] Uses mouse position to determine whether user is hovering over a chart canvas
+ * If yes, convert from pixel values to logical cartesian coordinates and return all nearby series
+ */
+export function legacyGetNearbySeriesData({
+  mousePos,
+  pinnedPos,
   chartData,
   chart,
   unit,
@@ -199,7 +398,7 @@ export function getNearbySeriesData({
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
     }
   }
 

@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import type { YAXisComponentOption } from 'echarts';
-import { StepOptions, TimeScale, getCommonTimeScale } from '@perses-dev/core';
+import { LineSeriesOption } from 'echarts/charts';
+import { StepOptions, TimeScale, TimeSeries, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
-  EChartsTimeSeries,
-  EChartsValues,
+  LegacyTimeSeries,
   EChartsDataFormat,
+  EChartsValues,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -55,20 +56,20 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 }
 
 /**
- * Gets default ECharts line series option properties
+ * Gets ECharts line series option properties for legacy LineChart
  */
 export function getLineSeries(
   id: string,
   formattedName: string,
-  data: EChartsTimeSeries['data'],
+  data: LegacyTimeSeries['data'],
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
-): EChartsTimeSeries {
+): LegacyTimeSeries {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
-  let showPoints = data.length <= HIDE_DATAPOINTS_LIMIT;
+  let showPoints = data !== undefined && data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'always') {
     showPoints = true;
@@ -113,19 +114,78 @@ export function getLineSeries(
 }
 
 /**
+ * Gets ECharts line series option properties for recommended TimeChart
+ */
+export function getTimeSeries(
+  id: string,
+  seriesIndex: number,
+  formattedName: string,
+  visual: TimeSeriesChartVisualOptions,
+  timeScale: TimeScale,
+  paletteColor?: string
+): LineSeriesOption {
+  const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
+  const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+
+  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  const minuteMs = 60000;
+  let showPoints = timeScale.rangeMs <= minuteMs * 15;
+  // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
+  if (visual.show_points === 'Always') {
+    showPoints = true;
+  }
+
+  const series: LineSeriesOption = {
+    type: 'line',
+    id: id,
+    datasetIndex: seriesIndex,
+    name: formattedName,
+    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    color: paletteColor,
+    stack: visual.stack === 'All' ? visual.stack : undefined,
+    sampling: 'lttb',
+    progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    showSymbol: showPoints,
+    showAllSymbol: true,
+    symbolSize: pointRadius,
+    lineStyle: {
+      width: lineWidth,
+      opacity: 0.8,
+    },
+    areaStyle: {
+      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+    },
+    // https://echarts.apache.org/en/option.html#series-line.emphasis
+    emphasis: {
+      focus: 'series',
+      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      lineStyle: {
+        width: lineWidth + 1.5,
+        opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: lineWidth,
+        opacity: BLUR_FADEOUT_OPACITY,
+      },
+    },
+  };
+  return series;
+}
+
+/**
  * Gets threshold-specific line series styles
  * markLine cannot be used since it does not update yAxis max / min
  * and threshold data needs to show in the tooltip
  */
-export function getThresholdSeries(
-  name: string,
-  data: EChartsTimeSeries['data'],
-  threshold: StepOptions
-): EChartsTimeSeries {
+export function getThresholdSeries(name: string, threshold: StepOptions, seriesIndex: number): LineSeriesOption {
   return {
     type: 'line',
     name: name,
-    data: data,
+    id: name,
+    datasetId: name,
+    datasetIndex: seriesIndex,
     color: threshold.color,
     label: {
       show: false,
@@ -152,7 +212,12 @@ export function getThresholdSeries(
  * Converts percent threshold into absolute step value
  * If max is undefined, use the max value from time series data as default
  */
-export function convertPercentThreshold(percent: number, data: EChartsTimeSeries[], max?: number, min?: number) {
+export function convertPercentThreshold(
+  percent: number,
+  data: LegacyTimeSeries[] | TimeSeries[],
+  max?: number,
+  min?: number
+) {
   const percentDecimal = percent / 100;
   const adjustedMax = max ?? findMax(data);
   const adjustedMin = min ?? 0;
@@ -160,15 +225,29 @@ export function convertPercentThreshold(percent: number, data: EChartsTimeSeries
   return percentDecimal * total + adjustedMin;
 }
 
-function findMax(timeSeries: EChartsTimeSeries[]) {
+function findMax(data: LegacyTimeSeries[] | TimeSeries[]) {
   let max = 0;
-  timeSeries.forEach((series) => {
-    series.data.forEach((value: EChartsValues) => {
-      if (typeof value === 'number' && value > max) {
-        max = value;
+  if (data.length && data[0] !== undefined && (data as TimeSeries[])[0]?.values) {
+    (data as TimeSeries[]).forEach((series) => {
+      series.values.forEach((valueTuple: TimeSeriesValueTuple) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_, value] = valueTuple;
+        if (typeof value === 'number' && value > max) {
+          max = value;
+        }
+      });
+    });
+  } else {
+    (data as LegacyTimeSeries[]).forEach((series) => {
+      if (series.data !== undefined) {
+        series.data.forEach((value: EChartsValues) => {
+          if (typeof value === 'number' && value > max) {
+            max = value;
+          }
+        });
       }
     });
-  });
+  }
   return max;
 }
 

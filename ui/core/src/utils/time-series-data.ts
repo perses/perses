@@ -65,28 +65,68 @@ export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<numb
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>): TimeScale | undefined {
+export function getCommonTimeScale(
+  seriesData: Array<TimeSeriesData | Pick<TimeSeries, 'values'> | undefined>
+): TimeScale | undefined {
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
+
   for (const data of seriesData) {
-    if (data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
+    if (data && 'timeRange' in data) {
+      if (data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
 
-    // Keep track of query steps so we can calculate a common one for the graph
-    steps.push(data.stepMs);
+      // Keep track of query steps so we can calculate a common one for the graph
+      steps.push(data.stepMs);
 
-    // If we don't have an overall time range yet, just start with this one
-    if (timeRange === undefined) {
-      timeRange = data.timeRange;
-      continue;
-    }
+      // If we don't have an overall time range yet, just start with this one
+      if (timeRange === undefined) {
+        timeRange = data.timeRange;
+        continue;
+      }
 
-    // Otherwise, see if this query has a start or end outside of the current
-    // time range
-    if (data.timeRange.start < timeRange.start) {
-      timeRange.start = data.timeRange.start;
-    }
-    if (data.timeRange.end > timeRange.end) {
-      timeRange.end = data.timeRange.end;
+      // Otherwise, see if this query has a start or end outside of the current
+      // time range
+      if (data.timeRange.start < timeRange.start) {
+        timeRange.start = data.timeRange.start;
+      }
+      if (data.timeRange.end > timeRange.end) {
+        timeRange.end = data.timeRange.end;
+      }
+    } else if (data && 'values' in data) {
+      for (let i = 0; i < data.values.length; i++) {
+        const values = data.values[i];
+        if (values === undefined) {
+          continue;
+        }
+
+        const [timestamp] = values;
+        const start = new Date(timestamp);
+        const end = new Date(timestamp);
+
+        if (timeRange === undefined) {
+          timeRange = {
+            start,
+            end,
+          };
+          continue;
+        }
+
+        if (start < timeRange.start) {
+          timeRange.start = start;
+        }
+
+        if (end > timeRange.end) {
+          timeRange.end = end;
+        }
+      }
+
+      if (timeRange === undefined) return undefined;
+
+      const startMs = timeRange.start.valueOf();
+      const endMs = timeRange.end.valueOf();
+      const rangeMs = endMs - startMs;
+
+      return { startMs, endMs, rangeMs, stepMs: MIN_STEP_INTERVAL_MS };
     }
   }
 
@@ -104,6 +144,7 @@ export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>
 
   const startMs = timeRange.start.valueOf();
   const endMs = timeRange.end.valueOf();
+  const rangeMs = endMs - startMs;
 
-  return { startMs, endMs, stepMs };
+  return { startMs, endMs, stepMs, rangeMs };
 }

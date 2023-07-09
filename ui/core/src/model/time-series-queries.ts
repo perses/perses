@@ -19,4 +19,9 @@ export type TimeSeriesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinitio
 
 export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
 
+export function isTimeSeriesValueTuple(data: TimeSeriesValueTuple): data is TimeSeriesValueTuple {
+  if (data.length !== 2) return false;
+  return true;
+}
+
 export type Labels = Record<string, string>;

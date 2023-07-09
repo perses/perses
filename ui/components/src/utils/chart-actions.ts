@@ -11,21 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatValue, UnitOptions } from '@perses-dev/core';
-import merge from 'lodash/merge';
-import type { YAXisComponentOption } from 'echarts';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { dateFormatOptionsWithTimeZone } from '../utils';
 
 export interface ZoomEventData {
   start: number;
   end: number;
-  startIndex: number;
-  endIndex: number;
+  // TODO: remove startIndex and endIndex once LineChart is deprecated
+  startIndex?: number;
+  endIndex?: number;
 }
 
 /**
- * Enable dataZoom without requring user to click toolbox icon
+ * Enable dataZoom without requring user to click toolbox icon.
+ * https://stackoverflow.com/questions/57183297/is-there-a-way-to-use-zoom-of-type-select-without-showing-the-toolbar
  */
 export function enableDataZoom(chart: EChartsInstance) {
   const chartModel = chart['_model'];
@@ -50,59 +48,6 @@ export function restoreChart(chart: EChartsInstance) {
   chart.dispatchAction({
     type: 'restore', // https://echarts.apache.org/en/api.html#events.restore
   });
-}
-
-/**
- * Calculate date range, used as a fallback when xAxis time range not passed as prop
- */
-export function getDateRange(data: number[]) {
-  const defaultRange = 3600000; // hour in ms
-  if (data.length === 0) return defaultRange;
-  const lastDatum = data[data.length - 1];
-  if (data[0] === undefined || lastDatum === undefined) return defaultRange;
-  return lastDatum - data[0];
-}
-
-/*
- * Determines time granularity for axis labels, defaults to hh:mm
- */
-export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
-  const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
-    {
-      hour: 'numeric',
-      minute: 'numeric',
-      hourCycle: 'h23',
-    },
-    timeZone
-  );
-  const thirtyMinMs = 1800000;
-  const dayMs = 86400000;
-  if (rangeMs <= thirtyMinMs) {
-    dateFormatOptions.second = 'numeric';
-  } else if (rangeMs >= dayMs) {
-    dateFormatOptions.month = 'numeric';
-    dateFormatOptions.day = 'numeric';
-  }
-  const DATE_FORMAT = new Intl.DateTimeFormat(undefined, dateFormatOptions);
-  // remove comma when month / day present
-  return DATE_FORMAT.format(value).replace(/, /g, ' ');
-}
-
-/*
- * Populate yAxis properties, returns an Array since multiple y axes will be supported in the future
- */
-export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
-  // TODO: support alternate yAxis that shows on right side
-  const Y_AXIS_DEFAULT = {
-    type: 'value',
-    boundaryGap: [0, '10%'],
-    axisLabel: {
-      formatter: (value: number) => {
-        return formatValue(value, unit);
-      },
-    },
-  };
-  return [merge(Y_AXIS_DEFAULT, yAxis)];
 }
 
 /*

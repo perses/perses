@@ -54,6 +54,7 @@ describe('getXValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
     const xValues = getXValues(timeScale);
@@ -74,6 +75,7 @@ describe('getYValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
 
@@ -99,6 +101,7 @@ describe('getYValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
     const yValues = getYValues(series, timeScale);
@@ -109,6 +112,7 @@ describe('getYValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
     const expectedIntervals = getExpectedIntervals(timeScale);
@@ -129,6 +133,7 @@ describe('getYValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
     const expectedIntervals = getExpectedIntervals(timeScale);
@@ -149,6 +154,7 @@ describe('getYValues', () => {
     const timeScale: TimeScale = {
       startMs: 1646164800000,
       endMs: 1646251200000,
+      rangeMs: 86400000,
       stepMs: 3600000,
     };
     const expectedIntervals = getExpectedIntervals(timeScale);
@@ -217,6 +223,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: singleTimeSeries.timeRange?.start.getTime(),
       endMs: singleTimeSeries.timeRange?.end.getTime(),
+      rangeMs: -43200000,
       stepMs: singleTimeSeries.stepMs,
     });
   });
@@ -255,6 +262,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: minTime.getTime(),
       endMs: maxTime.getTime(),
+      rangeMs: 604800000,
       stepMs: 3600,
     });
   });
@@ -287,6 +295,7 @@ describe('getCommonTimeScale', () => {
     expect(timeScale).toEqual({
       startMs: timeRange.start.getTime(),
       endMs: timeRange.end.getTime(),
+      rangeMs: 780000,
       stepMs: 1200,
     });
   });

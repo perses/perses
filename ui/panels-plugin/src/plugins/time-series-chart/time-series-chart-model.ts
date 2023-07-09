@@ -29,6 +29,7 @@ export interface TimeSeriesChartOptions {
   y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
+  show_legacy_chart?: boolean;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;

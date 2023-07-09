@@ -12,35 +12,90 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart, ChartInstance } from '@perses-dev/components';
+import { ChartInstance, TimeChart } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { action } from '@storybook/addon-actions';
 
-const meta: Meta<typeof LineChart> = {
-  component: LineChart,
+const meta: Meta<typeof TimeChart> = {
+  component: TimeChart,
   args: {
     height: 200,
-    data: {
-      timeSeries: [
-        {
-          type: 'line' as const,
-          id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}_1',
-          name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
-          data: [1, 1, 1],
-          color: 'hsla(158782136,50%,50%,0.8)',
-          sampling: 'lttb' as const,
-          progressiveThreshold: 1000,
-          symbolSize: 4,
-          lineStyle: { width: 1.5 },
-          emphasis: { lineStyle: { width: 2.5 } },
+    data: [
+      {
+        name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        values: [
+          [1673784000000, 1],
+          [1673784060000, 2],
+          [1673784120000, null],
+          [1673784180000, null],
+          [1673784240000, 4],
+          [1673784300000, 1],
+          [1673784360000, 2],
+          [1673784420000, 3],
+        ],
+      },
+      {
+        name: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        values: [
+          [1673784000000, 8],
+          [1673784060000, 6],
+          [1673784120000, 10],
+          [1673784180000, 9],
+          [1673784240000, 7],
+          [1673784300000, 8],
+          [1673784360000, 12],
+          [1673784420000, 10],
+        ],
+      },
+    ],
+    seriesMapping: [
+      {
+        type: 'line',
+        id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        datasetIndex: 0,
+        name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        connectNulls: false,
+        color: 'hsla(158782136,50%,50%,0.8)',
+        sampling: 'lttb',
+        progressiveThreshold: 1000,
+        symbolSize: 4,
+        lineStyle: {
+          width: 1.5,
+          opacity: 0.8,
         },
-      ],
-      xAxis: [1673784000000, 1673784060000, 1673784120000],
-      legendItems: [],
-      rangeMs: 21600000,
-    },
+        emphasis: {
+          focus: 'series',
+          lineStyle: {
+            width: 2.5,
+            opacity: 1,
+          },
+        },
+      },
+      {
+        type: 'line',
+        id: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        datasetIndex: 1,
+        name: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+        connectNulls: false,
+        color: 'hsla(240,50%,50%,0.8)',
+        sampling: 'lttb',
+        progressiveThreshold: 1000,
+        symbolSize: 4,
+        lineStyle: {
+          width: 1.5,
+          opacity: 0.8,
+        },
+        emphasis: {
+          focus: 'series',
+          lineStyle: {
+            width: 2.5,
+            opacity: 1,
+          },
+        },
+      },
+    ],
     yAxis: {
       show: true,
     },
@@ -66,7 +121,7 @@ const meta: Meta<typeof LineChart> = {
 
 export default meta;
 
-type Story = StoryObj<typeof LineChart>;
+type Story = StoryObj<typeof TimeChart>;
 
 export const Primary: Story = {};
 
@@ -86,13 +141,13 @@ export const RefApi: Story = {
     const chartRef = useRef<ChartInstance>(null);
 
     const handleOnClickHighlightSeries = () => {
-      const highlightSeriesId = args.data.timeSeries[0]?.id;
+      const highlightSeriesId = args.data[0]?.name;
       if (!highlightSeriesId || !chartRef.current) {
         return;
       }
 
       const highlightSeriesOpts = {
-        id: `${highlightSeriesId}`,
+        name: `${highlightSeriesId}`,
       };
 
       action('highlightSeries')(highlightSeriesOpts);
@@ -118,7 +173,7 @@ export const RefApi: Story = {
             clearHighlightedSeries
           </Button>
         </Stack>
-        <LineChart {...args} ref={chartRef} />
+        <TimeChart {...args} ref={chartRef} />
       </Stack>
     );
   },
@@ -126,12 +181,7 @@ export const RefApi: Story = {
 
 export const NoData: Story = {
   args: {
-    data: {
-      timeSeries: [],
-      xAxis: [1673784000000, 1673784060000, 1673784120000],
-      legendItems: [],
-      rangeMs: 21600000,
-    },
+    data: [],
   },
   argTypes: {
     // Remove from table because these values are managed in render.
@@ -153,13 +203,13 @@ export const NoData: Story = {
           <Typography variant="h3" gutterBottom align="center">
             message
           </Typography>
-          <LineChart {...args} noDataVariant="message" />
+          <TimeChart {...args} noDataVariant="message" />
         </div>
         <div>
           <Typography variant="h3" gutterBottom align="center">
             chart
           </Typography>
-          <LineChart {...args} noDataVariant="chart" />
+          <TimeChart {...args} noDataVariant="chart" />
         </div>
       </Stack>
     );
