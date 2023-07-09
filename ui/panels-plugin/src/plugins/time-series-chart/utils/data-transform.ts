@@ -131,7 +131,7 @@ export function getTimeSeries(
   const minuteMs = 60000;
   let showPoints = timeScale.rangeMs <= minuteMs * 15;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'Always') {
+  if (visual.show_points === 'always') {
     showPoints = true;
   }
 
@@ -142,7 +142,7 @@ export function getTimeSeries(
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'All' ? visual.stack : undefined,
+    stack: visual.stack === 'All' ? visual.stack : undefined, // TODO: convert stack to kebab-case
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,

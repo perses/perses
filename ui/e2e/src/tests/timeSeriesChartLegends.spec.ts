@@ -90,7 +90,7 @@ test.describe('Dashboard: Time Series Chart Legends', () => {
         await timeSeriesPanel.isLoaded();
         await waitForStableCanvas(timeSeriesPanel.canvas);
 
-        const legendItemRole = panelName.includes('table') ? 'row' : 'listitem';
+        const legendItemRole = panelName.includes('Table') ? 'row' : 'listitem';
 
         const legendItems = timeSeriesPanel.container.getByRole(legendItemRole);
         await legendItems.nth(2).hover();

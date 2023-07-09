@@ -38,7 +38,7 @@ describe('getContentWithLegendLayout', () => {
       minChildrenWidth: 0,
       minChildrenHeight: 0,
       theme: mockMuiTheme,
-      legendSize: 'Medium',
+      legendSize: 'medium',
     };
 
     test('does not show legend', () => {
