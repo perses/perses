@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import type { YAXisComponentOption } from 'echarts';
-import { LineSeriesOption } from 'echarts/charts';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import { StepOptions, TimeScale, TimeSeries, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
   EChartsDataFormat,
   EChartsValues,
+  TimeSeriesOption,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -123,7 +124,7 @@ export function getTimeSeries(
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
   paletteColor?: string
-): LineSeriesOption {
+): TimeSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
@@ -135,6 +136,17 @@ export function getTimeSeries(
     showPoints = true;
   }
 
+  if (visual.display === 'bar') {
+    const series: BarSeriesOption = {
+      type: 'bar',
+      id: id,
+      datasetIndex: seriesIndex,
+      name: formattedName,
+      color: paletteColor,
+      stack: visual.stack === 'All' ? visual.stack : undefined,
+    };
+    return series;
+  }
   const series: LineSeriesOption = {
     type: 'line',
     id: id,

@@ -48,9 +48,10 @@ export interface TimeSeriesChartPaletteOptions {
 }
 
 export type TimeSeriesChartVisualOptions = {
+  display?: 'line' | 'bar';
   line_width?: number;
   area_opacity?: number;
-  show_points?: 'Auto' | 'Always';
+  show_points?: 'Auto' | 'Always'; // TODO: lowercase as part of kebab-case migration
   palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;
