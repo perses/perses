@@ -80,13 +80,7 @@ export function BarChart(props: BarChartProps) {
       },
       tooltip: {
         formatter: (params: { name: string; data: number[] }) =>
-          params.data[1] && `<b>${params.name}</b> - ${formatValue(params.data[1], unit)}`,
-        backgroundColor: theme.palette.background.tooltip,
-        borderColor: theme.palette.background.tooltip,
-        textStyle: {
-          color: theme.palette.text.primary,
-          fontSize: 12,
-        },
+          params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
     };
   }, [data, chartsTheme, theme, unit]);

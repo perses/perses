@@ -121,7 +121,14 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         borderColor: primaryTextColor,
       },
     },
-    tooltip: {},
+    tooltip: {
+      backgroundColor: muiTheme.palette.designSystem.grey[800],
+      borderColor: muiTheme.palette.designSystem.grey[800],
+      textStyle: {
+        color: '#fff',
+        fontSize: 11,
+      },
+    },
     line: {
       showSymbol: false,
       symbol: 'circle',
