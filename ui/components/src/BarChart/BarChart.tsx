@@ -38,7 +38,6 @@ export interface BarChartProps {
 export function BarChart(props: BarChartProps) {
   const { width, height, data, unit } = props;
   const chartsTheme = useChartsTheme();
-  const theme = useTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data == null) return chartsTheme.noDataOption;
@@ -68,14 +67,7 @@ export function BarChart(props: BarChartProps) {
       series: {
         type: 'bar',
         label: {
-          position: 'right',
-          show: true,
           formatter: (params: { data: number[] }) => params.data[1] && formatValue(params.data[1], unit),
-          color: theme.palette.text.primary,
-        },
-        itemStyle: {
-          borderRadius: 4,
-          color: theme.palette.designSystem.blue[400],
         },
       },
       tooltip: {
@@ -83,7 +75,7 @@ export function BarChart(props: BarChartProps) {
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
     };
-  }, [data, chartsTheme, theme, unit]);
+  }, [data, chartsTheme, unit]);
 
   return (
     <EChart

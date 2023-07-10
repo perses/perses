@@ -148,6 +148,13 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       itemStyle: {
         borderWidth: 0,
         borderColor: muiTheme.palette.grey[300],
+        borderRadius: 4,
+        color: muiTheme.palette.designSystem.blue[400],
+      },
+      label: {
+        position: 'right',
+        show: true,
+        color: muiTheme.palette.text.primary,
       },
     },
     gauge: {
