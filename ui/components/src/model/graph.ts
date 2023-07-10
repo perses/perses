@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-import { LineSeriesOption } from 'echarts/charts';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
 
 // adjust display when there are many time series to help with performance
@@ -33,8 +33,10 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
 }
 
 // TODO: Continue to simplify TimeChart types, fix legend and thresholds
-export type TimeChartSeriesMapping = LineSeriesOption[];
+export type TimeChartSeriesMapping = TimeSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
+
+export type TimeSeriesOption = LineSeriesOption | BarSeriesOption;
 
 // TODO: Rename to LegacyEChartsDataFormat
 export type EChartsDataFormat = {
