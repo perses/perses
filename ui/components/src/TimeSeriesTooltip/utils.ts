@@ -52,7 +52,7 @@ export function assembleTransform(
 
   // If containerElement is defined, tooltip is attached to the containerElement instead.
   if (containerElement) {
-    // get the containeer's position relative to viewport
+    // get the container's position relative to viewport
     const containerRect = containerElement.getBoundingClientRect();
     // calculate the mouse position relative to container
     x = x - containerRect.left + containerElement.scrollLeft;
