@@ -17,7 +17,6 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useTheme } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
 
