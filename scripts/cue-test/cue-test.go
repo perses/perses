@@ -37,9 +37,6 @@ func validateSchemas(folder string, vf validateFunc) {
 		logrus.Fatal(err)
 	}
 	for _, dir := range dirEntries {
-		if dir.Name() == ".DS_Store" {
-			continue
-		}
 		data, readErr := os.ReadFile(filepath.Join(folder, dir.Name(), fmt.Sprintf("%s.json", dir.Name())))
 		if readErr != nil {
 			logrus.Fatal(readErr)
