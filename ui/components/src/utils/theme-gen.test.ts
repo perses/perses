@@ -43,7 +43,14 @@ describe('generateChartsTheme', () => {
             "barMaxWidth": 150,
             "itemStyle": Object {
               "borderColor": "#e0e0e0",
+              "borderRadius": 4,
               "borderWidth": 0,
+              "color": "#1976d2",
+            },
+            "label": Object {
+              "color": "rgba(0, 0, 0, 0.87)",
+              "position": "right",
+              "show": true,
             },
           },
           "categoryAxis": Object {
@@ -155,7 +162,14 @@ describe('generateChartsTheme', () => {
             "show": true,
             "top": 10,
           },
-          "tooltip": Object {},
+          "tooltip": Object {
+            "backgroundColor": undefined,
+            "borderColor": undefined,
+            "textStyle": Object {
+              "color": "#fff",
+              "fontSize": 11,
+            },
+          },
           "valueAxis": Object {
             "axisLabel": Object {
               "color": "rgba(0, 0, 0, 0.87)",

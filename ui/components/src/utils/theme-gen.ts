@@ -122,8 +122,8 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       },
     },
     tooltip: {
-      backgroundColor: muiTheme.palette.designSystem.grey[800],
-      borderColor: muiTheme.palette.designSystem.grey[800],
+      backgroundColor: muiTheme.palette.designSystem?.grey[800],
+      borderColor: muiTheme.palette.designSystem?.grey[800],
       textStyle: {
         color: '#fff',
         fontSize: 11,
@@ -149,7 +149,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         borderWidth: 0,
         borderColor: muiTheme.palette.grey[300],
         borderRadius: 4,
-        color: muiTheme.palette.designSystem.blue[400],
+        color: muiTheme.palette.primary.main,
       },
       label: {
         position: 'right',
