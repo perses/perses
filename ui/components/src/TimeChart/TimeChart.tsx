@@ -338,6 +338,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
+            containerId={chartsTheme.tooltipPortalContainerId}
             chartRef={chartRef}
             data={data}
             seriesMapping={seriesMapping}

@@ -20,7 +20,15 @@ const DEFAULT_TEXT_COLOR = '#222';
 // avoid component override type errors since only palette and typography are used
 type MuiTheme = Omit<Theme, 'components'>;
 
-export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsTheme): PersesChartsTheme {
+export function generateChartsTheme(
+  muiTheme: MuiTheme,
+  echartsTheme: EChartsTheme,
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, chart tooltip uses the body of the top-level document object.
+   */
+  tooltipPortalContainerId?: string
+): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
@@ -196,6 +204,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
   };
 
   return {
+    tooltipPortalContainerId,
     echartsTheme: merge(muiConvertedTheme, echartsTheme),
     noDataOption: {
       title: {

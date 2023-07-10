@@ -11,65 +11,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
+import { UnitOptions } from '@perses-dev/core';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { UnitOptions, TimeSeries } from '@perses-dev/core';
+import { memo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { TimeChartSeriesMapping } from '../model';
-import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
-import { assembleTransform, getTooltipStyles } from './utils';
-import { getNearbySeriesData } from './nearby-series';
-import { TooltipHeader } from './TooltipHeader';
+import { EChartsDataFormat } from '../model';
 import { TooltipContent } from './TooltipContent';
+import { TooltipHeader } from './TooltipHeader';
+import { getNearbySeriesData } from './nearby-series';
+import {
+  CursorCoordinates,
+  FALLBACK_CHART_WIDTH,
+  TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_MAX_HEIGHT,
+  TOOLTIP_MAX_WIDTH,
+  TOOLTIP_MIN_WIDTH,
+  useMousePosition,
+} from './tooltip-model';
+import { assembleTransform } from './utils';
 
-export interface TimeChartTooltipProps {
-  chartRef: React.MutableRefObject<EChartsInstance | undefined>;
-  data: TimeSeries[];
-  seriesMapping: TimeChartSeriesMapping;
-  pinnedPos: CursorCoordinates | null;
-  /**
-   * The id of the container that will have the chart tooltip appended to it.
-   * By default, chart tooltip uses the body of the top-level document object.
-   */
+export interface TimeSeriesTooltipProps {
   containerId?: string;
-  onUnpinClick?: () => void;
-  unit?: UnitOptions;
+  chartRef: React.MutableRefObject<EChartsInstance | undefined>;
+  chartData: EChartsDataFormat;
   wrapLabels?: boolean;
+  unit?: UnitOptions;
+  onUnpinClick?: () => void;
+  pinnedPos: CursorCoordinates | null;
 }
 
-export const TimeChartTooltip = memo(function TimeChartTooltip({
+export const TimeSeriesTooltip = memo(function TimeSeriesTooltip({
   containerId,
   chartRef,
-  data,
-  seriesMapping,
+  chartData,
   wrapLabels,
   unit,
   onUnpinClick,
   pinnedPos,
-}: TimeChartTooltipProps) {
+}: TimeSeriesTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
   const isTooltipPinned = pinnedPos !== null;
 
-  if (mousePos === null || mousePos.target === null || data === null) return null;
+  if (mousePos === null || mousePos.target === null) return null;
 
   // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-
-  const containerElement = containerId ? document.querySelector(containerId) : undefined;
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
     mousePos,
-    data,
-    seriesMapping,
+    chartData,
     pinnedPos,
     chart,
     unit,
@@ -79,13 +78,38 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     return null;
   }
 
-  const totalSeries = data.length;
+  const totalSeries = chartData.timeSeries.length;
 
+  const containerElement = containerId ? document.getElementById(containerId) : undefined;
+
+  console.log('container ID: ', containerId);
+  console.log('container Element: ', containerElement);
   return (
     <Portal container={containerElement}>
       <Box
         ref={tooltipRef}
-        sx={(theme) => getTooltipStyles(theme, pinnedPos)}
+        sx={(theme) => ({
+          minWidth: TOOLTIP_MIN_WIDTH,
+          maxWidth: TOOLTIP_MAX_WIDTH,
+          maxHeight: TOOLTIP_MAX_HEIGHT,
+          padding: 0,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
+          borderRadius: '6px',
+          color: '#fff',
+          fontSize: '11px',
+          visibility: 'visible',
+          opacity: 1,
+          transition: 'all 0.1s ease-out',
+          // Ensure pinned tooltip shows behind edit panel drawer and sticky header
+          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
+          overflow: 'hidden',
+          '&:hover': {
+            overflowY: 'auto',
+          },
+        })}
         style={{
           transform: cursorTransform,
         }}
