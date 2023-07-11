@@ -29,7 +29,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setDisplayLabel('Text Var');
     await variableEditor.selectType('Text');
     await variableEditor.setTextValue('test value');
-    await variableEditor.updateButton.click();
+    await variableEditor.createButton.click();
 
     // Includes one for the table header.
     await expect(variableEditor.tableRows).toHaveCount(2);
@@ -52,7 +52,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
     await variableEditor.selectSource('Custom List');
-    await variableEditor.updateButton.click();
+    await variableEditor.createButton.click();
 
     // Includes one for the table header.
     await expect(variableEditor.tableRows).toHaveCount(2);

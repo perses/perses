@@ -11,40 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
-import { dashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
-import { useDeleteDashboardMutation } from '../../model/dashboard-client';
+import { Button } from '@mui/material';
+import { useDeleteVariableMutation } from '../../model/project-client';
 
-export interface DeleteDashboardDialogProps {
-  dashboard: DashboardResource;
+interface DeleteVariableDialogProps {
+  variable: VariableResource;
   open: boolean;
   onClose: DispatchWithoutAction;
-  onSuccess?: Dispatch<DashboardResource>;
+  onSuccess?: Dispatch<VariableResource>;
 }
 
 /**
- * Dialog used to delete a dashboard.
+ * Dialog used to delete a variable.
  * @param props.open Define if the dialog should be opened or not.
  * @param props.closeDialog Provides the function to close itself.
  * @param props.onConfirm Action to perform when user confirmed.
- * @param props.dashboard The dashboard resource to delete.
+ * @param props.variable The variable resource to delete.
  * @constructor
  */
-export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
-  const { dashboard, open, onClose, onSuccess } = props;
+export function DeleteVariableDialog(props: DeleteVariableDialogProps) {
+  const { variable, open, onClose, onSuccess } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const deleteDashboardMutation = useDeleteDashboardMutation();
+  const deleteVariableMutation = useDeleteVariableMutation(variable.metadata.project);
 
   const handleSubmit = useCallback(() => {
-    return deleteDashboardMutation.mutate(dashboard, {
-      onSuccess: (deletedDashboard: DashboardResource) => {
-        successSnackbar(`Dashboard ${dashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+    return deleteVariableMutation.mutate(variable, {
+      onSuccess: (deletedVariable: VariableResource) => {
+        successSnackbar(`Variable ${getVariableExtendedDisplayName(deletedVariable)} was successfully deleted`);
         onClose();
         if (onSuccess) {
-          onSuccess(dashboard);
+          onSuccess(variable);
         }
       },
       onError: (err) => {
@@ -52,13 +51,13 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
         throw err;
       },
     });
-  }, [deleteDashboardMutation, dashboard, onClose, onSuccess, successSnackbar, exceptionSnackbar]);
+  }, [deleteVariableMutation, variable, onClose, onSuccess, successSnackbar, exceptionSnackbar]);
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <Dialog.Header>Delete Dashboard</Dialog.Header>
+      <Dialog.Header>Delete Variable</Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the dashboard {dashboardExtendedDisplayName(dashboard)}? This action cannot be
+        Are you sure you want to delete the variable {getVariableExtendedDisplayName(variable)}? This action cannot be
         undone.
       </Dialog.Content>
       <Dialog.Actions>
@@ -71,4 +70,4 @@ export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
       </Dialog.Actions>
     </Dialog>
   );
-};
+}

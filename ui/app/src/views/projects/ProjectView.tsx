@@ -15,32 +15,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Stack, Typography, Grid } from '@mui/material';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import { useCallback, useState } from 'react';
-import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
+import { DeleteProjectDialog } from '../../components/dialogs';
 import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
-import { ProjectDashboards } from './ProjectDashboards';
+import { ProjectTabs } from './ProjectTabs';
 
 function ProjectView() {
-  const { projectName } = useParams();
+  const { projectName, tab } = useParams();
   if (projectName === undefined) {
     throw new Error('Unable to get the project name');
   }
 
   // Navigate to the home page if the project has been successfully deleted
   const navigate = useNavigate();
+
   const handleDeleteProjectDialogSuccess = useCallback(() => navigate(`/`), [navigate]);
 
   // Open/Close management for the "Delete Project" dialog
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
-  const handleDeleteProjectDialogOpen = useCallback(
-    () => setIsDeleteProjectDialogOpen(true),
-    [setIsDeleteProjectDialogOpen]
-  );
-  const handleDeleteProjectDialogClose = useCallback(
-    () => setIsDeleteProjectDialogOpen(false),
-    [setIsDeleteProjectDialogOpen]
-  );
 
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
@@ -51,18 +43,17 @@ function ProjectView() {
             <FolderPound fontSize={'large'} />
             <Typography variant="h1">{projectName}</Typography>
           </Stack>
-          <CRUDButton text="Delete Project" variant="outlined" color="error" onClick={handleDeleteProjectDialogOpen} />
           <DeleteProjectDialog
             name={projectName}
             open={isDeleteProjectDialogOpen}
-            onClose={handleDeleteProjectDialogClose}
+            onClose={() => setIsDeleteProjectDialogOpen(false)}
             onSuccess={handleDeleteProjectDialogSuccess}
           />
         </Stack>
       </Box>
       <Grid container columnSpacing={8}>
         <Grid item xs={12} lg={8}>
-          <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
+          <ProjectTabs projectName={projectName} initialTab={tab} />
         </Grid>
         <Grid item xs={12} lg={4}>
           <RecentlyViewedDashboards projectName={projectName} id="recent-dashboard-list" />

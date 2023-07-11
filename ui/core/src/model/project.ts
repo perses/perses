@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export * from './constants';
-export * from './model';
-export * from './runtime';
-export * from './test-utils';
-export * from './utils';
+import { Metadata } from './resource';
+
+export interface ProjectResource {
+  kind: 'Project';
+  metadata: Metadata;
+}

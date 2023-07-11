@@ -14,12 +14,13 @@
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { ProjectModel, useAddProjectMutation } from '../../model/project-client';
+import { ProjectResource } from '@perses-dev/core';
+import { useAddProjectMutation } from '../../model/project-client';
 
-export interface AddProjectDialogProps {
+interface CreateProjectDialogProps {
   open: boolean;
   onClose: DispatchWithoutAction;
-  onSuccess?: Dispatch<ProjectModel>;
+  onSuccess?: Dispatch<ProjectResource>;
 }
 
 /**
@@ -29,7 +30,7 @@ export interface AddProjectDialogProps {
  * @param props.onSuccess Action to perform when user confirmed.
  * @constructor
  */
-export const AddProjectDialog = (props: AddProjectDialogProps) => {
+export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
 
   const [name, setName] = useState<string>('');
@@ -61,7 +62,7 @@ export const AddProjectDialog = (props: AddProjectDialogProps) => {
   const mutation = useAddProjectMutation();
   const handleSubmit = useCallback(() => {
     mutation.mutate(name, {
-      onSuccess: (entity: ProjectModel) => {
+      onSuccess: (entity: ProjectResource) => {
         successSnackbar(`project ${entity.metadata.name} was successfully created`);
         onClose();
         if (onSuccess) {
