@@ -344,6 +344,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             wrapLabels={tooltipConfig.wrapLabels}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
+            onUnpinClick={() => {
+              setTooltipPinnedCoords(null);
+            }}
           />
         )}
       <EChart
