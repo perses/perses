@@ -65,7 +65,7 @@ export const TooltipHeader = memo(function TooltipHeader({
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
   const showAllSeriesToggle = totalSeries > 5;
 
-  const pinTooltipHelpText = isTooltipPinned ? 'Click to Unpin' : 'Click chart to Pin';
+  const pinTooltipHelpText = isTooltipPinned ? 'Click to unpin' : 'Click chart to pin';
 
   return (
     <Box
