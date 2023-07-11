@@ -30,7 +30,8 @@ export function assembleTransform(
   chartWidth: number,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
-  tooltipWidth: number
+  tooltipWidth: number,
+  containerElement?: Element | null
 ) {
   if (mousePos === null) {
     return 'translate3d(0, 0)';
@@ -43,16 +44,25 @@ export function assembleTransform(
     mousePos = pinnedPos;
   }
 
-  // Tooltip is located in a Portal attached to the body.
+  // By default, tooltip is located in a Portal attached to the body.
   // Using page coordinates instead of viewport ensures the tooltip is
   // absolutely positioned correctly as the user scrolls
-  const x = mousePos.page.x;
+  let x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
+
+  // If containerElement is defined, tooltip is attached to the containerElement instead.
+  if (containerElement) {
+    // get the container's position relative to viewport
+    const containerRect = containerElement.getBoundingClientRect();
+    // calculate the mouse position relative to container
+    x = x - containerRect.left + containerElement.scrollLeft;
+    y = y - containerRect.top + containerElement.scrollTop;
+  }
 
   // adjust so tooltip does not get cut off at bottom of chart
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
     // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
-    y = mousePos.page.y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
+    y = y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
   }
 
   // use tooltip width to determine when to repos from right to left

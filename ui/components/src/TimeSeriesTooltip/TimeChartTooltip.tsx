@@ -27,13 +27,19 @@ export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
-  wrapLabels?: boolean;
-  unit?: UnitOptions;
-  onUnpinClick?: () => void;
   pinnedPos: CursorCoordinates | null;
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, the chart tooltip is attached to document.body.
+   */
+  containerId?: string;
+  onUnpinClick?: () => void;
+  unit?: UnitOptions;
+  wrapLabels?: boolean;
 }
 
 export const TimeChartTooltip = memo(function TimeChartTooltip({
+  containerId,
   chartRef,
   data,
   seriesMapping,
@@ -55,7 +61,9 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
+
+  const containerElement = containerId ? document.querySelector(containerId) : undefined;
+  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
@@ -74,7 +82,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   const totalSeries = data.length;
 
   return (
-    <Portal>
+    <Portal container={containerElement}>
       <Box
         ref={tooltipRef}
         sx={(theme) => getTooltipStyles(theme, pinnedPos)}
