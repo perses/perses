@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.37.1 / 2023-07-11
+
+- [BUGFIX] Add option to specify the portal container for the chart tooltip (#1289)
+- [BUGFIX] Fix unpin tooltip icon click, adjust help text (#1283)
+
 ## 0.37.0 / 2023-07-07
 
 - [FEATURE] Time series chart rewritten for intuitive x axis bucketing, improved render perf (#1268)
