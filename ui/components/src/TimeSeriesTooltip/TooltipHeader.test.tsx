@@ -57,7 +57,7 @@ describe('TooltipHeader', () => {
       showAllSeries: false,
     };
     renderComponent(tooltipContent);
-    expect(screen.getByText('Click to Unpin')).toBeInTheDocument();
+    expect(screen.getByText('Click to unpin')).toBeInTheDocument();
   });
 
   it('should not display show all toggle when only 1 total series', () => {
