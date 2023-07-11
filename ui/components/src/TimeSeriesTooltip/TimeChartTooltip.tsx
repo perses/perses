@@ -30,7 +30,7 @@ export interface TimeChartTooltipProps {
   pinnedPos: CursorCoordinates | null;
   /**
    * The id of the container that will have the chart tooltip appended to it.
-   * By default, chart tooltip uses the body of the top-level document object.
+   * By default, the chart tooltip is attached to document.body.
    */
   containerId?: string;
   onUnpinClick?: () => void;
