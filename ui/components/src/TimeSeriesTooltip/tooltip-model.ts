@@ -19,6 +19,7 @@ export const TOOLTIP_MAX_WIDTH = 650;
 export const TOOLTIP_MAX_HEIGHT = 650;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
+export const TOOLTIP_PADDING = 8;
 
 export const FALLBACK_CHART_WIDTH = 750;
 

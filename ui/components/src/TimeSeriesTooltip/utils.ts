@@ -20,6 +20,7 @@ import {
   TOOLTIP_MIN_WIDTH,
   TOOLTIP_ADJUST_Y_POS_MULTIPLIER,
   TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_PADDING,
 } from './tooltip-model';
 
 /**
@@ -51,18 +52,24 @@ export function assembleTransform(
   let y = mousePos.page.y + cursorPaddingY;
 
   // If containerElement is defined, tooltip is attached to the containerElement instead.
+  let containerRect;
   if (containerElement) {
     // get the container's position relative to viewport
-    const containerRect = containerElement.getBoundingClientRect();
+    containerRect = containerElement.getBoundingClientRect();
     // calculate the mouse position relative to container
     x = x - containerRect.left + containerElement.scrollLeft;
     y = y - containerRect.top + containerElement.scrollTop;
   }
 
-  // adjust so tooltip does not get cut off at bottom of chart
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
+    // adjust so tooltip does not get cut off at bottom of chart
     // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
     y = y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
+
+    // If y is now above of the top of containerElement, set y close to 0 so tooltip does not get cut off
+    if (containerRect && y < containerRect.top) {
+      y = TOOLTIP_PADDING / 2; // leaves room for some padding around tooltip
+    }
   }
 
   // use tooltip width to determine when to repos from right to left
@@ -77,11 +84,12 @@ export function assembleTransform(
 /**
  * Helper for tooltip positioning styles
  */
-export function getTooltipStyles(theme: Theme, pinnedPos: CursorCoordinates | null) {
+export function getTooltipStyles(theme: Theme, pinnedPos: CursorCoordinates | null, maxHeight?: number) {
+  const adjustedMaxHeight = maxHeight ? maxHeight - TOOLTIP_PADDING : undefined;
   return {
     minWidth: TOOLTIP_MIN_WIDTH,
     maxWidth: TOOLTIP_MAX_WIDTH,
-    maxHeight: TOOLTIP_MAX_HEIGHT,
+    maxHeight: adjustedMaxHeight ?? TOOLTIP_MAX_HEIGHT,
     padding: 0,
     position: 'absolute',
     top: 0,
