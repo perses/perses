@@ -24,7 +24,7 @@ use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipCo
 
 export interface BarChartData {
   label: string;
-  value: number | null | undefined;
+  value: number | null;
 }
 
 export interface BarChartProps {
