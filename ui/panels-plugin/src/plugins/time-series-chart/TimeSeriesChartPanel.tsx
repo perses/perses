@@ -19,6 +19,7 @@ import {
   useDeepMemo,
   getXValues,
   getYValues,
+  getTimeSeriesValues,
   DEFAULT_LEGEND,
   getCalculations,
   formatValue,
@@ -189,9 +190,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         if (Array.isArray(timeChartData)) {
+          const processedValues = getTimeSeriesValues(timeSeries.values, timeScale);
           timeChartData.push({
             name: formattedSeriesName,
-            values: [...timeSeries.values],
+            values: processedValues,
           });
         }
 

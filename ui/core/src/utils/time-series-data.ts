@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData } from '../model';
+import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '../model';
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;
@@ -28,6 +28,36 @@ export function getXValues(timeScale: TimeScale): number[] {
     timestamp += timeScale.stepMs;
   }
   return xValues;
+}
+
+export type PromValue = [number, string | null];
+
+export function getTimeSeriesValues(values: TimeSeriesValueTuple[], timeScale: TimeScale) {
+  const inputValues = values as PromValue[];
+  const completeResponse: PromValue[] = [];
+
+  const stepSize = timeScale.stepMs;
+  let baseTimeStamp = timeScale.startMs;
+  const endTimeStamp = timeScale.endMs;
+
+  for (const value of inputValues) {
+    // Adding the timestams before start range
+    for (let t = baseTimeStamp; t < value[0]; t += stepSize) {
+      completeResponse.push([t, null]);
+    }
+    baseTimeStamp = value[0] + stepSize;
+
+    // Adding all the available data points
+    const valueField = value[1] === 'NaN' ? null : value[1];
+    completeResponse.push([value[0], valueField]);
+  }
+
+  // Adding null if there is missing data till endTimeStamp
+  for (let t = baseTimeStamp; t <= endTimeStamp; t += stepSize) {
+    completeResponse.push([t, null]);
+  }
+
+  return completeResponse as TimeSeriesValueTuple[];
 }
 
 /**
