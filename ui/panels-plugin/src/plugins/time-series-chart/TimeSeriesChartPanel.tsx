@@ -190,10 +190,9 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         if (Array.isArray(timeChartData)) {
-          const processedValues = getTimeSeriesValues(timeSeries.values, timeScale);
           timeChartData.push({
             name: formattedSeriesName,
-            values: processedValues,
+            values: getTimeSeriesValues(timeSeries, timeScale),
           });
         }
 
