@@ -32,37 +32,34 @@ export function getXValues(timeScale: TimeScale): number[] {
 
 /**
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
- * process values and checks for 'NaN', while filling in any timestamps that are
- * missing from the time series data with `null` values.
+ * processes the time series values, filling in any timestamps that are missing
+ * from the time series data with `null` values.
  */
 export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale) {
   let timestamp = timeScale.startMs;
 
   const values = series.values;
-  const completeResponse: TimeSeriesValueTuple[] = [];
-
-  const stepSize = timeScale.stepMs;
-  const endTimeStamp = timeScale.endMs;
+  const processedValues: TimeSeriesValueTuple[] = [];
 
   for (const valueTuple of values) {
-    // Adding the timestamps before start range
-    for (let t = timestamp; t < valueTuple[0]; t += stepSize) {
-      completeResponse.push([t, null]);
+    // Fill in values up to the current series value timestamp with nulls
+    while (timestamp < valueTuple[0]) {
+      processedValues.push([timestamp, null]);
+      timestamp += timeScale.stepMs;
     }
-    timestamp = valueTuple[0] + stepSize;
 
-    // Adding all the available data points, string check is to catch any 'NaN' values
-    const valueField = typeof valueTuple[1] === 'string' ? null : valueTuple[1];
-
-    completeResponse.push([valueTuple[0], valueField]);
+    // Now add the current value since timestamp should match
+    processedValues.push([timestamp, valueTuple[1]]);
+    timestamp += timeScale.stepMs;
   }
 
-  // Adding null if there is missing data till endTimeStamp
-  for (let t = timestamp; t <= endTimeStamp; t += stepSize) {
-    completeResponse.push([t, null]);
+  // Add null values at the end of the series if necessary
+  while (timestamp <= timeScale.endMs) {
+    processedValues.push([timestamp, null]);
+    timestamp += timeScale.stepMs;
   }
 
-  return completeResponse;
+  return processedValues;
 }
 
 /**
