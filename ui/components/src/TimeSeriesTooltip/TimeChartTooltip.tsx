@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { UnitOptions, TimeSeries } from '@perses-dev/core';
@@ -49,6 +49,8 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   pinnedPos,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
+  const transform = useRef('');
+
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
@@ -63,7 +65,12 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
+  const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
+
+  if (!isTooltipPinned) {
+    transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  }
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
@@ -85,9 +92,9 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     <Portal container={containerElement}>
       <Box
         ref={tooltipRef}
-        sx={(theme) => getTooltipStyles(theme, pinnedPos)}
+        sx={(theme) => getTooltipStyles(theme, pinnedPos, maxHeight)}
         style={{
-          transform: cursorTransform,
+          transform: transform.current,
         }}
       >
         <Stack spacing={0.5}>
