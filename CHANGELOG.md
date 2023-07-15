@@ -3,7 +3,7 @@
 ## 0.37.2 / 2023-07-13
 
 - [BUGFIX] Fix tooltip pinning when apps set a `tooltipPortalContainerId` (#1294)
-- [BUGFIX] Time chart fix for incorrect connected values  (#1296)
+- [BUGFIX] Time chart fix for incorrect connected values (#1296)
 
 ## 0.37.1 / 2023-07-11
 
