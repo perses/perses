@@ -42,6 +42,11 @@ export interface PersesChartsTheme {
     };
   };
   thresholds: ThresholdColorPalette;
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, chart tooltip uses the body of the top-level document object.
+   */
+  tooltipPortalContainerId?: string;
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207

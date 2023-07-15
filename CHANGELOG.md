@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.37.2 / 2023-07-13
+
+- [BUGFIX] Fix tooltip pinning when apps set a `tooltipPortalContainerId` (#1294)
+- [BUGFIX] Time chart fix for incorrect connected values (#1296)
+
+## 0.37.1 / 2023-07-11
+
+- [BUGFIX] Add option to specify the portal container for the chart tooltip (#1289)
+- [BUGFIX] Fix unpin tooltip icon click, adjust help text (#1283)
+
+## 0.37.0 / 2023-07-07
+
+- [FEATURE] Time series chart rewritten for intuitive x axis bucketing, improved render perf (#1268)
+- [ENHANCEMENT] Add ability to select font size for stat chart (#1269)
+
 ## 0.36.2 / 2023-06-27
 
 - [BUGFIX] Fix useTimeSeriesQueries return type (#1273)

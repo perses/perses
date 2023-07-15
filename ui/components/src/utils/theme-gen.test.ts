@@ -257,6 +257,7 @@ describe('generateChartsTheme', () => {
             "#d32f2f",
           ],
         },
+        "tooltipPortalContainerId": undefined,
       }
     `);
   });

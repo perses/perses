@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { UnitOptions, TimeSeries } from '@perses-dev/core';
@@ -27,13 +27,19 @@ export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
-  wrapLabels?: boolean;
-  unit?: UnitOptions;
-  onUnpinClick?: () => void;
   pinnedPos: CursorCoordinates | null;
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, the chart tooltip is attached to document.body.
+   */
+  containerId?: string;
+  onUnpinClick?: () => void;
+  unit?: UnitOptions;
+  wrapLabels?: boolean;
 }
 
 export const TimeChartTooltip = memo(function TimeChartTooltip({
+  containerId,
   chartRef,
   data,
   seriesMapping,
@@ -43,6 +49,8 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   pinnedPos,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
+  const transform = useRef('');
+
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
@@ -55,7 +63,14 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
+
+  const containerElement = containerId ? document.querySelector(containerId) : undefined;
+  // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
+  const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
+
+  if (!isTooltipPinned) {
+    transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  }
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
@@ -74,12 +89,12 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   const totalSeries = data.length;
 
   return (
-    <Portal>
+    <Portal container={containerElement}>
       <Box
         ref={tooltipRef}
-        sx={(theme) => getTooltipStyles(theme, pinnedPos)}
+        sx={(theme) => getTooltipStyles(theme, pinnedPos, maxHeight)}
         style={{
-          transform: cursorTransform,
+          transform: transform.current,
         }}
       >
         <Stack spacing={0.5}>
