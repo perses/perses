@@ -14,7 +14,6 @@
 import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { ECharts, EChartsCoreOption, init, connect } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
-import isEqual from 'lodash/isEqual';
 import debounce from 'lodash/debounce';
 import { EChartsTheme } from '../model';
 
@@ -121,7 +120,6 @@ export const EChart = React.memo(function EChart<T>({
   onChartInitialized,
 }: EChartsProps<T>) {
   const initialOption = useRef<EChartsCoreOption>(option);
-  const prevOption = useRef<EChartsCoreOption>(option);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const chartElement = useRef<ECharts | null>(null);
 
@@ -151,10 +149,8 @@ export const EChart = React.memo(function EChart<T>({
 
   // Update chart data when option changes
   useEffect(() => {
-    if (prevOption.current === undefined || isEqual(prevOption.current, option)) return;
     if (!chartElement.current) return;
     chartElement.current.setOption(option, true);
-    prevOption.current = option;
   }, [option]);
 
   // Resize chart, cleanup listener on unmount
