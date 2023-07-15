@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { dashboardDisplayName, DashboardResource } from '@perses-dev/core';
+import { getDashboardDisplayName, DashboardResource } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -19,8 +19,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
-import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
+import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
 import { useIsReadonly } from '../../model/config-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
@@ -58,7 +57,7 @@ export function DashboardList(props: DashboardListProperties) {
         ({
           project: dashboard.metadata.project,
           name: dashboard.metadata.name,
-          displayName: dashboardDisplayName(dashboard),
+          displayName: getDashboardDisplayName(dashboard),
           version: dashboard.metadata.version,
           createdAt: dashboard.metadata.created_at,
           updatedAt: dashboard.metadata.updated_at,
@@ -163,7 +162,7 @@ export function DashboardList(props: DashboardListProperties) {
       ></DashboardDataGrid>
       <Box>
         {targetedDashboard && (
-          <Box>
+          <>
             <RenameDashboardDialog
               open={isRenameDashboardDialogStateOpened}
               onClose={() => setRenameDashboardDialogStateOpened(false)}
@@ -174,7 +173,7 @@ export function DashboardList(props: DashboardListProperties) {
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
               dashboard={targetedDashboard}
             />
-          </Box>
+          </>
         )}
       </Box>
     </Stack>

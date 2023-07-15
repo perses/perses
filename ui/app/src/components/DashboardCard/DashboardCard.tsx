@@ -14,7 +14,7 @@
 import { Button, Stack, Typography } from '@mui/material';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardResource } from '@perses-dev/core';
-import { dashboardDisplayName } from '@perses-dev/core/dist/utils/text';
+import { getDashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import FolderPoundIcon from 'mdi-material-ui/FolderPound';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ interface DashboardCardProps {
 }
 
 export function DashboardCard(props: DashboardCardProps) {
-  const naviguate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <Button
@@ -31,9 +31,9 @@ export function DashboardCard(props: DashboardCardProps) {
       fullWidth
       sx={{ justifyContent: 'start', backgroundColor: (theme) => theme.palette.designSystem.blue[700] }}
       onClick={() =>
-        naviguate(`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`)
+        navigate(`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`)
       }
-      title={dashboardDisplayName(props.dashboard)}
+      title={getDashboardDisplayName(props.dashboard)}
     >
       <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, maxWidth: '100%' }}>
         <ViewDashboardIcon />
@@ -42,7 +42,7 @@ export function DashboardCard(props: DashboardCardProps) {
             variant="h3"
             sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'initial', textAlign: 'start' }}
           >
-            {dashboardDisplayName(props.dashboard)}
+            {getDashboardDisplayName(props.dashboard)}
           </Typography>
           <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', gap: 1, textAlign: 'start' }}>
             <FolderPoundIcon fontSize={'small'} /> {props.dashboard.metadata.project}

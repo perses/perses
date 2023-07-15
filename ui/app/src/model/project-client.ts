@@ -11,30 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, Metadata } from '@perses-dev/core';
+import { fetch, fetchJson, ProjectResource, VariableResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST } from './http';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { resource as dashboardResource } from './dashboard-client';
 
 const resource = 'projects';
+const variableResource = 'variables';
 
-export interface ProjectModel {
-  kind: 'Project';
-  metadata: Metadata;
-}
-
-type ProjectListOptions = Omit<UseQueryOptions<ProjectModel[], Error>, 'queryKey' | 'queryFn'>;
+type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
 
 /**
  * Gets version information from the Perses server API.
  */
 export function useProjectList(options?: ProjectListOptions) {
-  return useQuery<ProjectModel[], Error>(
+  return useQuery<ProjectResource[], Error>(
     [resource],
     () => {
       const url = buildURL({ resource });
-      return fetchJson<ProjectModel[]>(url);
+      return fetchJson<ProjectResource[]>(url);
     },
     options
   );
@@ -52,11 +48,11 @@ export function useProjectList(options?: ProjectListOptions) {
  */
 export function useAddProjectMutation() {
   const queryClient = useQueryClient();
-  return useMutation<ProjectModel, Error, string>({
+  return useMutation<ProjectResource, Error, string>({
     mutationKey: [resource],
     mutationFn: (name: string) => {
       const url = buildURL({ resource });
-      return fetchJson<ProjectModel>(url, {
+      return fetchJson<ProjectResource>(url, {
         method: HTTPMethodPOST,
         headers: HTTPHeader,
         body: JSON.stringify({ kind: 'Project', metadata: { name } }),
@@ -100,5 +96,112 @@ export function useDeleteProjectMutation() {
         queryClient.invalidateQueries([resource]),
       ]);
     },
+  });
+}
+
+export function useCreateVariableMutation(projectName: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<VariableResource, Error, VariableResource>({
+    mutationKey: [resource, projectName, variableResource],
+    mutationFn: (variable: VariableResource) => {
+      return createVariable(variable);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([resource]);
+    },
+  });
+}
+
+/**
+ * Used to get a (project) variable in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useVariable(projectName: string, name: string) {
+  return useQuery<VariableResource, Error>([resource, projectName, variableResource, name], () => {
+    return getVariable(projectName, name);
+  });
+}
+
+/**
+ * Used to get (project) variables in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useVariableList(projectName: string) {
+  return useQuery<VariableResource[], Error>([resource, projectName, variableResource], () => {
+    return getVariables(projectName);
+  });
+}
+
+export function useUpdateVariableMutation(projectName: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<VariableResource, Error, VariableResource>({
+    mutationKey: [resource, projectName, variableResource],
+    mutationFn: (variable: VariableResource) => {
+      return updateVariable(variable);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([resource, projectName, variableResource]);
+    },
+  });
+}
+
+export function useDeleteVariableMutation(projectName: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<VariableResource, Error, VariableResource>({
+    mutationKey: [resource, projectName, variableResource],
+    mutationFn: (entity: VariableResource) => {
+      return deleteVariable(entity).then(() => {
+        return entity;
+      });
+    },
+    onSuccess: (variable) => {
+      queryClient.removeQueries([resource, projectName, variableResource, variableResource, variable.metadata.name]);
+      return queryClient.invalidateQueries([resource, projectName, variableResource]);
+    },
+  });
+}
+
+export function createVariable(entity: VariableResource) {
+  const url = buildURL({ resource: variableResource, project: entity.metadata.project });
+  return fetchJson<VariableResource>(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function getVariable(project: string, name: string) {
+  const url = buildURL({ resource: variableResource, project: project, name: name });
+  return fetchJson<VariableResource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function getVariables(project?: string) {
+  const url = buildURL({ resource: variableResource, project: project });
+  return fetchJson<VariableResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function updateVariable(entity: VariableResource) {
+  const url = buildURL({ resource: variableResource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetchJson<VariableResource>(url, {
+    method: HTTPMethodPUT,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function deleteVariable(entity: VariableResource) {
+  const url = buildURL({ resource: variableResource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetch(url, {
+    method: HTTPMethodDELETE,
+    headers: HTTPHeader,
   });
 }

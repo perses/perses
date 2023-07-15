@@ -16,7 +16,7 @@ import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, S
 import { Dialog } from '@perses-dev/components';
 import { DashboardSelector } from '@perses-dev/core';
 
-export interface CreateDashboardProps {
+interface CreateDashboardProps {
   open: boolean;
   projectOptions: string[];
   onClose: DispatchWithoutAction;

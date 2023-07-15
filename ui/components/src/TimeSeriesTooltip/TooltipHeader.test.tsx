@@ -46,7 +46,7 @@ describe('TooltipHeader', () => {
     renderComponent(tooltipContent);
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('13:53:00')).toBeInTheDocument();
-    expect(screen.getByText('Click to Pin')).toBeInTheDocument();
+    expect(screen.getByText('Click chart to pin')).toBeInTheDocument();
   });
 
   it('should display with unpin text', () => {
@@ -57,7 +57,7 @@ describe('TooltipHeader', () => {
       showAllSeries: false,
     };
     renderComponent(tooltipContent);
-    expect(screen.getByText('Click to Unpin')).toBeInTheDocument();
+    expect(screen.getByText('Click to unpin')).toBeInTheDocument();
   });
 
   it('should not display show all toggle when only 1 total series', () => {

@@ -22,18 +22,17 @@ import {
   FormControlLabel,
   InputLabel,
   MenuItem,
-  Select,
   Button,
   Stack,
   ClickAwayListener,
   Divider,
+  Select,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
-import { PluginEditor } from '@perses-dev/plugin-system';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { ErrorBoundary } from '@perses-dev/components';
-
 import { VARIABLE_TYPES } from '../variable-model';
+import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
@@ -59,14 +58,17 @@ function FallbackPreview() {
   return <div>Error previewing values</div>;
 }
 
+export type Action = 'create' | 'read' | 'update';
+
 interface VariableEditFormProps {
   initialVariableDefinition: VariableDefinition;
   onChange: (def: VariableDefinition) => void;
   onCancel: () => void;
+  action?: Action;
 }
 
 export function VariableEditForm(props: VariableEditFormProps) {
-  const { initialVariableDefinition, onChange, onCancel } = props;
+  const { initialVariableDefinition, onChange, onCancel, action = 'update' } = props;
   const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
   const validation = useMemo(() => getValidation(state), [state]);
 
@@ -85,6 +87,13 @@ export function VariableEditForm(props: VariableEditFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewKey]);
 
+  const title = useMemo(() => {
+    if (action === 'read') return 'View Variable';
+    if (action === 'create') return 'Create Variable';
+    if (action === 'update') return 'Edit Variable';
+    return '';
+  }, [action]);
+
   return (
     <>
       <Box
@@ -95,26 +104,40 @@ export function VariableEditForm(props: VariableEditFormProps) {
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">Edit Variable</Typography>
+        <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          <Button
-            disabled={!validation.isValid}
-            variant="contained"
-            onClick={() => {
-              onChange(getVariableDefinitionFromState(state));
-            }}
-          >
-            Update
-          </Button>
-          <Button
-            color="secondary"
-            variant="outlined"
-            onClick={() => {
-              onCancel();
-            }}
-          >
-            Cancel
-          </Button>
+          {action === 'read' ? (
+            <Button
+              color="secondary"
+              variant="outlined"
+              onClick={() => {
+                onCancel();
+              }}
+            >
+              Close
+            </Button>
+          ) : (
+            <>
+              <Button
+                disabled={!validation.isValid}
+                variant="contained"
+                onClick={() => {
+                  onChange(getVariableDefinitionFromState(state));
+                }}
+              >
+                {action === 'create' ? 'Create' : 'Update'}
+              </Button>
+              <Button
+                color="secondary"
+                variant="outlined"
+                onClick={() => {
+                  onCancel();
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          )}
         </Stack>
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
@@ -127,6 +150,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
               label="Name"
               value={state.name}
               helperText={validation.name}
+              InputProps={{
+                readOnly: action === 'update' || action === 'read',
+              }}
               onChange={(v) => {
                 setState((draft) => {
                   draft.name = v.target.value;
@@ -139,6 +165,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
               fullWidth
               label="Display Label"
               value={state.title || ''}
+              InputProps={{
+                readOnly: action === 'read',
+              }}
               onChange={(v) => {
                 setState((draft) => {
                   draft.title = v.target.value;
@@ -151,6 +180,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
               fullWidth
               label="Description"
               value={state.description}
+              InputProps={{
+                readOnly: action === 'read',
+              }}
               onChange={(v) => {
                 setState((draft) => {
                   draft.description = v.target.value;
@@ -166,6 +198,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                 id="variable-type-select"
                 label="Type"
                 value={state.kind}
+                readOnly={action === 'read'}
                 onChange={(v) => {
                   setState((draft) => {
                     draft.kind = v.target.value as VariableEditorState['kind'];
@@ -196,6 +229,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
               <TextField
                 label="Value"
                 value={state.textVariableFields.value}
+                InputProps={{
+                  readOnly: action === 'read',
+                }}
                 onChange={(v) => {
                   setState((draft) => {
                     draft.textVariableFields.value = v.target.value;
@@ -233,6 +269,7 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   pluginType="Variable"
                   pluginKindLabel="Source"
                   value={state.listVariableFields.plugin}
+                  isReadonly={action === 'read'}
                   onChange={(val) => {
                     setState((draft) => {
                       draft.listVariableFields.plugin = val;
@@ -245,6 +282,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                 <TextField
                   label="Capturing Regexp Filter"
                   value={state.listVariableFields.capturing_regexp || ''}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
                   onChange={(e) => {
                     setState((draft) => {
                       if (e.target.value) {
@@ -271,7 +311,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   control={
                     <Switch
                       checked={state.listVariableFields.allowMultiple}
+                      readOnly={action === 'read'}
                       onChange={(e) => {
+                        if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                         setState((draft) => {
                           draft.listVariableFields.allowMultiple = e.target.checked;
                         });
@@ -287,7 +329,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   control={
                     <Switch
                       checked={state.listVariableFields.allowAll}
+                      readOnly={action === 'read'}
                       onChange={(e) => {
+                        if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                         setState((draft) => {
                           draft.listVariableFields.allowAll = e.target.checked;
                         });
@@ -303,6 +347,9 @@ export function VariableEditForm(props: VariableEditFormProps) {
                   <TextField
                     label="Custom All Value"
                     value={state.listVariableFields.customAllValue}
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
                     onChange={(e) => {
                       setState((draft) => {
                         if (e.target.value) {

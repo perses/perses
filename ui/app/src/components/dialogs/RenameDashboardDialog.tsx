@@ -14,10 +14,10 @@
 import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
+import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 
-export interface RenameDashboardDialogProps {
+interface RenameDashboardDialogProps {
   dashboard: DashboardResource;
   open: boolean;
   onClose: DispatchWithoutAction;
@@ -67,7 +67,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
 
     updateDashboardMutation.mutate(dashboard, {
       onSuccess: (updatedDashboard: DashboardResource) => {
-        successSnackbar(`Dashboard ${dashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
+        successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
         onClose();
         if (onSuccess) {
           onSuccess(name);
@@ -98,7 +98,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
           type="text"
           fullWidth
           onChange={handleChange}
-          defaultValue={dashboardDisplayName(dashboard)}
+          defaultValue={getDashboardDisplayName(dashboard)}
           value={name}
           error={!!error}
           helperText={error}

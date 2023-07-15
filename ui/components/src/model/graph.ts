@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-import { LineSeriesOption } from 'echarts/charts';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
 
 // adjust display when there are many time series to help with performance
@@ -34,9 +34,10 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
 
 // Used for TimeChart dataset support, each time series returned is mapped to series options using datasetIndex
 // - https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
-export type TimeChartSeriesMapping = LineSeriesOption[];
-
+export type TimeChartSeriesMapping = TimeSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
+
+export type TimeSeriesOption = LineSeriesOption | BarSeriesOption;
 
 // [DEPRECATED] used for legacy LineChart 'category' axis.
 // May delete in future when embed users migrate to TimeChart.

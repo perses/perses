@@ -67,6 +67,7 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
           onChange={handleDatasourceChange}
+          readOnly={props.isReadonly}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"
         />
@@ -78,12 +79,16 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
         onChange={(e) => {
           props.onChange({ ...props.value, label_name: e.target.value });
         }}
+        InputProps={{
+          readOnly: props.isReadonly,
+        }}
       />
       <MatcherEditor
         matchers={props.value.matchers ?? []}
         onChange={(e) => {
           props.onChange({ ...props.value, matchers: e });
         }}
+        isReadonly={props.isReadonly}
       />
     </Stack>
   );
@@ -116,12 +121,14 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
           onChange={handleDatasourceChange}
+          disabled={props.isReadonly}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"
         />
       </FormControl>
       <MatcherEditor
         matchers={props.value.matchers ?? []}
+        isReadonly={props.isReadonly}
         onChange={(e) => {
           props.onChange({ ...props.value, matchers: e });
         }}
@@ -162,6 +169,7 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
           onChange={handleDatasourceChange}
           labelId="prom-datasource-label"
           label="Prometheus Datasource"
+          disabled={props.isReadonly}
         />
       </FormControl>
       <PromQLEditor
@@ -170,11 +178,15 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
         onChange={(query) => {
           props.onChange({ ...props.value, expr: query });
         }}
+        readOnly={props.isReadonly}
         width="100%"
       />
       <TextField
         label="Label Name"
         value={props.value.label_name}
+        InputProps={{
+          readOnly: props.isReadonly,
+        }}
         onChange={(e) => {
           props.onChange({ ...props.value, label_name: e.target.value });
         }}

@@ -20,7 +20,15 @@ const DEFAULT_TEXT_COLOR = '#222';
 // avoid component override type errors since only palette and typography are used
 type MuiTheme = Omit<Theme, 'components'>;
 
-export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsTheme): PersesChartsTheme {
+export function generateChartsTheme(
+  muiTheme: MuiTheme,
+  echartsTheme: EChartsTheme,
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, chart tooltip uses the body of the top-level document object.
+   */
+  tooltipPortalContainerId?: string
+): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
@@ -156,7 +164,14 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         borderColor: primaryTextColor,
       },
     },
-    tooltip: {},
+    tooltip: {
+      backgroundColor: muiTheme.palette.designSystem?.grey[800],
+      borderColor: muiTheme.palette.designSystem?.grey[800],
+      textStyle: {
+        color: '#fff',
+        fontSize: 11,
+      },
+    },
     line: {
       showSymbol: false,
       symbol: 'circle',
@@ -176,6 +191,13 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       itemStyle: {
         borderWidth: 0,
         borderColor: muiTheme.palette.grey[300],
+        borderRadius: 4,
+        color: muiTheme.palette.primary.main,
+      },
+      label: {
+        position: 'right',
+        show: true,
+        color: muiTheme.palette.text.primary,
       },
     },
     gauge: {
@@ -196,6 +218,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
   };
 
   return {
+    tooltipPortalContainerId,
     echartsTheme: merge(muiConvertedTheme, echartsTheme),
     noDataOption: {
       title: {

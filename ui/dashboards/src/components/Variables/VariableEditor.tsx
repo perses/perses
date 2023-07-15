@@ -35,10 +35,8 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
-
+import { Action, VariableEditForm, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { useDiscardChangesConfirmationDialog } from '../../context';
-import { VariableEditForm } from './VariableEditorForm';
-import { VARIABLE_TYPES } from './variable-model';
 
 function getVariableLabelByKind(kind: string) {
   return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
@@ -66,6 +64,7 @@ export function VariableEditor(props: {
 }) {
   const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
   const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
+  const [variableFormAction, setVariableFormAction] = useState<Action>('update');
 
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
@@ -97,6 +96,7 @@ export function VariableEditor(props: {
   };
 
   const addVariable = () => {
+    setVariableFormAction('create');
     setVariableDefinitions((draft) => {
       draft.push({
         kind: 'TextVariable',
@@ -107,6 +107,11 @@ export function VariableEditor(props: {
       });
     });
     setVariableEditIdx(variableDefinitions.length);
+  };
+
+  const editVariable = (index: number) => {
+    setVariableFormAction('update');
+    setVariableEditIdx(index);
   };
 
   const toggleVariableVisibility = (index: number, visible: boolean) => {
@@ -158,7 +163,13 @@ export function VariableEditor(props: {
               setVariableEditIdx(null);
             });
           }}
-          onCancel={() => setVariableEditIdx(null)}
+          onCancel={() => {
+            if (variableFormAction === 'create') {
+              removeVariable(variableEditIdx);
+            }
+            setVariableEditIdx(null);
+          }}
+          action={variableFormAction}
         />
       )}
       {!currentEditingVariableDefinition && (
@@ -231,7 +242,7 @@ export function VariableEditor(props: {
                             <ArrowDown />
                           </IconButton>
 
-                          <IconButton onClick={() => setVariableEditIdx(idx)}>
+                          <IconButton onClick={() => editVariable(idx)}>
                             <PencilIcon />
                           </IconButton>
                           <IconButton onClick={() => removeVariable(idx)}>

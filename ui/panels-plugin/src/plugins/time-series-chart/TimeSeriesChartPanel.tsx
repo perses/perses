@@ -18,6 +18,7 @@ import merge from 'lodash/merge';
 import {
   useDeepMemo,
   getXValues,
+  getTimeSeriesValues,
   DEFAULT_LEGEND,
   getCalculations,
   formatValue,
@@ -186,7 +187,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         if (Array.isArray(timeChartData)) {
           timeChartData.push({
             name: formattedSeriesName,
-            values: [...timeSeries.values],
+            values: getTimeSeriesValues(timeSeries, timeScale),
           });
         }
 

@@ -12,15 +12,13 @@
 // limitations under the License.
 
 import { useNavigate } from 'react-router-dom';
-import { Box, Stack, Typography, Card } from '@mui/material';
+import { Box, Card } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import ViewDashboard from 'mdi-material-ui/ViewDashboard';
 import { useCallback, useState } from 'react';
 import { DashboardSelector } from '@perses-dev/core';
-import { useDashboardList } from '../../model/dashboard-client';
-import { DashboardList } from '../../components/DashboardList/DashboardList';
-import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { useDashboardList } from '../../../model/dashboard-client';
+import { DashboardList } from '../../../components/DashboardList/DashboardList';
+import { CreateDashboardDialog } from '../../../components/dialogs';
 
 interface ProjectDashboardsProps {
   projectName: string;
@@ -43,17 +41,10 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
 
   return (
     <Box id={props.id}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Stack direction="row" alignItems="center" gap={1} my={2}>
-          <ViewDashboard />
-          <Typography variant="h3">Dashboards</Typography>
-        </Stack>
-        <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setOpenCreateDashboardDialogState(true)} />
-      </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card>
           <DashboardList
-            dashboardList={data || []}
+            dashboardList={data ?? []}
             hideToolbar={props.hideToolbar}
             isLoading={isLoading}
             initialState={{

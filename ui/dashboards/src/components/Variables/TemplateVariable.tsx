@@ -14,8 +14,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
 import { DEFAULT_ALL_VALUE, ListVariableDefinition, VariableName, VariableValue } from '@perses-dev/core';
+import { useListVariablePluginValues } from '@perses-dev/plugin-system';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
-import { useListVariablePluginValues } from './variable-model';
+
 type TemplateVariableProps = {
   name: VariableName;
 };

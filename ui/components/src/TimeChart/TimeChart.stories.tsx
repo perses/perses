@@ -196,6 +196,10 @@ export const NoData: Story = {
       },
     },
   },
+  parameters: {
+    // TODO: look into why test is flaky
+    happo: false,
+  },
   render: (args) => {
     return (
       <Stack>

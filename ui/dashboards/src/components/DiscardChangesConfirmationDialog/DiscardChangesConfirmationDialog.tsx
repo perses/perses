@@ -11,44 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
-export const DiscardChangesConfirmationDialog = () => {
+export const DashboardDiscardChangesConfirmationDialog = () => {
   const { discardChangesConfirmationDialog: dialog } = useDiscardChangesConfirmationDialog();
-  const isOpen = dialog !== undefined;
 
-  return (
-    <Dialog open={isOpen}>
-      {dialog !== undefined && (
-        <>
-          <DialogTitle>Discard Changes</DialogTitle>
-          <IconButton
-            aria-label="Close"
-            onClick={dialog.onCancel}
-            sx={(theme) => ({
-              position: 'absolute',
-              top: theme.spacing(0.5),
-              right: theme.spacing(0.5),
-            })}
-          >
-            <CloseIcon />
-          </IconButton>
-          <DialogContent dividers sx={{ width: '500px' }}>
-            {dialog.description ||
-              'You have unsaved changes in this dashboard. Are you sure you want to discard these changes? Changes cannot be recovered.'}
-          </DialogContent>
-          <DialogActions>
-            <Button variant="contained" onClick={dialog.onDiscardChanges}>
-              Discard Changes
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={dialog.onCancel}>
-              Cancel
-            </Button>
-          </DialogActions>
-        </>
-      )}
-    </Dialog>
-  );
+  if (dialog) {
+    return (
+      <DiscardChangesConfirmationDialog
+        description={
+          dialog.description ||
+          'You have unsaved changes in this dashboard. Are you sure you want to discard these changes? Changes cannot be recovered.'
+        }
+        isOpen={true}
+        onCancel={dialog.onCancel}
+        onDiscardChanges={dialog.onDiscardChanges}
+      />
+    );
+  }
+
+  return <></>;
 };

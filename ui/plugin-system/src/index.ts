@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './components';
+export * from './constants';
 export * from './model';
 export * from './runtime';
 export * from './test-utils';

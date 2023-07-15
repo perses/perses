@@ -24,7 +24,7 @@ import type {
   TooltipComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
-import { LineChart as EChartsLineChart } from 'echarts/charts';
+import { LineChart as EChartsLineChart, BarChart as EChartsBarChart } from 'echarts/charts';
 import {
   GridComponent,
   DatasetComponent,
@@ -53,6 +53,7 @@ import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
   EChartsLineChart,
+  EChartsBarChart,
   GridComponent,
   DatasetComponent,
   DataZoomComponent,
@@ -336,12 +337,16 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
+            containerId={chartsTheme.tooltipPortalContainerId}
             chartRef={chartRef}
             data={data}
             seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
+            onUnpinClick={() => {
+              setTooltipPinnedCoords(null);
+            }}
           />
         )}
       <EChart
