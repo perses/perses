@@ -32,13 +32,15 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-// TODO: Continue to simplify TimeChart types, fix legend and thresholds
+// Used for TimeChart dataset support, each time series returned is mapped to series options using datasetIndex
+// - https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
 export type TimeChartSeriesMapping = TimeSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 
 export type TimeSeriesOption = LineSeriesOption | BarSeriesOption;
 
-// TODO: Rename to LegacyEChartsDataFormat
+// [DEPRECATED] used for legacy LineChart 'category' axis.
+// May delete in future when embed users migrate to TimeChart.
 export type EChartsDataFormat = {
   timeSeries: LegacyTimeSeries[];
   xAxis: number[];

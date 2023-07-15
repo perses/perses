@@ -51,9 +51,8 @@ import (
 
 kind: "TimeSeriesChart"
 spec: close({
-	legend?:            #legend
-	y_axis?:            #y_axis
-	thresholds?:        common.#thresholds
-	visual?:            #visual
-	show_legacy_chart?: bool
+	legend?:     #legend
+	y_axis?:     #y_axis
+	thresholds?: common.#thresholds
+	visual?:     #visual
 })

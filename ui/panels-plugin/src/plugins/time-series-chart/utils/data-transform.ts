@@ -57,7 +57,7 @@ export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['query
 }
 
 /**
- * Gets ECharts line series option properties for legacy LineChart
+ * [DEPRECATED] Gets ECharts line series option properties for legacy LineChart
  */
 export function getLineSeries(
   id: string,

@@ -31,6 +31,7 @@ export function getXValues(timeScale: TimeScale): number[] {
 }
 
 /**
+ * [DEPRECATED] Used for legacy LineChart 'category' axis approach.
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
  * processes the time series values, filling in any timestamps that are missing
  * from the time series data with `null` values.
