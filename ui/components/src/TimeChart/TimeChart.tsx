@@ -239,6 +239,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       return __experimentalEChartsOptionsOverride(option);
     }
 
+    console.log('OPTION -> updated... ', option);
+    console.log('tooltipPinnedCoords -> updated... ', tooltipPinnedCoords);
     return option;
   }, [
     data,
@@ -251,6 +253,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     __experimentalEChartsOptionsOverride,
     noDataVariant,
     timeZone,
+    tooltipPinnedCoords,
   ]);
 
   return (
@@ -262,16 +265,11 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         if (chartRef.current !== undefined && chartRef.current.containPixel('grid', pointInPixel)) {
           const pointInGrid: number[] = chartRef.current.convertFromPixel('grid', pointInPixel);
           console.log('pointInGrid -> ', pointInGrid);
-        }
 
-        // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
           // https://github.com/perses/perses/compare/main...sjcobb/tooltip-pin-attach-mark-line-init
           const pinnedCrosshair: LineSeriesOption = {
             name: 'Pinned Crosshair',
             type: 'line',
-            // data: [[startTime, null] as unknown],
-            // data: [1689444705000, 0.02],
             // data: [timeScale.startMs, 0.02],
             markLine: {
               symbol: 'none',
@@ -281,9 +279,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               },
               data: [
                 {
-                  // xAxis: 1689444705000,
-                  // yAxis: 0.02,
-                  xAxis: timeScale.startMs,
+                  // xAxis: timeScale.startMs,
+                  xAxis: pointInGrid[0],
                 },
               ],
               // data: [timeScale.startMs, 0.02],
@@ -297,6 +294,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             },
           };
           seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+        }
+
+        // Pin and unpin when clicking on chart canvas but not tooltip text.
+        if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {

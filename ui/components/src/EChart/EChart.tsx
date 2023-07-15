@@ -149,6 +149,7 @@ export const EChart = React.memo(function EChart<T>({
 
   // Update chart data when option changes
   useEffect(() => {
+    console.log('EChart -> prevOption updated... ', option);
     if (!chartElement.current) return;
     chartElement.current.setOption(option, true);
   }, [option]);
