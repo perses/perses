@@ -251,7 +251,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     noDataVariant,
     timeZone,
   ]);
-  console.log({ option });
 
   return (
     <Box
