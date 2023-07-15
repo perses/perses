@@ -13,7 +13,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { Box, Skeleton, useTheme } from '@mui/material';
-import type { GridComponentOption } from 'echarts';
+import type { GridComponentOption, LineSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
@@ -48,6 +48,7 @@ import {
   useId,
   TimeChart,
   TimeChartSeriesMapping,
+  TimeSeriesOption,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -269,6 +270,37 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         seriesIndex++;
       });
     }
+
+    // const pinnedCrosshair: LineSeriesOption = {
+    //   name: 'Pinned Crosshair',
+    //   type: 'line',
+    //   // data: [[startTime, null] as unknown],
+    //   // data: [1689444705000, 0.02],
+    //   // data: [timeScale.startMs, 0.02],
+    //   markLine: {
+    //     symbol: 'none',
+    //     symbolSize: 0,
+    //     itemStyle: {
+    //       color: '#eee',
+    //     },
+    //     data: [
+    //       {
+    //         // xAxis: 1689444705000,
+    //         // yAxis: 0.02,
+    //         xAxis: timeScale.startMs,
+    //       },
+    //     ],
+    //     // data: [timeScale.startMs, 0.02],
+    //     lineStyle: {
+    //       width: 1,
+    //       type: 'dashed',
+    //     },
+    //     label: {
+    //       // distance: [20, 8],
+    //     },
+    //   },
+    // };
+    // timeSeriesMapping.push(pinnedCrosshair as TimeSeriesOption);
 
     return {
       graphData,

@@ -38,7 +38,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping } from '../model/graph';
+import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, TimeSeriesOption } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
@@ -238,6 +238,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     if (__experimentalEChartsOptionsOverride) {
       return __experimentalEChartsOptionsOverride(option);
     }
+
     return option;
   }, [
     data,
@@ -256,8 +257,46 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     <Box
       sx={{ height }}
       onClick={(e) => {
+        // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
+        const pointInPixel = [e.nativeEvent.offsetX ?? 0, e.nativeEvent.offsetY ?? 0];
+        if (chartRef.current !== undefined && chartRef.current.containPixel('grid', pointInPixel)) {
+          const pointInGrid: number[] = chartRef.current.convertFromPixel('grid', pointInPixel);
+          console.log('pointInGrid -> ', pointInGrid);
+        }
+
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
+          // https://github.com/perses/perses/compare/main...sjcobb/tooltip-pin-attach-mark-line-init
+          const pinnedCrosshair: LineSeriesOption = {
+            name: 'Pinned Crosshair',
+            type: 'line',
+            // data: [[startTime, null] as unknown],
+            // data: [1689444705000, 0.02],
+            // data: [timeScale.startMs, 0.02],
+            markLine: {
+              symbol: 'none',
+              symbolSize: 0,
+              itemStyle: {
+                color: '#eee',
+              },
+              data: [
+                {
+                  // xAxis: 1689444705000,
+                  // yAxis: 0.02,
+                  xAxis: timeScale.startMs,
+                },
+              ],
+              // data: [timeScale.startMs, 0.02],
+              lineStyle: {
+                width: 1,
+                type: 'dashed',
+              },
+              label: {
+                // distance: [20, 8],
+              },
+            },
+          };
+          seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {
