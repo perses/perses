@@ -271,37 +271,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       });
     }
 
-    // const pinnedCrosshair: LineSeriesOption = {
-    //   name: 'Pinned Crosshair',
-    //   type: 'line',
-    //   // data: [[startTime, null] as unknown],
-    //   // data: [1689444705000, 0.02],
-    //   // data: [timeScale.startMs, 0.02],
-    //   markLine: {
-    //     symbol: 'none',
-    //     symbolSize: 0,
-    //     itemStyle: {
-    //       color: '#eee',
-    //     },
-    //     data: [
-    //       {
-    //         // xAxis: 1689444705000,
-    //         // yAxis: 0.02,
-    //         xAxis: timeScale.startMs,
-    //       },
-    //     ],
-    //     // data: [timeScale.startMs, 0.02],
-    //     lineStyle: {
-    //       width: 1,
-    //       type: 'dashed',
-    //     },
-    //     label: {
-    //       // distance: [20, 8],
-    //     },
-    //   },
-    // };
-    // timeSeriesMapping.push(pinnedCrosshair as TimeSeriesOption);
-
     return {
       graphData,
       timeScale,

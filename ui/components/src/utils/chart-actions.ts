@@ -64,3 +64,22 @@ export function clearHighlightedSeries(chart: EChartsInstance, totalSeries: numb
     }
   }
 }
+
+/*
+ * Convert a point from pixel coordinate to logical coordinate.
+ * Used to determine if cursor is over chart canvas and closest datapoint.
+ * https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
+ */
+export function getPointInGrid(cursorCoordX: number, cursorCoordY: number, chart?: EChartsInstance) {
+  if (chart === undefined) {
+    return null;
+  }
+
+  const pointInPixel = [cursorCoordX, cursorCoordY];
+  if (!chart.containPixel('grid', pointInPixel)) {
+    return null;
+  }
+
+  const pointInGrid: number[] = chart.convertFromPixel('grid', pointInPixel);
+  return pointInGrid;
+}

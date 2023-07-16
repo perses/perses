@@ -44,6 +44,7 @@ import {
   clearHighlightedSeries,
   enableDataZoom,
   getFormattedAxisLabel,
+  getPointInGrid,
   getYAxes,
   restoreChart,
   ZoomEventData,
@@ -264,68 +265,65 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     <Box
       sx={{ height }}
       onClick={(e) => {
-        // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
-        const pointInPixel = [e.nativeEvent.offsetX ?? 0, e.nativeEvent.offsetY ?? 0];
-        if (chartRef.current !== undefined && chartRef.current.containPixel('grid', pointInPixel)) {
-          if (tooltipPinnedCoords !== null) {
-            seriesMapping.pop();
-          }
-          const isMarkLineSet = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
-          if (isMarkLineSet) {
-            seriesMapping.pop();
-          }
+        // determine where on chart canvas to plot pinned crosshair as markLine
+        const pointInGrid = getPointInGrid(e.nativeEvent.offsetX, e.nativeEvent.offsetY, chartRef.current);
+        if (pointInGrid === null) {
+          return;
+        }
+
+        if (tooltipPinnedCoords !== null) {
+          seriesMapping.pop();
+        }
+        const isMarkLineSet = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
+        if (isMarkLineSet) {
+          seriesMapping.pop();
         }
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              const pointInGrid: number[] = chartRef.current.convertFromPixel('grid', pointInPixel);
-              // https://github.com/perses/perses/compare/main...sjcobb/tooltip-pin-attach-mark-line-init
-              const pinnedCrosshair: LineSeriesOption = {
-                name: 'Pinned Crosshair',
-                type: 'line',
-                // data: [timeScale.startMs, 0.02],
-                // https://echarts.apache.org/en/option.html#series-line.markLine
-                markLine: {
-                  symbol: 'none',
-                  symbolSize: 0,
-                  itemStyle: {
-                    color: '#eee',
-                  },
-                  data: [
-                    {
-                      // xAxis: timeScale.startMs,
-                      xAxis: pointInGrid[0],
-                    },
-                  ],
-                  // data: [timeScale.startMs, 0.02],
-                  lineStyle: {
-                    width: 1,
-                    type: 'dashed',
-                  },
-                  label: {
-                    // distance: [20, 8],
-                  },
-                  emphasis: {
-                    lineStyle: {
-                      width: 1,
-                      type: 'dashed',
-                    },
-                  },
-                  blur: {
-                    lineStyle: {
-                      width: 1,
-                      type: 'dashed',
-                      opacity: 1,
-                    },
+              if (pointInGrid !== null) {
+                const pinnedCrosshair: LineSeriesOption = {
+                  name: 'Pinned Crosshair',
+                  type: 'line',
+                  // https://echarts.apache.org/en/option.html#series-line.markLine
+                  markLine: {
+                    symbol: 'none',
+                    symbolSize: 0,
                     itemStyle: {
                       color: '#eee',
                     },
+                    data: [
+                      {
+                        xAxis: pointInGrid[0],
+                      },
+                    ],
+                    lineStyle: {
+                      width: 1,
+                      type: 'dashed',
+                    },
+                    emphasis: {
+                      lineStyle: {
+                        width: 1,
+                        type: 'dashed',
+                      },
+                    },
+                    blur: {
+                      lineStyle: {
+                        width: 1,
+                        type: 'dashed',
+                        opacity: 1,
+                      },
+                      itemStyle: {
+                        color: '#eee',
+                      },
+                    },
                   },
-                },
-              };
-              seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+                };
+                seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+              }
+
               return {
                 page: {
                   x: e.pageX,

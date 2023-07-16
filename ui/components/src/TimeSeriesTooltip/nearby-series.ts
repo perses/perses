@@ -15,6 +15,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
+import { getPointInGrid } from '../utils';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -328,18 +329,14 @@ export function getNearbySeriesData({
   if (cursorTargetMatchesChart === false) return [];
 
   if (chart['_model'] === undefined || data === null) return [];
-  const chartModel = chart['_model'];
-  const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
-  const totalSeries = data.length;
 
-  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-
-  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
-  if (chart.containPixel('grid', pointInPixel)) {
-    const pointInGrid: number[] = chart.convertFromPixel('grid', pointInPixel);
-    if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
-    }
+  const pointInGrid = getPointInGrid(mousePos.plotCanvas.x, mousePos.plotCanvas.y, chart);
+  if (pointInGrid !== null) {
+    const chartModel = chart['_model'];
+    const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
+    const totalSeries = data.length;
+    const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
+    return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
   }
 
   return [];
