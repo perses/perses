@@ -208,6 +208,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           hideOverlap: true,
           formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
         },
+        axisPointer: {
+          snap: false, // important so shared crosshair does not lag
+        },
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,
@@ -215,6 +218,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         show: true,
         trigger: 'axis',
         showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
+        snap: false,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -222,7 +226,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
-        snap: true,
+        snap: false, // xAxis.axisPointer.snap takes priority
       },
       toolbox: {
         feature: {
@@ -239,9 +243,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       return __experimentalEChartsOptionsOverride(option);
     }
 
-    console.log('OPTION -> updated... ', option);
-    console.log('tooltipPinnedCoords -> updated... ', tooltipPinnedCoords);
     return option;
+    // tooltipPinnedCoords is needed in dep array so crosshair stays beside pinned tooltip onClick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data,
     seriesMapping,
@@ -263,43 +267,65 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         // https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
         const pointInPixel = [e.nativeEvent.offsetX ?? 0, e.nativeEvent.offsetY ?? 0];
         if (chartRef.current !== undefined && chartRef.current.containPixel('grid', pointInPixel)) {
-          const pointInGrid: number[] = chartRef.current.convertFromPixel('grid', pointInPixel);
-          console.log('pointInGrid -> ', pointInGrid);
-
-          // https://github.com/perses/perses/compare/main...sjcobb/tooltip-pin-attach-mark-line-init
-          const pinnedCrosshair: LineSeriesOption = {
-            name: 'Pinned Crosshair',
-            type: 'line',
-            // data: [timeScale.startMs, 0.02],
-            markLine: {
-              symbol: 'none',
-              symbolSize: 0,
-              itemStyle: {
-                color: '#eee',
-              },
-              data: [
-                {
-                  // xAxis: timeScale.startMs,
-                  xAxis: pointInGrid[0],
-                },
-              ],
-              // data: [timeScale.startMs, 0.02],
-              lineStyle: {
-                width: 1,
-                type: 'dashed',
-              },
-              label: {
-                // distance: [20, 8],
-              },
-            },
-          };
-          seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+          if (tooltipPinnedCoords !== null) {
+            seriesMapping.pop();
+          }
+          const isMarkLineSet = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
+          if (isMarkLineSet) {
+            seriesMapping.pop();
+          }
         }
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
+              const pointInGrid: number[] = chartRef.current.convertFromPixel('grid', pointInPixel);
+              // https://github.com/perses/perses/compare/main...sjcobb/tooltip-pin-attach-mark-line-init
+              const pinnedCrosshair: LineSeriesOption = {
+                name: 'Pinned Crosshair',
+                type: 'line',
+                // data: [timeScale.startMs, 0.02],
+                // https://echarts.apache.org/en/option.html#series-line.markLine
+                markLine: {
+                  symbol: 'none',
+                  symbolSize: 0,
+                  itemStyle: {
+                    color: '#eee',
+                  },
+                  data: [
+                    {
+                      // xAxis: timeScale.startMs,
+                      xAxis: pointInGrid[0],
+                    },
+                  ],
+                  // data: [timeScale.startMs, 0.02],
+                  lineStyle: {
+                    width: 1,
+                    type: 'dashed',
+                  },
+                  label: {
+                    // distance: [20, 8],
+                  },
+                  emphasis: {
+                    lineStyle: {
+                      width: 1,
+                      type: 'dashed',
+                    },
+                  },
+                  blur: {
+                    lineStyle: {
+                      width: 1,
+                      type: 'dashed',
+                      opacity: 1,
+                    },
+                    itemStyle: {
+                      color: '#eee',
+                    },
+                  },
+                },
+              };
+              seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
               return {
                 page: {
                   x: e.pageX,
@@ -385,6 +411,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             unit={unit}
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
+              // TODO: how to do this in less hacky way
+              seriesMapping.pop();
+              seriesMapping.pop();
             }}
           />
         )}
