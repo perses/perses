@@ -46,7 +46,7 @@ export function checkforNearbyTimeSeries(
   seriesMapping: TimeChartSeriesMapping,
   pointInGrid: number[],
   yBuffer: number,
-  chart?: EChartsInstance,
+  chart: EChartsInstance,
   unit?: UnitOptions
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
@@ -54,6 +54,8 @@ export function checkforNearbyTimeSeries(
   const cursorY: number | null = pointInGrid[1] ?? null;
 
   if (cursorX === null || cursorY === null) return currentNearbySeriesData;
+
+  if (chart.dispatchAction === undefined) return currentNearbySeriesData;
 
   if (!Array.isArray(data)) return currentNearbySeriesData;
   const nearbySeriesIndexes: number[] = [];
@@ -109,16 +111,22 @@ export function checkforNearbyTimeSeries(
                 percentage: percentRangeToCheck,
               });
               if (isClosestToCursor) {
+                // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
                 emphasizedSeriesIndexes.push(seriesIdx);
+
+                // allows for datapoint hover state, customize 'select' options in getTimeSeries util
+                chart.dispatchAction({
+                  type: 'select',
+                  seriesIndex: seriesIdx,
+                  dataIndex: datumIdx,
+                });
               } else {
                 nonEmphasizedSeriesIndexes.push(seriesIdx);
                 // ensure series far away from cursor are not highlighted
-                if (chart?.dispatchAction !== undefined) {
-                  chart.dispatchAction({
-                    type: 'downplay',
-                    seriesIndex: seriesIdx,
-                  });
-                }
+                chart.dispatchAction({
+                  type: 'downplay',
+                  seriesIndex: seriesIdx,
+                });
               }
               const formattedY = formatValue(yValue, unit);
               currentNearbySeriesData.push({
@@ -140,32 +148,30 @@ export function checkforNearbyTimeSeries(
     }
   }
 
-  if (chart?.dispatchAction !== undefined) {
-    // Clears emphasis state of all lines that are not emphasized.
-    // Emphasized is a subset of just the nearby series that are closest to cursor.
-    chart.dispatchAction({
-      type: 'downplay',
-      seriesIndex: nonEmphasizedSeriesIndexes,
-    });
+  // Clears emphasis state of all lines that are not emphasized.
+  // Emphasized is a subset of just the nearby series that are closest to cursor.
+  chart.dispatchAction({
+    type: 'downplay',
+    seriesIndex: nonEmphasizedSeriesIndexes,
+  });
 
-    // https://echarts.apache.org/en/api.html#action.highlight
-    if (emphasizedSeriesIndexes.length > 0) {
-      // Fadeout opacity of all series not closest to cursor.
-      chart.dispatchAction({
-        type: 'highlight',
-        seriesIndex: emphasizedSeriesIndexes,
-        notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
-        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
-      });
-    } else {
-      // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
-      chart.dispatchAction({
-        type: 'highlight',
-        seriesIndex: nearbySeriesIndexes,
-        notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
-        escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
-      });
-    }
+  // https://echarts.apache.org/en/api.html#action.highlight
+  if (emphasizedSeriesIndexes.length > 0) {
+    // Fadeout opacity of all series not closest to cursor.
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: emphasizedSeriesIndexes,
+      notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
+      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+    });
+  } else {
+    // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: nearbySeriesIndexes,
+      notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
+      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+    });
   }
 
   return currentNearbySeriesData;

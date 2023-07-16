@@ -123,7 +123,8 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
-  paletteColor?: string
+  paletteColor: string,
+  themeMode: 'dark' | 'light'
 ): TimeSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
@@ -157,6 +158,7 @@ export function getTimeSeries(
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
+    // symbol: 'emptyCircle',
     showSymbol: showPoints,
     showAllSymbol: true,
     symbolSize: pointRadius,
@@ -174,6 +176,18 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
+      },
+    },
+    selectedMode: 'single',
+    select: {
+      itemStyle: {
+        // color: paletteColor,
+        // color: themeMode === 'light' ? '#000' : '#fff',
+        color: themeMode === 'light' ? '#fff' : '#000',
+        // borderColor: themeMode === 'light' ? '#000' : '#fff',
+        borderColor: paletteColor,
+        borderType: 'solid',
+        borderWidth: 3,
       },
     },
     blur: {

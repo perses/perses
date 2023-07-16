@@ -48,7 +48,6 @@ import {
   useId,
   TimeChart,
   TimeChartSeriesMapping,
-  TimeSeriesOption,
 } from '@perses-dev/components';
 import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
 import {
@@ -192,6 +191,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           });
         }
 
+        console.log(muiTheme.palette);
+
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
           // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
@@ -217,7 +218,15 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         if (showTimeSeries) {
           timeSeriesMapping.push(
-            getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, timeScale, seriesColor)
+            getTimeSeries(
+              seriesId,
+              seriesIndex,
+              formattedSeriesName,
+              visual,
+              timeScale,
+              seriesColor,
+              muiTheme.palette.mode
+            )
           );
         }
         if (legend && legendItems) {
