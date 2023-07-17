@@ -19,6 +19,7 @@ import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } fro
 import { CanvasRenderer } from 'echarts/renderers';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
+import { ModeOption } from '../ModeSelector';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -32,14 +33,15 @@ export interface BarChartProps {
   height: number;
   data: BarChartData[] | null;
   unit: UnitOptions;
+  mode: ModeOption;
 }
 
 export function BarChart(props: BarChartProps) {
-  const { width, height, data, unit } = props;
+  const { width, height, data, unit, mode } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data == null) return chartsTheme.noDataOption;
+    if (data == null || !data.length) return chartsTheme.noDataOption;
 
     const source: Array<Array<BarChartData['label'] | BarChartData['value']>> = [];
     data.map((d) => {
@@ -62,19 +64,35 @@ export function BarChart(props: BarChartProps) {
         splitLine: {
           show: false,
         },
+        axisLabel: {
+          overflow: 'truncate',
+          width: width / 3,
+        },
       },
       series: {
         type: 'bar',
         label: {
-          formatter: (params: { data: number[] }) => params.data[1] && formatValue(params.data[1], unit),
+          formatter: (params: { data: number[] }) => {
+            if (mode === 'percentage') {
+              return (
+                params.data[1] &&
+                formatValue(params.data[1] * 100, {
+                  kind: 'Percent',
+                  decimal_places: unit.decimal_places,
+                })
+              );
+            }
+            return params.data[1] && formatValue(params.data[1], unit);
+          },
         },
       },
       tooltip: {
+        confine: true,
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
     };
-  }, [data, chartsTheme, unit]);
+  }, [data, chartsTheme, width, mode, unit]);
 
   return (
     <EChart
