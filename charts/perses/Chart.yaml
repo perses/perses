@@ -1,0 +1,21 @@
+apiVersion: v2
+name: perses
+description: Perses helm chart
+icon: https://avatars.githubusercontent.com/u/77209215?s=200&v=4
+type: application
+version: 0.1.0
+appVersion: "0.37.2"
+sources:
+  - https://github.com/perses/perses
+annotations:
+  "artifacthub.io/license": Apache-2.0
+  "artifacthub.io/links": |
+    - name: Chart Source
+      url: https://github.com/perses/perses/tree/main/charts/perses
+    - name: Upstream Project
+      url: https://github.com/perses/perses
+keywords:
+  - monitoring
+  - metric
+  - dashboarding
+  - prometheus
