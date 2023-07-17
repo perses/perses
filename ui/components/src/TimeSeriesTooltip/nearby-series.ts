@@ -15,7 +15,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
-import { getPointInGrid } from '../utils';
+import { getPointInGrid, restoreChart } from '../utils';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -172,6 +172,9 @@ export function checkforNearbyTimeSeries(
       notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
       escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
     });
+
+    // Clears datapoint select options
+    restoreChart(chart);
   }
 
   return currentNearbySeriesData;

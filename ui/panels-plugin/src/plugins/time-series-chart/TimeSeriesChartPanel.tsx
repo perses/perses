@@ -13,7 +13,7 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { Box, Skeleton, useTheme } from '@mui/material';
-import type { GridComponentOption, LineSeriesOption } from 'echarts';
+import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
@@ -190,8 +190,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
             values: getTimeSeriesValues(timeSeries, timeScale),
           });
         }
-
-        console.log(muiTheme.palette);
 
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
