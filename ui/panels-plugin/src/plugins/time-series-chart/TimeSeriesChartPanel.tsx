@@ -184,13 +184,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by series_name_format in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        if (Array.isArray(timeChartData)) {
-          timeChartData.push({
-            name: formattedSeriesName,
-            values: getTimeSeriesValues(timeSeries, timeScale),
-          });
-        }
-
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
           // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
@@ -215,10 +208,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         const showTimeSeries = isSelected || isSelectAll;
 
         if (showTimeSeries) {
+          // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
+          // which legend items are selected.
+          const datasetIndex = timeChartData.length;
+          // Each series is stored as a separate dataset source.
+          // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
           timeSeriesMapping.push(
-            getTimeSeries(seriesId, seriesIndex, formattedSeriesName, visual, timeScale, seriesColor)
+            getTimeSeries(seriesId, datasetIndex, formattedSeriesName, visual, timeScale, seriesColor)
           );
+
+          timeChartData.push({
+            name: formattedSeriesName,
+            values: getTimeSeriesValues(timeSeries, timeScale),
+          });
         }
+
         if (legend && legendItems) {
           legendItems.push({
             id: seriesId, // Avoids duplicate key console errors when there are duplicate series names
