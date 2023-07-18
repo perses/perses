@@ -119,7 +119,7 @@ export function getLineSeries(
  */
 export function getTimeSeries(
   id: string,
-  seriesIndex: number,
+  datasetIndex: number,
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
@@ -140,7 +140,7 @@ export function getTimeSeries(
     const series: BarSeriesOption = {
       type: 'bar',
       id: id,
-      datasetIndex: seriesIndex,
+      datasetIndex,
       name: formattedName,
       color: paletteColor,
       stack: visual.stack === 'All' ? visual.stack : undefined,
@@ -150,7 +150,7 @@ export function getTimeSeries(
   const series: LineSeriesOption = {
     type: 'line',
     id: id,
-    datasetIndex: seriesIndex,
+    datasetIndex,
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
