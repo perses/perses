@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,10 +27,11 @@ import {
   ClickAwayListener,
   Divider,
   Select,
+  capitalize,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
-import { ErrorBoundary } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
@@ -69,9 +70,10 @@ interface VariableEditFormProps {
 
 export function VariableEditForm(props: VariableEditFormProps) {
   const { initialVariableDefinition, onChange, onCancel, action = 'update' } = props;
-  const [state, setState] = useImmer(getInitialState(initialVariableDefinition));
+  const initialState = getInitialState(initialVariableDefinition);
+  const [state, setState] = useImmer(initialState);
   const validation = useMemo(() => getValidation(state), [state]);
-
+  const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState(0);
 
   const refreshPreview = () => {
@@ -94,6 +96,18 @@ export function VariableEditForm(props: VariableEditFormProps) {
     return '';
   }, [action]);
 
+  // When user click on cancel, several possibilities:
+  // - create action: ask for discard approval
+  // - update action: ask for discard approval if changed
+  // - read action: don´t ask for discard approval
+  const handleCancel = useCallback(() => {
+    if (action === 'create' || (action === 'update' && JSON.stringify(initialState) !== JSON.stringify(state))) {
+      setDiscardDialogStateOpened(true);
+    } else {
+      onCancel();
+    }
+  }, [state, initialState, action, setDiscardDialogStateOpened, onCancel]);
+
   return (
     <>
       <Box
@@ -106,38 +120,20 @@ export function VariableEditForm(props: VariableEditFormProps) {
       >
         <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
+          {action !== 'read' && (
             <Button
-              color="secondary"
-              variant="outlined"
+              disabled={!validation.isValid}
+              variant="contained"
               onClick={() => {
-                onCancel();
+                onChange(getVariableDefinitionFromState(state));
               }}
             >
-              Close
+              {capitalize(action)}
             </Button>
-          ) : (
-            <>
-              <Button
-                disabled={!validation.isValid}
-                variant="contained"
-                onClick={() => {
-                  onChange(getVariableDefinitionFromState(state));
-                }}
-              >
-                {action === 'create' ? 'Create' : 'Update'}
-              </Button>
-              <Button
-                color="secondary"
-                variant="outlined"
-                onClick={() => {
-                  onCancel();
-                }}
-              >
-                Cancel
-              </Button>
-            </>
           )}
+          <Button color="secondary" variant="outlined" onClick={handleCancel}>
+            {action === 'read' ? 'Close' : 'Cancel'}
+          </Button>
         </Stack>
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
@@ -367,6 +363,17 @@ export function VariableEditForm(props: VariableEditFormProps) {
           </>
         )}
       </Box>
+      <DiscardChangesConfirmationDialog
+        description="Are you sure you want to discard these changes? Changes cannot be recovered."
+        isOpen={isDiscardDialogStateOpened}
+        onCancel={() => {
+          setDiscardDialogStateOpened(false);
+        }}
+        onDiscardChanges={() => {
+          setDiscardDialogStateOpened(false);
+          onCancel();
+        }}
+      />
     </>
   );
 }
