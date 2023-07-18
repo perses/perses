@@ -78,7 +78,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
       alignItems="center"
     >
       <BarChart
-        width={contentDimensions.width - PADDING * 2} // check others
+        width={contentDimensions.width - PADDING * 2}
         height={contentDimensions.height - PADDING}
         data={barData}
         unit={unit}
