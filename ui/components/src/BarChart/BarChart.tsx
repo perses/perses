@@ -87,6 +87,7 @@ export function BarChart(props: BarChartProps) {
         },
       },
       tooltip: {
+        appendToBody: true,
         confine: true,
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
