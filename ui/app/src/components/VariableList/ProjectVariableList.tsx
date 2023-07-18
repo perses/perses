@@ -19,7 +19,7 @@ import { IconButton, Stack, Tooltip } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { DiscardChangesConfirmationDialog, useSnackbar } from '@perses-dev/components';
+import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { useIsReadonly } from '../../model/config-client';
 import { DeleteVariableDialog } from '../dialogs';
@@ -76,7 +76,6 @@ export function ProjectVariableList(props: VariableListProperties) {
   const [isViewVariableFormStateOpened, setViewVariableFormStateOpened] = useState<boolean>(false);
   const [isEditVariableFormStateOpened, setEditVariableFormStateOpened] = useState<boolean>(false);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
-  const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
 
   const handleRowClick = useCallback(
     (project: string, name: string) => {
@@ -86,15 +85,24 @@ export function ProjectVariableList(props: VariableListProperties) {
     [getVariable]
   );
 
-  const onRenameButtonClick = useCallback(
+  const handleCopyVarNameButtonClick = useCallback(
+    async (variableName: string) => {
+      await navigator.clipboard.writeText(variableName);
+      infoSnackbar('Variable copied to clipboard!');
+    },
+    [infoSnackbar]
+  );
+
+  const handleRenameButtonClick = useCallback(
     (project: string, name: string) => () => {
-      setTargetedVariable(getVariable(project, name));
+      const variable = getVariable(project, name);
+      setTargetedVariable(variable);
       setEditVariableFormStateOpened(true);
     },
     [getVariable]
   );
 
-  const onDeleteButtonClick = useCallback(
+  const handleDeleteButtonClick = useCallback(
     (project: string, name: string) => () => {
       setTargetedVariable(getVariable(project, name));
       setDeleteVariableDialogStateOpened(true);
@@ -118,10 +126,6 @@ export function ProjectVariableList(props: VariableListProperties) {
     [exceptionSnackbar, successSnackbar, updateVariableMutation]
   );
 
-  const handleVariableFormDiscard = () => {
-    setDiscardDialogStateOpened(true);
-  };
-
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
@@ -139,9 +143,9 @@ export function ProjectVariableList(props: VariableListProperties) {
             <pre>{params.value}</pre>
             <Tooltip title="Copy variable to clipboard" placement="top">
               <IconButton
-                onClick={async () => {
-                  await navigator.clipboard.writeText(params.value);
-                  infoSnackbar('Variable copied to clipboard!');
+                onClick={async ($event) => {
+                  $event.stopPropagation();
+                  await handleCopyVarNameButtonClick(params.value);
                 }}
                 size="small"
               >
@@ -200,19 +204,19 @@ export function ProjectVariableList(props: VariableListProperties) {
             icon={<PencilIcon />}
             label="Rename"
             disabled={isReadonly}
-            onClick={onRenameButtonClick(params.row.project, params.row.name)}
+            onClick={handleRenameButtonClick(params.row.project, params.row.name)}
           />,
           <GridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
             disabled={isReadonly}
-            onClick={onDeleteButtonClick(params.row.project, params.row.name)}
+            onClick={handleDeleteButtonClick(params.row.project, params.row.name)}
           />,
         ],
       },
     ],
-    [infoSnackbar, isReadonly, onRenameButtonClick, onDeleteButtonClick]
+    [isReadonly, handleRenameButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
   );
 
   return (
@@ -239,22 +243,13 @@ export function ProjectVariableList(props: VariableListProperties) {
             variable={targetedVariable}
             isOpen={isEditVariableFormStateOpened}
             onChange={handleVariableUpdate}
-            onClose={handleVariableFormDiscard}
+            onClose={() => setEditVariableFormStateOpened(false)}
             action="update"
           />
           <DeleteVariableDialog
             open={isDeleteVariableDialogStateOpened}
             onClose={() => setDeleteVariableDialogStateOpened(false)}
             variable={targetedVariable}
-          />
-          <DiscardChangesConfirmationDialog
-            description="Are you sure you want to discard these changes? Changes cannot be recovered."
-            isOpen={isDiscardDialogStateOpened}
-            onCancel={() => setDiscardDialogStateOpened(false)}
-            onDiscardChanges={() => {
-              setDiscardDialogStateOpened(false);
-              setEditVariableFormStateOpened(false);
-            }}
           />
         </>
       )}
