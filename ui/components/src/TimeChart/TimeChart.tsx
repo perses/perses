@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasetOption } from 'echarts/types/dist/shared';
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
+import merge from 'lodash/merge';
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
@@ -38,7 +39,13 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, TimeSeriesOption } from '../model/graph';
+import {
+  ChartInstanceFocusOpts,
+  ChartInstance,
+  TimeChartSeriesMapping,
+  TimeSeriesOption,
+  DEFAULT_PINNED_CROSSHAIR,
+} from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
@@ -265,17 +272,15 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     <Box
       sx={{ height }}
       onClick={(e) => {
-        // determine where on chart canvas to plot pinned crosshair as markLine
+        // Determine where on chart canvas to plot pinned crosshair as markLine.
         const pointInGrid = getPointInGrid(e.nativeEvent.offsetX, e.nativeEvent.offsetY, chartRef.current);
         if (pointInGrid === null) {
           return;
         }
 
-        if (tooltipPinnedCoords !== null) {
-          seriesMapping.pop();
-        }
+        // Clear previously set pinned crosshair
         const isMarkLineSet = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
-        if (isMarkLineSet) {
+        if (tooltipPinnedCoords !== null && isMarkLineSet) {
           seriesMapping.pop();
         }
 
@@ -284,44 +289,19 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               if (pointInGrid !== null) {
-                const pinnedCrosshair: LineSeriesOption = {
-                  name: 'Pinned Crosshair',
-                  type: 'line',
-                  // https://echarts.apache.org/en/option.html#series-line.markLine
-                  markLine: {
-                    symbol: 'none',
-                    symbolSize: 0,
-                    itemStyle: {
-                      color: '#eee',
+                // Only add pinned crosshair line series when there is not one already in seriesMapping.
+                if (seriesMapping.length !== data.length + 1) {
+                  const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+                    markLine: {
+                      data: [
+                        {
+                          xAxis: pointInGrid[0],
+                        },
+                      ],
                     },
-                    data: [
-                      {
-                        xAxis: pointInGrid[0],
-                      },
-                    ],
-                    lineStyle: {
-                      width: 1,
-                      type: 'dashed',
-                    },
-                    emphasis: {
-                      lineStyle: {
-                        width: 1,
-                        type: 'dashed',
-                      },
-                    },
-                    blur: {
-                      lineStyle: {
-                        width: 1,
-                        type: 'dashed',
-                        opacity: 1,
-                      },
-                      itemStyle: {
-                        color: '#eee',
-                      },
-                    },
-                  },
-                };
-                seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+                  });
+                  seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
+                }
               }
 
               return {
@@ -409,8 +389,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             unit={unit}
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
-              // TODO: how to do this in less hacky way
-              seriesMapping.pop();
+              // Clear previously set pinned crosshair
               seriesMapping.pop();
             }}
           />
