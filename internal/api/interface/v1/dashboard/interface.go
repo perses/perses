@@ -40,4 +40,5 @@ type DAO interface {
 
 type Service interface {
 	shared.ToolboxService
+	Validate(entity *v1.Dashboard) error
 }

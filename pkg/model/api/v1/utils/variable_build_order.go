@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dashboard
+package utils
 
 import (
 	"fmt"
@@ -19,7 +19,11 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
+	"golang.org/x/exp/slices"
 )
 
 var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
@@ -34,16 +38,16 @@ type VariableGroup struct {
 // 1. First calculate which variable depend on others
 // 2. Then, thanks to the dependencies, we can create a dependency graph.
 // 3. Then we have to determinate the build order.
-func BuildVariableOrder(variables []Variable) ([]VariableGroup, error) {
-	g, err := buildGraph(variables)
+func BuildVariableOrder(variables []dashboard.Variable, projectVariables []*v1.Variable, globalVariables []*v1.GlobalVariable) ([]VariableGroup, error) {
+	g, err := buildGraph(variables, projectVariables, globalVariables)
 	if err != nil {
 		return nil, err
 	}
 	return g.buildOrder()
 }
 
-func buildGraph(variables []Variable) (*graph, error) {
-	deps, err := buildVariableDependencies(variables)
+func buildGraph(variables []dashboard.Variable, projectVariables []*v1.Variable, globalVariables []*v1.GlobalVariable) (*graph, error) {
+	deps, err := buildVariableDependencies(variables, projectVariables, globalVariables)
 	if err != nil {
 		return nil, err
 	}
@@ -54,37 +58,107 @@ func buildGraph(variables []Variable) (*graph, error) {
 	return newGraph(variableNameList, deps), nil
 }
 
-func buildVariableDependencies(variables []Variable) (map[string][]string, error) {
+func buildVariableDependencies(variables []dashboard.Variable, projectVariables []*v1.Variable, globalVariables []*v1.GlobalVariable) (map[string][]string, error) {
 	variableNames := make(map[string]bool, len(variables))
-	// First build a list of the available variable name. That will be useful when creating the dependencies
-	// per variable to know if the dependencies are defined.
-	for _, variable := range variables {
-		variableNames[variable.Spec.GetName()] = true
+	// First build a list of the available variable name. That will be useful when creating the definedDeps
+	// per variable to know if the definedDeps are defined.
+	// We search also in the global and project variables.
+	// NB: Considering the low amount of variables expected, this is not an issue for now to collect all vars at
+	// project and global level before executing it. If it changes in the future, we might need to make one DB get by var.
+	for _, v := range globalVariables {
+		variableNames[v.GetMetadata().GetName()] = true
 	}
-	result := make(map[string][]string)
-	for _, variable := range variables {
-		name := variable.Spec.GetName()
-		var matches [][]string
-		switch variableSpec := variable.Spec.(type) {
-		case *TextVariableSpec:
-			matches = parseVariableUsed(variableSpec.Value)
-		case *ListVariableSpec:
-			matches = findAllVariableUsedInPlugin(variableSpec.Plugin)
-		}
-		deps := make(map[string]bool)
+	for _, v := range projectVariables {
+		variableNames[v.GetMetadata().GetName()] = true
+	}
+	for _, v := range variables {
+		variableNames[v.Spec.GetName()] = true
+	}
+
+	// Declare some map to store defined/undefined dependencies by variable.
+	undefinedDeps := make(map[string][]string)
+	definedDeps := make(map[string][]string)
+
+	// Closure to be used for each variable of each variable list.
+	// It checks the variables referenced in each variable and append them the dependency dictionary.
+	// If it finds a reference to an undefined variable, it's appended to a separate dictionary.
+	// /!\ Take care to follow the right priority order, calling the most prioritized at last.
+	var loadVar = func(name string, matches [][]string) {
+		// Each load of same name will reinitialize the previous one.
+		delete(undefinedDeps, name)
+		delete(definedDeps, name)
+
+		var tmpDefinedDeps []string
+		var tmpUndefinedDeps []string
 		for _, match := range matches {
 			// match[0] is the string that is matching the regexp (including the $)
 			// match[1] is the string that is matching the group defined by the regexp. (the string without the $)
-			if _, ok := variableNames[match[1]]; !ok {
-				return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", match[1], name)
+			usedVarName := match[1]
+			if _, ok := variableNames[usedVarName]; !ok {
+				if !slices.Contains(tmpUndefinedDeps, usedVarName) {
+					tmpUndefinedDeps = append(tmpUndefinedDeps, usedVarName)
+				}
+			} else {
+				if !slices.Contains(tmpDefinedDeps, usedVarName) {
+					tmpDefinedDeps = append(tmpDefinedDeps, usedVarName)
+				}
 			}
-			deps[match[1]] = true
 		}
-		for dep := range deps {
-			result[name] = append(result[name], dep)
+		if len(tmpDefinedDeps) > 0 {
+			definedDeps[name] = tmpDefinedDeps
+		}
+		if len(tmpUndefinedDeps) > 0 {
+			undefinedDeps[name] = tmpUndefinedDeps
 		}
 	}
-	return result, nil
+
+	// Loop on the global variables
+	for _, v := range globalVariables {
+		name := v.GetMetadata().GetName()
+		var matches [][]string
+		switch spec := v.Spec.Spec.(type) {
+		case *variable.TextSpec:
+			matches = parseVariableUsed(spec.Value)
+		case *variable.ListSpec:
+			matches = findAllVariableUsedInPlugin(spec.Plugin)
+		}
+		loadVar(name, matches)
+	}
+
+	// Loop on the project variables
+	for _, v := range projectVariables {
+		name := v.GetMetadata().GetName()
+		var matches [][]string
+		switch spec := v.Spec.Spec.(type) {
+		case *variable.TextSpec:
+			matches = parseVariableUsed(spec.Value)
+		case *variable.ListSpec:
+			matches = findAllVariableUsedInPlugin(spec.Plugin)
+		}
+		loadVar(name, matches)
+	}
+
+	// Loop on the dashboard variables
+	for _, v := range variables {
+		name := v.Spec.GetName()
+		var matches [][]string
+		switch spec := v.Spec.(type) {
+		case *dashboard.TextVariableSpec:
+			matches = parseVariableUsed(spec.Value)
+		case *dashboard.ListVariableSpec:
+			matches = findAllVariableUsedInPlugin(spec.Plugin)
+		}
+		loadVar(name, matches)
+	}
+
+	// At the end, if the undefined dependency is not empty, then we send an error for the first one.
+	for byVar, usedVars := range undefinedDeps {
+		for _, usedVar := range usedVars {
+			return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", usedVar, byVar)
+		}
+	}
+
+	return definedDeps, nil
 }
 
 func findAllVariableUsedInPlugin(plugin common.Plugin) [][]string {
@@ -188,11 +262,11 @@ func newGraph(variableNameList []string, dependencies map[string][]string) *grap
 			children: make(map[string]*node),
 		}
 	}
-	for variable, deps := range dependencies {
+	for variableName, deps := range dependencies {
 		for _, dep := range deps {
 			// here we add to the node representing the dep, a child which is the variable that depend on the dep.
 			// Like that once, we can build the dep, then we can loop others all variable that depend on the dep to reduce by the dependencies number.
-			g.addEdge(dep, variable)
+			g.addEdge(dep, variableName)
 		}
 	}
 	return g
