@@ -18,7 +18,7 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
 import { useProjectList } from '../../model/project-client';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
-import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import AppBreadcrumbs from '../../components/AppBreadcrumbs';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
@@ -58,7 +58,7 @@ function HomeView() {
 
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <DashboardBreadcrumbs />
+      <AppBreadcrumbs />
       <Box sx={{ width: '100%' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
