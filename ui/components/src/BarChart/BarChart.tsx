@@ -17,12 +17,15 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { Box } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
+const BAR_WIN_WIDTH = 14;
+const BAR_GAP = 6;
 export interface BarChartData {
   label: string;
   value: number | null;
@@ -85,6 +88,8 @@ export function BarChart(props: BarChartProps) {
             return params.data[1] && formatValue(params.data[1], unit);
           },
         },
+        barMinWidth: BAR_WIN_WIDTH,
+        barCategoryGap: BAR_GAP,
       },
       tooltip: {
         appendToBody: true,
@@ -96,13 +101,15 @@ export function BarChart(props: BarChartProps) {
   }, [data, chartsTheme, width, mode, unit]);
 
   return (
-    <EChart
-      sx={{
-        width: width,
-        height: height,
-      }}
-      option={option}
-      theme={chartsTheme.echartsTheme}
-    />
+    <Box sx={{ width: width, height: height, overflow: 'auto' }}>
+      <EChart
+        sx={{
+          minHeight: height,
+          height: data ? data.length * (BAR_WIN_WIDTH + BAR_GAP) : '100%',
+        }}
+        option={option}
+        theme={chartsTheme.echartsTheme}
+      />
+    </Box>
   );
 }
