@@ -13,7 +13,13 @@
 
 import { UnitOptions } from '@perses-dev/core';
 import { EChartsDataFormat } from '../model';
-import { legacyCheckforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
+import {
+  legacyCheckforNearbySeries,
+  getYBuffer,
+  isWithinPercentageRange,
+  findDuplicateDatapoints,
+  DatapointInfo,
+} from './nearby-series';
 
 describe('legacyCheckforNearbySeries', () => {
   const chartData: EChartsDataFormat = {
@@ -121,5 +127,50 @@ describe('isWithinPercentageRange', () => {
     const yValue = 100;
     const result = isWithinPercentageRange({ valueToCheck: 200, baseValue: yValue, percentage: 5 });
     expect(result).toBe(false);
+  });
+});
+
+describe('findDuplicateDatapoints', () => {
+  it('should return duplicate datapoints', () => {
+    const input: DatapointInfo[] = [
+      {
+        seriesIndex: 0,
+        dataIndex: 15,
+        seriesName: 'eth0 node demo.do.prometheus.io:9100',
+        yValue: 1000,
+      },
+      {
+        seriesIndex: 1,
+        dataIndex: 15,
+        seriesName: 'lo node demo.do.prometheus.io:9100',
+        yValue: 1000,
+      },
+      {
+        seriesIndex: 2,
+        dataIndex: 15,
+        seriesName: 'Threshold 1',
+        yValue: 900,
+      },
+      {
+        seriesIndex: 3,
+        dataIndex: 15,
+        seriesName: 'Threshold 2',
+        yValue: 920,
+      },
+    ];
+    expect(findDuplicateDatapoints(input)).toEqual([
+      {
+        seriesIndex: 0,
+        dataIndex: 15,
+        seriesName: 'eth0 node demo.do.prometheus.io:9100',
+        yValue: 1000,
+      },
+      {
+        seriesIndex: 1,
+        dataIndex: 15,
+        seriesName: 'lo node demo.do.prometheus.io:9100',
+        yValue: 1000,
+      },
+    ]);
   });
 });

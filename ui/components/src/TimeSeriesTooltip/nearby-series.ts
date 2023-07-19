@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import flatMap from 'lodash/flatMap';
+import groupBy from 'lodash/groupBy';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
@@ -37,6 +39,13 @@ export interface NearbySeriesInfo {
 
 export type NearbySeriesArray = NearbySeriesInfo[];
 
+export interface DatapointInfo {
+  dataIndex: number;
+  seriesIndex: number;
+  seriesName: string;
+  yValue: number;
+}
+
 /**
  * Returns formatted series data for the points that are close to the user's cursor.
  * Adjust xBuffer and yBuffer to increase or decrease number of series shown.
@@ -61,6 +70,8 @@ export function checkforNearbyTimeSeries(
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
+  const emphasizedDatapoints: DatapointInfo[] = [];
+
   const totalSeries = data.length;
 
   let closestTimestamp = null;
@@ -114,11 +125,12 @@ export function checkforNearbyTimeSeries(
                 // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
                 emphasizedSeriesIndexes.push(seriesIdx);
 
-                // allows for datapoint hover state, customize 'select' options in getTimeSeries util
-                chart.dispatchAction({
-                  type: 'select',
+                // keep track of all bold datapoints in tooltip so that 'select' state only applied to topmost
+                emphasizedDatapoints.push({
                   seriesIndex: seriesIdx,
                   dataIndex: datumIdx,
+                  seriesName: currentSeriesName,
+                  yValue: yValue,
                 });
               } else {
                 nonEmphasizedSeriesIndexes.push(seriesIdx);
@@ -146,6 +158,20 @@ export function checkforNearbyTimeSeries(
         }
       }
     }
+  }
+
+  // Accounts for multiple series that are rendered direct on top of eachother.
+  // Only applies select state to the datapoint that is visible to avoid color mismatch.
+  const duplicateDatapoints = findDuplicateDatapoints(emphasizedDatapoints);
+  const lastEmphasizedDatapoint = duplicateDatapoints[duplicateDatapoints.length - 1];
+  if (lastEmphasizedDatapoint !== undefined) {
+    // corresponds to select options inside getTimeSeries util
+    // https://echarts.apache.org/en/option.html#series-line.select.itemStyle
+    chart.dispatchAction({
+      type: 'select',
+      seriesIndex: lastEmphasizedDatapoint.seriesIndex,
+      dataIndex: lastEmphasizedDatapoint.dataIndex,
+    });
   }
 
   // Clears emphasis state of all lines that are not emphasized.
@@ -178,6 +204,14 @@ export function checkforNearbyTimeSeries(
   }
 
   return currentNearbySeriesData;
+}
+
+/*
+ * Which datapoint to apply select styles to should be the line rendered on top
+ */
+export function findDuplicateDatapoints(data: DatapointInfo[]): DatapointInfo[] {
+  const groupedData = groupBy(data, 'yValue');
+  return flatMap(groupedData, (group) => (group.length > 1 ? group : []));
 }
 
 /**
