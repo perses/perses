@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { TooltipConfig } from '@perses-dev/components';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
@@ -78,6 +79,8 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
 };
+
+export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = { wrapLabels: true };
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;

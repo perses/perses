@@ -144,6 +144,9 @@ export function getTimeSeries(
       name: formattedName,
       color: paletteColor,
       stack: visual.stack === 'All' ? visual.stack : undefined,
+      label: {
+        show: false,
+      },
     };
     return series;
   }
