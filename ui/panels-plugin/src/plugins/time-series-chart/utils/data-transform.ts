@@ -161,7 +161,6 @@ export function getTimeSeries(
     stack: visual.stack === 'All' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
-    symbol: 'circle',
     showSymbol: showPoints,
     showAllSymbol: true,
     symbolSize: pointRadius,

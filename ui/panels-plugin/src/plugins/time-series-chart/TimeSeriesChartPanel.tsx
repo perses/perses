@@ -270,7 +270,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         let currentTimestamp = timeScale.startMs;
         while (currentTimestamp <= timeScale.endMs) {
           thresholdTimeValueTuple.push([currentTimestamp, stepOption.value]);
-          // How often fake datapoints are added for thresholds so data shows in tooltip without flicker
+          // Used to plot fake thresholds datapoints so correct nearby threshold series shows in tooltip without flicker
           currentTimestamp += 1000 * THRESHOLD_PLOT_INTERVAL;
         }
 

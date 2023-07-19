@@ -203,9 +203,6 @@ export function checkforNearbyTimeSeries(
       notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
       escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
     });
-
-    // Clears datapoint select options
-    restoreChart(chart);
   }
 
   return currentNearbySeriesData;
