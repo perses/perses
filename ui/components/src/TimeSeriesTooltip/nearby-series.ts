@@ -205,54 +205,54 @@ export function legacyCheckforNearbySeries(
   if (Array.isArray(data.xAxis) && Array.isArray(data.timeSeries)) {
     for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
       const currentSeries = data.timeSeries[seriesIdx];
+      if (currentSeries === undefined) break;
       if (currentNearbySeriesData.length >= OPTIMIZED_MODE_SERIES_LIMIT) break;
-      if (currentSeries !== undefined) {
-        const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
-        const markerColor = currentSeries.color ?? '#000';
-        if (Array.isArray(currentSeries.data)) {
-          for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
-            const xValue = data.xAxis[datumIdx] ?? 0;
-            const yValue = currentSeries.data[datumIdx];
-            // ensure null values not displayed in tooltip
-            if (yValue !== undefined && yValue !== null && cursorX === datumIdx) {
-              if (yValue !== '-' && cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
-                // show fewer bold series in tooltip when many total series
-                const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
-                const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
-                const isClosestToCursor = isWithinPercentageRange({
-                  valueToCheck: cursorY,
-                  baseValue: yValue,
-                  percentage: percentRangeToCheck,
-                });
-                if (isClosestToCursor) {
-                  emphasizedSeriesIndexes.push(seriesIdx);
-                } else {
-                  nonEmphasizedSeriesIndexes.push(seriesIdx);
-                  // ensure series not close to cursor are not highlighted
-                  if (chart?.dispatchAction !== undefined) {
-                    chart.dispatchAction({
-                      type: 'downplay',
-                      seriesIndex: seriesIdx,
-                    });
-                  }
-                }
 
-                // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
-                const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-                const formattedY = formatValue(yValue, unit);
-                currentNearbySeriesData.push({
-                  seriesIdx: seriesIdx,
-                  datumIdx: datumIdx,
-                  seriesName: currentSeriesName,
-                  date: xValueMilliSeconds,
-                  x: xValue,
-                  y: yValue,
-                  formattedY: formattedY,
-                  markerColor: markerColor.toString(),
-                  isClosestToCursor,
-                });
-                nearbySeriesIndexes.push(seriesIdx);
+      const currentSeriesName = currentSeries.name ? currentSeries.name.toString() : '';
+      const markerColor = currentSeries.color ?? '#000';
+      if (Array.isArray(currentSeries.data)) {
+        for (let datumIdx = 0; datumIdx < currentSeries.data.length; datumIdx++) {
+          const xValue = data.xAxis[datumIdx] ?? 0;
+          const yValue = currentSeries.data[datumIdx];
+          // ensure null values not displayed in tooltip
+          if (yValue !== undefined && yValue !== null && cursorX === datumIdx) {
+            if (yValue !== '-' && cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
+              // show fewer bold series in tooltip when many total series
+              const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
+              const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
+              const isClosestToCursor = isWithinPercentageRange({
+                valueToCheck: cursorY,
+                baseValue: yValue,
+                percentage: percentRangeToCheck,
+              });
+              if (isClosestToCursor) {
+                emphasizedSeriesIndexes.push(seriesIdx);
+              } else {
+                nonEmphasizedSeriesIndexes.push(seriesIdx);
+                // ensure series not close to cursor are not highlighted
+                if (chart?.dispatchAction !== undefined) {
+                  chart.dispatchAction({
+                    type: 'downplay',
+                    seriesIndex: seriesIdx,
+                  });
+                }
               }
+
+              // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
+              const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
+              const formattedY = formatValue(yValue, unit);
+              currentNearbySeriesData.push({
+                seriesIdx: seriesIdx,
+                datumIdx: datumIdx,
+                seriesName: currentSeriesName,
+                date: xValueMilliSeconds,
+                x: xValue,
+                y: yValue,
+                formattedY: formattedY,
+                markerColor: markerColor.toString(),
+                isClosestToCursor,
+              });
+              nearbySeriesIndexes.push(seriesIdx);
             }
           }
         }
