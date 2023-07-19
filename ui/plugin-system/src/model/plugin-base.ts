@@ -27,6 +27,11 @@ export interface Plugin<Spec> {
    * Callback for creating the initial options for the plugin.
    */
   createInitialOptions: () => Spec;
+  // TODO: add ability for all plugins to participate in validation, upgrades / migration
+  // validateOptions()
+  // upgradeOptions()
+  // apiVersion // where does this fit in?
+  // - see: https://github.com/perses/perses/discussions/1186
 }
 
 /**
