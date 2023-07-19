@@ -214,8 +214,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         if (showTimeSeries) {
           // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
-          // which legend items are selected.
+          // which legend items are selected. This must happen before timeChartData.push to avoid an
+          // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
           const datasetIndex = timeChartData.length;
+
           // Each series is stored as a separate dataset source.
           // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
           timeSeriesMapping.push(
