@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Locator } from '@playwright/test';
-import { selectMenuItem } from '../utils';
 
 export class DatasourceEditor {
   readonly container: Locator;
@@ -23,6 +22,8 @@ export class DatasourceEditor {
   readonly displayLabelInput: Locator;
   readonly descriptionInput: Locator;
 
+  readonly isDefaultSwitch: Locator;
+
   constructor(container: Locator) {
     this.container = container;
 
@@ -31,6 +32,8 @@ export class DatasourceEditor {
     this.nameInput = container.getByLabel('Name');
     this.displayLabelInput = container.getByLabel('Display Label');
     this.descriptionInput = container.getByLabel('Description');
+
+    this.isDefaultSwitch = container.getByLabel('Set as default');
   }
 
   async setName(name: string) {
@@ -48,7 +51,11 @@ export class DatasourceEditor {
     await this.descriptionInput.type(description);
   }
 
-  async selectDefault(isDefault: string) {
-    await selectMenuItem(this.container, 'Default', isDefault);
+  async setDefault(isDefault: boolean) {
+    if (isDefault) {
+      await this.isDefaultSwitch.check();
+    } else {
+      await this.isDefaultSwitch.uncheck();
+    }
   }
 }

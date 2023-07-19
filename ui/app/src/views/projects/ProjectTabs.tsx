@@ -157,7 +157,7 @@ function TabButton(props: TabButtonProps) {
               },
             }}
             isOpen={isCreateDatasourceDrawerStateOpened}
-            saveAction="Create"
+            saveActionStr="Create"
             onSave={handleDatasourceCreation}
             onClose={() => setCreateDatasourceFormStateOpened(false)}
           />

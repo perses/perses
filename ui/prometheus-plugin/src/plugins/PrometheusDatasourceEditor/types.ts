@@ -13,7 +13,7 @@
 
 import { RequestHeaders } from '@perses-dev/core';
 
-// TODO unify this one with PrometheusDatasourceSpec from prometheus-datasource.tsx ? or rename one or the other for disambiguition?
+// TODO unify this one with the other PrometheusDatasourceSpec used for datasource store manipulation
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
   proxy?: HTTPProxy;

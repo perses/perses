@@ -93,7 +93,7 @@ test.describe('ProjectView', () => {
     await datasourceEditor.setName('my_ds');
     await datasourceEditor.setDisplayLabel('My personal datasource');
     await datasourceEditor.setDescription('This is a datasource for personal use');
-    await datasourceEditor.selectDefault('no');
+    await datasourceEditor.setDefault(false);
     await datasourceEditor.createButton.click();
 
     await expect(projectPage.datasourceList).toContainText('my_ds');

@@ -13,22 +13,10 @@
 
 import { useImmer } from 'use-immer';
 import { Datasource, Display } from '@perses-dev/core';
-import {
-  Box,
-  Button,
-  Divider,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
-import { DispatchWithoutAction, useMemo } from 'react';
+import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
+import { DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import { PluginEditor } from '@perses-dev/plugin-system';
+import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { useIsReadonly } from '../../model/config-client';
 
 // TODO: Replace with proper validation library
@@ -74,18 +62,18 @@ function getInitialState(datasource: Datasource): Datasource {
 
 interface DatasourceEditorFormProps {
   initialDatasource: Datasource;
-  saveAction: string;
+  saveActionStr: string;
   onSave: (datasource: Datasource) => void;
-  onCancel: DispatchWithoutAction;
+  onClose: DispatchWithoutAction;
   onDelete: DispatchWithoutAction | undefined;
-  flagAsDraft: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
-  const { initialDatasource, saveAction, flagAsDraft, onSave, onCancel, onDelete } = props;
-
+  const { initialDatasource, saveActionStr, onSave, onClose, onDelete } = props;
+  const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
   const isReadonly = useIsReadonly();
-  const [state, setState] = useImmer(getInitialState(initialDatasource));
+  const initialState = getInitialState(initialDatasource);
+  const [state, setState] = useImmer(initialState);
   const validation = useMemo(() => getValidation(state), [state]);
 
   // When saving, remove the display property if ever display.name is empty, then pass the value upstream
@@ -99,6 +87,15 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
     });
   };
 
+  // When the user clicks on cancel, ask for discard approval if anything was changed
+  const handleCancel = useCallback(() => {
+    if (JSON.stringify(initialState) !== JSON.stringify(state)) {
+      setDiscardDialogStateOpened(true);
+    } else {
+      onClose();
+    }
+  }, [state, initialState, setDiscardDialogStateOpened, onClose]);
+
   return (
     <>
       <Box
@@ -109,12 +106,12 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">{saveAction} Datasource</Typography>
+        <Typography variant="h2">{saveActionStr} Datasource</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           <Button disabled={isReadonly || !validation.isValid} variant="contained" onClick={handleSave}>
-            {saveAction}
+            {saveActionStr}
           </Button>
-          <Button color="secondary" variant="outlined" onClick={onCancel}>
+          <Button color="secondary" variant="outlined" onClick={handleCancel}>
             Cancel
           </Button>
           {onDelete && (
@@ -138,7 +135,6 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
               }}
               helperText={validation.name}
               onChange={(v) => {
-                flagAsDraft();
                 setState((draft) => {
                   draft.metadata.name = v.target.value;
                 });
@@ -154,7 +150,6 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                 readOnly: isReadonly,
               }}
               onChange={(v) => {
-                flagAsDraft();
                 setState((draft) => {
                   if (draft.spec.display) {
                     draft.spec.display.name = v.target.value;
@@ -172,7 +167,6 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                 readOnly: isReadonly,
               }}
               onChange={(v) => {
-                flagAsDraft();
                 setState((draft) => {
                   if (draft.spec.display) {
                     draft.spec.display.description = v.target.value;
@@ -181,31 +175,26 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
               }}
             />
           </Grid>
-          <Grid item xs={6}>
-            <FormControl fullWidth>
-              {/* TODO: How to ensure ids are unique? */}
-              <InputLabel id="datasource-default-label">Default</InputLabel>
-              <Select
-                labelId="datasource-default-label"
-                id="datasource-default-select"
-                label="Default"
-                value={state.spec.default == true ? 'yes' : 'no'}
-                readOnly={isReadonly}
-                onChange={(v) => {
-                  flagAsDraft();
-                  setState((draft) => {
-                    draft.spec.default = v.target.value === 'yes';
-                  });
-                }}
-                sx={{ width: '100%' }}
-              >
-                <MenuItem value="yes">Yes</MenuItem>
-                <MenuItem value="no">No</MenuItem>
-              </Select>
-            </FormControl>
-            <FormHelperText>
-              Whether this datasource should be the default {state.spec.plugin.kind} to be used
-            </FormHelperText>
+          <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
+            <Stack>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={state.spec.default}
+                    readOnly={isReadonly}
+                    onChange={(v) => {
+                      setState((draft) => {
+                        draft.spec.default = v.target.checked;
+                      });
+                    }}
+                  />
+                }
+                label="Set as default"
+              />
+              <Typography variant="caption">
+                Whether this datasource should be the default {state.spec.plugin.kind} to be used
+              </Typography>
+            </Stack>
           </Grid>
         </Grid>
         <Divider />
@@ -219,13 +208,21 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           value={state.spec.plugin}
           isReadonly={isReadonly}
           onChange={(v) => {
-            flagAsDraft();
             setState((draft) => {
               draft.spec.plugin = v;
             });
           }}
         />
       </Box>
+      <DiscardChangesConfirmationDialog
+        description="Are you sure you want to discard your changes? Changes cannot be recovered."
+        isOpen={isDiscardDialogStateOpened}
+        onCancel={() => setDiscardDialogStateOpened(false)}
+        onDiscardChanges={() => {
+          setDiscardDialogStateOpened(false);
+          onClose();
+        }}
+      />
     </>
   );
 }

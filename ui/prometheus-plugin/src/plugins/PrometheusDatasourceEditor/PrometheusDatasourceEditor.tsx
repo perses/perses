@@ -13,8 +13,8 @@
 
 import { RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
-import { Box, Grid, IconButton, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { Grid, IconButton, TextField, Typography } from '@mui/material';
+import React, { useState } from 'react';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { PrometheusDatasourceSpec } from './types';
@@ -30,8 +30,11 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
+  // TODO refactor with useImmer to avoid doing so much destructuring? feasibility & performances to be checked
+
   // utilitary function used for headers when renaming a property
-  // TODO maybe there's an cleaner way to manage this case?
+  // -> TODO it would be cleaner to manipulate headers as a list instead, to avoid doing this.
+  //    This could be a pure frontend trick, but change in the backend datamodel should also be considered
   const buildNewHeaders = (oldHeaders: RequestHeaders | undefined, oldName: string, newName: string) => {
     if (oldHeaders === undefined) return oldHeaders;
     const keys = Object.keys(oldHeaders);
@@ -52,19 +55,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       label: strDirect,
       content: (
         <>
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={4}>
-              <TextField
-                fullWidth
-                label="URL"
-                value={value.direct_url || ''}
-                InputProps={{
-                  readOnly: isReadonly,
-                }}
-                onChange={(e) => onChange({ ...value, direct_url: e.target.value })}
-              />
-            </Grid>
-          </Grid>
+          <TextField
+            fullWidth
+            label="URL"
+            value={value.direct_url || ''}
+            InputProps={{
+              readOnly: isReadonly,
+            }}
+            onChange={(e) => onChange({ ...value, direct_url: e.target.value })}
+          />
         </>
       ),
     },
@@ -94,140 +93,144 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               })
             }
           />
-          <Typography py={1} variant="h4">
+          <Typography py={2} variant="h4">
             Allowed endpoints
           </Typography>
-          {value.proxy?.spec.allowed_endpoints &&
-            value.proxy.spec.allowed_endpoints.map(({ endpoint_pattern, method }, i) => {
-              return (
-                <Grid container key={i} spacing={2} mb={2}>
-                  <Grid item xs={4}>
-                    <TextField
-                      disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
-                      fullWidth
-                      label="Endpoint pattern"
-                      value={endpoint_pattern}
-                      InputProps={{
-                        readOnly: isReadonly,
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
-                      fullWidth
-                      label="URL"
-                      value={method}
-                      InputProps={{
-                        readOnly: isReadonly,
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-              );
-            })}
-          <Typography py={1} variant="h4">
+          <Grid container spacing={2} mb={2}>
+            {value.proxy?.spec.allowed_endpoints &&
+              value.proxy.spec.allowed_endpoints.map(({ endpoint_pattern, method }, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    <Grid item xs={8}>
+                      <TextField
+                        disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
+                        fullWidth
+                        label="Endpoint pattern"
+                        value={endpoint_pattern}
+                        InputProps={{
+                          readOnly: isReadonly,
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
+                        fullWidth
+                        label="URL"
+                        value={method}
+                        InputProps={{
+                          readOnly: isReadonly,
+                        }}
+                      />
+                    </Grid>
+                  </React.Fragment>
+                );
+              })}
+          </Grid>
+          <Typography pb={2} variant="h4">
             Request Headers
           </Typography>
-          {value.proxy?.spec.headers !== undefined &&
-            Object.keys(value.proxy.spec.headers).map((headerName, i) => {
-              return (
-                <Grid container key={i} spacing={2} mb={2}>
-                  <Grid item xs={4}>
-                    <TextField
-                      fullWidth
-                      label="Header name"
-                      value={headerName}
-                      InputProps={{
-                        readOnly: isReadonly,
-                      }}
-                      onChange={(e) =>
-                        onChange({
-                          ...value,
-                          ...(value.proxy && {
-                            proxy: {
-                              ...value.proxy,
-                              spec: {
-                                ...value.proxy.spec,
-                                headers: buildNewHeaders(value.proxy.spec.headers, headerName, e.target.value),
+          <Grid container spacing={2} mb={2}>
+            {value.proxy?.spec.headers !== undefined &&
+              Object.keys(value.proxy.spec.headers).map((headerName, i) => {
+                return (
+                  <React.Fragment key={i}>
+                    <Grid item xs={4}>
+                      <TextField
+                        fullWidth
+                        label="Header name"
+                        value={headerName}
+                        InputProps={{
+                          readOnly: isReadonly,
+                        }}
+                        onChange={(e) =>
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  headers: buildNewHeaders(value.proxy.spec.headers, headerName, e.target.value),
+                                },
                               },
-                            },
-                          }),
-                        })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <TextField
-                      fullWidth
-                      label="Header value"
-                      value={value.proxy?.spec.headers?.[headerName]}
-                      InputProps={{
-                        readOnly: isReadonly,
-                      }}
-                      onChange={(e) =>
-                        onChange({
-                          ...value,
-                          ...(value.proxy && {
-                            proxy: {
-                              ...value.proxy,
-                              spec: {
-                                ...value.proxy.spec,
-                                headers: { ...value.proxy.spec.headers, [headerName]: e.target.value },
+                            }),
+                          })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={7}>
+                      <TextField
+                        fullWidth
+                        label="Header value"
+                        value={value.proxy?.spec.headers?.[headerName]}
+                        InputProps={{
+                          readOnly: isReadonly,
+                        }}
+                        onChange={(e) =>
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  headers: { ...value.proxy.spec.headers, [headerName]: e.target.value },
+                                },
                               },
-                            },
-                          }),
-                        })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={4}>
-                    <IconButton
-                      disabled={isReadonly}
-                      onClick={() => {
-                        const newHeaders = { ...value.proxy?.spec.headers };
-                        delete newHeaders[headerName];
-                        onChange({
-                          ...value,
-                          ...(value.proxy && {
-                            proxy: {
-                              ...value.proxy,
-                              spec: {
-                                ...value.proxy.spec,
-                                headers: newHeaders,
+                            }),
+                          })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <IconButton
+                        disabled={isReadonly}
+                        onClick={() => {
+                          const newHeaders = { ...value.proxy?.spec.headers };
+                          delete newHeaders[headerName];
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  headers: newHeaders,
+                                },
                               },
-                            },
-                          }),
-                        });
-                      }}
-                    >
-                      <MinusIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              );
-            })}
-          <Box mb={2}>
-            <IconButton
-              disabled={isReadonly}
-              onClick={() =>
-                onChange({
-                  ...value,
-                  ...(value.proxy && {
-                    proxy: {
-                      ...value.proxy,
-                      spec: {
-                        ...value.proxy.spec,
-                        headers: { ...value.proxy.spec.headers, '': '' },
+                            }),
+                          });
+                        }}
+                      >
+                        <MinusIcon />
+                      </IconButton>
+                    </Grid>
+                  </React.Fragment>
+                );
+              })}
+            <Grid item xs={12} sx={{ paddingTop: '5px !important' }}>
+              <IconButton
+                disabled={isReadonly}
+                onClick={() =>
+                  onChange({
+                    ...value,
+                    ...(value.proxy && {
+                      proxy: {
+                        ...value.proxy,
+                        spec: {
+                          ...value.proxy.spec,
+                          headers: { ...value.proxy.spec.headers, '': '' },
+                        },
                       },
-                    },
-                  }),
-                })
-              }
-            >
-              <PlusIcon />
-            </IconButton>
-          </Box>
+                    }),
+                  })
+                }
+              >
+                <PlusIcon />
+              </IconButton>
+            </Grid>
+          </Grid>
           <TextField
             fullWidth
             label="Secret"

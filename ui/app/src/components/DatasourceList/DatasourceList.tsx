@@ -202,7 +202,7 @@ export function DatasourceList(props: DatasourceListProperties) {
         <DatasourceDrawer
           datasource={targetedDatasource}
           isOpen={isEditDatasourceFormStateOpened}
-          saveAction="Update"
+          saveActionStr="Update"
           onSave={handleDatasourceUpdate}
           onClose={() => setEditDatasourceFormStateOpened(false)}
         />
