@@ -14,7 +14,7 @@
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import VariableBoxIcon from 'mdi-material-ui/VariableBox';
+import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import { DashboardSelector, getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
@@ -179,7 +179,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
           />
           <Tab
             label="Variables"
-            icon={<VariableBoxIcon />}
+            icon={<CodeJsonIcon />}
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}

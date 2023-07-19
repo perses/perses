@@ -16,20 +16,18 @@ import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export const DashboardDiscardChangesConfirmationDialog = () => {
   const { discardChangesConfirmationDialog: dialog } = useDiscardChangesConfirmationDialog();
-
-  if (dialog) {
-    return (
-      <DiscardChangesConfirmationDialog
-        description={
-          dialog.description ||
-          'You have unsaved changes in this dashboard. Are you sure you want to discard these changes? Changes cannot be recovered.'
-        }
-        isOpen={true}
-        onCancel={dialog.onCancel}
-        onDiscardChanges={dialog.onDiscardChanges}
-      />
-    );
+  if (dialog === undefined) {
+    return null;
   }
-
-  return <></>;
+  return (
+    <DiscardChangesConfirmationDialog
+      description={
+        dialog.description ||
+        'You have unsaved changes in this dashboard. Are you sure you want to discard these changes? Changes cannot be recovered.'
+      }
+      isOpen={true}
+      onCancel={dialog.onCancel}
+      onDiscardChanges={dialog.onDiscardChanges}
+    />
+  );
 };
