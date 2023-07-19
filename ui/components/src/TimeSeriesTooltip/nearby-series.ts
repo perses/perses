@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import flatMap from 'lodash/flatMap';
-import groupBy from 'lodash/groupBy';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
@@ -71,8 +69,11 @@ export function checkforNearbyTimeSeries(
   const emphasizedSeriesIndexes: number[] = [];
   const nonEmphasizedSeriesIndexes: number[] = [];
   const emphasizedDatapoints: DatapointInfo[] = [];
+  const duplicateDatapoints: DatapointInfo[] = [];
 
   const totalSeries = data.length;
+
+  const yValueCounts: Map<number, number> = new Map();
 
   let closestTimestamp = null;
   let closestDistance = Infinity;
@@ -125,6 +126,19 @@ export function checkforNearbyTimeSeries(
                 // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
                 emphasizedSeriesIndexes.push(seriesIdx);
 
+                // Used to determine which datapoint to apply select styles to.
+                // Accounts for cases where lines may be rendered directly on top of eachother.
+                const duplicateValuesCount = yValueCounts.get(yValue) ?? 0;
+                yValueCounts.set(yValue, duplicateValuesCount + 1);
+                if (duplicateValuesCount > 0) {
+                  duplicateDatapoints.push({
+                    seriesIndex: seriesIdx,
+                    dataIndex: datumIdx,
+                    seriesName: currentSeriesName,
+                    yValue: yValue,
+                  });
+                }
+
                 // keep track of all bold datapoints in tooltip so that 'select' state only applied to topmost
                 emphasizedDatapoints.push({
                   seriesIndex: seriesIdx,
@@ -162,7 +176,6 @@ export function checkforNearbyTimeSeries(
 
   // Accounts for multiple series that are rendered direct on top of eachother.
   // Only applies select state to the datapoint that is visible to avoid color mismatch.
-  const duplicateDatapoints = findDuplicateEmphasizedDatapoints(emphasizedDatapoints);
   const lastEmphasizedDatapoint =
     duplicateDatapoints.length > 0
       ? duplicateDatapoints[duplicateDatapoints.length - 1]
@@ -209,14 +222,6 @@ export function checkforNearbyTimeSeries(
   }
 
   return currentNearbySeriesData;
-}
-
-/*
- * Which datapoint to apply select styles to should be the line rendered on top
- */
-export function findDuplicateEmphasizedDatapoints(data: DatapointInfo[]): DatapointInfo[] {
-  const groupedData = groupBy(data, 'yValue');
-  return flatMap(groupedData, (group) => (group.length > 1 ? group : []));
 }
 
 /**
