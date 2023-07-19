@@ -76,7 +76,7 @@ export function BarChart(props: BarChartProps) {
             if (mode === 'percentage') {
               return (
                 params.data[1] &&
-                formatValue(params.data[1] * 100, {
+                formatValue(params.data[1], {
                   kind: 'Percent',
                   decimal_places: unit.decimal_places,
                 })

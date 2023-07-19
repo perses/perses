@@ -16,7 +16,7 @@ import { BarChartData, SortOption } from '@perses-dev/components';
 export function calculatePercentages(data: BarChartData[]) {
   const sum = data.reduce((accumulator, { value }) => accumulator + (value ?? 0), 0);
   return data.map((seriesData) => {
-    const percentage = (seriesData.value ?? 0) / sum;
+    const percentage = ((seriesData.value ?? 0) / sum) * 100;
     return {
       ...seriesData,
       value: percentage,

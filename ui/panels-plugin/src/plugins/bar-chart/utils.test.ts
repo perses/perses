@@ -39,11 +39,11 @@ describe('calculatePercentages', () => {
     expect(percentages).toEqual([
       {
         label: 'Label 1',
-        value: 0.3,
+        value: 30,
       },
       {
         label: 'Label 2',
-        value: 0.2,
+        value: 20,
       },
       {
         label: 'Label 3',
@@ -51,7 +51,7 @@ describe('calculatePercentages', () => {
       },
       {
         label: 'Label 4',
-        value: 0.5,
+        value: 50,
       },
     ]);
   });
