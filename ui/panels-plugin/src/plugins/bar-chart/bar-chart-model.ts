@@ -29,9 +29,9 @@ export interface BarChartDefinition extends Definition<BarChartOptions> {
  */
 export interface BarChartOptions {
   calculation: CalculationType;
-  unit: UnitOptions;
-  sort: SortOption;
-  mode: ModeOption;
+  unit?: UnitOptions;
+  sort?: SortOption;
+  mode?: ModeOption;
 }
 
 export type BarChartOptionsEditorProps = OptionsEditorProps<BarChartOptions>;

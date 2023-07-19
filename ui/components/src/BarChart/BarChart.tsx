@@ -32,12 +32,12 @@ export interface BarChartProps {
   width: number;
   height: number;
   data: BarChartData[] | null;
-  unit: UnitOptions;
-  mode: ModeOption;
+  unit?: UnitOptions;
+  mode?: ModeOption;
 }
 
 export function BarChart(props: BarChartProps) {
-  const { width, height, data, unit, mode } = props;
+  const { width, height, data, unit = { kind: 'Decimal' }, mode = 'value' } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
