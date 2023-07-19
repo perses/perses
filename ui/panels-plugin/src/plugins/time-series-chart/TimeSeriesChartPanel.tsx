@@ -54,6 +54,7 @@ import {
   DEFAULT_UNIT,
   DEFAULT_VISUAL,
   DEFAULT_TOOLTIP_CONFIG,
+  THRESHOLD_PLOT_INTERVAL,
 } from './time-series-chart-model';
 import {
   getTimeSeries,
@@ -264,12 +265,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         };
         const thresholdName = step.name ?? `Threshold ${index + 1}`;
 
-        // generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 30s
+        // Generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 15s
         const thresholdTimeValueTuple: TimeSeriesValueTuple[] = [];
         let currentTimestamp = timeScale.startMs;
         while (currentTimestamp <= timeScale.endMs) {
           thresholdTimeValueTuple.push([currentTimestamp, stepOption.value]);
-          currentTimestamp += 1000 * 30;
+          // How often fake datapoints are added for thresholds so data shows in tooltip without flicker
+          currentTimestamp += 1000 * THRESHOLD_PLOT_INTERVAL;
         }
 
         timeChartData.push({
