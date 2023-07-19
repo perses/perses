@@ -48,9 +48,13 @@ import {
   useId,
   TimeChart,
   TimeChartSeriesMapping,
-  TooltipConfig,
 } from '@perses-dev/components';
-import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_TOOLTIP_CONFIG,
+} from './time-series-chart-model';
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,
@@ -365,8 +369,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
 
-  const tooltipConfig: TooltipConfig = { wrapLabels: true };
-
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
@@ -410,7 +412,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 unit={unit}
                 grid={gridOverrides}
                 isStackedBar={isStackedBar}
-                tooltipConfig={tooltipConfig}
+                tooltipConfig={DEFAULT_TOOLTIP_CONFIG}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}
                 //  Show an empty chart when there is no data because the user unselected all items in
