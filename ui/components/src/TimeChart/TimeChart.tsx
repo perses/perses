@@ -226,16 +226,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       animation: false,
       tooltip: {
         show: true,
-<<<<<<< HEAD
-        trigger: 'axis',
-        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
-        snap: false,
-=======
         trigger: isStackedBar ? 'item' : 'axis',
         // ECharts tooltip content hidden since we use custom tooltip instead
         showContent: isStackedBar,
         appendToBody: true,
->>>>>>> main
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -289,31 +283,27 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         }
 
         // Clear previously set pinned crosshair
-        const isMarkLineSet = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
-        if (tooltipPinnedCoords !== null && isMarkLineSet) {
+        const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
+        if (tooltipPinnedCoords !== null && isCrosshairPinned) {
           seriesMapping.pop();
+        } else if (seriesMapping.length !== data.length + 1) {
+          // Only add pinned crosshair line series when there is not one already in seriesMapping.
+          const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+            markLine: {
+              data: [
+                {
+                  xAxis: pointInGrid[0],
+                },
+              ],
+            },
+          });
+          seriesMapping.push(pinnedCrosshair);
         }
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              if (pointInGrid !== null) {
-                // Only add pinned crosshair line series when there is not one already in seriesMapping.
-                if (seriesMapping.length !== data.length + 1) {
-                  const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
-                    markLine: {
-                      data: [
-                        {
-                          xAxis: pointInGrid[0],
-                        },
-                      ],
-                    },
-                  });
-                  seriesMapping.push(pinnedCrosshair as TimeSeriesOption);
-                }
-              }
-
               return {
                 page: {
                   x: e.pageX,
