@@ -17,11 +17,11 @@ import { calculatePercentages, sortSeriesData } from './utils';
 const MOCK_DATA: BarChartData[] = [
   {
     label: 'Label 1',
-    value: 30,
+    value: 3,
   },
   {
     label: 'Label 2',
-    value: 20,
+    value: 2,
   },
   {
     label: 'Label 3',
@@ -29,7 +29,11 @@ const MOCK_DATA: BarChartData[] = [
   },
   {
     label: 'Label 4',
-    value: 50,
+    value: 5,
+  },
+  {
+    label: 'Label 5',
+    value: null,
   },
 ];
 
@@ -53,6 +57,10 @@ describe('calculatePercentages', () => {
         label: 'Label 4',
         value: 50,
       },
+      {
+        label: 'Label 5',
+        value: 0,
+      },
     ]);
   });
 });
@@ -63,19 +71,23 @@ describe('sortSeriesData', () => {
     expect(sorted).toEqual([
       {
         label: 'Label 4',
-        value: 50,
+        value: 5,
       },
       {
         label: 'Label 1',
-        value: 30,
+        value: 3,
       },
       {
         label: 'Label 2',
-        value: 20,
+        value: 2,
       },
       {
         label: 'Label 3',
         value: 0,
+      },
+      {
+        label: 'Label 5',
+        value: null,
       },
     ]);
   });
@@ -84,20 +96,24 @@ describe('sortSeriesData', () => {
     const sorted = sortSeriesData(MOCK_DATA, 'desc');
     expect(sorted).toEqual([
       {
+        label: 'Label 5',
+        value: null,
+      },
+      {
         label: 'Label 3',
         value: 0,
       },
       {
         label: 'Label 2',
-        value: 20,
+        value: 2,
       },
       {
         label: 'Label 1',
-        value: 30,
+        value: 3,
       },
       {
         label: 'Label 4',
-        value: 50,
+        value: 5,
       },
     ]);
   });

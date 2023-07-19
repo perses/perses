@@ -43,10 +43,10 @@ export function sortSeriesData(data: BarChartData[], sortOrder: SortOption) {
     // sort in descending order by value
     return data.sort((a, b) => {
       if (a.value === null) {
-        return 1;
+        return -1;
       }
       if (b.value === null) {
-        return -1;
+        return 1;
       }
       if (a.value === b.value) {
         return 0;
