@@ -110,7 +110,8 @@ export const LineChartTooltip = memo(function LineChartTooltip({
           visibility: 'visible',
           opacity: 1,
           transition: 'all 0.1s ease-out',
-          zIndex: theme.zIndex.tooltip,
+          // Ensure pinned tooltip shows behind edit panel drawer and sticky header
+          zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
           overflow: 'hidden',
           '&:hover': {
             overflowY: 'auto',
