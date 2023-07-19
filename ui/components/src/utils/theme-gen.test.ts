@@ -82,7 +82,7 @@ describe('generateChartsTheme', () => {
             "splitLine": Object {
               "lineStyle": Object {
                 "color": "#e0e0e0",
-                "opacity": 0.6,
+                "opacity": 0.4,
                 "width": 0.5,
               },
               "show": true,
@@ -180,7 +180,7 @@ describe('generateChartsTheme', () => {
             "splitLine": Object {
               "lineStyle": Object {
                 "color": "#e0e0e0",
-                "opacity": 0.6,
+                "opacity": 0.4,
                 "width": 0.5,
               },
               "show": true,

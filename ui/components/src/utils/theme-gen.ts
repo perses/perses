@@ -82,7 +82,7 @@ export function generateChartsTheme(
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
@@ -117,7 +117,7 @@ export function generateChartsTheme(
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
