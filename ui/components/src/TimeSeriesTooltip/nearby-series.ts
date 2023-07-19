@@ -163,7 +163,10 @@ export function checkforNearbyTimeSeries(
   // Accounts for multiple series that are rendered direct on top of eachother.
   // Only applies select state to the datapoint that is visible to avoid color mismatch.
   const duplicateDatapoints = findDuplicateDatapoints(emphasizedDatapoints);
-  const lastEmphasizedDatapoint = duplicateDatapoints[duplicateDatapoints.length - 1];
+  const lastEmphasizedDatapoint =
+    duplicateDatapoints.length > 0
+      ? duplicateDatapoints[duplicateDatapoints.length - 1]
+      : emphasizedDatapoints[emphasizedDatapoints.length - 1];
   if (lastEmphasizedDatapoint !== undefined) {
     // corresponds to select options inside getTimeSeries util
     // https://echarts.apache.org/en/option.html#series-line.select.itemStyle
