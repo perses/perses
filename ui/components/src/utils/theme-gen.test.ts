@@ -43,14 +43,12 @@ describe('generateChartsTheme', () => {
             "barMaxWidth": 150,
             "itemStyle": Object {
               "borderColor": "#e0e0e0",
-              "borderRadius": 4,
+              "borderRadius": 0,
               "borderWidth": 0,
-              "color": "#1976d2",
             },
             "label": Object {
               "color": "rgba(0, 0, 0, 0.87)",
-              "position": "right",
-              "show": true,
+              "show": false,
             },
           },
           "categoryAxis": Object {
