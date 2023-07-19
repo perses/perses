@@ -41,7 +41,7 @@ export function BarChart(props: BarChartProps) {
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data == null || !data.length) return chartsTheme.noDataOption;
+    if (data == null) return chartsTheme.noDataOption;
 
     const source: Array<Array<BarChartData['label'] | BarChartData['value']>> = [];
     data.map((d) => {

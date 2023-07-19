@@ -14,7 +14,7 @@
 import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import { CalculationsMap } from '@perses-dev/core';
+import { CalculationType, CalculationsMap } from '@perses-dev/core';
 import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
 import { BarChartOptions } from './bar-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
@@ -32,25 +32,27 @@ export function BarChartPanel(props: BarChartPanelProps) {
 
   const { queryResults, isLoading, isFetching } = useDataQueries(); // gets data queries from a context provider, see DataQueriesProvider
 
-  const barData: BarChartData[] = useMemo(() => {
-    if (queryResults[0]?.data === undefined) {
-      return [];
-    }
-    const seriesData: BarChartData[] = [];
-    for (const timeSeries of queryResults[0].data.series) {
-      const calculate = CalculationsMap[calculation];
-      const series = {
-        value: calculate(timeSeries.values) ?? null,
-        label: timeSeries.formattedName ?? '',
-      };
-      seriesData.push(series);
-    }
-    const sortedSeriesData = sortSeriesData(seriesData, sort);
+  const barChartData: BarChartData[] = useMemo(() => {
+    const calculate = CalculationsMap[calculation as CalculationType];
+    const barChartData: BarChartData[] = [];
+    for (const result of queryResults) {
+      // Skip queries that are still loading or don't have data
+      if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
+      for (const seriesData of result.data.series) {
+        const series = {
+          value: calculate(seriesData.values) ?? null,
+          label: seriesData.formattedName ?? '',
+        };
+        barChartData.push(series);
+      }
+    }
+
+    const sortedBarChartData = sortSeriesData(barChartData, sort);
     if (mode === 'percentage') {
-      return calculatePercentages(sortedSeriesData);
+      return calculatePercentages(sortedBarChartData);
     } else {
-      return sortedSeriesData;
+      return sortedBarChartData;
     }
   }, [queryResults, sort, mode, calculation]);
 
@@ -75,7 +77,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
       <BarChart
         width={contentDimensions.width - PADDING * 2}
         height={contentDimensions.height - PADDING * 2}
-        data={barData}
+        data={barChartData}
         unit={unit}
         mode={mode}
       />
