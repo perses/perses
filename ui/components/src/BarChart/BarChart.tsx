@@ -66,7 +66,13 @@ export function BarChart(props: BarChartProps) {
       series: {
         type: 'bar',
         label: {
+          show: true,
+          position: 'right',
           formatter: (params: { data: number[] }) => params.data[1] && formatValue(params.data[1], unit),
+        },
+        itemStyle: {
+          borderRadius: 4,
+          color: chartsTheme.echartsTheme[0],
         },
       },
       tooltip: {

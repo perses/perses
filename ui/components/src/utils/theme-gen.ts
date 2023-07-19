@@ -190,14 +190,12 @@ export function generateChartsTheme(
       barMaxWidth: 150,
       itemStyle: {
         borderWidth: 0,
+        borderRadius: 0,
         borderColor: muiTheme.palette.grey[300],
-        borderRadius: 4,
-        color: muiTheme.palette.primary.main,
       },
       label: {
-        position: 'right',
-        show: true,
-        color: muiTheme.palette.text.primary,
+        show: false,
+        color: primaryTextColor,
       },
     },
     gauge: {

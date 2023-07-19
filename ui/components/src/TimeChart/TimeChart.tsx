@@ -77,6 +77,7 @@ export interface TimeChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  isStackedBar?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -91,6 +92,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     yAxis,
     unit,
     grid,
+    isStackedBar = false,
     tooltipConfig = { wrapLabels: true },
     noDataVariant = 'message',
     syncGroup,
@@ -213,8 +215,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       animation: false,
       tooltip: {
         show: true,
-        trigger: 'axis',
-        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
+        trigger: isStackedBar ? 'item' : 'axis',
+        // ECharts tooltip content hidden since we use custom tooltip instead
+        showContent: isStackedBar,
+        appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -250,6 +254,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     __experimentalEChartsOptionsOverride,
     noDataVariant,
     timeZone,
+    isStackedBar,
   ]);
 
   return (
