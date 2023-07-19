@@ -68,7 +68,10 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
 
+  console.log({ isTooltipPinned });
   if (!isTooltipPinned) {
+    console.log('transforming...........', pinnedPos);
+    console.log({ containerElement });
     transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
   }
 
