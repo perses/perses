@@ -14,8 +14,8 @@
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
-import { getPointInGrid, restoreChart } from '../utils';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
+import { batchDispatchNearbySeriesActions, getPointInGrid } from '../utils';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -36,13 +36,6 @@ export interface NearbySeriesInfo {
 }
 
 export type NearbySeriesArray = NearbySeriesInfo[];
-
-export interface DatapointInfo {
-  dataIndex: number;
-  seriesIndex: number;
-  seriesName: string;
-  yValue: number;
-}
 
 /**
  * Returns formatted series data for the points that are close to the user's cursor.
@@ -174,52 +167,14 @@ export function checkforNearbyTimeSeries(
     }
   }
 
-  // Accounts for multiple series that are rendered direct on top of eachother.
-  // Only applies select state to the datapoint that is visible to avoid color mismatch.
-  const lastEmphasizedDatapoint =
-    duplicateDatapoints.length > 0
-      ? duplicateDatapoints[duplicateDatapoints.length - 1]
-      : emphasizedDatapoints[emphasizedDatapoints.length - 1];
-  if (lastEmphasizedDatapoint !== undefined) {
-    // Corresponds to select options inside getTimeSeries util.
-    // https://echarts.apache.org/en/option.html#series-line.select.itemStyle
-    chart.dispatchAction({
-      type: 'select',
-      seriesIndex: lastEmphasizedDatapoint.seriesIndex,
-      dataIndex: lastEmphasizedDatapoint.dataIndex,
-      // Shared crosshair should not emphasize datapoints on adjacent charts.
-      escapeConnect: true, // TODO: try to remove escapeConnect and match by seriesName for cross panel correlation
-    });
-  }
-
-  // Clears emphasis state of all lines that are not emphasized.
-  // Emphasized is a subset of just the nearby series that are closest to cursor.
-  chart.dispatchAction({
-    type: 'downplay',
-    seriesIndex: nonEmphasizedSeriesIndexes,
-  });
-
-  // https://echarts.apache.org/en/api.html#action.highlight
-  if (emphasizedSeriesIndexes.length > 0) {
-    // Fadeout opacity of all series not closest to cursor.
-    chart.dispatchAction({
-      type: 'highlight',
-      seriesIndex: emphasizedSeriesIndexes,
-      notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
-      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
-    });
-  } else {
-    // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
-    chart.dispatchAction({
-      type: 'highlight',
-      seriesIndex: nearbySeriesIndexes,
-      notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
-      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
-    });
-
-    // Clears selected datapoints since no bold series in tooltip, restore does not impact highlighting
-    restoreChart(chart);
-  }
+  batchDispatchNearbySeriesActions(
+    chart,
+    nearbySeriesIndexes,
+    emphasizedSeriesIndexes,
+    nonEmphasizedSeriesIndexes,
+    emphasizedDatapoints,
+    duplicateDatapoints
+  );
 
   return currentNearbySeriesData;
 }

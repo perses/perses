@@ -93,3 +93,10 @@ export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
     },
   },
 };
+
+export interface DatapointInfo {
+  dataIndex: number;
+  seriesIndex: number;
+  seriesName: string;
+  yValue: number;
+}
