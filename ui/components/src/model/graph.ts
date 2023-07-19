@@ -74,29 +74,21 @@ export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
   type: 'line',
   // https://echarts.apache.org/en/option.html#series-line.markLine
   markLine: {
-    symbol: 'none',
-    symbolSize: 0,
-    itemStyle: {
-      color: '#eee',
-    },
     data: [],
     lineStyle: {
       type: 'dashed',
-      width: 1,
+      width: 2,
     },
     emphasis: {
       lineStyle: {
-        type: 'dashed',
-        width: 1.5,
+        width: 2,
+        opacity: 1,
       },
     },
     blur: {
       lineStyle: {
-        width: 1.5,
+        width: 2,
         opacity: 1,
-      },
-      itemStyle: {
-        color: '#eee',
       },
     },
   },

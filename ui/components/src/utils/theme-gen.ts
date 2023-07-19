@@ -172,6 +172,22 @@ export function generateChartsTheme(
         fontSize: 11,
       },
     },
+    axisPointer: {
+      lineStyle: {
+        color: muiTheme.palette.grey[500],
+      },
+    },
+    markLine: {
+      symbol: 'none',
+      symbolSize: 0,
+      itemStyle: {
+        color: muiTheme.palette.grey[700],
+      },
+      lineStyle: {
+        type: 'dashed',
+        width: 1,
+      },
+    },
     line: {
       showSymbol: false,
       symbol: 'circle',

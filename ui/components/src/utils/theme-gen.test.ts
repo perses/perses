@@ -39,6 +39,11 @@ describe('generateChartsTheme', () => {
           },
         },
         "echartsTheme": Object {
+          "axisPointer": Object {
+            "lineStyle": Object {
+              "color": "#9e9e9e",
+            },
+          },
           "bar": Object {
             "barMaxWidth": 150,
             "itemStyle": Object {
@@ -143,6 +148,17 @@ describe('generateChartsTheme', () => {
             "smooth": true,
             "symbol": "circle",
             "symbolSize": 4,
+          },
+          "markLine": Object {
+            "itemStyle": Object {
+              "color": "#616161",
+            },
+            "lineStyle": Object {
+              "type": "dashed",
+              "width": 1,
+            },
+            "symbol": "none",
+            "symbolSize": 0,
           },
           "textStyle": Object {
             "color": "rgba(0, 0, 0, 0.87)",
