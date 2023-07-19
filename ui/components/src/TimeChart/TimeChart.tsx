@@ -43,7 +43,6 @@ import {
   ChartInstanceFocusOpts,
   ChartInstance,
   TimeChartSeriesMapping,
-  TimeSeriesOption,
   DEFAULT_PINNED_CROSSHAIR,
 } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';

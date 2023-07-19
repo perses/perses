@@ -81,19 +81,18 @@ export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
     },
     data: [],
     lineStyle: {
-      width: 1,
       type: 'dashed',
+      width: 1,
     },
     emphasis: {
       lineStyle: {
-        width: 1,
         type: 'dashed',
+        width: 1.5,
       },
     },
     blur: {
       lineStyle: {
-        width: 1,
-        type: 'dashed',
+        width: 1.5,
         opacity: 1,
       },
       itemStyle: {
