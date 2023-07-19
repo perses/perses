@@ -17,7 +17,7 @@ import {
   legacyCheckforNearbySeries,
   getYBuffer,
   isWithinPercentageRange,
-  findDuplicateDatapoints,
+  findDuplicateEmphasizedDatapoints,
   DatapointInfo,
 } from './nearby-series';
 
@@ -130,7 +130,7 @@ describe('isWithinPercentageRange', () => {
   });
 });
 
-describe('findDuplicateDatapoints', () => {
+describe('findDuplicateEmphasizedDatapoints', () => {
   it('should return duplicate datapoints', () => {
     const input: DatapointInfo[] = [
       {
@@ -158,7 +158,7 @@ describe('findDuplicateDatapoints', () => {
         yValue: 920,
       },
     ];
-    expect(findDuplicateDatapoints(input)).toEqual([
+    expect(findDuplicateEmphasizedDatapoints(input)).toEqual([
       {
         seriesIndex: 0,
         dataIndex: 15,

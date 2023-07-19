@@ -162,7 +162,7 @@ export function checkforNearbyTimeSeries(
 
   // Accounts for multiple series that are rendered direct on top of eachother.
   // Only applies select state to the datapoint that is visible to avoid color mismatch.
-  const duplicateDatapoints = findDuplicateDatapoints(emphasizedDatapoints);
+  const duplicateDatapoints = findDuplicateEmphasizedDatapoints(emphasizedDatapoints);
   const lastEmphasizedDatapoint =
     duplicateDatapoints.length > 0
       ? duplicateDatapoints[duplicateDatapoints.length - 1]
@@ -214,7 +214,7 @@ export function checkforNearbyTimeSeries(
 /*
  * Which datapoint to apply select styles to should be the line rendered on top
  */
-export function findDuplicateDatapoints(data: DatapointInfo[]): DatapointInfo[] {
+export function findDuplicateEmphasizedDatapoints(data: DatapointInfo[]): DatapointInfo[] {
   const groupedData = groupBy(data, 'yValue');
   return flatMap(groupedData, (group) => (group.length > 1 ? group : []));
 }
