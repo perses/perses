@@ -168,12 +168,14 @@ export function checkforNearbyTimeSeries(
       ? duplicateDatapoints[duplicateDatapoints.length - 1]
       : emphasizedDatapoints[emphasizedDatapoints.length - 1];
   if (lastEmphasizedDatapoint !== undefined) {
-    // corresponds to select options inside getTimeSeries util
+    // Corresponds to select options inside getTimeSeries util.
     // https://echarts.apache.org/en/option.html#series-line.select.itemStyle
     chart.dispatchAction({
       type: 'select',
       seriesIndex: lastEmphasizedDatapoint.seriesIndex,
       dataIndex: lastEmphasizedDatapoint.dataIndex,
+      // Shared crosshair should not emphasize datapoints on adjacent charts.
+      escapeConnect: true, // TODO: try to remove escapeConnect and match by seriesName for cross panel correlation
     });
   }
 
