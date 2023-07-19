@@ -11,15 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChart, BarChartData } from '@perses-dev/components';
-import { Box, Stack, Skeleton } from '@mui/material';
+import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
+import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap } from '@perses-dev/core';
 import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
 import { BarChartOptions } from './bar-chart-model';
 import { calculatePercentages, sortSeriesData } from './utils';
-
-const PADDING = 24;
 
 export type BarChartPanelProps = PanelProps<BarChartOptions>;
 
@@ -28,6 +26,9 @@ export function BarChartPanel(props: BarChartPanelProps) {
     spec: { calculation, unit, sort, mode },
     contentDimensions,
   } = props;
+
+  const chartsTheme = useChartsTheme();
+  const PADDING = chartsTheme.container.padding.default;
 
   const { queryResults, isLoading, isFetching } = useDataQueries(); // gets data queries from a context provider, see DataQueriesProvider
 
@@ -70,20 +71,14 @@ export function BarChartPanel(props: BarChartPanelProps) {
   }
 
   return (
-    <Stack
-      height={contentDimensions.height}
-      width={contentDimensions.width}
-      direction="row"
-      justifyContent="center"
-      alignItems="center"
-    >
+    <Box sx={{ padding: `${PADDING}px` }}>
       <BarChart
         width={contentDimensions.width - PADDING * 2}
-        height={contentDimensions.height - PADDING}
+        height={contentDimensions.height - PADDING * 2}
         data={barData}
         unit={unit}
         mode={mode}
       />
-    </Stack>
+    </Box>
   );
 }
