@@ -15,6 +15,7 @@
 - [BUGFIX] Time series stacked bar correct palette color and tooltip (#1305)
 - [BUGFIX] Tooltip hidden when many series and legend item selected (#1302)
 - [BUGFIX] Follow up for the project variables CRUD (#1290)
+- [BREAKINGCHANGE] Custom dialogs such as `DiscardChangesConfirmationDialog` moved to components package (#1267)
 
 ## 0.37.2 / 2023-07-13
 
