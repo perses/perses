@@ -88,7 +88,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
     unit,
     grid,
     legend,
-    tooltipConfig = { wrapLabels: true },
+    tooltipConfig = { wrapLabels: true, enablePinning: true },
     noDataVariant = 'message',
     syncGroup,
     onDataZoom,
@@ -223,7 +223,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
       sx={{ height }}
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
+        if (tooltipConfig.enablePinning && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {
@@ -305,6 +305,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
+            enablePinning={tooltipConfig.enablePinning}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {

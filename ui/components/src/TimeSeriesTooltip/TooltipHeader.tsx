@@ -27,9 +27,9 @@ import {
 export interface TooltipHeaderProps {
   nearbySeries: NearbySeriesArray;
   totalSeries: number;
-  enablePinning: boolean;
   isTooltipPinned: boolean;
   showAllSeries: boolean;
+  enablePinning?: boolean;
   onShowAllClick?: (checked: boolean) => void;
   onUnpinClick?: () => void;
 }
@@ -37,9 +37,9 @@ export interface TooltipHeaderProps {
 export const TooltipHeader = memo(function TooltipHeader({
   nearbySeries,
   totalSeries,
-  enablePinning,
   isTooltipPinned,
   showAllSeries,
+  enablePinning = true,
   onShowAllClick,
   onUnpinClick,
 }: TooltipHeaderProps) {
