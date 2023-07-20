@@ -44,6 +44,7 @@ import {
   ChartInstance,
   TimeChartSeriesMapping,
   DEFAULT_PINNED_CROSSHAIR,
+  PINNED_CROSSHAIR_SERIES_NAME,
 } from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
@@ -283,7 +284,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         }
 
         // Clear previously set pinned crosshair
-        const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === 'Pinned Crosshair';
+        const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
         if (tooltipPinnedCoords !== null && isCrosshairPinned) {
           seriesMapping.pop();
         } else if (seriesMapping.length !== data.length + 1) {
