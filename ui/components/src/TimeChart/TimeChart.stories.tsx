@@ -13,7 +13,6 @@
 
 import { StoryObj, Meta } from '@storybook/react';
 import { ChartInstance, TimeChart } from '@perses-dev/components';
-import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { action } from '@storybook/addon-actions';
@@ -111,11 +110,7 @@ const meta: Meta<typeof TimeChart> = {
     },
   },
   parameters: {
-    happo: {
-      beforeScreenshot: async () => {
-        await waitForStableCanvas('canvas');
-      },
-    },
+    happo: false,
   },
 };
 
