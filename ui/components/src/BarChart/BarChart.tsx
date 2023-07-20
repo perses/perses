@@ -26,6 +26,7 @@ use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipCo
 
 const BAR_WIN_WIDTH = 14;
 const BAR_GAP = 6;
+
 export interface BarChartData {
   label: string;
   value: number | null;

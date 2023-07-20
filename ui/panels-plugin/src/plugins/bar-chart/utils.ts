@@ -24,7 +24,7 @@ export function calculatePercentages(data: BarChartData[]) {
   });
 }
 
-export function sortSeriesData(data: BarChartData[], sortOrder: SortOption) {
+export function sortSeriesData(data: BarChartData[], sortOrder: SortOption = 'desc') {
   if (sortOrder === 'asc') {
     // sort in ascending order by value
     return data.sort((a, b) => {

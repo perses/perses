@@ -23,10 +23,10 @@ export type SortOption = 'asc' | 'desc';
 
 export interface SortSelectorProps {
   onChange: (sort: SortOption) => void;
-  value: SortOption;
+  value?: SortOption;
 }
 
-export function SortSelector({ onChange, value }: SortSelectorProps) {
+export function SortSelector({ onChange, value = 'desc' }: SortSelectorProps) {
   const handleSortChange = (_: unknown, { id }: { id: SortOption }) => {
     onChange(id);
   };

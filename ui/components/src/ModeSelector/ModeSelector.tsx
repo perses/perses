@@ -24,10 +24,10 @@ export type ModeOption = 'value' | 'percentage';
 export interface ModeSelectorProps {
   disablePercentageMode: boolean;
   onChange: (mode: ModeOption) => void;
-  value: ModeOption;
+  value?: ModeOption;
 }
 
-export function ModeSelector({ disablePercentageMode, onChange, value }: ModeSelectorProps) {
+export function ModeSelector({ disablePercentageMode, onChange, value = 'value' }: ModeSelectorProps) {
   const handleModeChange = (_: unknown, { id }: { id: ModeOption }) => {
     onChange(id);
   };
