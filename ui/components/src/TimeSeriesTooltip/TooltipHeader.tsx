@@ -22,7 +22,7 @@ import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 export interface TooltipHeaderProps {
   nearbySeries: NearbySeriesArray;
   totalSeries: number;
-  enableTooltipPinning: boolean;
+  enablePinning: boolean;
   isTooltipPinned: boolean;
   showAllSeries: boolean;
   onShowAllClick?: (checked: boolean) => void;
@@ -32,7 +32,7 @@ export interface TooltipHeaderProps {
 export const TooltipHeader = memo(function TooltipHeader({
   nearbySeries,
   totalSeries,
-  enableTooltipPinning,
+  enablePinning,
   isTooltipPinned,
   showAllSeries,
   onShowAllClick,
@@ -65,7 +65,7 @@ export const TooltipHeader = memo(function TooltipHeader({
   };
 
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
-  const showAllSeriesToggle = enableTooltipPinning && totalSeries > 5;
+  const showAllSeriesToggle = enablePinning && totalSeries > 5;
 
   const pinTooltipHelpText = isTooltipPinned ? 'Click to unpin' : 'Click chart to pin';
 
@@ -114,7 +114,7 @@ export const TooltipHeader = memo(function TooltipHeader({
               />
             </Stack>
           )}
-          {enableTooltipPinning && (
+          {enablePinning && (
             <Stack direction="row" alignItems="center">
               <Typography
                 sx={{

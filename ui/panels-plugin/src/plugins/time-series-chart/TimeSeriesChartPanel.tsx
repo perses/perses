@@ -375,7 +375,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
   const tooltipConfig: TooltipConfig = {
     ...DEFAULT_TOOLTIP_CONFIG,
-    enableTooltipPinning: tooltip?.enable_pinning ?? true,
+    enablePinning: tooltip?.enable_pinning ?? true,
     enableEChartsTooltip: isStackedBar,
   };
 

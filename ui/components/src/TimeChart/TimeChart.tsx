@@ -300,7 +300,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         // if (e.target instanceof HTMLCanvasElement) {
-        if (tooltipConfig.enableTooltipPinning) {
+        if (tooltipConfig.enablePinning) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {
@@ -384,7 +384,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             data={data}
             seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
-            enableTooltipPinning={tooltipConfig.enableTooltipPinning}
+            enablePinning={tooltipConfig.enablePinning}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {
