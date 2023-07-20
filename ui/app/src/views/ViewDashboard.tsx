@@ -26,7 +26,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
-import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
+import AppBreadcrumbs from '../components/AppBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
@@ -171,10 +171,7 @@ function ViewDashboard() {
               dashboardResource={data}
               datasourceApi={datasourceApi}
               dashboardTitleComponent={
-                <DashboardBreadcrumbs
-                  dashboardName={getDashboardDisplayName(data)}
-                  dashboardProject={data.metadata.project}
-                />
+                <AppBreadcrumbs dashboardName={getDashboardDisplayName(data)} projectName={data.metadata.project} />
               }
               emptyDashboardProps={{
                 additionalText: 'In order to create a new dashboard, you need to add at least one panel!',
