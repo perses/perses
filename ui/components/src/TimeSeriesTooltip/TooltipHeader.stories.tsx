@@ -43,6 +43,7 @@ export const Primary: Story = {
         isClosestToCursor: true,
       },
     ],
+    enablePinning: true,
     isTooltipPinned: false,
     totalSeries: 5,
     showAllSeries: false,

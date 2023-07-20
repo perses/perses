@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { ChartInstance, TimeChart } from '@perses-dev/components';
+import { ChartInstance, DEFAULT_TOOLTIP_CONFIG, TimeChart } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
@@ -104,6 +104,7 @@ const meta: Meta<typeof TimeChart> = {
       decimal_places: 2,
       abbreviate: true,
     },
+    tooltipConfig: DEFAULT_TOOLTIP_CONFIG,
     grid: {
       left: 20,
       right: 20,

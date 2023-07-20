@@ -141,6 +141,6 @@ export type TooltipConfig = {
 
 export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
   wrapLabels: true,
-  enablePinning: false,
+  enablePinning: true,
   enableEChartsTooltip: false,
 };
