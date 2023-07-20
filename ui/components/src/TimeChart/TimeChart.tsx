@@ -180,6 +180,11 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           onDataZoom(zoomEvent);
         }
       },
+      finished: () => {
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      },
     };
   }, [onDataZoom, setTooltipPinnedCoords]);
 
@@ -399,9 +404,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         onEvents={handleEvents}
         _instance={chartRef}
         syncGroup={syncGroup}
-        onChartInitialized={(chart) => {
-          enableDataZoom(chart);
-        }}
       />
     </Box>
   );

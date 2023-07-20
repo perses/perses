@@ -142,6 +142,8 @@ export function batchDispatchNearbySeriesActions(
     });
 
     // Clears selected datapoints since no bold series in tooltip, restore does not impact highlighting
-    restoreChart(chart);
+    chart.dispatchAction({
+      type: 'toggleSelect', // https://echarts.apache.org/en/api.html#action.toggleSelect
+    });
   }
 }
