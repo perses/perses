@@ -2,9 +2,10 @@
 
 ## 0.38.0 / 2023-07-20
 
-- [FEATURE] Pinned crosshair remains in place (#1300)
-- [FEATURE] Consider external vars in dashboard validation (#1306)
 - [FEATURE] Add admin section on the UI (#1308)
+- [FEATURE] Implement `BarChart` panel plugin (#1307)
+- [FEATURE] Consider external vars in dashboard validation (#1306)
+- [FEATURE] Pinned crosshair remains in place (#1300)
 - [FEATURE] Implement BarChart component (#1279)
 - [FEATURE] Add project variables CRUD (#1267)
 - [FEATURE] Time series bar support using `visual.display` in TimeSeriesChart spec (#1284)
