@@ -310,6 +310,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
             }}
+            containerId={chartsTheme.tooltipPortalContainerId}
           />
         )}
       <EChart
