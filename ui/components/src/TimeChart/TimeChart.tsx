@@ -56,7 +56,7 @@ import {
   restoreChart,
   ZoomEventData,
 } from '../utils';
-import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
+import { CursorCoordinates, TimeChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
@@ -85,7 +85,6 @@ export interface TimeChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
-  isStackedBar?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -100,8 +99,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     yAxis,
     unit,
     grid,
-    isStackedBar = false,
-    tooltipConfig = { wrapLabels: true },
+    tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
     noDataVariant = 'message',
     syncGroup,
     onDataZoom,
@@ -227,9 +225,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       animation: false,
       tooltip: {
         show: true,
-        trigger: isStackedBar ? 'item' : 'axis',
-        // ECharts tooltip content hidden since we use custom tooltip instead
-        showContent: isStackedBar,
+        trigger: tooltipConfig.enableEChartsTooltip ? 'item' : 'axis',
+        // ECharts tooltip content hidden by default since we use custom tooltip instead
+        showContent: tooltipConfig.enableEChartsTooltip,
         appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
@@ -270,7 +268,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     noDataVariant,
     timeZone,
     tooltipPinnedCoords,
-    isStackedBar,
   ]);
 
   return (
@@ -302,7 +299,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         }
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
+        // if (e.target instanceof HTMLCanvasElement) {
+        if (tooltipConfig.enableTooltipPinning) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {
@@ -386,6 +384,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             data={data}
             seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
+            enableTooltipPinning={tooltipConfig.enableTooltipPinning}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {

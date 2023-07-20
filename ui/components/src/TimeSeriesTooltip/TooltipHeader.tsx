@@ -22,6 +22,7 @@ import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 export interface TooltipHeaderProps {
   nearbySeries: NearbySeriesArray;
   totalSeries: number;
+  enableTooltipPinning: boolean;
   isTooltipPinned: boolean;
   showAllSeries: boolean;
   onShowAllClick?: (checked: boolean) => void;
@@ -31,6 +32,7 @@ export interface TooltipHeaderProps {
 export const TooltipHeader = memo(function TooltipHeader({
   nearbySeries,
   totalSeries,
+  enableTooltipPinning,
   isTooltipPinned,
   showAllSeries,
   onShowAllClick,
@@ -63,7 +65,7 @@ export const TooltipHeader = memo(function TooltipHeader({
   };
 
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
-  const showAllSeriesToggle = totalSeries > 5;
+  const showAllSeriesToggle = enableTooltipPinning && totalSeries > 5;
 
   const pinTooltipHelpText = isTooltipPinned ? 'Click to unpin' : 'Click chart to pin';
 
@@ -112,32 +114,34 @@ export const TooltipHeader = memo(function TooltipHeader({
               />
             </Stack>
           )}
-          <Stack direction="row" alignItems="center">
-            <Typography
-              sx={{
-                marginRight: 0.5,
-                fontSize: 11,
-                verticalAlign: 'middle',
-              }}
-            >
-              {pinTooltipHelpText}
-            </Typography>
-            {isTooltipPinned ? (
-              <Pin
-                onClick={() => {
-                  if (onUnpinClick !== undefined) {
-                    onUnpinClick();
-                  }
-                }}
+          {enableTooltipPinning && (
+            <Stack direction="row" alignItems="center">
+              <Typography
                 sx={{
-                  fontSize: 16,
-                  cursor: 'pointer',
+                  marginRight: 0.5,
+                  fontSize: 11,
+                  verticalAlign: 'middle',
                 }}
-              />
-            ) : (
-              <PinOutline sx={{ fontSize: 16 }} />
-            )}
-          </Stack>
+              >
+                {pinTooltipHelpText}
+              </Typography>
+              {isTooltipPinned ? (
+                <Pin
+                  onClick={() => {
+                    if (onUnpinClick !== undefined) {
+                      onUnpinClick();
+                    }
+                  }}
+                  sx={{
+                    fontSize: 16,
+                    cursor: 'pointer',
+                  }}
+                />
+              ) : (
+                <PinOutline sx={{ fontSize: 16 }} />
+              )}
+            </Stack>
+          )}
         </Stack>
       </Box>
       <Divider

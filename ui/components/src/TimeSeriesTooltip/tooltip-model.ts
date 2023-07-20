@@ -135,4 +135,12 @@ export const useMousePosition = (): CursorData['coords'] => {
 export type TooltipConfig = {
   wrapLabels: boolean;
   hidden?: boolean;
+  enableTooltipPinning?: boolean;
+  enableEChartsTooltip?: boolean;
+};
+
+export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
+  wrapLabels: true,
+  enableTooltipPinning: false,
+  enableEChartsTooltip: false,
 };

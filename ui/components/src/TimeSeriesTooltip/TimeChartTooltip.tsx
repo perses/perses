@@ -27,6 +27,7 @@ export interface TimeChartTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
+  enableTooltipPinning?: boolean;
   pinnedPos: CursorCoordinates | null;
   /**
    * The id of the container that will have the chart tooltip appended to it.
@@ -43,6 +44,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   chartRef,
   data,
   seriesMapping,
+  enableTooltipPinning = true,
   wrapLabels,
   unit,
   onUnpinClick,
@@ -54,7 +56,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
-  const isTooltipPinned = pinnedPos !== null;
+  const isTooltipPinned = pinnedPos !== null && enableTooltipPinning;
 
   if (mousePos === null || mousePos.target === null || data === null) return null;
 
@@ -101,6 +103,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
           <TooltipHeader
             nearbySeries={nearbySeries}
             totalSeries={totalSeries}
+            enableTooltipPinning={enableTooltipPinning}
             isTooltipPinned={isTooltipPinned}
             showAllSeries={showAllSeries}
             onShowAllClick={(checked) => setShowAllSeries(checked)}

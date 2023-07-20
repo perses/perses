@@ -48,12 +48,13 @@ import {
   useId,
   TimeChart,
   TimeChartSeriesMapping,
+  TooltipConfig,
+  DEFAULT_TOOLTIP_CONFIG,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
   DEFAULT_UNIT,
   DEFAULT_VISUAL,
-  DEFAULT_TOOLTIP_CONFIG,
   THRESHOLD_PLOT_INTERVAL,
 } from './time-series-chart-model';
 import {
@@ -79,7 +80,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { thresholds, y_axis },
+    spec: { thresholds, y_axis, tooltip },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -372,6 +373,11 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   };
 
   const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
+  const tooltipConfig: TooltipConfig = {
+    ...DEFAULT_TOOLTIP_CONFIG,
+    enableTooltipPinning: tooltip?.enable_pinning ?? true,
+    enableEChartsTooltip: isStackedBar,
+  };
 
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
@@ -415,8 +421,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 yAxis={echartsYAxis}
                 unit={unit}
                 grid={gridOverrides}
-                isStackedBar={isStackedBar}
-                tooltipConfig={DEFAULT_TOOLTIP_CONFIG}
+                tooltipConfig={tooltipConfig}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}
                 //  Show an empty chart when there is no data because the user unselected all items in

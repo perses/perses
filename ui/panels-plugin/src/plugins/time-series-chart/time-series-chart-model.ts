@@ -30,6 +30,7 @@ export interface TimeSeriesChartOptions {
   y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
+  tooltip?: TooltipSpecOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -40,6 +41,10 @@ export interface TimeSeriesChartYAxisOptions {
   unit?: UnitOptions;
   min?: number;
   max?: number;
+}
+
+export interface TooltipSpecOptions {
+  enable_pinning: boolean;
 }
 
 export interface TimeSeriesChartPaletteOptions {
@@ -79,8 +84,6 @@ export const Y_AXIS_CONFIG = {
   min: { label: 'Min' },
   max: { label: 'Max' },
 };
-
-export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = { wrapLabels: true };
 
 export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;
