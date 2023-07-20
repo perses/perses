@@ -174,7 +174,7 @@ export function getTimeSeries(
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
-      focus: 'series',
+      focus: visual.area_opacity ? 'none' : 'series',
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
@@ -191,10 +191,11 @@ export function getTimeSeries(
     blur: {
       lineStyle: {
         width: lineWidth,
-        opacity: BLUR_FADEOUT_OPACITY,
+        opacity: visual.area_opacity ?? BLUR_FADEOUT_OPACITY,
       },
     },
   };
+  console.log(series);
   return series;
 }
 
