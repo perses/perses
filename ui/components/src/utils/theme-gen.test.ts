@@ -39,6 +39,11 @@ describe('generateChartsTheme', () => {
           },
         },
         "echartsTheme": Object {
+          "axisPointer": Object {
+            "lineStyle": Object {
+              "color": "#9e9e9e",
+            },
+          },
           "bar": Object {
             "barMaxWidth": 150,
             "itemStyle": Object {
@@ -82,7 +87,7 @@ describe('generateChartsTheme', () => {
             "splitLine": Object {
               "lineStyle": Object {
                 "color": "#e0e0e0",
-                "opacity": 0.6,
+                "opacity": 0.4,
                 "width": 0.5,
               },
               "show": true,
@@ -144,6 +149,17 @@ describe('generateChartsTheme', () => {
             "symbol": "circle",
             "symbolSize": 4,
           },
+          "markLine": Object {
+            "itemStyle": Object {
+              "color": "#9e9e9e",
+            },
+            "lineStyle": Object {
+              "type": "dashed",
+              "width": 1,
+            },
+            "symbol": "none",
+            "symbolSize": 0,
+          },
           "textStyle": Object {
             "color": "rgba(0, 0, 0, 0.87)",
             "fontFamily": "\\"Roboto\\", \\"Helvetica\\", \\"Arial\\", sans-serif",
@@ -180,7 +196,7 @@ describe('generateChartsTheme', () => {
             "splitLine": Object {
               "lineStyle": Object {
                 "color": "#e0e0e0",
-                "opacity": 0.6,
+                "opacity": 0.4,
                 "width": 0.5,
               },
               "show": true,

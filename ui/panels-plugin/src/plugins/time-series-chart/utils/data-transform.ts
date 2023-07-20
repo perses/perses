@@ -123,7 +123,7 @@ export function getTimeSeries(
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
-  paletteColor?: string
+  paletteColor: string
 ): TimeSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
@@ -150,6 +150,7 @@ export function getTimeSeries(
     };
     return series;
   }
+
   const series: LineSeriesOption = {
     type: 'line',
     id: id,
@@ -177,6 +178,13 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
+      },
+    },
+    selectedMode: 'single',
+    select: {
+      itemStyle: {
+        borderColor: paletteColor,
+        borderWidth: pointRadius + 0.5,
       },
     },
     blur: {

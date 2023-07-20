@@ -98,6 +98,10 @@ export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };
 
+// Controls how often static threshold values should be plotted so threshold data shows
+// in tooltip without flicker.
+export const THRESHOLD_PLOT_INTERVAL = 15;
+
 export const VISUAL_CONFIG = {
   line_width: {
     label: 'Line Width',

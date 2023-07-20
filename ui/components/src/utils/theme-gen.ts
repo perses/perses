@@ -82,7 +82,7 @@ export function generateChartsTheme(
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
@@ -117,7 +117,7 @@ export function generateChartsTheme(
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
@@ -170,6 +170,22 @@ export function generateChartsTheme(
       textStyle: {
         color: '#fff',
         fontSize: 11,
+      },
+    },
+    axisPointer: {
+      lineStyle: {
+        color: muiTheme.palette.grey[500],
+      },
+    },
+    markLine: {
+      symbol: 'none',
+      symbolSize: 0,
+      itemStyle: {
+        color: muiTheme.palette.grey[500],
+      },
+      lineStyle: {
+        type: 'dashed',
+        width: 1,
       },
     },
     line: {
