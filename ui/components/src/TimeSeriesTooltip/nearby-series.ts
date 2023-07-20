@@ -71,6 +71,11 @@ export function checkforNearbyTimeSeries(
   let closestTimestamp = null;
   let closestDistance = Infinity;
 
+  // // Clears selected datapoints since no bold series in tooltip, restore does not impact highlighting
+  // chart.dispatchAction({
+  //   type: 'toggleSelect', // https://echarts.apache.org/en/api.html#action.toggleSelect
+  // });
+
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentSeries = seriesMapping[seriesIdx];
@@ -138,6 +143,14 @@ export function checkforNearbyTimeSeries(
                   dataIndex: datumIdx,
                   seriesName: currentSeriesName,
                   yValue: yValue,
+                });
+
+                // triggers hover state for most recent closeby datapoint symbol using select.itemStyle.borderWidth
+                chart.dispatchAction({
+                  type: 'select',
+                  seriesIndex: seriesIdx,
+                  dataIndex: datumIdx,
+                  escapeConnect: true,
                 });
               } else {
                 nonEmphasizedSeriesIndexes.push(seriesIdx);

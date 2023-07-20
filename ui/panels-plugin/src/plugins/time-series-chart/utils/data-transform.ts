@@ -128,9 +128,10 @@ export function getTimeSeries(
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
-  // Shows datapoint symbols when selected time range is roughly 15 minutes or less
+  // Shows datapoint symbols when selected time range is roughly 6 hours or less
   const minuteMs = 60000;
-  let showPoints = timeScale.rangeMs <= minuteMs * 15;
+  let showPoints = timeScale.rangeMs <= minuteMs * 360;
+
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
   if (visual.show_points === 'Always') {
     showPoints = true;
@@ -163,7 +164,7 @@ export function getTimeSeries(
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,
     showAllSymbol: true,
-    symbolSize: pointRadius,
+    symbolSize: 0, // Hide datapoint symbols on initial page load but allow for hover state using select.itemStyle.borderWidth
     lineStyle: {
       width: lineWidth,
       opacity: 0.8,
@@ -174,7 +175,6 @@ export function getTimeSeries(
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
@@ -183,8 +183,9 @@ export function getTimeSeries(
     selectedMode: 'single',
     select: {
       itemStyle: {
+        // Workaround to only show datapoints on hover w/o hurting render performance, see 'symbolSize: 0' above
+        borderWidth: pointRadius + 3,
         borderColor: paletteColor,
-        borderWidth: pointRadius + 0.5,
       },
     },
     blur: {
