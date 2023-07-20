@@ -105,6 +105,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     }),
     metadata: {
       notices,
+      resolvedQuery: query,
     },
   };
 

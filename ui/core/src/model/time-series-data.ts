@@ -38,4 +38,5 @@ export interface TimeSeries {
 
 export interface TimeSeriesMetadata {
   notices?: Notice[];
+  resolvedQuery?: string;
 }
