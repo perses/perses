@@ -51,9 +51,21 @@ func buildGraph(variables []dashboard.Variable, projectVariables []*v1.Variable,
 	if err != nil {
 		return nil, err
 	}
-	variableNameList := make([]string, 0, len(variables))
+	var variableNameList []string
 	for _, v := range variables {
 		variableNameList = append(variableNameList, v.Spec.GetName())
+	}
+	for _, v := range projectVariables {
+		name := v.GetMetadata().GetName()
+		if !slices.Contains(variableNameList, name) {
+			variableNameList = append(variableNameList, name)
+		}
+	}
+	for _, v := range globalVariables {
+		name := v.GetMetadata().GetName()
+		if !slices.Contains(variableNameList, name) {
+			variableNameList = append(variableNameList, name)
+		}
 	}
 	return newGraph(variableNameList, deps), nil
 }
