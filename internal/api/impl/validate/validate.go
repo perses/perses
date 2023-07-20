@@ -18,6 +18,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
@@ -25,11 +26,15 @@ import (
 )
 
 type Endpoint struct {
-	sch schemas.Schemas
+	sch       schemas.Schemas
+	dashboard dashboard.Service
 }
 
-func New(sch schemas.Schemas) *Endpoint {
-	return &Endpoint{sch: sch}
+func New(sch schemas.Schemas, dashboard dashboard.Service) *Endpoint {
+	return &Endpoint{
+		sch:       sch,
+		dashboard: dashboard,
+	}
 }
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
@@ -46,9 +51,11 @@ func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}
-	if err := validate.Dashboard(entity, e.sch); err != nil {
+
+	if err := e.dashboard.Validate(entity); err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}
+
 	return ctx.NoContent(http.StatusOK)
 }
 

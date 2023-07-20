@@ -17,8 +17,9 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import HomeView from './views/home/HomeView';
 import MigrateView from './views/MigrateView';
-
+import AdminView from './views/admin/AdminView';
 // Other routes are lazy-loaded for code-splitting
+// -> TODO follow same naming convention for all Views? (aka have the "View" term be either always a prefix or always a suffix).
 const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
 const ViewProject = lazy(() => import('./views/projects/ProjectView'));
 
@@ -28,6 +29,8 @@ function Router() {
       {/* TODO: What sort of loading fallback to we want? */}
       <Suspense>
         <Routes>
+          <Route path="/admin" element={<AdminView />} />
+          <Route path="/admin/:tab" element={<AdminView />} />
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
           <Route path="/projects/:projectName" element={<ViewProject />} />

@@ -14,7 +14,7 @@
 import { Box, Portal, Stack } from '@mui/material';
 import { UnitOptions } from '@perses-dev/core';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat } from '../model';
 import { TooltipContent } from './TooltipContent';
@@ -38,6 +38,11 @@ export interface TimeSeriesTooltipProps {
   unit?: UnitOptions;
   onUnpinClick?: () => void;
   pinnedPos: CursorCoordinates | null;
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, the chart tooltip is attached to document.body.
+   */
+  containerId?: string;
 }
 
 export const LineChartTooltip = memo(function LineChartTooltip({
@@ -47,10 +52,12 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   unit,
   onUnpinClick,
   pinnedPos,
+  containerId,
 }: TimeSeriesTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
+  const transform = useRef('');
 
   const isTooltipPinned = pinnedPos !== null;
 
@@ -61,7 +68,6 @@ export const LineChartTooltip = memo(function LineChartTooltip({
 
   const chart = chartRef.current;
   const chartWidth = chart?.getWidth() ?? FALLBACK_CHART_WIDTH; // Fallback width not likely to ever be needed.
-  const cursorTransform = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0);
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = legacyGetNearbySeriesData({
@@ -78,14 +84,21 @@ export const LineChartTooltip = memo(function LineChartTooltip({
 
   const totalSeries = chartData.timeSeries.length;
 
+  const containerElement = containerId ? document.querySelector(containerId) : undefined;
+  // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
+  const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
+  if (!isTooltipPinned) {
+    transform.current = assembleTransform(mousePos, chartWidth, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  }
+
   return (
-    <Portal>
+    <Portal container={containerElement}>
       <Box
         ref={tooltipRef}
         sx={(theme) => ({
           minWidth: TOOLTIP_MIN_WIDTH,
           maxWidth: TOOLTIP_MAX_WIDTH,
-          maxHeight: TOOLTIP_MAX_HEIGHT,
+          maxHeight: maxHeight ?? TOOLTIP_MAX_HEIGHT,
           padding: 0,
           position: 'absolute',
           top: 0,
@@ -105,7 +118,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
           },
         })}
         style={{
-          transform: cursorTransform,
+          transform: transform.current,
         }}
       >
         <Stack spacing={0.5}>

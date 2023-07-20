@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { TooltipConfig } from '@perses-dev/components';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
@@ -79,6 +80,8 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
+export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = { wrapLabels: true };
+
 export const DEFAULT_LINE_WIDTH = 1.5;
 export const DEFAULT_AREA_OPACITY = 0;
 
@@ -94,6 +97,10 @@ export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   point_radius: DEFAULT_POINT_RADIUS,
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };
+
+// Controls how often static threshold values should be plotted so threshold data shows
+// in tooltip without flicker.
+export const THRESHOLD_PLOT_INTERVAL = 15;
 
 export const VISUAL_CONFIG = {
   line_width: {

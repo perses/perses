@@ -73,7 +73,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService)
+	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService, dao.GetGlobalVariable(), dao.GetVariable())
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)

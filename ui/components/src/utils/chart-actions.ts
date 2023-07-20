@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
+import { DatapointInfo } from '../model';
 
 export interface ZoomEventData {
   start: number;
@@ -62,5 +63,87 @@ export function clearHighlightedSeries(chart: EChartsInstance, totalSeries: numb
         seriesIndex: i,
       });
     }
+  }
+}
+
+/*
+ * Convert a point from pixel coordinate to logical coordinate.
+ * Used to determine if cursor is over chart canvas and closest datapoint.
+ * https://echarts.apache.org/en/api.html#echartsInstance.convertFromPixel
+ */
+export function getPointInGrid(cursorCoordX: number, cursorCoordY: number, chart?: EChartsInstance) {
+  if (chart === undefined) {
+    return null;
+  }
+
+  const pointInPixel = [cursorCoordX, cursorCoordY];
+  if (!chart.containPixel('grid', pointInPixel)) {
+    return null;
+  }
+
+  const pointInGrid: number[] = chart.convertFromPixel('grid', pointInPixel);
+  return pointInGrid;
+}
+
+/*
+ * TimeSeriesChart tooltip is built custom to support finding nearby series instead of single or all series.
+ * This means ECharts actions need to be dispatched manually for series highlighting, datapoint select state, etc.
+ * More info: https://echarts.apache.org/en/api.html#action
+ */
+export function batchDispatchNearbySeriesActions(
+  chart: EChartsInstance,
+  nearbySeriesIndexes: number[],
+  emphasizedSeriesIndexes: number[],
+  nonEmphasizedSeriesIndexes: number[],
+  emphasizedDatapoints: DatapointInfo[],
+  duplicateDatapoints: DatapointInfo[]
+) {
+  // Accounts for multiple series that are rendered direct on top of eachother.
+  // Only applies select state to the datapoint that is visible to avoid color mismatch.
+  const lastEmphasizedDatapoint =
+    duplicateDatapoints.length > 0
+      ? duplicateDatapoints[duplicateDatapoints.length - 1]
+      : emphasizedDatapoints[emphasizedDatapoints.length - 1];
+  if (lastEmphasizedDatapoint !== undefined) {
+    // Corresponds to select options inside getTimeSeries util.
+    // https://echarts.apache.org/en/option.html#series-line.select.itemStyle
+    chart.dispatchAction({
+      type: 'select',
+      seriesIndex: lastEmphasizedDatapoint.seriesIndex,
+      dataIndex: lastEmphasizedDatapoint.dataIndex,
+      // Shared crosshair should not emphasize datapoints on adjacent charts.
+      escapeConnect: true, // TODO: try to remove escapeConnect and match by seriesName for cross panel correlation
+    });
+  }
+
+  // Clears emphasis state of all lines that are not emphasized.
+  // Emphasized is a subset of just the nearby series that are closest to cursor.
+  chart.dispatchAction({
+    type: 'downplay',
+    seriesIndex: nonEmphasizedSeriesIndexes,
+  });
+
+  // https://echarts.apache.org/en/api.html#action.highlight
+  if (emphasizedSeriesIndexes.length > 0) {
+    // Fadeout opacity of all series not closest to cursor.
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: emphasizedSeriesIndexes,
+      notBlur: false, // ensure blur IS triggered, this is default but setting so it is explicit
+      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+    });
+  } else {
+    // When no emphasized series with bold text, notBlur allows opacity fadeout to not trigger.
+    chart.dispatchAction({
+      type: 'highlight',
+      seriesIndex: nearbySeriesIndexes,
+      notBlur: true, // do not trigger blur state when cursor is not immediately close to any series
+      escapeConnect: true, // shared crosshair should not emphasize series on adjacent charts
+    });
+
+    // Clears selected datapoints since no bold series in tooltip, restore does not impact highlighting
+    chart.dispatchAction({
+      type: 'toggleSelect', // https://echarts.apache.org/en/api.html#action.toggleSelect
+    });
   }
 }

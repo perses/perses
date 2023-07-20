@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasetOption } from 'echarts/types/dist/shared';
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
+import merge from 'lodash/merge';
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
@@ -38,12 +39,19 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping } from '../model/graph';
+import {
+  ChartInstanceFocusOpts,
+  ChartInstance,
+  TimeChartSeriesMapping,
+  DEFAULT_PINNED_CROSSHAIR,
+  PINNED_CROSSHAIR_SERIES_NAME,
+} from '../model/graph';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
   getFormattedAxisLabel,
+  getPointInGrid,
   getYAxes,
   restoreChart,
   ZoomEventData,
@@ -77,6 +85,7 @@ export interface TimeChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  isStackedBar?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -91,6 +100,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     yAxis,
     unit,
     grid,
+    isStackedBar = false,
     tooltipConfig = { wrapLabels: true },
     noDataVariant = 'message',
     syncGroup,
@@ -171,12 +181,13 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           onDataZoom(zoomEvent);
         }
       },
+      finished: () => {
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      },
     };
   }, [onDataZoom, setTooltipPinnedCoords]);
-
-  if (chartRef.current !== undefined) {
-    enableDataZoom(chartRef.current);
-  }
 
   const { noDataOption } = chartsTheme;
 
@@ -208,13 +219,18 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           hideOverlap: true,
           formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
         },
+        axisPointer: {
+          snap: false, // important so shared crosshair does not lag
+        },
       },
       yAxis: getYAxes(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
-        trigger: 'axis',
-        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
+        trigger: isStackedBar ? 'item' : 'axis',
+        // ECharts tooltip content hidden since we use custom tooltip instead
+        showContent: isStackedBar,
+        appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -222,7 +238,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
-        snap: true,
+        snap: false, // xAxis.axisPointer.snap takes priority
       },
       toolbox: {
         feature: {
@@ -238,7 +254,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     if (__experimentalEChartsOptionsOverride) {
       return __experimentalEChartsOptionsOverride(option);
     }
+
     return option;
+    // tooltipPinnedCoords is needed in dep array so crosshair stays beside pinned tooltip onClick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data,
     seriesMapping,
@@ -250,12 +269,38 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     __experimentalEChartsOptionsOverride,
     noDataVariant,
     timeZone,
+    tooltipPinnedCoords,
+    isStackedBar,
   ]);
 
   return (
     <Box
       sx={{ height }}
       onClick={(e) => {
+        // Determine where on chart canvas to plot pinned crosshair as markLine.
+        const pointInGrid = getPointInGrid(e.nativeEvent.offsetX, e.nativeEvent.offsetY, chartRef.current);
+        if (pointInGrid === null) {
+          return;
+        }
+
+        // Clear previously set pinned crosshair
+        const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
+        if (tooltipPinnedCoords !== null && isCrosshairPinned) {
+          seriesMapping.pop();
+        } else if (seriesMapping.length !== data.length + 1) {
+          // Only add pinned crosshair line series when there is not one already in seriesMapping.
+          const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+            markLine: {
+              data: [
+                {
+                  xAxis: pointInGrid[0],
+                },
+              ],
+            },
+          });
+          seriesMapping.push(pinnedCrosshair);
+        }
+
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
@@ -345,6 +390,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             unit={unit}
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
+              // Clear previously set pinned crosshair
+              seriesMapping.pop();
             }}
           />
         )}

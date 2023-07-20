@@ -68,3 +68,37 @@ export type ChartInstance = {
    */
   clearHighlightedSeries: () => void;
 };
+
+export const PINNED_CROSSHAIR_SERIES_NAME = 'Pinned Crosshair';
+
+export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
+  name: PINNED_CROSSHAIR_SERIES_NAME,
+  type: 'line',
+  // https://echarts.apache.org/en/option.html#series-line.markLine
+  markLine: {
+    data: [],
+    lineStyle: {
+      type: 'dashed',
+      width: 2,
+    },
+    emphasis: {
+      lineStyle: {
+        width: 2,
+        opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: 2,
+        opacity: 1,
+      },
+    },
+  },
+};
+
+export interface DatapointInfo {
+  dataIndex: number;
+  seriesIndex: number;
+  seriesName: string;
+  yValue: number;
+}

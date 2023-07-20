@@ -11,22 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dashboard
+package utils
 
 import (
 	"fmt"
 	"testing"
 
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestBuildVariableDependencies(t *testing.T) {
 	testSuite := []struct {
-		title     string
-		variables []Variable
-		result    map[string][]string
+		title            string
+		variables        []dashboard.Variable
+		projectVariables []*v1.Variable
+		globalVariables  []*v1.GlobalVariable
+		result           map[string][]string
 	}{
 		{
 			title:     "no variable, not dep",
@@ -35,10 +39,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "constant variable, no dep",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -50,10 +54,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "query variable with no variable used",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -70,10 +74,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "query variable with variable used",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -87,7 +91,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -99,10 +103,19 @@ func TestBuildVariableDependencies(t *testing.T) {
 						Name: "foo",
 					},
 				},
+			},
+			projectVariables: []*v1.Variable{
 				{
-					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
-						ListSpec: variable.ListSpec{
+					Kind: v1.KindVariable,
+					Metadata: v1.ProjectMetadata{
+						Metadata: v1.Metadata{
+							Name: "bar",
+						},
+						Project: "myProject",
+					},
+					Spec: v1.VariableSpec{
+						Kind: variable.KindList,
+						Spec: &variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]interface{}{
@@ -110,16 +123,59 @@ func TestBuildVariableDependencies(t *testing.T) {
 								},
 							},
 						},
-						Name: "bar",
 					},
 				},
+				// Invalid but we expect it to be overridden by a valid local variable
 				{
-					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
-						TextSpec: variable.TextSpec{
+					Kind: v1.KindVariable,
+					Metadata: v1.ProjectMetadata{
+						Metadata: v1.Metadata{
+							Name: "myVariable",
+						},
+						Project: "myProject",
+					},
+					Spec: v1.VariableSpec{
+						Kind: variable.KindList,
+						Spec: &variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "sum by($undefinedVar) (rate($foo{label='$undefinedVar'}))",
+								},
+							},
+						},
+					},
+				},
+			},
+			globalVariables: []*v1.GlobalVariable{
+				{
+					Kind: v1.KindGlobalVariable,
+					Metadata: v1.Metadata{
+						Name: "doe",
+					},
+					Spec: v1.VariableSpec{
+						Kind: variable.KindText,
+						Spec: &variable.TextSpec{
 							Value: "myConstant",
 						},
-						Name: "doe",
+					},
+				},
+				// Invalid but we expect it to be overridden by a valid global variable
+				{
+					Kind: v1.KindGlobalVariable,
+					Metadata: v1.Metadata{
+						Name: "bar",
+					},
+					Spec: v1.VariableSpec{
+						Kind: variable.KindList,
+						Spec: &variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($undefinedVar)",
+								},
+							},
+						},
 					},
 				},
 			},
@@ -134,10 +190,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "query variable label_values with variable used",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusLabelValuesVariable",
@@ -154,7 +210,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -168,7 +224,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -182,7 +238,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -201,10 +257,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "multiple usage of the same variable",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -218,7 +274,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -232,7 +288,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -246,7 +302,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -265,10 +321,10 @@ func TestBuildVariableDependencies(t *testing.T) {
 		},
 		{
 			title: "variable with only number is ignored",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -277,7 +333,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -286,7 +342,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -295,7 +351,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -304,7 +360,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -327,7 +383,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result, err := buildVariableDependencies(test.variables)
+			result, err := buildVariableDependencies(test.variables, test.projectVariables, test.globalVariables)
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(result))
 			for k, v := range test.result {
@@ -339,16 +395,18 @@ func TestBuildVariableDependencies(t *testing.T) {
 
 func TestBuildVariableDependenciesError(t *testing.T) {
 	testSuite := []struct {
-		title     string
-		variables []Variable
-		err       error
+		title            string
+		variables        []dashboard.Variable
+		projectVariables []*v1.Variable
+		globalVariables  []*v1.GlobalVariable
+		err              error
 	}{
 		{
 			title: "variable used but not defined",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -366,7 +424,7 @@ func TestBuildVariableDependenciesError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			_, err := buildVariableDependencies(test.variables)
+			_, err := buildVariableDependencies(test.variables, test.projectVariables, test.globalVariables)
 			assert.Equal(t, test.err, err)
 		})
 	}
@@ -480,19 +538,21 @@ func TestGraph_BuildOrderError(t *testing.T) {
 
 func TestBuildOrder(t *testing.T) {
 	testSuite := []struct {
-		title     string
-		variables []Variable
-		result    []VariableGroup
+		title            string
+		variables        []dashboard.Variable
+		projectVariables []*v1.Variable
+		globalVariables  []*v1.GlobalVariable
+		result           []VariableGroup
 	}{
 		{
 			title: "no variable",
 		},
 		{
 			title: "constant variable, no dep",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -504,10 +564,10 @@ func TestBuildOrder(t *testing.T) {
 		},
 		{
 			title: "multiple usage of same variable",
-			variables: []Variable{
+			variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -521,7 +581,7 @@ func TestBuildOrder(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -535,7 +595,7 @@ func TestBuildOrder(t *testing.T) {
 				},
 				{
 					Kind: variable.KindList,
-					Spec: &ListVariableSpec{
+					Spec: &dashboard.ListVariableSpec{
 						ListSpec: variable.ListSpec{
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
@@ -549,7 +609,7 @@ func TestBuildOrder(t *testing.T) {
 				},
 				{
 					Kind: variable.KindText,
-					Spec: &TextVariableSpec{
+					Spec: &dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Value: "myConstant",
 						},
@@ -566,7 +626,7 @@ func TestBuildOrder(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			groups, err := BuildVariableOrder(test.variables)
+			groups, err := BuildVariableOrder(test.variables, test.projectVariables, test.globalVariables)
 			assert.NoError(t, err)
 			assert.Equal(t, len(test.result), len(groups))
 			for i := 0; i < len(groups); i++ {

@@ -49,7 +49,13 @@ import {
   TimeChart,
   TimeChartSeriesMapping,
 } from '@perses-dev/components';
-import { TimeSeriesChartOptions, DEFAULT_UNIT, DEFAULT_VISUAL } from './time-series-chart-model';
+import {
+  TimeSeriesChartOptions,
+  DEFAULT_UNIT,
+  DEFAULT_VISUAL,
+  DEFAULT_TOOLTIP_CONFIG,
+  THRESHOLD_PLOT_INTERVAL,
+} from './time-series-chart-model';
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,
@@ -209,8 +215,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         if (showTimeSeries) {
           // Use timeChartData.length to ensure the data that is passed into the tooltip accounts for
-          // which legend items are selected.
+          // which legend items are selected. This must happen before timeChartData.push to avoid an
+          // off-by-one error, seriesIndex cannot be used since it's needed to cycle through palette
           const datasetIndex = timeChartData.length;
+
           // Each series is stored as a separate dataset source.
           // https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
           timeSeriesMapping.push(
@@ -257,12 +265,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         };
         const thresholdName = step.name ?? `Threshold ${index + 1}`;
 
-        // generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 30s
+        // Generates array of [time, step.value] where time ranges from timescale.startMs to timescale.endMs with an interval of 15s
         const thresholdTimeValueTuple: TimeSeriesValueTuple[] = [];
         let currentTimestamp = timeScale.startMs;
         while (currentTimestamp <= timeScale.endMs) {
           thresholdTimeValueTuple.push([currentTimestamp, stepOption.value]);
-          currentTimestamp += 1000 * 30;
+          // Used to plot fake thresholds datapoints so correct nearby threshold series shows in tooltip without flicker
+          currentTimestamp += 1000 * THRESHOLD_PLOT_INTERVAL;
         }
 
         timeChartData.push({
@@ -362,6 +371,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
+  const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
+
   return (
     <Box sx={{ padding: `${contentPadding}px` }}>
       <ContentWithLegend
@@ -404,7 +415,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 yAxis={echartsYAxis}
                 unit={unit}
                 grid={gridOverrides}
-                tooltipConfig={{ wrapLabels: true }}
+                isStackedBar={isStackedBar}
+                tooltipConfig={DEFAULT_TOOLTIP_CONFIG}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}
                 //  Show an empty chart when there is no data because the user unselected all items in

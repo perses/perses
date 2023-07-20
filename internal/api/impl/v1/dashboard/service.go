@@ -17,6 +17,8 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
+	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
+	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/schemas"
@@ -28,14 +30,18 @@ import (
 
 type service struct {
 	dashboard.Service
-	dao dashboard.DAO
-	sch schemas.Schemas
+	dao           dashboard.DAO
+	sch           schemas.Schemas
+	globalVarDAO  globalvariable.DAO
+	projectVarDAO variable.DAO
 }
 
-func NewService(dao dashboard.DAO, sch schemas.Schemas) dashboard.Service {
+func NewService(dao dashboard.DAO, sch schemas.Schemas, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO) dashboard.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:           dao,
+		sch:           sch,
+		globalVarDAO:  globalVarDAO,
+		projectVarDAO: projectVarDAO,
 	}
 }
 
@@ -48,8 +54,8 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 
 func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// verify this new dashboard passes the validation
-	if err := validate.Dashboard(entity, s.sch); err != nil {
-		return nil, shared.HandleBadRequestError(err.Error())
+	if err := s.Validate(entity); err != nil {
+		return nil, err
 	}
 
 	// Update the time contains in the entity
@@ -80,8 +86,8 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	}
 
 	// verify this new dashboard passes the validation
-	if err := validate.Dashboard(entity, s.sch); err != nil {
-		return nil, shared.HandleBadRequestError(err.Error())
+	if err := s.Validate(entity); err != nil {
+		return nil, err
 	}
 
 	// find the previous version of the dashboard
@@ -107,4 +113,32 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) Validate(entity *v1.Dashboard) error {
+	projectVars, projectVarsErr := s.collectProjectVariables(entity.Metadata.Project)
+	if projectVarsErr != nil {
+		return shared.HandleError(projectVarsErr)
+	}
+
+	globalVars, globalVarsErr := s.collectGlobalVariables()
+	if globalVarsErr != nil {
+		return shared.HandleError(globalVarsErr)
+	}
+
+	if err := validate.DashboardWithVars(entity, s.sch, projectVars, globalVars); err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	return nil
+}
+
+func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error) {
+	if len(project) == 0 {
+		return nil, nil
+	}
+	return s.projectVarDAO.List(&variable.Query{Project: project})
+}
+
+func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
+	return s.globalVarDAO.List(&globalvariable.Query{})
 }

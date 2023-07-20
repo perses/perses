@@ -19,38 +19,24 @@ import (
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/utils"
 )
 
 func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
-	if _, err := dashboard.BuildVariableOrder(entity.Spec.Variables); err != nil {
+	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
 		return err
 	}
-	if sch != nil {
-		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
-			return err
-		}
-		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
-			return err
-		}
-	}
-	if len(entity.Spec.Datasources) > 0 {
-		defaultDTS := make(map[string]bool)
-		for _, spec := range entity.Spec.Datasources {
-			if err := validateDTSPlugin(spec.Plugin, sch); err != nil {
-				return err
-			}
-			if spec.Default {
-				if defaultDTS[spec.Plugin.Kind] {
-					return fmt.Errorf("there is already a default datasource defined for the kind %q", spec.Plugin.Kind)
-				}
-				defaultDTS[spec.Plugin.Kind] = true
-			}
-		}
+	return validateDashboard(entity, sch)
+
+}
+
+func DashboardWithVars(entity *modelV1.Dashboard, sch schemas.Schemas, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, projectVariables, globalVariables); err != nil {
+		return err
 	}
 
-	return nil
+	return validateDashboard(entity, sch)
 }
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
@@ -86,4 +72,30 @@ func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
 		return err
 	}
 	return sch.ValidateDatasource(plugin)
+}
+
+func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
+	if sch != nil {
+		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
+			return err
+		}
+		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
+			return err
+		}
+	}
+	if len(entity.Spec.Datasources) > 0 {
+		defaultDTS := make(map[string]bool)
+		for _, spec := range entity.Spec.Datasources {
+			if err := validateDTSPlugin(spec.Plugin, sch); err != nil {
+				return err
+			}
+			if spec.Default {
+				if defaultDTS[spec.Plugin.Kind] {
+					return fmt.Errorf("there is already a default datasource defined for the kind %q", spec.Plugin.Kind)
+				}
+				defaultDTS[spec.Plugin.Kind] = true
+			}
+		}
+	}
+	return nil
 }

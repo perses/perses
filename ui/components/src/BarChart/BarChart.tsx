@@ -76,6 +76,8 @@ export function BarChart(props: BarChartProps) {
       series: {
         type: 'bar',
         label: {
+          show: true,
+          position: 'right',
           formatter: (params: { data: number[] }) => {
             if (mode === 'percentage') {
               return (
@@ -88,9 +90,13 @@ export function BarChart(props: BarChartProps) {
             }
             return params.data[1] && formatValue(params.data[1], unit);
           },
+          barMinWidth: BAR_WIN_WIDTH,
+          barCategoryGap: BAR_GAP,
         },
-        barMinWidth: BAR_WIN_WIDTH,
-        barCategoryGap: BAR_GAP,
+        itemStyle: {
+          borderRadius: 4,
+          color: chartsTheme.echartsTheme[0],
+        },
       },
       tooltip: {
         appendToBody: true,
