@@ -181,7 +181,7 @@ export function generateChartsTheme(
       symbol: 'none',
       symbolSize: 0,
       itemStyle: {
-        color: muiTheme.palette.grey[700],
+        color: muiTheme.palette.grey[500],
       },
       lineStyle: {
         type: 'dashed',

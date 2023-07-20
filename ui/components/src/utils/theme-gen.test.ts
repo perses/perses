@@ -151,7 +151,7 @@ describe('generateChartsTheme', () => {
           },
           "markLine": Object {
             "itemStyle": Object {
-              "color": "#616161",
+              "color": "#9e9e9e",
             },
             "lineStyle": Object {
               "type": "dashed",
