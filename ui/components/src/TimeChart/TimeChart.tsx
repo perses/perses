@@ -183,10 +183,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     };
   }, [onDataZoom, setTooltipPinnedCoords]);
 
-  if (chartRef.current !== undefined) {
-    enableDataZoom(chartRef.current);
-  }
-
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -403,6 +399,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         onEvents={handleEvents}
         _instance={chartRef}
         syncGroup={syncGroup}
+        onChartInitialized={(chart) => {
+          enableDataZoom(chart);
+        }}
       />
     </Box>
   );
