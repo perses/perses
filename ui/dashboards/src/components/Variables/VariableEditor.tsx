@@ -28,6 +28,7 @@ import {
   Alert,
   styled,
   capitalize,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { VariableDefinition } from '@perses-dev/core';
@@ -36,6 +37,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
+import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import { Action, VariableEditForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
@@ -156,6 +158,12 @@ export function VariableEditor(props: {
         draft[index + 1] = currentElement;
         draft[index] = nextElement;
       }
+    });
+  };
+
+  const overrideVariable = (v: VariableDefinition) => {
+    setVariableDefinitions((draft) => {
+      draft.push(v);
     });
   };
 
@@ -295,6 +303,14 @@ export function VariableEditor(props: {
                           </TableCell>
                           <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                           <TableCell align="right">
+                            <Tooltip title="Override">
+                              <IconButton
+                                onClick={() => overrideVariable(v)}
+                                disabled={!!variableState.get({ name: v.spec.name })}
+                              >
+                                <ContentDuplicate />
+                              </IconButton>
+                            </Tooltip>
                             <IconButton disabled>
                               <ArrowUp />
                             </IconButton>
