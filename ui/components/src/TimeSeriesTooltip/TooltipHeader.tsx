@@ -17,7 +17,12 @@ import PinOutline from 'mdi-material-ui/PinOutline';
 import { memo } from 'react';
 import { format } from 'date-fns';
 import { NearbySeriesArray } from './nearby-series';
-import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import {
+  TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_MAX_WIDTH,
+  PIN_TOOLTIP_HELP_TEXT,
+  UNPIN_TOOLTIP_HELP_TEXT,
+} from './tooltip-model';
 
 export interface TooltipHeaderProps {
   nearbySeries: NearbySeriesArray;
@@ -67,7 +72,7 @@ export const TooltipHeader = memo(function TooltipHeader({
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
   const showAllSeriesToggle = enablePinning && totalSeries > 5;
 
-  const pinTooltipHelpText = isTooltipPinned ? 'Click to unpin' : 'Click chart to pin';
+  const pinTooltipHelpText = isTooltipPinned ? UNPIN_TOOLTIP_HELP_TEXT : PIN_TOOLTIP_HELP_TEXT;
 
   return (
     <Box

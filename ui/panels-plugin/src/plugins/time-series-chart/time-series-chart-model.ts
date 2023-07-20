@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
-import { TooltipConfig } from '@perses-dev/components';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**

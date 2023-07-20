@@ -144,3 +144,7 @@ export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
   enablePinning: true,
   enableEChartsTooltip: false,
 };
+
+export const PIN_TOOLTIP_HELP_TEXT = 'Click chart to pin';
+
+export const UNPIN_TOOLTIP_HELP_TEXT = 'Click to unpin';
