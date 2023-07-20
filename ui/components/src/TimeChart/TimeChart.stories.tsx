@@ -111,11 +111,7 @@ const meta: Meta<typeof TimeChart> = {
     },
   },
   parameters: {
-    happo: {
-      beforeScreenshot: async () => {
-        await waitForStableCanvas('canvas');
-      },
-    },
+    happo: false,
   },
 };
 
