@@ -86,7 +86,11 @@ export async function waitForStableCanvas(
       // data was not stable. Check again.
 
       // Helpful for debugging
-      console.log(`Canvas was not stable after ${totalChecks + 1} check(s). Trying again in ${interval}.`);
+      console.log(
+        `Canvas was not stable after ${totalChecks + 1} check(s) for ${
+          canvasData.length
+        } canvas(es). Trying again in ${interval}.`
+      );
 
       totalChecks++;
       prevCanvasData = canvasData;
