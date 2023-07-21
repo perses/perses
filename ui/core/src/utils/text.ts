@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DashboardResource, VariableResource } from '../model';
+import { Datasource, DashboardResource, GlobalDatasource, VariableResource } from '../model';
 
 /**
  * If the dashboard has a display name, return the dashboard display name
@@ -36,7 +36,7 @@ export function getVariableDisplayName(variable: VariableResource) {
  * Else, only return the datasource name
  * @param variable Project or Global datasource
  */
-export function getDatasourceDisplayName(datasource: Datasource) {
+export function getDatasourceDisplayName(datasource: Datasource | GlobalDatasource) {
   return datasource.spec.display?.name || datasource.metadata.name;
 }
 
@@ -69,7 +69,7 @@ export function getVariableExtendedDisplayName(variable: VariableResource) {
  * Else, only return the datasource name
  * @param variable Project or Global datasource
  */
-export function getDatasourceExtendedDisplayName(datasource: Datasource) {
+export function getDatasourceExtendedDisplayName(datasource: Datasource | GlobalDatasource) {
   if (datasource.spec.display?.name) {
     return `${datasource.spec.display.name} (ID: ${datasource.metadata.name})`;
   }

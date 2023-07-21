@@ -14,11 +14,12 @@
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { Datasource } from '@perses-dev/core';
+import { Datasource, GlobalDatasource } from '@perses-dev/core';
 import { getDatasourceExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useDeleteDatasourceMutation } from '../../model/project-client';
+import { useDeleteGlobalDatasourceMutation } from '../../model/admin-client';
 
-export interface DeleteDatasourceDialogProps {
+export interface DeleteProjectDatasourceDialogProps {
   datasource: Datasource;
   open: boolean;
   onClose: DispatchWithoutAction;
@@ -34,9 +35,10 @@ export interface DeleteDatasourceDialogProps {
  * @param props.datasource The datasource resource to delete.
  * @constructor
  */
-export const DeleteDatasourceDialog = (props: DeleteDatasourceDialogProps) => {
+export const DeleteProjectDatasourceDialog = (props: DeleteProjectDatasourceDialogProps) => {
   const { datasource, open, onClose, onDelete, onSuccess } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+
   const deleteDatasourceMutation = useDeleteDatasourceMutation(datasource.metadata.project);
 
   const handleSubmit = useCallback(() => {
@@ -56,6 +58,64 @@ export const DeleteDatasourceDialog = (props: DeleteDatasourceDialogProps) => {
     });
   }, [deleteDatasourceMutation, datasource, onClose, onDelete, onSuccess, successSnackbar, exceptionSnackbar]);
 
+  return <DeleteDatasourceDialog datasource={datasource} open={open} onDelete={handleSubmit} onClose={onClose} />;
+};
+
+export interface DeleteGlobalDatasourceDialogProps {
+  datasource: GlobalDatasource;
+  open: boolean;
+  onClose: DispatchWithoutAction;
+  onDelete: DispatchWithoutAction;
+  onSuccess?: Dispatch<GlobalDatasource>;
+}
+
+/**
+ * Dialog used to delete a global datasource.
+ * @param props.open Define if the dialog should be opened or not.
+ * @param props.closeDialog Provides the function to close itself.
+ * @param props.onConfirm Action to perform when user confirmed.
+ * @param props.datasource The datasource resource to delete.
+ * @constructor
+ */
+export const DeleteGlobalDatasourceDialog = (props: DeleteGlobalDatasourceDialogProps) => {
+  const { datasource, open, onClose, onDelete, onSuccess } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+
+  const deleteDatasourceMutation = useDeleteGlobalDatasourceMutation();
+
+  const handleSubmit = useCallback(() => {
+    return deleteDatasourceMutation.mutate(datasource, {
+      onSuccess: (deletedDatasource: GlobalDatasource) => {
+        successSnackbar(`Datasource ${getDatasourceExtendedDisplayName(deletedDatasource)} was successfully deleted`);
+        onClose();
+        onDelete();
+        if (onSuccess) {
+          onSuccess(datasource);
+        }
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+        throw err;
+      },
+    });
+  }, [deleteDatasourceMutation, datasource, onClose, onDelete, onSuccess, successSnackbar, exceptionSnackbar]);
+
+  return <DeleteDatasourceDialog datasource={datasource} open={open} onDelete={handleSubmit} onClose={onClose} />;
+};
+
+interface DeleteDatasourceDialogProps {
+  datasource: Datasource | GlobalDatasource;
+  open: boolean;
+  onDelete: DispatchWithoutAction;
+  onClose: DispatchWithoutAction;
+}
+
+/**
+ * Generic component to build a Dialog for datasource deletion
+ */
+function DeleteDatasourceDialog(props: DeleteDatasourceDialogProps) {
+  const { datasource, open, onDelete, onClose } = props;
+
   return (
     <Dialog open={open} onClose={onClose}>
       <Dialog.Header>Delete Datasource</Dialog.Header>
@@ -64,7 +124,7 @@ export const DeleteDatasourceDialog = (props: DeleteDatasourceDialogProps) => {
         cannot be undone.
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" onClick={handleSubmit}>
+        <Button variant="contained" type="submit" onClick={onDelete}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>
@@ -73,4 +133,4 @@ export const DeleteDatasourceDialog = (props: DeleteDatasourceDialogProps) => {
       </Dialog.Actions>
     </Dialog>
   );
-};
+}
