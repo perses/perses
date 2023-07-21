@@ -16,10 +16,12 @@ import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { useSuggestedStepMs } from '../../utils';
 import { Panel, PanelProps } from '../Panel/Panel';
+import { PanelOptions } from '../Panel';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
   width: number; // necessary for determining the suggested step ms
+  panelOptions?: PanelOptions;
 }
 
 /**
@@ -56,7 +58,7 @@ export function GridItemContent(props: GridItemContentProps) {
 
   return (
     <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-      <Panel definition={panelDefinition} editHandlers={editHandlers} />
+      <Panel definition={panelDefinition} editHandlers={editHandlers} panelOptions={props.panelOptions} />
     </DataQueriesProvider>
   );
 }

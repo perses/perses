@@ -16,15 +16,16 @@ import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { PanelOptions } from '../Panel';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
-
 const DEFAULT_MARGIN = 10;
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
+  panelOptions?: PanelOptions;
 }
 
 /**
@@ -102,6 +103,7 @@ export function GridLayout(props: GridLayoutProps) {
             <div key={i}>
               <ErrorBoundary FallbackComponent={ErrorAlert}>
                 <GridItemContent
+                  panelOptions={props.panelOptions}
                   panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
                   width={calculateGridItemWidth(w, gridColWidth)}
                 />

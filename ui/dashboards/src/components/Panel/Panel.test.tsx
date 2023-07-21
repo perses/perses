@@ -34,7 +34,11 @@ describe('Panel', () => {
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = (definition?: PanelDefinition, editHandlers?: PanelProps['editHandlers']) => {
+  const renderPanel = (
+    definition?: PanelDefinition,
+    editHandlers?: PanelProps['editHandlers'],
+    panelOptions?: PanelProps['panelOptions']
+  ) => {
     definition ??= createTestPanel();
 
     renderWithContext(
@@ -49,13 +53,13 @@ describe('Panel', () => {
           },
         ]}
       >
-        <Panel definition={definition} editHandlers={editHandlers} />
+        <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
       </TemplateVariableProvider>
     );
   };
 
   // Helper to get the panel once rendered
-  const getPanel = () => screen.getByRole('region', { name: 'Fake Panel Title - bar' });
+  const getPanel = () => screen.getByTestId('panel');
 
   it('should render panel', async () => {
     renderPanel();
@@ -132,5 +136,28 @@ describe('Panel', () => {
     expect(onEditPanelClick).toHaveBeenCalledTimes(1);
     expect(onDeletePanelClick).toHaveBeenCalledTimes(1);
     expect(onDuplicatePanelClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('should render extra panel content when not in edit mode', () => {
+    renderPanel(undefined, undefined, {
+      extra: () => <div>Extra content</div>,
+    });
+    const panel = getPanel();
+    expect(panel).toHaveTextContent('Extra content');
+  });
+
+  it('should not render extra panel content when not in edit mode', () => {
+    const onEditPanelClick = jest.fn();
+    const onDeletePanelClick = jest.fn();
+    const onDuplicatePanelClick = jest.fn();
+    renderPanel(
+      undefined,
+      { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick },
+      {
+        extra: () => <div>Extra content</div>,
+      }
+    );
+    const panel = getPanel();
+    expect(panel).not.toHaveTextContent('Extra content');
   });
 });
