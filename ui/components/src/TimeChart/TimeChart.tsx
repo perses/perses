@@ -110,7 +110,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme, isAnyTooltipPinned, setIsAnyTooltipPinned } = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
@@ -287,7 +287,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
         if (tooltipPinnedCoords !== null && isCrosshairPinned) {
           seriesMapping.pop();
-        } else if (seriesMapping.length !== data.length + 1) {
+        } else if (!isAnyTooltipPinned && seriesMapping.length !== data.length + 1) {
           // Only add pinned crosshair line series when there is not one already in seriesMapping.
           const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
             markLine: {
@@ -304,7 +304,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
-            if (current === null) {
+            if (current === null && !isAnyTooltipPinned) {
+              if (setIsAnyTooltipPinned) {
+                setIsAnyTooltipPinned(true);
+              }
               return {
                 page: {
                   x: e.pageX,
@@ -321,6 +324,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
                 target: e.target,
               };
             } else {
+              if (setIsAnyTooltipPinned) {
+                setIsAnyTooltipPinned(false);
+              }
               return null;
             }
           });

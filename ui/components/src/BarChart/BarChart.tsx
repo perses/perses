@@ -42,7 +42,7 @@ export interface BarChartProps {
 
 export function BarChart(props: BarChartProps) {
   const { width, height, data, unit = { kind: 'Decimal' }, mode = 'value' } = props;
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data == null) return chartsTheme.noDataOption;

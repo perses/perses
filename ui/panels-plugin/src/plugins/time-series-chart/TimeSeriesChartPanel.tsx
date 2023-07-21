@@ -82,7 +82,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { thresholds, y_axis },
     contentDimensions,
   } = props;
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
   const muiTheme = useTheme();
   const chartId = useId('time-series-panel');
 

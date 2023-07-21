@@ -50,7 +50,7 @@ export interface StatChartProps {
 
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, color, sparkline, showSeriesName, valueFontSize } = props;
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   let formattedValue = '';
   if (data.calculatedValue === null) {

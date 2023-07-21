@@ -34,9 +34,10 @@ export function ThresholdColorPicker({
     setAnchorEl(null);
   };
 
+  const { chartsTheme } = useChartsTheme();
   const {
     thresholds: { defaultColor, palette },
-  } = useChartsTheme();
+  } = chartsTheme;
 
   return (
     <>

@@ -33,9 +33,10 @@ export interface ThresholdsEditorProps {
 const DEFAULT_STEP = 10;
 
 export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePercentMode }: ThresholdsEditorProps) {
+  const { chartsTheme } = useChartsTheme();
   const {
     thresholds: { defaultColor, palette },
-  } = useChartsTheme();
+  } = chartsTheme;
   const defaultThresholdColor = thresholds?.default_color ?? defaultColor;
 
   const [steps, setSteps] = useState(thresholds?.steps);

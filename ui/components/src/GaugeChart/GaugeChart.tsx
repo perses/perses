@@ -44,7 +44,7 @@ export interface GaugeChartProps {
 
 export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
   const option: EChartsCoreOption = useDeepMemo(() => {

@@ -27,7 +27,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
     contentDimensions,
   } = props;
 
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
 
   const { queryResults, isLoading, isFetching } = useDataQueries(); // gets data queries from a context provider, see DataQueriesProvider

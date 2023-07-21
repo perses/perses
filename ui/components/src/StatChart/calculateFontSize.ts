@@ -49,7 +49,7 @@ export function useOptimalFontSize({
   fontSizeOverride,
 }: CalculateFontSize) {
   const ctx = getGlobalCanvasContext();
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   // if user has selected a font size in the settings, use it instead of calculating the optimal size
   if (fontSizeOverride !== undefined) {

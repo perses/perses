@@ -11,25 +11,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { PersesChartsTheme } from '../model';
 
 export interface ChartsThemeProviderProps {
-  chartsTheme?: PersesChartsTheme;
+  chartsTheme: PersesChartsTheme;
+  enablePinning?: boolean;
   children?: React.ReactNode;
 }
 
-export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
-  const { children, chartsTheme } = props;
-  return <ChartsThemeContext.Provider value={chartsTheme}>{children}</ChartsThemeContext.Provider>;
+export interface SharedChartsState {
+  chartsTheme: PersesChartsTheme;
+  isAnyTooltipPinned?: boolean;
+  setIsAnyTooltipPinned?: (isTooltipPinned: boolean) => void;
 }
 
-export const ChartsThemeContext = createContext<PersesChartsTheme | undefined>(undefined);
+export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
+  const { children, chartsTheme, enablePinning } = props;
 
-export function useChartsTheme(): PersesChartsTheme {
+  const [isAnyTooltipPinned, setIsAnyTooltipPinned] = useState(false);
+
+  const ctx = useMemo(() => {
+    return {
+      chartsTheme,
+      enablePinning,
+      isAnyTooltipPinned,
+      setIsAnyTooltipPinned,
+    };
+  }, [chartsTheme, enablePinning, isAnyTooltipPinned, setIsAnyTooltipPinned]);
+
+  return <ChartsThemeContext.Provider value={ctx}>{children}</ChartsThemeContext.Provider>;
+}
+
+export const ChartsThemeContext = createContext<SharedChartsState | undefined>(undefined);
+
+export function useChartsThemeContext() {
   const ctx = useContext(ChartsThemeContext);
   if (ctx === undefined) {
     throw new Error('No ChartsThemeContext found. Did you forget a Provider?');
   }
+  return ctx;
+}
+
+export function useChartsTheme(): SharedChartsState {
+  const ctx = useChartsThemeContext();
   return ctx;
 }

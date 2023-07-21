@@ -31,7 +31,9 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { calculation, max } = pluginSpec;
 
-  const { thresholds: thresholdsColors } = useChartsTheme();
+  const {
+    chartsTheme: { thresholds: thresholdsColors },
+  } = useChartsTheme();
 
   const { queryResults, isLoading } = useDataQueries();
 

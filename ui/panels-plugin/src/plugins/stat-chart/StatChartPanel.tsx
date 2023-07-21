@@ -35,7 +35,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   const statChartData = useStatChartData(queryResults, calculation);
   const isMultiSeries = statChartData.length > 1;
 
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
 

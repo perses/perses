@@ -50,7 +50,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     triggerOnce: true,
   });
 
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);

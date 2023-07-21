@@ -79,7 +79,7 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     spec: { text },
   } = props;
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
 
   const textAfterVariableReplacement = useReplaceVariablesInString(text);
 

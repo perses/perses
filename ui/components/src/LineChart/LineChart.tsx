@@ -97,7 +97,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
   },
   ref
 ) {
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme } = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
