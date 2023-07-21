@@ -11,32 +11,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, TimeSeriesData, UnknownSpec } from '@perses-dev/core';
+import { Definition, QueryDefinition, QueryType, UnknownSpec } from '@perses-dev/core';
+import { QueryDataType } from '@perses-dev/core';
+import { UseQueryResult } from '@tanstack/react-query';
 
 type QueryOptions = Record<string, unknown>;
 
-interface DataQueriesDefinitions<QueryPluginDefinition> {
-  definitions: QueryPluginDefinition[];
+export interface DataQueriesDefinition extends Definition<UnknownSpec> {
+  /**
+   * @default 'TimeSeriesQuery'
+   */
+  type?: keyof QueryType;
 }
-export interface DataQueriesProviderProps<QueryPluginDefinition = Definition<UnknownSpec>>
-  extends DataQueriesDefinitions<QueryPluginDefinition> {
+
+export interface DataQueriesProviderProps {
+  definitions: DataQueriesDefinition[];
   options?: QueryOptions;
   children?: React.ReactNode;
 }
 
-export interface UseDataQueryResults<QueryPluginDefinition = Definition<UnknownSpec>> {
-  queryResults: Array<QueryData<QueryPluginDefinition>>;
+export interface DataQueriesContextType {
+  queryResults: QueryData[];
   refetchAll: () => void;
   isFetching: boolean;
   isLoading: boolean;
   errors: unknown[];
 }
 
-export interface QueryData<QueryPluginDefinition> {
-  data?: TimeSeriesData;
-  definition: QueryPluginDefinition;
+export interface UseDataQueryResults<T> extends Omit<DataQueriesContextType, 'queryResults'> {
+  queryResults: Array<QueryData<T>>;
+}
+
+export type QueryData<T = QueryDataType> = {
+  data?: T;
+  definition: QueryDefinition;
   error: unknown;
   isFetching: boolean;
   isLoading: boolean;
   refetch?: () => void;
+};
+
+export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]) {
+  return results.map(({ data, isFetching, isLoading, refetch, error }, i) => {
+    return {
+      definition: definitions[i],
+      data,
+      isFetching,
+      isLoading,
+      refetch,
+      error,
+    } as QueryData;
+  });
 }
