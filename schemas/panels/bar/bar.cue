@@ -11,8 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './plugins/time-series-chart';
-export * from './plugins/gauge-chart';
-export * from './plugins/stat-chart';
-export * from './plugins/markdown';
-export * from './plugins/bar-chart';
+package bar
+
+import (
+	"github.com/perses/perses/schemas/common"
+)
+
+kind: "BarChart"
+spec: close({
+	calculation: common.#calculation
+	unit?:       common.#unit
+	sort?:       "asc" | "desc"
+	mode?:       "value" | "percentage"
+})
