@@ -15,13 +15,21 @@ import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import {
+  getDatasourceDisplayName,
+  GlobalDatasource,
+  getVariableExtendedDisplayName,
+  GlobalVariableResource,
+} from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import { getVariableExtendedDisplayName, GlobalVariableResource } from '@perses-dev/core';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
+import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
+import { GlobalDatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
+import { GlobalDatasources } from './tabs/GlobalDatasources';
 
 const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
@@ -31,10 +39,29 @@ interface TabButtonProps {
 }
 
 function TabButton(props: TabButtonProps) {
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalVariableMutation = useCreateGlobalVariableMutation();
 
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+
+  const [isCreateGlobalDatasourceDrawerStateOpened, setCreateGlobalDatasourceFormStateOpened] = useState(false);
   const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
+
+  const handleGlobalDatasourceCreation = useCallback(
+    (datasource: GlobalDatasource) => {
+      createDatasourceMutation.mutate(datasource, {
+        onSuccess: (createdDatasource: GlobalDatasource) => {
+          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          setCreateGlobalDatasourceFormStateOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+  );
   const handleVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
       createGlobalVariableMutation.mutate(variable, {
@@ -89,7 +116,27 @@ function TabButton(props: TabButtonProps) {
           <CRUDButton
             text="Add Global Datasource"
             variant="contained"
-            onClick={() => console.log('TODO implement Global Datasource CRUD')}
+            onClick={() => setCreateGlobalDatasourceFormStateOpened(true)}
+          />
+          <GlobalDatasourceDrawer
+            datasource={{
+              kind: 'GlobalDatasource',
+              metadata: {
+                name: 'NewDatasource',
+              },
+              spec: {
+                default: false,
+                plugin: {
+                  // TODO: find a way to avoid assuming that the PrometheusDatasource plugin is installed
+                  kind: 'PrometheusDatasource',
+                  spec: {},
+                },
+              },
+            }}
+            isOpen={isCreateGlobalDatasourceDrawerStateOpened}
+            saveActionStr="Create"
+            onSave={handleGlobalDatasourceCreation}
+            onClose={() => setCreateGlobalDatasourceFormStateOpened(false)}
           />
         </>
       );
@@ -172,7 +219,9 @@ export function AdminTabs(props: AdminTabsProps) {
       <TabPanel value={value} index={variablesTabIndex}>
         <GlobalVariables id="global-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index={datasourcesTabIndex}></TabPanel>
+      <TabPanel value={value} index={datasourcesTabIndex}>
+        <GlobalDatasources id="global-datasource-list" />
+      </TabPanel>
     </Box>
   );
 }

@@ -12,23 +12,21 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useDatasourceList } from '../../../model/datasource-client';
-import { ProjectDatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import { useGlobalDatasourceList } from '../../../model/admin-client';
+import { GlobalDatasourceList } from '../../../components/DatasourceList/DatasourceList';
 
-interface ProjectDatasourcesProps {
-  projectName: string;
+interface GlobalDatasourcesProps {
   hideToolbar?: boolean;
   id?: string;
 }
 
-export function ProjectDatasources(props: ProjectDatasourcesProps) {
-  const { projectName, hideToolbar, id } = props;
-  const { data, isLoading } = useDatasourceList(projectName);
+export function GlobalDatasources(props: GlobalDatasourcesProps) {
+  const { hideToolbar, id } = props;
+  const { data, isLoading } = useGlobalDatasourceList();
 
   return (
     <Card id={id}>
-      <ProjectDatasourceList
-        projectName={projectName}
+      <GlobalDatasourceList
         datasourceList={data || []}
         hideToolbar={hideToolbar}
         isLoading={isLoading}

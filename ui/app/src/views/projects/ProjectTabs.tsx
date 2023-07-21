@@ -28,8 +28,8 @@ import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
+import { ProjectDatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
-import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
 import { useCreateVariableMutation } from '../../model/variable-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
@@ -52,7 +52,7 @@ function TabButton(props: TabButtonProps) {
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
   const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
-  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceFormStateOpened] = useState(false);
+  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceDrawerStateOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
@@ -79,7 +79,7 @@ function TabButton(props: TabButtonProps) {
       createDatasourceMutation.mutate(datasource, {
         onSuccess: (createdDatasource: Datasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setCreateDatasourceFormStateOpened(false);
+          setCreateDatasourceDrawerStateOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -139,9 +139,9 @@ function TabButton(props: TabButtonProps) {
           <CRUDButton
             text="Add Datasource"
             variant="contained"
-            onClick={() => setCreateDatasourceFormStateOpened(true)}
+            onClick={() => setCreateDatasourceDrawerStateOpened(true)}
           />
-          <DatasourceDrawer
+          <ProjectDatasourceDrawer
             datasource={{
               kind: 'Datasource',
               metadata: {
@@ -160,7 +160,7 @@ function TabButton(props: TabButtonProps) {
             isOpen={isCreateDatasourceDrawerStateOpened}
             saveActionStr="Create"
             onSave={handleDatasourceCreation}
-            onClose={() => setCreateDatasourceFormStateOpened(false)}
+            onClose={() => setCreateDatasourceDrawerStateOpened(false)}
           />
         </>
       );
@@ -223,7 +223,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         justifyContent="space-between"
         sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+        <Tabs value={value} onChange={handleChange} aria-label="project tabs">
           <Tab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
@@ -248,13 +248,13 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         </Tabs>
         <TabButton index={value} projectName={projectName} />
       </Stack>
-      <TabPanel value={value} index="dashboards">
+      <TabPanel value={value} index={dashboardTabIndex}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
-      <TabPanel value={value} index="variables">
+      <TabPanel value={value} index={variablesTabIndex}>
         <ProjectVariables projectName={projectName} id="project-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index="datasources">
+      <TabPanel value={value} index={datasourcesTabIndex}>
         <ProjectDatasources projectName={projectName} id="project-datasource-list" />
       </TabPanel>
     </Box>
