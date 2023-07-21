@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, QueryDefinition, QueryType, UnknownSpec } from '@perses-dev/core';
-import { QueryDataType } from '@perses-dev/core';
+import { Definition, QueryDefinition, QueryType, UnknownSpec, QueryDataType } from '@perses-dev/core';
 import { UseQueryResult } from '@tanstack/react-query';
 
 type QueryOptions = Record<string, unknown>;
