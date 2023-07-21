@@ -283,6 +283,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           return;
         }
 
+        // TODO: pin subsequent tooltips and unpin prevous
+        // TODO: opt-in to multi tooltip pinning when CTRL key held down
+
         // Clear previously set pinned crosshair
         const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
         if (tooltipPinnedCoords !== null && isCrosshairPinned) {
