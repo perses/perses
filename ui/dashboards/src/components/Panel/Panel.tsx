@@ -27,6 +27,10 @@ export interface PanelProps extends CardProps<'section'> {
 }
 
 export type PanelOptions = {
+  /**
+   * Content to render in the top-right corner of the panel. It will only be
+   * rendered when the panel is in edit mode.
+   */
   extra?: () => React.ReactNode;
 };
 

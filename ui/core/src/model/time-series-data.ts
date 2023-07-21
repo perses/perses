@@ -38,5 +38,11 @@ export interface TimeSeries {
 
 export interface TimeSeriesMetadata {
   notices?: Notice[];
-  resolvedQuery?: string;
+
+  /**
+   * The raw query that is executed to generate this data.
+   * Useful when needing to inspect the query that was executed
+   * after variables and other context modifications have been applied.
+   */
+  executedQueryString?: string;
 }
