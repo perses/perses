@@ -13,7 +13,7 @@
 
 import React, { createContext, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
-import { ChartsThemeProvider, generateChartsTheme, PersesChartsTheme, getTheme } from '@perses-dev/components';
+import { ChartsProvider, generateChartsTheme, PersesChartsTheme, getTheme } from '@perses-dev/components';
 import { useLocalStorage } from '../utils/browser-storage';
 
 // app specific echarts option overrides, empty since perses uses default
@@ -54,9 +54,9 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ChartsThemeProvider chartsTheme={chartsTheme} enablePinning={true}>
+      <ChartsProvider chartsTheme={chartsTheme} enablePinning={true}>
         <DarkModeContext.Provider value={darkModeContext}>{props.children}</DarkModeContext.Provider>
-      </ChartsThemeProvider>
+      </ChartsProvider>
     </ThemeProvider>
   );
 }

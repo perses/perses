@@ -14,7 +14,7 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { PersesChartsTheme } from '../model';
 
-export interface ChartsThemeProviderProps {
+export interface ChartsProviderProps {
   chartsTheme: PersesChartsTheme;
   enablePinning?: boolean;
   children?: React.ReactNode;
@@ -26,7 +26,7 @@ export interface SharedChartsState {
   setIsAnyTooltipPinned?: (isTooltipPinned: boolean) => void;
 }
 
-export function ChartsThemeProvider(props: ChartsThemeProviderProps) {
+export function ChartsProvider(props: ChartsProviderProps) {
   const { children, chartsTheme, enablePinning } = props;
 
   const [isAnyTooltipPinned, setIsAnyTooltipPinned] = useState(false);

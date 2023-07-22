@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { UnitOptions } from '@perses-dev/core';
-import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
+import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
 
@@ -28,9 +28,9 @@ describe('StatChart', () => {
       height: 200,
     };
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 

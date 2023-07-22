@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BarChartOptions } from './bar-chart-model';
@@ -20,7 +20,7 @@ import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
 describe('BarChartOptionsEditorSettings', () => {
   const renderBarChartOptionsEditorSettings = (value?: BarChartOptions, onChange = jest.fn()) => {
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <BarChartOptionsEditorSettings
           value={
             value ?? {
@@ -34,7 +34,7 @@ describe('BarChartOptionsEditorSettings', () => {
           }
           onChange={onChange}
         />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 

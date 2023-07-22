@@ -15,7 +15,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { useMemo } from 'react';
 import { Decorator } from '@storybook/react';
 import { useDarkMode } from 'storybook-dark-mode';
-import { getTheme, ChartsThemeProvider, generateChartsTheme } from '@perses-dev/components';
+import { getTheme, ChartsProvider, generateChartsTheme } from '@perses-dev/components';
 
 export const WithThemes: Decorator = (Story) => {
   const isDarkModeEnabled = useDarkMode();
@@ -28,9 +28,9 @@ export const WithThemes: Decorator = (Story) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ChartsThemeProvider chartsTheme={chartsTheme}>
+      <ChartsProvider chartsTheme={chartsTheme}>
         <Story />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     </ThemeProvider>
   );
 };

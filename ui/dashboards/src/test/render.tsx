@@ -18,7 +18,7 @@ import { createMemoryHistory, MemoryHistory } from 'history';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ChartsThemeProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
 import { mockPluginRegistry, PluginRegistry } from '@perses-dev/plugin-system';
 import { MOCK_PLUGINS } from './plugin-registry';
 
@@ -64,9 +64,9 @@ export function renderWithContext(
       <QueryClientProvider client={queryClient}>
         <QueryParamProvider adapter={ReactRouter6Adapter}>
           <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-            <ChartsThemeProvider chartsTheme={testChartsTheme}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
               <PluginRegistry {...mockPluginRegistry(...MOCK_PLUGINS)}>{ui}</PluginRegistry>
-            </ChartsThemeProvider>
+            </ChartsProvider>
           </SnackbarProvider>
         </QueryParamProvider>
       </QueryClientProvider>

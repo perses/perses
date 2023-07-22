@@ -46,7 +46,7 @@ import {
   DEFAULT_PINNED_CROSSHAIR,
   PINNED_CROSSHAIR_SERIES_NAME,
 } from '../model/graph';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,

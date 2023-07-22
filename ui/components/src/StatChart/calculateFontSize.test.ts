@@ -13,7 +13,7 @@
 
 import { useOptimalFontSize } from './calculateFontSize';
 
-jest.mock('../context/ChartsThemeProvider', () => ({
+jest.mock('../context/ChartsProvider', () => ({
   useChartsTheme: jest.fn().mockReturnValue({
     echartsTheme: {
       textStyle: {

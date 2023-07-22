@@ -18,7 +18,7 @@ import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
 

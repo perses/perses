@@ -15,16 +15,16 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import produce from 'immer';
-import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
+import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {
   const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = jest.fn()) => {
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <ThresholdsEditor thresholds={thresholds} onChange={onChange} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 
