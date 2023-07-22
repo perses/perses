@@ -23,8 +23,8 @@ export interface ChartsProviderProps {
 export interface SharedChartsState {
   chartsTheme: PersesChartsTheme;
   enablePinning: boolean;
-  isAnyTooltipPinned?: boolean;
-  setIsAnyTooltipPinned?: (isTooltipPinned: boolean) => void;
+  isAnyTooltipPinned: boolean;
+  setIsAnyTooltipPinned: (isTooltipPinned: boolean) => void;
 }
 
 export function ChartsProvider(props: ChartsProviderProps) {
