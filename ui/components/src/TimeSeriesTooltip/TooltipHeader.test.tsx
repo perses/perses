@@ -14,6 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
+import { PIN_TOOLTIP_HELP_TEXT, UNPIN_TOOLTIP_HELP_TEXT } from './tooltip-model';
 
 describe('TooltipHeader', () => {
   const renderComponent = (props: TooltipHeaderProps) => {
@@ -42,11 +43,12 @@ describe('TooltipHeader', () => {
       isTooltipPinned: false,
       totalSeries: 5,
       showAllSeries: false,
+      enablePinning: true,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
     expect(screen.getByText('13:53:00')).toBeInTheDocument();
-    expect(screen.getByText('Click chart to pin')).toBeInTheDocument();
+    expect(screen.getByText(PIN_TOOLTIP_HELP_TEXT)).toBeInTheDocument();
   });
 
   it('should display with unpin text', () => {
@@ -55,9 +57,10 @@ describe('TooltipHeader', () => {
       isTooltipPinned: true,
       totalSeries: 5,
       showAllSeries: false,
+      enablePinning: true,
     };
     renderComponent(tooltipContent);
-    expect(screen.getByText('Click to unpin')).toBeInTheDocument();
+    expect(screen.getByText(UNPIN_TOOLTIP_HELP_TEXT)).toBeInTheDocument();
   });
 
   it('should not display show all toggle when only 1 total series', () => {
@@ -66,8 +69,21 @@ describe('TooltipHeader', () => {
       isTooltipPinned: false,
       totalSeries: 1,
       showAllSeries: false,
+      enablePinning: true,
     };
     renderComponent(tooltipContent);
     expect(screen.queryByText('Show All?')).not.toBeInTheDocument();
+  });
+
+  it('should not display pin tooltip text and icon', () => {
+    const tooltipContent: TooltipHeaderProps = {
+      nearbySeries: testNearbySeries,
+      isTooltipPinned: false,
+      totalSeries: 6,
+      showAllSeries: false,
+      enablePinning: false,
+    };
+    renderComponent(tooltipContent);
+    expect(screen.queryByText(PIN_TOOLTIP_HELP_TEXT)).not.toBeInTheDocument();
   });
 });
