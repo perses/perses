@@ -18,7 +18,12 @@ import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { VariableDefinition } from '@perses-dev/core';
 
 import { TOOLTIP_TEXT } from '../../constants';
-import { useTemplateVariableDefinitions, useTemplateVariableActions } from '../../context';
+import {
+  ExternalVariableDefinition,
+  useTemplateExternalVariableDefinitions,
+  useTemplateVariableActions,
+  useTemplateVariableDefinitions,
+} from '../../context';
 import { VariableEditor } from './VariableEditor';
 
 export interface EditVariablesButtonProps extends Pick<ButtonProps, 'fullWidth'> {
@@ -46,6 +51,7 @@ export function EditVariablesButton({
 }: EditVariablesButtonProps) {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
   const { setVariableDefinitions } = useTemplateVariableActions();
 
   const openVariableEditor = () => {
@@ -79,6 +85,7 @@ export function EditVariablesButton({
       >
         <VariableEditor
           variableDefinitions={variableDefinitions}
+          externalVariableDefinitions={externalVariableDefinitions}
           onCancel={closeVariableEditor}
           onChange={(variables: VariableDefinition[]) => {
             setVariableDefinitions(variables);
