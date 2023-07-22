@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.38.0 / 2023-07-20
+
+- [FEATURE] Add admin section on the UI (#1308)
+- [FEATURE] Implement `BarChart` panel plugin (#1307)
+- [FEATURE] Consider external vars in dashboard validation (#1306)
+- [FEATURE] Pinned crosshair remains in place (#1300)
+- [FEATURE] Implement BarChart component (#1279)
+- [FEATURE] Add project variables CRUD (#1267)
+- [FEATURE] Time series bar support using `visual.display` in TimeSeriesChart spec (#1284)
+- [ENHANCEMENT] Closest datapoint hover state for short time ranges (#1300)
+- [ENHANCEMENT] Clean up legacy LineChart conditions in TimeSeriesChartPanel (#1286)
+- [BUGFIX] Consider external vars in dashboard validation (#1310)
+- [BUGFIX] Fix tooltip pinning in legacy LineChart component (#1309)
+- [BUGFIX] Time series stacked bar correct palette color and tooltip (#1305)
+- [BUGFIX] Tooltip hidden when many series and legend item selected (#1302)
+- [BUGFIX] Follow up for the project variables CRUD (#1290)
+- [BREAKINGCHANGE] Custom dialogs such as `DiscardChangesConfirmationDialog` moved to components package (#1267)
+
 ## 0.37.2 / 2023-07-13
 
 - [BUGFIX] Fix tooltip pinning when apps set a `tooltipPortalContainerId` (#1294)

@@ -23,13 +23,22 @@ import { PanelContent } from './PanelContent';
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
   editHandlers?: PanelHeaderProps['editHandlers'];
+  panelOptions?: PanelOptions;
 }
+
+export type PanelOptions = {
+  /**
+   * Content to render in the top-right corner of the panel. It will only be
+   * rendered when the panel is in edit mode.
+   */
+  extra?: () => React.ReactNode;
+};
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export const Panel = memo(function Panel(props: PanelProps) {
-  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, ...others } = props;
+  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, panelOptions, ...others } = props;
 
   // Make sure we have an ID we can use for aria attributes
   const generatedPanelId = useId('Panel');
@@ -82,6 +91,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
       {...others}
     >
       <PanelHeader
+        extra={panelOptions?.extra?.()}
         id={headerId}
         title={definition.spec.display.name}
         description={definition.spec.display.description}

@@ -17,10 +17,15 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
+import { Box } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
+import { ModeOption } from '../ModeSelector';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
+
+const BAR_WIN_WIDTH = 14;
+const BAR_GAP = 6;
 
 export interface BarChartData {
   label: string;
@@ -31,11 +36,12 @@ export interface BarChartProps {
   width: number;
   height: number;
   data: BarChartData[] | null;
-  unit: UnitOptions;
+  unit?: UnitOptions;
+  mode?: ModeOption;
 }
 
 export function BarChart(props: BarChartProps) {
-  const { width, height, data, unit } = props;
+  const { width, height, data, unit = { kind: 'Decimal' }, mode = 'value' } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -62,13 +68,30 @@ export function BarChart(props: BarChartProps) {
         splitLine: {
           show: false,
         },
+        axisLabel: {
+          overflow: 'truncate',
+          width: width / 3,
+        },
       },
       series: {
         type: 'bar',
         label: {
           show: true,
           position: 'right',
-          formatter: (params: { data: number[] }) => params.data[1] && formatValue(params.data[1], unit),
+          formatter: (params: { data: number[] }) => {
+            if (mode === 'percentage') {
+              return (
+                params.data[1] &&
+                formatValue(params.data[1], {
+                  kind: 'Percent',
+                  decimal_places: unit.decimal_places,
+                })
+              );
+            }
+            return params.data[1] && formatValue(params.data[1], unit);
+          },
+          barMinWidth: BAR_WIN_WIDTH,
+          barCategoryGap: BAR_GAP,
         },
         itemStyle: {
           borderRadius: 4,
@@ -76,20 +99,24 @@ export function BarChart(props: BarChartProps) {
         },
       },
       tooltip: {
+        appendToBody: true,
+        confine: true,
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
     };
-  }, [data, chartsTheme, unit]);
+  }, [data, chartsTheme, width, mode, unit]);
 
   return (
-    <EChart
-      sx={{
-        width: width,
-        height: height,
-      }}
-      option={option}
-      theme={chartsTheme.echartsTheme}
-    />
+    <Box sx={{ width: width, height: height, overflow: 'auto' }}>
+      <EChart
+        sx={{
+          minHeight: height,
+          height: data ? data.length * (BAR_WIN_WIDTH + BAR_GAP) : '100%',
+        }}
+        option={option}
+        theme={chartsTheme.echartsTheme}
+      />
+    </Box>
   );
 }

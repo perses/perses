@@ -1,0 +1,54 @@
+{
+  "kind": "Datasource",
+  "metadata": {
+    "name": "PrometheusDemoOfficial",
+    "created_at": "0001-01-01T00:00:00Z",
+    "updated_at": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Prometheus OFFICIAL Demo instance",
+      "description": "This is the Prometheus Official demo instance."
+    },
+    "default": true,
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "proxy": {
+          "kind": "HTTPProxy",
+          "spec": {
+            "allowed_endpoints": [
+              {
+                "endpoint_pattern": "/api/v1/labels",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/series",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/metadata",
+                "method": "GET"
+              },
+              {
+                "endpoint_pattern": "/api/v1/query",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/query_range",
+                "method": "POST"
+              },
+              {
+                "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                "method": "GET"
+              }
+            ],
+            "url": "https://prometheus.demo.do.prometheus.io"
+          }
+        }
+      }
+    }
+  }
+}

@@ -276,6 +276,20 @@ export const CustomEmptyState: Story = {
   },
 };
 
+export const CustomPanelContent: Story = {
+  args: {
+    panelOptions: {
+      extra: () => {
+        return <div>Custom Actions</div>;
+      },
+    },
+  },
+  parameters: {
+    happo: false,
+    ...formatProviderParameters(DEFAULT_ALL_DASHBOARD),
+  },
+};
+
 const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {

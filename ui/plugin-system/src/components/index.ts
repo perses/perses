@@ -14,6 +14,7 @@
 export * from './CalculationSelector';
 export * from './DatasourceSelect';
 export * from './LegendOptionsEditor';
+export * from './OptionsEditorRadios';
 export * from './OptionsEditorTabs';
 export * from './PanelSpecEditor';
 export * from './PluginEditor';

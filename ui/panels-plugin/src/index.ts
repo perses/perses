@@ -15,3 +15,4 @@ export * from './plugins/time-series-chart';
 export * from './plugins/gauge-chart';
 export * from './plugins/stat-chart';
 export * from './plugins/markdown';
+export * from './plugins/bar-chart';
