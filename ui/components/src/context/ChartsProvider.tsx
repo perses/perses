@@ -22,12 +22,13 @@ export interface ChartsProviderProps {
 
 export interface SharedChartsState {
   chartsTheme: PersesChartsTheme;
+  enablePinning: boolean;
   isAnyTooltipPinned?: boolean;
   setIsAnyTooltipPinned?: (isTooltipPinned: boolean) => void;
 }
 
 export function ChartsProvider(props: ChartsProviderProps) {
-  const { children, chartsTheme, enablePinning } = props;
+  const { children, chartsTheme, enablePinning = false } = props;
 
   const [isAnyTooltipPinned, setIsAnyTooltipPinned] = useState(false);
 
