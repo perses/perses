@@ -68,3 +68,56 @@ func TestDashboard(t *testing.T) {
 		})
 	}
 }
+
+func TestDatasource(t *testing.T) {
+
+	testSuite := []struct {
+		title            string
+		datasourceFiles  []string
+		expectedErrorStr string
+	}{
+		{
+			title:            "nominal case with few datasources",
+			datasourceFiles:  []string{"datasource_custom.json", "datasource_default.json"},
+			expectedErrorStr: "",
+		},
+	}
+
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			var datasourcesRaw [][]byte
+			for _, file := range test.datasourceFiles {
+				datasourcesRaw = append(datasourcesRaw, testUtils.ReadFile(filepath.Join(testDataFolder, file)))
+			}
+
+			projectPath := testUtils.GetRepositoryPath()
+			schemasService, schErr := schemas.New(config.Schemas{
+				// use the real schemas for these tests
+				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
+				QueriesPath:   filepath.Join(projectPath, config.DefaultQueriesPath),
+				VariablesPath: filepath.Join(projectPath, config.DefaultVariablesPath),
+			})
+			if schErr != nil {
+				t.Fatal(schErr)
+			}
+
+			var datasources []*modelV1.Datasource
+			for _, datasourceRaw := range datasourcesRaw {
+				var datasource modelV1.Datasource
+				testUtils.JSONUnmarshal(datasourceRaw, &datasource)
+
+				datasources = append(datasources, &datasource)
+			}
+
+			for _, datasource := range datasources {
+				err := Datasource(datasource, datasources, schemasService)
+
+				actualErrorStr := ""
+				if err != nil {
+					actualErrorStr = err.Error()
+				}
+				assert.Equal(t, test.expectedErrorStr, actualErrorStr)
+			}
+		})
+	}
+}

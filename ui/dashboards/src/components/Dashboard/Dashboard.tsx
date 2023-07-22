@@ -16,7 +16,7 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { usePanelGroupIds } from '../../context';
 import { GridLayout } from '../GridLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
-
+import { PanelOptions } from '../Panel';
 export type DashboardProps = BoxProps & {
   /**
    * Props for `EmptyDashboard` component that will be rendered when the dashboard
@@ -24,12 +24,13 @@ export type DashboardProps = BoxProps & {
    * be used.
    */
   emptyDashboardProps?: EmptyDashboardProps;
+  panelOptions?: PanelOptions;
 };
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
-export function Dashboard({ emptyDashboardProps, ...boxProps }: DashboardProps) {
+export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: DashboardProps) {
   const panelGroupIds = usePanelGroupIds();
   const isEmpty = !panelGroupIds.length;
 
@@ -41,7 +42,10 @@ export function Dashboard({ emptyDashboardProps, ...boxProps }: DashboardProps) 
             <EmptyDashboard {...emptyDashboardProps} />
           </Box>
         )}
-        {!isEmpty && panelGroupIds.map((panelGroupId) => <GridLayout key={panelGroupId} panelGroupId={panelGroupId} />)}
+        {!isEmpty &&
+          panelGroupIds.map((panelGroupId) => (
+            <GridLayout key={panelGroupId} panelGroupId={panelGroupId} panelOptions={panelOptions} />
+          ))}
       </ErrorBoundary>
     </Box>
   );

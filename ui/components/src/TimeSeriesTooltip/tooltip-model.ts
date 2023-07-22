@@ -135,4 +135,14 @@ export const useMousePosition = (): CursorData['coords'] => {
 export type TooltipConfig = {
   wrapLabels: boolean;
   hidden?: boolean;
+  enablePinning?: boolean;
 };
+
+export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
+  wrapLabels: true,
+  enablePinning: true,
+};
+
+export const PIN_TOOLTIP_HELP_TEXT = 'Click chart to pin';
+
+export const UNPIN_TOOLTIP_HELP_TEXT = 'Click to unpin';

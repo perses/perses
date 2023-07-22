@@ -14,6 +14,10 @@
 import { RequestHeaders } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
+import {
+  PrometheusDatasourceEditor,
+  PrometheusDatasourceSpec as PrometheusDatasourceSpecFull,
+} from './PrometheusDatasourceEditor';
 
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
@@ -45,8 +49,8 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
   };
 };
 
-export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient> = {
+export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpecFull, PrometheusClient> = {
   createClient,
-  OptionsEditorComponent: () => null,
+  OptionsEditorComponent: PrometheusDatasourceEditor,
   createInitialOptions: () => ({ direct_url: '' }),
 };

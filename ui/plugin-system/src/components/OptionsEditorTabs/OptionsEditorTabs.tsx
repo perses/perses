@@ -13,7 +13,7 @@
 
 import { Tab, Tabs, TabsProps, Box } from '@mui/material';
 import { useState } from 'react';
-import { TabPanel } from './TabPanel';
+import { OptionsEditorTabPanel } from '../OptionsEditorTabPanel';
 
 export type OptionsEditorTab = {
   label: string;
@@ -52,9 +52,9 @@ export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
       </Box>
       {tabs.map(({ label, content }, i) => {
         return (
-          <TabPanel key={label} value={activeTab} index={i}>
+          <OptionsEditorTabPanel key={label} value={activeTab} index={i}>
             {content}
-          </TabPanel>
+          </OptionsEditorTabPanel>
         );
       })}
     </>

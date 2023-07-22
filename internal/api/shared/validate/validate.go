@@ -52,6 +52,7 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 }
 
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
+	name := entity.GetMetadata().GetName()
 	spec := entity.GetDTSSpec()
 	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
 	if !spec.Default {
@@ -59,6 +60,10 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 	}
 	entityPluginKind := spec.Plugin.Kind
 	for _, dts := range list {
+		if name == dts.GetMetadata().GetName() {
+			// nothing to check if comparing with same datasource
+			continue
+		}
 		dtsSpec := dts.GetDTSSpec()
 		if dtsSpec.Default && dtsSpec.Plugin.Kind == entityPluginKind {
 			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.GetMetadata().GetName(), entityPluginKind, dts.GetMetadata().GetName())

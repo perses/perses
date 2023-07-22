@@ -26,6 +26,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   id: string;
   title: string;
   description?: string;
+  extra?: React.ReactNode;
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -39,6 +40,7 @@ export function PanelHeader({
   description: rawDescription,
   editHandlers,
   sx,
+  extra,
   ...rest
 }: PanelHeaderProps) {
   const titleElementId = `${id}-title`;
@@ -136,7 +138,7 @@ export function PanelHeader({
       }
       action={
         <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-          {actions}
+          {editHandlers === undefined && extra} {actions}
         </HeaderActionWrapper>
       }
       sx={combineSx(

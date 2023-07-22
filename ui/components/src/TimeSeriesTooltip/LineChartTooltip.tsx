@@ -34,6 +34,7 @@ import { assembleTransform } from './utils';
 export interface TimeSeriesTooltipProps {
   chartRef: React.MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
+  enablePinning?: boolean;
   wrapLabels?: boolean;
   unit?: UnitOptions;
   onUnpinClick?: () => void;
@@ -48,6 +49,7 @@ export interface TimeSeriesTooltipProps {
 export const LineChartTooltip = memo(function LineChartTooltip({
   chartRef,
   chartData,
+  enablePinning = true,
   wrapLabels,
   unit,
   onUnpinClick,
@@ -59,7 +61,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   const { height, width, ref: tooltipRef } = useResizeObserver();
   const transform = useRef('');
 
-  const isTooltipPinned = pinnedPos !== null;
+  const isTooltipPinned = pinnedPos !== null && enablePinning;
 
   if (mousePos === null || mousePos.target === null) return null;
 
@@ -125,6 +127,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
           <TooltipHeader
             nearbySeries={nearbySeries}
             totalSeries={totalSeries}
+            enablePinning={enablePinning}
             isTooltipPinned={isTooltipPinned}
             showAllSeries={showAllSeries}
             onShowAllClick={(checked) => setShowAllSeries(checked)}
