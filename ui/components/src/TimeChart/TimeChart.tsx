@@ -275,11 +275,11 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   // Unpin tooltip when another chart is clicked
   // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
-  useEffect(() => {
-    if (!isAnyTooltipPinned) {
-      setTooltipPinnedCoords(null);
-    }
-  }, [tooltipPinnedCoords, isAnyTooltipPinned, setIsAnyTooltipPinned]);
+  // useEffect(() => {
+  //   if (!isAnyTooltipPinned) {
+  //     setTooltipPinnedCoords(null); // TODO: debug first click to pin and reset correctly
+  //   }
+  // }, [tooltipPinnedCoords, isAnyTooltipPinned, setIsAnyTooltipPinned]);
 
   return (
     <Box
