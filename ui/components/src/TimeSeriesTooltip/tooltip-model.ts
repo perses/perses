@@ -136,13 +136,11 @@ export type TooltipConfig = {
   wrapLabels: boolean;
   hidden?: boolean;
   enablePinning?: boolean;
-  enableEChartsTooltip?: boolean;
 };
 
 export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
   wrapLabels: true,
   enablePinning: true,
-  enableEChartsTooltip: false,
 };
 
 export const PIN_TOOLTIP_HELP_TEXT = 'Click chart to pin';

@@ -372,11 +372,12 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     setTimeRange({ start: new Date(event.start), end: new Date(event.end) });
   };
 
+  // Used to opt in to ECharts trigger item which show subgroup data accurately
   const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
+
   const tooltipConfig: TooltipConfig = {
     ...DEFAULT_TOOLTIP_CONFIG,
     enablePinning: tooltip?.enable_pinning ?? true,
-    enableEChartsTooltip: isStackedBar,
   };
 
   return (
@@ -421,6 +422,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 yAxis={echartsYAxis}
                 unit={unit}
                 grid={gridOverrides}
+                isStackedBar={isStackedBar}
                 tooltipConfig={tooltipConfig}
                 syncGroup="default-panel-group" // TODO: make configurable from dashboard settings and per panel-group overrides
                 onDataZoom={handleDataZoom}

@@ -85,6 +85,7 @@ export interface TimeChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  isStackedBar?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -99,6 +100,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     yAxis,
     unit,
     grid,
+    isStackedBar = false,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
     noDataVariant = 'message',
     syncGroup,
@@ -225,9 +227,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       animation: false,
       tooltip: {
         show: true,
-        trigger: tooltipConfig.enableEChartsTooltip ? 'item' : 'axis',
-        // ECharts tooltip content hidden by default since we use custom tooltip instead
-        showContent: tooltipConfig.enableEChartsTooltip,
+        // ECharts tooltip content hidden by default since we use custom tooltip instead.
+        // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
+        showContent: isStackedBar,
+        trigger: isStackedBar ? 'item' : 'axis',
         appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
