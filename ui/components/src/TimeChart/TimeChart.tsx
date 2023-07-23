@@ -119,11 +119,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   const { timeZone } = useTimeZone();
   const totalSeries = data?.length ?? 0;
 
-  console.log(seriesMapping);
-  console.log(data);
-  console.log(timeScaleProp);
-  console.log(yAxis);
-
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);

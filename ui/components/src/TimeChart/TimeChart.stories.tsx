@@ -218,8 +218,7 @@ export const NoData: Story = {
   },
 };
 
-// Time series bar using visual.display and visual.stack
-// http://localhost:3000/projects/perses/dashboards/DemoDashboard?start=1690076587000&refresh=0s&var-JobPromVariableProj=alertmanager&var-InstancePromVariableProj=demo.do.prometheus.io%3A9093&end=1690076694000
+// Time series bar test data to demonstrate visual.display and visual.stack
 const STACKED_BAR_DATA: TimeSeries[] = [
   {
     name: '{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
