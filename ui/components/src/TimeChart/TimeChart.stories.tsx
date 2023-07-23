@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
+import { waitForStableCanvas } from '@perses-dev/storybook';
+import { TimeSeries } from '@perses-dev/core';
 import { ChartInstance, DEFAULT_TOOLTIP_CONFIG, TimeChart } from '@perses-dev/components';
-import { Button, Stack, Typography } from '@mui/material';
+import { Button, Stack } from '@mui/material';
 import { useRef } from 'react';
 import { action } from '@storybook/addon-actions';
 
@@ -213,5 +215,75 @@ export const NoData: Story = {
         </div>
       </Stack>
     );
+  },
+};
+
+// Time series bar using visual.display and visual.stack
+const STACKED_BAR_DATA: TimeSeries[] = [
+  {
+    name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+    values: [
+      [1673784000000, 1],
+      [1673784060000, 2],
+      [1673784120000, null],
+      [1673784180000, null],
+      [1673784240000, 4],
+      [1673784300000, 1],
+      [1673784360000, 2],
+      [1673784420000, 3],
+    ],
+  },
+  {
+    name: 'up{instance="demo.do.prometheus.io:3000",job="caddy"}',
+    values: [
+      [1673784000000, 8],
+      [1673784060000, 6],
+      [1673784120000, 10],
+      [1673784180000, 9],
+      [1673784240000, 7],
+      [1673784300000, 8],
+      [1673784360000, 12],
+      [1673784420000, 10],
+    ],
+  },
+];
+
+export const StackedBar: Story = {
+  parameters: {
+    happo: {
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
+      },
+    },
+  },
+  args: {
+    height: 200,
+    data: STACKED_BAR_DATA,
+    seriesMapping: [
+      {
+        type: 'bar',
+        id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        datasetIndex: 0,
+        name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
+        color: 'hsla(158782136,50%,50%,0.8)',
+      },
+    ],
+    yAxis: {
+      show: true,
+    },
+    unit: {
+      kind: 'Decimal' as const,
+      decimal_places: 2,
+      abbreviate: true,
+    },
+    tooltipConfig: DEFAULT_TOOLTIP_CONFIG,
+    grid: {
+      left: 20,
+      right: 20,
+      bottom: 0,
+    },
+  },
+  render: (args) => {
+    return <TimeChart {...args} isStackedBar={true} />;
   },
 };
