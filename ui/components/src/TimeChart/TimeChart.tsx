@@ -271,6 +271,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     noDataVariant,
     timeZone,
     tooltipPinnedCoords,
+    isStackedBar,
   ]);
 
   return (
