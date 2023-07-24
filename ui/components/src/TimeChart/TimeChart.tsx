@@ -282,18 +282,20 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           seriesMapping.pop();
         }
 
-        const pointInGrid = getPointInGrid(
+        const syncedChartPointInGrid = getPointInGrid(
           lastTooltipPinnedCoords.plotCanvas.x,
           lastTooltipPinnedCoords.plotCanvas.y,
           chartRef.current
         );
 
-        if (pointInGrid !== null) {
+        if (syncedChartPointInGrid !== null) {
+          seriesMapping.pop();
+          seriesMapping.pop();
           const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
             markLine: {
               data: [
                 {
-                  xAxis: pointInGrid[0],
+                  xAxis: syncedChartPointInGrid[0],
                 },
               ],
             },
