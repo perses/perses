@@ -34,9 +34,7 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
   },
 };
 
-export function formatDecimal(value: number, options: DecimalUnitOptions): string {
-  const { abbreviate, decimal_places } = options;
-
+export function formatDecimal(value: number, { abbreviate, decimal_places }: DecimalUnitOptions): string {
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
     useGrouping: true,
@@ -55,5 +53,6 @@ export function formatDecimal(value: number, options: DecimalUnitOptions): strin
     }
   }
 
-  return Intl.NumberFormat('en-US', formatterOptions).format(value);
+  const formatter = Intl.NumberFormat('en-US', formatterOptions);
+  return formatter.format(value);
 }

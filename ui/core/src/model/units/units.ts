@@ -11,11 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BytesUnitOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG, formatBytes } from './bytes';
-import { DecimalUnitOptions, DECIMAL_UNIT_CONFIG, formatDecimal, DECIMAL_GROUP_CONFIG } from './decimal';
-import { PERCENT_GROUP_CONFIG, formatPercent, PercentUnitOptions, PERCENT_UNIT_CONFIG } from './percent';
+import { formatBytes, BytesUnitOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
+import { formatDecimal, DecimalUnitOptions, DECIMAL_GROUP_CONFIG, DECIMAL_UNIT_CONFIG } from './decimal';
+import { formatPercent, PercentUnitOptions, PERCENT_GROUP_CONFIG, PERCENT_UNIT_CONFIG } from './percent';
 import { formatTime, TimeUnitOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
 import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
+
+/**
+ * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
+ * Prefer Intl.NumbeFormat because it covers most use cases and will continue to be well-supported with time.
+ *
+ * To format bytes, we also make use of the `numbro` package,
+ * because it can handle adding units like KB, MB, GB, etc. correctly.
+ */
 
 export const UNIT_GROUP_CONFIG: Readonly<Record<UnitGroup, UnitGroupConfig>> = {
   Time: TIME_GROUP_CONFIG,
@@ -40,20 +48,20 @@ export function formatValue(value: number, unitOptions?: UnitOptions): string {
     return value.toString();
   }
 
-  if (isDecimalUnit(unitOptions)) {
-    return formatDecimal(value, unitOptions);
+  if (isBytesUnit(unitOptions)) {
+    return formatBytes(value, unitOptions);
   }
 
-  if (isTimeUnit(unitOptions)) {
-    return formatTime(value, unitOptions);
+  if (isDecimalUnit(unitOptions)) {
+    return formatDecimal(value, unitOptions);
   }
 
   if (isPercentUnit(unitOptions)) {
     return formatPercent(value, unitOptions);
   }
 
-  if (isBytesUnit(unitOptions)) {
-    return formatBytes(value, unitOptions);
+  if (isTimeUnit(unitOptions)) {
+    return formatTime(value, unitOptions);
   }
 
   const exhaustive: never = unitOptions;

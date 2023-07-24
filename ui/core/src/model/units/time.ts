@@ -90,5 +90,6 @@ export function formatTime(value: number, { kind, decimal_places }: TimeUnitOpti
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
-  return Intl.NumberFormat('en-US', formatterOptions).format(value);
+  const formatter = Intl.NumberFormat('en-US', formatterOptions);
+  return formatter.format(value);
 }
