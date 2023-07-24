@@ -276,10 +276,30 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     if (tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null) {
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
-      }
-      const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
-      if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-        seriesMapping.pop();
+
+        const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
+        if (tooltipPinnedCoords !== null && isCrosshairPinned) {
+          seriesMapping.pop();
+        }
+
+        const pointInGrid = getPointInGrid(
+          lastTooltipPinnedCoords.plotCanvas.x,
+          lastTooltipPinnedCoords.plotCanvas.y,
+          chartRef.current
+        );
+
+        if (pointInGrid !== null) {
+          const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+            markLine: {
+              data: [
+                {
+                  xAxis: pointInGrid[0],
+                },
+              ],
+            },
+          });
+          seriesMapping.push(pinnedCrosshair);
+        }
       }
     }
     // tooltipPinnedCoords cannot be in dep array or current chart onClick overrides unpinning behavior
@@ -290,14 +310,13 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     <Box
       sx={{ height }}
       onClick={(e) => {
+        // TODO: opt-in to multi tooltip pinning when CTRL key held down
+
         // Determine where on chart canvas to plot pinned crosshair as markLine.
         const pointInGrid = getPointInGrid(e.nativeEvent.offsetX, e.nativeEvent.offsetY, chartRef.current);
         if (pointInGrid === null) {
           return;
         }
-
-        // TODO: pin subsequent tooltips and unpin prevous
-        // TODO: opt-in to multi tooltip pinning when CTRL key held down
 
         // Clear previously set pinned crosshair
         const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
