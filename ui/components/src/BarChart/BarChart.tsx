@@ -21,6 +21,7 @@ import { Box } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
+import { getYAxes } from '../utils';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -45,7 +46,7 @@ export function BarChart(props: BarChartProps) {
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data == null) return chartsTheme.noDataOption;
+    if (data == null || !data.length) return chartsTheme.noDataOption;
 
     const source: Array<Array<BarChartData['label'] | BarChartData['value']>> = [];
     data.map((d) => {
@@ -62,7 +63,7 @@ export function BarChart(props: BarChartProps) {
           source: source,
         },
       ],
-      xAxis: {},
+      xAxis: getYAxes({}, unit),
       yAxis: {
         type: 'category',
         splitLine: {
