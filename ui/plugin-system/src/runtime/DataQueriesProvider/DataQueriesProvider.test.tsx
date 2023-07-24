@@ -15,6 +15,7 @@ import React from 'react';
 import { render, renderHook } from '@testing-library/react';
 import { MOCK_TIME_SERIES_DATA } from '../../test';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
+import { DataQueriesDefinition } from './model';
 
 jest.mock('../time-series-queries', () => ({
   useTimeSeriesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
@@ -22,9 +23,8 @@ jest.mock('../time-series-queries', () => ({
 
 describe('useDataQueries', () => {
   it('should return the correct data for TimeSeriesQuery', () => {
-    const definitions = [
+    const definitions: DataQueriesDefinition[] = [
       {
-        type: 'TimeSeriesQuery',
         kind: 'PrometheusTimeSeriesQuery',
         spec: {
           query: 'up',
@@ -45,7 +45,8 @@ describe('useDataQueries', () => {
 
 describe('DataQueriesProvider', () => {
   it('should throw an errory for unsupported query type', () => {
-    const definitions = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const definitions: any = [
       {
         type: 'CustomQuery',
         kind: 'CustomQueryPlugin',
