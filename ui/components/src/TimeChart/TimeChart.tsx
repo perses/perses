@@ -14,6 +14,7 @@
 import { forwardRef, MouseEvent, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import merge from 'lodash/merge';
+import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
@@ -110,7 +111,14 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const { chartsTheme, isAnyTooltipPinned, setIsAnyTooltipPinned, enablePinning } = useChartsTheme();
+  const {
+    chartsTheme,
+    enablePinning,
+    isAnyTooltipPinned,
+    setIsAnyTooltipPinned,
+    lastTooltipPinnedCoords,
+    setLastTooltipPinnedCoords,
+  } = useChartsTheme();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -276,11 +284,19 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   // Unpin tooltip when another chart is clicked
   // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
-  // useEffect(() => {
-  //   if (!isAnyTooltipPinned) {
-  //     setTooltipPinnedCoords(null); // TODO: debug first click to pin and reset correctly
-  //   }
-  // }, [tooltipPinnedCoords, isAnyTooltipPinned, setIsAnyTooltipPinned]);
+  useEffect(() => {
+    if (tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null) {
+      if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
+        setTooltipPinnedCoords(null);
+      }
+      const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
+      if (tooltipPinnedCoords !== null && isCrosshairPinned) {
+        seriesMapping.pop();
+      }
+    }
+    // tooltipPinnedCoords cannot be in dep array or current chart onClick overrides unpinning behavior
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastTooltipPinnedCoords]);
 
   return (
     <Box
@@ -318,8 +334,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              setIsAnyTooltipPinned(true);
-              return {
+              // setIsAnyTooltipPinned(true);
+              const pinnedPos: CursorCoordinates = {
                 page: {
                   x: e.pageX,
                   y: e.pageY,
@@ -334,8 +350,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
                 },
                 target: e.target,
               };
+              setLastTooltipPinnedCoords(pinnedPos);
+              return pinnedPos;
             } else {
-              setIsAnyTooltipPinned(false);
+              // setIsAnyTooltipPinned(false);
               return null;
             }
           });
