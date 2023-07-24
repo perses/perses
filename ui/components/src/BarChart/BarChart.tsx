@@ -105,6 +105,10 @@ export function BarChart(props: BarChartProps) {
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
+      grid: {
+        left: '5%',
+        right: '5%',
+      },
     };
   }, [data, chartsTheme, width, mode, unit]);
 
