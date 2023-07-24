@@ -24,8 +24,6 @@ export interface ChartsProviderProps {
 export interface SharedChartsState {
   chartsTheme: PersesChartsTheme;
   enablePinning: boolean;
-  isAnyTooltipPinned: boolean;
-  setIsAnyTooltipPinned: (isTooltipPinned: boolean) => void;
   lastTooltipPinnedCoords: CursorCoordinates | null;
   setLastTooltipPinnedCoords: (lastTooltipPinnedCoords: CursorCoordinates | null) => void;
 }
@@ -33,26 +31,16 @@ export interface SharedChartsState {
 export function ChartsProvider(props: ChartsProviderProps) {
   const { children, chartsTheme, enablePinning = false } = props;
 
-  const [isAnyTooltipPinned, setIsAnyTooltipPinned] = useState(false);
   const [lastTooltipPinnedCoords, setLastTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
 
   const ctx = useMemo(() => {
     return {
       chartsTheme,
       enablePinning,
-      isAnyTooltipPinned,
-      setIsAnyTooltipPinned,
       lastTooltipPinnedCoords,
       setLastTooltipPinnedCoords,
     };
-  }, [
-    chartsTheme,
-    enablePinning,
-    isAnyTooltipPinned,
-    setIsAnyTooltipPinned,
-    lastTooltipPinnedCoords,
-    setLastTooltipPinnedCoords,
-  ]);
+  }, [chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords]);
 
   return <ChartsThemeContext.Provider value={ctx}>{children}</ChartsThemeContext.Provider>;
 }

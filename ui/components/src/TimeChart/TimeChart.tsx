@@ -111,14 +111,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const {
-    chartsTheme,
-    enablePinning,
-    isAnyTooltipPinned,
-    setIsAnyTooltipPinned,
-    lastTooltipPinnedCoords,
-    setLastTooltipPinnedCoords,
-  } = useChartsTheme();
+  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsTheme();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
@@ -334,7 +327,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              // setIsAnyTooltipPinned(true);
               const pinnedPos: CursorCoordinates = {
                 page: {
                   x: e.pageX,
@@ -353,7 +345,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               setLastTooltipPinnedCoords(pinnedPos);
               return pinnedPos;
             } else {
-              // setIsAnyTooltipPinned(false);
               return null;
             }
           });
