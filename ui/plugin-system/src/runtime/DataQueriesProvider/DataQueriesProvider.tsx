@@ -20,6 +20,7 @@ import {
   transformQueryResults,
   DataQueriesContextType,
   QueryData,
+  useQueryType,
 } from './model';
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
@@ -58,17 +59,16 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
 export function DataQueriesProvider(props: DataQueriesProviderProps) {
   const { definitions, options, children } = props;
 
-  const queryDefinitions = definitions.map((definition) => {
-    if (definition.type === undefined || definition.type === 'TimeSeriesQuery') {
-      return {
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: definition,
-        },
-      } as TimeSeriesQueryDefinition;
-    }
+  const getQueryType = useQueryType();
 
-    throw new Error(`Query type is not supported: ${definition.type}`);
+  const queryDefinitions = definitions.map((definition) => {
+    const type = getQueryType(definition.kind);
+    return {
+      kind: type,
+      spec: {
+        plugin: definition,
+      },
+    };
   });
 
   // Filter definitions for time series query and other future query plugins

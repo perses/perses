@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataQueriesDefinition, DataQueriesProvider } from '@perses-dev/plugin-system';
+import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { useSuggestedStepMs } from '../../utils';
 import { Panel, PanelProps } from '../Panel/Panel';
@@ -45,12 +45,11 @@ export function GridItemContent(props: GridItemContentProps) {
     };
   }
 
-  // map TimeSeriesQueryDefinition to DataQueriesDefinition
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const suggestedStepMs = useSuggestedStepMs(width);
   const queryDefinitions = queries ?? [];
-  const definitions: DataQueriesDefinition[] = queryDefinitions.map((query) => {
+  const definitions = queryDefinitions.map((query) => {
     return {
-      type: query.kind,
       kind: query.spec.plugin.kind,
       spec: query.spec.plugin.spec,
     };

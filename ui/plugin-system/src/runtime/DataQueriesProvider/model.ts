@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, QueryDefinition, QueryType, UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
 import { UseQueryResult } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
+import { useListPluginMetadata } from '../plugin-registry';
 
 type QueryOptions = Record<string, unknown>;
-
-export interface DataQueriesDefinition extends Definition<UnknownSpec> {
-  /**
-   * @default 'TimeSeriesQuery'
-   */
-  type?: keyof QueryType;
-}
-
 export interface DataQueriesProviderProps {
-  definitions: DataQueriesDefinition[];
+  definitions: Array<Definition<UnknownSpec>>;
   options?: QueryOptions;
   children?: React.ReactNode;
 }
@@ -61,4 +55,41 @@ export function transformQueryResults(results: UseQueryResult[], definitions: Qu
       error,
     } as QueryData;
   });
+}
+
+export function useQueryType(): (pluginKind: string) => string | undefined {
+  const { data: timeSeriesQueryPlugins, isLoading } = useListPluginMetadata('TimeSeriesQuery');
+
+  const queryTypeMap = useMemo(() => {
+    const map: Record<string, string[]> = {
+      TimeSeriesQuery: [],
+    };
+
+    if (timeSeriesQueryPlugins) {
+      timeSeriesQueryPlugins.forEach((plugin) => {
+        map['TimeSeriesQuery']?.push(plugin.kind);
+      });
+    }
+
+    return map;
+  }, [timeSeriesQueryPlugins]);
+
+  const getQueryType = useCallback(
+    (pluginKind: string) => {
+      if (isLoading) {
+        return undefined;
+      }
+
+      for (const queryType in queryTypeMap) {
+        if (queryTypeMap[queryType]?.includes(pluginKind)) {
+          return queryType;
+        }
+      }
+
+      throw new Error(`Unable to determine the query type: ${pluginKind}`);
+    },
+    [queryTypeMap, isLoading]
+  );
+
+  return getQueryType;
 }

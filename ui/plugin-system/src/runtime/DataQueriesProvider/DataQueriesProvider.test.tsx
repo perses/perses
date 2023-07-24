@@ -12,18 +12,34 @@
 // limitations under the License.
 
 import React from 'react';
-import { render, renderHook } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { MOCK_TIME_SERIES_DATA } from '../../test';
+import { useListPluginMetadata } from '../plugin-registry';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
-import { DataQueriesDefinition } from './model';
+import { useQueryType } from './model';
 
 jest.mock('../time-series-queries', () => ({
   useTimeSeriesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
 }));
 
+jest.mock('../plugin-registry', () => ({
+  useListPluginMetadata: jest.fn().mockImplementation(() => ({
+    data: [
+      {
+        display: {
+          name: 'Prometheus Range Query',
+        },
+        kind: 'PrometheusTimeSeriesQuery',
+        pluginType: 'TimeSeriesQuery',
+      },
+    ],
+    isLoading: false,
+  })),
+}));
+
 describe('useDataQueries', () => {
   it('should return the correct data for TimeSeriesQuery', () => {
-    const definitions: DataQueriesDefinition[] = [
+    const definitions = [
       {
         kind: 'PrometheusTimeSeriesQuery',
         spec: {
@@ -43,20 +59,26 @@ describe('useDataQueries', () => {
   });
 });
 
-describe('DataQueriesProvider', () => {
-  it('should throw an errory for unsupported query type', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const definitions: any = [
-      {
-        type: 'CustomQuery',
-        kind: 'CustomQueryPlugin',
-        spec: {
-          query: 'hi',
-        },
-      },
-    ];
-    expect(() => {
-      render(<DataQueriesProvider definitions={definitions} />);
-    }).toThrow('Query type is not supported: CustomQuery');
+describe('useQueryType', () => {
+  it('should return the correct query type for a given plugin kind', () => {
+    const { result } = renderHook(() => useQueryType());
+
+    const getQueryType = result.current;
+    expect(getQueryType('PrometheusTimeSeriesQuery')).toBe('TimeSeriesQuery');
+  });
+
+  it('should throw an error if query type is not found ', () => {
+    const { result } = renderHook(() => useQueryType());
+
+    const getQueryType = result.current;
+    expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
+  });
+
+  it('should return undefined if useLIstPluginMetadata is still loading', () => {
+    (useListPluginMetadata as jest.Mock).mockReturnValue({ isLoading: true });
+    const { result } = renderHook(() => useQueryType());
+
+    const getQueryType = result.current;
+    expect(getQueryType('UnknownQuery')).toBeUndefined();
   });
 });
