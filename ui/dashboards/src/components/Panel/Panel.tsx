@@ -31,7 +31,11 @@ export type PanelOptions = {
    * Content to render in the top-right corner of the panel. It will only be
    * rendered when the panel is in edit mode.
    */
-  extra?: () => React.ReactNode;
+  extra?: (props: PanelExtraProps) => React.ReactNode;
+};
+
+type PanelExtraProps = {
+  panelDefinition?: PanelDefinition;
 };
 
 /**
@@ -91,7 +95,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
       {...others}
     >
       <PanelHeader
-        extra={panelOptions?.extra?.()}
+        extra={panelOptions?.extra?.({ panelDefinition: definition })}
         id={headerId}
         title={definition.spec.display.name}
         description={definition.spec.display.description}
