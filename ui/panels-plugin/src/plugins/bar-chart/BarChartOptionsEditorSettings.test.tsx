@@ -133,4 +133,31 @@ describe('BarChartOptionsEditorSettings', () => {
     const unitSelector = screen.getByRole('combobox', { name: 'Unit' });
     expect(unitSelector).toBeDisabled;
   });
+
+  it('should reset settings to defaults', () => {
+    const onChange = jest.fn();
+    renderBarChartOptionsEditorSettings(
+      {
+        unit: {
+          kind: 'Years',
+        },
+        calculation: 'First',
+        sort: 'asc',
+        mode: 'percentage',
+      },
+      onChange
+    );
+    const resetButton = screen.getByRole('button', { name: 'Reset To Defaults', exact: true });
+    userEvent.click(resetButton);
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        unit: {
+          kind: 'Decimal',
+        },
+        calculation: 'LastNumber',
+        sort: 'desc',
+        mode: 'value',
+      })
+    );
+  });
 });

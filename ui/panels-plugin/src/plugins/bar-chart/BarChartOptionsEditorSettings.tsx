@@ -28,6 +28,7 @@ import {
   SortOption,
 } from '@perses-dev/components';
 import { CalculationType, DEFAULT_CALCULATION, UnitOptions, isPercentUnit } from '@perses-dev/core';
+import { Button } from '@mui/material';
 import { BarChartOptions, DEFAULT_UNIT, BarChartOptionsEditorProps } from './bar-chart-model';
 
 export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps) {
@@ -65,6 +66,17 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     );
   };
 
+  const handleResetSettings: React.MouseEventHandler<HTMLButtonElement> = () => {
+    onChange(
+      produce(value, (draft: BarChartOptions) => {
+        draft.calculation = 'LastNumber';
+        draft.unit = DEFAULT_UNIT;
+        draft.sort = 'desc';
+        draft.mode = 'value';
+      })
+    );
+  };
+
   // ensures decimal_places defaults to correct value
   const unit = merge({}, DEFAULT_UNIT, value.unit);
 
@@ -76,6 +88,13 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
           <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
           <SortSelector value={value.sort} onChange={handleSortChange} />
           <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(unit)} />
+        </OptionsEditorGroup>
+      </OptionsEditorColumn>
+      <OptionsEditorColumn>
+        <OptionsEditorGroup title="Reset Settings">
+          <Button variant="outlined" color="secondary" onClick={handleResetSettings}>
+            Reset To Defaults
+          </Button>
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>
