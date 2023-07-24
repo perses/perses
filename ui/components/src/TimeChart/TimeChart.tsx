@@ -40,15 +40,10 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import {
-  ChartInstanceFocusOpts,
-  ChartInstance,
-  TimeChartSeriesMapping,
-  DEFAULT_PINNED_CROSSHAIR,
-  PINNED_CROSSHAIR_SERIES_NAME,
-} from '../model/graph';
+import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, DEFAULT_PINNED_CROSSHAIR } from '../model';
 import { useChartsTheme } from '../context/ChartsProvider';
 import {
+  checkCrosshairPinnedStatus,
   clearHighlightedSeries,
   enableDataZoom,
   getFormattedAxisLabel,
@@ -282,7 +277,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
       }
-      const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
+      const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
       if (tooltipPinnedCoords !== null && isCrosshairPinned) {
         seriesMapping.pop();
       }
@@ -305,7 +300,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         // TODO: opt-in to multi tooltip pinning when CTRL key held down
 
         // Clear previously set pinned crosshair
-        const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
+        const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
         if (tooltipPinnedCoords !== null && isCrosshairPinned) {
           seriesMapping.pop();
         } else if (seriesMapping.length !== data.length + 1) {
@@ -416,7 +411,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
               // Clear previously set pinned crosshair
-              seriesMapping.pop();
+              const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
+              if (isCrosshairPinned) {
+                seriesMapping.pop();
+              }
             }}
           />
         )}
