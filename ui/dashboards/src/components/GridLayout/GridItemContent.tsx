@@ -58,7 +58,12 @@ export function GridItemContent(props: GridItemContentProps) {
 
   return (
     <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-      <Panel definition={panelDefinition} editHandlers={editHandlers} panelOptions={props.panelOptions} />
+      <Panel
+        definition={panelDefinition}
+        editHandlers={editHandlers}
+        panelOptions={props.panelOptions}
+        panelGroupItemId={panelGroupItemId}
+      />
     </DataQueriesProvider>
   );
 }
