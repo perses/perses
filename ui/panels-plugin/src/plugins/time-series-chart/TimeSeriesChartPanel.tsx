@@ -375,9 +375,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // Used to opt in to ECharts trigger item which show subgroup data accurately
   const isStackedBar = visual.display === 'bar' && visual.stack === 'All';
 
+  // Turn on tooltip pinning by default but opt out for stacked bar or if explicitly set in tooltip panel spec
+  let enablePinning = true;
+  if (isStackedBar) {
+    enablePinning = false;
+  } else if (tooltip?.enable_pinning !== undefined) {
+    enablePinning = tooltip.enable_pinning;
+  }
   const tooltipConfig: TooltipConfig = {
     ...DEFAULT_TOOLTIP_CONFIG,
-    enablePinning: tooltip?.enable_pinning ?? true,
+    enablePinning,
   };
 
   return (

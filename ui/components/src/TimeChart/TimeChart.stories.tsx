@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
+import { waitForStableCanvas } from '@perses-dev/storybook';
+import { TimeSeries } from '@perses-dev/core';
 import { ChartInstance, DEFAULT_TOOLTIP_CONFIG, TimeChart } from '@perses-dev/components';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
@@ -213,5 +215,115 @@ export const NoData: Story = {
         </div>
       </Stack>
     );
+  },
+};
+
+// Time series bar test data to demonstrate visual.display and visual.stack
+const STACKED_BAR_DATA: TimeSeries[] = [
+  {
+    name: '{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    values: [
+      [1690076580000, 585465856],
+      [1690076595000, 597020672],
+      [1690076610000, 595795968],
+      [1690076625000, 595472384],
+      [1690076640000, 604037120],
+      [1690076655000, 587571200],
+      [1690076670000, 584241152],
+      [1690076685000, 584945664],
+    ],
+  },
+  {
+    name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    values: [
+      [1690076580000, 41164800],
+      [1690076595000, 41177088],
+      [1690076610000, 41193472],
+      [1690076625000, 41209856],
+      [1690076640000, 41234432],
+      [1690076655000, 41246720],
+      [1690076670000, 41267200],
+      [1690076685000, 41279488],
+    ],
+  },
+  {
+    name: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+    values: [
+      [1690076580000, 106176512],
+      [1690076595000, 94519296],
+      [1690076610000, 95629312],
+      [1690076625000, 95854592],
+      [1690076640000, 87154688],
+      [1690076655000, 103501824],
+      [1690076670000, 106725376],
+      [1690076685000, 105930752],
+    ],
+  },
+];
+
+export const StackedBar: Story = {
+  parameters: {
+    happo: {
+      beforeScreenshot: async () => {
+        await waitForStableCanvas('canvas');
+      },
+    },
+  },
+  args: {
+    height: 200,
+    timeScale: { startMs: 1690076580000, endMs: 1690076685000, stepMs: 15000, rangeMs: 105000 },
+    data: STACKED_BAR_DATA,
+    seriesMapping: [
+      {
+        type: 'bar',
+        id: 'time-series-panel-19{env="demo",instance="demo.do.prometheus.io:9100",job="node"}0',
+        datasetIndex: 0,
+        name: '{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+        color: '#56B4E9',
+        stack: 'all',
+        label: {
+          show: false,
+        },
+      },
+      {
+        type: 'bar',
+        id: 'time-series-panel-19node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}1',
+        datasetIndex: 1,
+        name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+        color: '#009E73',
+        stack: 'all',
+        label: {
+          show: false,
+        },
+      },
+      {
+        type: 'bar',
+        id: 'time-series-panel-19node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}2',
+        datasetIndex: 2,
+        name: 'node_memory_MemFree_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
+        color: '#0072B2',
+        stack: 'all',
+        label: {
+          show: false,
+        },
+      },
+    ],
+    yAxis: {
+      show: true,
+      min: 400000000,
+    },
+    unit: {
+      kind: 'Decimal',
+      abbreviate: true,
+    },
+    tooltipConfig: { wrapLabels: true, enablePinning: false },
+    grid: {
+      left: 20,
+      right: 20,
+      bottom: 0,
+    },
+  },
+  render: (args) => {
+    return <TimeChart {...args} isStackedBar={true} />;
   },
 };
