@@ -47,15 +47,10 @@ export function ChartsProvider(props: ChartsProviderProps) {
 
 export const ChartsThemeContext = createContext<SharedChartsState | undefined>(undefined);
 
-export function useChartsThemeContext() {
+export function useChartsContext(): SharedChartsState {
   const ctx = useContext(ChartsThemeContext);
   if (ctx === undefined) {
     throw new Error('No ChartsThemeContext found. Did you forget a Provider?');
   }
-  return ctx;
-}
-
-export function useChartsTheme(): SharedChartsState {
-  const ctx = useChartsThemeContext();
   return ctx;
 }

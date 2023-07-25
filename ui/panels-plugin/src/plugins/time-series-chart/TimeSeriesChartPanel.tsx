@@ -39,7 +39,7 @@ import {
   ChartInstance,
   YAxisLabel,
   ZoomEventData,
-  useChartsTheme,
+  useChartsContext,
   SelectedLegendItemState,
   ContentWithLegend,
   TableColumnConfig,
@@ -83,7 +83,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     spec: { thresholds, y_axis, tooltip },
     contentDimensions,
   } = props;
-  const { chartsTheme } = useChartsTheme();
+  const { chartsTheme } = useChartsContext();
   const muiTheme = useTheme();
   const chartId = useId('time-series-panel');
 

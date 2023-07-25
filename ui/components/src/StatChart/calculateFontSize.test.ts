@@ -14,7 +14,7 @@
 import { useOptimalFontSize } from './calculateFontSize';
 
 jest.mock('../context/ChartsProvider', () => ({
-  useChartsTheme: jest.fn().mockReturnValue({
+  useChartsContext: jest.fn().mockReturnValue({
     echartsTheme: {
       textStyle: {
         fontSize: '12',

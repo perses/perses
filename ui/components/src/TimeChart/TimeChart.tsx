@@ -41,7 +41,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, DEFAULT_PINNED_CROSSHAIR } from '../model';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { useChartsContext } from '../context/ChartsProvider';
 import {
   checkCrosshairPinnedStatus,
   clearHighlightedSeries,
@@ -106,7 +106,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsTheme();
+  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
   const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);

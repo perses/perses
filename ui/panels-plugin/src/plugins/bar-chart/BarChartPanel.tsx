@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
+import { BarChart, BarChartData, useChartsContext } from '@perses-dev/components';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationType, CalculationsMap } from '@perses-dev/core';
@@ -27,7 +27,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
     contentDimensions,
   } = props;
 
-  const { chartsTheme } = useChartsTheme();
+  const { chartsTheme } = useChartsContext();
   const PADDING = chartsTheme.container.padding.default;
 
   const { queryResults, isLoading, isFetching } = useDataQueries(); // gets data queries from a context provider, see DataQueriesProvider
