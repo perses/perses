@@ -54,3 +54,8 @@ export function useChartsContext(): SharedChartsState {
   }
   return ctx;
 }
+
+export function useChartsTheme(): PersesChartsTheme {
+  const ctx = useChartsContext();
+  return ctx.chartsTheme;
+}

@@ -11,17 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { testChartsTheme } from '../test-utils';
 import { useOptimalFontSize } from './calculateFontSize';
 
 jest.mock('../context/ChartsProvider', () => ({
-  useChartsContext: jest.fn().mockReturnValue({
-    echartsTheme: {
-      textStyle: {
-        fontSize: '12',
-        fontFamily: 'Lato',
-      },
-    },
-  }),
+  useChartsTheme: jest.fn().mockReturnValue(testChartsTheme),
 }));
 
 describe('useOptimalFontSize', () => {

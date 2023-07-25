@@ -53,7 +53,7 @@ describe('ThresholdsEditor', () => {
     userEvent.click(addButton);
     expect(onChange).toHaveBeenCalledWith(
       produce(thresholds, (draft) => {
-        draft.steps?.push({ value: 75, color: '#EE6C6C' });
+        draft.steps?.push({ value: 75, color: '#d32f2f' });
       })
     );
   });
@@ -103,13 +103,13 @@ describe('ThresholdsEditor', () => {
     const openColorPickerButton = screen.getByLabelText('change threshold T1 color');
     userEvent.click(openColorPickerButton);
     await screen.findByTestId('threshold color picker');
-    const redColorButton = screen.getByLabelText('change color to #EE6C6C');
+    const redColorButton = screen.getByLabelText('change color to #d32f2f');
     userEvent.click(redColorButton);
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith(
         produce(thresholds, (draft) => {
           if (draft.steps && draft.steps[0]) {
-            draft.steps[0].color = '#EE6C6C';
+            draft.steps[0].color = '#d32f2f';
           }
         })
       );

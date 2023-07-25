@@ -19,7 +19,7 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { LineChart as EChartsLineChart, LineSeriesOption } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useChartsContext } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 import { GraphSeries } from '../model/graph';
 import { FontSizeOption } from '../FontSizeSelector';
@@ -50,7 +50,7 @@ export interface StatChartProps {
 
 export function StatChart(props: StatChartProps) {
   const { width, height, data, unit, color, sparkline, showSeriesName, valueFontSize } = props;
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   let formattedValue = '';
   if (data.calculatedValue === null) {

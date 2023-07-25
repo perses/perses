@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useChartsContext } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { FontSizeOption } from '../FontSizeSelector';
 
 interface CalculateFontSize {
@@ -49,14 +49,14 @@ export function useOptimalFontSize({
   fontSizeOverride,
 }: CalculateFontSize) {
   const ctx = getGlobalCanvasContext();
-  const { chartsTheme } = useChartsContext();
+  const { echartsTheme } = useChartsTheme();
 
   // if user has selected a font size in the settings, use it instead of calculating the optimal size
   if (fontSizeOverride !== undefined) {
     return Number(fontSizeOverride);
   }
 
-  const textStyle = chartsTheme.echartsTheme.textStyle;
+  const textStyle = echartsTheme.textStyle;
   const fontSize = Number(textStyle?.fontSize) ?? 12;
   const fontFamily = textStyle?.fontFamily ?? 'Lato';
 
