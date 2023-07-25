@@ -282,9 +282,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         seriesMapping.pop();
       }
     }
-    // tooltipPinnedCoords cannot be in dep array or current chart onClick overrides unpinning behavior
+    // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastTooltipPinnedCoords]);
+  }, [lastTooltipPinnedCoords, seriesMapping]);
 
   return (
     <Box
