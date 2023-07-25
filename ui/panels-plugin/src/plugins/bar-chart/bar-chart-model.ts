@@ -16,6 +16,8 @@ import { CalculationType, Definition, UnitOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export const DEFAULT_UNIT: UnitOptions = { kind: 'Decimal' };
+export const DEFAULT_SORT: SortOption = 'desc';
+export const DEFAULT_MODE: ModeOption = 'value';
 
 /**
  * The schema for a BarChart panel.
@@ -43,7 +45,7 @@ export function createInitialBarChartOptions(): BarChartOptions {
   return {
     calculation: 'LastNumber',
     unit: DEFAULT_UNIT,
-    sort: 'desc',
-    mode: 'value',
+    sort: DEFAULT_SORT,
+    mode: DEFAULT_MODE,
   };
 }

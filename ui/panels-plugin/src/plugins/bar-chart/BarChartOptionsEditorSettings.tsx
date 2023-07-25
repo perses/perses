@@ -27,9 +27,15 @@ import {
   ModeOption,
   SortOption,
 } from '@perses-dev/components';
-import { CalculationType, DEFAULT_CALCULATION, UnitOptions, isPercentUnit } from '@perses-dev/core';
+import { CalculationType, UnitOptions, isPercentUnit } from '@perses-dev/core';
 import { Button } from '@mui/material';
-import { BarChartOptions, DEFAULT_UNIT, BarChartOptionsEditorProps } from './bar-chart-model';
+import {
+  BarChartOptions,
+  DEFAULT_UNIT,
+  BarChartOptionsEditorProps,
+  DEFAULT_SORT,
+  DEFAULT_MODE,
+} from './bar-chart-model';
 
 export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps) {
   const { onChange, value } = props;
@@ -71,8 +77,8 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
       produce(value, (draft: BarChartOptions) => {
         draft.calculation = 'LastNumber';
         draft.unit = DEFAULT_UNIT;
-        draft.sort = 'desc';
-        draft.mode = 'value';
+        draft.sort = DEFAULT_SORT;
+        draft.mode = DEFAULT_MODE;
       })
     );
   };
@@ -85,7 +91,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <UnitSelector value={unit} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
-          <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+          <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <SortSelector value={value.sort} onChange={handleSortChange} />
           <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(unit)} />
         </OptionsEditorGroup>
