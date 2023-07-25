@@ -280,6 +280,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
       }
+
+      // To only pin crosshair on current chart, move below four lines outside of null conditions
       const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
       if (tooltipPinnedCoords !== null && isCrosshairPinned) {
         setPinnedCrosshair(null);
@@ -287,7 +289,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     }
     // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastTooltipPinnedCoords, seriesMapping]);
+  }, [lastTooltipPinnedCoords, seriesMapping, pinnedCrosshair]);
 
   return (
     <Box
