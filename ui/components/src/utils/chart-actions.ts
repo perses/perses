@@ -13,7 +13,6 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } from '../model';
-import { CursorCoordinates } from '../TimeSeriesTooltip';
 
 export interface ZoomEventData {
   start: number;
@@ -156,19 +155,3 @@ export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping
   const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
   return isCrosshairPinned;
 }
-
-/*
- * Pinned crosshairs are stored as an ECharts markLine attached to a temporary final series in seriesMapping.
- * To unpin the crosshair, the series with the markLine must be removed.
- */
-// export function removePreviouslyPinnedCrosshair(
-//   seriesMapping: TimeChartSeriesMapping,
-//   tooltipPinnedCoords: CursorCoordinates | null
-// ): TimeChartSeriesMapping {
-//   const newSeriesMapping = { ...seriesMapping };
-//   const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
-//   if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-//     newSeriesMapping.pop();
-//   }
-//   return newSeriesMapping;
-// }
