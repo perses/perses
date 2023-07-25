@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { StatChart, StatChartData, useChartsContext, GraphSeries } from '@perses-dev/components';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
 import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType } from '@perses-dev/core';
@@ -35,7 +35,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   const statChartData = useStatChartData(queryResults, calculation);
   const isMultiSeries = statChartData.length > 1;
 
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
 

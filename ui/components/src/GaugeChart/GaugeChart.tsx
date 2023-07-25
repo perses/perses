@@ -16,7 +16,7 @@ import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useChartsContext } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -44,7 +44,7 @@ export interface GaugeChartProps {
 
 export function GaugeChart(props: GaugeChartProps) {
   const { width, height, data, unit, axisLine, max } = props;
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
   const option: EChartsCoreOption = useDeepMemo(() => {

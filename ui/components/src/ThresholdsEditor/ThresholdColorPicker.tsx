@@ -14,7 +14,7 @@
 import React from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useChartsContext } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { ColorPicker } from '../ColorPicker';
 import { ThresholdInputProps } from './ThresholdInput';
 
@@ -34,7 +34,7 @@ export function ThresholdColorPicker({
     setAnchorEl(null);
   };
 
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
   const {
     thresholds: { defaultColor, palette },
   } = chartsTheme;

@@ -16,7 +16,7 @@ import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
 import { PanelProps, useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { PersesChartsTheme, useChartsContext } from '@perses-dev/components';
+import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
@@ -79,7 +79,7 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const {
     spec: { text },
   } = props;
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   const textAfterVariableReplacement = useReplaceVariablesInString(text);
 

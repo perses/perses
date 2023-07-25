@@ -18,7 +18,7 @@ import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
-import { useChartsContext } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
 
@@ -42,7 +42,7 @@ export interface BarChartProps {
 
 export function BarChart(props: BarChartProps) {
   const { width, height, data, unit = { kind: 'Decimal' }, mode = 'value' } = props;
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
     if (data == null) return chartsTheme.noDataOption;

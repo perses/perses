@@ -14,7 +14,7 @@
 import { useState, useMemo, memo } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
-import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsContext } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
 import { PanelGroupItemId } from '../../context';
@@ -72,7 +72,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     triggerOnce: true,
   });
 
-  const { chartsTheme } = useChartsContext();
+  const chartsTheme = useChartsTheme();
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
