@@ -17,8 +17,8 @@ import { useCallback, useMemo } from 'react';
 import { useListPluginMetadata } from '../plugin-registry';
 
 type QueryOptions = Record<string, unknown>;
-export interface DataQueriesProviderProps {
-  definitions: Array<Definition<UnknownSpec>>;
+export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
+  definitions: Array<Definition<QueryPluginSpec>>;
   options?: QueryOptions;
   children?: React.ReactNode;
 }
