@@ -19,7 +19,7 @@ import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
 
 /**
  * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
- * Prefer Intl.NumbeFormat because it covers most use cases and will continue to be well-supported with time.
+ * Prefer Intl.NumbeFormat because it covers most use cases and will continue to be supported with time.
  *
  * To format bytes, we also make use of the `numbro` package,
  * because it can handle adding units like KB, MB, GB, etc. correctly.
