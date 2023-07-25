@@ -17,6 +17,14 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
 
+/**
+ * We consider the units for bytes to be powers of 1000.
+ * In other words:
+ * 1 KB = 1000 bytes (1000^1 bytes)
+ * 1 MB = 1,000,000 bytes (1000^2 bytes)
+ * etc.
+ */
+
 const DEFAULT_NUMBRO_MANTISSA = 2;
 
 const bytesUnitKinds = ['Bytes'] as const;
@@ -32,17 +40,14 @@ export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
-  // These units are powers of 1000.
-  // In other words, 1 KB = 1000 bytes.
   Bytes: {
     group: 'Bytes',
     label: 'Bytes',
   },
 };
 
-export function formatBytes(bytes: number, options: BytesUnitOptions) {
-  const { abbreviate, decimal_places } = options;
-
+export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
+  // If we're showing the entire value, we can use Intl.NumberFormat.
   if (!shouldAbbreviate(abbreviate) || Math.abs(bytes) < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
@@ -60,11 +65,12 @@ export function formatBytes(bytes: number, options: BytesUnitOptions) {
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
     }
-
-    return Intl.NumberFormat('en-US', formatterOptions).format(bytes);
+    const formatter = Intl.NumberFormat('en-US', formatterOptions);
+    return formatter.format(bytes);
   }
 
-  // numbro is able to add units like KB, MB, GB, etc. correctly
+  // If we're showing the "abbreviated" value, we use numbro.
+  // numbro is able to add units like KB, MB, GB, etc. correctly.
   return numbro(bytes).format({
     output: 'byte',
     base: 'decimal',
