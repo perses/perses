@@ -45,11 +45,6 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
 };
 
 export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
-  // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%
-  if (kind === 'Percent') {
-    value = value / 100;
-  }
-
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'percent',
     useGrouping: true,
@@ -62,5 +57,11 @@ export function formatPercent(value: number, { kind, decimal_places }: PercentUn
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }
 
-  return Intl.NumberFormat('en-US', formatterOptions).format(value);
+  // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%, etc.
+  if (kind === 'Percent') {
+    value = value / 100;
+  }
+
+  const formatter = Intl.NumberFormat('en-US', formatterOptions);
+  return formatter.format(value);
 }
