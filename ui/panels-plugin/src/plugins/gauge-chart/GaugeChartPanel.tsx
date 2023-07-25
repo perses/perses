@@ -14,7 +14,7 @@
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { GaugeChart, GaugeSeries, useChartsContext } from '@perses-dev/components';
+import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
 import { Box, Skeleton, Stack } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap } from '@perses-dev/core';
@@ -31,9 +31,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   const { spec: pluginSpec, contentDimensions } = props;
   const { calculation, max } = pluginSpec;
 
-  const {
-    chartsTheme: { thresholds: thresholdsColors },
-  } = useChartsContext();
+  const { thresholds: thresholdsColors } = useChartsTheme();
 
   const { queryResults, isLoading } = useDataQueries();
 

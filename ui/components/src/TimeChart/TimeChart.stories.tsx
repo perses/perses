@@ -271,6 +271,7 @@ export const StackedBar: Story = {
   },
   args: {
     height: 200,
+    isStackedBar: true,
     timeScale: { startMs: 1690076580000, endMs: 1690076685000, stepMs: 15000, rangeMs: 105000 },
     data: STACKED_BAR_DATA,
     seriesMapping: [
@@ -324,6 +325,6 @@ export const StackedBar: Story = {
     },
   },
   render: (args) => {
-    return <TimeChart {...args} isStackedBar={true} />;
+    return <TimeChart {...args} />;
   },
 };

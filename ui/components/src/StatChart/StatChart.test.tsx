@@ -28,7 +28,7 @@ describe('StatChart', () => {
       height: 200,
     };
     render(
-      <ChartsProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme} enablePinning={false}>
         <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
       </ChartsProvider>
     );
