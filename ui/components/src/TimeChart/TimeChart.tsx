@@ -268,6 +268,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     noDataVariant,
     timeZone,
     isStackedBar,
+    enablePinning,
     pinnedCrosshair,
   ]);
 
