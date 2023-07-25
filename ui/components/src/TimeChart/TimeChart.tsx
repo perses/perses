@@ -270,9 +270,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     isStackedBar,
   ]);
 
-  // Unpin tooltip when another chart is clicked
-  // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
+  // Update adjacent charts so tooltip is unpinned when current chart is clicked.
   useEffect(() => {
+    // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
+    // Multiple tooltips can only be pinned if Ctrl or Cmd key is pressed while clicking.
     if (tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null) {
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
@@ -412,8 +413,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {
+              // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
-              // Clear previously set pinned crosshair
+              // Clear previously set pinned crosshair.
               const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
               if (isCrosshairPinned) {
                 seriesMapping.pop();
