@@ -111,6 +111,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
+  const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const { timeZone } = useTimeZone();
@@ -206,7 +207,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
     const option: EChartsCoreOption = {
       dataset: dataset,
-      series: seriesMapping,
+      series: { seriesMapping, ...pinnedCrosshair },
       xAxis: {
         type: 'time',
         min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
@@ -280,7 +281,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       }
       const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
       if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-        seriesMapping.pop();
+        // seriesMapping.pop();
+        setPinnedCrosshair(null);
       }
     }
     // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
@@ -308,7 +310,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               // Clear previously set pinned crosshair
               const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
               if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-                seriesMapping.pop();
+                setPinnedCrosshair(null);
+                // seriesMapping.pop();
               } else if (seriesMapping.length !== data.length + 1) {
                 // Only add pinned crosshair line series when there is not one already in seriesMapping.
                 const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
@@ -319,8 +322,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
                       },
                     ],
                   },
-                });
-                seriesMapping.push(pinnedCrosshair);
+                } as LineSeriesOption);
+                setPinnedCrosshair(pinnedCrosshair);
               }
 
               // Pin tooltip and update shared charts context to remember these coordinates.
@@ -418,7 +421,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               // Clear previously set pinned crosshair.
               const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
               if (isCrosshairPinned) {
-                seriesMapping.pop();
+                setPinnedCrosshair(null);
+                // seriesMapping.pop();
               }
             }}
           />
