@@ -13,7 +13,14 @@
 
 import type { YAXisComponentOption } from 'echarts';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
-import { StepOptions, TimeScale, TimeSeries, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
+import {
+  StepOptions,
+  TimeScale,
+  TimeSeries,
+  TimeSeriesValueTuple,
+  getCommonTimeScale,
+  TimeSeriesData,
+} from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
@@ -51,7 +58,9 @@ export const BLUR_FADEOUT_OPACITY = 0.5;
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['queryResults']): TimeScale | undefined {
+export function getCommonTimeScaleForQueries(
+  queries: UseDataQueryResults<TimeSeriesData>['queryResults']
+): TimeScale | undefined {
   const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
   return getCommonTimeScale(seriesData);
 }

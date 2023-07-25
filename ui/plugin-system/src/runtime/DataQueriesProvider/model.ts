@@ -11,32 +11,85 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, TimeSeriesData, UnknownSpec } from '@perses-dev/core';
+import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { UseQueryResult } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
+import { useListPluginMetadata } from '../plugin-registry';
 
 type QueryOptions = Record<string, unknown>;
-
-interface DataQueriesDefinitions<QueryPluginDefinition> {
-  definitions: QueryPluginDefinition[];
-}
-export interface DataQueriesProviderProps<QueryPluginDefinition = Definition<UnknownSpec>>
-  extends DataQueriesDefinitions<QueryPluginDefinition> {
+export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
+  definitions: Array<Definition<QueryPluginSpec>>;
   options?: QueryOptions;
   children?: React.ReactNode;
 }
 
-export interface UseDataQueryResults<QueryPluginDefinition = Definition<UnknownSpec>> {
-  queryResults: Array<QueryData<QueryPluginDefinition>>;
+export interface DataQueriesContextType {
+  queryResults: QueryData[];
   refetchAll: () => void;
   isFetching: boolean;
   isLoading: boolean;
   errors: unknown[];
 }
 
-export interface QueryData<QueryPluginDefinition> {
-  data?: TimeSeriesData;
-  definition: QueryPluginDefinition;
+export interface UseDataQueryResults<T> extends Omit<DataQueriesContextType, 'queryResults'> {
+  queryResults: Array<QueryData<T>>;
+}
+
+export type QueryData<T = QueryDataType> = {
+  data?: T;
+  definition: QueryDefinition;
   error: unknown;
   isFetching: boolean;
   isLoading: boolean;
   refetch?: () => void;
+};
+
+export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]) {
+  return results.map(({ data, isFetching, isLoading, refetch, error }, i) => {
+    return {
+      definition: definitions[i],
+      data,
+      isFetching,
+      isLoading,
+      refetch,
+      error,
+    } as QueryData;
+  });
+}
+
+export function useQueryType(): (pluginKind: string) => string | undefined {
+  const { data: timeSeriesQueryPlugins, isLoading } = useListPluginMetadata('TimeSeriesQuery');
+
+  const queryTypeMap = useMemo(() => {
+    const map: Record<string, string[]> = {
+      TimeSeriesQuery: [],
+    };
+
+    if (timeSeriesQueryPlugins) {
+      timeSeriesQueryPlugins.forEach((plugin) => {
+        map['TimeSeriesQuery']?.push(plugin.kind);
+      });
+    }
+
+    return map;
+  }, [timeSeriesQueryPlugins]);
+
+  const getQueryType = useCallback(
+    (pluginKind: string) => {
+      if (isLoading) {
+        return undefined;
+      }
+
+      for (const queryType in queryTypeMap) {
+        if (queryTypeMap[queryType]?.includes(pluginKind)) {
+          return queryType;
+        }
+      }
+
+      throw new Error(`Unable to determine the query type: ${pluginKind}`);
+    },
+    [queryTypeMap, isLoading]
+  );
+
+  return getQueryType;
 }

@@ -93,7 +93,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   // Colors are manually applied since our legend and tooltip are built custom with React.
   const categoricalPalette = chartsTheme.echartsTheme.color;
 
-  const { isFetching, isLoading, queryResults } = useDataQueries();
+  const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
   const hasData = queryResults.some((result) => result.data && result.data.series.length > 0);
 
