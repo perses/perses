@@ -74,10 +74,12 @@ export enum PersesTimeToIntlTime {
   Years = 'year',
 }
 
-// Note: This conversion will not be exactly accurate for months and years,
-// due variations in the lengths of months (i.e. 28 - 31 days) and years (i.e. leap years).
-// For precision with months and years, we would need more complex algorithms and/or external libraries.
-// However, we expect that measurements in months and years will be rare.
+/**
+ * Note: This conversion will not be exactly accurate for months and years,
+ * due variations in the lengths of months (i.e. 28 - 31 days) and years (i.e. leap years).
+ * For precision with months and years, we would need more complex algorithms and/or external libraries.
+ * However, we expect that measurements in months and years will be rare.
+ */
 const TIME_UNITS_IN_SECONDS: Record<TimeUnitKind, number> = {
   Years: 31536000, // 365 days
   Months: 2592000, // 30 days
@@ -100,7 +102,9 @@ const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnitKind[] = [
   'Milliseconds',
 ];
 
-// Choose the first time unit that produces a number greater than 1, starting from the biggest time unit.
+/**
+ * Choose the first time unit that produces a number greater than 1, starting from the biggest time unit.
+ */
 function getValueAndKindForNaturalNumbers(value: number, kind: TimeUnitKind): { value: number; kind: TimeUnitKind } {
   const valueInSeconds = value * TIME_UNITS_IN_SECONDS[kind];
 
@@ -125,11 +129,13 @@ function isMonthOrYear(kind: TimeUnitKind): boolean {
 }
 
 export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
-  if (value === 0) return '0s';
+  const { value: valueForNaturalNumbers, kind: kindForNaturalNumbers } = getValueAndKindForNaturalNumbers(value, kind);
 
-  const valueAndKindForNaturalNumbers = getValueAndKindForNaturalNumbers(value, kind);
-  value = valueAndKindForNaturalNumbers.value;
-  kind = valueAndKindForNaturalNumbers.kind;
+  return _formatTime(valueForNaturalNumbers, { kind: kindForNaturalNumbers, decimal_places });
+}
+
+function _formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
+  if (value === 0) return '0s';
 
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',
