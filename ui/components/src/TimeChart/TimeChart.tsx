@@ -296,32 +296,33 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           return;
         }
 
-        // TODO: pin subsequent tooltips and unpin prevous
-        // TODO: opt-in to multi tooltip pinning when CTRL key held down
-
-        // Clear previously set pinned crosshair
-        const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
-        if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-          seriesMapping.pop();
-        } else if (seriesMapping.length !== data.length + 1) {
-          // Only add pinned crosshair line series when there is not one already in seriesMapping.
-          const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
-            markLine: {
-              data: [
-                {
-                  xAxis: pointInGrid[0],
-                },
-              ],
-            },
-          });
-          seriesMapping.push(pinnedCrosshair);
-        }
+        // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
+        const isControlKeyPressed = e.ctrlKey || e.metaKey;
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         // if (!isAnyTooltipPinned && isPinningEnabled && e.target instanceof HTMLCanvasElement) {
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
+              // Clear previously set pinned crosshair
+              const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
+              if (tooltipPinnedCoords !== null && isCrosshairPinned) {
+                seriesMapping.pop();
+              } else if (seriesMapping.length !== data.length + 1) {
+                // Only add pinned crosshair line series when there is not one already in seriesMapping.
+                const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+                  markLine: {
+                    data: [
+                      {
+                        xAxis: pointInGrid[0],
+                      },
+                    ],
+                  },
+                });
+                seriesMapping.push(pinnedCrosshair);
+              }
+
+              // Pin tooltip and update shared charts context to remember these coordinates.
               const pinnedPos: CursorCoordinates = {
                 page: {
                   x: e.pageX,
@@ -337,7 +338,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
                 },
                 target: e.target,
               };
-              setLastTooltipPinnedCoords(pinnedPos);
+              if (!isControlKeyPressed) {
+                setLastTooltipPinnedCoords(pinnedPos);
+              }
               return pinnedPos;
             } else {
               return null;
