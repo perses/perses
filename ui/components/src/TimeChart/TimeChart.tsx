@@ -52,7 +52,7 @@ import {
   enableDataZoom,
   getFormattedAxisLabel,
   getPointInGrid,
-  formatAxesValues,
+  getFormattedAxis,
   restoreChart,
   ZoomEventData,
 } from '../utils';
@@ -223,7 +223,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           snap: false, // important so shared crosshair does not lag
         },
       },
-      yAxis: formatAxesValues(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,

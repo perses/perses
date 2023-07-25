@@ -46,7 +46,7 @@ import {
   enableDataZoom,
   getDateRange,
   getFormattedDate,
-  formatAxesValues,
+  getFormattedAxis,
   restoreChart,
   ZoomEventData,
 } from '../utils';
@@ -185,7 +185,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           },
         },
       },
-      yAxis: formatAxesValues(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
