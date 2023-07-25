@@ -12,15 +12,15 @@
 // limitations under the License.
 
 import merge from 'lodash/merge';
-import type { YAXisComponentOption } from 'echarts';
+import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
 import { formatValue, UnitOptions } from '@perses-dev/core';
 
 /*
- * Populate yAxis properties, returns an Array since multiple y axes will be supported in the future
+ * Populate yAxis or xAxis properties, returns an Array since multiple axes will be supported in the future
  */
-export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
+export function formatAxesValues(axis?: YAXisComponentOption | XAXisComponentOption, unit?: UnitOptions) {
   // TODO: support alternate yAxis that shows on right side
-  const Y_AXIS_DEFAULT = {
+  const AXIS_DEFAULT = {
     type: 'value',
     boundaryGap: [0, '10%'],
     axisLabel: {
@@ -29,7 +29,7 @@ export function getYAxes(yAxis?: YAXisComponentOption, unit?: UnitOptions) {
       },
     },
   };
-  return [merge(Y_AXIS_DEFAULT, yAxis)];
+  return [merge(AXIS_DEFAULT, axis)];
 }
 
 /**

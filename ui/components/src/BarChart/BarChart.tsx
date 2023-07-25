@@ -21,7 +21,7 @@ import { Box } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsThemeProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
-import { getYAxes } from '../utils';
+import { formatAxesValues } from '../utils';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -63,7 +63,7 @@ export function BarChart(props: BarChartProps) {
           source: source,
         },
       ],
-      xAxis: getYAxes({}, unit),
+      xAxis: formatAxesValues({}, unit),
       yAxis: {
         type: 'category',
         splitLine: {
