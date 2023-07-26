@@ -105,6 +105,7 @@ export function BarChart(props: BarChartProps) {
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
       },
+      // increase distance between grid and container to prevent y axis labels from getting cut off
       grid: {
         left: '5%',
         right: '5%',

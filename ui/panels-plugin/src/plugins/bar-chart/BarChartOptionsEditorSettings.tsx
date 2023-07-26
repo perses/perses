@@ -31,8 +31,9 @@ import { CalculationType, UnitOptions, isPercentUnit } from '@perses-dev/core';
 import { Button } from '@mui/material';
 import {
   BarChartOptions,
-  DEFAULT_UNIT,
   BarChartOptionsEditorProps,
+  DEFAULT_CALCULATION,
+  DEFAULT_UNIT,
   DEFAULT_SORT,
   DEFAULT_MODE,
 } from './bar-chart-model';
@@ -75,7 +76,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   const handleResetSettings: React.MouseEventHandler<HTMLButtonElement> = () => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        draft.calculation = 'LastNumber';
+        draft.calculation = DEFAULT_CALCULATION;
         draft.unit = DEFAULT_UNIT;
         draft.sort = DEFAULT_SORT;
         draft.mode = DEFAULT_MODE;
