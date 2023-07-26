@@ -161,7 +161,11 @@ export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping
  * Find closest timestamp to logical x coordinate returned from echartsInstance.convertFromPixel
  * Used to find nearby series in time series tooltip.
  */
-export function getClosestTimestamp(cursorX: number, timeSeriesValues: TimeSeriesValueTuple[]) {
+export function getClosestTimestamp(timeSeriesValues?: TimeSeriesValueTuple[], cursorX?: number): number | null {
+  if (timeSeriesValues === undefined || cursorX === undefined) {
+    return null;
+  }
+
   let currentClosestTimestamp: number | null = null;
   let currentClosestDistance = Infinity;
 
@@ -178,7 +182,7 @@ export function getClosestTimestamp(cursorX: number, timeSeriesValues: TimeSerie
 /*
  * Find closest timestamp in full dataset, used to snap crosshair into place onClick when tooltip is pinned.
  */
-export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: number) {
+export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: number): number | null {
   if (cursorX === undefined) {
     return null;
   }
@@ -188,7 +192,7 @@ export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: n
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
     if (currentDataset == null) break;
     const currentValues: TimeSeriesValueTuple[] = currentDataset.values;
-    closestTimestamp = getClosestTimestamp(cursorX, currentValues);
+    closestTimestamp = getClosestTimestamp(currentValues, cursorX);
   }
   return closestTimestamp;
 }

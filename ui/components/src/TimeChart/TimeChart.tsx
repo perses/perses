@@ -17,7 +17,7 @@ import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -47,6 +47,7 @@ import {
   clearHighlightedSeries,
   enableDataZoom,
   getClosestTimestampInFullDataset,
+  getClosestTimestamp,
   getFormattedAxisLabel,
   getPointInGrid,
   getFormattedAxis,
@@ -343,7 +344,12 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             // Only add pinned crosshair line series when there is not one already in seriesMapping.
             if (current === null) {
               const cursorX = pointInGrid[0];
-              const closestTimestamp = getClosestTimestampInFullDataset(data, cursorX);
+
+              // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
+              const firstTimeSeriesValues = data[0]?.values;
+              const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
+
+              // Crosshair snaps to nearest timestamp since cursor may be slightly to left or right
               const pinnedCrosshair = merge({}, DEFAULT_PINNED_CROSSHAIR, {
                 markLine: {
                   data: [

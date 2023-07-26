@@ -69,8 +69,8 @@ export function checkforNearbyTimeSeries(
   const yValueCounts: Map<number, number> = new Map();
 
   // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
-  const firstDatasetValues = data[0]?.values;
-  const closestTimestamp = firstDatasetValues ? getClosestTimestamp(cursorX, firstDatasetValues) : null;
+  const firstTimeSeriesValues = data[0]?.values;
+  const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
 
   if (closestTimestamp === null) {
     return [];
