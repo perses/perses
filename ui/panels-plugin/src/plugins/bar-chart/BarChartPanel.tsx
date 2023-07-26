@@ -30,7 +30,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
   const chartsTheme = useChartsTheme();
   const PADDING = chartsTheme.container.padding.default;
 
-  const { queryResults, isLoading, isFetching } = useDataQueries(); // gets data queries from a context provider, see DataQueriesProvider
+  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery'); // gets data queries from a context provider, see DataQueriesProvider
 
   const barChartData: BarChartData[] = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];

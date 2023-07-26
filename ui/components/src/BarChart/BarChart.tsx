@@ -21,6 +21,7 @@ import { Box } from '@mui/material';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 import { ModeOption } from '../ModeSelector';
+import { getFormattedAxis } from '../utils';
 
 use([EChartsBarChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -45,7 +46,7 @@ export function BarChart(props: BarChartProps) {
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
-    if (data == null) return chartsTheme.noDataOption;
+    if (data == null || !data.length) return chartsTheme.noDataOption;
 
     const source: Array<Array<BarChartData['label'] | BarChartData['value']>> = [];
     data.map((d) => {
@@ -62,7 +63,7 @@ export function BarChart(props: BarChartProps) {
           source: source,
         },
       ],
-      xAxis: {},
+      xAxis: getFormattedAxis({}, unit),
       yAxis: {
         type: 'category',
         splitLine: {
@@ -103,6 +104,11 @@ export function BarChart(props: BarChartProps) {
         confine: true,
         formatter: (params: { name: string; data: number[] }) =>
           params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
+      },
+      // increase distance between grid and container to prevent y axis labels from getting cut off
+      grid: {
+        left: '5%',
+        right: '5%',
       },
     };
   }, [data, chartsTheme, width, mode, unit]);

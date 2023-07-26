@@ -15,7 +15,10 @@ import { ModeOption, SortOption } from '@perses-dev/components';
 import { CalculationType, Definition, UnitOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export const DEFAULT_UNIT: UnitOptions = { kind: 'Decimal' };
+export const DEFAULT_CALCULATION: CalculationType = 'LastNumber';
+export const DEFAULT_UNIT: UnitOptions = { kind: 'Decimal', abbreviate: true };
+export const DEFAULT_SORT: SortOption = 'desc';
+export const DEFAULT_MODE: ModeOption = 'value';
 
 /**
  * The schema for a BarChart panel.
@@ -41,9 +44,9 @@ export type BarChartOptionsEditorProps = OptionsEditorProps<BarChartOptions>;
  */
 export function createInitialBarChartOptions(): BarChartOptions {
   return {
-    calculation: 'LastNumber',
+    calculation: DEFAULT_CALCULATION,
     unit: DEFAULT_UNIT,
-    sort: 'desc',
-    mode: 'value',
+    sort: DEFAULT_SORT,
+    mode: DEFAULT_MODE,
   };
 }

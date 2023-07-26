@@ -12,16 +12,18 @@
 // limitations under the License.
 
 import { createContext, useCallback, useContext, useMemo } from 'react';
-import { Definition, TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
-import { DataQueriesProviderProps, QueryData, UseDataQueryResults } from './model';
+import {
+  DataQueriesProviderProps,
+  UseDataQueryResults,
+  transformQueryResults,
+  DataQueriesContextType,
+  QueryData,
+  useQueryType,
+} from './model';
 
-export function useDataQueries(): UseDataQueryResults {
-  const ctx = useDataQueriesContext();
-  return ctx;
-}
-
-export const DataQueriesContext = createContext<UseDataQueryResults | undefined>(undefined);
+export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
 
 export function useDataQueriesContext() {
   const ctx = useContext(DataQueriesContext);
@@ -31,47 +33,65 @@ export function useDataQueriesContext() {
   return ctx;
 }
 
+export function useDataQueries<T extends keyof QueryType>(queryType: T): UseDataQueryResults<QueryType[T]> {
+  const ctx = useDataQueriesContext();
+
+  // Filter the query results based on the specified query type
+  const filteredQueryResults = ctx.queryResults.filter(
+    (queryResult) => queryResult.definition.kind === queryType
+  ) as Array<QueryData<QueryType[T]>>;
+
+  // Filter the errors based on the specified query type
+  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition.kind === queryType);
+
+  // Create a new context object with the filtered results and errors
+  const filteredCtx = {
+    queryResults: filteredQueryResults,
+    isFetching: filteredQueryResults.some((result) => result.isFetching),
+    isLoading: filteredQueryResults.some((result) => result.isLoading),
+    refetchAll: ctx.refetchAll,
+    errors: filteredErrors,
+  };
+
+  return filteredCtx;
+}
+
 export function DataQueriesProvider(props: DataQueriesProviderProps) {
   const { definitions, options, children } = props;
 
-  // For now we will map each query plugin definition to TimeSeriesQueryDefinition
-  // Later on when we add support for other query types,
-  // we will have to map each query maps to the correct QueryDefinition
-  const timeSeriesQueries = definitions.map(
-    (definition) =>
-      ({
-        kind: 'TimeSeriesQuery',
-        spec: {
-          plugin: definition,
-        },
-      } as TimeSeriesQueryDefinition)
-  );
-  const results = useTimeSeriesQueries(timeSeriesQueries, options);
+  const getQueryType = useQueryType();
 
-  const data = results.map(({ data, isFetching, isLoading, refetch, error }, i) => {
+  const queryDefinitions = definitions.map((definition) => {
+    const type = getQueryType(definition.kind);
     return {
-      definition: definitions[i],
-      data,
-      isFetching,
-      isLoading,
-      refetch,
-      error,
-    } as QueryData<Definition<UnknownSpec>>;
+      kind: type,
+      spec: {
+        plugin: definition,
+      },
+    };
   });
 
+  // Filter definitions for time series query and other future query plugins
+  const timeSeriesQueries = queryDefinitions.filter(
+    (definition) => definition.kind === 'TimeSeriesQuery'
+  ) as TimeSeriesQueryDefinition[];
+  const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options);
+
   const refetchAll = useCallback(() => {
-    results.forEach((result) => result.refetch());
-  }, [results]);
+    timeSeriesResults.forEach((result) => result.refetch());
+  }, [timeSeriesResults]);
 
   const ctx = useMemo(() => {
+    const mergedQueryResults = [...transformQueryResults(timeSeriesResults, timeSeriesQueries)];
+
     return {
-      queryResults: data,
-      isFetching: results.some((result) => result.isFetching),
-      isLoading: results.some((result) => result.isLoading),
+      queryResults: mergedQueryResults,
+      isFetching: mergedQueryResults.some((result) => result.isFetching),
+      isLoading: mergedQueryResults.some((result) => result.isLoading),
       refetchAll,
-      errors: results.map((result) => result.error),
+      errors: mergedQueryResults.map((result) => result.error),
     };
-  }, [data, results, refetchAll]);
+  }, [timeSeriesQueries, timeSeriesResults, refetchAll]);
 
   return <DataQueriesContext.Provider value={ctx}>{children}</DataQueriesContext.Provider>;
 }

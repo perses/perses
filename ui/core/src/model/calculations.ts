@@ -66,8 +66,6 @@ export const CALCULATIONS_CONFIG: Readonly<Record<CalculationType, CalculationCo
   },
 } as const;
 
-export const DEFAULT_CALCULATION: CalculationType = 'Sum';
-
 type CalculationValue = number | null | undefined;
 
 /**

@@ -33,7 +33,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   const { thresholds: thresholdsColors } = useChartsTheme();
 
-  const { queryResults, isLoading } = useDataQueries();
+  const { queryResults, isLoading } = useDataQueries('TimeSeriesQuery');
 
   // ensures all default unit properties set if undef
   const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
