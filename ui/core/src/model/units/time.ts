@@ -74,13 +74,69 @@ export enum PersesTimeToIntlTime {
   Years = 'year',
 }
 
+/**
+ * Note: This conversion will not be exactly accurate for months and years,
+ * due variations in the lengths of months (i.e. 28 - 31 days) and years (i.e. leap years).
+ * For precision with months and years, we would need more complex algorithms and/or external libraries.
+ * However, we expect that measurements in months and years will be rare.
+ */
+const TIME_UNITS_IN_SECONDS: Record<TimeUnitKind, number> = {
+  Years: 31536000, // 365 days
+  Months: 2592000, // 30 days
+  Weeks: 604800,
+  Days: 86400,
+  Hours: 3600,
+  Minutes: 60,
+  Seconds: 1,
+  Milliseconds: 0.001,
+};
+
+const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnitKind[] = [
+  'Years',
+  'Months',
+  'Weeks',
+  'Days',
+  'Hours',
+  'Minutes',
+  'Seconds',
+  'Milliseconds',
+];
+
+/**
+ * Choose the first time unit that produces a number greater than 1, starting from the biggest time unit.
+ */
+function getValueAndKindForNaturalNumbers(value: number, kind: TimeUnitKind): { value: number; kind: TimeUnitKind } {
+  const valueInSeconds = value * TIME_UNITS_IN_SECONDS[kind];
+
+  // Initialize for TS
+  const largestTimeUnit = LARGEST_TO_SMALLEST_TIME_UNITS[0] || 'Years';
+  let timeUnit: TimeUnitKind = largestTimeUnit;
+  let valueInTimeUnit: number = valueInSeconds / TIME_UNITS_IN_SECONDS[largestTimeUnit];
+
+  for (timeUnit of LARGEST_TO_SMALLEST_TIME_UNITS) {
+    valueInTimeUnit = valueInSeconds / TIME_UNITS_IN_SECONDS[timeUnit];
+    if (valueInTimeUnit >= 1) {
+      return { value: valueInTimeUnit, kind: timeUnit };
+    }
+  }
+
+  // If we didn't find a time unit, we have to settle for the smallest time unit (which is the last time unit).
+  return { value: valueInTimeUnit, kind: timeUnit };
+}
+
+function isMonthOrYear(kind: TimeUnitKind): boolean {
+  return kind === 'Months' || kind === 'Years';
+}
+
 export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
-  const isMonthOrYear = kind === 'Months' || kind === 'Years';
+  if (value === 0) return '0s';
+
+  const results = getValueAndKindForNaturalNumbers(value, kind);
 
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',
-    unit: PersesTimeToIntlTime[kind],
-    unitDisplay: isMonthOrYear ? 'long' : 'narrow',
+    unit: PersesTimeToIntlTime[results.kind],
+    unitDisplay: isMonthOrYear(results.kind) ? 'long' : 'narrow',
   };
 
   if (hasDecimalPlaces(decimal_places)) {
@@ -91,5 +147,5 @@ export function formatTime(value: number, { kind, decimal_places }: TimeUnitOpti
   }
 
   const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  return formatter.format(results.value);
 }
