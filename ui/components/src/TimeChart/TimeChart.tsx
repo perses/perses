@@ -278,7 +278,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   useEffect(() => {
     // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
     // Multiple tooltips can only be pinned if Ctrl or Cmd key is pressed while clicking.
-    if (tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null) {
+    const multipleTooltipsPinned = tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null;
+    if (multipleTooltipsPinned) {
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
         if (tooltipPinnedCoords !== null && pinnedCrosshair !== null) {
