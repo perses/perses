@@ -304,27 +304,25 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
+          // Pin tooltip and update shared charts context to remember these coordinates.
+          const pinnedPos: CursorCoordinates = {
+            page: {
+              x: e.pageX,
+              y: e.pageY,
+            },
+            client: {
+              x: e.clientX,
+              y: e.clientY,
+            },
+            plotCanvas: {
+              x: e.nativeEvent.offsetX,
+              y: e.nativeEvent.offsetY,
+            },
+            target: e.target,
+          };
+
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              // Pin tooltip and update shared charts context to remember these coordinates.
-              const pinnedPos: CursorCoordinates = {
-                page: {
-                  x: e.pageX,
-                  y: e.pageY,
-                },
-                client: {
-                  x: e.clientX,
-                  y: e.clientY,
-                },
-                plotCanvas: {
-                  x: e.nativeEvent.offsetX,
-                  y: e.nativeEvent.offsetY,
-                },
-                target: e.target,
-              };
-              if (!isControlKeyPressed) {
-                setLastTooltipPinnedCoords(pinnedPos);
-              }
               return pinnedPos;
             } else {
               setPinnedCrosshair(null);
@@ -350,6 +348,10 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               return null;
             }
           });
+
+          if (!isControlKeyPressed) {
+            setLastTooltipPinnedCoords(pinnedPos);
+          }
         }
       }}
       onMouseDown={(e) => {
