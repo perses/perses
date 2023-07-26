@@ -343,7 +343,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             if (current === null) {
               const cursorX = pointInGrid[0];
               const closestTimestamp = getClosestTimestampInFullDataset(data, cursorX);
-              const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+              const pinnedCrosshair = merge({}, DEFAULT_PINNED_CROSSHAIR, {
                 markLine: {
                   data: [
                     {
