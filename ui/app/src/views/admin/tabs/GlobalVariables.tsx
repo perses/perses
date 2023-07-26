@@ -13,34 +13,36 @@
 
 import { Card } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { getVariableExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { VariablesList } from '../../../components/VariableList/VariablesList';
+import { getVariableExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
-import { useDeleteVariableMutation, useUpdateVariableMutation, useVariableList } from '../../../model/variable-client';
+import { VariablesList } from '../../../components/VariableList/VariablesList';
+import {
+  useDeleteGlobalVariableMutation,
+  useGlobalVariableList,
+  useUpdateGlobalVariableMutation,
+} from '../../../model/global-variable-client';
 
-interface ProjectVariablesProps {
-  projectName: string;
+interface GlobalVariablesProps {
   id?: string;
 }
 
-export function ProjectVariables(props: ProjectVariablesProps) {
-  const { projectName, id } = props;
+export function GlobalVariables(props: GlobalVariablesProps) {
+  const { id } = props;
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {
     // warm up the caching of the datasources
-    datasourceApi.listDatasources(projectName);
     datasourceApi.listGlobalDatasources();
-  }, [datasourceApi, projectName]);
+  }, [datasourceApi]);
 
-  const { data, isLoading } = useVariableList(projectName);
+  const { data, isLoading } = useGlobalVariableList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const updateVariableMutation = useUpdateVariableMutation(projectName);
-  const deleteVariableMutation = useDeleteVariableMutation(projectName);
+  const updateVariableMutation = useUpdateGlobalVariableMutation();
+  const deleteVariableMutation = useDeleteGlobalVariableMutation();
 
   const handleVariableUpdate = useCallback(
-    (variable: VariableResource): Promise<void> =>
+    (variable: GlobalVariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         updateVariableMutation.mutate(variable, {
           onSuccess: (updatedVariable: Variable) => {
@@ -60,7 +62,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
   );
 
   const handleVariableDelete = useCallback(
-    (variable: VariableResource): Promise<void> =>
+    (variable: GlobalVariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: Variable) => {

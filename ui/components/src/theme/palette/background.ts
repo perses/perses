@@ -24,6 +24,7 @@ export const background = (mode: PaletteMode): PaletteOptions['background'] => {
         default: white,
         paper: grey[50],
         tooltip: grey[100],
+        lighter: grey[50],
         border: grey[100],
       }
     : {
@@ -31,7 +32,8 @@ export const background = (mode: PaletteMode): PaletteOptions['background'] => {
         overlay,
         default: grey[900],
         paper: grey[850],
-        tooltip: grey[700],
+        tooltip: grey[600],
+        lighter: grey[700],
         border: grey[600],
       };
 };

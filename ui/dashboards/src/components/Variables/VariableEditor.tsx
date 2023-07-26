@@ -38,7 +38,9 @@ import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
+import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import { Action, VariableEditForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
 
@@ -197,7 +199,7 @@ export function VariableEditor(props: {
               borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h2">Dashboard Variables</Typography>
+            <Typography variant="h2">Edit Dashboard Variables</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
                 disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
@@ -215,70 +217,13 @@ export function VariableEditor(props: {
           </Box>
           <Box padding={2} sx={{ overflowY: 'scroll' }}>
             <Stack spacing={2}>
-              {!validation.isValid &&
-                validation.errors.map((error) => (
-                  <Alert severity="error" key={error}>
-                    {error}
-                  </Alert>
-                ))}
-              <TableContainer>
-                <Table sx={{ minWidth: 650 }} aria-label="table of variables">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Visibility</TableCell>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Type</TableCell>
-                      <TableCell align="right" />
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {variableDefinitions.map((v, idx) => (
-                      <TableRow key={v.spec.name}>
-                        <TableCell component="th" scope="row">
-                          <Switch
-                            checked={v.spec.display?.hidden !== true}
-                            onChange={(e) => {
-                              toggleVariableVisibility(idx, e.target.checked);
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                          <VariableName name={v.spec.name} state={variableState.get({ name: v.spec.name })} />
-                        </TableCell>
-                        <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
-                        <TableCell align="right">
-                          <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
-                            <ArrowUp />
-                          </IconButton>
-                          <IconButton
-                            onClick={() => changeVariableOrder(idx, 'down')}
-                            disabled={idx === variableDefinitions.length - 1}
-                          >
-                            <ArrowDown />
-                          </IconButton>
-
-                          <IconButton onClick={() => editVariable(idx)}>
-                            <PencilIcon />
-                          </IconButton>
-                          <IconButton onClick={() => removeVariable(idx)}>
-                            <TrashIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <Box display="flex">
-                <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={addVariable}>
-                  Add Variable
-                </Button>
-              </Box>
-            </Stack>
-
-            {externalVariableDefinitions.map((extVar) => (
-              <Stack key={extVar.source}>
-                <Typography variant="h2">{capitalize(extVar.source)} Variables</Typography>
+              <Stack spacing={2}>
+                {!validation.isValid &&
+                  validation.errors.map((error) => (
+                    <Alert severity="error" key={error}>
+                      {error}
+                    </Alert>
+                  ))}
                 <TableContainer>
                   <Table sx={{ minWidth: 650 }} aria-label="table of variables">
                     <TableHead>
@@ -290,37 +235,35 @@ export function VariableEditor(props: {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {extVar.definitions.map((v) => (
+                      {variableDefinitions.map((v, idx) => (
                         <TableRow key={v.spec.name}>
                           <TableCell component="th" scope="row">
-                            <Switch checked={v.spec.display?.hidden !== true} disabled />
+                            <Switch
+                              checked={v.spec.display?.hidden !== true}
+                              onChange={(e) => {
+                                toggleVariableVisibility(idx, e.target.checked);
+                              }}
+                            />
                           </TableCell>
                           <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                            <VariableName
-                              name={v.spec.name}
-                              state={variableState.get({ name: v.spec.name, source: extVar.source })}
-                            />
+                            <VariableName name={v.spec.name} state={variableState.get({ name: v.spec.name })} />
                           </TableCell>
                           <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                           <TableCell align="right">
-                            <Tooltip title="Override">
-                              <IconButton
-                                onClick={() => overrideVariable(v)}
-                                disabled={!!variableState.get({ name: v.spec.name })}
-                              >
-                                <ContentDuplicate />
-                              </IconButton>
-                            </Tooltip>
-                            <IconButton disabled>
+                            <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                               <ArrowUp />
                             </IconButton>
-                            <IconButton disabled>
+                            <IconButton
+                              onClick={() => changeVariableOrder(idx, 'down')}
+                              disabled={idx === variableDefinitions.length - 1}
+                            >
                               <ArrowDown />
                             </IconButton>
-                            <IconButton disabled>
+
+                            <IconButton onClick={() => editVariable(idx)}>
                               <PencilIcon />
                             </IconButton>
-                            <IconButton disabled>
+                            <IconButton onClick={() => removeVariable(idx)}>
                               <TrashIcon />
                             </IconButton>
                           </TableCell>
@@ -329,8 +272,96 @@ export function VariableEditor(props: {
                     </TableBody>
                   </Table>
                 </TableContainer>
+                <Box display="flex">
+                  <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={addVariable}>
+                    Add Variable
+                  </Button>
+                </Box>
               </Stack>
-            ))}
+
+              {externalVariableDefinitions.length > 0 &&
+                !externalVariableDefinitions.every((v) => v.definitions.length === 0) && (
+                  <Stack padding={2} spacing={3} bgcolor={(theme) => theme.palette.background.lighter}>
+                    {externalVariableDefinitions.map(
+                      (extVar) =>
+                        extVar.definitions.length > 0 && (
+                          <Stack key={extVar.source}>
+                            <Stack flexDirection="row" alignItems="center" justifyContent="start">
+                              {extVar.tooltip && (
+                                <Typography variant="h2">
+                                  <InfoTooltip
+                                    title={extVar.tooltip.title || ''}
+                                    description={extVar.tooltip.description || ''}
+                                  >
+                                    <span>{capitalize(extVar.source)} Variables</span>
+                                  </InfoTooltip>
+                                </Typography>
+                              )}
+                              {!extVar.tooltip && (
+                                <Typography variant="h2">{capitalize(extVar.source)} Variables</Typography>
+                              )}
+                              {extVar.editLink && (
+                                <IconButton href={extVar.editLink} target="_blank">
+                                  <OpenInNewIcon />
+                                </IconButton>
+                              )}
+                            </Stack>
+                            <TableContainer>
+                              <Table sx={{ minWidth: 650 }} aria-label="table of variables">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Visibility</TableCell>
+                                    <TableCell>Name</TableCell>
+                                    <TableCell>Type</TableCell>
+                                    <TableCell align="right" />
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {extVar.definitions.map((v) => (
+                                    <TableRow key={v.spec.name}>
+                                      <TableCell component="th" scope="row">
+                                        <Switch checked={v.spec.display?.hidden !== true} disabled />
+                                      </TableCell>
+                                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                                        <VariableName
+                                          name={v.spec.name}
+                                          state={variableState.get({ name: v.spec.name, source: extVar.source })}
+                                        />
+                                      </TableCell>
+                                      <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                                      <TableCell align="right">
+                                        <Tooltip title="Override">
+                                          <IconButton
+                                            onClick={() => overrideVariable(v)}
+                                            disabled={!!variableState.get({ name: v.spec.name })}
+                                          >
+                                            <ContentDuplicate />
+                                          </IconButton>
+                                        </Tooltip>
+                                        <IconButton disabled>
+                                          <ArrowUp />
+                                        </IconButton>
+                                        <IconButton disabled>
+                                          <ArrowDown />
+                                        </IconButton>
+                                        <IconButton disabled>
+                                          <PencilIcon />
+                                        </IconButton>
+                                        <IconButton disabled>
+                                          <TrashIcon />
+                                        </IconButton>
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TableContainer>
+                          </Stack>
+                        )
+                    )}
+                  </Stack>
+                )}
+            </Stack>
           </Box>
         </>
       )}

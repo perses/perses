@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, fetchJson, GlobalDatasource } from '@perses-dev/core';
+import { Datasource, fetchJson } from '@perses-dev/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT, HTTPMethodDELETE, HTTPHeader } from './http';
+import buildQueryKey from './querykey-builder';
 import buildURL from './url-builder';
 
-const datasourceResource = 'datasources';
-const globalDatasourceResource = 'globaldatasources';
+export const resource = 'datasources';
 
-function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boolean, name?: string) {
+export function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boolean, name?: string) {
   const q = new URLSearchParams();
   if (kind !== undefined) {
     q.append('kind', kind);
@@ -33,17 +35,131 @@ function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boole
 
 export function fetchDatasourceList(project: string, kind?: string, defaultDatasource?: boolean, name?: string) {
   const url = buildURL({
-    resource: datasourceResource,
+    resource: resource,
     project: project,
     queryParams: buildDatasourceQueryParameters(kind, defaultDatasource, name),
   });
   return fetchJson<Datasource[]>(url);
 }
 
-export function fetchGlobalDatasourceList(kind?: string, defaultDatasource?: boolean, name?: string) {
-  const url = buildURL({
-    resource: globalDatasourceResource,
-    queryParams: buildDatasourceQueryParameters(kind, defaultDatasource, name),
+/**
+ * Used to create a new project datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
+ */
+export function useCreateDatasourceMutation(projectName: string) {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<Datasource, Error, Datasource>({
+    mutationKey: key,
+    mutationFn: (datasource: Datasource) => {
+      return createDatasource(datasource);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries(key);
+    },
   });
-  return fetchJson<GlobalDatasource[]>(url);
+}
+
+/**
+ * Used to update a project datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
+ */
+export function useUpdateDatasourceMutation(projectName: string) {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<Datasource, Error, Datasource>({
+    mutationKey: key,
+    mutationFn: (datasource: Datasource) => {
+      return updateDatasource(datasource);
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries(key);
+    },
+  });
+}
+
+/**
+ * Used to delete a datasource in the API.
+ * Will automatically invalidate datasources and force the get query to be executed again.
+ */
+export function useDeleteDatasourceMutation(projectName: string) {
+  const queryClient = useQueryClient();
+  const key = buildQueryKey({ resource, parent: projectName });
+
+  return useMutation<Datasource, Error, Datasource>({
+    mutationKey: key,
+    mutationFn: (entity: Datasource) => {
+      return deleteDatasource(entity).then(() => {
+        return entity;
+      });
+    },
+    onSuccess: (datasource) => {
+      queryClient.removeQueries([...key, datasource.metadata.name]);
+      return queryClient.invalidateQueries(key);
+    },
+  });
+}
+
+/**
+ * Used to get a datasource in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useDatasource(project: string, name: string) {
+  return useQuery<Datasource, Error>(buildQueryKey({ resource, parent: project, name }), () => {
+    return getDatasource(project, name);
+  });
+}
+
+/**
+ * Used to get datasources in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useDatasourceList(project: string) {
+  return useQuery<Datasource[], Error>(buildQueryKey({ resource, parent: project }), () => {
+    return getDatasources(project);
+  });
+}
+
+export function createDatasource(entity: Datasource) {
+  const url = buildURL({ resource, project: entity.metadata.project });
+  return fetchJson<Datasource>(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function getDatasource(project: string, name: string) {
+  const url = buildURL({ resource, project: project, name: name });
+  return fetchJson<Datasource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function getDatasources(project?: string) {
+  const url = buildURL({ resource, project: project });
+  return fetchJson<Datasource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function updateDatasource(entity: Datasource) {
+  const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetchJson<Datasource>(url, {
+    method: HTTPMethodPUT,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function deleteDatasource(entity: Datasource) {
+  const url = buildURL({ resource, project: entity.metadata.project, name: entity.metadata.name });
+  return fetch(url, {
+    method: HTTPMethodDELETE,
+    headers: HTTPHeader,
+  });
 }

@@ -14,8 +14,10 @@
 import { Datasource, DatasourceSelector, GlobalDatasource } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 import LRUCache from 'lru-cache';
-import { fetchDatasourceList, fetchGlobalDatasourceList } from './datasource-client';
+import { fetchDatasourceList } from './datasource-client';
+import { fetchGlobalDatasourceList } from './global-datasource-client';
 
+//TODO: Move to tanstack query for caching
 export class HTTPDatasourceAPI implements DatasourceApi {
   getDatasource(
     project: string,

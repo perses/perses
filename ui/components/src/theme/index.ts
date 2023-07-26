@@ -23,6 +23,7 @@ declare module '@mui/material/styles/createPalette' {
     tooltip: string;
     overlay: string;
     border: string;
+    lighter: string;
   }
 
   interface TypeText {

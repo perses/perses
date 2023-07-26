@@ -306,6 +306,11 @@ function createTemplateVariableSrvStore({
 
 export type ExternalVariableDefinition = {
   source: string;
+  tooltip?: {
+    title?: string;
+    description?: string;
+  };
+  editLink?: string;
   definitions: VariableDefinition[];
 };
 
