@@ -306,23 +306,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              // Only add pinned crosshair line series when there is not one already in seriesMapping.
-              if (pinnedCrosshair === null) {
-                const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
-                  markLine: {
-                    data: [
-                      {
-                        xAxis: pointInGrid[0],
-                      },
-                    ],
-                  },
-                } as LineSeriesOption);
-                setPinnedCrosshair(pinnedCrosshair);
-              } else {
-                // Clear previously set pinned crosshair
-                setPinnedCrosshair(null);
-              }
-
               // Pin tooltip and update shared charts context to remember these coordinates.
               const pinnedPos: CursorCoordinates = {
                 page: {
@@ -345,6 +328,25 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               return pinnedPos;
             } else {
               setPinnedCrosshair(null);
+              return null;
+            }
+          });
+
+          setPinnedCrosshair((current) => {
+            // Only add pinned crosshair line series when there is not one already in seriesMapping.
+            if (current === null) {
+              const pinnedCrosshair = merge(DEFAULT_PINNED_CROSSHAIR, {
+                markLine: {
+                  data: [
+                    {
+                      xAxis: pointInGrid[0],
+                    },
+                  ],
+                },
+              } as LineSeriesOption);
+              return pinnedCrosshair;
+            } else {
+              // Clear previously set pinned crosshair
               return null;
             }
           });
