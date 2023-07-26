@@ -68,8 +68,13 @@ export function checkforNearbyTimeSeries(
 
   const yValueCounts: Map<number, number> = new Map();
 
-  let closestTimestamp = null;
-  const closestDistance = Infinity;
+  // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
+  const firstDatasetValues = data[0]?.values;
+  const closestTimestamp = firstDatasetValues ? getClosestTimestamp(cursorX, firstDatasetValues) : null;
+
+  if (closestTimestamp === null) {
+    return [];
+  }
 
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
@@ -80,11 +85,6 @@ export function checkforNearbyTimeSeries(
     if (currentDataset == null) break;
 
     const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
-
-    // Determine closestTimestamp before checking whether it is equal to xValue. Consolidating
-    // with second currentDatasetValues loop below would result in duplicate nearby series
-    closestTimestamp = getClosestTimestamp(cursorX, closestTimestamp, closestDistance, currentDatasetValues);
-
     if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';

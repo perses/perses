@@ -161,12 +161,10 @@ export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping
  * Find closest timestamp to logical x coordinate returned from echartsInstance.convertFromPixel
  * Used to find nearby series in time series tooltip.
  */
-export function getClosestTimestamp(
-  cursorX: number,
-  currentClosestTimestamp: null | number,
-  currentClosestDistance: number,
-  timeSeriesValues: TimeSeriesValueTuple[]
-) {
+export function getClosestTimestamp(cursorX: number, timeSeriesValues: TimeSeriesValueTuple[]) {
+  let currentClosestTimestamp: number | null = null;
+  let currentClosestDistance = Infinity;
+
   for (const [timestamp] of timeSeriesValues) {
     const distance = Math.abs(timestamp - cursorX);
     if (distance < currentClosestDistance) {
@@ -186,12 +184,11 @@ export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: n
   }
   const totalSeries = data.length;
   let closestTimestamp = null;
-  const closestDistance = Infinity;
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
     if (currentDataset == null) break;
     const currentValues: TimeSeriesValueTuple[] = currentDataset.values;
-    closestTimestamp = getClosestTimestamp(cursorX, closestTimestamp, closestDistance, currentValues);
+    closestTimestamp = getClosestTimestamp(cursorX, currentValues);
   }
   return closestTimestamp;
 }

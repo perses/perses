@@ -121,7 +121,7 @@ const TEST_TIME_SERIES_DATA: TimeSeries[] = [
 
 describe('getClosestTimestamp', () => {
   it('should determine closest timestamp to current cursor xValue in single dataset source', () => {
-    expect(getClosestTimestamp(1690381320276.3362, null, Infinity, TEST_TIME_SERIES_VALUES)).toEqual(1690381320000);
+    expect(getClosestTimestamp(1690381320276.3362, TEST_TIME_SERIES_VALUES)).toEqual(1690381320000);
   });
 });
 
