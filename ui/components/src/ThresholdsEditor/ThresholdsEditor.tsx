@@ -17,7 +17,7 @@ import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/ma
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
 import { ThresholdOptions } from '@perses-dev/core';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
 import { InfoTooltip } from '../InfoTooltip';
 import { ThresholdColorPicker } from './ThresholdColorPicker';
@@ -33,9 +33,10 @@ export interface ThresholdsEditorProps {
 const DEFAULT_STEP = 10;
 
 export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePercentMode }: ThresholdsEditorProps) {
+  const chartsTheme = useChartsTheme();
   const {
     thresholds: { defaultColor, palette },
-  } = useChartsTheme();
+  } = chartsTheme;
   const defaultThresholdColor = thresholds?.default_color ?? defaultColor;
 
   const [steps, setSteps] = useState(thresholds?.steps);

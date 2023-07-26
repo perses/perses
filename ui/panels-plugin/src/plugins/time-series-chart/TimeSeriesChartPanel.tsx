@@ -17,7 +17,6 @@ import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
   useDeepMemo,
-  getXValues,
   getTimeSeriesValues,
   DEFAULT_LEGEND,
   getCalculations,
@@ -35,7 +34,6 @@ import {
   legendValues,
 } from '@perses-dev/plugin-system';
 import {
-  EChartsDataFormat,
   ChartInstance,
   YAxisLabel,
   ZoomEventData,
@@ -60,7 +58,6 @@ import {
 import {
   getTimeSeries,
   getCommonTimeScaleForQueries,
-  EMPTY_GRAPH_DATA,
   convertPanelYAxis,
   getThresholdSeries,
   convertPercentThreshold,
@@ -89,7 +86,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
   const chartRef = useRef<ChartInstance>(null);
 
-  // ECharts theme comes from ChartsThemeProvider, more info: https://echarts.apache.org/en/option.html#color
+  // ECharts theme comes from ChartsProvider, more info: https://echarts.apache.org/en/option.html#color
   // Colors are manually applied since our legend and tooltip are built custom with React.
   const categoricalPalette = chartsTheme.echartsTheme.color;
 
@@ -136,7 +133,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // We skip the expensive loops below until we are done loading or fetching.
     if (isLoading || isFetching) {
       return {
-        graphData: EMPTY_GRAPH_DATA,
         timeChartData: [],
         timeSeriesMapping: [],
       };
@@ -145,19 +141,10 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     const timeScale = getCommonTimeScaleForQueries(queryResults);
     if (timeScale === undefined) {
       return {
-        graphData: EMPTY_GRAPH_DATA,
         timeChartData: [],
         timeSeriesMapping: [],
       };
     }
-
-    const graphData: EChartsDataFormat = {
-      timeSeries: [],
-      xAxis: [],
-      legendItems: [],
-      rangeMs: timeScale.rangeMs,
-    };
-    const xAxisData = [...getXValues(timeScale)];
 
     const legendItems: LegendItem[] = [];
 
@@ -185,7 +172,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries: TimeSeries | undefined = result.data.series[i];
         if (timeSeries === undefined) {
-          return { graphData, timeChartData: [], timeSeriesMapping: [], legendItems: [] };
+          return { timeChartData: [], timeSeriesMapping: [], legendItems: [] };
         }
 
         // Format is determined by series_name_format in query spec
@@ -193,7 +180,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
         // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
-          // ECharts type for color is not always an array but it is always an array in ChartsThemeProvider
+          // ECharts type for color is not always an array but it is always an array in ChartsProvider
           categoricalPalette: categoricalPalette as string[],
           visual,
           muiPrimaryColor: muiTheme.palette.primary.main,
@@ -245,7 +232,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         seriesIndex++;
       }
     }
-    graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
       // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
@@ -285,7 +271,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     }
 
     return {
-      graphData,
       timeScale,
       timeChartData,
       timeSeriesMapping,

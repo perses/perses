@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { DatapointInfo } from '../model';
+import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
+import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } from '../model';
 
 export interface ZoomEventData {
   start: number;
@@ -146,4 +147,52 @@ export function batchDispatchNearbySeriesActions(
       type: 'toggleSelect', // https://echarts.apache.org/en/api.html#action.toggleSelect
     });
   }
+}
+
+/*
+ * Determine whether a markLine was pushed into the final series, which means crosshair was already pinned onClick
+ */
+export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping) {
+  const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
+  return isCrosshairPinned;
+}
+
+/*
+ * Find closest timestamp to logical x coordinate returned from echartsInstance.convertFromPixel
+ * Used to find nearby series in time series tooltip.
+ */
+export function getClosestTimestamp(timeSeriesValues?: TimeSeriesValueTuple[], cursorX?: number): number | null {
+  if (timeSeriesValues === undefined || cursorX === undefined) {
+    return null;
+  }
+
+  let currentClosestTimestamp: number | null = null;
+  let currentClosestDistance = Infinity;
+
+  for (const [timestamp] of timeSeriesValues) {
+    const distance = Math.abs(timestamp - cursorX);
+    if (distance < currentClosestDistance) {
+      currentClosestTimestamp = timestamp;
+      currentClosestDistance = distance;
+    }
+  }
+  return currentClosestTimestamp;
+}
+
+/*
+ * Find closest timestamp in full dataset, used to snap crosshair into place onClick when tooltip is pinned.
+ */
+export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: number): number | null {
+  if (cursorX === undefined) {
+    return null;
+  }
+  const totalSeries = data.length;
+  let closestTimestamp = null;
+  for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
+    const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
+    if (currentDataset == null) break;
+    const currentValues: TimeSeriesValueTuple[] = currentDataset.values;
+    closestTimestamp = getClosestTimestamp(currentValues, cursorX);
+  }
+  return closestTimestamp;
 }

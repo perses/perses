@@ -38,7 +38,7 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { CursorCoordinates, LineChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import {

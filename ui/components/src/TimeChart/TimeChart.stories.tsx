@@ -14,7 +14,13 @@
 import { StoryObj, Meta } from '@storybook/react';
 import { waitForStableCanvas } from '@perses-dev/storybook';
 import { TimeSeries } from '@perses-dev/core';
-import { ChartInstance, DEFAULT_TOOLTIP_CONFIG, TimeChart } from '@perses-dev/components';
+import {
+  ChartInstance,
+  DEFAULT_TOOLTIP_CONFIG,
+  TimeChart,
+  ChartsProvider,
+  testChartsTheme,
+} from '@perses-dev/components';
 import { Button, Stack, Typography } from '@mui/material';
 import { useRef } from 'react';
 import { action } from '@storybook/addon-actions';
@@ -271,6 +277,7 @@ export const StackedBar: Story = {
   },
   args: {
     height: 200,
+    isStackedBar: true,
     timeScale: { startMs: 1690076580000, endMs: 1690076685000, stepMs: 15000, rangeMs: 105000 },
     data: STACKED_BAR_DATA,
     seriesMapping: [
@@ -324,6 +331,24 @@ export const StackedBar: Story = {
     },
   },
   render: (args) => {
-    return <TimeChart {...args} isStackedBar={true} />;
+    return <TimeChart {...args} />;
+  },
+};
+
+export const PinnedTooltip: Story = {
+  parameters: {
+    parameters: {
+      happo: false,
+    },
+  },
+  args: {
+    tooltipConfig: { wrapLabels: true, enablePinning: true },
+  },
+  render: (args) => {
+    return (
+      <ChartsProvider chartsTheme={testChartsTheme} enablePinning={true}>
+        <TimeChart {...args} />
+      </ChartsProvider>
+    );
   },
 };

@@ -15,7 +15,7 @@ import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
-import { batchDispatchNearbySeriesActions, getPointInGrid } from '../utils';
+import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
@@ -68,8 +68,13 @@ export function checkforNearbyTimeSeries(
 
   const yValueCounts: Map<number, number> = new Map();
 
-  let closestTimestamp = null;
-  let closestDistance = Infinity;
+  // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
+  const firstTimeSeriesValues = data[0]?.values;
+  const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
+
+  if (closestTimestamp === null) {
+    return [];
+  }
 
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
@@ -80,17 +85,6 @@ export function checkforNearbyTimeSeries(
     if (currentDataset == null) break;
 
     const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
-
-    // Determine closestTimestamp before checking whether it is equal to xValue. Consolidating
-    // with second currentDatasetValues loop below would result in duplicate nearby series
-    for (const [timestamp] of currentDatasetValues) {
-      const distance = Math.abs(timestamp - cursorX);
-      if (distance < closestDistance) {
-        closestTimestamp = timestamp;
-        closestDistance = distance;
-      }
-    }
-
     if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
