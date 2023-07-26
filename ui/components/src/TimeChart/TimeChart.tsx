@@ -17,7 +17,7 @@ import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -46,7 +46,6 @@ import {
   checkCrosshairPinnedStatus,
   clearHighlightedSeries,
   enableDataZoom,
-  getClosestTimestampInFullDataset,
   getClosestTimestamp,
   getFormattedAxisLabel,
   getPointInGrid,
