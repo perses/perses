@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { TimeSeriesValueTuple } from '@perses-dev/core';
+import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
 import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } from '../model';
 
 export interface ZoomEventData {
@@ -159,6 +159,7 @@ export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping
 
 /*
  * Find closest timestamp to logical x coordinate returned from echartsInstance.convertFromPixel
+ * Used to find nearby series in time series tooltip.
  */
 export function getClosestTimestamp(
   cursorX: number,
@@ -174,4 +175,23 @@ export function getClosestTimestamp(
     }
   }
   return currentClosestTimestamp;
+}
+
+/*
+ * Find closest timestamp in full dataset, used to snap crosshair into place onClick when tooltip is pinned.
+ */
+export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: number) {
+  if (cursorX === undefined) {
+    return null;
+  }
+  const totalSeries = data.length;
+  let closestTimestamp = null;
+  const closestDistance = Infinity;
+  for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
+    const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
+    if (currentDataset == null) break;
+    const currentValues: TimeSeriesValueTuple[] = currentDataset.values;
+    closestTimestamp = getClosestTimestamp(cursorX, closestTimestamp, closestDistance, currentValues);
+  }
+  return closestTimestamp;
 }
