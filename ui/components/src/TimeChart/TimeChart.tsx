@@ -205,7 +205,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
 
-    const updatedSeriesMapping = enablePinning ? [...seriesMapping, pinnedCrosshair] : seriesMapping;
+    const updatedSeriesMapping =
+      enablePinning && pinnedCrosshair !== null ? [...seriesMapping, pinnedCrosshair] : seriesMapping;
 
     const option: EChartsCoreOption = {
       dataset: dataset,
