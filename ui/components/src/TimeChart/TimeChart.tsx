@@ -280,10 +280,9 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     if (tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null) {
       if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
         setTooltipPinnedCoords(null);
-      }
-      const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
-      if (tooltipPinnedCoords !== null && isCrosshairPinned) {
-        setPinnedCrosshair(null);
+        if (tooltipPinnedCoords !== null && pinnedCrosshair !== null) {
+          setPinnedCrosshair(null);
+        }
       }
     }
     // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
