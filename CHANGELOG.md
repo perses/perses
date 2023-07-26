@@ -12,9 +12,9 @@
 - [ENHANCEMENT] App level `enablePinning` prop added to ChartsProvider (#1317)
 - [ENHANCEMENT] Only pin one tooltip at a time by default, Cmd + Click to pin multiple (#1317)
 - [ENHANCEMENT] Snap crosshair to nearest datapoint when clicking to pin (#1317)
-- [ENHANCEMENT] Improve performance in checkforNearbyTimeSeries #1330
-- [BUGFIX] Disable tooltip pinning in panel preview #1329
-- [BREAKINGCHANGE] `ChartsThemeProvider` renamed to `ChartsProvider`, app-level enablePinning prop added (#1317)
+- [ENHANCEMENT] Improve performance in checkforNearbyTimeSeries (#1330)
+- [BUGFIX] Disable tooltip pinning in panel preview (#1329)
+- [BREAKINGCHANGE] `ChartsThemeProvider` renamed to `ChartsProvider` (#1317)
 - [BREAKINGCHANGE] Update DataQueriesProvider to support other data types (#1318)
 
 ## 0.38.0 / 2023-07-20
