@@ -245,7 +245,6 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         seriesIndex++;
       }
     }
-    graphData.xAxis = xAxisData;
 
     if (thresholds && thresholds.steps) {
       // Convert how thresholds are defined in the panel spec to valid ECharts 'line' series.
