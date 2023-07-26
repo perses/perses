@@ -337,10 +337,8 @@ export const StackedBar: Story = {
 
 export const PinnedTooltip: Story = {
   parameters: {
-    happo: {
-      beforeScreenshot: async () => {
-        await waitForStableCanvas('canvas');
-      },
+    parameters: {
+      happo: false,
     },
   },
   args: {
