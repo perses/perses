@@ -24,7 +24,7 @@ import {
   OptionsEditorControl,
   ThresholdsEditor,
 } from '@perses-dev/components';
-import { DEFAULT_CALCULATION, ThresholdOptions } from '@perses-dev/core';
+import { ThresholdOptions } from '@perses-dev/core';
 import {
   GaugeChartOptions,
   DEFAULT_UNIT,
@@ -76,7 +76,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <UnitSelector value={unit} onChange={handleUnitChange} />
-          <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+          <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <OptionsEditorControl
             label="Max"
             control={
