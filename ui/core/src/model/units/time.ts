@@ -129,18 +129,14 @@ function isMonthOrYear(kind: TimeUnitKind): boolean {
 }
 
 export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
-  const { value: valueForNaturalNumbers, kind: kindForNaturalNumbers } = getValueAndKindForNaturalNumbers(value, kind);
-
-  return _formatTime(valueForNaturalNumbers, { kind: kindForNaturalNumbers, decimal_places });
-}
-
-function _formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
   if (value === 0) return '0s';
+
+  const results = getValueAndKindForNaturalNumbers(value, kind);
 
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',
-    unit: PersesTimeToIntlTime[kind],
-    unitDisplay: isMonthOrYear(kind) ? 'long' : 'narrow',
+    unit: PersesTimeToIntlTime[results.kind],
+    unitDisplay: isMonthOrYear(results.kind) ? 'long' : 'narrow',
   };
 
   if (hasDecimalPlaces(decimal_places)) {
@@ -151,5 +147,5 @@ function _formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): 
   }
 
   const formatter = Intl.NumberFormat('en-US', formatterOptions);
-  return formatter.format(value);
+  return formatter.format(results.value);
 }
