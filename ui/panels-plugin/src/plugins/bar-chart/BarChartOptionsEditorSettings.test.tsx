@@ -153,6 +153,7 @@ describe('BarChartOptionsEditorSettings', () => {
       expect.objectContaining({
         unit: {
           kind: 'Decimal',
+          abbreviate: true,
         },
         calculation: 'LastNumber',
         sort: 'desc',
