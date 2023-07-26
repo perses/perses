@@ -28,7 +28,7 @@ export const WithThemes: Decorator = (Story) => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <ChartsProvider chartsTheme={chartsTheme}>
+      <ChartsProvider chartsTheme={chartsTheme} enablePinning={true}>
         <Story />
       </ChartsProvider>
     </ThemeProvider>

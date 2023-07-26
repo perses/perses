@@ -43,7 +43,6 @@ import { EChart, OnEventsType } from '../EChart';
 import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, DEFAULT_PINNED_CROSSHAIR } from '../model';
 import { useChartsContext } from '../context/ChartsProvider';
 import {
-  checkCrosshairPinnedStatus,
   clearHighlightedSeries,
   enableDataZoom,
   getClosestTimestamp,
@@ -437,10 +436,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
               // Clear previously set pinned crosshair.
-              const isCrosshairPinned = checkCrosshairPinnedStatus(seriesMapping);
-              if (isCrosshairPinned) {
-                setPinnedCrosshair(null);
-              }
+              setPinnedCrosshair(null);
             }}
           />
         )}
