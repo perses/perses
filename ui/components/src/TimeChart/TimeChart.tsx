@@ -293,11 +293,14 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   return (
     <Box
       sx={{ height }}
+      onContextMenu={(e) => {
+        // TODO: confirm tooltip pinning works correctly on Windows, is e.preventDefault() necessary in onClick?
+        e.preventDefault(); // Prevent the default behaviour when right clicked
+      }}
       onClick={(e) => {
         // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
         const isControlKeyPressed = e.ctrlKey || e.metaKey;
         if (isControlKeyPressed) {
-          // Do not show browser built-in menu
           e.preventDefault();
         }
 
