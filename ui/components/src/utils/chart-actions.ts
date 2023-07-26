@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
+import { TimeSeriesValueTuple } from '@perses-dev/core';
 import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } from '../model';
 
 export interface ZoomEventData {
@@ -154,4 +155,23 @@ export function batchDispatchNearbySeriesActions(
 export function checkCrosshairPinnedStatus(seriesMapping: TimeChartSeriesMapping) {
   const isCrosshairPinned = seriesMapping[seriesMapping.length - 1]?.name === PINNED_CROSSHAIR_SERIES_NAME;
   return isCrosshairPinned;
+}
+
+/*
+ * Find closest timestamp to logical x coordinate returned from echartsInstance.convertFromPixel
+ */
+export function getClosestTimestamp(
+  cursorX: number,
+  currentClosestTimestamp: null | number,
+  currentClosestDistance: number,
+  timeSeriesValues: TimeSeriesValueTuple[]
+) {
+  for (const [timestamp] of timeSeriesValues) {
+    const distance = Math.abs(timestamp - cursorX);
+    if (distance < currentClosestDistance) {
+      currentClosestTimestamp = timestamp;
+      currentClosestDistance = distance;
+    }
+  }
+  return currentClosestTimestamp;
 }
