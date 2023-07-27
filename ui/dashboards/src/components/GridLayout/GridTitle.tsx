@@ -20,6 +20,7 @@ import ArrowUpIcon from 'mdi-material-ui/ArrowUp';
 import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
 
@@ -37,7 +38,9 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps) {
-  const { panelGroupId, title, collapse } = props;
+  const { panelGroupId, title: rawTitle, collapse } = props;
+
+  const title = useReplaceVariablesInString(rawTitle) as string;
 
   const { openAddPanel, openEditPanelGroup, moveUp, moveDown } = usePanelGroupActions(panelGroupId);
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
@@ -54,8 +57,7 @@ export function GridTitle(props: GridTitleProps) {
         alignItems: 'center',
         padding: (theme) => theme.spacing(1),
         cursor: collapse ? 'pointer' : 'auto',
-        backgroundColor: ({ palette }) =>
-          palette.mode === 'dark' ? palette.background.paper : palette.background.default,
+        backgroundColor: ({ palette }) => palette.background.paper,
       }}
       data-testid="panel-group-header"
     >

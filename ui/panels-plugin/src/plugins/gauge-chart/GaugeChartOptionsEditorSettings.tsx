@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { merge } from 'lodash-es';
+import merge from 'lodash/merge';
 import { TextField } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps, DEFAULT_CALCULATION } from '@perses-dev/plugin-system';
+import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import {
   UnitSelector,
@@ -76,7 +76,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
           <UnitSelector value={unit} onChange={handleUnitChange} />
-          <CalculationSelector value={value.calculation ?? DEFAULT_CALCULATION} onChange={handleCalculationChange} />
+          <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <OptionsEditorControl
             label="Max"
             control={

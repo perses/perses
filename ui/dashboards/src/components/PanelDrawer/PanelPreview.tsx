@@ -13,7 +13,6 @@
 
 import { useRef } from 'react';
 import { Box } from '@mui/material';
-import { QueryDefinition } from '@perses-dev/core';
 import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
 import { Panel } from '../Panel';
@@ -38,7 +37,7 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
-    ? queries.map((query: QueryDefinition) => {
+    ? queries.map((query) => {
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,

@@ -30,7 +30,7 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="row" alignItems="center" gap={1} my={2}>
           <HistoryIcon />
-          <Typography variant="h3">Recently Viewed</Typography>
+          <Typography variant="h3">Recently Viewed Dashboards</Typography>
         </Stack>
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>

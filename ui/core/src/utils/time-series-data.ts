@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData } from '../model';
+import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '../model';
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;
@@ -31,6 +31,39 @@ export function getXValues(timeScale: TimeScale): number[] {
 }
 
 /**
+ * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
+ * processes the time series values, filling in any timestamps that are missing
+ * from the time series data with `null` values.
+ */
+export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale) {
+  let timestamp = timeScale.startMs;
+
+  const values = series.values;
+  const processedValues: TimeSeriesValueTuple[] = [];
+
+  for (const valueTuple of values) {
+    // Fill in values up to the current series value timestamp with nulls
+    while (timestamp < valueTuple[0]) {
+      processedValues.push([timestamp, null]);
+      timestamp += timeScale.stepMs;
+    }
+
+    // Now add the current value since timestamp should match
+    processedValues.push([timestamp, valueTuple[1]]);
+    timestamp += timeScale.stepMs;
+  }
+
+  // Add null values at the end of the series if necessary
+  while (timestamp <= timeScale.endMs) {
+    processedValues.push([timestamp, null]);
+    timestamp += timeScale.stepMs;
+  }
+
+  return processedValues;
+}
+
+/**
+ * [DEPRECATED] Used for legacy LineChart 'category' axis approach.
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
  * gets the values for the y axis of a graph, filling in any timestamps that are
  * missing from the time series data with `null` values.
@@ -65,28 +98,68 @@ export function getYValues(series: TimeSeries, timeScale: TimeScale): Array<numb
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>): TimeScale | undefined {
+export function getCommonTimeScale(
+  seriesData: Array<TimeSeriesData | Pick<TimeSeries, 'values'> | undefined>
+): TimeScale | undefined {
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];
+
   for (const data of seriesData) {
-    if (data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
+    if (data && 'timeRange' in data) {
+      if (data === undefined || data.timeRange === undefined || data.stepMs === undefined) continue;
 
-    // Keep track of query steps so we can calculate a common one for the graph
-    steps.push(data.stepMs);
+      // Keep track of query steps so we can calculate a common one for the graph
+      steps.push(data.stepMs);
 
-    // If we don't have an overall time range yet, just start with this one
-    if (timeRange === undefined) {
-      timeRange = data.timeRange;
-      continue;
-    }
+      // If we don't have an overall time range yet, just start with this one
+      if (timeRange === undefined) {
+        timeRange = data.timeRange;
+        continue;
+      }
 
-    // Otherwise, see if this query has a start or end outside of the current
-    // time range
-    if (data.timeRange.start < timeRange.start) {
-      timeRange.start = data.timeRange.start;
-    }
-    if (data.timeRange.end > timeRange.end) {
-      timeRange.end = data.timeRange.end;
+      // Otherwise, see if this query has a start or end outside of the current
+      // time range
+      if (data.timeRange.start < timeRange.start) {
+        timeRange.start = data.timeRange.start;
+      }
+      if (data.timeRange.end > timeRange.end) {
+        timeRange.end = data.timeRange.end;
+      }
+    } else if (data && 'values' in data) {
+      for (let i = 0; i < data.values.length; i++) {
+        const values = data.values[i];
+        if (values === undefined) {
+          continue;
+        }
+
+        const [timestamp] = values;
+        const start = new Date(timestamp);
+        const end = new Date(timestamp);
+
+        if (timeRange === undefined) {
+          timeRange = {
+            start,
+            end,
+          };
+          continue;
+        }
+
+        if (start < timeRange.start) {
+          timeRange.start = start;
+        }
+
+        if (end > timeRange.end) {
+          timeRange.end = end;
+        }
+      }
+
+      if (timeRange === undefined) return undefined;
+
+      const startMs = timeRange.start.valueOf();
+      const endMs = timeRange.end.valueOf();
+      const rangeMs = endMs - startMs;
+
+      return { startMs, endMs, rangeMs, stepMs: MIN_STEP_INTERVAL_MS };
     }
   }
 
@@ -104,6 +177,7 @@ export function getCommonTimeScale(seriesData: Array<TimeSeriesData | undefined>
 
   const startMs = timeRange.start.valueOf();
   const endMs = timeRange.end.valueOf();
+  const rangeMs = endMs - startMs;
 
-  return { startMs, endMs, stepMs };
+  return { startMs, endMs, stepMs, rangeMs };
 }

@@ -19,6 +19,7 @@ export interface TimeScale {
   startMs: number;
   endMs: number;
   stepMs: number;
+  rangeMs: number;
 }
 
 export interface TimeSeriesData {
@@ -37,4 +38,11 @@ export interface TimeSeries {
 
 export interface TimeSeriesMetadata {
   notices?: Notice[];
+
+  /**
+   * The raw query that is executed to generate this data.
+   * Useful when needing to inspect the query that was executed
+   * after variables and other context modifications have been applied.
+   */
+  executedQueryString?: string;
 }

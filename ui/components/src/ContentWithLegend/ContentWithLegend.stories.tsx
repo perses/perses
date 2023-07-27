@@ -12,19 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import {
-  ContentWithLegend,
-  LegendPositions,
-  LegendProps,
-  LineChart,
-  legendModes,
-  legendPositions,
-} from '@perses-dev/components';
+import { ContentWithLegend, LegendProps, LineChart } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 import { Stack, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { StorySection } from '@perses-dev/storybook';
 import { useState } from 'react';
+import { LegendPositions, legendModes, legendPositions, legendSizes } from '@perses-dev/core';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -45,6 +39,12 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
       label: `${labelPrefix} ${i}`,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
+      data: {
+        index: i,
+        squared: Math.pow(i, 2),
+        cubed: Math.pow(i, 3),
+        description: `This is entry #${i}`,
+      },
     });
   }
   return data;
@@ -92,6 +92,7 @@ const meta: Meta<typeof ContentWithLegend> = {
       data: generateMockLegendData(10),
       options: {
         position: 'Right',
+        mode: 'List',
       },
       selectedItems: {},
       onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -126,6 +127,7 @@ export const Position: Story = {
                   data: generateMockLegendData(10),
                   options: {
                     position,
+                    mode: 'List',
                   },
                   selectedItems: {},
                   onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -139,26 +141,79 @@ export const Position: Story = {
   },
 };
 
-export const Mode: Story = {
+/**
+ * The amount of space the legend takes up is determined by the `legendSize`.
+ */
+export const LegendSize: Story = {
   args: {},
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendSizes.map((size) => {
+          return (
+            <StorySection key={size} title={size} level="h3">
+              <Stack spacing={1} direction="row">
+                {legendPositions.map((position) => {
+                  return (
+                    <StorySection key={position} title={position} level="h4">
+                      <ContentWithLegend
+                        {...args}
+                        legendSize={size}
+                        legendProps={{
+                          data: generateMockLegendData(10),
+                          options: {
+                            position,
+                            mode: 'Table',
+                          },
+                          selectedItems: {},
+                          onSelectedItemsChange: (newSelectedItems) =>
+                            action('onSelectedItemsChange')(newSelectedItems),
+                        }}
+                      />
+                    </StorySection>
+                  );
+                })}
+              </Stack>
+            </StorySection>
+          );
+        })}
+      </Stack>
+    );
+  },
+};
+
+export const Mode: Story = {
+  args: {
+    width: 500,
+    height: 300,
+  },
   render: (args) => {
     return (
       <Stack spacing={3}>
         {legendModes.map((mode) => {
           return (
             <StorySection key={mode} title={mode} level="h3">
-              <ContentWithLegend
-                {...args}
-                legendProps={{
-                  data: generateMockLegendData(100),
-                  options: {
-                    position: 'Right',
-                    mode,
-                  },
-                  selectedItems: {},
-                  onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
-                }}
-              />
+              <Stack spacing={1} direction="row" flexWrap="wrap">
+                {legendPositions.map((position) => {
+                  return (
+                    <StorySection key={position} title={position} level="h4">
+                      <ContentWithLegend
+                        {...args}
+                        legendProps={{
+                          data: generateMockLegendData(10),
+                          options: {
+                            position,
+                            mode,
+                          },
+                          selectedItems: 'ALL',
+                          onSelectedItemsChange: (newSelectedItems) =>
+                            action('onSelectedItemsChange')(newSelectedItems),
+                        }}
+                      />
+                    </StorySection>
+                  );
+                })}
+              </Stack>
             </StorySection>
           );
         })}
@@ -181,6 +236,7 @@ export const Children: Story = {
       data: generateMockLegendData(10),
       options: {
         position: 'Right',
+        mode: 'List',
       },
       selectedItems: {},
       onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -247,6 +303,48 @@ export const NoLegend: Story = {
 };
 
 /**
+ * When laying out a legend with `mode` set to `table`, `position` set to `right`,
+ * and additional `tableProps.columns` defined, the width of the legend will be
+ * increased to account for column definitions with the `width` set to a numeric
+ * value.
+ */
+export const TableWithColumns: Story = {
+  args: {
+    legendProps: {
+      data: generateMockLegendData(10),
+      options: {
+        position: 'Right',
+        mode: 'Table',
+      },
+      selectedItems: {},
+      onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+      tableProps: {
+        columns: [
+          {
+            header: 'Index',
+            accessorKey: 'data.index',
+            align: 'center',
+            width: 50,
+          },
+          {
+            header: 'Squared',
+            accessorKey: 'data.squared',
+            align: 'right',
+            width: 60,
+          },
+          {
+            header: 'Cubed',
+            accessorKey: 'data.cubed',
+            align: 'right',
+            width: 70,
+          },
+        ],
+      },
+    },
+  },
+};
+
+/**
  * Use the `minChildrenHeight` and `minChildrenWidth` props to manage responsive
  * handling for bottom and right positioned legends. If the content specified
  * by `children` will be smaller than these values, the legend will not be
@@ -266,6 +364,7 @@ export const Responsive: Story = {
                 data: generateMockLegendData(10),
                 options: {
                   position: 'Right',
+                  mode: 'List',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -278,6 +377,7 @@ export const Responsive: Story = {
                 data: generateMockLegendData(10),
                 options: {
                   position: 'Bottom',
+                  mode: 'List',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -285,7 +385,7 @@ export const Responsive: Story = {
             />
           </Stack>
         </StorySection>
-        <StorySection title="size of bottom legend adjusts depending on the height" level="h3">
+        <StorySection title="size of bottom list legend adjusts depending on the height" level="h3">
           <Stack direction="row" spacing={2} flexWrap="wrap">
             <ContentWithLegend
               {...args}
@@ -295,6 +395,7 @@ export const Responsive: Story = {
                 data: generateMockLegendData(10),
                 options: {
                   position: 'Bottom',
+                  mode: 'List',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -308,6 +409,41 @@ export const Responsive: Story = {
                 data: generateMockLegendData(10),
                 options: {
                   position: 'Bottom',
+                  mode: 'List',
+                },
+                selectedItems: {},
+                onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+              }}
+            />
+          </Stack>
+        </StorySection>
+        <StorySection title="size of bottom table legend will be shorter if the items do not fill the space" level="h3">
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            <ContentWithLegend
+              {...args}
+              width={400}
+              height={400}
+              legendProps={{
+                data: generateMockLegendData(2),
+                options: {
+                  position: 'Bottom',
+                  mode: 'Table',
+                  size: 'Small',
+                },
+                selectedItems: {},
+                onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
+              }}
+            />
+            <ContentWithLegend
+              {...args}
+              width={400}
+              height={400}
+              legendProps={{
+                data: generateMockLegendData(10),
+                options: {
+                  position: 'Bottom',
+                  mode: 'Table',
+                  size: 'Small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),

@@ -11,15 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, dashboardDisplayName } from '@perses-dev/core';
+import { DashboardResource, getDashboardDisplayName } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
-import { DeleteDashboardDialog } from '../DeleteDashboardDialog/DeleteDashboardDialog';
-import { RenameDashboardDialog } from '../RenameDashboardDialog/RenameDashboardDialog';
+import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
 import { DatedDashboards } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../model/config-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
@@ -51,7 +50,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         ({
           project: datedDashboard.dashboard.metadata.project,
           name: datedDashboard.dashboard.metadata.name,
-          displayName: dashboardDisplayName(datedDashboard.dashboard),
+          displayName: getDashboardDisplayName(datedDashboard.dashboard),
           version: datedDashboard.dashboard.metadata.version,
           createdAt: datedDashboard.dashboard.metadata.created_at,
           updatedAt: datedDashboard.dashboard.metadata.updated_at,

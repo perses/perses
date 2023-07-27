@@ -13,12 +13,13 @@
 
 import { Definition, UnknownSpec } from './definitions';
 import { Display } from './display';
+import { ProjectMetadata } from './resource';
 
 export type VariableName = string;
 
 export type VariableValue = string | string[] | null;
 
-interface VariableSpec {
+export interface VariableSpec {
   name: VariableName;
   display?: Display & {
     hidden?: boolean;
@@ -47,3 +48,14 @@ export interface ListVariableSpec<PluginSpec> extends VariableSpec {
 }
 
 export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
+
+/**
+ * A variable that belongs to a project.
+ */
+export interface VariableResource {
+  kind: 'Variable';
+  metadata: ProjectMetadata;
+  spec: VariableDefinition;
+}
+
+export const DEFAULT_ALL_VALUE = '$__all' as const;

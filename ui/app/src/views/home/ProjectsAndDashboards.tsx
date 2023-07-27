@@ -34,7 +34,7 @@ import { KVSearch } from '@nexucis/kvsearch';
 import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
-import { DeleteProjectDialog } from '../../components/DeleteProjectDialog/DeleteProjectDialog';
+import { DeleteProjectDialog } from '../../components/dialogs';
 import { useIsReadonly } from '../../model/config-client';
 
 interface ProjectRow {

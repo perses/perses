@@ -11,14 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableValue, VariableDefinition } from '@perses-dev/core';
-import { VariableStateMap, VariableState, DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
+import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-dev/core';
+import { VariableStoreStateMap, VariableState } from '@perses-dev/plugin-system';
+import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 
 // TODO: move to TemplateVariableProvider/utils.ts
-function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue) {
+function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue): VariableState {
   const varState: VariableState = {
     value: null,
     loading: false,
+    overriding: false,
+    overridden: false,
   };
   switch (variable.kind) {
     case 'TextVariable':
@@ -51,17 +54,76 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
   return varState;
 }
 
+/**
+ * Build the local variable states according to the given definitions
+ * @param localDefinitions local variable definitions. Dynamic part.
+ * @param externalDefinitions external variables definitions. Static part.
+ * @param initialValues values coming from query parameters
+ */
 export function hydrateTemplateVariableStates(
-  definitions: VariableDefinition[],
-  initialValues: Record<string, VariableValue>
-): VariableStateMap {
-  const state: VariableStateMap = {};
-  definitions.forEach((v) => {
+  localDefinitions: VariableDefinition[],
+  initialValues: Record<string, VariableValue>,
+  externalDefinitions: ExternalVariableDefinition[] = []
+): VariableStoreStateMap {
+  const state: VariableStoreStateMap = new VariableStoreStateMap();
+
+  // Collect the names used by local definitions
+  let overridingNames: Record<string, boolean> = {};
+  localDefinitions.forEach((v) => {
+    overridingNames[v.spec.name] = true;
+  }, {} as Record<string, boolean>);
+
+  // Then populate the external variables state,
+  // taking care of well flagging each name as used, so the overridden state can be filled accordingly.
+  const overriddenNames: Record<string, boolean> = {};
+  externalDefinitions.forEach((externalDef) => {
+    const source = externalDef.source;
+    externalDef.definitions.forEach((v) => {
+      const name = v.spec.name;
+      const param = initialValues[name];
+      const initialValue = param ? param : null;
+      state.set(
+        { source, name },
+        {
+          ...hydrateTemplateVariableState(v, initialValue),
+          overridden: !!overridingNames[name],
+        }
+      );
+
+      overridingNames[name] = true;
+      overriddenNames[v.spec.name] = true;
+    });
+  }, {} as Record<string, boolean>);
+
+  // Then populate the local variables state,
+  // taking care the overriding state is filled according to the names used in external variables.
+  localDefinitions.forEach((v) => {
     const name = v.spec.name;
     const param = initialValues[name];
     const initialValue = param ? param : null;
-    state[name] = hydrateTemplateVariableState(v, initialValue);
+    state.set(
+      { name },
+      {
+        ...hydrateTemplateVariableState(v, initialValue),
+        overriding: !!overriddenNames[name],
+      }
+    );
   });
 
+  overridingNames = {};
+  externalDefinitions
+    .slice()
+    .reverse()
+    .forEach((externalDef) => {
+      const source = externalDef.source;
+      externalDef.definitions.forEach((v) => {
+        const name = v.spec.name;
+        const value = state.get({ source, name });
+        if (value) {
+          value.overriding = !!overridingNames[name];
+        }
+        overridingNames[name] = true;
+      });
+    });
   return state;
 }

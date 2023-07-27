@@ -22,7 +22,7 @@ describe('Panel Groups', () => {
   const renderDashboard = () => {
     renderWithContext(
       <DatasourceStoreProvider {...defaultDatasourceProps}>
-        <TimeRangeProvider initialTimeRange={{ pastDuration: '30m' }}>
+        <TimeRangeProvider initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '30m' }}>
           <TemplateVariableProvider>
             <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
               <DashboardApp dashboardResource={getTestDashboard()} isReadonly={false} />

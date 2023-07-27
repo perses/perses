@@ -199,6 +199,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
       },
     ],
     duration: '5m',
+    refreshInterval: '0s',
   },
 };
 
@@ -275,6 +276,20 @@ export const CustomEmptyState: Story = {
   },
 };
 
+export const CustomPanelContent: Story = {
+  args: {
+    panelOptions: {
+      extra: () => {
+        return <div>Custom Actions</div>;
+      },
+    },
+  },
+  parameters: {
+    happo: false,
+    ...formatProviderParameters(DEFAULT_ALL_DASHBOARD),
+  },
+};
+
 const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
@@ -286,6 +301,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
   },
   spec: {
     duration: '6h',
+    refreshInterval: '0s',
     variables: [],
     panels: {
       ConnectedNulls: {
@@ -625,6 +641,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
   },
   spec: {
     duration: '6h',
+    refreshInterval: '0s',
     variables: [],
     panels: {
       TwentySeries: {
@@ -913,6 +930,7 @@ const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
     project: 'testing',
   },
   spec: {
+    refreshInterval: '0s',
     duration: '6h',
     variables: [],
     panels: {

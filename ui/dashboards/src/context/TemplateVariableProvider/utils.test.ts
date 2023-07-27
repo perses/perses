@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { VariableDefinition } from '@perses-dev/core';
-import { isSavedVariableModified } from './utils';
+import { ExternalVariableDefinition } from '@perses-dev/dashboards';
+import { VariableStoreStateMap } from '@perses-dev/plugin-system';
+import { checkSavedDefaultVariableStatus, mergeVariableDefinitions } from './utils';
 
-describe('isSavedVariableModified', () => {
+describe('checkSavedDefaultVariableStatus', () => {
   it('should check whether saved variable definitions are out of date with current default values state', () => {
     const savedVariables: VariableDefinition[] = [
       {
@@ -76,8 +78,10 @@ describe('isSavedVariableModified', () => {
         },
       },
     ];
-    const variableState = {
-      interval: {
+    const variableState = new VariableStoreStateMap();
+    variableState.set(
+      { name: 'interval' },
+      {
         value: '5m',
         loading: false,
         options: [
@@ -90,8 +94,11 @@ describe('isSavedVariableModified', () => {
             value: '5m',
           },
         ],
-      },
-      NewListVariable: {
+      }
+    );
+    variableState.set(
+      { name: 'NewListVariable' },
+      {
         value: 'last list value',
         loading: false,
         options: [
@@ -109,13 +116,17 @@ describe('isSavedVariableModified', () => {
           },
         ],
         default_value: 'test list value',
-      },
-      NewTextVariable: {
+      }
+    );
+    variableState.set(
+      { name: 'NewTextVariable' },
+      {
         value: 'New text value',
         loading: false,
-      },
-    };
-    expect(isSavedVariableModified(savedVariables, variableState)).toBe(true);
+      }
+    );
+    const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
+    expect(isSavedVariableModified).toBe(true);
   });
 
   it('should confirm list variable default value was not modified', () => {
@@ -136,8 +147,10 @@ describe('isSavedVariableModified', () => {
         },
       },
     ];
-    const variableState = {
-      interval: {
+    const variableState = new VariableStoreStateMap();
+    variableState.set(
+      { name: 'interval' },
+      {
         value: '5m',
         default_value: '5m',
         loading: false,
@@ -151,9 +164,40 @@ describe('isSavedVariableModified', () => {
             value: '5m',
           },
         ],
+      }
+    );
+    const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
+    expect(isSavedVariableModified).toBe(false);
+  });
+
+  it('should confirm null list variable was not modified', () => {
+    const savedVariables: VariableDefinition[] = [
+      {
+        kind: 'ListVariable',
+        spec: {
+          allow_all_value: false,
+          allow_multiple: false,
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: [],
+            },
+          },
+          name: 'EmptyListVariableTest',
+        },
       },
-    };
-    expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
+    ];
+    const variableState = new VariableStoreStateMap();
+    variableState.set(
+      { name: 'EmptyListVariableTest' },
+      {
+        value: null,
+        loading: false,
+        options: [],
+      }
+    );
+    const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
+    expect(isSavedVariableModified).toBe(false);
   });
 
   it('should confirm text variable value was not modified', () => {
@@ -170,13 +214,16 @@ describe('isSavedVariableModified', () => {
         },
       },
     ];
-    const variableState = {
-      NewTextVariable: {
+    const variableState = new VariableStoreStateMap();
+    variableState.set(
+      { name: 'NewTextVariable' },
+      {
         value: 'first text value',
         loading: false,
-      },
-    };
-    expect(isSavedVariableModified(savedVariables, variableState)).toBe(false);
+      }
+    );
+    const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
+    expect(isSavedVariableModified).toBe(false);
   });
 
   it('should confirm text variable value was modified', () => {
@@ -189,12 +236,111 @@ describe('isSavedVariableModified', () => {
         },
       },
     ];
-    const variableState = {
-      NewTextVariable: {
+    const variableState = new VariableStoreStateMap();
+    variableState.set(
+      { name: 'NewTextVariable' },
+      {
         value: 'updated text value',
         loading: false,
+      }
+    );
+    const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
+    expect(isSavedVariableModified).toBe(true);
+  });
+
+  it('should merge variable definitions giving priority on local over externals', () => {
+    const localVariables: VariableDefinition[] = [
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'NewTextVariable',
+          value: 'Lorem ipsum',
+        },
       },
-    };
-    expect(isSavedVariableModified(savedVariables, variableState)).toBe(true);
+    ];
+    const externalVariables: ExternalVariableDefinition[] = [
+      {
+        source: 'project',
+        definitions: [
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'project_greetings',
+              display: {
+                name: 'Greetings(project)',
+              },
+              value: 'hello',
+            },
+          },
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'overridden',
+              value: 'project scope value',
+            },
+          },
+        ],
+      },
+      {
+        source: 'global',
+        definitions: [
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'global_greetings',
+              display: {
+                name: 'Greetings(global)',
+              },
+              value: 'hello',
+            },
+          },
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'overridden',
+              value: 'global scope value',
+            },
+          },
+        ],
+      },
+    ];
+
+    const expected = [
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'NewTextVariable',
+          value: 'Lorem ipsum',
+        },
+      },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'project_greetings',
+          display: {
+            name: 'Greetings(project)',
+          },
+          value: 'hello',
+        },
+      },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'overridden',
+          value: 'project scope value',
+        },
+      },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'global_greetings',
+          display: {
+            name: 'Greetings(global)',
+          },
+          value: 'hello',
+        },
+      },
+    ];
+    expect(mergeVariableDefinitions(localVariables, externalVariables)).toEqual(expected);
   });
 });

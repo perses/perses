@@ -19,9 +19,10 @@ import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
 import { TableHead } from './TableHead';
+import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableProps } from './model/table-model';
+import { TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
@@ -29,12 +30,13 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> & {
-  onRowClick: (id: string) => void;
-  rows: Array<Row<TableData>>;
-  columns: Array<Column<TableData, unknown>>;
-  headers: Array<HeaderGroup<TableData>>;
-};
+export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> &
+  Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
+    onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
+    rows: Array<Row<TableData>>;
+    columns: Array<Column<TableData, unknown>>;
+    headers: Array<HeaderGroup<TableData>>;
+  };
 
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
@@ -44,6 +46,8 @@ export function VirtualizedTable<TableData>({
   height,
   density,
   onRowClick,
+  onRowMouseOver,
+  onRowMouseOut,
   rows,
   columns,
   headers,
@@ -93,11 +97,25 @@ export function VirtualizedTable<TableData>({
           return null;
         }
 
-        return <TableRow {...props} onClick={() => onRowClick(row.id)} density={density} />;
+        const rowEventOpts: TableRowEventOpts = { id: row.id, index: row.index };
+
+        return (
+          <TableRow
+            {...props}
+            onClick={(e) => onRowClick(e, row.id)}
+            density={density}
+            onMouseOver={(e) => {
+              onRowMouseOver?.(e, rowEventOpts);
+            }}
+            onMouseOut={(e) => {
+              onRowMouseOut?.(e, rowEventOpts);
+            }}
+          />
+        );
       },
       TableBody,
     };
-  }, [density, keyboardNav.onTableKeyDown, onRowClick, rows, width]);
+  }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
 
   return (
     <Box sx={{ width, height }}>
@@ -115,24 +133,34 @@ export function VirtualizedTable<TableData>({
               {headers.map((headerGroup) => {
                 return (
                   <TableRow key={headerGroup.id} density={density}>
-                    {headerGroup.headers.map((header, i) => {
+                    {headerGroup.headers.map((header, i, headers) => {
                       const column = header.column;
                       const position: TableCellPosition = {
                         row: 0,
                         column: i,
                       };
 
+                      const isSorted = column.getIsSorted();
+                      const nextSorting = column.getNextSortingOrder();
+
                       return (
-                        <TableCell
+                        <TableHeaderCell
                           key={header.id}
+                          onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
+                          sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
+                          nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
                           width={column.getSize() || 'auto'}
+                          align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
+                          description={column.columnDef.meta?.headerDescription}
                           focusState={getFocusState(position)}
                           onFocusTrigger={() => keyboardNav.onCellFocus(position)}
+                          isFirstColumn={i === 0}
+                          isLastColumn={i === headers.length - 1}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
-                        </TableCell>
+                        </TableHeaderCell>
                       );
                     })}
                   </TableRow>
@@ -149,22 +177,43 @@ export function VirtualizedTable<TableData>({
 
           return (
             <>
-              {row.getVisibleCells().map((cell, i) => {
+              {row.getVisibleCells().map((cell, i, cells) => {
                 const position: TableCellPosition = {
                   // Add 1 to the row index because the header is row 0
                   row: index + 1,
                   column: i,
                 };
 
+                const cellContext = cell.getContext();
+                const cellRenderFn = cell.column.columnDef.cell;
+                const cellContent = typeof cellRenderFn == 'function' ? cellRenderFn(cellContext) : null;
+
+                const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
+                let description: string | undefined = undefined;
+                if (typeof cellDescriptionDef === 'function') {
+                  // If the cell description is a function, set the value using
+                  // the function.
+                  description = cellDescriptionDef(cellContext);
+                } else if (cellDescriptionDef && typeof cellContent === 'string') {
+                  // If the cell description is `true` AND the cell content is
+                  // a string (and thus viable as a `title` attribute), use the
+                  // cell content.
+                  description = cellContent;
+                }
+
                 return (
                   <TableCell
                     key={cell.id}
-                    sx={{ width: cell.column.getSize() || 'auto' }}
+                    width={cell.column.getSize() || 'auto'}
+                    align={cell.column.columnDef.meta?.align}
                     density={density}
                     focusState={getFocusState(position)}
                     onFocusTrigger={() => keyboardNav.onCellFocus(position)}
+                    isFirstColumn={i === 0}
+                    isLastColumn={i === cells.length - 1}
+                    description={description}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    {cellContent}
                   </TableCell>
                 );
               })}

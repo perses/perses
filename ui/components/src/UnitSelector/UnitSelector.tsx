@@ -10,14 +10,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { Box, Switch, TextField, Autocomplete, SwitchProps } from '@mui/material';
-import { UnitOptions, UNIT_CONFIG, UnitConfig, isUnitWithDecimalPlaces, isUnitWithAbbreviate } from '../model';
-import { shouldAbbreviate } from '../model/units/utils';
+import { Switch, SwitchProps } from '@mui/material';
+import {
+  shouldAbbreviate,
+  UnitOptions,
+  UNIT_CONFIG,
+  UnitConfig,
+  isUnitWithDecimalPlaces,
+  isUnitWithAbbreviate,
+} from '@perses-dev/core';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
+import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
 export interface UnitSelectorProps {
   value: UnitOptions;
   onChange: (unit: UnitOptions) => void;
+  disabled?: boolean;
 }
 
 type AutocompleteKindOption = UnitConfig & { id: UnitOptions['kind'] };
@@ -32,19 +40,19 @@ const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
   .filter((config) => !config.disableSelectorOption);
 
 const DECIMAL_PLACES_OPTIONS = [
-  { label: 'Default', decimal_places: undefined },
-  { label: '0', decimal_places: 0 },
-  { label: '1', decimal_places: 1 },
-  { label: '2', decimal_places: 2 },
-  { label: '3', decimal_places: 3 },
-  { label: '4', decimal_places: 4 },
+  { id: 'default', label: 'Default', decimal_places: undefined },
+  { id: '0', label: '0', decimal_places: 0 },
+  { id: '1', label: '1', decimal_places: 1 },
+  { id: '2', label: '2', decimal_places: 2 },
+  { id: '3', label: '3', decimal_places: 3 },
+  { id: '4', label: '4', decimal_places: 4 },
 ];
 
 function getOptionByDecimalPlaces(decimal_places?: number) {
   return DECIMAL_PLACES_OPTIONS.find((o) => o.decimal_places === decimal_places);
 }
 
-export function UnitSelector({ value, onChange }: UnitSelectorProps) {
+export function UnitSelector({ value, onChange, disabled = false }: UnitSelectorProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
   const hasAbbreviate = isUnitWithAbbreviate(value);
 
@@ -89,35 +97,23 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
       <OptionsEditorControl
         label="Unit"
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={{ id: value.kind, ...kindConfig }}
             options={KIND_OPTIONS}
-            isOptionEqualToValue={(option, value) => option.id === value.id}
             groupBy={(option) => option.group}
-            renderInput={(params) => <TextField {...params} />}
-            renderOption={(renderOptsProps, option) => {
-              // Custom option needed to get some increased left padding to make
-              // the items more distinct from the group label.
-              return (
-                <li {...renderOptsProps}>
-                  <Box paddingLeft={(theme) => theme.spacing(1)}>{option.label}</Box>
-                </li>
-              );
-            }}
             onChange={handleKindChange}
             disableClearable
-          ></Autocomplete>
+            disabled={disabled}
+          ></SettingsAutocomplete>
         }
       />
       <OptionsEditorControl
         label="Decimals"
         control={
-          <Autocomplete
+          <SettingsAutocomplete
             value={getOptionByDecimalPlaces(value.decimal_places)}
             options={DECIMAL_PLACES_OPTIONS}
             getOptionLabel={(o) => o.label}
-            isOptionEqualToValue={(option, value) => option.label === value.label}
-            renderInput={(params) => <TextField {...params} />}
             onChange={handleDecimalPlacesChange}
             disabled={!hasDecimalPlaces}
             disableClearable

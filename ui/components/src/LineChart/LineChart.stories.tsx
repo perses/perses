@@ -12,9 +12,11 @@
 // limitations under the License.
 
 import { StoryObj, Meta } from '@storybook/react';
-import { LineChart } from '@perses-dev/components';
+import { LineChart, ChartInstance } from '@perses-dev/components';
 import { waitForStableCanvas } from '@perses-dev/storybook';
-import { Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
+import { useRef } from 'react';
+import { action } from '@storybook/addon-actions';
 
 const meta: Meta<typeof LineChart> = {
   component: LineChart,
@@ -24,6 +26,7 @@ const meta: Meta<typeof LineChart> = {
       timeSeries: [
         {
           type: 'line' as const,
+          id: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}_1',
           name: 'up{instance="demo.do.prometheus.io:3000",job="grafana"}',
           data: [1, 1, 1],
           color: 'hsla(158782136,50%,50%,0.8)',
@@ -66,6 +69,60 @@ export default meta;
 type Story = StoryObj<typeof LineChart>;
 
 export const Primary: Story = {};
+
+/**
+ * Setting a `ref` on a `LineChart` exposes an API with the following methods:
+ * - `highlightSeries`: Highlight the series associated with the specified options. The options currently takes an `id`.
+ * - `clearHighlightedSeries`: Clear all highlighted series.
+ */
+export const RefApi: Story = {
+  parameters: {
+    // This story exists to show how the api works and is not valuable as a
+    // visual test.
+    happo: false,
+  },
+  render: (args) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const chartRef = useRef<ChartInstance>(null);
+
+    const handleOnClickHighlightSeries = () => {
+      const highlightSeriesId = args.data.timeSeries[0]?.id;
+      if (!highlightSeriesId || !chartRef.current) {
+        return;
+      }
+
+      const highlightSeriesOpts = {
+        id: `${highlightSeriesId}`,
+      };
+
+      action('highlightSeries')(highlightSeriesOpts);
+      chartRef.current.highlightSeries(highlightSeriesOpts);
+    };
+
+    const handleOnClickClearHighlightedSeries = () => {
+      if (!chartRef.current) {
+        return;
+      }
+
+      action('clearHighlightedSeries')();
+      chartRef.current.clearHighlightedSeries();
+    };
+
+    return (
+      <Stack spacing={3}>
+        <Stack spacing={1} direction="row">
+          <Button onClick={handleOnClickHighlightSeries} variant="outlined">
+            highlightSeries
+          </Button>
+          <Button onClick={handleOnClickClearHighlightedSeries} variant="outlined">
+            clearHighlightedSeries
+          </Button>
+        </Stack>
+        <LineChart {...args} ref={chartRef} />
+      </Stack>
+    );
+  },
+};
 
 export const NoData: Story = {
   args: {

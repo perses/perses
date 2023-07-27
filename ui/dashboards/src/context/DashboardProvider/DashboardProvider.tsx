@@ -17,7 +17,13 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { DashboardResource, Display, ProjectMetadata, DurationString } from '@perses-dev/core';
+import {
+  DashboardResource,
+  Display,
+  ProjectMetadata,
+  DurationString,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -47,6 +53,7 @@ export interface DashboardStoreState
   setDashboard: (dashboard: DashboardResource) => void;
   metadata: ProjectMetadata;
   duration: DurationString;
+  refreshInterval: DurationString;
   display?: Display;
 }
 
@@ -104,7 +111,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration },
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL },
     metadata,
   } = dashboardResource;
 
@@ -137,9 +144,10 @@ function initStore(props: DashboardProviderProps) {
           metadata,
           display,
           duration,
+          refreshInterval,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration } }) => {
+          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration, refreshInterval } }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
@@ -148,6 +156,7 @@ function initStore(props: DashboardProviderProps) {
               state.panelGroups = panelGroups;
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
+              state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
             });
           },
         };

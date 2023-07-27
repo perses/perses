@@ -17,19 +17,41 @@ import { useInView } from 'react-intersection-observer';
 import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
+import { PanelGroupItemId } from '../../context';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
   editHandlers?: PanelHeaderProps['editHandlers'];
+  panelOptions?: PanelOptions;
+  panelGroupItemId?: PanelGroupItemId;
 }
+
+export type PanelOptions = {
+  /**
+   * Content to render in the top-right corner of the panel. It will only be
+   * rendered when the panel is in edit mode.
+   */
+  extra?: (props: PanelExtraProps) => React.ReactNode;
+};
+
+export type PanelExtraProps = {
+  /**
+   * The PanelDefinition for the panel.
+   */
+  panelDefinition?: PanelDefinition;
+  /**
+   * The PanelGroupItemId for the panel.
+   */
+  panelGroupItemId?: PanelGroupItemId;
+};
 
 /**
  * Renders a PanelDefinition's content inside of a Card.
  */
 export const Panel = memo(function Panel(props: PanelProps) {
-  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, ...others } = props;
+  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, panelOptions, panelGroupItemId, ...others } = props;
 
   // Make sure we have an ID we can use for aria attributes
   const generatedPanelId = useId('Panel');
@@ -82,6 +104,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
       {...others}
     >
       <PanelHeader
+        extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
         id={headerId}
         title={definition.spec.display.name}
         description={definition.spec.display.description}

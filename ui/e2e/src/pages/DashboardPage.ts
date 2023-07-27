@@ -68,6 +68,7 @@ export class DashboardPage {
 
   readonly toolbar: Locator;
   readonly timePicker: Locator;
+  readonly refreshIntervalPicker: Locator;
   readonly editButton: Locator;
   readonly cancelButton: Locator;
   readonly saveButton: Locator;
@@ -95,6 +96,7 @@ export class DashboardPage {
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
     this.timePicker = page.getByRole('button', { name: 'Select time range' });
+    this.refreshIntervalPicker = page.getByRole('button', { name: 'Select refresh interval' });
     this.editButton = this.toolbar.getByRole('button', { name: /Edit$/ });
     this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
     this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });

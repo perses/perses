@@ -37,13 +37,9 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('Test node demo.do.prometheus.io:9100')).toBeInTheDocument();
-    expect(screen.getByText('Dec 23, 2022 -')).toBeInTheDocument();
-    expect(screen.getByText('13:53:00')).toBeInTheDocument();
     expect(screen.getByText('0.1')).toBeInTheDocument();
   });
 
@@ -74,8 +70,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(screen.getByText('84.64M')).toBeInTheDocument();
@@ -115,8 +109,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     expect(
@@ -156,8 +148,6 @@ describe('TooltipContent', () => {
         },
       ],
       wrapLabels: true,
-      isTooltipPinned: false,
-      onUnpinClick: () => null,
     };
     renderComponent(tooltipContent);
     const boldSeriesText = screen.getByLabelText(EMPHASIZED_SERIES_DESCRIPTION);

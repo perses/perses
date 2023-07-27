@@ -13,7 +13,7 @@
 
 import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
 import { useEffect, useRef } from 'react';
-import { TableDensity, getTableCellLayout } from './model/table-model';
+import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   padding: 0,
@@ -21,7 +21,7 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
 
   '&.MuiTableCell-head': {
     // Important to avoid scrolling behind the header showing through.
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.background.default,
   },
   '&:focus-visible': {
     outline: `solid 1px ${theme.palette.primary.main}`,
@@ -32,8 +32,25 @@ const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   },
 }));
 
-export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex'> {
+export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'align'> {
   density: TableDensity;
+
+  // These values are used to adjust the spacing for the first/last columns.
+  isLastColumn: boolean;
+  isFirstColumn: boolean;
+
+  align?: TableCellAlignment;
+
+  /**
+   * Additional information to be displayed when hovering over the cell. This
+   * may be the full cell value (e.g. to enable the user to see the full value
+   * if it is ellipsized to fit into the space) or some other descriptive text
+   * that is useful for the user.
+   *
+   * The hover behavior is currently managed with the `title` attribute, but this
+   * may be changed to a tooltip in the future.
+   */
+  description?: string;
 
   /**
    * How the cell should behave related to focus.
@@ -54,6 +71,9 @@ export function TableCell({
   width,
   focusState = 'none',
   onFocusTrigger,
+  isFirstColumn,
+  isLastColumn,
+  description,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -71,7 +91,7 @@ export function TableCell({
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
-      'a[href], button, input, textarea, select, details'
+      'a[href], button, input, textarea, select, details,[role="button"]'
     );
     if (nestedFocusTarget) {
       // If the cell has a focusable child, focus it instead. Mostly used for
@@ -110,7 +130,7 @@ export function TableCell({
     >
       <Box
         sx={{
-          ...getTableCellLayout(theme, density),
+          ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
           position: 'relative',
 
           // Text truncation. Currently enforced on all cells. We may control
@@ -118,7 +138,13 @@ export function TableCell({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
+
+          // Need to inherit from the MUI cell because this manages some ordering
+          // that the `TableSortLabel` uses to determine the location of the icon
+          // in headers.
+          flexDirection: 'inherit',
         }}
+        title={description}
       >
         {children}
       </Box>

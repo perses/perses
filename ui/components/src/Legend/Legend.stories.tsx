@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Legend, LegendProps, legendModes } from '@perses-dev/components';
+import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
 import { useState } from 'react';
 import { StorySection } from '@perses-dev/storybook';
+import { legendModes } from '@perses-dev/core';
 
 const COLOR_SHADES = ['400', '800'] as const;
 const COLOR_NAMES = [red, orange, yellow, green, blue, indigo, purple];
@@ -38,6 +39,12 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
       label: `${labelPrefix} ${i}`,
       color: MOCK_COLORS[i % MOCK_COLORS.length] as string,
       onClick: action(`onClick legendItem ${i}`),
+      data: {
+        index: i,
+        squared: Math.pow(i, 2),
+        cubed: Math.pow(i, 3),
+        description: `This is entry #${i}`,
+      },
     });
   }
   return data;
@@ -47,13 +54,31 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // story does not need to. Useful for stories that are not focused on explaining
 // how this state works.
 const UncontrolledLegendWrapper = (props: LegendProps) => {
-  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>('ALL');
+  const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>(props.selectedItems);
+  const [sorting, setSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
+
   const handleSelectedItemsChange: LegendProps['onSelectedItemsChange'] = (newSelectedItems) => {
     action('onSelectedItemsChange')(newSelectedItems);
     setSelectedItems(newSelectedItems);
   };
 
-  return <LegendWrapper {...props} selectedItems={selectedItems} onSelectedItemsChange={handleSelectedItemsChange} />;
+  const handleSortingChange: NonNullable<LegendProps['tableProps']>['onSortingChange'] = (newSorting) => {
+    action('onSortingChange')(newSorting);
+    setSorting(newSorting);
+  };
+
+  return (
+    <LegendWrapper
+      {...props}
+      selectedItems={selectedItems}
+      onSelectedItemsChange={handleSelectedItemsChange}
+      tableProps={{
+        ...props.tableProps,
+        sorting,
+        onSortingChange: handleSortingChange,
+      }}
+    />
+  );
 };
 
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
@@ -253,7 +278,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -270,7 +295,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
             {legendModes.map((mode) => {
               return (
                 <StorySection key={mode} title={mode} level="h4">
-                  <LegendWrapper
+                  <UncontrolledLegendWrapper
                     {...args}
                     width={400}
                     height={200}
@@ -285,6 +310,117 @@ export const SelectedItems: StoryObj<LegendProps> = {
             })}
           </Stack>
         </StorySection>
+      </Stack>
+    );
+  },
+};
+
+/**
+ * When the legend mode is set to `table`, you may define additional columns
+ * to display in the table after the selection checkboxes and the item label
+ * using the `tableProps.columns` property.
+ *
+ * A `LegendItem` may define additional information for columns in the `data`
+ * property and then use the `accessorKey` property of a column definition to
+ * reference it.
+ *
+ * See the stories for the `Table` component for additional examples related to
+ * defining table columns.
+ */
+export const TableColumns: Story = {
+  args: {
+    width: 500,
+    height: 200,
+    selectedItems: 'ALL',
+    data: generateMockLegendData(10),
+    options: { position: 'Bottom', mode: 'Table' },
+    tableProps: {
+      columns: [
+        {
+          header: 'Index',
+          accessorKey: 'data.index',
+          align: 'center',
+          width: 70,
+          enableSorting: true,
+        },
+        {
+          header: 'Squared',
+          accessorKey: 'data.squared',
+          align: 'right',
+          width: 80,
+          enableSorting: true,
+        },
+        {
+          header: 'Cubed',
+          accessorKey: 'data.cubed',
+          align: 'right',
+          enableSorting: true,
+          width: 80,
+        },
+        {
+          header: 'Description',
+          accessorKey: 'data.description',
+        },
+      ],
+    },
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    data: {
+      table: {
+        disable: true,
+      },
+    },
+  },
+};
+
+/**
+ * The legend includes the following callback props for items in the legend:
+ * - `onItemMouseOver`: mouse over the legend item.
+ * - `onItemMouseOut`: mouse out the legend item.
+ *
+ * Each callback includes the following arguments:
+ * - `e`: the event that triggered the callback.
+ * - `opts`: an object containing the `index` and `id` for the legend item.
+ */
+export const LegendItemEvents: Story = {
+  args: {
+    selectedItems: 'ALL',
+  },
+  argTypes: {
+    // Do not show values managed internally in the render prop.
+    width: {
+      table: {
+        disable: true,
+      },
+    },
+    height: {
+      table: {
+        disable: true,
+      },
+    },
+    data: {
+      options: {
+        disable: true,
+      },
+    },
+  },
+  parameters: {
+    // This story is functionally identical to several other ones and mostly
+    // exists as a place to hang documentation, so we don't need another
+    // screenshot for it.
+    happo: false,
+  },
+  render: (args) => {
+    return (
+      <Stack spacing={3}>
+        {legendModes.map((mode) => {
+          return (
+            <StorySection key={mode} title={mode} level="h3">
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+            </StorySection>
+          );
+        })}
       </Stack>
     );
   },

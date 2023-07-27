@@ -23,8 +23,6 @@ const config: Config.InitialOptions = {
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
   moduleNameMapper: {
-    // Jest currently doesn't natively support ES Modules, so use the non ES Modules versions instead
-    '^lodash-es$': 'lodash',
     '^echarts/(.*)$': 'echarts',
 
     // Use polyfill for jsdom environment

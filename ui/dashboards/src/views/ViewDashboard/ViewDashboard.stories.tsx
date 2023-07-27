@@ -16,12 +16,12 @@ import { Button } from '@mui/material';
 import { ViewDashboard } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
 import { WithPluginRegistry } from '@perses-dev/plugin-system/src/stories/shared-utils';
-import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
+import { WithErrorSnackbar, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 import { WithDashboard } from '../../stories/decorators';
 
 const meta: Meta<typeof ViewDashboard> = {
   component: ViewDashboard,
-  decorators: [WithDashboard, WithQueryParams, WithPluginRegistry, WithQueryClient],
+  decorators: [WithDashboard, WithErrorSnackbar, WithQueryParams, WithPluginRegistry, WithQueryClient],
   parameters: {
     // Overriding the default on* regex for actions becaues we expose a LOT
     // of these by exposing the MUI BoxProps, and it was making the storybook
@@ -52,6 +52,7 @@ export const ViewEmptyState: Story = {
         version: 0,
       },
       spec: {
+        refreshInterval: '0s',
         duration: '1h',
         variables: [],
         layouts: [],
@@ -75,6 +76,7 @@ export const EditEmptyState: Story = {
       },
       spec: {
         duration: '1h',
+        refreshInterval: '0s',
         variables: [],
         layouts: [],
         panels: {},
@@ -102,6 +104,7 @@ export const CustomEmptyState: Story = {
       },
       spec: {
         duration: '1h',
+        refreshInterval: '0s',
         variables: [],
         layouts: [],
         panels: {},

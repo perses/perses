@@ -28,6 +28,7 @@ const history = createMemoryHistory({
 describe('TimeRangeControls', () => {
   let initialState: DashboardStoreProps;
   const testDefaultTimeRange = { pastDuration: testDashboard.spec.duration };
+  const testDefaultRefreshInterval = testDashboard.spec.refreshInterval;
 
   beforeEach(() => {
     initialState = {
@@ -38,7 +39,11 @@ describe('TimeRangeControls', () => {
   const renderTimeRangeControls = (testURLParams: boolean) => {
     renderWithContext(
       <DashboardProvider initialState={initialState}>
-        <TimeRangeProvider initialTimeRange={testDefaultTimeRange} enabledURLParams={testURLParams}>
+        <TimeRangeProvider
+          initialRefreshInterval={testDefaultRefreshInterval}
+          initialTimeRange={testDefaultTimeRange}
+          enabledURLParams={testURLParams}
+        >
           <TimeRangeControls />
         </TimeRangeProvider>
       </DashboardProvider>,
@@ -63,12 +68,19 @@ describe('TimeRangeControls', () => {
     userEvent.click(dateButton);
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
-    expect(history.location.search).toEqual('?start=5m');
+    expect(history.location.search).toEqual('?start=5m&refresh=0s');
 
     // pick another option from TimeRangeSelector dropdown
     const secondSelected = screen.getByText('Last 12 hours');
     userEvent.click(secondSelected);
-    expect(history.location.search).toEqual('?start=12h');
+    expect(history.location.search).toEqual('?start=12h&refresh=0s');
+
+    const refreshButton = screen.getByRole('button', { name: /refresh interval/i });
+    userEvent.click(refreshButton);
+
+    const firstRefreshSelected = screen.getByRole('option', { name: '5s' });
+    userEvent.click(firstRefreshSelected);
+    expect(history.location.search).toEqual('?start=12h&refresh=5s');
 
     // back button should return to previous page selected
     act(() => {

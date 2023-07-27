@@ -24,8 +24,7 @@ function App() {
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: ({ palette }) =>
-          palette.mode === 'dark' ? palette.background.default : palette.background.paper,
+        backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
       <Header />

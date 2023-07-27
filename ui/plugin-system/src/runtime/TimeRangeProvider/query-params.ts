@@ -20,6 +20,7 @@ import {
   isDurationString,
   DurationString,
   AbsoluteTimeRange,
+  parseDurationString,
 } from '@perses-dev/core';
 import { TimeRange } from './TimeRangeProvider';
 
@@ -91,6 +92,10 @@ export const timeRangeQueryConfig = {
   end: TimeRangeParam,
 };
 
+export const refreshIntervalQueryConfig = {
+  refresh: TimeRangeParam,
+};
+
 /**
  * Gets the initial time range taking into account URL params and dashboard JSON duration
  * Sets start query param if it is empty on page load
@@ -156,4 +161,80 @@ export function useSetTimeRangeParams(
     return { timeRange: timeRangeState, setTimeRange: setTimeRangeState };
   }
   return { timeRange: initialTimeRange, setTimeRange: setTimeRange };
+}
+
+/**
+ * Gets the initial refresh interval taking into account URL params and dashboard JSON duration
+ * Sets refresh query param if it is empty on page load
+ */
+export function useInitialRefreshInterval(dashboardDuration: DurationString): DurationString {
+  const [query] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
+  const { refresh } = query;
+  return useMemo(() => {
+    let initialTimeRange: DurationString = dashboardDuration;
+    if (!refresh) {
+      return initialTimeRange;
+    }
+    const startStr = refresh.toString();
+    if (isDurationString(startStr)) {
+      initialTimeRange = startStr;
+    }
+    return initialTimeRange;
+  }, [dashboardDuration, refresh]);
+}
+
+function getRefreshIntervalInMs(refreshInterval?: DurationString) {
+  let refreshIntervalInMs = 0;
+  if (refreshInterval) {
+    const refreshIntervalDuration = parseDurationString(refreshInterval);
+    if (refreshIntervalDuration && refreshIntervalDuration.seconds) {
+      refreshIntervalInMs = refreshIntervalDuration?.seconds * 1000;
+    }
+  }
+  return refreshIntervalInMs;
+}
+
+/**
+ * Returns refresh interval getter and setter, set enabledURLParams to false to disable query string serialization
+ */
+export function useSetRefreshIntervalParams(
+  initialRefreshInterval?: DurationString,
+  enabledURLParams = true
+): Pick<TimeRange, 'refreshInterval' | 'setRefreshInterval' | 'refreshIntervalInMs'> {
+  const [query, setQuery] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
+
+  // determine whether initial param had previously been populated to fix back btn
+  const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
+
+  // optional fallback when app does not want query string as source of truth
+  // this occurs when enabledURLParams is set to false on TimeRangeProvider
+  const [refreshIntervalState, setRefreshIntervalState] = useState<DurationString | undefined>(initialRefreshInterval);
+
+  const { refresh } = query;
+
+  useEffect(() => {
+    // when dashboard loaded with no params, default to dashboard duration
+    if (enabledURLParams && !paramsLoaded && !refresh) {
+      setQuery({ refresh: initialRefreshInterval });
+      setParamsLoaded(true);
+    }
+  }, [initialRefreshInterval, enabledURLParams, paramsLoaded, refresh, setQuery]);
+
+  const setRefreshInterval: TimeRange['setRefreshInterval'] = useCallback(
+    (refresh: DurationString) => setQuery({ refresh }),
+    [setQuery]
+  );
+
+  if (!enabledURLParams) {
+    return {
+      refreshInterval: refreshIntervalState,
+      setRefreshInterval: setRefreshIntervalState,
+      refreshIntervalInMs: getRefreshIntervalInMs(refreshIntervalState),
+    };
+  }
+  return {
+    refreshInterval: initialRefreshInterval,
+    setRefreshInterval: setRefreshInterval,
+    refreshIntervalInMs: getRefreshIntervalInMs(initialRefreshInterval),
+  };
 }

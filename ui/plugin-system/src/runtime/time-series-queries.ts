@@ -85,6 +85,7 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
   return useQuery({
     enabled: queryEnabled,
     queryKey: queryKey,
+    refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
@@ -116,6 +117,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
+        refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : undefined,
         queryFn: async () => {
           // Keep options out of query key so we don't re-run queries because suggested step changes
           const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
@@ -132,7 +134,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
  * Build the time series query context object from data available at runtime
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  const { absoluteTimeRange, refreshKey } = useTimeRange();
+  const { absoluteTimeRange, refreshKey, refreshIntervalInMs } = useTimeRange();
   const variableState = useTemplateVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -141,6 +143,7 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     variableState,
     datasourceStore,
     refreshKey,
+    refreshIntervalInMs: refreshIntervalInMs,
   };
 }
 

@@ -17,8 +17,15 @@ import { TableColumnConfig, getTableCellLayout, persesColumnsToTanstackColumns }
 const mockMuiTheme = createTheme({});
 
 describe('getTableCellLayout', () => {
-  test.each(['compact', 'standard'] as const)('gets layout for %s density', (density) => {
-    expect(getTableCellLayout(mockMuiTheme, density)).toMatchSnapshot();
+  describe.each(['compact', 'standard'] as const)('gets layout for %s density', (density) => {
+    test.each([
+      { name: 'first column', opts: { isFirstColumn: true } },
+      { name: 'center column', opts: {} },
+      { name: 'last column', opts: { isLastColumn: true } },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ])(`in $name`, ({ name, opts }) => {
+      expect(getTableCellLayout(mockMuiTheme, density, opts)).toMatchSnapshot();
+    });
   });
 });
 
@@ -63,18 +70,108 @@ describe('persesColumnToTanstackColumn', () => {
     );
   });
 
+  test('maps `align` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        align: 'center',
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          align: 'center',
+        },
+      })
+    );
+  });
+
+  test('maps `headerDescription` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        headerDescription: 'The name',
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          headerDescription: 'The name',
+        },
+      })
+    );
+  });
+
+  test('maps `cellDescription` prop to associated `meta` property`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        cellDescription: true,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        meta: {
+          cellDescription: true,
+        },
+      })
+    );
+  });
+
+  test('defaults `enableSorting` to `false`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        width: 100,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        enableSorting: false,
+      })
+    );
+  });
+
+  test('can set `enableSorting` to `true`', () => {
+    const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+      {
+        accessorKey: 'label',
+        header: 'Name',
+        width: 100,
+        enableSorting: true,
+      },
+    ];
+    const tanstackColumns = persesColumnsToTanstackColumns(persesColumns);
+    expect(tanstackColumns[0]).toEqual(
+      expect.objectContaining({
+        enableSorting: true,
+      })
+    );
+  });
+
   test('transforms perses columns to tanstack columns', () => {
     const persesColumns: Array<TableColumnConfig<MockTableData>> = [
       {
         accessorKey: 'label',
         header: 'Name',
         width: 'auto',
+        align: 'right',
       },
       {
         accessorKey: 'value',
         header: 'Count',
+        headerDescription: 'The total number of values.',
         width: 120,
         cell: (data) => <strong>{data.getValue()}</strong>,
+        cellDescription: (data) => `Desc for ${data.getValue()}`,
       },
     ];
     expect(persesColumnsToTanstackColumns(persesColumns)).toMatchSnapshot();

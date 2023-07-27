@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GaugeChartOptions } from './gauge-chart-model';
@@ -20,9 +20,9 @@ import { GaugeChartOptionsEditorSettings } from './GaugeChartOptionsEditorSettin
 describe('GaugeChartOptionsEditorSettings', () => {
   const renderGaugeChartOptionsEditorSettings = (value: GaugeChartOptions, onChange = jest.fn()) => {
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <GaugeChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 
@@ -66,7 +66,7 @@ describe('GaugeChartOptionsEditorSettings', () => {
     const calcSelector = screen.getByRole('combobox', { name: 'Calculation' });
     userEvent.click(calcSelector);
     const meanOption = screen.getByRole('option', {
-      name: 'Mean',
+      name: /Average/,
     });
     userEvent.click(meanOption);
     expect(onChange).toHaveBeenCalledWith(

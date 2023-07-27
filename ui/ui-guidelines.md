@@ -37,7 +37,7 @@ Below is a list of notable tooling that is used throughout the Perses UI.
   - Math: [math.js](https://mathjs.org/)
   - Color utils: [react-colorful](https://github.com/omgovich/react-colorful)
   - XSS util: [dompurify](https://github.com/cure53/DOMPurify)
-  - Other: [use-resize-observer](https://github.com/ZeeCoder/use-resize-observer), [lodash-es](https://lodash.com/), [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
+  - Other: [use-resize-observer](https://github.com/ZeeCoder/use-resize-observer), [lodash](https://lodash.com/), [react-error-boundary](https://github.com/bvaughn/react-error-boundary)
 - Testing tools
   - Unit/integration testing for components & utilities: [Jest](https://jestjs.io/), [React Testing library](https://testing-library.com/docs/react-testing-library/intro/)
   - Browser testing: [Playwright](https://playwright.dev/)

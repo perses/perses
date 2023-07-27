@@ -15,15 +15,15 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { renderWithContext } from '../../test';
+import { TemplateVariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
-
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
     kind: 'Panel',
     spec: {
       display: {
-        name: 'Fake Panel Title',
-        description: 'This is a fake panel',
+        name: 'Fake Panel Title - $foo',
+        description: 'This is a fake panel - $foo',
       },
       plugin: {
         kind: 'TimeSeriesChart',
@@ -34,14 +34,32 @@ describe('Panel', () => {
   });
 
   // Helper to render the panel with some context set
-  const renderPanel = (definition?: PanelDefinition, editHandlers?: PanelProps['editHandlers']) => {
+  const renderPanel = (
+    definition?: PanelDefinition,
+    editHandlers?: PanelProps['editHandlers'],
+    panelOptions?: PanelProps['panelOptions']
+  ) => {
     definition ??= createTestPanel();
 
-    renderWithContext(<Panel definition={definition} editHandlers={editHandlers} />);
+    renderWithContext(
+      <TemplateVariableProvider
+        initialVariableDefinitions={[
+          {
+            kind: 'TextVariable',
+            spec: {
+              name: 'foo',
+              value: 'bar ',
+            },
+          },
+        ]}
+      >
+        <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+      </TemplateVariableProvider>
+    );
   };
 
   // Helper to get the panel once rendered
-  const getPanel = () => screen.getByRole('region', { name: 'Fake Panel Title' });
+  const getPanel = () => screen.getByTestId('panel');
 
   it('should render panel', async () => {
     renderPanel();
@@ -70,7 +88,7 @@ describe('Panel', () => {
     // Can hover to see panel description in tooltip
     userEvent.hover(descriptionButton);
     const tooltip = await screen.findByRole('tooltip');
-    expect(tooltip).toHaveTextContent('This is a fake panel');
+    expect(tooltip).toHaveTextContent('This is a fake panel - bar');
   });
 
   it('does not show description when panel does not have one', () => {
@@ -85,12 +103,11 @@ describe('Panel', () => {
     expect(descriptionButton).not.toBeInTheDocument();
   });
 
-  it('does not show description in edit mode', () => {
-    renderPanel(undefined, {
-      onEditPanelClick: jest.fn(),
-      onDeletePanelClick: jest.fn(),
-      onDuplicatePanelClick: jest.fn(),
-    });
+  it('does not show description when description only contains whitespace', () => {
+    // Render a panel with an all whitespace description
+    const withoutDescription = createTestPanel();
+    withoutDescription.spec.display.description = '   ';
+    renderPanel(withoutDescription);
 
     const panel = getPanel();
     userEvent.hover(panel);
@@ -119,5 +136,28 @@ describe('Panel', () => {
     expect(onEditPanelClick).toHaveBeenCalledTimes(1);
     expect(onDeletePanelClick).toHaveBeenCalledTimes(1);
     expect(onDuplicatePanelClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('should render extra panel content when not in edit mode', () => {
+    renderPanel(undefined, undefined, {
+      extra: () => <div>Extra content</div>,
+    });
+    const panel = getPanel();
+    expect(panel).toHaveTextContent('Extra content');
+  });
+
+  it('should not render extra panel content when not in edit mode', () => {
+    const onEditPanelClick = jest.fn();
+    const onDeletePanelClick = jest.fn();
+    const onDuplicatePanelClick = jest.fn();
+    renderPanel(
+      undefined,
+      { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick },
+      {
+        extra: () => <div>Extra content</div>,
+      }
+    );
+    const panel = getPanel();
+    expect(panel).not.toHaveTextContent('Extra content');
   });
 });

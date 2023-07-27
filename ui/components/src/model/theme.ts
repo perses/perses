@@ -11,11 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { EChartsOption, EChartsCoreOption, BarSeriesOption, LineSeriesOption, GaugeSeriesOption } from 'echarts';
+import { ThresholdColorPalette } from '@perses-dev/core';
+import type {
+  EChartsOption,
+  BarSeriesOption,
+  LineSeriesOption,
+  GaugeSeriesOption,
+  TitleComponentOption,
+  ComposeOption,
+  XAXisComponentOption,
+  YAXisComponentOption,
+} from 'echarts';
 
 export interface PersesChartsTheme {
   echartsTheme: EChartsTheme;
-  noDataOption: EChartsCoreOption;
+  noDataOption: NoDataOption;
   sparkline: {
     width: number;
     color: string;
@@ -32,6 +42,11 @@ export interface PersesChartsTheme {
     };
   };
   thresholds: ThresholdColorPalette;
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, chart tooltip uses the body of the top-level document object.
+   */
+  tooltipPortalContainerId?: string;
 }
 
 // https://github.com/apache/echarts/issues/12489#issuecomment-643185207
@@ -41,7 +56,4 @@ export interface EChartsTheme extends EChartsOption {
   gauge?: GaugeSeriesOption;
 }
 
-export interface ThresholdColorPalette {
-  defaultColor: string;
-  palette: string[];
-}
+export type NoDataOption = ComposeOption<TitleComponentOption | XAXisComponentOption | YAXisComponentOption>;

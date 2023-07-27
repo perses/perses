@@ -12,10 +12,14 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
-import { UnitOptions } from '../model';
+import { UnitOptions } from '@perses-dev/core';
+import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
+
+jest.mock('./calculateFontSize', () => ({
+  useOptimalFontSize: jest.fn().mockImplementation(() => 12),
+}));
 
 describe('StatChart', () => {
   const renderChart = (unit: UnitOptions) => {
@@ -24,9 +28,9 @@ describe('StatChart', () => {
       height: 200,
     };
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme} enablePinning={false}>
         <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 

@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useDeepMemo } from '@perses-dev/core';
+import { formatValue, useDeepMemo, UnitOptions } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { formatValue, UnitOptions } from '../model/units';
+import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 
 use([EChartsGaugeChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
@@ -49,7 +48,7 @@ export function GaugeChart(props: GaugeChartProps) {
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
   const option: EChartsCoreOption = useDeepMemo(() => {
-    if (data.value === undefined || data.value === null) return chartsTheme.noDataOption;
+    if (data.value === undefined) return chartsTheme.noDataOption;
 
     // adjusts fontSize depending on number of characters
     const valueSizeClamp = getResponsiveValueSize(data.value, unit, width, height);
@@ -151,9 +150,16 @@ export function GaugeChart(props: GaugeChartProps) {
             offsetCenter: [0, '-9%'],
             color: 'inherit', // allows value color to match active threshold color
             fontSize: valueSizeClamp,
-            formatter: (value: number) => {
-              return formatValue(value, unit);
-            },
+            formatter:
+              data.value === null
+                ? // We use a different function when we *know* the value is null
+                  // at this level because the `formatter` function argument is `NaN`
+                  // when the value is `null`, making it difficult to differentiate
+                  // `null` from a true `NaN` case.
+                  () => 'null'
+                : (value: number) => {
+                    return formatValue(value, unit);
+                  },
           },
           data: [
             {
@@ -193,11 +199,11 @@ export function GaugeChart(props: GaugeChartProps) {
  * Responsive font size depending on number of characters, clamp used
  * to ensure size stays within given range
  */
-export function getResponsiveValueSize(value: number, unit: UnitOptions, width: number, height: number) {
+export function getResponsiveValueSize(value: number | null, unit: UnitOptions, width: number, height: number) {
   const MIN_SIZE = 3;
   const MAX_SIZE = 24;
   const SIZE_MULTIPLIER = 0.7;
-  const formattedValue = formatValue(value, unit);
+  const formattedValue = typeof value === 'number' ? formatValue(value, unit) : `${value}`;
   const valueCharacters = formattedValue.length ?? 2;
   const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
   return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;

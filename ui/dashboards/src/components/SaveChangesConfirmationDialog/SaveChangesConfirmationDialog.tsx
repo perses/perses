@@ -16,13 +16,18 @@ import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
-import { useSaveChangesConfirmationDialog } from '../../context';
+import { useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
-  const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(true);
-  const [saveDefaultVariables, setSaveDefaultVariables] = useState(true);
-
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
+  const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
+  const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;
+  const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
+  const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
+
+  const { getSavedVariablesStatus } = useTemplateVariableActions();
+  const { modifiedVariableNames } = getSavedVariablesStatus();
+
   const isOpen = dialog !== undefined;
 
   const { timeRange } = useTimeRange();
@@ -30,7 +35,11 @@ export const SaveChangesConfirmationDialog = () => {
     ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
-  const timeRangeInfoText = `Save current time range as new default ${currentTimeRangeText}`;
+  const saveTimeRangeText = `Save current time range as new default ${currentTimeRangeText}`;
+
+  const saveVariablesText = `Save current variable values as new default (${
+    modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
+  })`;
 
   return (
     <Dialog open={isOpen}>
@@ -44,21 +53,22 @@ export const SaveChangesConfirmationDialog = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    disabled={!isRelativeTimeRange(timeRange)}
-                    checked={saveDefaultTimeRange && isRelativeTimeRange(timeRange)}
+                    disabled={!isSavedDurationModified || !isRelativeTimeRange(timeRange)}
+                    checked={saveDefaultTimeRange && isSavedDurationModified && isRelativeTimeRange(timeRange)}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeRange(e.target.checked)}
                   />
                 }
-                label={timeRangeInfoText}
+                label={saveTimeRangeText}
               />
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={saveDefaultVariables}
+                    disabled={!isSavedVariableModified}
+                    checked={saveDefaultVariables && isSavedVariableModified}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultVariables(e.target.checked)}
                   />
                 }
-                label="Save current variable values as new default."
+                label={saveVariablesText}
               />
             </FormGroup>
           </Dialog.Content>

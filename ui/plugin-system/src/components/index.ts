@@ -13,6 +13,8 @@
 
 export * from './CalculationSelector';
 export * from './DatasourceSelect';
+export * from './LegendOptionsEditor';
+export * from './OptionsEditorRadios';
 export * from './OptionsEditorTabs';
 export * from './PanelSpecEditor';
 export * from './PluginEditor';
@@ -20,3 +22,4 @@ export * from './PluginKindSelect';
 export * from './PluginRegistry';
 export * from './PluginSpecEditor';
 export * from './TimeSeriesQueryEditor';
+export * from './Variables';

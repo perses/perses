@@ -62,10 +62,10 @@ export const globalTypes = {
   bgColor: {
     name: 'Background',
     description: 'Background color',
-    defaultValue: 'paper',
+    defaultValue: 'default',
     toolbar: {
       icon: 'photo',
-      items: ['paper', 'default', 'overlay', 'navigation', 'tooltip'],
+      items: ['default', 'paper', 'overlay', 'navigation', 'tooltip'],
       // Change title based on selected value
       dynamicTitle: true,
     },

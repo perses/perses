@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useReactTable, getCoreRowModel, ColumnDef, RowSelectionState, OnChangeFn } from '@tanstack/react-table';
+import {
+  useReactTable,
+  getCoreRowModel,
+  ColumnDef,
+  RowSelectionState,
+  OnChangeFn,
+  Row,
+  Table as TanstackTable,
+  SortingState,
+  getSortedRowModel,
+} from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
@@ -21,6 +31,12 @@ import { TableProps, persesColumnsToTanstackColumns } from './model/table-model'
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
   return `${index}`;
 };
+
+// Setting these defaults one enables them to be consistent across renders instead
+// of being recreated every time, which can be important for perf because react
+// does not do deep equality checking for objects and arrays.
+const DEFAULT_ROW_SELECTION: NonNullable<TableProps<unknown>['rowSelection']> = {};
+const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
 
 /**
  * Component used to render tabular data in Perses use cases. This component is
@@ -34,9 +50,12 @@ export function Table<TableData>({
   density = 'standard',
   checkboxSelection,
   onRowSelectionChange,
+  onSortingChange,
   getCheckboxColor,
   getRowId = DEFAULT_GET_ROW_ID,
-  rowSelection = {},
+  rowSelection = DEFAULT_ROW_SELECTION,
+  sorting = DEFAULT_SORTING,
+  rowSelectionVariant = 'standard',
   ...otherProps
 }: TableProps<TableData>) {
   const theme = useTheme();
@@ -47,10 +66,49 @@ export function Table<TableData>({
     onRowSelectionChange?.(newRowSelection);
   };
 
+  const handleRowSelectionEvent = useCallback(
+    (table: TanstackTable<TableData>, row: Row<TableData>, isModified: boolean) => {
+      if (rowSelectionVariant === 'standard' || isModified) {
+        row.toggleSelected();
+      } else {
+        // Legend variant (when action not modified with shift/meta key).
+        // Note that this behavior needs to be kept in sync with behavior in
+        // the Legend component for list-based legends.
+        if (row.getIsSelected() && !table.getIsAllRowsSelected()) {
+          // Row was already selected. Revert to select all.
+          table.toggleAllRowsSelected();
+        } else {
+          // Focus the selected row.
+          onRowSelectionChange?.({
+            [row.id]: true,
+          });
+        }
+      }
+    },
+    [onRowSelectionChange, rowSelectionVariant]
+  );
+
+  const handleCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, table: TanstackTable<TableData>, row: Row<TableData>) => {
+      const nativePointerEvent =
+        e.nativeEvent && (e.nativeEvent instanceof MouseEvent || e.nativeEvent instanceof KeyboardEvent)
+          ? (e.nativeEvent as PointerEvent)
+          : undefined;
+      const isModifed = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
+      handleRowSelectionEvent(table, row, isModifed);
+    },
+    [handleRowSelectionEvent]
+  );
+
+  const handleSortingChange: OnChangeFn<SortingState> = (sortingUpdater) => {
+    const newSorting = typeof sortingUpdater === 'function' ? sortingUpdater(sorting) : sortingUpdater;
+    onSortingChange?.(newSorting);
+  };
+
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
     return {
       id: 'checkboxRowSelect',
-      size: 32,
+      size: 28,
       header: ({ table }) => {
         return (
           <TableCheckbox
@@ -62,21 +120,22 @@ export function Table<TableData>({
           />
         );
       },
-      cell: ({ row }) => {
+      cell: ({ row, table }) => {
         return (
           <TableCheckbox
             checked={row.getIsSelected()}
             indeterminate={row.getIsSomeSelected()}
             onChange={(e) => {
-              row.getToggleSelectedHandler()(e);
+              handleCheckboxChange(e, table, row);
             }}
             color={getCheckboxColor?.(row.original)}
             density={density}
           />
         );
       },
+      enableSorting: false,
     };
-  }, [density, getCheckboxColor, theme.palette.text.primary]);
+  }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
     const initTableColumns = persesColumnsToTanstackColumns(columns);
@@ -93,18 +152,26 @@ export function Table<TableData>({
     columns: tableColumns,
     getRowId,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
+    onSortingChange: handleSortingChange,
+    // For now, defaulting to sort by descending first. We can expose the ability
+    // to customize it if/when we have use cases for it.
+    sortDescFirst: true,
     state: {
       rowSelection,
+      sorting,
     },
   });
 
   const handleRowClick = useCallback(
-    (rowId: string) => {
-      table.getRow(rowId).toggleSelected();
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, rowId: string) => {
+      const row = table.getRow(rowId);
+      const isModifiedClick = e.metaKey || e.shiftKey;
+      handleRowSelectionEvent(table, row, isModifiedClick);
     },
-    [table]
+    [handleRowSelectionEvent, table]
   );
 
   return (

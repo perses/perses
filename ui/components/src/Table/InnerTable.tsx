@@ -19,7 +19,7 @@ const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
   // This value is needed to have a consistent table layout when scrolling.
   tableLayout: 'fixed',
   borderCollapse: 'separate',
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.background.default,
 }));
 
 type InnerTableProps = Omit<MuiTableProps, 'size'> & {
@@ -32,7 +32,7 @@ const TABLE_DENSITY_CONFIG: Record<TableDensity, MuiTableProps['size']> = {
 };
 
 export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function InnerTable(
-  { density, width, ...otherProps },
+  { density, ...otherProps },
   ref
 ) {
   return (
@@ -42,7 +42,7 @@ export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function
       size={TABLE_DENSITY_CONFIG[density]}
       ref={ref}
       sx={{
-        width: width,
+        width: '100%',
       }}
     />
   );

@@ -1,5 +1,105 @@
 # Changelog
 
+## 0.38.0 / 2023-07-20
+
+- [FEATURE] Add admin section on the UI (#1308)
+- [FEATURE] Implement `BarChart` panel plugin (#1307)
+- [FEATURE] Consider external vars in dashboard validation (#1306)
+- [FEATURE] Pinned crosshair remains in place (#1300)
+- [FEATURE] Implement BarChart component (#1279)
+- [FEATURE] Add project variables CRUD (#1267)
+- [FEATURE] Time series bar support using `visual.display` in TimeSeriesChart spec (#1284)
+- [ENHANCEMENT] Closest datapoint hover state for short time ranges (#1300)
+- [ENHANCEMENT] Clean up legacy LineChart conditions in TimeSeriesChartPanel (#1286)
+- [BUGFIX] Consider external vars in dashboard validation (#1310)
+- [BUGFIX] Fix tooltip pinning in legacy LineChart component (#1309)
+- [BUGFIX] Time series stacked bar correct palette color and tooltip (#1305)
+- [BUGFIX] Tooltip hidden when many series and legend item selected (#1302)
+- [BUGFIX] Follow up for the project variables CRUD (#1290)
+- [BREAKINGCHANGE] Custom dialogs such as `DiscardChangesConfirmationDialog` moved to components package (#1267)
+
+## 0.37.2 / 2023-07-13
+
+- [BUGFIX] Fix tooltip pinning when apps set a `tooltipPortalContainerId` (#1294)
+- [BUGFIX] Time chart fix for incorrect connected values (#1296)
+
+## 0.37.1 / 2023-07-11
+
+- [BUGFIX] Add option to specify the portal container for the chart tooltip (#1289)
+- [BUGFIX] Fix unpin tooltip icon click, adjust help text (#1283)
+
+## 0.37.0 / 2023-07-07
+
+- [FEATURE] Time series chart rewritten for intuitive x axis bucketing, improved render perf (#1268)
+- [ENHANCEMENT] Add ability to select font size for stat chart (#1269)
+
+## 0.36.2 / 2023-06-27
+
+- [BUGFIX] Fix useTimeSeriesQueries return type (#1273)
+
+## 0.36.1 / 2023-06-26
+
+- [BUGFIX] Chart utils export formatter correctly
+- [BUGFIX] Refresh interval should be optional, fix defaults mismatch
+
+## 0.36.0 / 2023-06-23
+
+- [FEATURE] Add dashboard refresh interval form control (#1215)
+- [ENHANCEMENT] Highlight associated line on mouseover legend item (#1263)
+- [ENHANCEMENT] Table supports legend variation of selection behavior (#1261)
+- [ENHANCEMENT] Add size option for content with legend (#1254)
+- [ENHANCEMENT] Table columns can be sorted (#1253)
+- [ENHANCEMENT] Improve the responsive layout of the toolbar buttons (#1251)
+- [ENHANCEMENT] Ability to specify descriptive text for table (#1252)
+- [BUGFIX] Avoid unnecessary horizontal scroll with table & legend (#1260)
+- [BUGFIX] Highlighted series not always cleared when cursor moved quickly (#1259)
+- [BUGFIX] Ensure pinned tooltip shows behind modals / sticky header (#1258)
+- [BREAKINGCHANGE] Adjust props on TimeRangeControls to control each action (#1250)
+- [BREAKINGCHANGE] Move units types and utils to core to avoid unnecessary MUI coupling (#1265)
+- [BREAKINGCHANGE] Move DEFAULT_ALL_VALUE to core since plugin-system requires MUI (#1266)
+
+## 0.35.0 / 2023-06-14
+
+- [FEATURE] TimeSeriesChartPanel can show values in legend (#1237)
+- [FEATURE] Support Multi-Series Stat Chart (#1241)
+- [FEATURE] SettingsAutocomplete component (#1242)
+- [BUGFIX] Fix y axis label positioning (#1240)
+- [ENHANCEMENT] Update panel header info tooltips (#1247)
+- [ENHANCEMENT] Export prom variables types (#1248)
+- [BREAKINGCHANGE] Improve calculations for gauge and stat charts (#1246)
+
+## 0.34.0 / 2023-06-08
+
+- [FEATURE] Shared crosshair for all time series panels on a dashboard (#1228)
+- [FEATURE] Support variables in markdown (#1233)
+- [FEATURE] Resolve variables in prometheus legend formatter (#1231)
+- [FEATURE] Support variables in Panels and Panel Groups strings (title, description) (#1225)
+- [FEATURE] Respect custom all value in list variables (#1236)
+- [BUGFIX] lodash-es import fix (#1238)
+- [ENHANCEMENT] Table legend can include additional columns (#1230)
+- [ENHANCEMENT] Export from each core panel plugin barrel file (#1229)
+- [BREAKINGCHANGE] Move calculation model to `core` package (#1238)
+- [BREAKINGCHANGE] Reorg legend code to separate plugin spec & component concerns (#1223)
+
+## 0.33.0 / 2023-06-06
+
+- [BUGFIX] Fix save dashboard console warning and saved duration checkbox (#1226)
+- [BREAKINGCHANGE] Adjust MUI bg tokens to simplify theming (#1222)
+
+## 0.32.0 / 2023-06-05
+
+- [FEATURE] Table legend for time series chart panel (#1197)
+- [ENHANCEMENT] Tooltip sticky header and move show all toggle (#1202)
+- [ENHANCEMENT] Add table mode to legend component (#1193)
+- [ENHANCEMENT] Export SaveDashboardButton from dashboards package (#1203)
+- [ENHANCEMENT] Predefined point_radius ratio to simplify TimeSeriesChart visual editing (#1102)
+- [ENHANCEMENT] Set stat chart yaxis min (#1204)
+- [BUGFIX] Saving defaults error adjustments and account for Empty StaticListVariable (#1214)
+- [BUGFIX] Fix pin event to work on first click without hiding tooltip (#1202)
+- [BUGFIX] Avoiding screen reload on theme toggle (#1198)
+- [BREAKINGCHANGE] Save dashboard type change for embed gql users (#1210)
+- [BREAKINGCHANGE] Extract legend layout to reusable component (#1196)
+
 ## 0.31.0 / 2023-05-26
 
 - [FEATURE] Revamp dashboard variables form (#1177)

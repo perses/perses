@@ -13,29 +13,30 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
-import { VariableName, ListVariableDefinition, VariableValue } from '@perses-dev/core';
-import { DEFAULT_ALL_VALUE } from '@perses-dev/plugin-system';
+import { DEFAULT_ALL_VALUE, ListVariableDefinition, VariableName, VariableValue } from '@perses-dev/core';
+import { useListVariablePluginValues } from '@perses-dev/plugin-system';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
-import { useListVariablePluginValues } from './variable-model';
+
 type TemplateVariableProps = {
   name: VariableName;
+  source?: string;
 };
 
-export function TemplateVariable({ name }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name);
+export function TemplateVariable({ name, source }: TemplateVariableProps) {
+  const ctx = useTemplateVariable(name, source);
   const kind = ctx.definition?.kind;
   switch (kind) {
     case 'TextVariable':
-      return <TextVariable name={name} />;
+      return <TextVariable name={name} source={source} />;
     case 'ListVariable':
-      return <ListVariable name={name} />;
+      return <ListVariable name={name} source={source} />;
   }
 
   return <div>Unsupported Variable Kind: ${kind}</div>;
 }
 
-function ListVariable({ name }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name);
+function ListVariable({ name, source }: TemplateVariableProps) {
+  const ctx = useTemplateVariable(name, source);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
@@ -45,11 +46,11 @@ function ListVariable({ name }: TemplateVariableProps) {
   const title = definition?.spec.display?.name ?? name;
 
   useEffect(() => {
-    setVariableLoading(name, variablesOptionsQuery.isFetching);
+    setVariableLoading(name, variablesOptionsQuery.isFetching, source);
     if (variablesOptionsQuery.data) {
-      setVariableOptions(name, variablesOptionsQuery.data);
+      setVariableOptions(name, variablesOptionsQuery.data, source);
     }
-  }, [variablesOptionsQuery, name, setVariableLoading, setVariableOptions]);
+  }, [variablesOptionsQuery, name, setVariableLoading, setVariableOptions, source]);
 
   let value = ctx.state?.value;
   const options = ctx.state?.options;
@@ -93,9 +94,9 @@ function ListVariable({ name }: TemplateVariableProps) {
 
     // If there is no value but there are options, set the value to the first option.
     if (!value && firstOption) {
-      setVariableValue(name, firstOption.value);
+      setVariableValue(name, firstOption.value, source);
     }
-  }, [finalOptions, setVariableValue, value, name, allowMultiple]);
+  }, [finalOptions, setVariableValue, value, name, allowMultiple, source]);
 
   return (
     <Box display={'flex'}>
@@ -110,11 +111,11 @@ function ListVariable({ name }: TemplateVariableProps) {
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
               if (allowAllValue) {
-                setVariableValue(name, DEFAULT_ALL_VALUE);
+                setVariableValue(name, DEFAULT_ALL_VALUE, source);
               }
               return;
             }
-            setVariableValue(name, e.target.value as VariableValue);
+            setVariableValue(name, e.target.value as VariableValue, source);
           }}
           multiple={allowMultiple}
         >
@@ -141,8 +142,8 @@ function ListVariable({ name }: TemplateVariableProps) {
   );
 }
 
-function TextVariable({ name }: TemplateVariableProps) {
-  const { state, definition } = useTemplateVariable(name);
+function TextVariable({ name, source }: TemplateVariableProps) {
+  const { state, definition } = useTemplateVariable(name, source);
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const { setVariableValue } = useTemplateVariableActions();
 
@@ -154,7 +155,7 @@ function TextVariable({ name }: TemplateVariableProps) {
     <TextField
       value={tempValue}
       onChange={(e) => setTempValue(e.target.value)}
-      onBlur={() => setVariableValue(name, tempValue)}
+      onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}
       label={definition?.spec.display?.name ?? name}
     />

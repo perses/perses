@@ -12,18 +12,21 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
-import { TimeRangeProvider, useInitialTimeRange } from '@perses-dev/plugin-system';
+import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
 import {
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
+  TemplateVariableProviderProps,
 } from '../../context';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
 }
 
@@ -34,6 +37,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const {
     dashboardResource,
     datasourceApi,
+    externalVariableDefinitions,
     dashboardTitleComponent,
     emptyDashboardProps,
     onSave,
@@ -45,14 +49,23 @@ export function ViewDashboard(props: ViewDashboardProps) {
     ...others
   } = props;
   const { spec } = dashboardResource;
-  const dashboardDuration = spec.duration ?? '1h';
+  const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
+  const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
+  const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
-        <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
-          <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
+        <TimeRangeProvider
+          initialTimeRange={initialTimeRange}
+          initialRefreshInterval={initialRefreshInterval}
+          enabledURLParams={true}
+        >
+          <TemplateVariableProvider
+            initialVariableDefinitions={spec.variables}
+            externalVariableDefinitions={externalVariableDefinitions}
+          >
             <Box
               sx={combineSx(
                 {

@@ -19,14 +19,67 @@ import (
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/utils"
 )
 
 func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
-	if _, err := dashboard.BuildVariableOrder(entity.Spec.Variables); err != nil {
+	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
 		return err
 	}
+	return validateDashboard(entity, sch)
+
+}
+
+func DashboardWithVars(entity *modelV1.Dashboard, sch schemas.Schemas, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, projectVariables, globalVariables); err != nil {
+		return err
+	}
+
+	return validateDashboard(entity, sch)
+}
+
+func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
+	if err := validateDTSPlugin(entity.GetDTSSpec().Plugin, sch); err != nil {
+		return err
+	}
+	if list != nil {
+		if err := validateUnicityOfDefaultDTS(entity, list); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
+	name := entity.GetMetadata().GetName()
+	spec := entity.GetDTSSpec()
+	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
+	if !spec.Default {
+		return nil
+	}
+	entityPluginKind := spec.Plugin.Kind
+	for _, dts := range list {
+		if name == dts.GetMetadata().GetName() {
+			// nothing to check if comparing with same datasource
+			continue
+		}
+		dtsSpec := dts.GetDTSSpec()
+		if dtsSpec.Default && dtsSpec.Plugin.Kind == entityPluginKind {
+			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.GetMetadata().GetName(), entityPluginKind, dts.GetMetadata().GetName())
+		}
+	}
+	return nil
+}
+
+func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
+	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
+		return err
+	}
+	return sch.ValidateDatasource(plugin)
+}
+
+func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 	if sch != nil {
 		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
 			return err
@@ -49,41 +102,5 @@ func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 			}
 		}
 	}
-
 	return nil
-}
-
-func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
-	if err := validateDTSPlugin(entity.GetDTSSpec().Plugin, sch); err != nil {
-		return err
-	}
-	if list != nil {
-		if err := validateUnicityOfDefaultDTS(entity, list); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
-	spec := entity.GetDTSSpec()
-	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
-	if !spec.Default {
-		return nil
-	}
-	entityPluginKind := spec.Plugin.Kind
-	for _, dts := range list {
-		dtsSpec := dts.GetDTSSpec()
-		if dtsSpec.Default && dtsSpec.Plugin.Kind == entityPluginKind {
-			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.GetMetadata().GetName(), entityPluginKind, dts.GetMetadata().GetName())
-		}
-	}
-	return nil
-}
-
-func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
-	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
-		return err
-	}
-	return sch.ValidateDatasource(plugin)
 }

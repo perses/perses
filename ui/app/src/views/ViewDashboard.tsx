@@ -11,20 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box } from '@mui/material';
+import { ExternalVariableDefinition, ViewDashboard as DashboardView } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource, dashboardDisplayName, dashboardExtendedDisplayName } from '@perses-dev/core';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  DashboardResource,
+  getDashboardDisplayName,
+  getDashboardExtendedDisplayName,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
+} from '@perses-dev/core';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { bundledPluginLoader } from '../model/bundled-plugins';
 import { useCreateDashboardMutation, useDashboard, useUpdateDashboardMutation } from '../model/dashboard-client';
-import DashboardBreadcrumbs from '../components/DashboardBreadcrumbs';
+import AppBreadcrumbs from '../components/AppBreadcrumbs';
 import { useIsReadonly } from '../model/config-client';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
 import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
+import { useVariableList } from '../model/project-client';
+import { buildExternalVariableDefinition } from '../utils/variables';
 
 /**
  * Generated a resource name valid for the API.
@@ -61,6 +69,15 @@ function ViewDashboard() {
   let { data } = useDashboard(projectName, dashboardName);
   const isReadonly = useIsReadonly();
 
+  // Collect the Project variables and setup external variables from it
+  // TODO: Once we'll implement global variables CRUD, we'll do the same with 'global' as source
+  const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
+  const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(() => {
+    const result: ExternalVariableDefinition[] = [];
+    if (projectVars && projectVars.length > 0) result.push(buildExternalVariableDefinition('project', projectVars));
+    return result;
+  }, [projectVars]);
+
   const createDashboardMutation = useCreateDashboardMutation();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
@@ -76,7 +93,7 @@ function ViewDashboard() {
     if (data !== undefined) {
       // Dashboard already exists in the API, the user is redirected to the existing dashboard
       actionRef.current = undefined;
-      warningSnackbar(`Dashboard ${dashboardDisplayName(data)} already exists`);
+      warningSnackbar(`Dashboard ${getDashboardDisplayName(data)} already exists`);
       navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
     } else {
       data = {
@@ -90,7 +107,8 @@ function ViewDashboard() {
           display: {
             name: dashboardName,
           },
-          duration: '5m',
+          duration: DEFAULT_DASHBOARD_DURATION,
+          refreshInterval: DEFAULT_REFRESH_INTERVAL,
           variables: [],
           layouts: [],
           panels: {},
@@ -106,7 +124,7 @@ function ViewDashboard() {
         return createDashboardMutation.mutateAsync(data, {
           onSuccess: (createdDashboard: DashboardResource) => {
             actionRef.current = undefined;
-            successSnackbar(`Dashboard ${dashboardDisplayName(createdDashboard)} has been successfully created`);
+            successSnackbar(`Dashboard ${getDashboardDisplayName(createdDashboard)} has been successfully created`);
             navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
             return createdDashboard;
           },
@@ -119,7 +137,9 @@ function ViewDashboard() {
 
       return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
-          successSnackbar(`Dashboard ${dashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
+          successSnackbar(
+            `Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`
+          );
           return updatedDashboard;
         },
         onError: (err) => {
@@ -138,6 +158,7 @@ function ViewDashboard() {
   }, [actionRef, navigate, projectName]);
 
   if (isLoading) return null;
+  if (isLoadingProjectVars) return null;
 
   if (!data || data.spec === undefined || isReadonly === undefined) return null;
 
@@ -161,11 +182,9 @@ function ViewDashboard() {
             <DashboardView
               dashboardResource={data}
               datasourceApi={datasourceApi}
+              externalVariableDefinitions={externalVariableDefinitions}
               dashboardTitleComponent={
-                <DashboardBreadcrumbs
-                  dashboardName={dashboardDisplayName(data)}
-                  dashboardProject={data.metadata.project}
-                />
+                <AppBreadcrumbs dashboardName={getDashboardDisplayName(data)} projectName={data.metadata.project} />
               }
               emptyDashboardProps={{
                 additionalText: 'In order to create a new dashboard, you need to add at least one panel!',

@@ -16,14 +16,17 @@ import { NearbySeriesArray } from './nearby-series';
 
 export const TOOLTIP_MIN_WIDTH = 375;
 export const TOOLTIP_MAX_WIDTH = 650;
-export const TOOLTIP_MAX_HEIGHT = 600;
+export const TOOLTIP_MAX_HEIGHT = 650;
 export const TOOLTIP_LABELS_MAX_WIDTH = TOOLTIP_MAX_WIDTH - 150;
 export const TOOLTIP_ADJUST_Y_POS_MULTIPLIER = 0.75;
+export const TOOLTIP_PADDING = 8;
 
 export const FALLBACK_CHART_WIDTH = 750;
 
 export const NEARBY_SERIES_DESCRIPTION = 'nearby series showing in tooltip';
 export const EMPHASIZED_SERIES_DESCRIPTION = 'emphasized series showing as bold in tooltip';
+
+export const TOOLTIP_BG_COLOR_FALLBACK = '#2E313E';
 
 export const TOOLTIP_DATE_FORMAT = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
@@ -55,20 +58,16 @@ export const emptyTooltipData = {
   focusedSeries: null,
 };
 
+export interface Coordinate {
+  x: number;
+  y: number;
+}
+
 export interface CursorCoordinates {
-  page: {
-    x: number;
-    y: number;
-  };
-  client: {
-    x: number;
-    y: number;
-  };
-  plotCanvas: {
-    x: number;
-    y: number;
-  };
-  zrender: {
+  page: Coordinate;
+  client: Coordinate;
+  plotCanvas: Coordinate;
+  zrender?: {
     x?: number;
     y?: number;
   };
@@ -132,3 +131,18 @@ export const useMousePosition = (): CursorData['coords'] => {
 
   return coords;
 };
+
+export type TooltipConfig = {
+  wrapLabels: boolean;
+  hidden?: boolean;
+  enablePinning?: boolean;
+};
+
+export const DEFAULT_TOOLTIP_CONFIG: TooltipConfig = {
+  wrapLabels: true,
+  enablePinning: true,
+};
+
+export const PIN_TOOLTIP_HELP_TEXT = 'Click chart to pin';
+
+export const UNPIN_TOOLTIP_HELP_TEXT = 'Click chart to unpin';

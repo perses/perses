@@ -30,6 +30,6 @@ test.describe('Dashboard: EditJson', () => {
     await dashboardPage.saveChanges();
     await expect(page.url()).toContain('start=5m');
     await expect(dashboardPage.timePicker).toContainText('Last 5 minutes');
-    await expect(dashboardPage.page.getByRole('button', { name: 'interval' })).toContainText('5m');
+    await expect(dashboardPage.page.getByRole('button', { name: 'interval', exact: true })).toContainText('5m');
   });
 });

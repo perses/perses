@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions, LegendOptions } from '@perses-dev/components';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
  * The schema for a TimeSeriesChart panel.
@@ -26,10 +25,11 @@ export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOpt
  * The Options object supported by the TimeSeriesChartPanel plugin.
  */
 export interface TimeSeriesChartOptions {
-  legend?: LegendOptions;
+  legend?: LegendSpecOptions;
   y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
+  tooltip?: TooltipSpecOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -42,14 +42,20 @@ export interface TimeSeriesChartYAxisOptions {
   max?: number;
 }
 
+export interface TooltipSpecOptions {
+  enable_pinning: boolean;
+}
+
 export interface TimeSeriesChartPaletteOptions {
   kind: 'Auto' | 'Categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 
 export type TimeSeriesChartVisualOptions = {
+  display?: 'line' | 'bar';
   line_width?: number;
   area_opacity?: number;
+  // TODO: change to lowercase as part of kebab-case migration in PR #1262
   show_points?: 'Auto' | 'Always';
   palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
@@ -94,6 +100,10 @@ export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };
 
+// Controls how often static threshold values should be plotted so threshold data shows
+// in tooltip without flicker.
+export const THRESHOLD_PLOT_INTERVAL = 15;
+
 export const VISUAL_CONFIG = {
   line_width: {
     label: 'Line Width',
@@ -130,7 +140,9 @@ export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent opti
 export const STACK_CONFIG = {
   None: { label: 'None' },
   All: { label: 'All' },
-  Percent: { label: 'Percent' }, // temporarily disabled
+
+  // TODO: enable option after 'Percent' implemented
+  Percent: { label: 'Percent', disabled: true }, // temporarily disabled
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {

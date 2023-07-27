@@ -29,7 +29,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setDisplayLabel('Text Var');
     await variableEditor.selectType('Text');
     await variableEditor.setTextValue('test value');
-    await variableEditor.updateButton.click();
+    await variableEditor.createButton.click();
 
     // Includes one for the table header.
     await expect(variableEditor.tableRows).toHaveCount(2);
@@ -52,7 +52,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
     await variableEditor.selectSource('Custom List');
-    await variableEditor.updateButton.click();
+    await variableEditor.createButton.click();
 
     // Includes one for the table header.
     await expect(variableEditor.tableRows).toHaveCount(2);
@@ -63,8 +63,6 @@ test.describe('Dashboard: Variables', () => {
     // TODO: add helper for saving and confirming in defaults dialog
     const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
-    const dialogSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save Changes' });
-    await dialogSaveButton.click();
 
     await expect(dashboardPage.variableListItems).toHaveCount(1);
     await expect(dashboardPage.variableListItems).toContainText([/List Var/]);

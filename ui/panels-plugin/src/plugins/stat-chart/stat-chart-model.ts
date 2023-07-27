@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions } from '@perses-dev/components';
-import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { CalculationType, Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { FontSizeOption } from '@perses-dev/components';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 /**
  * The schema for a StatChart panel.
@@ -27,6 +27,7 @@ export interface StatChartOptions {
   unit: UnitOptions;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
+  value_font_size?: FontSizeOption;
 }
 
 export interface StatChartSparklineOptions {

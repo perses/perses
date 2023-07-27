@@ -16,7 +16,11 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
 import { StatChartSparklineOptions } from '../stat-chart-model';
 
-export function getColorFromThresholds(chartsTheme: PersesChartsTheme, thresholds?: ThresholdOptions, value?: number) {
+export function getColorFromThresholds(
+  chartsTheme: PersesChartsTheme,
+  thresholds?: ThresholdOptions,
+  value?: number | null
+) {
   // thresholds color takes priority over other colors
   const defaultColor = thresholds?.default_color ?? chartsTheme.thresholds.defaultColor;
 
@@ -25,7 +29,7 @@ export function getColorFromThresholds(chartsTheme: PersesChartsTheme, threshold
   }
 
   let color = defaultColor;
-  if (thresholds.steps && value) {
+  if (thresholds.steps && value && typeof value === 'number') {
     thresholds.steps.forEach((step, index) => {
       if (value > step.value) {
         color = step.color ?? chartsTheme.thresholds.palette[index] ?? defaultColor;
@@ -42,7 +46,7 @@ export function convertSparkline(
   chartsTheme: PersesChartsTheme,
   sparkline?: StatChartSparklineOptions,
   thresholds?: ThresholdOptions,
-  value?: number
+  value?: number | null
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 

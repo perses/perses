@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions } from '@perses-dev/core';
-import { UnitOptions } from '@perses-dev/components';
-import { CalculationType, OptionsEditorProps } from '@perses-dev/plugin-system';
+import { CalculationType, Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
 export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal' };
 export const DEFAULT_MAX_PERCENT = 100;

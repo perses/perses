@@ -15,11 +15,10 @@ import { Box, Grid, Stack, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate } from 'react-router-dom';
-import { DashboardSelector } from '@perses-dev/core';
-import { ProjectModel, useProjectList } from '../../model/project-client';
-import { AddProjectDialog } from '../../components/AddProjectDialog/AddProjectDialog';
-import { CreateDashboardDialog } from '../../components/CreateDashboardDialog/CreateDashboardDialog';
-import DashboardBreadcrumbs from '../../components/DashboardBreadcrumbs';
+import { DashboardSelector, ProjectResource } from '@perses-dev/core';
+import { useProjectList } from '../../model/project-client';
+import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
+import AppBreadcrumbs from '../../components/AppBreadcrumbs';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
@@ -36,7 +35,7 @@ function HomeView() {
     return (data || []).map((project) => project.metadata.name);
   }, [data]);
 
-  const handleAddProjectDialogSubmit = (entity: ProjectModel) => navigate(`/projects/${entity.metadata.name}`);
+  const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
     navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
 
@@ -59,7 +58,7 @@ function HomeView() {
 
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <DashboardBreadcrumbs />
+      <AppBreadcrumbs />
       <Box sx={{ width: '100%' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
@@ -74,7 +73,7 @@ function HomeView() {
               onClick={handleAddDashboardDialogOpen}
               disabled={projectOptions.length === 0}
             />
-            <AddProjectDialog
+            <CreateProjectDialog
               open={isAddProjectDialogOpen}
               onClose={handleAddProjectDialogClose}
               onSuccess={handleAddProjectDialogSubmit}

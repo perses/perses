@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useMemo, useRef, useState } from 'react';
+import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { UnitOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -36,12 +37,19 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { EChartsDataFormat } from '../model/graph';
-import { UnitOptions } from '../model/units';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { TimeSeriesTooltip } from '../TimeSeriesTooltip';
+import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
+import { useChartsTheme } from '../context/ChartsProvider';
+import { CursorCoordinates, LineChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { enableDataZoom, getDateRange, getFormattedDate, getYAxes, restoreChart, ZoomEventData } from './utils';
+import {
+  clearHighlightedSeries,
+  enableDataZoom,
+  getDateRange,
+  getFormattedDate,
+  getFormattedAxis,
+  restoreChart,
+  ZoomEventData,
+} from '../utils';
 
 use([
   EChartsLineChart,
@@ -57,15 +65,7 @@ use([
   CanvasRenderer,
 ]);
 
-export type TooltipConfig = {
-  wrapLabels: boolean;
-  hidden?: boolean;
-};
-
 export interface LineChartProps {
-  /**
-   * Height of the chart
-   */
   height: number;
   data: EChartsDataFormat;
   yAxis?: YAXisComponentOption;
@@ -74,29 +74,61 @@ export interface LineChartProps {
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
+  syncGroup?: string;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
 }
 
-export function LineChart({
-  height,
-  data,
-  yAxis,
-  unit,
-  grid,
-  legend,
-  tooltipConfig = { wrapLabels: true },
-  noDataVariant = 'message',
-  onDataZoom,
-  onDoubleClick,
-  __experimentalEChartsOptionsOverride,
-}: LineChartProps) {
+export const LineChart = forwardRef<ChartInstance, LineChartProps>(function LineChart(
+  {
+    height,
+    data,
+    yAxis,
+    unit,
+    grid,
+    legend,
+    tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
+    noDataVariant = 'message',
+    syncGroup,
+    onDataZoom,
+    onDoubleClick,
+    __experimentalEChartsOptionsOverride,
+  },
+  ref
+) {
   const chartsTheme = useChartsTheme();
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
-  const [isTooltipPinned, setIsTooltipPinned] = useState<boolean>(false);
+  const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
   const { timeZone } = useTimeZone();
+
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+
+  useImperativeHandle(
+    ref,
+    () => {
+      return {
+        highlightSeries({ id }: ChartInstanceFocusOpts) {
+          if (!chartRef.current) {
+            // when chart undef, do not highlight series when hovering over legend
+            return;
+          }
+
+          chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+        },
+        clearHighlightedSeries: () => {
+          if (!chartRef.current) {
+            // when chart undef, do not clear highlight series
+            return;
+          }
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+        },
+      };
+    },
+    [data.timeSeries.length]
+  );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
@@ -104,7 +136,7 @@ export function LineChart({
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
-            setIsTooltipPinned(false);
+            setTooltipPinnedCoords(null);
           }, 10);
         }
         if (onDataZoom === undefined || params.batch[0] === undefined) return;
@@ -123,25 +155,12 @@ export function LineChart({
           onDataZoom(zoomEvent);
         }
       },
-      // TODO: use legendselectchanged event to fix tooltip when legend selected
     };
-  }, [data, onDataZoom, setIsTooltipPinned]);
+  }, [data, onDataZoom, setTooltipPinnedCoords]);
 
   if (chartRef.current !== undefined) {
     enableDataZoom(chartRef.current);
   }
-
-  const handleOnDoubleClick = (e: MouseEvent) => {
-    setIsTooltipPinned(false);
-    // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
-    if (onDoubleClick === undefined) {
-      if (chartRef.current !== undefined) {
-        restoreChart(chartRef.current);
-      }
-    } else {
-      onDoubleClick(e);
-    }
-  };
 
   const { noDataOption } = chartsTheme;
 
@@ -166,7 +185,7 @@ export function LineChart({
           },
         },
       },
-      yAxis: getYAxes(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
@@ -204,21 +223,61 @@ export function LineChart({
       sx={{ height }}
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
-          setIsTooltipPinned((current) => !current);
+        if (tooltipConfig.enablePinning && e.target instanceof HTMLCanvasElement) {
+          setTooltipPinnedCoords((current) => {
+            if (current === null) {
+              return {
+                page: {
+                  x: e.pageX,
+                  y: e.pageY,
+                },
+                client: {
+                  x: e.clientX,
+                  y: e.clientY,
+                },
+                plotCanvas: {
+                  x: e.nativeEvent.offsetX,
+                  y: e.nativeEvent.offsetY,
+                },
+                target: e.target,
+              };
+            } else {
+              return null;
+            }
+          });
         }
       }}
       onMouseDown={(e) => {
-        // Hide tooltip when user drags to zoom, but allow clicking inside tooltip to copy labels.
-        if (e.target instanceof HTMLCanvasElement) {
-          setShowTooltip(false);
+        const { clientX } = e;
+        setIsDragging(true);
+        setStartX(clientX);
+      }}
+      onMouseMove={(e) => {
+        // Allow clicking inside tooltip to copy labels.
+        if (!(e.target instanceof HTMLCanvasElement)) {
+          return;
+        }
+        const { clientX } = e;
+        if (isDragging) {
+          const deltaX = clientX - startX;
+          if (deltaX > 0) {
+            // Hide tooltip when user drags to zoom.
+            setShowTooltip(false);
+          }
         }
       }}
       onMouseUp={() => {
+        setIsDragging(false);
+        setStartX(0);
         setShowTooltip(true);
       }}
       onMouseLeave={() => {
-        setShowTooltip(false);
+        if (tooltipPinnedCoords === null) {
+          setShowTooltip(false);
+        }
+        if (chartRef.current !== undefined) {
+          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+        }
       }}
       onMouseEnter={() => {
         setShowTooltip(true);
@@ -226,21 +285,33 @@ export function LineChart({
           enableDataZoom(chartRef.current);
         }
       }}
-      onDoubleClick={handleOnDoubleClick}
+      onDoubleClick={(e) => {
+        setTooltipPinnedCoords(null);
+        // either dispatch ECharts restore action to return to orig state or allow consumer to define behavior
+        if (onDoubleClick === undefined) {
+          if (chartRef.current !== undefined) {
+            restoreChart(chartRef.current);
+          }
+        } else {
+          onDoubleClick(e);
+        }
+      }}
     >
       {/* Allows overrides prop to hide custom tooltip and use the ECharts option.tooltip instead */}
       {showTooltip === true &&
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
-          <TimeSeriesTooltip
+          <LineChartTooltip
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
-            isTooltipPinned={isTooltipPinned}
+            enablePinning={tooltipConfig.enablePinning}
+            pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {
-              setIsTooltipPinned(false);
+              setTooltipPinnedCoords(null);
             }}
+            containerId={chartsTheme.tooltipPortalContainerId}
           />
         )}
       <EChart
@@ -252,7 +323,8 @@ export function LineChart({
         theme={chartsTheme.echartsTheme}
         onEvents={handleEvents}
         _instance={chartRef}
+        syncGroup={syncGroup}
       />
     </Box>
   );
-}
+});

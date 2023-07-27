@@ -24,6 +24,7 @@ export const EMPTY_DASHBOARD_RESOURCE: DashboardResource = {
   },
   spec: {
     duration: '1h',
+    refreshInterval: '0s',
     variables: [],
     layouts: [],
     panels: {},

@@ -14,16 +14,18 @@
 import { Box } from '@mui/material';
 import { produce } from 'immer';
 import { ReactNode } from 'react';
-import { LegendOptions, LegendItem, SelectedLegendItemState, getLegendMode } from '../model';
+import { getLegendMode } from '@perses-dev/core';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
-import { TableLegend } from './TableLegend';
+import { TableLegend, TableLegendProps } from './TableLegend';
+import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
+import { ListLegendItemProps } from './ListLegendItem';
 
 export interface LegendProps {
   width: number;
   height: number;
   data: LegendItem[];
-  options: LegendOptions;
+  options: LegendComponentOptions;
 
   /**
    * State of selected items in the legend.
@@ -37,6 +39,21 @@ export interface LegendProps {
    * Callback fired when the selected items in the legend changes.
    */
   onSelectedItemsChange: (newSelected: SelectedLegendItemState) => void;
+
+  /**
+   * Callback fired when the mouse is moved over a legend item.
+   */
+  onItemMouseOver?: ListLegendItemProps['onMouseOver'];
+
+  /**
+   * Callback fired when the mouse is moved out of a legend item.
+   */
+  onItemMouseOut?: ListLegendItemProps['onMouseOut'];
+
+  /**
+   * Props specific to legend with `mode` set to `table`.
+   */
+  tableProps?: Pick<TableLegendProps, 'columns' | 'onSortingChange' | 'sorting'>;
 }
 
 // When the number of items to display is above this number, it is likely to
@@ -46,7 +63,17 @@ export interface LegendProps {
 // future as people test this out on different machines.
 const NEED_VIRTUALIZATION_LIMIT = 500;
 
-export function Legend({ width, height, options, data, selectedItems, onSelectedItemsChange }: LegendProps) {
+export function Legend({
+  width,
+  height,
+  options,
+  data,
+  selectedItems,
+  onSelectedItemsChange,
+  onItemMouseOver,
+  onItemMouseOut,
+  tableProps,
+}: LegendProps) {
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
@@ -96,11 +123,15 @@ export function Legend({ width, height, options, data, selectedItems, onSelected
     items: data,
     selectedItems,
     onLegendItemClick,
+    onItemMouseOver,
+    onItemMouseOut,
   };
 
   let legendContent: ReactNode;
   if (mode === 'Table') {
-    legendContent = <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} />;
+    legendContent = (
+      <TableLegend {...commonLegendProps} onSelectedItemsChange={onSelectedItemsChange} width={width} {...tableProps} />
+    );
   } else if (options.position === 'Right' || needsVirtualization) {
     legendContent = <ListLegend {...commonLegendProps} width={width} onLegendItemClick={onLegendItemClick} />;
   } else {
