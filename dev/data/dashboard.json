@@ -2311,7 +2311,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[1m]))",
                       "series_name_format": "{{mode}} mode "
                     }
                   }
@@ -2344,7 +2344,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))",
+                      "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[1m]))",
                       "series_name_format": "{{mode}} mode "
                     }
                   }
