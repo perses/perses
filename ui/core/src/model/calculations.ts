@@ -13,6 +13,8 @@
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
 
+export const DEFAULT_CALCULATION: CalculationType = 'last-number';
+
 export const CalculationsMap = {
   first: first,
   last: last,

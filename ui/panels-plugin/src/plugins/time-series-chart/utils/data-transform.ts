@@ -152,7 +152,7 @@ export function getTimeSeries(
       datasetIndex,
       name: formattedName,
       color: paletteColor,
-      stack: visual.stack === 'All' ? visual.stack : undefined,
+      stack: visual.stack === 'all' ? visual.stack : undefined,
       label: {
         show: false,
       },
