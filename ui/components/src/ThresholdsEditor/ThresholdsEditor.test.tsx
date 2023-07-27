@@ -15,16 +15,16 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import produce from 'immer';
-import { ChartsThemeProvider } from '../context/ChartsThemeProvider';
+import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {
   const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = jest.fn()) => {
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <ThresholdsEditor thresholds={thresholds} onChange={onChange} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 
@@ -53,7 +53,7 @@ describe('ThresholdsEditor', () => {
     userEvent.click(addButton);
     expect(onChange).toHaveBeenCalledWith(
       produce(thresholds, (draft) => {
-        draft.steps?.push({ value: 75, color: '#EE6C6C' });
+        draft.steps?.push({ value: 75, color: '#d32f2f' });
       })
     );
   });
@@ -103,13 +103,13 @@ describe('ThresholdsEditor', () => {
     const openColorPickerButton = screen.getByLabelText('change threshold T1 color');
     userEvent.click(openColorPickerButton);
     await screen.findByTestId('threshold color picker');
-    const redColorButton = screen.getByLabelText('change color to #EE6C6C');
+    const redColorButton = screen.getByLabelText('change color to #d32f2f');
     userEvent.click(redColorButton);
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith(
         produce(thresholds, (draft) => {
           if (draft.steps && draft.steps[0]) {
-            draft.steps[0].color = '#EE6C6C';
+            draft.steps[0].color = '#d32f2f';
           }
         })
       );

@@ -38,15 +38,15 @@ import {
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
 import { EChartsDataFormat, ChartInstanceFocusOpts, ChartInstance } from '../model/graph';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
-import { CursorCoordinates, LineChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
+import { useChartsTheme } from '../context/ChartsProvider';
+import { CursorCoordinates, LineChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
   getDateRange,
   getFormattedDate,
-  getYAxes,
+  getFormattedAxis,
   restoreChart,
   ZoomEventData,
 } from '../utils';
@@ -88,7 +88,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
     unit,
     grid,
     legend,
-    tooltipConfig = { wrapLabels: true },
+    tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
     noDataVariant = 'message',
     syncGroup,
     onDataZoom,
@@ -185,7 +185,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           },
         },
       },
-      yAxis: getYAxes(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
@@ -223,7 +223,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
       sx={{ height }}
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
+        if (tooltipConfig.enablePinning && e.target instanceof HTMLCanvasElement) {
           setTooltipPinnedCoords((current) => {
             if (current === null) {
               return {
@@ -305,11 +305,13 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
             chartRef={chartRef}
             chartData={data}
             wrapLabels={tooltipConfig.wrapLabels}
+            enablePinning={tooltipConfig.enablePinning}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
             }}
+            containerId={chartsTheme.tooltipPortalContainerId}
           />
         )}
       <EChart

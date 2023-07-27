@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { StatChartOptions } from './stat-chart-model';
@@ -20,9 +20,9 @@ import { StatChartOptionsEditorSettings } from './StatChartOptionsEditorSettings
 describe('StatChartOptionsEditorSettings', () => {
   const renderStatChartOptionsEditorSettings = (value: StatChartOptions, onChange = jest.fn()) => {
     render(
-      <ChartsThemeProvider chartsTheme={testChartsTheme}>
+      <ChartsProvider chartsTheme={testChartsTheme}>
         <StatChartOptionsEditorSettings value={value} onChange={onChange} />
-      </ChartsThemeProvider>
+      </ChartsProvider>
     );
   };
 

@@ -26,11 +26,16 @@ import (
 	values?: [...#legend_value]
 }
 
+#tooltip: {
+	enable_pinning?: bool
+}
+
 #palette: {
 	kind: "Auto" | "Categorical"
 }
 
 #visual: {
+	display?:       "line" | "bar"
 	line_width?:    number & >=0.25 & <=3
 	area_opacity?:  number & >=0 & <=1
 	show_points?:   "auto" | "always"
@@ -50,9 +55,9 @@ import (
 
 kind: "TimeSeriesChart"
 spec: close({
-	legend?:            #legend
-	y_axis?:            #y_axis
-	thresholds?:        common.#thresholds
-	visual?:            #visual
-	show_legacy_chart?: bool
+	legend?:     #legend
+	tooltip?:    #tooltip
+	y_axis?:     #y_axis
+	thresholds?: common.#thresholds
+	visual?:     #visual
 })

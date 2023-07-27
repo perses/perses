@@ -12,13 +12,21 @@
 // limitations under the License.
 
 import type { YAXisComponentOption } from 'echarts';
-import { LineSeriesOption } from 'echarts/charts';
-import { StepOptions, TimeScale, TimeSeries, TimeSeriesValueTuple, getCommonTimeScale } from '@perses-dev/core';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
+import {
+  StepOptions,
+  TimeScale,
+  TimeSeries,
+  TimeSeriesValueTuple,
+  getCommonTimeScale,
+  TimeSeriesData,
+} from '@perses-dev/core';
 import {
   OPTIMIZED_MODE_SERIES_LIMIT,
   LegacyTimeSeries,
   EChartsDataFormat,
   EChartsValues,
+  TimeSeriesOption,
 } from '@perses-dev/components';
 import { useTimeSeriesQueries, UseDataQueryResults } from '@perses-dev/plugin-system';
 import {
@@ -50,13 +58,15 @@ export const BLUR_FADEOUT_OPACITY = 0.5;
  * the x axis (i.e. start/end dates and a step that is divisible into all of
  * the queries' steps).
  */
-export function getCommonTimeScaleForQueries(queries: UseDataQueryResults['queryResults']): TimeScale | undefined {
+export function getCommonTimeScaleForQueries(
+  queries: UseDataQueryResults<TimeSeriesData>['queryResults']
+): TimeScale | undefined {
   const seriesData = queries.map((query) => (query.isLoading ? undefined : query.data));
   return getCommonTimeScale(seriesData);
 }
 
 /**
- * Gets ECharts line series option properties for legacy LineChart
+ * [DEPRECATED] Gets ECharts line series option properties for legacy LineChart
  */
 export function getLineSeries(
   id: string,
@@ -118,12 +128,12 @@ export function getLineSeries(
  */
 export function getTimeSeries(
   id: string,
-  seriesIndex: number,
+  datasetIndex: number,
   formattedName: string,
   visual: TimeSeriesChartVisualOptions,
   timeScale: TimeScale,
-  paletteColor?: string
-): LineSeriesOption {
+  paletteColor: string
+): TimeSeriesOption {
   const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
   const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
 
@@ -135,10 +145,25 @@ export function getTimeSeries(
     showPoints = true;
   }
 
+  if (visual.display === 'bar') {
+    const series: BarSeriesOption = {
+      type: 'bar',
+      id: id,
+      datasetIndex,
+      name: formattedName,
+      color: paletteColor,
+      stack: visual.stack === 'All' ? visual.stack : undefined,
+      label: {
+        show: false,
+      },
+    };
+    return series;
+  }
+
   const series: LineSeriesOption = {
     type: 'line',
     id: id,
-    datasetIndex: seriesIndex,
+    datasetIndex,
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
@@ -162,6 +187,13 @@ export function getTimeSeries(
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
+      },
+    },
+    selectedMode: 'single',
+    select: {
+      itemStyle: {
+        borderColor: paletteColor,
+        borderWidth: pointRadius + 0.5,
       },
     },
     blur: {

@@ -20,11 +20,13 @@ import {
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
+  TemplateVariableProviderProps,
 } from '../../context';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
 }
 
@@ -35,6 +37,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const {
     dashboardResource,
     datasourceApi,
+    externalVariableDefinitions,
     dashboardTitleComponent,
     emptyDashboardProps,
     onSave,
@@ -47,9 +50,9 @@ export function ViewDashboard(props: ViewDashboardProps) {
   } = props;
   const { spec } = dashboardResource;
   const dashboardDuration = spec.duration ?? DEFAULT_DASHBOARD_DURATION;
-  const dashhboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+  const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
-  const initialRefreshInterval = useInitialRefreshInterval(dashhboardRefreshInterval);
+  const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
@@ -59,7 +62,10 @@ export function ViewDashboard(props: ViewDashboardProps) {
           initialRefreshInterval={initialRefreshInterval}
           enabledURLParams={true}
         >
-          <TemplateVariableProvider initialVariableDefinitions={spec.variables}>
+          <TemplateVariableProvider
+            initialVariableDefinitions={spec.variables}
+            externalVariableDefinitions={externalVariableDefinitions}
+          >
             <Box
               sx={combineSx(
                 {

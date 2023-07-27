@@ -27,6 +27,8 @@ import {
   IconButton,
   Alert,
   styled,
+  capitalize,
+  Tooltip,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { VariableDefinition } from '@perses-dev/core';
@@ -35,10 +37,10 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
-
-import { useDiscardChangesConfirmationDialog } from '../../context';
-import { VariableEditForm } from './VariableEditorForm';
-import { VARIABLE_TYPES } from './variable-model';
+import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
+import { Action, VariableEditForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
+import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
 
 function getVariableLabelByKind(kind: string) {
   return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
@@ -61,13 +63,19 @@ function getValidation(variableDefinitions: VariableDefinition[]) {
 
 export function VariableEditor(props: {
   variableDefinitions: VariableDefinition[];
+  externalVariableDefinitions: ExternalVariableDefinition[];
   onChange: (variableDefinitions: VariableDefinition[]) => void;
   onCancel: () => void;
 }) {
   const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
   const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
+  const [variableFormAction, setVariableFormAction] = useState<Action>('update');
 
+  const externalVariableDefinitions = props.externalVariableDefinitions;
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
+  const [variableState] = useMemo(() => {
+    return [hydrateTemplateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
+  }, [externalVariableDefinitions, variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
@@ -97,6 +105,7 @@ export function VariableEditor(props: {
   };
 
   const addVariable = () => {
+    setVariableFormAction('create');
     setVariableDefinitions((draft) => {
       draft.push({
         kind: 'TextVariable',
@@ -107,6 +116,11 @@ export function VariableEditor(props: {
       });
     });
     setVariableEditIdx(variableDefinitions.length);
+  };
+
+  const editVariable = (index: number) => {
+    setVariableFormAction('update');
+    setVariableEditIdx(index);
   };
 
   const toggleVariableVisibility = (index: number, visible: boolean) => {
@@ -147,6 +161,12 @@ export function VariableEditor(props: {
     });
   };
 
+  const overrideVariable = (v: VariableDefinition) => {
+    setVariableDefinitions((draft) => {
+      draft.push(v);
+    });
+  };
+
   return (
     <>
       {currentEditingVariableDefinition && (
@@ -158,7 +178,13 @@ export function VariableEditor(props: {
               setVariableEditIdx(null);
             });
           }}
-          onCancel={() => setVariableEditIdx(null)}
+          onCancel={() => {
+            if (variableFormAction === 'create') {
+              removeVariable(variableEditIdx);
+            }
+            setVariableEditIdx(null);
+          }}
+          action={variableFormAction}
         />
       )}
       {!currentEditingVariableDefinition && (
@@ -171,7 +197,7 @@ export function VariableEditor(props: {
               borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
             }}
           >
-            <Typography variant="h2">Variables</Typography>
+            <Typography variant="h2">Dashboard Variables</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
                 disabled={props.variableDefinitions === variableDefinitions || !validation.isValid}
@@ -217,7 +243,7 @@ export function VariableEditor(props: {
                           />
                         </TableCell>
                         <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                          {v.spec.name}
+                          <VariableName name={v.spec.name} state={variableState.get({ name: v.spec.name })} />
                         </TableCell>
                         <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                         <TableCell align="right">
@@ -231,7 +257,7 @@ export function VariableEditor(props: {
                             <ArrowDown />
                           </IconButton>
 
-                          <IconButton onClick={() => setVariableEditIdx(idx)}>
+                          <IconButton onClick={() => editVariable(idx)}>
                             <PencilIcon />
                           </IconButton>
                           <IconButton onClick={() => removeVariable(idx)}>
@@ -249,6 +275,62 @@ export function VariableEditor(props: {
                 </Button>
               </Box>
             </Stack>
+
+            {externalVariableDefinitions.map((extVar) => (
+              <Stack key={extVar.source}>
+                <Typography variant="h2">{capitalize(extVar.source)} Variables</Typography>
+                <TableContainer>
+                  <Table sx={{ minWidth: 650 }} aria-label="table of variables">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Visibility</TableCell>
+                        <TableCell>Name</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell align="right" />
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {extVar.definitions.map((v) => (
+                        <TableRow key={v.spec.name}>
+                          <TableCell component="th" scope="row">
+                            <Switch checked={v.spec.display?.hidden !== true} disabled />
+                          </TableCell>
+                          <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                            <VariableName
+                              name={v.spec.name}
+                              state={variableState.get({ name: v.spec.name, source: extVar.source })}
+                            />
+                          </TableCell>
+                          <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                          <TableCell align="right">
+                            <Tooltip title="Override">
+                              <IconButton
+                                onClick={() => overrideVariable(v)}
+                                disabled={!!variableState.get({ name: v.spec.name })}
+                              >
+                                <ContentDuplicate />
+                              </IconButton>
+                            </Tooltip>
+                            <IconButton disabled>
+                              <ArrowUp />
+                            </IconButton>
+                            <IconButton disabled>
+                              <ArrowDown />
+                            </IconButton>
+                            <IconButton disabled>
+                              <PencilIcon />
+                            </IconButton>
+                            <IconButton disabled>
+                              <TrashIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Stack>
+            ))}
           </Box>
         </>
       )}
@@ -259,3 +341,25 @@ export function VariableEditor(props: {
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   borderBottom: `solid 1px ${theme.palette.divider}`,
 }));
+
+export function VariableName(props: { name: string; state: VariableState | undefined }) {
+  const { name, state } = props;
+  return (
+    <>
+      {!state?.overridden && `${name} `}
+      {!state?.overridden && state?.overriding && (
+        <Box fontWeight="normal" color={(theme) => theme.palette.primary.main}>
+          (overriding)
+        </Box>
+      )}
+      {state?.overridden && (
+        <>
+          <Box color={(theme) => theme.palette.grey[500]}>{name}</Box>
+          <Box fontWeight="normal" color={(theme) => theme.palette.grey[500]}>
+            (overridden)
+          </Box>
+        </>
+      )}
+    </>
+  );
+}

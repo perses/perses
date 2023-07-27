@@ -20,6 +20,7 @@ import {
   TOOLTIP_MIN_WIDTH,
   TOOLTIP_ADJUST_Y_POS_MULTIPLIER,
   TOOLTIP_BG_COLOR_FALLBACK,
+  TOOLTIP_PADDING,
 } from './tooltip-model';
 
 /**
@@ -30,7 +31,8 @@ export function assembleTransform(
   chartWidth: number,
   pinnedPos: CursorCoordinates | null,
   tooltipHeight: number,
-  tooltipWidth: number
+  tooltipWidth: number,
+  containerElement?: Element | null
 ) {
   if (mousePos === null) {
     return 'translate3d(0, 0)';
@@ -43,16 +45,31 @@ export function assembleTransform(
     mousePos = pinnedPos;
   }
 
-  // Tooltip is located in a Portal attached to the body.
+  // By default, tooltip is located in a Portal attached to the body.
   // Using page coordinates instead of viewport ensures the tooltip is
   // absolutely positioned correctly as the user scrolls
-  const x = mousePos.page.x;
+  let x = mousePos.page.x;
   let y = mousePos.page.y + cursorPaddingY;
 
-  // adjust so tooltip does not get cut off at bottom of chart
+  // If containerElement is defined, tooltip is attached to the containerElement instead.
+  let containerRect;
+  if (containerElement) {
+    // get the container's position relative to viewport
+    containerRect = containerElement.getBoundingClientRect();
+    // calculate the mouse position relative to container
+    x = x - containerRect.left + containerElement.scrollLeft;
+    y = y - containerRect.top + containerElement.scrollTop;
+  }
+
   if (mousePos.client.y + tooltipHeight + cursorPaddingY > window.innerHeight) {
+    // adjust so tooltip does not get cut off at bottom of chart
     // multiplier ensures tooltip isn't overly adjusted and gets cut off at the top of the viewport
-    y = mousePos.page.y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
+    y = y - tooltipHeight * TOOLTIP_ADJUST_Y_POS_MULTIPLIER;
+
+    // If y is now above of the top of containerElement, set y close to 0 so tooltip does not get cut off
+    if (containerRect && y < containerRect.top) {
+      y = TOOLTIP_PADDING / 2; // leaves room for some padding around tooltip
+    }
   }
 
   // use tooltip width to determine when to repos from right to left
@@ -67,11 +84,12 @@ export function assembleTransform(
 /**
  * Helper for tooltip positioning styles
  */
-export function getTooltipStyles(theme: Theme, pinnedPos: CursorCoordinates | null) {
+export function getTooltipStyles(theme: Theme, pinnedPos: CursorCoordinates | null, maxHeight?: number) {
+  const adjustedMaxHeight = maxHeight ? maxHeight - TOOLTIP_PADDING : undefined;
   return {
     minWidth: TOOLTIP_MIN_WIDTH,
     maxWidth: TOOLTIP_MAX_WIDTH,
-    maxHeight: TOOLTIP_MAX_HEIGHT,
+    maxHeight: adjustedMaxHeight ?? TOOLTIP_MAX_HEIGHT,
     padding: 0,
     position: 'absolute',
     top: 0,

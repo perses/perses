@@ -18,9 +18,10 @@ import TrashIcon from 'mdi-material-ui/TrashCan';
 type MatcherEditorProps = {
   matchers: string[];
   onChange: (matchers: string[]) => void;
+  isReadonly?: boolean;
 };
 
-export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
+export function MatcherEditor({ matchers, onChange, isReadonly }: MatcherEditorProps) {
   return (
     <Stack spacing={1} mb={2}>
       {matchers.map((matcher, index) => (
@@ -29,6 +30,9 @@ export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
             fullWidth
             label="Series Selector"
             value={matcher}
+            InputProps={{
+              readOnly: isReadonly,
+            }}
             onChange={(e) => {
               const newMatchers = produce(matchers, (draft) => {
                 draft[index] = e.target.value;
@@ -43,6 +47,7 @@ export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
               });
               onChange(newMatchers);
             }}
+            disabled={isReadonly}
           >
             <TrashIcon />
           </IconButton>
@@ -59,6 +64,7 @@ export function MatcherEditor({ matchers, onChange }: MatcherEditorProps) {
             });
             onChange(newMatchers);
           }}
+          disabled={isReadonly}
         >
           Add Series Selector
         </Button>

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
+import { TimeSeriesData } from './time-series-data';
 
 interface QuerySpec<PluginSpec> {
   plugin: Definition<PluginSpec>;
@@ -19,9 +20,24 @@ interface QuerySpec<PluginSpec> {
 /**
  * A generic query definition interface that can be extended to support more than just TimeSeriesQuery
  */
-export interface QueryDefinition<Kind = QueryType, PluginSpec = UnknownSpec> {
+// Kind needs to be `any` because otherwise typescript will complain 'unknown' is not assignable to type '"TimeSeriesQuery"' in a few places
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface QueryDefinition<Kind = any, PluginSpec = UnknownSpec> {
   kind: Kind;
   spec: QuerySpec<PluginSpec>;
 }
 
-export type QueryType = 'TimeSeriesQuery';
+/**
+ * Mapping the query plugin to the data type it returns
+ */
+export interface QueryType {
+  TimeSeriesQuery: TimeSeriesData;
+  // in the future we can add other query plugin and data types
+  // for example: we can add something like `LogsQuery: LogsData;`
+}
+
+/**
+ * Values of QueryType
+ * ex: 'TimeSeriesData'
+ */
+export type QueryDataType = QueryType[keyof QueryType];

@@ -25,7 +25,7 @@ export interface GlobalDatasource {
 }
 
 /**
- * A Datasource that belongs to a project.
+ * A Datasource resource, that belongs to a project.
  */
 export interface Datasource {
   kind: 'Datasource';

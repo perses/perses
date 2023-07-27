@@ -13,7 +13,7 @@
 
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ChartsThemeProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
 import {
   PluginRegistry,
@@ -104,11 +104,11 @@ describe('TimeSeriesChartPanel', () => {
     render(
       <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
         <PluginRegistry {...mockPluginRegistry(MOCK_PROM_QUERY_PLUGIN)}>
-          <ChartsThemeProvider chartsTheme={testChartsTheme}>
+          <ChartsProvider chartsTheme={testChartsTheme}>
             <TimeRangeContext.Provider value={mockTimeRangeContext}>
               <TimeSeriesChartPanel {...TEST_TIME_SERIES_PANEL} />
             </TimeRangeContext.Provider>
-          </ChartsThemeProvider>
+          </ChartsProvider>
         </PluginRegistry>
       </VirtuosoMockContext.Provider>
     );

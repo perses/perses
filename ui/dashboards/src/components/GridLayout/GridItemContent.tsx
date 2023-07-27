@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition } from '@perses-dev/core';
 import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { useSuggestedStepMs } from '../../utils';
 import { Panel, PanelProps } from '../Panel/Panel';
+import { PanelOptions } from '../Panel';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
   width: number; // necessary for determining the suggested step ms
+  panelOptions?: PanelOptions;
 }
 
 /**
@@ -47,7 +48,7 @@ export function GridItemContent(props: GridItemContentProps) {
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const suggestedStepMs = useSuggestedStepMs(width);
   const queryDefinitions = queries ?? [];
-  const definitions = queryDefinitions.map((query: QueryDefinition) => {
+  const definitions = queryDefinitions.map((query) => {
     return {
       kind: query.spec.plugin.kind,
       spec: query.spec.plugin.spec,
@@ -56,7 +57,12 @@ export function GridItemContent(props: GridItemContentProps) {
 
   return (
     <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-      <Panel definition={panelDefinition} editHandlers={editHandlers} />
+      <Panel
+        definition={panelDefinition}
+        editHandlers={editHandlers}
+        panelOptions={props.panelOptions}
+        panelGroupItemId={panelGroupItemId}
+      />
     </DataQueriesProvider>
   );
 }

@@ -16,44 +16,164 @@ import { UnitTestCase } from './types';
 
 const TIME_TESTS: UnitTestCase[] = [
   {
-    value: 8000,
+    value: 0,
     unit: { kind: 'Milliseconds' },
-    expected: '8,000ms',
+    expected: '0s',
   },
   {
-    value: 8000,
+    value: 0,
     unit: { kind: 'Seconds' },
-    expected: '8,000s',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Minutes' },
-    expected: '300m',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Hours' },
-    expected: '300h',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Days' },
-    expected: '300d',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Weeks' },
-    expected: '300w',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Months' },
-    expected: '300 months',
+    expected: '0s',
   },
   {
-    value: 300,
+    value: 0,
     unit: { kind: 'Years' },
-    expected: '300 years',
+    expected: '0s',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Milliseconds' },
+    expected: '0.001ms',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Seconds' },
+    expected: '1ms',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Minutes' },
+    expected: '60ms',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Hours' },
+    expected: '3.6s',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Days' },
+    expected: '1.44m',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Weeks' },
+    expected: '10.1m',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Months' },
+    expected: '43.2m',
+  },
+  {
+    value: 0.001,
+    unit: { kind: 'Years' },
+    expected: '8.76h',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Milliseconds' },
+    expected: '1ms',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Seconds' },
+    expected: '1s',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Minutes' },
+    expected: '1m',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Hours' },
+    expected: '1h',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Days' },
+    expected: '1d',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Weeks' },
+    expected: '1w',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Months' },
+    expected: '1 month',
+  },
+  {
+    value: 1,
+    unit: { kind: 'Years' },
+    expected: '1 year',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Milliseconds' },
+    expected: '100ms',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Seconds' },
+    expected: '1.67m',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Minutes' },
+    expected: '1.67h',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Hours' },
+    expected: '4.17d',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Days' },
+    expected: '3.33 months',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Weeks' },
+    expected: '1.92 years',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Months' },
+    expected: '8.22 years',
+  },
+  {
+    value: 100,
+    unit: { kind: 'Years' },
+    expected: '100 years',
   },
 ];
 

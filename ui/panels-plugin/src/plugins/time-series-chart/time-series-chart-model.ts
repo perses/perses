@@ -29,7 +29,7 @@ export interface TimeSeriesChartOptions {
   y_axis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
-  show_legacy_chart?: boolean;
+  tooltip?: TooltipSpecOptions;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -42,12 +42,17 @@ export interface TimeSeriesChartYAxisOptions {
   max?: number;
 }
 
+export interface TooltipSpecOptions {
+  enable_pinning: boolean;
+}
+
 export interface TimeSeriesChartPaletteOptions {
   kind: 'Auto' | 'Categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 
 export type TimeSeriesChartVisualOptions = {
+  display?: 'line' | 'bar';
   line_width?: number;
   area_opacity?: number;
   show_points?: 'auto' | 'always';
@@ -93,6 +98,10 @@ export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
   point_radius: DEFAULT_POINT_RADIUS,
   connect_nulls: DEFAULT_CONNECT_NULLS,
 };
+
+// Controls how often static threshold values should be plotted so threshold data shows
+// in tooltip without flicker.
+export const THRESHOLD_PLOT_INTERVAL = 15;
 
 export const VISUAL_CONFIG = {
   line_width: {

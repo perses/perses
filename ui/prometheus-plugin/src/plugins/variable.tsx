@@ -55,6 +55,7 @@ function StaticListVariableOptionEditor(props: OptionsEditorProps<StaticListVari
         options={[]}
         freeSolo
         clearOnBlur
+        readOnly={props.isReadonly}
         renderInput={(params) => (
           <TextField
             {...params}

@@ -37,6 +37,7 @@ export interface OptionsEditorProps<Spec> {
   // with whatever makes sense as visual editing evolves
   value: Spec;
   onChange: (next: Spec) => void;
+  isReadonly?: boolean;
 }
 
 /**

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './BarChart';
 export * from './ColorPicker';
 export * from './ContentWithLegend';
 export * from './DateTimeRangePicker';
@@ -25,8 +26,10 @@ export * from './InfoTooltip';
 export * from './JSONEditor';
 export * from './Legend';
 export * from './LineChart';
+export * from './ModeSelector';
 export * from './OptionsEditorLayout';
 export * from './SettingsAutocomplete';
+export * from './SortSelector';
 export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
@@ -34,9 +37,7 @@ export * from './TimeChart';
 export * from './TimeSeriesTooltip';
 export * from './UnitSelector';
 export * from './YAxisLabel';
-export * from './context/ChartsThemeProvider';
-export * from './context/TimeZoneProvider';
-export * from './context/SnackbarProvider';
+export * from './context';
 export * from './utils';
 export * from './model';
 export * from './test-utils';

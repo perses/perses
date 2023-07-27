@@ -29,6 +29,8 @@ import {
 } from '@mui/material';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
+import Cog from 'mdi-material-ui/Cog';
+import Folder from 'mdi-material-ui/Folder';
 import { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
@@ -59,16 +61,17 @@ function ProjectMenu(): JSX.Element {
   }
 
   return (
-    <Box sx={{ padding: (theme) => theme.spacing(0.5, 0, 0, 1) }}>
+    <Box>
       <Button
         aria-label="List of the available projects"
         aria-controls="menu-project-list-appbar"
         aria-haspopup="true"
         color="inherit"
-        endIcon={<ChevronDown />}
         onClick={handleMenu}
       >
+        <Folder sx={{ marginRight: 0.5 }} />
         Projects
+        <ChevronDown />
       </Button>
       <Menu
         id="menu-project-list-appbar"
@@ -161,7 +164,22 @@ export default function Header(): JSX.Element {
           >
             <PersesLogo />
           </Button>
-          <Divider orientation="vertical" flexItem sx={{ borderRightColor: 'rgba(255,255,255,0.2)' }} />
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ borderRightColor: 'rgba(255,255,255,0.2)', marginRight: 0.5 }}
+          />
+          <Button
+            aria-label="Administration"
+            aria-controls="menu-admin-appbar"
+            aria-haspopup="true"
+            color="inherit"
+            onClick={() => {
+              navigate('/admin');
+            }}
+          >
+            <Cog sx={{ marginRight: 0.5 }} /> Admin
+          </Button>
           <ProjectMenu />
         </Box>
         <Stack direction={'row'} alignItems={'center'}>

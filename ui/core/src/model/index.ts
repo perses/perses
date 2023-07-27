@@ -21,6 +21,7 @@ export * from './layout';
 export * from './legend';
 export * from './notice';
 export * from './panels';
+export * from './project';
 export * from './query';
 export * from './resource';
 export * from './thresholds';

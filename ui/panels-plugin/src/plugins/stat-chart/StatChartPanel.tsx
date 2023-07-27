@@ -15,7 +15,7 @@ import { TitleComponentOption } from 'echarts';
 import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
 import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
-import { CalculationsMap, CalculationType } from '@perses-dev/core';
+import { CalculationsMap, CalculationType, TimeSeriesData } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
@@ -31,7 +31,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
     contentDimensions,
   } = props;
 
-  const { queryResults, isLoading, isFetching } = useDataQueries();
+  const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
   const statChartData = useStatChartData(queryResults, calculation);
   const isMultiSeries = statChartData.length > 1;
 
@@ -96,7 +96,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
 }
 
 const useStatChartData = (
-  queryResults: UseDataQueryResults['queryResults'],
+  queryResults: UseDataQueryResults<TimeSeriesData>['queryResults'],
   calculation: CalculationType
 ): StatChartData[] => {
   return useMemo(() => {

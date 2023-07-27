@@ -13,14 +13,14 @@
 
 import { useState } from 'react';
 import { Box } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import {
   PanelDrawer,
   Dashboard,
   PanelGroupDialog,
   DeletePanelGroupDialog,
-  DiscardChangesConfirmationDialog,
+  DashboardDiscardChangesConfirmationDialog,
   DashboardToolbar,
   DeletePanelDialog,
   EmptyDashboardProps,
@@ -49,6 +49,9 @@ export const DashboardApp = (props: DashboardAppProps) => {
     initialVariableIsSticky,
     isReadonly,
   } = props;
+
+  const chartsTheme = useChartsTheme();
+
   const { setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
@@ -117,11 +120,13 @@ export const DashboardApp = (props: DashboardAppProps) => {
             }}
           />
         </ErrorBoundary>
-        <PanelDrawer />
+        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
+          <PanelDrawer />
+        </ChartsProvider>
         <PanelGroupDialog />
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
-        <DiscardChangesConfirmationDialog />
+        <DashboardDiscardChangesConfirmationDialog />
         <EditJsonDialog />
         <SaveChangesConfirmationDialog />
       </Box>

@@ -20,7 +20,15 @@ const DEFAULT_TEXT_COLOR = '#222';
 // avoid component override type errors since only palette and typography are used
 type MuiTheme = Omit<Theme, 'components'>;
 
-export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsTheme): PersesChartsTheme {
+export function generateChartsTheme(
+  muiTheme: MuiTheme,
+  echartsTheme: EChartsTheme,
+  /**
+   * The id of the container that will have the chart tooltip appended to it.
+   * By default, chart tooltip uses the body of the top-level document object.
+   */
+  tooltipPortalContainerId?: string
+): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
@@ -74,7 +82,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
@@ -109,7 +117,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         lineStyle: {
           width: 0.5,
           color: muiTheme.palette.grey[300],
-          opacity: 0.6,
+          opacity: 0.4,
         },
       },
       splitArea: {
@@ -156,7 +164,30 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
         borderColor: primaryTextColor,
       },
     },
-    tooltip: {},
+    tooltip: {
+      backgroundColor: muiTheme.palette.designSystem?.grey[800],
+      borderColor: muiTheme.palette.designSystem?.grey[800],
+      textStyle: {
+        color: '#fff',
+        fontSize: 11,
+      },
+    },
+    axisPointer: {
+      lineStyle: {
+        color: muiTheme.palette.grey[500],
+      },
+    },
+    markLine: {
+      symbol: 'none',
+      symbolSize: 0,
+      itemStyle: {
+        color: muiTheme.palette.grey[500],
+      },
+      lineStyle: {
+        type: 'dashed',
+        width: 1,
+      },
+    },
     line: {
       showSymbol: false,
       symbol: 'circle',
@@ -175,7 +206,12 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
       barMaxWidth: 150,
       itemStyle: {
         borderWidth: 0,
+        borderRadius: 0,
         borderColor: muiTheme.palette.grey[300],
+      },
+      label: {
+        show: false,
+        color: primaryTextColor,
       },
     },
     gauge: {
@@ -196,6 +232,7 @@ export function generateChartsTheme(muiTheme: MuiTheme, echartsTheme: EChartsThe
   };
 
   return {
+    tooltipPortalContainerId,
     echartsTheme: merge(muiConvertedTheme, echartsTheme),
     noDataOption: {
       title: {

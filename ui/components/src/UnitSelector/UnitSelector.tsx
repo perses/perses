@@ -25,6 +25,7 @@ import { SettingsAutocomplete } from '../SettingsAutocomplete';
 export interface UnitSelectorProps {
   value: UnitOptions;
   onChange: (unit: UnitOptions) => void;
+  disabled?: boolean;
 }
 
 type AutocompleteKindOption = UnitConfig & { id: UnitOptions['kind'] };
@@ -51,7 +52,7 @@ function getOptionByDecimalPlaces(decimal_places?: number) {
   return DECIMAL_PLACES_OPTIONS.find((o) => o.decimal_places === decimal_places);
 }
 
-export function UnitSelector({ value, onChange }: UnitSelectorProps) {
+export function UnitSelector({ value, onChange, disabled = false }: UnitSelectorProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
   const hasAbbreviate = isUnitWithAbbreviate(value);
 
@@ -102,6 +103,7 @@ export function UnitSelector({ value, onChange }: UnitSelectorProps) {
             groupBy={(option) => option.group}
             onChange={handleKindChange}
             disableClearable
+            disabled={disabled}
           ></SettingsAutocomplete>
         }
       />

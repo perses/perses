@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { Locator, Page } from '@playwright/test';
+import { DatasourceEditor } from './DatasourceEditor';
+import { VariableEditor } from './VariableEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
 const recentDashboardListId = 'recent-dashboard-list';
@@ -25,18 +27,51 @@ export class AppProjectPage {
   readonly addDashboardButton: Locator;
   readonly createDashboardDialog: Locator;
 
+  readonly variableEditor: Locator;
+  readonly addVariableButton: Locator;
+  readonly variableList: Locator;
+
+  readonly datasourceEditor: Locator;
+  readonly addDatasourceButton: Locator;
+  readonly datasourceList: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
     this.addDashboardButton = page.getByRole('button', { name: 'Add Dashboard' });
-
     this.createDashboardDialog = page.getByRole('dialog', {
       name: 'Create Dashboard',
     });
+
+    this.addVariableButton = page.getByRole('button', { name: 'Add Variable' });
+    this.variableEditor = page.getByTestId('variable-editor');
+    this.variableList = page.locator('#project-variable-list');
+
+    this.addDatasourceButton = page.getByRole('button', { name: 'Add Datasource' });
+    this.datasourceEditor = page.getByTestId('datasource-editor');
+    this.datasourceList = page.locator('#project-datasource-list');
   }
 
   async goto(projectName: string) {
     await this.page.goto(`/projects/${projectName}`);
+  }
+
+  async gotoDashboardsTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Dashboards');
+    await navigationPromise;
+  }
+
+  async gotoVariablesTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Variables');
+    await navigationPromise;
+  }
+
+  async gotoDatasourcesTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Datasources');
+    await navigationPromise;
   }
 
   async createDashboard(name: string) {
@@ -76,10 +111,37 @@ export class AppProjectPage {
     await navigationPromise;
   }
 
+  async clickTab(tabLabel: string) {
+    const tab = this.page.getByRole('tab').getByText(tabLabel, {
+      exact: false,
+    });
+    await tab.click();
+  }
+
   async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {
     const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(dashboardName, {
       exact: true,
     });
     await dashboardButton.click();
+  }
+
+  async startCreatingVariables() {
+    await this.addVariableButton.click();
+    const variableEditor = this.getVariableEditor();
+    await variableEditor.isVisible();
+  }
+
+  getVariableEditor() {
+    return new VariableEditor(this.variableEditor);
+  }
+
+  async startCreatingDatasources() {
+    await this.addDatasourceButton.click();
+    const datasourceEditor = this.getDatasourceEditor();
+    await datasourceEditor.isVisible();
+  }
+
+  getDatasourceEditor() {
+    return new DatasourceEditor(this.datasourceEditor);
   }
 }

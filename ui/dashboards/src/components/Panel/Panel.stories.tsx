@@ -108,6 +108,14 @@ EditMode.args = {
   },
 };
 
+export const PanelExtraContent: StoryFn<typeof Panel> = (args) => {
+  return (
+    <Box width={'500px'} height={'300px'}>
+      <Panel {...args} panelOptions={{ extra: () => <div>Custom Content</div> }} />
+    </Box>
+  );
+};
+
 /**
  * You can use the props to customize the messaging and actions.
  */

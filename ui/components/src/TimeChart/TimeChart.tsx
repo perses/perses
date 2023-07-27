@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasetOption } from 'echarts/types/dist/shared';
-import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import { forwardRef, MouseEvent, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
+import merge from 'lodash/merge';
+import isEqual from 'lodash/isEqual';
+import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
 import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
 import type {
@@ -24,7 +26,7 @@ import type {
   TooltipComponentOption,
 } from 'echarts';
 import { ECharts as EChartsInstance, use } from 'echarts/core';
-import { LineChart as EChartsLineChart } from 'echarts/charts';
+import { LineChart as EChartsLineChart, BarChart as EChartsBarChart } from 'echarts/charts';
 import {
   GridComponent,
   DatasetComponent,
@@ -38,21 +40,24 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChart, OnEventsType } from '../EChart';
-import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping } from '../model/graph';
-import { useChartsTheme } from '../context/ChartsThemeProvider';
+import { ChartInstanceFocusOpts, ChartInstance, TimeChartSeriesMapping, DEFAULT_PINNED_CROSSHAIR } from '../model';
+import { useChartsContext } from '../context/ChartsProvider';
 import {
   clearHighlightedSeries,
   enableDataZoom,
+  getClosestTimestamp,
   getFormattedAxisLabel,
-  getYAxes,
+  getPointInGrid,
+  getFormattedAxis,
   restoreChart,
   ZoomEventData,
 } from '../utils';
-import { CursorCoordinates, TimeChartTooltip, TooltipConfig } from '../TimeSeriesTooltip';
+import { CursorCoordinates, TimeChartTooltip, TooltipConfig, DEFAULT_TOOLTIP_CONFIG } from '../TimeSeriesTooltip';
 import { useTimeZone } from '../context/TimeZoneProvider';
 
 use([
   EChartsLineChart,
+  EChartsBarChart,
   GridComponent,
   DatasetComponent,
   DataZoomComponent,
@@ -76,6 +81,7 @@ export interface TimeChartProps {
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
   syncGroup?: string;
+  isStackedBar?: boolean;
   onDataZoom?: (e: ZoomEventData) => void;
   onDoubleClick?: (e: MouseEvent) => void;
   __experimentalEChartsOptionsOverride?: (options: EChartsCoreOption) => EChartsCoreOption;
@@ -90,7 +96,8 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     yAxis,
     unit,
     grid,
-    tooltipConfig = { wrapLabels: true },
+    isStackedBar = false,
+    tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
     noDataVariant = 'message',
     syncGroup,
     onDataZoom,
@@ -99,15 +106,16 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   },
   ref
 ) {
-  const chartsTheme = useChartsTheme();
+  const { chartsTheme, enablePinning, lastTooltipPinnedCoords, setLastTooltipPinnedCoords } = useChartsContext();
+  const isPinningEnabled = tooltipConfig.enablePinning && enablePinning;
   const chartRef = useRef<EChartsInstance>();
   const [showTooltip, setShowTooltip] = useState<boolean>(true);
   const [tooltipPinnedCoords, setTooltipPinnedCoords] = useState<CursorCoordinates | null>(null);
+  const [pinnedCrosshair, setPinnedCrosshair] = useState<LineSeriesOption | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const { timeZone } = useTimeZone();
   const totalSeries = data?.length ?? 0;
-
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
@@ -170,19 +178,17 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           onDataZoom(zoomEvent);
         }
       },
+      finished: () => {
+        if (chartRef.current !== undefined) {
+          enableDataZoom(chartRef.current);
+        }
+      },
     };
   }, [onDataZoom, setTooltipPinnedCoords]);
-
-  if (chartRef.current !== undefined) {
-    enableDataZoom(chartRef.current);
-  }
 
   const { noDataOption } = chartsTheme;
 
   const option: EChartsCoreOption = useMemo(() => {
-    // TODO: fix loading state and noData variants
-    // if (data === undefined) return {};
-
     // The "chart" `noDataVariant` is only used when the `timeSeries` is an
     // empty array because a `null` value will throw an error.
     if (data === null || (data.length === 0 && noDataVariant === 'message')) return noDataOption;
@@ -199,9 +205,12 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
       dataset.push({ id: index, source: [...values], dimensions: ['time', 'value'] });
     });
 
+    const updatedSeriesMapping =
+      enablePinning && pinnedCrosshair !== null ? [...seriesMapping, pinnedCrosshair] : seriesMapping;
+
     const option: EChartsCoreOption = {
       dataset: dataset,
-      series: seriesMapping,
+      series: updatedSeriesMapping,
       xAxis: {
         type: 'time',
         min: isLocalTimeZone ? timeScale.startMs : utcToZonedTime(timeScale.startMs, timeZone),
@@ -210,13 +219,19 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           hideOverlap: true,
           formatter: getFormattedAxisLabel(timeScale.rangeMs ?? 0),
         },
+        axisPointer: {
+          snap: false, // important so shared crosshair does not lag
+        },
       },
-      yAxis: getYAxes(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, unit),
       animation: false,
       tooltip: {
         show: true,
-        trigger: 'axis',
-        showContent: false, // echarts tooltip content hidden since we use custom tooltip instead
+        // ECharts tooltip content hidden by default since we use custom tooltip instead.
+        // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
+        showContent: isStackedBar,
+        trigger: isStackedBar ? 'item' : 'axis',
+        appendToBody: true,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -224,7 +239,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         z: 0, // ensure point symbol shows on top of dashed line
         triggerEmphasis: false, // https://github.com/apache/echarts/issues/18495
         triggerTooltip: false,
-        snap: true,
+        snap: false, // xAxis.axisPointer.snap takes priority
       },
       toolbox: {
         feature: {
@@ -240,6 +255,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     if (__experimentalEChartsOptionsOverride) {
       return __experimentalEChartsOptionsOverride(option);
     }
+
     return option;
   }, [
     data,
@@ -252,35 +268,105 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     __experimentalEChartsOptionsOverride,
     noDataVariant,
     timeZone,
+    isStackedBar,
+    enablePinning,
+    pinnedCrosshair,
   ]);
+
+  // Update adjacent charts so tooltip is unpinned when current chart is clicked.
+  useEffect(() => {
+    // Only allow pinning one tooltip at a time, subsequent tooltip click unpins previous.
+    // Multiple tooltips can only be pinned if Ctrl or Cmd key is pressed while clicking.
+    const multipleTooltipsPinned = tooltipPinnedCoords !== null && lastTooltipPinnedCoords !== null;
+    if (multipleTooltipsPinned) {
+      if (!isEqual(lastTooltipPinnedCoords, tooltipPinnedCoords)) {
+        setTooltipPinnedCoords(null);
+        if (tooltipPinnedCoords !== null && pinnedCrosshair !== null) {
+          setPinnedCrosshair(null);
+        }
+      }
+    }
+    // tooltipPinnedCoords CANNOT be in dep array or tooltip pinning breaks in the current chart's onClick
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastTooltipPinnedCoords, seriesMapping]);
 
   return (
     <Box
       sx={{ height }}
+      // onContextMenu={(e) => {
+      //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
+      //   e.preventDefault(); // Prevent the default behaviour when right clicked
+      // }}
       onClick={(e) => {
+        // Allows user to opt-in to multi tooltip pinning when Ctrl or Cmd key held down
+        const isControlKeyPressed = e.ctrlKey || e.metaKey;
+        if (isControlKeyPressed) {
+          e.preventDefault();
+        }
+
+        // Determine where on chart canvas to plot pinned crosshair as markLine.
+        const pointInGrid = getPointInGrid(e.nativeEvent.offsetX, e.nativeEvent.offsetY, chartRef.current);
+        if (pointInGrid === null) {
+          return;
+        }
+
         // Pin and unpin when clicking on chart canvas but not tooltip text.
-        if (e.target instanceof HTMLCanvasElement) {
+        if (isPinningEnabled && e.target instanceof HTMLCanvasElement) {
+          // Pin tooltip and update shared charts context to remember these coordinates.
+          const pinnedPos: CursorCoordinates = {
+            page: {
+              x: e.pageX,
+              y: e.pageY,
+            },
+            client: {
+              x: e.clientX,
+              y: e.clientY,
+            },
+            plotCanvas: {
+              x: e.nativeEvent.offsetX,
+              y: e.nativeEvent.offsetY,
+            },
+            target: e.target,
+          };
+
           setTooltipPinnedCoords((current) => {
             if (current === null) {
-              return {
-                page: {
-                  x: e.pageX,
-                  y: e.pageY,
-                },
-                client: {
-                  x: e.clientX,
-                  y: e.clientY,
-                },
-                plotCanvas: {
-                  x: e.nativeEvent.offsetX,
-                  y: e.nativeEvent.offsetY,
-                },
-                target: e.target,
-              };
+              return pinnedPos;
             } else {
+              setPinnedCrosshair(null);
               return null;
             }
           });
+
+          setPinnedCrosshair((current) => {
+            // Only add pinned crosshair line series when there is not one already in seriesMapping.
+            if (current === null) {
+              const cursorX = pointInGrid[0];
+
+              // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
+              const firstTimeSeriesValues = data[0]?.values;
+              const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
+
+              // Crosshair snaps to nearest timestamp since cursor may be slightly to left or right
+              const pinnedCrosshair = merge({}, DEFAULT_PINNED_CROSSHAIR, {
+                markLine: {
+                  data: [
+                    {
+                      xAxis: closestTimestamp,
+                    },
+                  ],
+                },
+              } as LineSeriesOption);
+              return pinnedCrosshair;
+            } else {
+              // Clear previously set pinned crosshair
+              return null;
+            }
+          });
+
+          if (!isControlKeyPressed) {
+            setLastTooltipPinnedCoords(pinnedPos);
+          }
         }
       }}
       onMouseDown={(e) => {
@@ -338,12 +424,20 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         (option.tooltip as TooltipComponentOption)?.showContent === false &&
         tooltipConfig.hidden !== true && (
           <TimeChartTooltip
+            containerId={chartsTheme.tooltipPortalContainerId}
             chartRef={chartRef}
             data={data}
             seriesMapping={seriesMapping}
             wrapLabels={tooltipConfig.wrapLabels}
+            enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
             unit={unit}
+            onUnpinClick={() => {
+              // Unpins tooltip when clicking Pin icon in TooltipHeader.
+              setTooltipPinnedCoords(null);
+              // Clear previously set pinned crosshair.
+              setPinnedCrosshair(null);
+            }}
           />
         )}
       <EChart

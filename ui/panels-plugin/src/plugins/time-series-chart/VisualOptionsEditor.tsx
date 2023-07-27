@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Switch } from '@mui/material';
+import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -56,6 +56,33 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   return (
     <OptionsEditorGroup title="Visual">
       <OptionsEditorControl
+        label={'Display'}
+        control={
+          <ToggleButtonGroup
+            color="primary"
+            exclusive
+            value={value.display}
+            onChange={(__, newValue) => {
+              onChange({
+                ...value,
+                display: newValue,
+              });
+            }}
+          >
+            <ToggleButton
+              value="line"
+              selected={value.display === undefined || value.display === 'line'}
+              aria-label="display line series"
+            >
+              Line
+            </ToggleButton>
+            <ToggleButton value="bar" aria-label="display bar series">
+              Bar
+            </ToggleButton>
+          </ToggleButtonGroup>
+        }
+      />
+      <OptionsEditorControl
         label={VISUAL_CONFIG.line_width.label}
         control={
           <Slider
@@ -66,6 +93,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             marks
             min={VISUAL_CONFIG.line_width.min}
             max={VISUAL_CONFIG.line_width.max}
+            disabled={value.display === 'bar'}
             onChange={handleLineWidthChange}
           />
         }
@@ -81,6 +109,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             marks
             min={VISUAL_CONFIG.area_opacity.min}
             max={VISUAL_CONFIG.area_opacity.max}
+            disabled={value.display === 'bar'}
             onChange={handleAreaOpacityChange}
           />
         }
@@ -115,6 +144,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         control={
           <Switch
             checked={value.connect_nulls ?? DEFAULT_CONNECT_NULLS}
+            disabled={value.display === 'bar'}
             onChange={(e) => {
               onChange({
                 ...value,

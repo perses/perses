@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData } from '../model';
+import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '../model';
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;
@@ -31,6 +31,39 @@ export function getXValues(timeScale: TimeScale): number[] {
 }
 
 /**
+ * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
+ * processes the time series values, filling in any timestamps that are missing
+ * from the time series data with `null` values.
+ */
+export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale) {
+  let timestamp = timeScale.startMs;
+
+  const values = series.values;
+  const processedValues: TimeSeriesValueTuple[] = [];
+
+  for (const valueTuple of values) {
+    // Fill in values up to the current series value timestamp with nulls
+    while (timestamp < valueTuple[0]) {
+      processedValues.push([timestamp, null]);
+      timestamp += timeScale.stepMs;
+    }
+
+    // Now add the current value since timestamp should match
+    processedValues.push([timestamp, valueTuple[1]]);
+    timestamp += timeScale.stepMs;
+  }
+
+  // Add null values at the end of the series if necessary
+  while (timestamp <= timeScale.endMs) {
+    processedValues.push([timestamp, null]);
+    timestamp += timeScale.stepMs;
+  }
+
+  return processedValues;
+}
+
+/**
+ * [DEPRECATED] Used for legacy LineChart 'category' axis approach.
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
  * gets the values for the y axis of a graph, filling in any timestamps that are
  * missing from the time series data with `null` values.

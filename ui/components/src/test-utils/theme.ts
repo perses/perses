@@ -11,22 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesChartsTheme } from '../model';
+import { createTheme as createMuiTheme } from '@mui/material';
+import { PersesChartsTheme, EChartsTheme } from '../model';
+import { generateChartsTheme } from '../utils';
+import { SharedChartsState } from '../context';
 
-export const testChartsTheme: PersesChartsTheme = {
-  echartsTheme: {},
-  noDataOption: {},
-  sparkline: {
-    width: 1,
-    color: '#000000',
-  },
-  container: {
-    padding: {
-      default: 12,
+// app specific echarts option overrides
+const TEST_ECHARTS_THEME_OVERRIDES: EChartsTheme = {
+  textStyle: { fontFamily: 'Lato' },
+  categoryAxis: {
+    splitLine: {
+      show: false,
     },
   },
-  thresholds: {
-    defaultColor: '#59CC8D',
-    palette: ['#438FEB', '#FFB249', '#EE6C6C'],
+  timeAxis: {
+    splitLine: {
+      show: false,
+    },
   },
+  bar: {
+    barCategoryGap: 2,
+  },
+};
+
+export const testChartsTheme: PersesChartsTheme = generateChartsTheme(createMuiTheme({}), TEST_ECHARTS_THEME_OVERRIDES);
+
+export const mockChartsContext: SharedChartsState = {
+  chartsTheme: testChartsTheme,
+  enablePinning: false,
+  lastTooltipPinnedCoords: null,
+  setLastTooltipPinnedCoords: () => null,
 };

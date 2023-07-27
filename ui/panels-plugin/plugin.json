@@ -15,9 +15,9 @@
       },
       {
         "pluginType": "Panel",
-        "kind": "GaugeChart",
+        "kind": "BarChart",
         "display": {
-          "name": "Gauge Chart",
+          "name": "Bar Chart",
           "description": ""
         }
       },
@@ -26,6 +26,14 @@
         "kind": "StatChart",
         "display": {
           "name": "Stat Chart",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "GaugeChart",
+        "display": {
+          "name": "Gauge Chart",
           "description": ""
         }
       },

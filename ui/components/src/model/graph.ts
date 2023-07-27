@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesValueTuple } from '@perses-dev/core';
-import { LineSeriesOption } from 'echarts/charts';
+import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
 
 // adjust display when there are many time series to help with performance
@@ -32,11 +32,15 @@ export interface LegacyTimeSeries extends Omit<LineSeriesOption, 'data'> {
   data: EChartsValues[];
 }
 
-// TODO: Continue to simplify TimeChart types, fix legend and thresholds
-export type TimeChartSeriesMapping = LineSeriesOption[];
+// Used for TimeChart dataset support, each time series returned is mapped to series options using datasetIndex
+// - https://apache.github.io/echarts-handbook/en/concepts/dataset/#how-to-reference-several-datasets
+export type TimeChartSeriesMapping = TimeSeriesOption[];
 export type TimeChartLegendItems = LegendItem[];
 
-// TODO: Rename to LegacyEChartsDataFormat
+export type TimeSeriesOption = LineSeriesOption | BarSeriesOption;
+
+// [DEPRECATED] used for legacy LineChart 'category' axis.
+// May delete in future when embed users migrate to TimeChart.
 export type EChartsDataFormat = {
   timeSeries: LegacyTimeSeries[];
   xAxis: number[];
@@ -64,3 +68,37 @@ export type ChartInstance = {
    */
   clearHighlightedSeries: () => void;
 };
+
+export const PINNED_CROSSHAIR_SERIES_NAME = 'Pinned Crosshair';
+
+export const DEFAULT_PINNED_CROSSHAIR: LineSeriesOption = {
+  name: PINNED_CROSSHAIR_SERIES_NAME,
+  type: 'line',
+  // https://echarts.apache.org/en/option.html#series-line.markLine
+  markLine: {
+    data: [],
+    lineStyle: {
+      type: 'dashed',
+      width: 2,
+    },
+    emphasis: {
+      lineStyle: {
+        width: 2,
+        opacity: 1,
+      },
+    },
+    blur: {
+      lineStyle: {
+        width: 2,
+        opacity: 1,
+      },
+    },
+  },
+};
+
+export interface DatapointInfo {
+  dataIndex: number;
+  seriesIndex: number;
+  seriesName: string;
+  yValue: number;
+}
