@@ -38,20 +38,20 @@ describe('generateChartsTheme', () => {
             "default": 12,
           },
         },
-        "echartsTheme": Object {
-          "axisPointer": Object {
-            "lineStyle": Object {
+        "echartsTheme": {
+          "axisPointer": {
+            "lineStyle": {
               "color": "#9e9e9e",
             },
           },
-          "bar": Object {
+          "bar": {
             "barMaxWidth": 150,
             "itemStyle": {
               "borderColor": "#e0e0e0",
               "borderRadius": 0,
               "borderWidth": 0,
             },
-            "label": Object {
+            "label": {
               "color": "rgba(0, 0, 0, 0.87)",
               "show": false,
             },
@@ -149,52 +149,52 @@ describe('generateChartsTheme', () => {
             "symbol": "circle",
             "symbolSize": 4,
           },
-          "markLine": Object {
-            "itemStyle": Object {
+          "markLine": {
+            "itemStyle": {
               "color": "#9e9e9e",
             },
-            "lineStyle": Object {
+            "lineStyle": {
               "type": "dashed",
               "width": 1,
             },
             "symbol": "none",
             "symbolSize": 0,
           },
-          "textStyle": Object {
+          "textStyle": {
             "color": "rgba(0, 0, 0, 0.87)",
             "fontFamily": ""Roboto", "Helvetica", "Arial", sans-serif",
             "fontSize": 12,
           },
-          "timeAxis": Object {
-            "axisLabel": Object {
+          "timeAxis": {
+            "axisLabel": {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 15,
               "show": true,
             },
-            "axisLine": Object {
-              "lineStyle": Object {
+            "axisLine": {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": true,
             },
-            "axisTick": Object {
+            "axisTick": {
               "length": 6,
-              "lineStyle": Object {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": false,
             },
             "show": true,
-            "splitArea": Object {
-              "areaStyle": Object {
-                "color": Array [
+            "splitArea": {
+              "areaStyle": {
+                "color": [
                   "#e0e0e0",
                 ],
               },
               "show": false,
             },
-            "splitLine": Object {
-              "lineStyle": Object {
+            "splitLine": {
+              "lineStyle": {
                 "color": "#e0e0e0",
                 "opacity": 0.4,
                 "width": 0.5,
@@ -202,7 +202,7 @@ describe('generateChartsTheme', () => {
               "show": true,
             },
           },
-          "title": Object {
+          "title": {
             "show": false,
           },
           "toolbox": {
@@ -213,16 +213,16 @@ describe('generateChartsTheme', () => {
             "show": true,
             "top": 10,
           },
-          "tooltip": Object {
+          "tooltip": {
             "backgroundColor": undefined,
             "borderColor": undefined,
-            "textStyle": Object {
+            "textStyle": {
               "color": "#fff",
               "fontSize": 11,
             },
           },
-          "valueAxis": Object {
-            "axisLabel": Object {
+          "valueAxis": {
+            "axisLabel": {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 12,
             },
