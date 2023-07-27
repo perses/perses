@@ -128,7 +128,14 @@ export const EChart = React.memo(function EChart<T>({
   // Initialize chart, dispose on unmount
   useLayoutEffect(() => {
     if (containerRef.current === null || chartElement.current !== null) return;
-    chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
+
+    try {
+      chartElement.current = init(containerRef.current, theme, { renderer: renderer ?? 'canvas' });
+    } catch (error) {
+      console.error('Error initializing ECharts: ', error);
+      return;
+    }
+
     if (chartElement.current === undefined) return;
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
