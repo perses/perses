@@ -1,7 +1,7 @@
 {
   "kind": "BarChart",
   "spec": {
-    "calculation": "LastNumber",
+    "calculation": "last-number",
     "unit": {
       "kind": "Percent",
       "decimal_places": 2

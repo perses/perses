@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { DEFAULT_CALCULATION } from '@perses-dev/core';
 import { BarChart } from '@perses-dev/panels-plugin';
 import {
   WithDataQueries,
@@ -112,7 +113,7 @@ export const Primary: Story = {
       height: 400,
     },
     spec: {
-      calculation: 'LastNumber',
+      calculation: DEFAULT_CALCULATION,
       unit: { abbreviate: false, kind: 'Decimal' },
       sort: 'desc',
       mode: 'percentage',
