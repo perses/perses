@@ -38,7 +38,7 @@ describe('getContentWithLegendLayout', () => {
       minChildrenWidth: 0,
       minChildrenHeight: 0,
       theme: mockMuiTheme,
-      legendSize: 'Medium',
+      legendSize: 'medium',
     };
 
     test('does not show legend', () => {
@@ -66,7 +66,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -103,7 +103,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -140,7 +140,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Right',
+                position: 'right',
                 mode: mode,
               },
               data: [],
@@ -175,7 +175,7 @@ describe('getContentWithLegendLayout', () => {
             minChildrenHeight: 0,
             legendProps: {
               options: {
-                position: 'Bottom',
+                position: 'bottom',
                 mode: mode,
               },
               data: [],
@@ -213,7 +213,7 @@ describe('getContentWithLegendLayout', () => {
           minChildrenHeight: 0,
           legendProps: {
             options: {
-              position: 'Bottom',
+              position: 'bottom',
               mode: mode,
             },
             data: [],
@@ -250,7 +250,7 @@ describe('getContentWithLegendLayout', () => {
           minChildrenHeight: 100,
           legendProps: {
             options: {
-              position: 'Bottom',
+              position: 'bottom',
               mode: mode,
             },
             data: [],
@@ -285,8 +285,8 @@ describe('getContentWithLegendLayout', () => {
       minChildrenHeight: 0,
       legendProps: {
         options: {
-          position: 'Right',
-          mode: 'Table',
+          position: 'right',
+          mode: 'table',
         },
         tableProps: {
           columns: [
@@ -322,7 +322,7 @@ describe('getContentWithLegendLayout', () => {
 
     test('legend width accounts for columns', () => {
       const layout = getContentWithLegendLayout(layoutOpts);
-      expect(layout.legend.width).toEqual(TABLE_LEGEND_SIZE[size]['Right'] + 50);
+      expect(layout.legend.width).toEqual(TABLE_LEGEND_SIZE[size]['right'] + 50);
     });
   });
 
@@ -336,8 +336,8 @@ describe('getContentWithLegendLayout', () => {
         minChildrenHeight: 0,
         legendProps: {
           options: {
-            position: 'Bottom',
-            mode: 'Table',
+            position: 'bottom',
+            mode: 'table',
           },
           data: [
             {
@@ -354,7 +354,7 @@ describe('getContentWithLegendLayout', () => {
           selectedItems: 'ALL',
           onSelectedItemsChange: jest.fn(),
         },
-        legendSize: 'Medium',
+        legendSize: 'medium',
         theme: mockMuiTheme,
       };
 
@@ -364,7 +364,7 @@ describe('getContentWithLegendLayout', () => {
       });
 
       const layout = getContentWithLegendLayout(layoutOpts);
-      expect(layout.legend.height).toBeLessThan(TABLE_LEGEND_SIZE['Medium']['Bottom'] * MOCK_TABLE_CELL_HEIGHT);
+      expect(layout.legend.height).toBeLessThan(TABLE_LEGEND_SIZE['medium']['bottom'] * MOCK_TABLE_CELL_HEIGHT);
 
       // Height is for 3 rows because there are 2 legend items + 1 header row.
       expect(layout.legend.height).toEqual(3 * MOCK_TABLE_CELL_HEIGHT);

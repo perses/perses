@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
+import { Box, Skeleton, Stack } from '@mui/material';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
-import { Box, Skeleton, Stack } from '@mui/material';
-import { useMemo } from 'react';
-import { CalculationsMap } from '@perses-dev/core';
+import { CalculationsMap, DEFAULT_CALCULATION } from '@perses-dev/core';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
 import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
 
@@ -44,9 +44,15 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
     if (queryResults[0]?.data === undefined) {
       return [];
     }
+
+    if (CalculationsMap[calculation] === undefined) {
+      console.warn(`Invalid GaugeChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
+    }
+
+    const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
+
     const seriesData: GaugeSeries[] = [];
     for (const timeSeries of queryResults[0].data.series) {
-      const calculate = CalculationsMap[calculation];
       const series = {
         value: calculate(timeSeries.values),
         label: timeSeries.formattedName ?? '',

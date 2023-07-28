@@ -12,29 +12,26 @@
       "name": "queues-test"
     },
     "duration": "1h",
-    "variables": [{
-      "kind": "ListVariable",
-      "spec": {
-        "name": "datasource",
-        "display": {
-          "name": "PaaS",
-          "hidden": true
-        },
-        "allow_all_value": false,
-        "allow_multiple": false,
-        "plugin": {
-          "kind": "StaticListVariable",
-          "spec": {
-            "values": [
-              "grafana",
-              "migration",
-              "not",
-              "supported"
-            ]
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "name": "datasource",
+          "display": {
+            "name": "PaaS",
+            "hidden": true
+          },
+          "allow_all_value": false,
+          "allow_multiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": ["grafana", "migration", "not", "supported"]
+            }
           }
         }
       }
-    }],
+    ],
     "panels": {
       "0_0": {
         "kind": "Panel",
@@ -75,31 +72,34 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom",
-                "mode": "Table",
-                "values": ["Min", "Max", "Mean"]
+                "position": "bottom",
+                "mode": "table",
+                "values": ["min", "max", "mean"]
               }
             }
           },
-          "queries": [{
-            "kind": "TimeSeriesQuery",
-            "spec": {
-              "plugin": {
-                "kind": "PrometheusTimeSeriesQuery",
-                "spec": {
-                  "datasource": {
-                    "kind": "PrometheusDatasource",
-                    "name": "MigrationFromGrafanaNotSupported"
-                  },
-                  "query": "migration_from_grafana_not_supported"
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "MigrationFromGrafanaNotSupported"
+                    },
+                    "query": "migration_from_grafana_not_supported"
+                  }
                 }
               }
             }
-          }]
+          ]
         }
       }
     },
-    "layouts": [{
+    "layouts": [
+      {
         "kind": "Grid",
         "spec": {
           "items": []
@@ -114,7 +114,8 @@
               "open": false
             }
           },
-          "items": [{
+          "items": [
+            {
               "x": 0,
               "y": 0,
               "width": 12,
@@ -144,15 +145,17 @@
               "open": false
             }
           },
-          "items": [{
-            "x": 0,
-            "y": 2,
-            "width": 12,
-            "height": 10,
-            "content": {
-              "$ref": "#/spec/panels/1_0"
+          "items": [
+            {
+              "x": 0,
+              "y": 2,
+              "width": 12,
+              "height": 10,
+              "content": {
+                "$ref": "#/spec/panels/1_0"
+              }
             }
-          }]
+          ]
         }
       }
     ]

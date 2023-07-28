@@ -91,8 +91,8 @@ const meta: Meta<typeof ContentWithLegend> = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
-        mode: 'List',
+        position: 'right',
+        mode: 'list',
       },
       selectedItems: {},
       onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -127,7 +127,7 @@ export const Position: Story = {
                   data: generateMockLegendData(10),
                   options: {
                     position,
-                    mode: 'List',
+                    mode: 'list',
                   },
                   selectedItems: {},
                   onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -163,7 +163,7 @@ export const LegendSize: Story = {
                           data: generateMockLegendData(10),
                           options: {
                             position,
-                            mode: 'Table',
+                            mode: 'table',
                           },
                           selectedItems: {},
                           onSelectedItemsChange: (newSelectedItems) =>
@@ -235,8 +235,8 @@ export const Children: Story = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
-        mode: 'List',
+        position: 'right',
+        mode: 'list',
       },
       selectedItems: {},
       onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -313,8 +313,8 @@ export const TableWithColumns: Story = {
     legendProps: {
       data: generateMockLegendData(10),
       options: {
-        position: 'Right',
-        mode: 'Table',
+        position: 'right',
+        mode: 'table',
       },
       selectedItems: {},
       onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -363,8 +363,8 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Right',
-                  mode: 'List',
+                  position: 'right',
+                  mode: 'list',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -376,8 +376,8 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
-                  mode: 'List',
+                  position: 'bottom',
+                  mode: 'list',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -394,8 +394,8 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
-                  mode: 'List',
+                  position: 'bottom',
+                  mode: 'list',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -408,8 +408,8 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
-                  mode: 'List',
+                  position: 'bottom',
+                  mode: 'list',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -426,9 +426,9 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(2),
                 options: {
-                  position: 'Bottom',
-                  mode: 'Table',
-                  size: 'Small',
+                  position: 'bottom',
+                  mode: 'table',
+                  size: 'small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -441,9 +441,9 @@ export const Responsive: Story = {
               legendProps={{
                 data: generateMockLegendData(10),
                 options: {
-                  position: 'Bottom',
-                  mode: 'Table',
-                  size: 'Small',
+                  position: 'bottom',
+                  mode: 'table',
+                  size: 'small',
                 },
                 selectedItems: {},
                 onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),
@@ -460,7 +460,7 @@ export const ChangingPosition: Story = {
   args: {},
   render: (args) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [position, setPosition] = useState<LegendPositions>('Right');
+    const [position, setPosition] = useState<LegendPositions>('right');
 
     return (
       <Stack spacing={1}>
@@ -484,7 +484,7 @@ export const ChangingPosition: Story = {
             data: generateMockLegendData(100),
             options: {
               position: position,
-              mode: 'List',
+              mode: 'list',
             },
             selectedItems: {},
             onSelectedItemsChange: (newSelectedItems) => action('onSelectedItemsChange')(newSelectedItems),

@@ -27,12 +27,11 @@ import {
   ModeOption,
   SortOption,
 } from '@perses-dev/components';
-import { CalculationType, UnitOptions, isPercentUnit } from '@perses-dev/core';
+import { CalculationType, DEFAULT_CALCULATION, isPercentUnit, UnitOptions } from '@perses-dev/core';
 import { Button } from '@mui/material';
 import {
   BarChartOptions,
   BarChartOptionsEditorProps,
-  DEFAULT_CALCULATION,
   DEFAULT_UNIT,
   DEFAULT_SORT,
   DEFAULT_MODE,

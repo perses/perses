@@ -26,7 +26,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 99],
     ],
-    calculation: 'FirstNumber',
+    calculation: 'first-number',
     expected: 100,
   },
   {
@@ -35,7 +35,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 200],
     ],
-    calculation: 'FirstNumber',
+    calculation: 'first-number',
     expected: 100,
   },
   {
@@ -43,12 +43,12 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386895000, null],
       [1677386865000, null],
     ],
-    calculation: 'FirstNumber',
+    calculation: 'first-number',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'FirstNumber',
+    calculation: 'first-number',
     expected: undefined,
   },
   {
@@ -56,7 +56,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 99],
     ],
-    calculation: 'First',
+    calculation: 'first',
     expected: 100,
   },
   {
@@ -65,12 +65,12 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 200],
     ],
-    calculation: 'First',
+    calculation: 'first',
     expected: null,
   },
   {
     values: [],
-    calculation: 'First',
+    calculation: 'first',
     expected: undefined,
   },
   {
@@ -78,7 +78,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 99],
     ],
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     expected: 99,
   },
   {
@@ -87,17 +87,17 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, null],
     ],
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     expected: 200,
   },
   {
     values: [[1677386895000, null]],
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     expected: undefined,
   },
   {
@@ -106,7 +106,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, null],
     ],
-    calculation: 'Last',
+    calculation: 'last',
     expected: null,
   },
   {
@@ -114,12 +114,12 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, 100],
       [1677386880000, 200],
     ],
-    calculation: 'Last',
+    calculation: 'last',
     expected: 200,
   },
   {
     values: [],
-    calculation: 'Last',
+    calculation: 'last',
     expected: undefined,
   },
   {
@@ -128,7 +128,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, 300],
     ],
-    calculation: 'Sum',
+    calculation: 'sum',
     expected: 600,
   },
   {
@@ -138,7 +138,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, null],
       [1677386895000, 300],
     ],
-    calculation: 'Sum',
+    calculation: 'sum',
     expected: 600,
   },
   {
@@ -146,12 +146,12 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, null],
       [1677386895000, null],
     ],
-    calculation: 'Sum',
+    calculation: 'sum',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'Sum',
+    calculation: 'sum',
     expected: undefined,
   },
   {
@@ -160,7 +160,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, 300],
     ],
-    calculation: 'Mean',
+    calculation: 'mean',
     expected: 200,
   },
   {
@@ -170,7 +170,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386895000, 300],
       [1677386895000, null],
     ],
-    calculation: 'Mean',
+    calculation: 'mean',
     expected: 200,
   },
   {
@@ -178,12 +178,12 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386865000, null],
       [1677386895000, null],
     ],
-    calculation: 'Mean',
+    calculation: 'mean',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'Mean',
+    calculation: 'mean',
     expected: undefined,
   },
   {
@@ -192,7 +192,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, 500],
     ],
-    calculation: 'Min',
+    calculation: 'min',
     expected: 200,
   },
   {
@@ -202,17 +202,17 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 150],
       [1677386895000, 500],
     ],
-    calculation: 'Min',
+    calculation: 'min',
     expected: 150,
   },
   {
     values: [[1677386865000, null]],
-    calculation: 'Min',
+    calculation: 'min',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'Min',
+    calculation: 'min',
     expected: undefined,
   },
   {
@@ -221,7 +221,7 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 200],
       [1677386895000, 500],
     ],
-    calculation: 'Max',
+    calculation: 'max',
     expected: 500,
   },
   {
@@ -231,17 +231,17 @@ const singleCalculationTests: CalculationTestCase[] = [
       [1677386880000, 150],
       [1677386895000, 550],
     ],
-    calculation: 'Max',
+    calculation: 'max',
     expected: 550,
   },
   {
     values: [[1677386865000, null]],
-    calculation: 'Max',
+    calculation: 'max',
     expected: undefined,
   },
   {
     values: [],
-    calculation: 'Max',
+    calculation: 'max',
     expected: undefined,
   },
 ];
@@ -276,10 +276,10 @@ describe('getCalculations', () => {
       [1677386880000, 200],
       [1677386895000, 500],
     ];
-    const calculations = getCalculations(values, ['First', 'Last']);
-    expect(Object.keys(calculations)).toEqual(['First', 'Last']);
-    expect(calculations.First).toEqual(300);
-    expect(calculations.Last).toEqual(500);
+    const calculations = getCalculations(values, ['first', 'last']);
+    expect(Object.keys(calculations)).toEqual(['first', 'last']);
+    expect(calculations.first).toEqual(300);
+    expect(calculations.last).toEqual(500);
   });
 
   test('can include all calculations', () => {
@@ -289,22 +289,22 @@ describe('getCalculations', () => {
       [1677386895000, 500],
     ];
     const calculations = getCalculations(values, [
-      'First',
-      'Last',
-      'FirstNumber',
-      'LastNumber',
-      'Min',
-      'Max',
-      'Mean',
-      'Sum',
+      'first',
+      'last',
+      'first-number',
+      'last-number',
+      'min',
+      'max',
+      'mean',
+      'sum',
     ]);
-    expect(calculations.First).toEqual(300);
-    expect(calculations.Last).toEqual(500);
-    expect(calculations.FirstNumber).toEqual(300);
-    expect(calculations.LastNumber).toEqual(500);
-    expect(calculations.Min).toEqual(200);
-    expect(calculations.Max).toEqual(500);
-    expect(calculations.Mean).toEqual(1000 / 3);
-    expect(calculations.Sum).toEqual(1000);
+    expect(calculations.first).toEqual(300);
+    expect(calculations.last).toEqual(500);
+    expect(calculations['first-number']).toEqual(300);
+    expect(calculations['last-number']).toEqual(500);
+    expect(calculations.min).toEqual(200);
+    expect(calculations.max).toEqual(500);
+    expect(calculations.mean).toEqual(1000 / 3);
+    expect(calculations.sum).toEqual(1000);
   });
 });

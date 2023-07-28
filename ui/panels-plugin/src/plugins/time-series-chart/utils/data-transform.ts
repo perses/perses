@@ -81,7 +81,7 @@ export function getLineSeries(
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   let showPoints = data !== undefined && data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'Always') {
+  if (visual.show_points === 'always') {
     showPoints = true;
   }
 
@@ -92,7 +92,7 @@ export function getLineSeries(
     data: data,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'All' ? visual.stack : undefined,
+    stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,
@@ -141,7 +141,7 @@ export function getTimeSeries(
   const minuteMs = 60000;
   let showPoints = timeScale.rangeMs <= minuteMs * 15;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'Always') {
+  if (visual.show_points === 'always') {
     showPoints = true;
   }
 
@@ -152,7 +152,7 @@ export function getTimeSeries(
       datasetIndex,
       name: formattedName,
       color: paletteColor,
-      stack: visual.stack === 'All' ? visual.stack : undefined,
+      stack: visual.stack === 'all' ? visual.stack : undefined,
       label: {
         show: false,
       },
@@ -167,7 +167,7 @@ export function getTimeSeries(
     name: formattedName,
     connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
-    stack: visual.stack === 'All' ? visual.stack : undefined,
+    stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
     progressiveThreshold: OPTIMIZED_MODE_SERIES_LIMIT, // https://echarts.apache.org/en/option.html#series-lines.progressiveThreshold
     showSymbol: showPoints,

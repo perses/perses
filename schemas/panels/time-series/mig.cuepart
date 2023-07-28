@@ -4,12 +4,12 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         legend: {
             if #panel.type == "timeseries" {
                 position: [
-                    if #panel.options.legend.placement == "bottom" { "Bottom" },
-                    if #panel.options.legend.placement == "right" { "Right" },
+                    if #panel.options.legend.placement == "bottom" { "bottom" },
+                    if #panel.options.legend.placement == "right" { "right" },
                 ][0]
                 mode: [
-                    if #panel.options.legend.displayMode == "list" { "List" },
-                    if #panel.options.legend.displayMode == "table" { "Table" },
+                    if #panel.options.legend.displayMode == "list" { "list" },
+                    if #panel.options.legend.displayMode == "table" { "table" },
                 ][0]
                 values: [ for calc in #panel.options.legend.calcs 
                     if (#mapping.calc[calc] != _|_) { #mapping.calc[calc] }
@@ -17,12 +17,12 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
             }
             if #panel.type == "graph" {
                 position: [ // switch
-                    if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "Right" },
-                    { "Bottom" }
+                    if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "right" },
+                    { "bottom" }
                 ][0]
                 mode: [
-                    if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "Table" },
-                    { "List" }
+                    if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "table" },
+                    { "list" }
                 ][0]
                 values: [ for oldCalc, newCalc in #mapping.calc  
                     // Check if the mapping field is set on the legend and 

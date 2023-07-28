@@ -74,7 +74,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -117,7 +117,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
               y_axis: {
                 unit: {
@@ -311,7 +311,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              visual: { connect_nulls: true, show_points: 'Always' },
+              visual: { connect_nulls: true, show_points: 'always' },
             },
           },
           queries: [
@@ -363,7 +363,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              legend: { position: 'Bottom' },
+              legend: { position: 'bottom' },
             },
           },
           queries: [
@@ -392,7 +392,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              legend: { position: 'Right' },
+              legend: { position: 'right' },
             },
           },
           queries: [
@@ -421,7 +421,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              legend: { position: 'Bottom' },
+              legend: { position: 'bottom' },
             },
           },
           queries: [
@@ -473,7 +473,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
               visual: { connect_nulls: true },
             },
@@ -505,7 +505,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
               visual: {
                 palette: { kind: 'Categorical' },
@@ -652,7 +652,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -680,7 +680,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -708,7 +708,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -736,7 +736,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -764,7 +764,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -792,7 +792,7 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },
@@ -942,7 +942,7 @@ const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
             kind: 'TimeSeriesChart',
             spec: {
               legend: {
-                position: 'Right',
+                position: 'right',
               },
             },
           },

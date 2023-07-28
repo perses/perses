@@ -12,10 +12,9 @@
 // limitations under the License.
 
 import { ModeOption, SortOption } from '@perses-dev/components';
-import { CalculationType, Definition, UnitOptions } from '@perses-dev/core';
+import { CalculationType, DEFAULT_CALCULATION, Definition, UnitOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export const DEFAULT_CALCULATION: CalculationType = 'LastNumber';
 export const DEFAULT_UNIT: UnitOptions = { kind: 'Decimal', abbreviate: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';

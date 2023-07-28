@@ -39,7 +39,7 @@ export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     unit: {
       kind: 'Decimal',
     },

@@ -173,7 +173,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
             onChange={handleLegendSizeChange}
             // TODO: enable sizes for list mode when we normalize the layout of
             // lists to more closely match tables.
-            disabled={value === undefined || currentMode !== 'Table'}
+            disabled={value === undefined || currentMode !== 'table'}
             disableClearable
           ></SettingsAutocomplete>
         }
@@ -191,7 +191,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
             value={legendValuesConfig}
             options={VALUE_OPTIONS}
             onChange={handleLegendValueChange}
-            disabled={value === undefined || currentMode !== 'Table'}
+            disabled={value === undefined || currentMode !== 'table'}
             limitTags={1}
             ChipProps={{
               size: 'small',

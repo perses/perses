@@ -22,11 +22,7 @@
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": [
-                "one",
-                "two",
-                "three"
-              ]
+              "values": ["one", "two", "three"]
             }
           }
         }
@@ -47,11 +43,7 @@
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": [
-                "alice",
-                "bob",
-                "chris"
-              ]
+              "values": ["alice", "bob", "chris"]
             }
           }
         }
@@ -91,9 +83,7 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": [
-                "thanos_build_info"
-              ]
+              "matchers": ["thanos_build_info"]
             }
           }
         }
@@ -113,9 +103,7 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": [
-                "thanos_build_info{stack=~\"erd.+\"}"
-              ]
+              "matchers": ["thanos_build_info{stack=~\"erd.+\"}"]
             }
           }
         }
@@ -135,9 +123,7 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": [
-                "thanos_build_info{stack=~\"$lv1\"}"
-              ]
+              "matchers": ["thanos_build_info{stack=~\"$lv1\"}"]
             }
           }
         }
@@ -186,12 +172,7 @@
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": [
-                "grafana",
-                "migration",
-                "not",
-                "supported"
-              ]
+              "values": ["grafana", "migration", "not", "supported"]
             }
           }
         }
@@ -282,7 +263,7 @@
           "plugin": {
             "kind": "StatChart",
             "spec": {
-              "calculation": "LastNumber",
+              "calculation": "last-number",
               "thresholds": {
                 "steps": [
                   {
@@ -326,7 +307,7 @@
           "plugin": {
             "kind": "GaugeChart",
             "spec": {
-              "calculation": "LastNumber",
+              "calculation": "last-number",
               "thresholds": {
                 "steps": [
                   {
@@ -374,17 +355,17 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom",
-                "mode": "List",
+                "position": "bottom",
+                "mode": "list",
                 "values": [
-                  "Min",
-                  "Max",
-                  "First",
-                  "FirstNumber",
-                  "Last",
-                  "LastNumber",
-                  "Mean",
-                  "Sum"
+                  "min",
+                  "max",
+                  "first",
+                  "first-number",
+                  "last",
+                  "last-number",
+                  "mean",
+                  "sum"
                 ]
               },
               "thresholds": {
@@ -431,8 +412,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "Bottom",
-                "mode": "Table",
+                "position": "bottom",
+                "mode": "table",
                 "values": []
               },
               "thresholds": {
