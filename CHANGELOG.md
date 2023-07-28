@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.39.0 / 2023-07-26
+
+- [FEATURE] Injection of external variables (#1256)
+- [FEATURE] Add project datasources CRUD (#1282)
+- [FEATURE] Ability to customize panel extra content (#1315)
+- [ENHANCEMENT] Bar chart updates (#1325)
+- [ENHANCEMENT] Choose largest time unit that produces natural numbers (#1327)
+- [ENHANCEMENT] Include panel definition in extra panel props (#1323)
+- [ENHANCEMENT] Disable tooltip pinning at panel level using tooltip.enable_pinning (#1313)
+- [ENHANCEMENT] App level `enablePinning` prop added to ChartsProvider (#1317)
+- [ENHANCEMENT] Only pin one tooltip at a time by default, Cmd + Click to pin multiple (#1317)
+- [ENHANCEMENT] Snap crosshair to nearest datapoint when clicking to pin (#1317)
+- [ENHANCEMENT] Improve performance in checkforNearbyTimeSeries (#1330)
+- [BUGFIX] Disable tooltip pinning in panel preview (#1329)
+- [BREAKINGCHANGE] `ChartsThemeProvider` renamed to `ChartsProvider` (#1317)
+- [BREAKINGCHANGE] Update DataQueriesProvider to support other data types (#1318)
+
 ## 0.38.0 / 2023-07-20
 
 - [FEATURE] Add admin section on the UI (#1308)
