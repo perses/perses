@@ -138,7 +138,7 @@ export const Primary: Story = {
     },
     spec: {
       legend: {
-        position: 'Bottom',
+        position: 'bottom',
       },
     },
   },
@@ -200,9 +200,9 @@ export const TableLegendWithValues: Story = {
     },
     spec: {
       legend: {
-        position: 'Bottom',
-        mode: 'Table',
-        values: ['Mean', 'FirstNumber', 'LastNumber', 'Max', 'Min', 'Sum'],
+        position: 'bottom',
+        mode: 'table',
+        values: ['mean', 'first-number', 'last-number', 'max', 'min', 'sum'],
       },
     },
   },

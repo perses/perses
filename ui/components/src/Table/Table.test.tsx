@@ -143,7 +143,7 @@ function getTableCellByIndex(row: number, column: number) {
   return cellEl;
 }
 
-describe('Table', () => {
+describe('table', () => {
   test('renders a table with the expected column headings', () => {
     renderTable();
     screen.getByRole('table');

@@ -15,7 +15,7 @@ import { TitleComponentOption } from 'echarts';
 import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
 import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
-import { CalculationsMap, CalculationType, TimeSeriesData } from '@perses-dev/core';
+import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
@@ -100,7 +100,11 @@ const useStatChartData = (
   calculation: CalculationType
 ): StatChartData[] => {
   return useMemo(() => {
-    const calculate = CalculationsMap[calculation];
+    if (CalculationsMap[calculation] === undefined) {
+      console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
+    }
+    const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
+
     const statChartData: StatChartData[] = [];
     for (const result of queryResults) {
       // Skip queries that are still loading or don't have data

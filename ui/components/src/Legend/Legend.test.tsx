@@ -43,7 +43,7 @@ type RenderLegendOpts = Partial<
 const renderLegend = ({
   onSelectedItemsChange = jest.fn(),
   selectedItems = 'ALL',
-  position = 'Bottom',
+  position = 'bottom',
   onItemMouseOver = jest.fn(),
   onItemMouseOut = jest.fn(),
 }: RenderLegendOpts = {}) => {
@@ -66,7 +66,7 @@ const renderLegend = ({
 };
 
 describe('Legend', () => {
-  describe.each(['Right', 'Bottom'] as const)('positioned %s', (position) => {
+  describe.each(['right', 'bottom'] as const)('positioned %s', (position) => {
     test('renders items in a list', () => {
       renderLegend({ position });
 

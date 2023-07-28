@@ -32,14 +32,14 @@ import {
 // that we only use a subset of calculations for the legend because the calculations
 // are also used by other features.
 export const legendValues: CalculationType[] = [
-  'Mean',
-  'First',
-  'FirstNumber',
-  'Last',
-  'LastNumber',
-  'Min',
-  'Max',
-  'Sum',
+  'mean',
+  'first',
+  'first-number',
+  'last',
+  'last-number',
+  'min',
+  'max',
+  'sum',
 ];
 export type LegendValue = (typeof legendValues)[number];
 
@@ -56,18 +56,18 @@ export type LegendSingleSelectConfig = {
 };
 
 export const LEGEND_POSITIONS_CONFIG: Readonly<Record<LegendPositions, LegendSingleSelectConfig>> = {
-  Bottom: { label: 'Bottom' },
-  Right: { label: 'Right' },
+  bottom: { label: 'Bottom' },
+  right: { label: 'Right' },
 };
 
 export const LEGEND_MODE_CONFIG: Readonly<Record<LegendMode, LegendSingleSelectConfig>> = {
-  List: { label: 'List' },
-  Table: { label: 'Table' },
+  list: { label: 'List' },
+  table: { label: 'Table' },
 };
 
 export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectConfig>> = {
-  Small: { label: 'Small' },
-  Medium: { label: 'Medium' },
+  small: { label: 'Small' },
+  medium: { label: 'Medium' },
 };
 
 export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {

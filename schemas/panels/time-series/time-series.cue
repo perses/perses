@@ -20,9 +20,9 @@ import (
 #legend_value: common.#calculation
 
 #legend: {
-	position: "Bottom" | "Right"
-	mode?:    "List" | "Table"
-	size?:    "Small" | "Medium"
+	position: "bottom" | "right"
+	mode?:    "list" | "table"
+	size?:    "small" | "medium"
 	values?: [...#legend_value]
 }
 
@@ -38,10 +38,10 @@ import (
 	display?:       "line" | "bar"
 	line_width?:    number & >=0.25 & <=3
 	area_opacity?:  number & >=0 & <=1
-	show_points?:   "Auto" | "Always" // TODO: change to lowercase as part of kebab-case migration in PR #1262
+	show_points?:   "auto" | "always"
 	palette?:       #palette
 	point_radius?:  number & >=0 & <=6
-	stack?:         "All" | "Percent" // TODO: Percent option is disabled until support is added
+	stack?:         "all" | "percent" // TODO: Percent option is disabled until support is added
 	connect_nulls?: bool
 }
 

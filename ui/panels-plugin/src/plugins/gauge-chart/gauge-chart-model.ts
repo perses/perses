@@ -42,7 +42,7 @@ export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>
  */
 export function createInitialGaugeChartOptions(): GaugeChartOptions {
   return {
-    calculation: 'LastNumber',
+    calculation: 'last-number',
     unit: DEFAULT_UNIT,
     thresholds: {
       steps: [

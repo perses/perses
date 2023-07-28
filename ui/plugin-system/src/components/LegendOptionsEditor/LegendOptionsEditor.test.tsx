@@ -46,73 +46,73 @@ describe('LegendOptionsEditor', () => {
     renderLegendOptionsEditor(undefined, onChange);
     expect(getLegendPositionSelector()).toBeDisabled();
     userEvent.click(getLegendShowSwitch());
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom' });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom' });
   });
 
   it('should allow changing legend position', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom' }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom' }, onChange);
     expect(getLegendPositionSelector()).toBeEnabled();
     userEvent.click(getLegendPositionSelector());
     const positionRightOption = screen.getByRole('option', {
       name: 'Right',
     });
     userEvent.click(positionRightOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Right' });
+    expect(onChange).toHaveBeenCalledWith({ position: 'right' });
   });
 
   it('should allow changing legend mode', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'List' }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
     expect(getLegendModeSelector()).toBeEnabled();
     userEvent.click(getLegendModeSelector());
     const tableModeOption = screen.getByRole('option', {
       name: 'Table',
     });
     userEvent.click(tableModeOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table' });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table' });
   });
 
   it('should allow setting a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table' }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'table' }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
       name: /Sum/,
     });
     userEvent.click(totalValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['sum'] });
   });
 
   it('should allow adding a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Sum'] }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const minValueOption = screen.getByRole('option', {
       name: /Min/,
     });
     userEvent.click(minValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Sum', 'Min'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['sum', 'min'] });
   });
 
   it('should allow removing a legend value', () => {
     const onChange = jest.fn();
-    renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table', values: ['Sum', 'Min'] }, onChange);
+    renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum', 'min'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
     const totalValueOption = screen.getByRole('option', {
       name: /Sum/,
     });
     userEvent.click(totalValueOption);
-    expect(onChange).toHaveBeenCalledWith({ position: 'Bottom', mode: 'Table', values: ['Min'] });
+    expect(onChange).toHaveBeenCalledWith({ position: 'bottom', mode: 'table', values: ['min'] });
   });
 
   describe('when legend mode is "list"', () => {
     test('legend values should be disabled', () => {
       const onChange = jest.fn();
-      renderLegendOptionsEditor({ position: 'Bottom', mode: 'List' }, onChange);
+      renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
       expect(getLegendValuesSelector()).toBeDisabled();
     });
   });
@@ -120,7 +120,7 @@ describe('LegendOptionsEditor', () => {
   describe('when legend mode is "list"', () => {
     test('legend values should be enabled', () => {
       const onChange = jest.fn();
-      renderLegendOptionsEditor({ position: 'Bottom', mode: 'Table' }, onChange);
+      renderLegendOptionsEditor({ position: 'bottom', mode: 'table' }, onChange);
       expect(getLegendValuesSelector()).toBeEnabled();
     });
   });

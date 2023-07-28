@@ -103,8 +103,8 @@ const LegendWrapper = (props: LegendProps) => {
 
         // Accounting for border sizes to fit nicely within the box without
         // changing the box-sizing.
-        width: (position === 'Right' ? props.width + 100 : props.width) + borderWidth * 2,
-        height: (position === 'Right' ? props.height : props.height + 100) + borderWidth * 2,
+        width: (position === 'right' ? props.width + 100 : props.width) + borderWidth * 2,
+        height: (position === 'right' ? props.height : props.height + 100) + borderWidth * 2,
       }}
     >
       <Legend {...props} />
@@ -129,8 +129,8 @@ const meta: Meta<typeof Legend> = {
     height: 100,
     data: generateMockLegendData(5),
     options: {
-      position: 'Bottom',
-      mode: 'List',
+      position: 'bottom',
+      mode: 'list',
     },
     selectedItems: 'ALL',
   },
@@ -171,11 +171,11 @@ export const Position: Story = {
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <StorySection title="Right" level="h3">
-          <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right' }} />
+        <StorySection title="right" level="h3">
+          <LegendWrapper {...args} width={400} height={200} options={{ position: 'right' }} />
         </StorySection>
-        <StorySection title="Bottom" level="h3">
-          <LegendWrapper {...args} width={500} height={100} options={{ position: 'Bottom' }} />
+        <StorySection title="bottom" level="h3">
+          <LegendWrapper {...args} width={500} height={100} options={{ position: 'bottom' }} />
         </StorySection>
       </Stack>
     );
@@ -214,7 +214,7 @@ export const Mode: Story = {
         {legendModes.map((mode) => {
           return (
             <StorySection key={mode} title={mode} level="h3">
-              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'right', mode }} />
             </StorySection>
           );
         })}
@@ -282,7 +282,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     selectedItems="ALL"
                   />
                 </StorySection>
@@ -299,7 +299,7 @@ export const SelectedItems: StoryObj<LegendProps> = {
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     selectedItems={{
                       '1': true,
                       '3': true,
@@ -333,7 +333,7 @@ export const TableColumns: Story = {
     height: 200,
     selectedItems: 'ALL',
     data: generateMockLegendData(10),
-    options: { position: 'Bottom', mode: 'Table' },
+    options: { position: 'bottom', mode: 'table' },
     tableProps: {
       columns: [
         {
@@ -417,7 +417,7 @@ export const LegendItemEvents: Story = {
         {legendModes.map((mode) => {
           return (
             <StorySection key={mode} title={mode} level="h3">
-              <LegendWrapper {...args} width={400} height={200} options={{ position: 'Right', mode }} />
+              <LegendWrapper {...args} width={400} height={200} options={{ position: 'right', mode }} />
             </StorySection>
           );
         })}
@@ -462,7 +462,7 @@ export const RightWithLongLabels: Story = {
                 <StorySection key={mode} title={mode} level="h4">
                   <UncontrolledLegendWrapper
                     {...args}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(4, labelPrefix)}
                   />
                 </StorySection>
@@ -477,7 +477,7 @@ export const RightWithLongLabels: Story = {
                 <StorySection key={mode} title={mode} level="h4">
                   <UncontrolledLegendWrapper
                     {...args}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(1000, labelPrefix)}
                   />
                 </StorySection>
@@ -536,7 +536,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
   render: (args) => {
     return (
       <Stack spacing={3}>
-        <StorySection title="Position: right" level="h3">
+        <StorySection title="position: right" level="h3">
           <Stack spacing={1} direction="row" flexWrap="wrap">
             {legendModes.map((mode) => {
               return (
@@ -545,7 +545,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
                     {...args}
                     width={400}
                     height={200}
-                    options={{ position: 'Right', mode }}
+                    options={{ position: 'right', mode }}
                     data={generateMockLegendData(args.legendItemsCount)}
                   />
                 </StorySection>
@@ -553,7 +553,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
             })}
           </Stack>
         </StorySection>
-        <StorySection title="Position: bottom" level="h3">
+        <StorySection title="position: bottom" level="h3">
           <Stack spacing={1} direction="row" flexWrap="wrap">
             {legendModes.map((mode) => {
               return (
@@ -562,7 +562,7 @@ export const Scalability: StoryObj<LegendProps & { legendItemsCount: number }> =
                     {...args}
                     width={500}
                     height={100}
-                    options={{ position: 'Bottom', mode }}
+                    options={{ position: 'bottom', mode }}
                     data={generateMockLegendData(args.legendItemsCount)}
                   />
                 </StorySection>

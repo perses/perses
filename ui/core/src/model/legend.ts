@@ -16,13 +16,13 @@
 // component and the  `plugin-system` package for legend model code specific to
 // panel plugin specs.
 
-export const legendPositions = ['Bottom', 'Right'] as const;
+export const legendPositions = ['bottom', 'right'] as const;
 export type LegendPositions = (typeof legendPositions)[number];
 
-export const legendModes = ['List', 'Table'] as const;
+export const legendModes = ['list', 'table'] as const;
 export type LegendMode = (typeof legendModes)[number];
 
-export const legendSizes = ['Small', 'Medium'] as const;
+export const legendSizes = ['small', 'medium'] as const;
 export type LegendSize = (typeof legendSizes)[number];
 
 // Common legend options used across some UI components and panel specifications
@@ -45,9 +45,9 @@ export function isValidLegendSize(size: LegendSize) {
 }
 
 export const DEFAULT_LEGEND: Required<LegendOptionsBase> = {
-  position: 'Bottom',
-  mode: 'List',
-  size: 'Medium',
+  position: 'bottom',
+  mode: 'list',
+  size: 'medium',
 };
 
 export function getLegendPosition(position?: LegendPositions) {

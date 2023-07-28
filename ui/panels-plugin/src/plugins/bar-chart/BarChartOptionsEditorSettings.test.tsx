@@ -27,7 +27,7 @@ describe('BarChartOptionsEditorSettings', () => {
               unit: {
                 kind: 'Decimal',
               },
-              calculation: 'First',
+              calculation: 'first',
               sort: 'desc',
               mode: 'value',
             }
@@ -67,7 +67,7 @@ describe('BarChartOptionsEditorSettings', () => {
     userEvent.click(meanOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'Mean',
+        calculation: 'mean',
       })
     );
   });
@@ -109,7 +109,7 @@ describe('BarChartOptionsEditorSettings', () => {
       unit: {
         kind: 'Percent',
       },
-      calculation: 'First',
+      calculation: 'first',
       sort: 'desc',
       mode: 'value',
     });
@@ -126,7 +126,7 @@ describe('BarChartOptionsEditorSettings', () => {
       unit: {
         kind: 'Decimal',
       },
-      calculation: 'First',
+      calculation: 'first',
       sort: 'desc',
       mode: 'percentage',
     });
@@ -141,7 +141,7 @@ describe('BarChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Years',
         },
-        calculation: 'First',
+        calculation: 'first',
         sort: 'asc',
         mode: 'percentage',
       },
@@ -155,7 +155,7 @@ describe('BarChartOptionsEditorSettings', () => {
           kind: 'Decimal',
           abbreviate: true,
         },
-        calculation: 'LastNumber',
+        calculation: 'last-number',
         sort: 'desc',
         mode: 'value',
       })

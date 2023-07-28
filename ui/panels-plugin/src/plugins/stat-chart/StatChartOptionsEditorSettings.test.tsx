@@ -33,7 +33,7 @@ describe('StatChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Minutes',
         },
-        calculation: 'Last',
+        calculation: 'last',
       },
       onChange
     );
@@ -59,7 +59,7 @@ describe('StatChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Days',
         },
-        calculation: 'Sum',
+        calculation: 'sum',
       },
       onChange
     );
@@ -71,7 +71,7 @@ describe('StatChartOptionsEditorSettings', () => {
     userEvent.click(firstOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        calculation: 'FirstNumber',
+        calculation: 'first-number',
       })
     );
   });
@@ -83,7 +83,7 @@ describe('StatChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Days',
         },
-        calculation: 'Sum',
+        calculation: 'sum',
       },
       onChange
     );
@@ -105,7 +105,7 @@ describe('StatChartOptionsEditorSettings', () => {
         unit: {
           kind: 'Days',
         },
-        calculation: 'Sum',
+        calculation: 'sum',
         sparkline: {
           color: '#ff0000',
         },

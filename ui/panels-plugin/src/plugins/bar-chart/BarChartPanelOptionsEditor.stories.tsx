@@ -65,7 +65,7 @@ const meta: Meta<typeof PanelOptionsEditorWrapper> = {
         plugin: {
           kind: 'BarChart',
           spec: {
-            calculation: 'First',
+            calculation: 'first',
             unit: {
               kind: 'Decimal',
             },

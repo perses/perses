@@ -50,7 +50,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     });
   };
 
-  const currentStack: StackOptions = value.stack ?? 'None';
+  const currentStack: StackOptions = value.stack ?? 'none';
   const stackConfig = STACK_CONFIG[currentStack];
 
   return (
@@ -126,10 +126,10 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             onChange={(__, newValue) => {
               const updatedValue: TimeSeriesChartVisualOptions = {
                 ...value,
-                stack: newValue.id === 'None' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
+                stack: newValue.id === 'none' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
               };
               // stacked area chart preset to automatically set area under a curve shading
-              if (newValue.id === 'All' && !value.area_opacity) {
+              if (newValue.id === 'all' && !value.area_opacity) {
                 updatedValue.area_opacity = 0.3;
               }
               onChange(updatedValue);

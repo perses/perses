@@ -1,7 +1,7 @@
 {
   "kind": "StatChart",
   "spec": {
-    "calculation": "Sum",
+    "calculation": "sum",
     "unit": {
       "kind": "Decimal",
       "decimal_places": 2,

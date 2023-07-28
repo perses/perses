@@ -55,8 +55,7 @@ export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
   line_width?: number;
   area_opacity?: number;
-  // TODO: change to lowercase as part of kebab-case migration in PR #1262
-  show_points?: 'Auto' | 'Always';
+  show_points?: 'auto' | 'always';
   palette?: TimeSeriesChartPaletteOptions;
   point_radius?: number;
   stack?: StackOptions;
@@ -135,14 +134,13 @@ export const VISUAL_CONFIG = {
 };
 
 // None is equivalent to undefined since stack is optional
-export type StackOptions = 'None' | 'All' | 'Percent'; // TODO: add Percent option support
+export type StackOptions = 'none' | 'all'; // TODO: add percent option support
 
 export const STACK_CONFIG = {
-  None: { label: 'None' },
-  All: { label: 'All' },
-
+  none: { label: 'None' },
+  all: { label: 'All' },
   // TODO: enable option after 'Percent' implemented
-  Percent: { label: 'Percent', disabled: true }, // temporarily disabled
+  // percent: { label: 'Percent', disabled: true }, // hidden since not implemented yet
 };
 
 export const STACK_OPTIONS = Object.entries(STACK_CONFIG).map(([id, config]) => {
