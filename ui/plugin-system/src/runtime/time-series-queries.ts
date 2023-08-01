@@ -77,13 +77,17 @@ function getQueryOptions({
 /**
  * Runs a time series query using a plugin and returns the results.
  */
-export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
+export const useTimeSeriesQuery = (
+  definition: TimeSeriesQueryDefinition,
+  options?: UseTimeSeriesQueryOptions,
+  enabled?: boolean
+) => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
-    enabled: queryEnabled,
+    enabled: enabled || queryEnabled,
     queryKey: queryKey,
     refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
@@ -101,7 +105,11 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
 /**
  * Runs multiple time series queries using plugins and returns the results.
  */
-export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], options?: UseTimeSeriesQueryOptions) {
+export function useTimeSeriesQueries(
+  definitions: TimeSeriesQueryDefinition[],
+  options?: UseTimeSeriesQueryOptions,
+  enabled = true
+) {
   const { getPlugin } = usePluginRegistry();
   const context = useTimeSeriesQueryContext();
 
@@ -115,7 +123,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        enabled: queryEnabled,
+        enabled: enabled && queryEnabled,
         queryKey: queryKey,
         refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : undefined,
         queryFn: async () => {

@@ -19,8 +19,12 @@ import { useListPluginMetadata } from '../plugin-registry';
 type QueryOptions = Record<string, unknown>;
 export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
   definitions: Array<Definition<QueryPluginSpec>>;
-  options?: QueryOptions;
   children?: React.ReactNode;
+  options?: QueryOptions;
+  /**
+   * @default true
+   */
+  enabled?: boolean;
 }
 
 export interface DataQueriesContextType {

@@ -13,7 +13,6 @@
 
 import { useState, useMemo, memo } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { useInView } from 'react-intersection-observer';
 import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
@@ -66,12 +65,6 @@ export const Panel = memo(function Panel(props: PanelProps) {
     return { width, height };
   }, [width, height]);
 
-  const { ref, inView } = useInView({
-    threshold: 0.3,
-    initialInView: false,
-    triggerOnce: true,
-  });
-
   const chartsTheme = useChartsTheme();
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
@@ -84,7 +77,6 @@ export const Panel = memo(function Panel(props: PanelProps) {
 
   return (
     <Card
-      ref={ref}
       component="section"
       sx={combineSx(
         {
@@ -127,13 +119,11 @@ export const Panel = memo(function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec.plugin.spec]}>
-          {inView === true && (
-            <PanelContent
-              panelPluginKind={definition.spec.plugin.kind}
-              spec={definition.spec.plugin.spec}
-              contentDimensions={contentDimensions}
-            />
-          )}
+          <PanelContent
+            panelPluginKind={definition.spec.plugin.kind}
+            spec={definition.spec.plugin.spec}
+            contentDimensions={contentDimensions}
+          />
         </ErrorBoundary>
       </CardContent>
     </Card>
