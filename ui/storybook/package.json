@@ -9,7 +9,7 @@
     "storybook:build": "npm run storybook:clean && storybook build --config-dir src/config",
     "storybook:serve": "npx http-server --port=6006 ./storybook-static",
     "storybook:test": "test-storybook --config-dir src/config --stories-json",
-    "storybook:serve-and-test": "concurrently -k -s first -n \"SB,TEST\" \"npm run storybook:serve -- --silent\" \"npx wait-on tcp:6006 && npm run storybook:test\"",
+    "storybook:serve-and-test": "concurrently -k -s first -n \"SB,TEST\" \"npm run storybook:serve -- --silent\" \"npx wait-on tcp:127.0.0.1:6006 && npm run storybook:test\"",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
     "type-check": "tsc --noEmit",

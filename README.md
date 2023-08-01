@@ -87,7 +87,7 @@ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 To build Perses from source code, You need:
 
 - Go [version 1.18 or greater](https://golang.org/doc/install).
-- NodeJS [version 16 or greater](https://nodejs.org/).
+- NodeJS [version 18 or greater](https://nodejs.org/).
 - npm [version 8 or greater](https://www.npmjs.com/).
 
 Start by cloning the repository:

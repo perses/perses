@@ -32,60 +32,60 @@ describe('generateChartsTheme', () => {
 
   it('should return perses specific charts theme from converted MUI theme', () => {
     expect(chartsTheme).toMatchInlineSnapshot(`
-      Object {
-        "container": Object {
-          "padding": Object {
+      {
+        "container": {
+          "padding": {
             "default": 12,
           },
         },
-        "echartsTheme": Object {
-          "axisPointer": Object {
-            "lineStyle": Object {
+        "echartsTheme": {
+          "axisPointer": {
+            "lineStyle": {
               "color": "#9e9e9e",
             },
           },
-          "bar": Object {
+          "bar": {
             "barMaxWidth": 150,
-            "itemStyle": Object {
+            "itemStyle": {
               "borderColor": "#e0e0e0",
               "borderRadius": 0,
               "borderWidth": 0,
             },
-            "label": Object {
+            "label": {
               "color": "rgba(0, 0, 0, 0.87)",
               "show": false,
             },
           },
-          "categoryAxis": Object {
-            "axisLabel": Object {
+          "categoryAxis": {
+            "axisLabel": {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 15,
               "show": true,
             },
-            "axisLine": Object {
-              "lineStyle": Object {
+            "axisLine": {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": true,
             },
-            "axisTick": Object {
+            "axisTick": {
               "length": 6,
-              "lineStyle": Object {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": false,
             },
             "show": true,
-            "splitArea": Object {
-              "areaStyle": Object {
-                "color": Array [
+            "splitArea": {
+              "areaStyle": {
+                "color": [
                   "#e0e0e0",
                 ],
               },
               "show": false,
             },
-            "splitLine": Object {
-              "lineStyle": Object {
+            "splitLine": {
+              "lineStyle": {
                 "color": "#e0e0e0",
                 "opacity": 0.4,
                 "width": 0.5,
@@ -93,7 +93,7 @@ describe('generateChartsTheme', () => {
               "show": true,
             },
           },
-          "color": Array [
+          "color": [
             "#56B4E9",
             "#009E73",
             "#0072B2",
@@ -102,46 +102,46 @@ describe('generateChartsTheme', () => {
             "#E69F00",
             "#D55E00",
           ],
-          "gauge": Object {
-            "detail": Object {
+          "gauge": {
+            "detail": {
               "fontSize": 18,
               "fontWeight": 600,
               "valueAnimation": false,
             },
-            "splitLine": Object {
+            "splitLine": {
               "distance": 0,
               "length": 4,
-              "lineStyle": Object {
+              "lineStyle": {
                 "width": 1,
               },
             },
             "splitNumber": 12,
           },
-          "grid": Object {
+          "grid": {
             "bottom": 0,
             "containLabel": true,
             "left": 20,
             "right": 20,
             "top": 5,
           },
-          "legend": Object {
+          "legend": {
             "orient": "horizontal",
             "pageIconColor": "rgba(0, 0, 0, 0.54)",
             "pageIconInactiveColor": "rgba(0, 0, 0, 0.26)",
-            "pageTextStyle": Object {
+            "pageTextStyle": {
               "color": "#757575",
             },
-            "textStyle": Object {
+            "textStyle": {
               "color": "yellow",
             },
           },
-          "line": Object {
-            "emphasis": Object {
-              "lineStyle": Object {
+          "line": {
+            "emphasis": {
+              "lineStyle": {
                 "width": 1.5,
               },
             },
-            "lineStyle": Object {
+            "lineStyle": {
               "width": 1,
             },
             "showSymbol": true,
@@ -149,52 +149,52 @@ describe('generateChartsTheme', () => {
             "symbol": "circle",
             "symbolSize": 4,
           },
-          "markLine": Object {
-            "itemStyle": Object {
+          "markLine": {
+            "itemStyle": {
               "color": "#9e9e9e",
             },
-            "lineStyle": Object {
+            "lineStyle": {
               "type": "dashed",
               "width": 1,
             },
             "symbol": "none",
             "symbolSize": 0,
           },
-          "textStyle": Object {
+          "textStyle": {
             "color": "rgba(0, 0, 0, 0.87)",
-            "fontFamily": "\\"Roboto\\", \\"Helvetica\\", \\"Arial\\", sans-serif",
+            "fontFamily": ""Roboto", "Helvetica", "Arial", sans-serif",
             "fontSize": 12,
           },
-          "timeAxis": Object {
-            "axisLabel": Object {
+          "timeAxis": {
+            "axisLabel": {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 15,
               "show": true,
             },
-            "axisLine": Object {
-              "lineStyle": Object {
+            "axisLine": {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": true,
             },
-            "axisTick": Object {
+            "axisTick": {
               "length": 6,
-              "lineStyle": Object {
+              "lineStyle": {
                 "color": "#757575",
               },
               "show": false,
             },
             "show": true,
-            "splitArea": Object {
-              "areaStyle": Object {
-                "color": Array [
+            "splitArea": {
+              "areaStyle": {
+                "color": [
                   "#e0e0e0",
                 ],
               },
               "show": false,
             },
-            "splitLine": Object {
-              "lineStyle": Object {
+            "splitLine": {
+              "lineStyle": {
                 "color": "#e0e0e0",
                 "opacity": 0.4,
                 "width": 0.5,
@@ -202,36 +202,36 @@ describe('generateChartsTheme', () => {
               "show": true,
             },
           },
-          "title": Object {
+          "title": {
             "show": false,
           },
-          "toolbox": Object {
-            "iconStyle": Object {
+          "toolbox": {
+            "iconStyle": {
               "borderColor": "rgba(0, 0, 0, 0.87)",
             },
             "right": 10,
             "show": true,
             "top": 10,
           },
-          "tooltip": Object {
+          "tooltip": {
             "backgroundColor": undefined,
             "borderColor": undefined,
-            "textStyle": Object {
+            "textStyle": {
               "color": "#fff",
               "fontSize": 11,
             },
           },
-          "valueAxis": Object {
-            "axisLabel": Object {
+          "valueAxis": {
+            "axisLabel": {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 12,
             },
-            "axisLine": Object {
+            "axisLine": {
               "show": false,
             },
             "show": true,
-            "splitLine": Object {
-              "lineStyle": Object {
+            "splitLine": {
+              "lineStyle": {
                 "color": "#e0e0e0",
                 "opacity": 0.6,
                 "width": 0.5,
@@ -240,32 +240,32 @@ describe('generateChartsTheme', () => {
             },
           },
         },
-        "noDataOption": Object {
-          "title": Object {
+        "noDataOption": {
+          "title": {
             "left": "center",
             "show": true,
             "text": "No data",
-            "textStyle": Object {
+            "textStyle": {
               "color": "rgba(0, 0, 0, 0.87)",
               "fontSize": 16,
               "fontWeight": 400,
             },
             "top": "center",
           },
-          "xAxis": Object {
+          "xAxis": {
             "show": false,
           },
-          "yAxis": Object {
+          "yAxis": {
             "show": false,
           },
         },
-        "sparkline": Object {
+        "sparkline": {
           "color": "#1976d2",
           "width": 2,
         },
-        "thresholds": Object {
+        "thresholds": {
           "defaultColor": "#2e7d32",
-          "palette": Array [
+          "palette": [
             "#FFCC00",
             "#ed6c02",
             "#d32f2f",

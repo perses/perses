@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`getXValues returns timestamp values for the x axis 1`] = `
-Array [
+[
   1646164800000,
   1646168400000,
   1646172000000,
@@ -31,7 +31,7 @@ Array [
 `;
 
 exports[`getYValues fills in null values when missing some values at the beginning 1`] = `
-Array [
+[
   null,
   null,
   null,
@@ -61,7 +61,7 @@ Array [
 `;
 
 exports[`getYValues fills in null values when missing some values at the end 1`] = `
-Array [
+[
   0,
   1,
   2,
@@ -91,7 +91,7 @@ Array [
 `;
 
 exports[`getYValues fills in null values when missing some values in the middle 1`] = `
-Array [
+[
   null,
   null,
   null,
@@ -121,7 +121,7 @@ Array [
 `;
 
 exports[`getYValues fills in null values when there are no values 1`] = `
-Array [
+[
   null,
   null,
   null,
@@ -151,7 +151,7 @@ Array [
 `;
 
 exports[`getYValues uses the specified values if they have no missing timestamps 1`] = `
-Array [
+[
   0,
   1,
   2,
