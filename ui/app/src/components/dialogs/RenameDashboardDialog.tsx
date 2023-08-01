@@ -37,7 +37,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
-  const [name, setName] = useState<string>('');
+  const [name, setName] = useState<string>(getDashboardDisplayName(dashboard));
   const [error, setError] = useState<string>('');
 
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
@@ -98,7 +98,6 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
           type="text"
           fullWidth
           onChange={handleChange}
-          defaultValue={getDashboardDisplayName(dashboard)}
           value={name}
           error={!!error}
           helperText={error}
