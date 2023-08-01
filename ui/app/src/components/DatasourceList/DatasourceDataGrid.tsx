@@ -20,7 +20,6 @@ import {
   GridToolbarFilterButton,
   GridToolbarQuickFilter,
   GridRow,
-  GridRowParams,
   GridColumnHeaders,
 } from '@mui/x-data-grid';
 import { memo, useMemo } from 'react';
@@ -82,7 +81,7 @@ export interface DatasourceDataGridProperties {
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
   isLoading?: boolean;
-  onRowClick: (params: GridRowParams) => void;
+  onRowClick: (name: string, project?: string) => void;
 }
 
 export function DatasourceDataGrid(props: DatasourceDataGridProperties) {
@@ -100,7 +99,9 @@ export function DatasourceDataGrid(props: DatasourceDataGridProperties) {
     <DataGrid
       disableRowSelectionOnClick
       autoHeight={true}
-      onRowClick={onRowClick}
+      onRowClick={(params) => {
+        onRowClick(params.row.name, params.row.project);
+      }}
       rows={rows}
       columns={columns}
       getRowId={(row) => row.name}

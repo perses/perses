@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DatasourceSelector, GlobalDatasource } from '@perses-dev/core';
+import { ProjectDatasource, DatasourceSelector, GlobalDatasource, Datasource } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 import LRUCache from 'lru-cache';
 import { fetchDatasourceList } from './datasource-client';
@@ -22,7 +22,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
   getDatasource(
     project: string,
     selector: DatasourceSelector
-  ): Promise<{ resource: Datasource; proxyUrl: string } | undefined> {
+  ): Promise<{ resource: ProjectDatasource; proxyUrl: string } | undefined> {
     return fetchDatasourceList(project, selector.kind, selector.name ? undefined : true, selector.name).then((list) => {
       // hopefully it should return at most one element
       if (list[0] !== undefined) {
@@ -48,7 +48,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
     });
   }
 
-  listDatasources(project: string, pluginKind?: string): Promise<Datasource[]> {
+  listDatasources(project: string, pluginKind?: string): Promise<ProjectDatasource[]> {
     return fetchDatasourceList(project, pluginKind);
   }
 
@@ -58,7 +58,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
 }
 
 class Cache {
-  private datasources: LRUCache<string, Datasource>;
+  private datasources: LRUCache<string, ProjectDatasource>;
   private emptyDatasources: LRUCache<string, boolean>;
   private globalDatasources: LRUCache<string, GlobalDatasource>;
 
@@ -68,17 +68,17 @@ class Cache {
     // Note: TTL (Time To Leave) is in millisecond.
     const option = { ttl: 5 * 60 * 1000, ttlAutopurge: true };
     this.globalDatasources = new LRUCache<string, GlobalDatasource>(option);
-    this.datasources = new LRUCache<string, Datasource>(option);
+    this.datasources = new LRUCache<string, ProjectDatasource>(option);
     this.emptyDatasources = new LRUCache<string, boolean>(option);
   }
 
-  setDatasources(list: Datasource[]) {
+  setDatasources(list: ProjectDatasource[]) {
     for (const dts of list) {
       this.setDatasource(dts);
     }
   }
 
-  setDatasource(dts: Datasource) {
+  setDatasource(dts: ProjectDatasource) {
     const kind = dts.spec.plugin.kind;
     const project = dts.metadata.project;
     if (dts.spec.default) {
@@ -157,7 +157,7 @@ export class CachedDatasourceAPI implements DatasourceApi {
   getDatasource(
     project: string,
     selector: DatasourceSelector
-  ): Promise<{ resource: Datasource; proxyUrl: string } | undefined> {
+  ): Promise<{ resource: ProjectDatasource; proxyUrl: string } | undefined> {
     const { resource, keyExist } = this.cache.getDatasource(project, selector);
     if (resource) {
       return Promise.resolve({ resource: resource, proxyUrl: getProxyUrl(resource) });
@@ -200,7 +200,7 @@ export class CachedDatasourceAPI implements DatasourceApi {
     });
   }
 
-  listDatasources(project: string, pluginKind?: string): Promise<Datasource[]> {
+  listDatasources(project: string, pluginKind?: string): Promise<ProjectDatasource[]> {
     return this.client.listDatasources(project, pluginKind).then((list) => {
       this.cache.setDatasources(list);
       return list;
@@ -216,7 +216,7 @@ export class CachedDatasourceAPI implements DatasourceApi {
 }
 
 // Helper function for getting a proxy URL from a datasource or global datasource
-function getProxyUrl(datasource: Datasource | GlobalDatasource) {
+function getProxyUrl(datasource: Datasource) {
   let url = `/proxy`;
   if (datasource.kind === 'Datasource') {
     url += `/projects/${encodeURIComponent(datasource.metadata.project)}`;

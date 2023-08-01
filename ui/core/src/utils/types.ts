@@ -11,11 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './event';
-export * from './fetch';
-export * from './is-empty-object';
-export * from './memo';
-export * from './panel-refs';
-export * from './text';
-export * from './time-series-data';
-export * from './types';
+export type DispatchWithPromise<A> = (value: A) => Promise<void>;

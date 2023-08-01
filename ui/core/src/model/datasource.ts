@@ -27,11 +27,13 @@ export interface GlobalDatasource {
 /**
  * A Datasource resource, that belongs to a project.
  */
-export interface Datasource {
+export interface ProjectDatasource {
   kind: 'Datasource';
   metadata: ProjectMetadata;
   spec: DatasourceSpec;
 }
+
+export type Datasource = ProjectDatasource | GlobalDatasource;
 
 export interface DatasourceSpec<PluginSpec = UnknownSpec> {
   display?: Display;

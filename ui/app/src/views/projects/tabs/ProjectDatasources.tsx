@@ -12,8 +12,16 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useDatasourceList } from '../../../model/datasource-client';
-import { ProjectDatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import { useSnackbar } from '@perses-dev/components';
+import { useCallback } from 'react';
+import { getDatasourceDisplayName, ProjectDatasource } from '@perses-dev/core';
+import {
+  useDatasourceList,
+  useCreateDatasourceMutation,
+  useDeleteDatasourceMutation,
+  useUpdateDatasourceMutation,
+} from '../../../model/datasource-client';
+import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
 
 interface ProjectDatasourcesProps {
   projectName: string;
@@ -25,12 +33,83 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   const { projectName, hideToolbar, id } = props;
   const { data, isLoading } = useDatasourceList(projectName);
 
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+
+  const createDatasourceMutation = useCreateDatasourceMutation(projectName);
+  const deleteDatasourceMutation = useDeleteDatasourceMutation(projectName);
+  const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
+
+  const handleDatasourceCreate = useCallback(
+    (datasource: ProjectDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        createDatasourceMutation.mutate(datasource, {
+          onSuccess: (createdDatasource: ProjectDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+  );
+
+  const handleDatasourceUpdate = useCallback(
+    (datasource: ProjectDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        updateDatasourceMutation.mutate(datasource, {
+          onSuccess: (updatedDatasource: ProjectDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
+  );
+
+  const handleDatasourceDelete = useCallback(
+    (datasource: ProjectDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        deleteDatasourceMutation.mutate(datasource, {
+          onSuccess: (deletedDatasource: ProjectDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation]
+  );
+
   return (
     <Card id={id}>
-      <ProjectDatasourceList
-        projectName={projectName}
-        datasourceList={data || []}
+      <DatasourceList
+        data={data || []}
         hideToolbar={hideToolbar}
+        onCreate={handleDatasourceCreate}
+        onUpdate={handleDatasourceUpdate}
+        onDelete={handleDatasourceDelete}
         isLoading={isLoading}
         initialState={{
           columns: {

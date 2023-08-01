@@ -12,8 +12,16 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useGlobalDatasourceList } from '../../../model/admin-client';
-import { GlobalDatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import { getDatasourceDisplayName, GlobalDatasource } from '@perses-dev/core';
+import { useSnackbar } from '@perses-dev/components';
+import { useCallback } from 'react';
+import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import {
+  useCreateGlobalDatasourceMutation,
+  useDeleteGlobalDatasourceMutation,
+  useGlobalDatasourceList,
+  useUpdateGlobalDatasourceMutation,
+} from '../../../model/admin-client';
 
 interface GlobalDatasourcesProps {
   hideToolbar?: boolean;
@@ -23,12 +31,83 @@ interface GlobalDatasourcesProps {
 export function GlobalDatasources(props: GlobalDatasourcesProps) {
   const { hideToolbar, id } = props;
   const { data, isLoading } = useGlobalDatasourceList();
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+
+  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
+  const deleteDatasourceMutation = useDeleteGlobalDatasourceMutation();
+  const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
+
+  const handleDatasourceCreate = useCallback(
+    (datasource: GlobalDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        createDatasourceMutation.mutate(datasource, {
+          onSuccess: (createdDatasource: GlobalDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+  );
+
+  const handleDatasourceUpdate = useCallback(
+    (datasource: GlobalDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        updateDatasourceMutation.mutate(datasource, {
+          onSuccess: (updatedDatasource: GlobalDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
+  );
+
+  const handleDatasourceDelete = useCallback(
+    (datasource: GlobalDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        deleteDatasourceMutation.mutate(datasource, {
+          onSuccess: (deletedDatasource: GlobalDatasource) => {
+            successSnackbar(
+              `Global Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, deleteDatasourceMutation]
+  );
 
   return (
     <Card id={id}>
-      <GlobalDatasourceList
-        datasourceList={data || []}
+      <DatasourceList
+        data={data || []}
         hideToolbar={hideToolbar}
+        onCreate={handleDatasourceCreate}
+        onUpdate={handleDatasourceUpdate}
+        onDelete={handleDatasourceDelete}
         isLoading={isLoading}
         initialState={{
           columns: {

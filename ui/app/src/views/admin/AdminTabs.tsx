@@ -27,7 +27,7 @@ import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
-import { GlobalDatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
+import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 
@@ -47,21 +47,6 @@ function TabButton(props: TabButtonProps) {
   const [isCreateGlobalDatasourceDrawerStateOpened, setCreateGlobalDatasourceFormStateOpened] = useState(false);
   const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
 
-  const handleGlobalDatasourceCreation = useCallback(
-    (datasource: GlobalDatasource) => {
-      createDatasourceMutation.mutate(datasource, {
-        onSuccess: (createdDatasource: GlobalDatasource) => {
-          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setCreateGlobalDatasourceFormStateOpened(false);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-          throw err;
-        },
-      });
-    },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
-  );
   const handleVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
       createGlobalVariableMutation.mutate(variable, {
@@ -78,6 +63,22 @@ function TabButton(props: TabButtonProps) {
       });
     },
     [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
+  );
+
+  const handleGlobalDatasourceCreation = useCallback(
+    (datasource: GlobalDatasource) => {
+      createDatasourceMutation.mutate(datasource, {
+        onSuccess: (createdDatasource: GlobalDatasource) => {
+          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          setCreateGlobalDatasourceFormStateOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
   );
 
   switch (props.index) {
@@ -118,7 +119,7 @@ function TabButton(props: TabButtonProps) {
             variant="contained"
             onClick={() => setCreateGlobalDatasourceFormStateOpened(true)}
           />
-          <GlobalDatasourceDrawer
+          <DatasourceDrawer
             datasource={{
               kind: 'GlobalDatasource',
               metadata: {

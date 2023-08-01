@@ -11,68 +11,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Datasource,
-  GlobalDatasource,
-  getDatasourceDisplayName,
-  getDatasourceExtendedDisplayName,
-} from '@perses-dev/core';
+import { getDatasourceDisplayName, getMetadataProject, Datasource, DispatchWithPromise } from '@perses-dev/core';
 import { Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { useSnackbar } from '@perses-dev/components';
-import {
-  useCreateGlobalDatasourceMutation,
-  useDeleteGlobalDatasourceMutation,
-  useUpdateGlobalDatasourceMutation,
-} from '../../model/admin-client';
-import {
-  useCreateDatasourceMutation,
-  useDeleteDatasourceMutation,
-  useUpdateDatasourceMutation,
-} from '../../model/datasource-client';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
-import { GlobalDatasourceDrawer, ProjectDatasourceDrawer } from './DatasourceDrawer';
+import { DatasourceDrawer } from './DatasourceDrawer';
 
-export interface ProjectDatasourceListProperties {
-  projectName: string;
-  datasourceList: Datasource[];
+export interface DatasourceListProperties<T extends Datasource> {
+  data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
+  onUpdate: DispatchWithPromise<T>;
+  onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
   isLoading?: boolean;
 }
 
 /**
  * Display datasources in a table style.
- * @param props.datasourceList Contains all datasources to display
+ * @param props.data Contains all datasources to display
  * @param props.hideToolbar Hide toolbar if enabled
+ * @param props.onCreate Event received when a 'create' action has been requested
+ * @param props.onUpdate Event received when an 'update' action has been requested
+ * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
- * @param props.isLoading Display a loading circle if enableds
+ * @param props.isLoading Display a loading circle if enabled
  */
-export function ProjectDatasourceList(props: ProjectDatasourceListProperties) {
-  const { projectName, datasourceList, hideToolbar, initialState, isLoading } = props;
+export function DatasourceList<T extends Datasource>(props: DatasourceListProperties<T>) {
+  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
 
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const createDatasourceMutation = useCreateDatasourceMutation(projectName);
-  const deleteDatasourceMutation = useDeleteDatasourceMutation(projectName);
-  const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
-
-  const getDatasource = useCallback(
-    (project: string, name: string) => {
-      return datasourceList.find(
-        (datasource) => datasource.metadata.project === project && datasource.metadata.name === name
+  const findDatasource = useCallback(
+    (name: string, project?: string) => {
+      return data.find(
+        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name
       );
     },
-    [datasourceList]
+    [data]
   );
 
   const rows = useMemo(() => {
-    return datasourceList.map(
+    return data.map(
       (datasource) =>
         ({
-          project: datasource.metadata.project,
+          project: getMetadataProject(datasource.metadata),
           name: datasource.metadata.name,
           displayName: getDatasourceDisplayName(datasource),
           version: datasource.metadata.version,
@@ -81,70 +65,33 @@ export function ProjectDatasourceList(props: ProjectDatasourceListProperties) {
           type: datasource.spec.plugin.kind,
         } as Row)
     );
-  }, [datasourceList]);
+  }, [data]);
 
-  const [targetedDatasource, setTargetedDatasource] = useState<Datasource>();
+  const [targetedDatasource, setTargetedDatasource] = useState<T>();
   const [isEditDatasourceFormStateOpened, setEditDatasourceFormStateOpened] = useState<boolean>(false);
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: Datasource) => {
+    async (datasource: T) => {
       if (targetedDatasource != undefined && datasource.metadata.name != targetedDatasource.metadata.name) {
         // In this case "move" the datasource, aka create it with the new name & remove the former one
         // We do this because we can't just do a PUT call in that case (results in "document not found" error)
         // TODO: create + delete calls should be bundled together so that we avoid the case where only one would succeed
-        createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: Datasource) => {
-            successSnackbar(
-              `Datasource ${getDatasourceExtendedDisplayName(createdDatasource)} has been successfully created`
-            );
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
-        deleteDatasourceMutation.mutate(targetedDatasource, {
-          onSuccess: (deletedDatasource: Datasource) => {
-            successSnackbar(
-              `Datasource ${getDatasourceExtendedDisplayName(deletedDatasource)} has been successfully deleted`
-            );
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
+        await onCreate(datasource);
+        await onDelete(targetedDatasource);
       } else {
-        updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: Datasource) => {
-            successSnackbar(`Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`);
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
+        await onUpdate(datasource);
       }
+      setEditDatasourceFormStateOpened(false);
     },
-    [
-      exceptionSnackbar,
-      successSnackbar,
-      createDatasourceMutation,
-      deleteDatasourceMutation,
-      updateDatasourceMutation,
-      targetedDatasource,
-    ]
+    [onCreate, onUpdate, onDelete, targetedDatasource]
   );
 
-  const onRowClick = useCallback(
-    (params: GridRowParams) => {
-      setTargetedDatasource(getDatasource(params.row.project, params.row.name));
+  const handleRowClick = useCallback(
+    (name: string, project?: string) => {
+      setTargetedDatasource(findDatasource(name, project));
       setEditDatasourceFormStateOpened(true);
     },
-    [getDatasource]
+    [findDatasource]
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -206,196 +153,15 @@ export function ProjectDatasourceList(props: ProjectDatasourceListProperties) {
         initialState={initialState}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
-        onRowClick={onRowClick}
+        onRowClick={handleRowClick}
       />
       {targetedDatasource && (
-        <ProjectDatasourceDrawer
+        <DatasourceDrawer
           datasource={targetedDatasource}
           isOpen={isEditDatasourceFormStateOpened}
           saveActionStr="Update"
           onSave={handleDatasourceUpdate}
-          onClose={() => setEditDatasourceFormStateOpened(false)}
-        />
-      )}
-    </Stack>
-  );
-}
-
-export interface GlobalDatasourceListProperties {
-  datasourceList: GlobalDatasource[];
-  hideToolbar?: boolean;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
-
-/**
- * Display datasources in a table style.
- * @param props.datasourceList Contains all datasources to display
- * @param props.hideToolbar Hide toolbar if enabled
- * @param props.initialState Provide a way to override default initialState
- * @param props.isLoading Display a loading circle if enableds
- */
-export function GlobalDatasourceList(props: GlobalDatasourceListProperties) {
-  const { datasourceList, hideToolbar, initialState, isLoading } = props;
-
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
-  const deleteDatasourceMutation = useDeleteGlobalDatasourceMutation();
-  const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
-
-  const getDatasource = useCallback(
-    (name: string) => {
-      return datasourceList.find((datasource) => datasource.metadata.name === name);
-    },
-    [datasourceList]
-  );
-
-  const rows = useMemo(() => {
-    return datasourceList.map(
-      (datasource) =>
-        ({
-          name: datasource.metadata.name,
-          displayName: getDatasourceDisplayName(datasource),
-          version: datasource.metadata.version,
-          createdAt: datasource.metadata.created_at,
-          updatedAt: datasource.metadata.updated_at,
-          type: datasource.spec.plugin.kind,
-        } as Row)
-    );
-  }, [datasourceList]);
-
-  const [targetedDatasource, setTargetedDatasource] = useState<GlobalDatasource>();
-  const [isEditDatasourceFormStateOpened, setEditDatasourceFormStateOpened] = useState<boolean>(false);
-
-  const handleDatasourceUpdate = useCallback(
-    (datasource: GlobalDatasource) => {
-      if (targetedDatasource != undefined && datasource.metadata.name != targetedDatasource.metadata.name) {
-        // In this case "move" the datasource, aka create it with the new name & remove the former one
-        // We do this because we can't just do a PUT call in that case (results in "document not found" error)
-        // TODO: create + delete calls should be bundled together so that we avoid the case where only one would succeed
-        createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: GlobalDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceExtendedDisplayName(createdDatasource)} has been successfully created`
-            );
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
-        deleteDatasourceMutation.mutate(targetedDatasource, {
-          onSuccess: (deletedDatasource: GlobalDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceExtendedDisplayName(deletedDatasource)} has been successfully deleted`
-            );
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
-      } else {
-        updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: GlobalDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
-            );
-            setEditDatasourceFormStateOpened(false);
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            throw err;
-          },
-        });
-      }
-    },
-    [
-      exceptionSnackbar,
-      successSnackbar,
-      createDatasourceMutation,
-      deleteDatasourceMutation,
-      updateDatasourceMutation,
-      targetedDatasource,
-    ]
-  );
-
-  const onRowClick = useCallback(
-    (params: GridRowParams) => {
-      setTargetedDatasource(getDatasource(params.row.name));
-      setEditDatasourceFormStateOpened(true);
-    },
-    [getDatasource]
-  );
-
-  const columns = useMemo<Array<GridColDef<Row>>>(
-    () => [
-      { field: 'type', headerName: 'Type', type: 'string', flex: 2 },
-      {
-        field: 'name',
-        headerName: 'Name',
-        type: 'string',
-        flex: 2,
-        renderCell: (params) => <pre>{params.value}</pre>,
-      },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-    ],
-    []
-  );
-
-  return (
-    <Stack width="100%">
-      <DatasourceDataGrid
-        rows={rows}
-        columns={columns}
-        initialState={initialState}
-        hideToolbar={hideToolbar}
-        isLoading={isLoading}
-        onRowClick={onRowClick}
-      />
-      {targetedDatasource && (
-        <GlobalDatasourceDrawer
-          datasource={targetedDatasource}
-          isOpen={isEditDatasourceFormStateOpened}
-          saveActionStr="Update"
-          onSave={handleDatasourceUpdate}
+          onDelete={onDelete}
           onClose={() => setEditDatasourceFormStateOpened(false)}
         />
       )}

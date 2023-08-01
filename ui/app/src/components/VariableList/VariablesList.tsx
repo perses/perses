@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
+import { DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -25,8 +25,6 @@ import { useIsReadonly } from '../../model/config-client';
 import { DeleteVariableDialog } from '../dialogs';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableFormDrawer } from './VariableFormDrawer';
-
-type DispatchWithPromise<A> = (value: A) => Promise<void>;
 
 export interface VariableListProperties<T extends Variable> {
   data: T[];
