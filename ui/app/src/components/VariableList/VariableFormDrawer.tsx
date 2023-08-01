@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, VariableResource } from '@perses-dev/core';
-import React, { DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
+import { VariableDefinition, Variable, getVariableProject } from '@perses-dev/core';
+import React, { Dispatch, DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
 import { DatasourceStoreProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
@@ -25,17 +25,17 @@ import {
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 
-interface VariableFormDrawerProps {
-  variable: VariableResource;
+interface VariableFormDrawerProps<T extends Variable> {
+  variable: T;
   isOpen: boolean;
-  onChange?: (variable: VariableResource) => void;
+  onChange?: Dispatch<T>;
   onClose: DispatchWithoutAction;
-  projectName?: string;
   action: Action;
 }
 
-export function VariableFormDrawer(props: VariableFormDrawerProps) {
-  const { variable, isOpen, onChange, onClose, projectName, action } = props;
+export function VariableFormDrawer<T extends Variable>(props: VariableFormDrawerProps<T>) {
+  const { variable, isOpen, onChange, onClose, action } = props;
+  const projectName = getVariableProject(variable);
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {

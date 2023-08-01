@@ -12,12 +12,16 @@
 // limitations under the License.
 
 import { Box, Stack, Tab, Tabs } from '@mui/material';
-import { ReactNode, SyntheticEvent, useState } from 'react';
+import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import { useNavigate } from 'react-router-dom';
-//import { useSnackbar } from '@perses-dev/components';
+import { useSnackbar } from '@perses-dev/components';
+import { getVariableExtendedDisplayName, GlobalVariableResource } from '@perses-dev/core';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
+import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
+import { GlobalVariables } from './tabs/GlobalVariables';
 
 const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
@@ -27,7 +31,27 @@ interface TabButtonProps {
 }
 
 function TabButton(props: TabButtonProps) {
-  //const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createGlobalVariableMutation = useCreateGlobalVariableMutation();
+
+  const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
+  const handleVariableCreation = useCallback(
+    (variable: GlobalVariableResource) => {
+      createGlobalVariableMutation.mutate(variable, {
+        onSuccess: (updatedVariable: GlobalVariableResource) => {
+          successSnackbar(
+            `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`
+          );
+          setOpenCreateVariableDrawerState(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
+  );
 
   switch (props.index) {
     case variablesTabIndex:
@@ -36,7 +60,26 @@ function TabButton(props: TabButtonProps) {
           <CRUDButton
             text="Add Global Variable"
             variant="contained"
-            onClick={() => console.log('TODO implement Global Variable CRUD')}
+            onClick={() => setOpenCreateVariableDrawerState(true)}
+          />
+          <VariableFormDrawer
+            variable={{
+              kind: 'GlobalVariable',
+              metadata: {
+                name: 'NewVariable',
+              },
+              spec: {
+                kind: 'TextVariable',
+                spec: {
+                  name: 'NewVariable',
+                  value: '',
+                },
+              },
+            }}
+            isOpen={openCreateVariableDrawerState}
+            onChange={handleVariableCreation}
+            onClose={() => setOpenCreateVariableDrawerState(false)}
+            action="create"
           />
         </>
       );
@@ -84,11 +127,11 @@ function a11yProps(index: string) {
   };
 }
 
-interface DashboardVariableTabsProps {
+interface AdminTabsProps {
   initialTab?: string;
 }
 
-export function AdminTabs(props: DashboardVariableTabsProps) {
+export function AdminTabs(props: AdminTabsProps) {
   const { initialTab } = props;
 
   const navigate = useNavigate();
@@ -126,8 +169,10 @@ export function AdminTabs(props: DashboardVariableTabsProps) {
         </Tabs>
         <TabButton index={value} />
       </Stack>
-      <TabPanel value={value} index="global variables"></TabPanel>
-      <TabPanel value={value} index="global datasources"></TabPanel>
+      <TabPanel value={value} index={variablesTabIndex}>
+        <GlobalVariables id="global-variable-list" />
+      </TabPanel>
+      <TabPanel value={value} index={datasourcesTabIndex}></TabPanel>
     </Box>
   );
 }

@@ -16,7 +16,7 @@ import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { Datasource } from '@perses-dev/core';
 import { getDatasourceExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
-import { useDeleteDatasourceMutation } from '../../model/project-client';
+import { useDeleteDatasourceMutation } from '../../model/datasource-client';
 
 export interface DeleteDatasourceDialogProps {
   datasource: Datasource;

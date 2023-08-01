@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useDatasourceList } from '../../../model/project-client';
+import { useDatasourceList } from '../../../model/datasource-client';
 import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
 
 interface ProjectDatasourcesProps {

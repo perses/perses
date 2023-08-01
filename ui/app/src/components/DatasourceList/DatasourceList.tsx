@@ -22,7 +22,7 @@ import {
   useCreateDatasourceMutation,
   useDeleteDatasourceMutation,
   useUpdateDatasourceMutation,
-} from '../../model/project-client';
+} from '../../model/datasource-client';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 

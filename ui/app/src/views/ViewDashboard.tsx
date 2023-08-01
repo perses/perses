@@ -31,8 +31,9 @@ import { useIsReadonly } from '../model/config-client';
 import { CreateAction } from '../model/action';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../model/datasource-api';
 import { useNavHistoryDispatch } from '../context/DashboardNavHistory';
-import { useVariableList } from '../model/project-client';
-import { buildExternalVariableDefinition } from '../utils/variables';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../utils/variables';
+import { useVariableList } from '../model/variable-client';
+import { useGlobalVariableList } from '../model/global-variable-client';
 
 /**
  * Generated a resource name valid for the API.
@@ -70,13 +71,15 @@ function ViewDashboard() {
   const isReadonly = useIsReadonly();
 
   // Collect the Project variables and setup external variables from it
-  // TODO: Once we'll implement global variables CRUD, we'll do the same with 'global' as source
+  const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(projectName);
-  const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(() => {
-    const result: ExternalVariableDefinition[] = [];
-    if (projectVars && projectVars.length > 0) result.push(buildExternalVariableDefinition('project', projectVars));
-    return result;
-  }, [projectVars]);
+  const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
+    () => [
+      buildProjectVariableDefinition(projectName, projectVars || []),
+      buildGlobalVariableDefinition(globalVars || []),
+    ],
+    [projectName, projectVars, globalVars]
+  );
 
   const createDashboardMutation = useCreateDashboardMutation();
   const updateDashboardMutation = useUpdateDashboardMutation();
@@ -158,7 +161,7 @@ function ViewDashboard() {
   }, [actionRef, navigate, projectName]);
 
   if (isLoading) return null;
-  if (isLoadingProjectVars) return null;
+  if (isLoadingProjectVars || isLoadingGlobalVars) return null;
 
   if (!data || data.spec === undefined || isReadonly === undefined) return null;
 

@@ -13,10 +13,12 @@
 
 import { Box, Stack, Typography } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
+import { useParams } from 'react-router-dom';
 import AppBreadcrumbs from '../../components/AppBreadcrumbs';
 import { AdminTabs } from './AdminTabs';
 
 function AdminView() {
+  const { tab } = useParams();
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
       <AppBreadcrumbs admin={true} />
@@ -28,7 +30,7 @@ function AdminView() {
           </Stack>
         </Stack>
       </Box>
-      <AdminTabs />
+      <AdminTabs initialTab={tab} />
     </Stack>
   );
 }

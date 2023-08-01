@@ -12,17 +12,38 @@
 // limitations under the License.
 
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { VariableResource } from '@perses-dev/core';
+import { Variable } from '@perses-dev/core';
 import { ExternalVariableSource } from '../model/variables';
 
+export function buildProjectVariableDefinition(projectName: string, variables: Variable[]): ExternalVariableDefinition {
+  return {
+    editLink: `/projects/${projectName}/variables`,
+    tooltip: {
+      title: 'Project scope variables',
+      description: 'Variables defined at project level. Can be overridden by any local variable of same name.',
+    },
+    ...buildExternalVariableDefinition('project', variables),
+  };
+}
+
+export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVariableDefinition {
+  return {
+    editLink: `/admin/variables`,
+    tooltip: {
+      title: 'Global scope variables',
+      description: 'Variables defined at global level. Can be overridden by any local/project variable of same name.',
+    },
+    ...buildExternalVariableDefinition('global', variables),
+  };
+}
 /**
  * Build the definition of the external variables from the variable resources collected from the API.
  * @param source the source of external variables. Used in view only, to display and discriminate from other sources.
  * @param variables variable resources collected from the API
  */
-export function buildExternalVariableDefinition(
+function buildExternalVariableDefinition(
   source: ExternalVariableSource,
-  variables: VariableResource[]
+  variables: Variable[]
 ): ExternalVariableDefinition {
   return {
     source: source,

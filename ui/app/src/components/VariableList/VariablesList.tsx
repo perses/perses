@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getVariableDisplayName, getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
+import { getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -23,44 +23,47 @@ import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { useIsReadonly } from '../../model/config-client';
 import { DeleteVariableDialog } from '../dialogs';
-import { useUpdateVariableMutation } from '../../model/project-client';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableFormDrawer } from './VariableFormDrawer';
 
-export interface VariableListProperties {
-  projectName: string;
-  variableList: VariableResource[];
+type DispatchWithPromise<A> = (value: A) => Promise<void>;
+
+export interface VariableListProperties<T extends Variable> {
+  data: T[];
   hideToolbar?: boolean;
+  onUpdate: DispatchWithPromise<T>;
+  onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
   isLoading?: boolean;
 }
 
 /**
  * Display variables in a table style.
- * @param props.variableList Contains all variables to display
+ * @param props.data Contains all variables to display
  * @param props.hideToolbar Hide toolbar if enabled
+ * @param props.onUpdate Event received when an update action has been requested
+ * @param props.onDelete Event received when a delete action has been requested
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function ProjectVariableList(props: VariableListProperties) {
-  const { projectName, variableList, hideToolbar, isLoading, initialState } = props;
+export function VariablesList<T extends Variable>(props: VariableListProperties<T>) {
+  const { data, hideToolbar, isLoading, initialState, onUpdate, onDelete } = props;
 
   const isReadonly = useIsReadonly();
-  const { infoSnackbar, successSnackbar, exceptionSnackbar } = useSnackbar();
-  const updateVariableMutation = useUpdateVariableMutation(projectName);
+  const { infoSnackbar } = useSnackbar();
 
-  const getVariable = useCallback(
-    (project: string, name: string) => {
-      return variableList.find((variable) => variable.metadata.project === project && variable.metadata.name === name);
+  const findVariable = useCallback(
+    (name: string, project?: string) => {
+      return data.find((variable: T) => getVariableProject(variable) === project && variable.metadata.name === name);
     },
-    [variableList]
+    [data]
   );
 
   const rows = useMemo(() => {
-    return variableList.map(
+    return data.map(
       (variable) =>
         ({
-          project: variable.metadata.project,
+          project: getVariableProject(variable),
           name: variable.metadata.name,
           displayName: getVariableDisplayName(variable),
           description: variable.spec.spec.display?.description,
@@ -70,19 +73,19 @@ export function ProjectVariableList(props: VariableListProperties) {
           updatedAt: variable.metadata.updated_at,
         } as Row)
     );
-  }, [variableList]);
+  }, [data]);
 
-  const [targetedVariable, setTargetedVariable] = useState<VariableResource>();
+  const [targetedVariable, setTargetedVariable] = useState<T>();
   const [isViewVariableFormStateOpened, setViewVariableFormStateOpened] = useState<boolean>(false);
   const [isEditVariableFormStateOpened, setEditVariableFormStateOpened] = useState<boolean>(false);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
   const handleRowClick = useCallback(
-    (project: string, name: string) => {
-      setTargetedVariable(getVariable(project, name));
+    (name: string, project?: string) => {
+      setTargetedVariable(findVariable(name, project));
       setViewVariableFormStateOpened(true);
     },
-    [getVariable]
+    [findVariable]
   );
 
   const handleCopyVarNameButtonClick = useCallback(
@@ -94,36 +97,20 @@ export function ProjectVariableList(props: VariableListProperties) {
   );
 
   const handleRenameButtonClick = useCallback(
-    (project: string, name: string) => () => {
-      const variable = getVariable(project, name);
+    (name: string, project?: string) => () => {
+      const variable = findVariable(name, project);
       setTargetedVariable(variable);
       setEditVariableFormStateOpened(true);
     },
-    [getVariable]
+    [findVariable]
   );
 
   const handleDeleteButtonClick = useCallback(
-    (project: string, name: string) => () => {
-      setTargetedVariable(getVariable(project, name));
+    (name: string, project?: string) => () => {
+      setTargetedVariable(findVariable(name, project));
       setDeleteVariableDialogStateOpened(true);
     },
-    [getVariable]
-  );
-
-  const handleVariableUpdate = useCallback(
-    (variable: VariableResource) => {
-      updateVariableMutation.mutate(variable, {
-        onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully updated`);
-          setEditVariableFormStateOpened(false);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-          throw err;
-        },
-      });
-    },
-    [exceptionSnackbar, successSnackbar, updateVariableMutation]
+    [findVariable]
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
@@ -204,14 +191,14 @@ export function ProjectVariableList(props: VariableListProperties) {
             icon={<PencilIcon />}
             label="Rename"
             disabled={isReadonly}
-            onClick={handleRenameButtonClick(params.row.project, params.row.name)}
+            onClick={handleRenameButtonClick(params.row.name, params.row.project)}
           />,
           <GridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
             disabled={isReadonly}
-            onClick={handleDeleteButtonClick(params.row.project, params.row.name)}
+            onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
           />,
         ],
       },
@@ -242,13 +229,14 @@ export function ProjectVariableList(props: VariableListProperties) {
           <VariableFormDrawer
             variable={targetedVariable}
             isOpen={isEditVariableFormStateOpened}
-            onChange={handleVariableUpdate}
+            onChange={(v: T) => onUpdate(v).then(() => setEditVariableFormStateOpened(false))}
             onClose={() => setEditVariableFormStateOpened(false)}
             action="update"
           />
           <DeleteVariableDialog
             open={isDeleteVariableDialogStateOpened}
             onClose={() => setDeleteVariableDialogStateOpened(false)}
+            onSubmit={(v) => onDelete(v).then(() => setDeleteVariableDialogStateOpened(false))}
             variable={targetedVariable}
           />
         </>

@@ -79,7 +79,7 @@ function NoVariableRowOverlay() {
 export interface VariableDataGridProperties {
   columns: Array<GridColDef<Row>>;
   rows: Row[];
-  onRowClick: (projectName: string, name: string) => void;
+  onRowClick: (name: string, project?: string) => void;
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
   isLoading?: boolean;
@@ -99,7 +99,7 @@ export function VariableDataGrid(props: VariableDataGridProperties) {
   return (
     <DataGrid
       autoHeight={true}
-      onRowClick={(params) => onRowClick(params.row.project, params.row.name)}
+      onRowClick={(params) => onRowClick(params.row.name, params.row.project)}
       rows={rows}
       columns={columns}
       getRowId={(row) => row.name}

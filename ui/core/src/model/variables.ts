@@ -13,7 +13,7 @@
 
 import { Definition, UnknownSpec } from './definitions';
 import { Display } from './display';
-import { ProjectMetadata } from './resource';
+import { Metadata, ProjectMetadata } from './resource';
 
 export type VariableName = string;
 
@@ -56,6 +56,21 @@ export interface VariableResource {
   kind: 'Variable';
   metadata: ProjectMetadata;
   spec: VariableDefinition;
+}
+
+/**
+ * A global variable that doesn´t belong to a project.
+ */
+export interface GlobalVariableResource {
+  kind: 'GlobalVariable';
+  metadata: Metadata;
+  spec: VariableDefinition;
+}
+
+export type Variable = VariableResource | GlobalVariableResource;
+
+export function getVariableProject(variable: Variable) {
+  return 'project' in variable.metadata ? variable.metadata.project : undefined;
 }
 
 export const DEFAULT_ALL_VALUE = '$__all' as const;

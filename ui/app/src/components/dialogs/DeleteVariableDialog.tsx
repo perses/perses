@@ -11,47 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getVariableExtendedDisplayName, VariableResource } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
-import { Dialog, useSnackbar } from '@perses-dev/components';
+import { getVariableExtendedDisplayName, Variable } from '@perses-dev/core';
+import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
-import { useDeleteVariableMutation } from '../../model/project-client';
 
-interface DeleteVariableDialogProps {
-  variable: VariableResource;
+interface DeleteVariableDialogProps<T extends Variable> {
+  variable: T;
   open: boolean;
+  onSubmit: Dispatch<T>;
   onClose: DispatchWithoutAction;
-  onSuccess?: Dispatch<VariableResource>;
 }
 
 /**
  * Dialog used to delete a variable.
- * @param props.open Define if the dialog should be opened or not.
- * @param props.closeDialog Provides the function to close itself.
- * @param props.onConfirm Action to perform when user confirmed.
  * @param props.variable The variable resource to delete.
+ * @param props.open Define if the dialog should be opened or not.
+ * @param props.onSubmit Action to perform when user confirmed.
+ * @param props.onClose Provides the function to close itself.
  * @constructor
  */
-export function DeleteVariableDialog(props: DeleteVariableDialogProps) {
-  const { variable, open, onClose, onSuccess } = props;
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const deleteVariableMutation = useDeleteVariableMutation(variable.metadata.project);
-
-  const handleSubmit = useCallback(() => {
-    return deleteVariableMutation.mutate(variable, {
-      onSuccess: (deletedVariable: VariableResource) => {
-        successSnackbar(`Variable ${getVariableExtendedDisplayName(deletedVariable)} was successfully deleted`);
-        onClose();
-        if (onSuccess) {
-          onSuccess(variable);
-        }
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-        throw err;
-      },
-    });
-  }, [deleteVariableMutation, variable, onClose, onSuccess, successSnackbar, exceptionSnackbar]);
+export function DeleteVariableDialog<T extends Variable>(props: DeleteVariableDialogProps<T>) {
+  const { variable, open, onClose, onSubmit } = props;
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -61,7 +42,7 @@ export function DeleteVariableDialog(props: DeleteVariableDialogProps) {
         undone.
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" onClick={handleSubmit}>
+        <Button variant="contained" type="submit" onClick={() => onSubmit(variable)}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>
