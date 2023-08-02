@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueries,
+  useQueryClient,
+  Query,
+  QueryCache,
+  QueryKey,
+  QueryObserverOptions,
+} from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap, useTemplateVariableValues } from './template-variables';
@@ -80,14 +88,14 @@ function getQueryOptions({
 export const useTimeSeriesQuery = (
   definition: TimeSeriesQueryDefinition,
   options?: UseTimeSeriesQueryOptions,
-  enabled?: boolean
+  queryOptions?: QueryObserverOptions
 ) => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
-    enabled: enabled || queryEnabled,
+    enabled: (queryOptions?.enabled ?? true) || queryEnabled,
     queryKey: queryKey,
     refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
@@ -108,7 +116,7 @@ export const useTimeSeriesQuery = (
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
-  enabled = true
+  queryOptions?: QueryObserverOptions
 ) {
   const { getPlugin } = usePluginRegistry();
   const context = useTimeSeriesQueryContext();
@@ -123,7 +131,7 @@ export function useTimeSeriesQueries(
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        enabled: enabled && queryEnabled,
+        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : undefined,
         queryFn: async () => {

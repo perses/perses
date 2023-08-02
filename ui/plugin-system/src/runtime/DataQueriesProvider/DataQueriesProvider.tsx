@@ -57,7 +57,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
 }
 
 export function DataQueriesProvider(props: DataQueriesProviderProps) {
-  const { definitions, options, children, enabled = true } = props;
+  const { definitions, options, children, queryOptions } = props;
 
   const getQueryType = useQueryType();
 
@@ -75,7 +75,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
   const timeSeriesQueries = queryDefinitions.filter(
     (definition) => definition.kind === 'TimeSeriesQuery'
   ) as TimeSeriesQueryDefinition[];
-  const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, enabled);
+  const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
 
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());

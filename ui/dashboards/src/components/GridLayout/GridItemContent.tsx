@@ -38,7 +38,7 @@ export function GridItemContent(props: GridItemContentProps) {
   const { openEditPanel, openDeletePanelDialog, duplicatePanel } = usePanelActions(panelGroupItemId);
 
   const { ref, inView } = useInView({
-    threshold: 0.3,
+    threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
     initialInView: false,
     triggerOnce: true,
   });
@@ -71,7 +71,7 @@ export function GridItemContent(props: GridItemContentProps) {
         height: '100%',
       }}
     >
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }} enabled={inView}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }} queryOptions={{ enabled: inView }}>
         {inView && (
           <Panel
             definition={panelDefinition}
