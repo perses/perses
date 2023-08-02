@@ -12,8 +12,79 @@
 // limitations under the License.
 
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { Variable } from '@perses-dev/core';
+import {
+  DashboardResource,
+  getDashboardDisplayName,
+  TextVariableSpec,
+  Variable,
+  VariableDefinition,
+} from '@perses-dev/core';
 import { ExternalVariableSource } from '../model/variables';
+
+export function getBuiltinVariableDefinitions(dashboardResource: DashboardResource): VariableDefinition[] {
+  return [
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__dashboard',
+        value: getDashboardDisplayName(dashboardResource),
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__dashboard.displayName',
+        value: dashboardResource.spec.display?.name ?? '',
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__dashboard.name',
+        value: dashboardResource.metadata.name,
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__project',
+        value: dashboardResource.metadata.project,
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__from',
+        value: '$__from',
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+    {
+      kind: 'TextVariable',
+      spec: {
+        name: '__to',
+        value: '$__to',
+        display: {
+          hidden: true,
+        },
+      } as TextVariableSpec,
+    },
+  ];
+}
 
 export function buildProjectVariableDefinition(projectName: string, variables: Variable[]): ExternalVariableDefinition {
   return {
@@ -36,6 +107,18 @@ export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVa
     ...buildExternalVariableDefinition('global', variables),
   };
 }
+
+export function buildBuiltinVariableDefinition(variables: VariableDefinition[]): ExternalVariableDefinition {
+  return {
+    source: 'builtin',
+    tooltip: {
+      title: 'Builtin variables',
+      description: 'Variables computed when rendering the dashboard.',
+    },
+    definitions: variables,
+  };
+}
+
 /**
  * Build the definition of the external variables from the variable resources collected from the API.
  * @param source the source of external variables. Used in view only, to display and discriminate from other sources.

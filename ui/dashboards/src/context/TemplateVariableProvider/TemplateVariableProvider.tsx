@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
@@ -22,8 +22,18 @@ import {
   VariableState,
   VariableStoreStateMap,
   VariableOption,
+  useInitialTimeRange,
 } from '@perses-dev/plugin-system';
-import { DEFAULT_ALL_VALUE as ALL_VALUE, VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import {
+  DEFAULT_ALL_VALUE as ALL_VALUE,
+  VariableName,
+  VariableValue,
+  VariableDefinition,
+  isRelativeTimeRange,
+  toAbsoluteTimeRange,
+  DEFAULT_DASHBOARD_DURATION,
+  DurationString,
+} from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -136,10 +146,26 @@ export function useTemplateVariableStore() {
   return useStore(store);
 }
 
-function PluginProvider({ children }: { children: React.ReactNode }) {
+interface PluginProviderProps {
+  children: ReactNode;
+  dashboardDuration?: DurationString;
+}
+
+function PluginProvider({ children, dashboardDuration }: PluginProviderProps) {
   const originalValues = useTemplateVariableValues();
   const definitions = useTemplateVariableDefinitions();
   const externalDefinitions = useTemplateExternalVariableDefinitions();
+
+  const initialTimeRange = useInitialTimeRange(dashboardDuration ?? DEFAULT_DASHBOARD_DURATION);
+  const convertedTimeRange = useMemo(() => {
+    return isRelativeTimeRange(initialTimeRange) ? toAbsoluteTimeRange(initialTimeRange) : initialTimeRange;
+  }, [initialTimeRange]);
+  const from = useMemo(() => {
+    return convertedTimeRange.start;
+  }, [convertedTimeRange]);
+  const to = useMemo(() => {
+    return convertedTimeRange.end;
+  }, [convertedTimeRange]);
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -158,11 +184,15 @@ function PluginProvider({ children }: { children: React.ReactNode }) {
         } else {
           v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
         }
+      } else if (v.value === '$__from') {
+        v.value = from.valueOf().toString();
+      } else if (v.value === '$__to') {
+        v.value = to.valueOf().toString();
       }
       contextValues[name] = v;
     });
     return contextValues;
-  }, [originalValues, definitions, externalDefinitions]);
+  }, [originalValues, definitions, externalDefinitions, from, to]);
 
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
@@ -326,12 +356,17 @@ export interface TemplateVariableProviderProps {
    * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
    */
   externalVariableDefinitions?: ExternalVariableDefinition[];
+  /**
+   * The dashboard duration is used to initialize time related builtin variables (from & to)
+   */
+  dashboardDuration?: DurationString;
 }
 
 export function TemplateVariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
+  dashboardDuration,
 }: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
@@ -341,7 +376,7 @@ export function TemplateVariableProvider({
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
-      <PluginProvider>{children}</PluginProvider>
+      <PluginProvider dashboardDuration={dashboardDuration}>{children}</PluginProvider>
     </TemplateVariableStoreContext.Provider>
   );
 }

@@ -15,12 +15,15 @@ import { Box, BoxProps } from '@mui/material';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
+import { useMemo } from 'react';
+import { buildBuiltinVariableDefinition, getBuiltinVariableDefinitions } from '@perses-dev/app/src/utils/variables';
 import {
   TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
   TemplateVariableProviderProps,
+  ExternalVariableDefinition,
 } from '../../context';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
@@ -53,6 +56,12 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
+  const builtinVariableDefinitions = getBuiltinVariableDefinitions(dashboardResource);
+
+  const mergedExternalVariableDefinition: ExternalVariableDefinition[] = useMemo(
+    () => [...(externalVariableDefinitions ?? []), buildBuiltinVariableDefinition(builtinVariableDefinitions)],
+    [externalVariableDefinitions, builtinVariableDefinitions]
+  );
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
@@ -64,7 +73,8 @@ export function ViewDashboard(props: ViewDashboardProps) {
         >
           <TemplateVariableProvider
             initialVariableDefinitions={spec.variables}
-            externalVariableDefinitions={externalVariableDefinitions}
+            externalVariableDefinitions={mergedExternalVariableDefinition}
+            dashboardDuration={dashboardDuration}
           >
             <Box
               sx={combineSx(

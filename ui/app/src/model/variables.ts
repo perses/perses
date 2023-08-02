@@ -16,4 +16,4 @@
  * - 'project': variables defined for every dashboard of the current project.
  * - 'global': variables defined for every dashboard of every project.
  */
-export type ExternalVariableSource = 'project' | 'global';
+export type ExternalVariableSource = 'project' | 'global' | 'builtin';
