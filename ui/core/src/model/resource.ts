@@ -21,3 +21,7 @@ export interface Metadata {
 export interface ProjectMetadata extends Metadata {
   project: string;
 }
+
+export function getMetadataProject(metadata: ProjectMetadata | Metadata): string | undefined {
+  return 'project' in metadata ? metadata.project : undefined;
+}

@@ -15,7 +15,7 @@ import { ReactNode, useCallback, useMemo } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
-  Datasource,
+  ProjectDatasource,
   DatasourceSelector,
   DatasourceSpec,
   GlobalDatasource,
@@ -42,13 +42,13 @@ export interface DatasourceApi {
   getDatasource: (
     project: string,
     selector: DatasourceSelector
-  ) => Promise<{ resource: Datasource; proxyUrl: string } | undefined>;
+  ) => Promise<{ resource: ProjectDatasource; proxyUrl: string } | undefined>;
 
   getGlobalDatasource: (
     selector: DatasourceSelector
   ) => Promise<{ resource: GlobalDatasource; proxyUrl: string } | undefined>;
 
-  listDatasources: (project: string, pluginKind?: string) => Promise<Datasource[]>;
+  listDatasources: (project: string, pluginKind?: string) => Promise<ProjectDatasource[]>;
 
   listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasource[]>;
 }

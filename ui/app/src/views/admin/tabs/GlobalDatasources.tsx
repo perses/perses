@@ -12,38 +12,36 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
+import { getDatasourceDisplayName, GlobalDatasource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
-import { getDatasourceDisplayName, ProjectDatasource } from '@perses-dev/core';
-import {
-  useDatasourceList,
-  useCreateDatasourceMutation,
-  useDeleteDatasourceMutation,
-  useUpdateDatasourceMutation,
-} from '../../../model/datasource-client';
 import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import {
+  useCreateGlobalDatasourceMutation,
+  useDeleteGlobalDatasourceMutation,
+  useGlobalDatasourceList,
+  useUpdateGlobalDatasourceMutation,
+} from '../../../model/admin-client';
 
-interface ProjectDatasourcesProps {
-  projectName: string;
+interface GlobalDatasourcesProps {
   hideToolbar?: boolean;
   id?: string;
 }
 
-export function ProjectDatasources(props: ProjectDatasourcesProps) {
-  const { projectName, hideToolbar, id } = props;
-  const { data, isLoading } = useDatasourceList(projectName);
-
+export function GlobalDatasources(props: GlobalDatasourcesProps) {
+  const { hideToolbar, id } = props;
+  const { data, isLoading } = useGlobalDatasourceList();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const createDatasourceMutation = useCreateDatasourceMutation(projectName);
-  const deleteDatasourceMutation = useDeleteDatasourceMutation(projectName);
-  const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
+  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
+  const deleteDatasourceMutation = useDeleteGlobalDatasourceMutation();
+  const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
 
   const handleDatasourceCreate = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: GlobalDatasource): Promise<void> => {
       return new Promise((resolve, reject) => {
         createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: ProjectDatasource) => {
+          onSuccess: (createdDatasource: GlobalDatasource) => {
             successSnackbar(
               `Global Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`
             );
@@ -61,10 +59,10 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   );
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: GlobalDatasource): Promise<void> => {
       return new Promise((resolve, reject) => {
         updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: ProjectDatasource) => {
+          onSuccess: (updatedDatasource: GlobalDatasource) => {
             successSnackbar(
               `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
             );
@@ -82,10 +80,10 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   );
 
   const handleDatasourceDelete = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: GlobalDatasource): Promise<void> => {
       return new Promise((resolve, reject) => {
         deleteDatasourceMutation.mutate(datasource, {
-          onSuccess: (deletedDatasource: ProjectDatasource) => {
+          onSuccess: (deletedDatasource: GlobalDatasource) => {
             successSnackbar(
               `Global Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`
             );

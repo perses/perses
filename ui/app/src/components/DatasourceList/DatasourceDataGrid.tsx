@@ -42,7 +42,7 @@ const MemoizedRow = memo(GridRow);
 const MemoizedColumnHeaders = memo(GridColumnHeaders);
 
 export interface Row {
-  project: string;
+  project?: string;
   name: string;
   displayName: string;
   version: number;
@@ -81,7 +81,7 @@ export interface DatasourceDataGridProperties {
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
   isLoading?: boolean;
-  onRowClick: (project: string, name: string) => void;
+  onRowClick: (name: string, project?: string) => void;
 }
 
 export function DatasourceDataGrid(props: DatasourceDataGridProperties) {
@@ -100,7 +100,7 @@ export function DatasourceDataGrid(props: DatasourceDataGridProperties) {
       disableRowSelectionOnClick
       autoHeight={true}
       onRowClick={(params) => {
-        onRowClick(params.row.project, params.row.name);
+        onRowClick(params.row.name, params.row.project);
       }}
       rows={rows}
       columns={columns}

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { useImmer } from 'use-immer';
-import { Datasource, Display } from '@perses-dev/core';
+import { Display, Datasource } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import { DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
+import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import { PluginEditor } from '@perses-dev/plugin-system';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { useIsReadonly } from '../../model/config-client';
@@ -37,8 +37,11 @@ function getValidation(state: Datasource) {
   };
 }
 
-// this preprocessing ensure that we always have a defined object for the `display` property:
-function getInitialState(datasource: Datasource): Datasource {
+/**
+ * This preprocessing ensures that we always have a defined object for the `display` property
+ * @param datasource
+ */
+function getInitialState<T extends Datasource>(datasource: T): T {
   const patchedDisplay: Display = {
     name: '',
     description: '',
@@ -60,20 +63,21 @@ function getInitialState(datasource: Datasource): Datasource {
   };
 }
 
-interface DatasourceEditorFormProps {
-  initialDatasource: Datasource;
+interface DatasourceEditorFormProps<T extends Datasource> {
+  initialDatasource: T;
   saveActionStr: string;
-  onSave: (datasource: Datasource) => void;
+  onSave: Dispatch<T>;
   onClose: DispatchWithoutAction;
-  onDelete: DispatchWithoutAction | undefined;
+  onDelete?: DispatchWithoutAction;
 }
 
-export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
+export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
   const { initialDatasource, saveActionStr, onSave, onClose, onDelete } = props;
+
+  const patchedInitialDatasource = getInitialState(initialDatasource);
+  const [state, setState] = useImmer(patchedInitialDatasource);
   const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
   const isReadonly = useIsReadonly();
-  const initialState = getInitialState(initialDatasource);
-  const [state, setState] = useImmer(initialState);
   const validation = useMemo(() => getValidation(state), [state]);
 
   // When saving, remove the display property if ever display.name is empty, then pass the value upstream
@@ -89,13 +93,12 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
 
   // When the user clicks on cancel, ask for discard approval if anything was changed
   const handleCancel = useCallback(() => {
-    if (JSON.stringify(initialState) !== JSON.stringify(state)) {
+    if (JSON.stringify(patchedInitialDatasource) !== JSON.stringify(state)) {
       setDiscardDialogStateOpened(true);
     } else {
       onClose();
     }
-  }, [state, initialState, setDiscardDialogStateOpened, onClose]);
-
+  }, [state, patchedInitialDatasource, setDiscardDialogStateOpened, onClose]);
   return (
     <>
       <Box

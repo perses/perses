@@ -20,7 +20,7 @@ import {
   getDatasourceDisplayName,
   getVariableExtendedDisplayName,
   DashboardSelector,
-  Datasource,
+  ProjectDatasource,
   VariableResource,
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
@@ -28,14 +28,14 @@ import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
-import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
+import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
 
-const dashboardTabIndex = 'dashboards';
+const dashboardsTabIndex = 'dashboards';
 const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
 
@@ -52,7 +52,7 @@ function TabButton(props: TabButtonProps) {
 
   const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
   const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
-  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceFormStateOpened] = useState(false);
+  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceDrawerStateOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
@@ -75,11 +75,11 @@ function TabButton(props: TabButtonProps) {
   );
 
   const handleDatasourceCreation = useCallback(
-    (datasource: Datasource) => {
+    (datasource: ProjectDatasource) => {
       createDatasourceMutation.mutate(datasource, {
-        onSuccess: (createdDatasource: Datasource) => {
+        onSuccess: (createdDatasource: ProjectDatasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setCreateDatasourceFormStateOpened(false);
+          setCreateDatasourceDrawerStateOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -91,7 +91,7 @@ function TabButton(props: TabButtonProps) {
   );
 
   switch (props.index) {
-    case dashboardTabIndex:
+    case dashboardsTabIndex:
       return (
         <>
           <CRUDButton
@@ -139,7 +139,7 @@ function TabButton(props: TabButtonProps) {
           <CRUDButton
             text="Add Datasource"
             variant="contained"
-            onClick={() => setCreateDatasourceFormStateOpened(true)}
+            onClick={() => setCreateDatasourceDrawerStateOpened(true)}
           />
           <DatasourceDrawer
             datasource={{
@@ -160,7 +160,7 @@ function TabButton(props: TabButtonProps) {
             isOpen={isCreateDatasourceDrawerStateOpened}
             saveActionStr="Create"
             onSave={handleDatasourceCreation}
-            onClose={() => setCreateDatasourceFormStateOpened(false)}
+            onClose={() => setCreateDatasourceDrawerStateOpened(false)}
           />
         </>
       );
@@ -208,7 +208,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
 
   const navigate = useNavigate();
 
-  const [value, setValue] = useState((initialTab ?? dashboardTabIndex).toLowerCase());
+  const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);
@@ -223,13 +223,13 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         justifyContent="space-between"
         sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+        <Tabs value={value} onChange={handleChange} aria-label="project tabs">
           <Tab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
             iconPosition="start"
-            {...a11yProps(dashboardTabIndex)}
-            value={dashboardTabIndex}
+            {...a11yProps(dashboardsTabIndex)}
+            value={dashboardsTabIndex}
           />
           <Tab
             label="Variables"
@@ -248,13 +248,13 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         </Tabs>
         <TabButton index={value} projectName={projectName} />
       </Stack>
-      <TabPanel value={value} index="dashboards">
+      <TabPanel value={value} index={dashboardsTabIndex}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
-      <TabPanel value={value} index="variables">
+      <TabPanel value={value} index={variablesTabIndex}>
         <ProjectVariables projectName={projectName} id="project-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index="datasources">
+      <TabPanel value={value} index={datasourcesTabIndex}>
         <ProjectDatasources projectName={projectName} id="project-datasource-list" />
       </TabPanel>
     </Box>
