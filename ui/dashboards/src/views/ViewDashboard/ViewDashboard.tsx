@@ -56,7 +56,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
-  const builtinVariableDefinitions = getBuiltinVariableDefinitions(dashboardResource);
+  const builtinVariableDefinitions = getBuiltinVariableDefinitions();
 
   const mergedExternalVariableDefinition: ExternalVariableDefinition[] = useMemo(
     () => [...(externalVariableDefinitions ?? []), buildBuiltinVariableDefinition(builtinVariableDefinitions)],
@@ -74,7 +74,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
           <TemplateVariableProvider
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={mergedExternalVariableDefinition}
-            dashboardDuration={dashboardDuration}
           >
             <Box
               sx={combineSx(

@@ -23,6 +23,7 @@ import {
   VariableStoreStateMap,
   VariableOption,
   useInitialTimeRange,
+  useTimeRange,
 } from '@perses-dev/plugin-system';
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
@@ -148,24 +149,12 @@ export function useTemplateVariableStore() {
 
 interface PluginProviderProps {
   children: ReactNode;
-  dashboardDuration?: DurationString;
 }
 
-function PluginProvider({ children, dashboardDuration }: PluginProviderProps) {
+function PluginProvider({ children }: PluginProviderProps) {
   const originalValues = useTemplateVariableValues();
   const definitions = useTemplateVariableDefinitions();
   const externalDefinitions = useTemplateExternalVariableDefinitions();
-
-  const initialTimeRange = useInitialTimeRange(dashboardDuration ?? DEFAULT_DASHBOARD_DURATION);
-  const convertedTimeRange = useMemo(() => {
-    return isRelativeTimeRange(initialTimeRange) ? toAbsoluteTimeRange(initialTimeRange) : initialTimeRange;
-  }, [initialTimeRange]);
-  const from = useMemo(() => {
-    return convertedTimeRange.start;
-  }, [convertedTimeRange]);
-  const to = useMemo(() => {
-    return convertedTimeRange.end;
-  }, [convertedTimeRange]);
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -184,15 +173,11 @@ function PluginProvider({ children, dashboardDuration }: PluginProviderProps) {
         } else {
           v.value = v.options?.map((o: { value: string }) => o.value) ?? null;
         }
-      } else if (v.value === '$__from') {
-        v.value = from.valueOf().toString();
-      } else if (v.value === '$__to') {
-        v.value = to.valueOf().toString();
       }
       contextValues[name] = v;
     });
     return contextValues;
-  }, [originalValues, definitions, externalDefinitions, from, to]);
+  }, [originalValues, definitions, externalDefinitions]);
 
   return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
 }
@@ -341,6 +326,8 @@ export type ExternalVariableDefinition = {
     description?: string;
   };
   editLink?: string;
+  hideActions?: boolean;
+  hideSwitch?: boolean;
   definitions: VariableDefinition[];
 };
 
@@ -366,7 +353,6 @@ export function TemplateVariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  dashboardDuration,
 }: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
@@ -376,7 +362,7 @@ export function TemplateVariableProvider({
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
-      <PluginProvider dashboardDuration={dashboardDuration}>{children}</PluginProvider>
+      <PluginProvider>{children}</PluginProvider>
     </TemplateVariableStoreContext.Provider>
   );
 }

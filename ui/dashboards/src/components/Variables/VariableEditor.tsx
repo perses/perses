@@ -231,7 +231,8 @@ export function VariableEditor(props: {
                         <TableCell>Visibility</TableCell>
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>
-                        <TableCell align="right" />
+                        <TableCell>Description</TableCell>
+                        <TableCell align="right">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -249,6 +250,7 @@ export function VariableEditor(props: {
                             <VariableName name={v.spec.name} state={variableState.get({ name: v.spec.name })} />
                           </TableCell>
                           <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                          <TableCell>{v.spec.display?.description ?? ''}</TableCell>
                           <TableCell align="right">
                             <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                               <ArrowUp />
@@ -310,18 +312,21 @@ export function VariableEditor(props: {
                               <Table sx={{ minWidth: 650 }} aria-label="table of variables">
                                 <TableHead>
                                   <TableRow>
-                                    <TableCell>Visibility</TableCell>
+                                    {!extVar.hideSwitch && <TableCell>Visibility</TableCell>}
                                     <TableCell>Name</TableCell>
                                     <TableCell>Type</TableCell>
-                                    <TableCell align="right" />
+                                    <TableCell>Description</TableCell>
+                                    {!extVar.hideActions && <TableCell align="right">Actions</TableCell>}
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
                                   {extVar.definitions.map((v) => (
                                     <TableRow key={v.spec.name}>
-                                      <TableCell component="th" scope="row">
-                                        <Switch checked={v.spec.display?.hidden !== true} disabled />
-                                      </TableCell>
+                                      {!extVar.hideSwitch && (
+                                        <TableCell component="th" scope="row">
+                                          <Switch checked={v.spec.display?.hidden !== true} disabled />
+                                        </TableCell>
+                                      )}
                                       <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                                         <VariableName
                                           name={v.spec.name}
@@ -329,28 +334,31 @@ export function VariableEditor(props: {
                                         />
                                       </TableCell>
                                       <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
-                                      <TableCell align="right">
-                                        <Tooltip title="Override">
-                                          <IconButton
-                                            onClick={() => overrideVariable(v)}
-                                            disabled={!!variableState.get({ name: v.spec.name })}
-                                          >
-                                            <ContentDuplicate />
+                                      <TableCell>{v.spec.display?.description ?? ''}</TableCell>
+                                      {!extVar.hideActions && (
+                                        <TableCell align="right">
+                                          <Tooltip title="Override">
+                                            <IconButton
+                                              onClick={() => overrideVariable(v)}
+                                              disabled={!!variableState.get({ name: v.spec.name })}
+                                            >
+                                              <ContentDuplicate />
+                                            </IconButton>
+                                          </Tooltip>
+                                          <IconButton disabled>
+                                            <ArrowUp />
                                           </IconButton>
-                                        </Tooltip>
-                                        <IconButton disabled>
-                                          <ArrowUp />
-                                        </IconButton>
-                                        <IconButton disabled>
-                                          <ArrowDown />
-                                        </IconButton>
-                                        <IconButton disabled>
-                                          <PencilIcon />
-                                        </IconButton>
-                                        <IconButton disabled>
-                                          <TrashIcon />
-                                        </IconButton>
-                                      </TableCell>
+                                          <IconButton disabled>
+                                            <ArrowDown />
+                                          </IconButton>
+                                          <IconButton disabled>
+                                            <PencilIcon />
+                                          </IconButton>
+                                          <IconButton disabled>
+                                            <TrashIcon />
+                                          </IconButton>
+                                        </TableCell>
+                                      )}
                                     </TableRow>
                                   ))}
                                 </TableBody>

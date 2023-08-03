@@ -12,43 +12,18 @@
 // limitations under the License.
 
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import {
-  DashboardResource,
-  getDashboardDisplayName,
-  TextVariableSpec,
-  Variable,
-  VariableDefinition,
-} from '@perses-dev/core';
+import { TextVariableSpec, Variable, VariableDefinition } from '@perses-dev/core';
 import { ExternalVariableSource } from '../model/variables';
 
-export function getBuiltinVariableDefinitions(dashboardResource: DashboardResource): VariableDefinition[] {
+export function getBuiltinVariableDefinitions(): VariableDefinition[] {
   return [
     {
       kind: 'TextVariable',
       spec: {
         name: '__dashboard',
-        value: getDashboardDisplayName(dashboardResource),
+        value: '$__dashboard',
         display: {
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__dashboard.displayName',
-        value: dashboardResource.spec.display?.name ?? '',
-        display: {
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__dashboard.name',
-        value: dashboardResource.metadata.name,
-        display: {
+          description: 'The name of the current dashboard',
           hidden: true,
         },
       } as TextVariableSpec,
@@ -57,8 +32,9 @@ export function getBuiltinVariableDefinitions(dashboardResource: DashboardResour
       kind: 'TextVariable',
       spec: {
         name: '__project',
-        value: dashboardResource.metadata.project,
+        value: '$__project',
         display: {
+          description: 'The name of the current dashboard project',
           hidden: true,
         },
       } as TextVariableSpec,
@@ -69,6 +45,7 @@ export function getBuiltinVariableDefinitions(dashboardResource: DashboardResour
         name: '__from',
         value: '$__from',
         display: {
+          description: 'Start time of the current time range in unix millisecond epoch',
           hidden: true,
         },
       } as TextVariableSpec,
@@ -79,6 +56,7 @@ export function getBuiltinVariableDefinitions(dashboardResource: DashboardResour
         name: '__to',
         value: '$__to',
         display: {
+          description: 'End time of the current time range in unix millisecond epoch',
           hidden: true,
         },
       } as TextVariableSpec,
@@ -115,6 +93,8 @@ export function buildBuiltinVariableDefinition(variables: VariableDefinition[]):
       title: 'Builtin variables',
       description: 'Variables computed when rendering the dashboard.',
     },
+    hideActions: true,
+    hideSwitch: true,
     definitions: variables,
   };
 }
