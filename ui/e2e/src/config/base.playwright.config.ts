@@ -66,7 +66,7 @@ const config: PlaywrightTestConfig = {
         // Keep this in sync with the setting in `.happo.js` for consistency for
         // canvas elements, which are converted into images when run in playwright
         // and sent to happo.
-        viewport: { width: 1200, height: 800 },
+        viewport: { width: 1200, height: 1000 },
       },
     },
   ],

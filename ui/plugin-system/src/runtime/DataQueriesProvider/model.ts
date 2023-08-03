@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
-import { UseQueryResult } from '@tanstack/react-query';
+import { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { useListPluginMetadata } from '../plugin-registry';
 
 type QueryOptions = Record<string, unknown>;
 export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
   definitions: Array<Definition<QueryPluginSpec>>;
-  options?: QueryOptions;
   children?: React.ReactNode;
+  options?: QueryOptions;
+  queryOptions?: QueryObserverOptions;
 }
 
 export interface DataQueriesContextType {

@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box } from '@mui/material';
+import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { useSuggestedStepMs } from '../../utils';
@@ -35,6 +37,12 @@ export function GridItemContent(props: GridItemContentProps) {
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel } = usePanelActions(panelGroupItemId);
 
+  const { ref, inView } = useInView({
+    threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
+    initialInView: false,
+    triggerOnce: true,
+  });
+
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
   if (isEditMode) {
@@ -56,13 +64,23 @@ export function GridItemContent(props: GridItemContentProps) {
   });
 
   return (
-    <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-      <Panel
-        definition={panelDefinition}
-        editHandlers={editHandlers}
-        panelOptions={props.panelOptions}
-        panelGroupItemId={panelGroupItemId}
-      />
-    </DataQueriesProvider>
+    <Box
+      ref={ref}
+      sx={{
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }} queryOptions={{ enabled: inView }}>
+        {inView && (
+          <Panel
+            definition={panelDefinition}
+            editHandlers={editHandlers}
+            panelOptions={props.panelOptions}
+            panelGroupItemId={panelGroupItemId}
+          />
+        )}
+      </DataQueriesProvider>
+    </Box>
   );
 }

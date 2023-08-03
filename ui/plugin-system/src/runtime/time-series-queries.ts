@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, useQueries, useQueryClient, Query, QueryCache, QueryKey } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueries,
+  useQueryClient,
+  Query,
+  QueryCache,
+  QueryKey,
+  QueryObserverOptions,
+} from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap, useTemplateVariableValues } from './template-variables';
@@ -77,13 +85,17 @@ function getQueryOptions({
 /**
  * Runs a time series query using a plugin and returns the results.
  */
-export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, options?: UseTimeSeriesQueryOptions) => {
+export const useTimeSeriesQuery = (
+  definition: TimeSeriesQueryDefinition,
+  options?: UseTimeSeriesQueryOptions,
+  queryOptions?: QueryObserverOptions
+) => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
 
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
-    enabled: queryEnabled,
+    enabled: (queryOptions?.enabled ?? true) || queryEnabled,
     queryKey: queryKey,
     refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
@@ -101,7 +113,11 @@ export const useTimeSeriesQuery = (definition: TimeSeriesQueryDefinition, option
 /**
  * Runs multiple time series queries using plugins and returns the results.
  */
-export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], options?: UseTimeSeriesQueryOptions) {
+export function useTimeSeriesQueries(
+  definitions: TimeSeriesQueryDefinition[],
+  options?: UseTimeSeriesQueryOptions,
+  queryOptions?: QueryObserverOptions
+) {
   const { getPlugin } = usePluginRegistry();
   const context = useTimeSeriesQueryContext();
 
@@ -115,7 +131,7 @@ export function useTimeSeriesQueries(definitions: TimeSeriesQueryDefinition[], o
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
       return {
-        enabled: queryEnabled,
+        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : undefined,
         queryFn: async () => {

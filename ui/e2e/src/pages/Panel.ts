@@ -55,7 +55,7 @@ export class Panel {
     // Need to look up to panel draggable parent first to get the resize handle.
     // The classname selector here is not ideal, but it's all that is available
     // because this lives deeper in another library.
-    this.resizeHandle = this.container.locator('..').locator('.react-resizable-handle');
+    this.resizeHandle = this.container.locator('..').locator('..').locator('.react-resizable-handle');
 
     this.figure = this.container.getByRole('figure');
     this.canvas = this.container.locator('canvas');
