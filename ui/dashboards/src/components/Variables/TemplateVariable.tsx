@@ -13,8 +13,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
-import { DEFAULT_ALL_VALUE, ListVariableDefinition, VariableName, VariableValue } from '@perses-dev/core';
-import { useListVariablePluginValues } from '@perses-dev/plugin-system';
+import {
+  DEFAULT_ALL_VALUE,
+  ListVariableDefinition,
+  ListVariableSpec,
+  UnknownSpec,
+  VariableName,
+  VariableValue,
+} from '@perses-dev/core';
+import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
+import { UseQueryResult } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
 
 type TemplateVariableProps = {
@@ -35,33 +43,33 @@ export function TemplateVariable({ name, source }: TemplateVariableProps) {
   return <div>Unsupported Variable Kind: ${kind}</div>;
 }
 
-function ListVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
-  const definition = ctx.definition as ListVariableDefinition;
-  const variablesOptionsQuery = useListVariablePluginValues(definition);
-  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+export function useListVariableState(
+  spec: ListVariableSpec<UnknownSpec> | undefined,
+  state: VariableState | undefined,
+  variablesOptionsQuery: Partial<UseQueryResult<VariableOption[]>>
+): {
+  // Value, Loading, Options are modified only when we want to save the changes made
+  value: VariableValue | undefined;
+  loading: boolean;
+  options: VariableOption[] | undefined;
+  // selectedValue is the value(s) that will be used in the view only
+  selectedValue: VariableValue;
+  // viewOptions are the options used in the view only (options + All if allowed)
+  viewOptions: VariableOption[];
+} {
+  const allowMultiple = spec?.allow_multiple === true;
+  const allowAllValue = spec?.allow_all_value === true;
+  const loading = useMemo(() => variablesOptionsQuery.isFetching || false, [variablesOptionsQuery]);
+  const options = variablesOptionsQuery.data;
 
-  const allowMultiple = definition?.spec.allow_multiple === true;
-  const allowAllValue = definition?.spec.allow_all_value === true;
-  const title = definition?.spec.display?.name ?? name;
-
-  useEffect(() => {
-    setVariableLoading(name, variablesOptionsQuery.isFetching, source);
-    if (variablesOptionsQuery.data) {
-      setVariableOptions(name, variablesOptionsQuery.data, source);
-    }
-  }, [variablesOptionsQuery, name, setVariableLoading, setVariableOptions, source]);
-
-  let value = ctx.state?.value;
-  const options = ctx.state?.options;
-  const loading = ctx.state?.loading;
+  let value = state?.value;
 
   // Make sure value is an array if allowMultiple is true
   if (allowMultiple && !Array.isArray(value)) {
     value = typeof value === 'string' ? [value] : [];
   }
 
-  const finalOptions = useMemo(() => {
+  const viewOptions = useMemo(() => {
     let computedOptions = options ? [...options] : [];
 
     // Add the all value if it's allowed
@@ -74,29 +82,68 @@ function ListVariable({ name, source }: TemplateVariableProps) {
   const valueIsInOptions = useMemo(
     () =>
       Boolean(
-        finalOptions.find((v) => {
+        viewOptions.find((v) => {
           if (allowMultiple) {
             return (value as string[]).includes(v.value);
           }
           return value === v.value;
         })
       ),
-    [finalOptions, value, allowMultiple]
+    [viewOptions, value, allowMultiple]
   );
 
-  let selectValue = value;
-  if (!valueIsInOptions) {
-    selectValue = allowMultiple ? [] : '';
-  }
+  value = useMemo(() => {
+    const firstOptionValue = viewOptions?.[allowAllValue ? 1 : 0]?.value;
 
-  useEffect(() => {
-    const firstOption = finalOptions?.[0];
-
-    // If there is no value but there are options, set the value to the first option.
-    if (!value && firstOption) {
-      setVariableValue(name, firstOption.value, source);
+    // If there is no value but there are options, or the value is not in options, we set the value to the first option.
+    if (firstOptionValue) {
+      if (!valueIsInOptions || !value || value.length === 0) {
+        return allowMultiple ? [firstOptionValue] : firstOptionValue;
+      }
     }
-  }, [finalOptions, setVariableValue, value, name, allowMultiple, source]);
+
+    return value;
+  }, [viewOptions, value, valueIsInOptions, allowMultiple, allowAllValue]);
+
+  // Once we computed value, we set it as the selected one, if it is available in the options
+  const selectedValue = value && valueIsInOptions ? value : allowMultiple ? [] : '';
+
+  return { value, loading, options, selectedValue, viewOptions };
+}
+
+function ListVariable({ name, source }: TemplateVariableProps) {
+  const ctx = useTemplateVariable(name, source);
+  const definition = ctx.definition as ListVariableDefinition;
+  const variablesOptionsQuery = useListVariablePluginValues(definition);
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+  const { selectedValue, value, loading, options, viewOptions } = useListVariableState(
+    definition?.spec,
+    ctx.state,
+    variablesOptionsQuery
+  );
+
+  const title = definition?.spec.display?.name ?? name;
+  const allowMultiple = definition?.spec.allow_multiple === true;
+  const allowAllValue = definition?.spec.allow_all_value === true;
+
+  // Update value when changed
+  useEffect(() => {
+    if (value) {
+      setVariableValue(name, value, source);
+    }
+  }, [setVariableValue, name, value, source]);
+
+  // Update loading when changed
+  useEffect(() => {
+    setVariableLoading(name, loading, source);
+  }, [setVariableLoading, name, loading, source]);
+
+  // Update options when changed
+  useEffect(() => {
+    if (options) {
+      setVariableOptions(name, options, source);
+    }
+  }, [setVariableOptions, name, options, source]);
 
   return (
     <Box display={'flex'}>
@@ -106,7 +153,7 @@ function ListVariable({ name, source }: TemplateVariableProps) {
           sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={title}
-          value={selectValue}
+          value={selectedValue}
           onChange={(e) => {
             // Must be selected
             if (e.target.value === null || e.target.value.length === 0) {
@@ -125,12 +172,12 @@ function ListVariable({ name, source }: TemplateVariableProps) {
             </MenuItem>
           )}
 
-          {finalOptions.length === 0 && (
+          {viewOptions.length === 0 && (
             <MenuItem value="empty" disabled>
               No options
             </MenuItem>
           )}
-          {finalOptions.map((option) => (
+          {viewOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               {option.label}
             </MenuItem>
