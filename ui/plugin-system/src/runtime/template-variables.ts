@@ -16,6 +16,7 @@ import { VariableValue } from '@perses-dev/core';
 import { immerable } from 'immer';
 import { VariableOption } from '../model';
 import { parseTemplateVariables, replaceTemplateVariables } from '../utils';
+import { useBuiltinVariableValues } from './builtin-variables';
 
 export type VariableState = {
   value: VariableValue;
@@ -137,7 +138,7 @@ function useTemplateVariableContext() {
   return ctx;
 }
 
-export function useTemplateVariableValues(names?: string[]) {
+export function useTemplateVariableValues(names?: string[]): VariableStateMap {
   const { state } = useTemplateVariableContext();
 
   const values = useMemo(() => {
@@ -158,10 +159,17 @@ export function useTemplateVariableValues(names?: string[]) {
   return values;
 }
 
+export function useVariableValues(names?: string[]): VariableStateMap {
+  const templateVariableValues = useTemplateVariableValues(names);
+  const builtinVariableValues = useBuiltinVariableValues(names);
+
+  return Object.assign(templateVariableValues, builtinVariableValues);
+}
+
 // Convenience hook for replacing template variables in a string
 export function useReplaceVariablesInString(str: string | undefined): string | undefined {
   const variablesInString = str ? parseTemplateVariables(str) : [];
-  const variableValues = useTemplateVariableValues(variablesInString);
+  const variableValues = useVariableValues(variablesInString);
   if (!str) return undefined;
   return replaceTemplateVariables(str, variableValues);
 }

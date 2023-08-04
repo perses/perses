@@ -14,7 +14,12 @@
 import { Box, BoxProps } from '@mui/material';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
-import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
+import {
+  BuiltinVariables,
+  TimeRangeProvider,
+  useInitialRefreshInterval,
+  useInitialTimeRange,
+} from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import { buildBuiltinVariableDefinition, getBuiltinVariableDefinitions } from '@perses-dev/app/src/utils/variables';
 import {
@@ -63,6 +68,13 @@ export function ViewDashboard(props: ViewDashboardProps) {
     [externalVariableDefinitions, builtinVariableDefinitions]
   );
 
+  const dashboardBuiltinVariables: BuiltinVariables = {
+    __dashboard: () => {
+      return dashboardResource.metadata.name;
+    },
+    __project: () => dashboardResource.metadata.project,
+  };
+
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
@@ -74,6 +86,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           <TemplateVariableProvider
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={mergedExternalVariableDefinition}
+            builtinVariables={dashboardBuiltinVariables}
           >
             <Box
               sx={combineSx(

@@ -22,19 +22,11 @@ import {
   VariableState,
   VariableStoreStateMap,
   VariableOption,
-  useInitialTimeRange,
+  BuiltinVariableContext,
   useTimeRange,
+  BuiltinVariables,
 } from '@perses-dev/plugin-system';
-import {
-  DEFAULT_ALL_VALUE as ALL_VALUE,
-  VariableName,
-  VariableValue,
-  VariableDefinition,
-  isRelativeTimeRange,
-  toAbsoluteTimeRange,
-  DEFAULT_DASHBOARD_DURATION,
-  DurationString,
-} from '@perses-dev/core';
+import { DEFAULT_ALL_VALUE as ALL_VALUE, VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -149,12 +141,14 @@ export function useTemplateVariableStore() {
 
 interface PluginProviderProps {
   children: ReactNode;
+  builtinVariables?: BuiltinVariables;
 }
 
-function PluginProvider({ children }: PluginProviderProps) {
+function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
   const originalValues = useTemplateVariableValues();
   const definitions = useTemplateVariableDefinitions();
   const externalDefinitions = useTemplateExternalVariableDefinitions();
+  const { absoluteTimeRange } = useTimeRange();
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -179,7 +173,15 @@ function PluginProvider({ children }: PluginProviderProps) {
     return contextValues;
   }, [originalValues, definitions, externalDefinitions]);
 
-  return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
+  const allBuiltinVariables = { ...builtinVariables };
+  allBuiltinVariables['__from'] = () => absoluteTimeRange.start.valueOf().toString();
+  allBuiltinVariables['__to'] = () => absoluteTimeRange.end.valueOf().toString();
+
+  return (
+    <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
+      <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>
+    </BuiltinVariableContext.Provider>
+  );
 }
 
 interface TemplateVariableSrvArgs {
@@ -343,16 +345,14 @@ export interface TemplateVariableProviderProps {
    * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
    */
   externalVariableDefinitions?: ExternalVariableDefinition[];
-  /**
-   * The dashboard duration is used to initialize time related builtin variables (from & to)
-   */
-  dashboardDuration?: DurationString;
+  builtinVariables?: BuiltinVariables;
 }
 
 export function TemplateVariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
+  builtinVariables = {},
 }: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
@@ -362,7 +362,7 @@ export function TemplateVariableProvider({
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
-      <PluginProvider>{children}</PluginProvider>
+      <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
     </TemplateVariableStoreContext.Provider>
   );
 }
