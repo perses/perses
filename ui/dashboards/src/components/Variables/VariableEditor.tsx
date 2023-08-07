@@ -309,7 +309,7 @@ export function VariableEditor(props: {
                               )}
                             </Stack>
                             <TableContainer>
-                              <Table sx={{ minWidth: 650 }} aria-label="table of variables">
+                              <Table sx={{ minWidth: 650 }} aria-label="table of external variables">
                                 <TableHead>
                                   <TableRow>
                                     {!extVar.hideSwitch && <TableCell>Visibility</TableCell>}
