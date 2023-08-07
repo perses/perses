@@ -22,6 +22,7 @@ import {
   LabelValuesResponse,
   RangeQueryRequestParameters,
   RangeQueryResponse,
+  SuccessResponse,
 } from './api-types';
 
 interface PrometheusClientOptions {
@@ -66,8 +67,20 @@ export function labelNames(params: LabelNamesRequestParameters, queryOptions: Qu
 /**
  * Calls the `/api/v1/label/{labelName}/values` endpoint to get a list of values for a label.
  */
-export function labelValues(params: LabelValuesRequestParameters, queryOptions: QueryOptions) {
+export function labelValues(
+  params: LabelValuesRequestParameters,
+  queryOptions: QueryOptions
+): Promise<LabelValuesResponse> {
   const { labelName, ...searchParams } = params;
+
+  // In case label name is empty, we'll receive a 404, so we can replace it by an empty list, which is less confusing.
+  // Note that an empty list is the prometheus result if the label does not exist.
+  if (labelName.length === 0) {
+    return new Promise((resolve) => {
+      resolve({ data: [] as string[] } as SuccessResponse<string[]>);
+    });
+  }
+
   const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
   return fetchWithGet<typeof searchParams, LabelValuesResponse>(apiURI, searchParams, queryOptions);
 }
