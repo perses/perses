@@ -38,9 +38,9 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
 
   return {
     name: initialVariableDefinition.spec.name,
-    title: initialVariableDefinition.spec.display?.name,
+    title: initialVariableDefinition.spec.display?.name ?? '',
     kind: initialVariableDefinition.kind,
-    description: initialVariableDefinition.spec.display?.description,
+    description: initialVariableDefinition.spec.display?.description ?? '',
     listVariableFields,
     textVariableFields,
   };
