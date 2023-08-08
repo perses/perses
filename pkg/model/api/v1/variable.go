@@ -22,6 +22,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type VariableInterface interface {
+	GetMetadata() modelAPI.Metadata
+	GetVarSpec() VariableSpec
+}
+
 type VariableSpec struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind variable.Kind `json:"kind" yaml:"kind"`
@@ -81,6 +86,10 @@ func (v *GlobalVariable) GetKind() string {
 	return string(v.Kind)
 }
 
+func (v *GlobalVariable) GetVarSpec() VariableSpec {
+	return v.Spec
+}
+
 func (v *GlobalVariable) GetSpec() interface{} {
 	return v.Spec
 }
@@ -99,6 +108,10 @@ func (v *Variable) GetMetadata() modelAPI.Metadata {
 
 func (v *Variable) GetKind() string {
 	return string(v.Kind)
+}
+
+func (v *Variable) GetVarSpec() VariableSpec {
+	return v.Spec
 }
 
 func (v *Variable) GetSpec() interface{} {

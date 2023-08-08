@@ -15,6 +15,8 @@ package validate
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"regexp"
 
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -51,6 +53,16 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 	return nil
 }
 
+func Variable[T modelV1.VariableInterface](entity T, sch schemas.Schemas) error {
+	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
+		return err
+	}
+	if err := sch.ValidateGlobalVariable(entity.GetVarSpec()); err != nil {
+		return err
+	}
+	return nil
+}
+
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
 	name := entity.GetMetadata().GetName()
 	spec := entity.GetDTSSpec()
@@ -72,6 +84,31 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 	return nil
 }
 
+func validateVariableName(variable string) error {
+	var variableRegex = regexp.MustCompile(`^\w+$`)
+	valid := variableRegex.MatchString(variable)
+	if !valid {
+		return fmt.Errorf("variable name '%s' is not valid", variable)
+	}
+
+	// Checking if variable do not have builting variable prefix: __
+	var builtinVarPrefixRegex = regexp.MustCompile(`^__`)
+	isBuiltinVar := builtinVarPrefixRegex.MatchString(variable)
+	if isBuiltinVar {
+		return fmt.Errorf("variable name '%s' can not have builtin variable prefix: __", variable)
+	}
+	return nil
+}
+
+func validateVariableNames(variables []dashboard.Variable) error {
+	for _, variable := range variables {
+		if err := validateVariableName(variable.Spec.GetName()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
 	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
@@ -80,6 +117,10 @@ func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
 }
 
 func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
+	if err := validateVariableNames(entity.Spec.Variables); err != nil {
+		return err
+	}
+
 	if sch != nil {
 		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
 			return err
