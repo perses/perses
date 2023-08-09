@@ -1,0 +1,52 @@
+---
+name: Bug report
+description: Create a report to help us improve.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for opening a bug report for Perses.
+
+        Please do *NOT* ask support questions in Github issues.
+
+        If your issue is not a feature request or bug report use [Discussions](https://github.com/perses/perses/discussions).
+  - type: textarea
+    attributes:
+      label: What did you do?
+      description: Please provide steps for us to reproduce this issue.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What did you expect to see?
+  - type: textarea
+    attributes:
+      label: What did you see instead? Under which circumstances?
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        ## Environment
+  - type: input
+    attributes:
+      label: System information
+      description: insert output of `uname -srm` here, or operating system version
+      placeholder: e.g. Linux 5.16.15 x86_64
+  - type: textarea
+    attributes:
+      label: Perses version
+      description: Insert the Perses version here.
+      render: text
+      placeholder: |
+        e.g. 0.39.0
+  - type: textarea
+    attributes:
+      label: Perses configuration file
+      description: Insert relevant configuration here. Don't forget to remove secrets.
+      render: yaml
+  - type: textarea
+    attributes:
+      label: Logs
+      description: Insert Perses logs relevant to the issue here.
+      render: text

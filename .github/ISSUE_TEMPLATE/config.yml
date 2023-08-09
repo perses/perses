@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Perses Discussions
+    url: https://github.com/perses/perses/discussions
+  - name: Perses Public Channel
+    url: https://matrix.to/#/!mnvXmsFzbmKXoBYGcv:matrix.org?via=matrix.org
+    about: If you need help or support, please request help here
+  - name: Perses Development Channel
+    url: https://matrix.to/#/#perses-dev:matrix.org
+    about: If you are unsure about what to do, and you are eager to contribute, you can reach us on this development channel
