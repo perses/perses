@@ -8,7 +8,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.15.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/goreleaser/goreleaser v1.19.2
-	github.com/huandu/go-sqlbuilder v1.21.0
+	github.com/huandu/go-sqlbuilder v1.22.0
 	github.com/json-iterator/go v1.1.12
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/olekukonko/tablewriter v0.0.5
