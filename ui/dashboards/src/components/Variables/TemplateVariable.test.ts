@@ -1,0 +1,210 @@
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { useListVariableState } from '@perses-dev/dashboards';
+import { renderHook } from '@testing-library/react';
+import { VariableValue } from '@perses-dev/core';
+import { VariableOption } from '@perses-dev/plugin-system';
+
+/**
+ * Builder shortcut used in test to build a dummy option from value.
+ * @param value
+ */
+function option(value: string): VariableOption {
+  return {
+    label: '',
+    value,
+  };
+}
+
+/**
+ * Builder shortcut used in test to build an "all" option
+ */
+function allOption(): VariableOption {
+  return {
+    label: 'All',
+    value: '$__all',
+  };
+}
+
+/**
+ * struct used in tests for following parametrized tests
+ */
+interface TestParams {
+  description: string;
+  input: {
+    allow_multiple: boolean;
+    allow_all_value: boolean;
+    value: VariableValue;
+    isFetchingOptions: boolean;
+    fetchedOptions: VariableOption[];
+  };
+  output: {
+    value: VariableValue;
+    loading: boolean;
+    options: VariableOption[];
+    selectedValue: VariableValue;
+    viewOptions: VariableOption[];
+  };
+}
+
+describe('useListVariableState', () => {
+  it.each([
+    {
+      description: '[!ALL][!MULTIPLE] is fetching',
+      input: {
+        allow_multiple: false,
+        allow_all_value: false,
+        value: 'hello',
+        isFetchingOptions: true,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: 'hello',
+        loading: true,
+        options: [option('hello')],
+        selectedValue: 'hello',
+        viewOptions: [option('hello')],
+      },
+    },
+    {
+      description: '[!ALL][!MULTIPLE] state.value is in options',
+      input: {
+        allow_multiple: false,
+        allow_all_value: false,
+        value: 'hello',
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: 'hello',
+        loading: false,
+        options: [option('hello')],
+        selectedValue: 'hello',
+        viewOptions: [option('hello')],
+      },
+    },
+    {
+      description: '[ALL][MULTIPLE] state.value is in options',
+      input: {
+        allow_multiple: true,
+        allow_all_value: true,
+        value: 'hello',
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: ['hello'],
+        loading: false,
+        options: [option('hello')],
+        selectedValue: ['hello'],
+        viewOptions: [allOption(), option('hello')],
+      },
+    },
+    {
+      description: '[!ALL][!MULTIPLE] state.value is null',
+      input: {
+        allow_multiple: false,
+        allow_all_value: false,
+        value: null,
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: 'hello',
+        loading: false,
+        options: [option('hello')],
+        selectedValue: '', // Not a problem. As long the value is good, next update will set it
+        viewOptions: [option('hello')],
+      },
+    },
+    {
+      description: '[ALL][MULTIPLE] state.value is null',
+      input: {
+        allow_multiple: true,
+        allow_all_value: true,
+        value: null,
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: ['hello'],
+        loading: false,
+        options: [option('hello')],
+        selectedValue: [], // Not a problem. As long the value is good, next update will set it
+        viewOptions: [allOption(), option('hello')],
+      },
+    },
+    {
+      description: '[!ALL][!MULTIPLE] state.value is not in options',
+      input: {
+        allow_multiple: false,
+        allow_all_value: false,
+        value: 'test',
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: 'hello',
+        loading: false,
+        options: [option('hello')],
+        selectedValue: '', // Not a problem. As long the value is good, next update will set it
+        viewOptions: [option('hello')],
+      },
+    },
+    {
+      description: '[ALL][MULTIPLE] state.value is not in options',
+      input: {
+        allow_multiple: true,
+        allow_all_value: true,
+        value: 'test',
+        isFetchingOptions: false,
+        fetchedOptions: [option('hello')],
+      },
+      output: {
+        value: ['hello'],
+        loading: false,
+        options: [option('hello')],
+        selectedValue: [], // Not a problem. As long the value is good, next update will set it
+        viewOptions: [allOption(), option('hello')],
+      },
+    },
+  ])('$description', (params: TestParams) => {
+    const { result } = renderHook(() =>
+      useListVariableState(
+        {
+          name: 'myVar', // unused by the hook
+          plugin: { spec: {}, kind: 'unknown-plugin' }, // unused by the hook
+          allow_multiple: params.input.allow_multiple,
+          allow_all_value: params.input.allow_all_value,
+        },
+        {
+          value: params.input.value,
+          loading: false, // unused by the hook
+        },
+        {
+          isFetching: params.input.isFetchingOptions,
+          data: params.input.fetchedOptions,
+        }
+      )
+    );
+
+    expect(result.current).toStrictEqual({
+      value: params.output.value,
+      loading: params.output.loading,
+      options: params.output.options,
+      selectedValue: params.output.selectedValue,
+      viewOptions: params.output.viewOptions,
+    });
+  });
+});
