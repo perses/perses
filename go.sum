@@ -186,8 +186,8 @@ github.com/prometheus/common/assets v0.2.0 h1:0P5OrzoHrYBOSM1OigWL3mY8ZvV2N4zIE/
 github.com/prometheus/common/assets v0.2.0/go.mod h1:D17UVUE12bHbim7HzwUvtqm6gwBEaDQ0F+hIGbFbccI=
 github.com/prometheus/procfs v0.9.0 h1:wzCHvIvM5SxWqYvwgVL7yJY8Lz3PKn49KQtpgMYJfhI=
 github.com/prometheus/procfs v0.9.0/go.mod h1:+pB4zwohETzFnmlpe6yd2lSc+0/46IYZRB/chUwxUZY=
-github.com/prometheus/promu v0.14.0 h1:Y8zSMY5Mzpug4DIjmUqLoGgTUPlt9ApPa8Pc8v03VDY=
-github.com/prometheus/promu v0.14.0/go.mod h1:cHDmbpJakPiMLz8eo8P0NMhzMHbPJPMCUZa1a2vlFlU=
+github.com/prometheus/promu v0.15.0 h1:HeihVxaiNBL7MCL14v4QFjYGFPAC/oa1/AB2gqRbcXQ=
+github.com/prometheus/promu v0.15.0/go.mod h1:7JtFYJXheeXhw6LNsaI9ZSSxUZU4UpkKuVmzc+zSB6c=
 github.com/protocolbuffers/txtpbfmt v0.0.0-20220428173112-74888fd59c2b h1:zd/2RNzIRkoGGMjE+YIsZ85CnDIz672JK2F3Zl4vux4=
 github.com/protocolbuffers/txtpbfmt v0.0.0-20220428173112-74888fd59c2b/go.mod h1:KjY0wibdYKc4DYkerHSbguaf3JeIPGhNJBp2BNiFH78=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
