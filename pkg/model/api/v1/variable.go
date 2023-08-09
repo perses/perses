@@ -16,11 +16,12 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"gopkg.in/yaml.v2"
 )
+
+var BuiltinVariableNames = []string{"$__project", "$__dashboard", "$__from", "$__to"}
 
 type VariableInterface interface {
 	GetMetadata() modelAPI.Metadata

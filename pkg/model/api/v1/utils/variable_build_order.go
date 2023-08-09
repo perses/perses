@@ -15,18 +15,23 @@ package utils
 
 import (
 	"fmt"
-	"reflect"
-	"regexp"
-	"strconv"
-
 	"github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"golang.org/x/exp/slices"
+	"reflect"
+	"regexp"
 )
 
-var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
+// We want to keep only variables that are not only a number.
+// A number that represents a variable is not meaningful, and so we don't want to consider it.
+// It's also a way to avoid a collision in terms of variable template syntax.
+// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
+var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$(\w*?[^0-9]\w*)`)
+
+// BuiltinVariablePrefixRegexp is the regex for detecting builtin variables (i.e.: $__dashboard, $__from, $__to, ...)
+var BuiltinVariablePrefixRegexp = regexp.MustCompile(`^__`)
 
 type VariableGroup struct {
 	Variables []string
@@ -166,7 +171,11 @@ func buildVariableDependencies(variables []dashboard.Variable, projectVariables 
 	// At the end, if the undefined dependency is not empty, then we send an error for the first one.
 	for byVar, usedVars := range undefinedDeps {
 		for _, usedVar := range usedVars {
-			return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", usedVar, byVar)
+			// Checking if the variable is not a builting variable
+			isBuiltinVar := BuiltinVariablePrefixRegexp.MatchString(usedVar)
+			if !isBuiltinVar {
+				return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", usedVar, byVar)
+			}
 		}
 	}
 
@@ -229,20 +238,7 @@ func extractVariableInStringOrInSomethingElse(v reflect.Value, matches *[][]stri
 }
 
 func parseVariableUsed(str string) [][]string {
-	matches := variableTemplateSyntaxRegexp.FindAllStringSubmatch(str, -1)
-	var result [][]string
-	for _, match := range matches {
-		if _, err := strconv.Atoi(match[1]); err != nil {
-			// We want to keep only variables that are not only a number.
-			// A number that represents a variable is not meaningful, and so we don't want to consider it.
-			// It's also a way to avoid a collision in terms of variable template syntax.
-			// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-			//
-			// If the string cannot be parsed as an integer, then we can keep it because that means it contains other characters than just numbers.
-			result = append(result, match)
-		}
-	}
-	return result
+	return variableTemplateSyntaxRegexp.FindAllStringSubmatch(str, -1)
 }
 
 type node struct {

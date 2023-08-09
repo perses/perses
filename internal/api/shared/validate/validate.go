@@ -25,6 +25,12 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 )
 
+// We want to keep only variables that are not only a number.
+// A number that represents a variable is not meaningful, and so we don't want to consider it.
+// It's also a way to avoid a collision in terms of variable template syntax.
+// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
+var variableTemplateNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
+
 func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
 		return err
@@ -85,15 +91,13 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 }
 
 func validateVariableName(variable string) error {
-	var variableRegex = regexp.MustCompile(`^\w+$`)
-	valid := variableRegex.MatchString(variable)
+	valid := variableTemplateNameRegexp.MatchString(variable)
 	if !valid {
 		return fmt.Errorf("variable name '%s' is not valid", variable)
 	}
 
 	// Checking if variable do not have builting variable prefix: __
-	var builtinVarPrefixRegex = regexp.MustCompile(`^__`)
-	isBuiltinVar := builtinVarPrefixRegex.MatchString(variable)
+	isBuiltinVar := utils.BuiltinVariablePrefixRegexp.MatchString(variable)
 	if isBuiltinVar {
 		return fmt.Errorf("variable name '%s' can not have builtin variable prefix: __", variable)
 	}
