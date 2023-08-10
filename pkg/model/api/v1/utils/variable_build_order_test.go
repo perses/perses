@@ -339,6 +339,67 @@ func TestBuildVariableDependencies(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "variable with only number is ignored",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "filter_platform",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "PaaS",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "filter_kube_sts",
+					},
+				},
+				{
+					Kind: variable.KindText,
+					Spec: &dashboard.TextVariableSpec{
+						TextSpec: variable.TextSpec{
+							Value: "myConstant",
+						},
+						Name: "extlabels_prometheus_namespace",
+					},
+				},
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr":       "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
+									"label_name": "prometheus",
+								},
+							},
+						},
+						Name: "foo",
+					},
+				},
+			},
+			result: map[string][]string{
+				"foo": {
+					"filter_platform", "PaaS", "filter_kube_sts", "extlabels_prometheus_namespace",
+				},
+			},
+		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {

@@ -19,9 +19,8 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"gopkg.in/yaml.v2"
+	"regexp"
 )
-
-var BuiltinVariableNames = []string{"$__project", "$__dashboard", "$__from", "$__to"}
 
 type VariableInterface interface {
 	GetMetadata() modelAPI.Metadata
@@ -117,4 +116,11 @@ func (v *Variable) GetVarSpec() VariableSpec {
 
 func (v *Variable) GetSpec() interface{} {
 	return v.Spec
+}
+
+// IsBuiltinVariable check if variable name is a builtin variable
+func IsBuiltinVariable(variableName string) bool {
+	// A variable is considered as builtin variable if there is the prefix __
+	var builtinVariablePrefixRegexp = regexp.MustCompile(`^__`)
+	return builtinVariablePrefixRegexp.MatchString(variableName)
 }

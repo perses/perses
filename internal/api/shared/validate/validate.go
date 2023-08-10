@@ -59,7 +59,7 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 	return nil
 }
 
-func Variable[T modelV1.VariableInterface](entity T, sch schemas.Schemas) error {
+func Variable(entity modelV1.VariableInterface, sch schemas.Schemas) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func validateVariableName(variable string) error {
 	}
 
 	// Checking if variable do not have builting variable prefix: __
-	isBuiltinVar := utils.BuiltinVariablePrefixRegexp.MatchString(variable)
+	isBuiltinVar := modelV1.IsBuiltinVariable(variable)
 	if isBuiltinVar {
 		return fmt.Errorf("variable name '%s' can not have builtin variable prefix: __", variable)
 	}

@@ -75,7 +75,7 @@ func (e *Endpoint) ValidateGlobalVariable(ctx echo.Context) error {
 	return validateVariable(&v1.GlobalVariable{}, e.sch, ctx)
 }
 
-func validateDatasource[T v1.DatasourceInterface](entity T, sch schemas.Schemas, ctx echo.Context) error {
+func validateDatasource(entity v1.DatasourceInterface, sch schemas.Schemas, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}
@@ -85,7 +85,7 @@ func validateDatasource[T v1.DatasourceInterface](entity T, sch schemas.Schemas,
 	return ctx.NoContent(http.StatusOK)
 }
 
-func validateVariable[T v1.VariableInterface](entity T, sch schemas.Schemas, ctx echo.Context) error {
+func validateVariable(entity v1.VariableInterface, sch schemas.Schemas, ctx echo.Context) error {
 	if err := ctx.Bind(entity); err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}
