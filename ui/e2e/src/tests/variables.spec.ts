@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getBuiltinVariableDefinitions } from '@perses-dev/app/src/utils/variables';
 import { test, expect } from '../fixtures/dashboardTest';
 
 test.use({
@@ -21,6 +20,8 @@ test.use({
 
 test.describe('Dashboard: Variables', () => {
   test('can add simple text variable', async ({ dashboardPage }) => {
+    const initialCount = await dashboardPage.variableListItems.count(); // Builtin variables are hidden
+
     await dashboardPage.startEditing();
     await dashboardPage.startEditingVariables();
 
@@ -39,11 +40,12 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.applyChanges();
     await dashboardPage.saveChanges();
 
-    await expect(dashboardPage.variableListItems).toHaveCount(getBuiltinVariableDefinitions().length + 1);
+    await expect(dashboardPage.variableListItems).toHaveCount(initialCount + 1);
     await expect(dashboardPage.variableListItems).toContainText([/Text Var/]);
   });
 
   test('can add simple list variable', async ({ dashboardPage }) => {
+    const initialCount = await dashboardPage.variableListItems.count(); // Builtin variables are hidden
     await dashboardPage.startEditing();
     await dashboardPage.startEditingVariables();
     const variableEditor = dashboardPage.getVariableEditor();
@@ -65,7 +67,7 @@ test.describe('Dashboard: Variables', () => {
     const toolbarSaveButton = await dashboardPage.page.getByRole('button', { name: 'Save' });
     await toolbarSaveButton.click();
 
-    await expect(dashboardPage.variableListItems).toHaveCount(getBuiltinVariableDefinitions().length + 1);
+    await expect(dashboardPage.variableListItems).toHaveCount(initialCount + 1);
     await expect(dashboardPage.variableListItems).toContainText([/List Var/]);
   });
 });

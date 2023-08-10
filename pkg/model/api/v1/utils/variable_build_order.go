@@ -25,11 +25,9 @@ import (
 	"strconv"
 )
 
-// We want to keep only variables that are not only a number.
-// A number that represents a variable is not meaningful, and so we don't want to consider it.
-// It's also a way to avoid a collision in terms of variable template syntax.
+// Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
 // For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$(\w*?[^0-9]\w*)`)
+var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$(\w+)`)
 
 type VariableGroup struct {
 	Variables []string
