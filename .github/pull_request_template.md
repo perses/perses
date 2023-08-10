@@ -3,6 +3,14 @@
   https://github.com/perses/perses/blob/main/CONTRIBUTING.md
 -->
 
+# Description
+<!-- Context useful to a reviewer -->
+
+
+# Screenshots
+<!-- If there are UI changes -->
+
+
 # Checklist
 
 - [ ] Pull request has a descriptive title and context useful to a reviewer.
