@@ -13,18 +13,7 @@
 
 //go:build integration
 
-package e2e
+package api
 
-import (
-	"testing"
-
-	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/pkg/model/api"
-)
-
-func TestMainScenarioVariable(t *testing.T) {
-	e2eframework.MainTestScenarioWithProject(t, shared.PathVariable, func(projectName string, name string) (api.Entity, api.Entity) {
-		return e2eframework.NewProject(projectName), e2eframework.NewVariable(projectName, name)
-	})
-}
+// this file is only present to trigger the e2e test. The e2e test of the api are in a dedicated package to avoid
+// a cycle in the import: core -> utils -> core.

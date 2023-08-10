@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,9 +12,19 @@
 // limitations under the License.
 
 //go:build integration
-// +build integration
 
-package e2e
+package api
 
-// this file is only present to trigger the e2e test. The e2e test of the api are in a dedicated package to avoid
-// a cycle in the import: core -> utils -> core.
+import (
+	"testing"
+
+	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/pkg/model/api"
+)
+
+func TestMainScenarioVariable(t *testing.T) {
+	e2eframework.MainTestScenarioWithProject(t, shared.PathVariable, func(projectName string, name string) (api.Entity, api.Entity) {
+		return e2eframework.NewProject(projectName), e2eframework.NewVariable(projectName, name)
+	})
+}
