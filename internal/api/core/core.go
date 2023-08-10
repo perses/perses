@@ -44,6 +44,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	persesAPI := NewPersesAPI(serviceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	proxyMiddleware := &middleware.Proxy{
+		Dashboard:    persistenceManager.GetDashboard(),
 		Secret:       persistenceManager.GetSecret(),
 		GlobalSecret: persistenceManager.GetGlobalSecret(),
 		DTS:          persistenceManager.GetDatasource(),

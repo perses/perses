@@ -12,7 +12,12 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import { DatasourceStoreContext, DatasourceStore, usePluginRegistry } from '@perses-dev/plugin-system';
+import {
+  DatasourceStoreContext,
+  DatasourceStore,
+  usePluginRegistry,
+  DatasourceSelectItemGroup,
+} from '@perses-dev/plugin-system';
 import { StoryFn, StoryContext } from '@storybook/react';
 
 declare module '@storybook/react' {
@@ -45,7 +50,7 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
   // basic stories. It likely will need expanding in the future.
   // In general, `plugin-system` would probably benefit from a provider wrapper
   // for `DatasourceStoreContext` that is more generic than the one available
-  // in in the `dashboard` package for non-dashboard use cases.
+  // in the `dashboard` package for non-dashboard use cases.
   const defaultValue: DatasourceStore = {
     getDatasource: (selector) => {
       if (selector.kind === 'PrometheusDatasource') {
@@ -70,12 +75,16 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
       }
       throw new Error(`WithDatasourceStore is not configured to support kind: ${selector.kind}`);
     },
-    listDatasourceMetadata: async (datasourcePluginKind) => {
+    listDatasourceSelectItems: async (datasourcePluginKind): Promise<DatasourceSelectItemGroup[]> => {
       if (datasourcePluginKind === 'PrometheusDatasource') {
         return Promise.resolve([
           {
-            name: 'PrometheusDatasource',
-            selector: { kind: 'PrometheusDatasource' },
+            items: [
+              {
+                name: 'PrometheusDatasource',
+                selector: { kind: 'PrometheusDatasource' },
+              },
+            ],
           },
         ]);
       }

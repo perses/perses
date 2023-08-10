@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
@@ -35,15 +36,16 @@ import (
 )
 
 var (
-	globalProxyMatcher  = regexp.MustCompile(`/proxy/globaldatasources/([a-zA-Z-0-9_-]+)(/.*)?`)
-	projectProxyMatcher = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+	globalProxyMatcher    = regexp.MustCompile(`/proxy/globaldatasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+	projectProxyMatcher   = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+	dashboardProxyMatcher = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/dashboards/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
 )
 
 // TODO cache the request to the database
 
 func extractGlobalDatasourceAndPath(requestPath string) (dtsName string, path string, err error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
-	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
+	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 1 {
 		return "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	dtsName = matchingGroups[0][1]
@@ -58,7 +60,7 @@ func extractGlobalDatasourceAndPath(requestPath string) (dtsName string, path st
 
 func extractProjectDatasourceAndPath(requestPath string) (projectName string, dtsName string, path string, err error) {
 	matchingGroups := projectProxyMatcher.FindAllStringSubmatch(requestPath, -1)
-	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
+	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 2 {
 		return "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
 	projectName = matchingGroups[0][1]
@@ -72,7 +74,25 @@ func extractProjectDatasourceAndPath(requestPath string) (projectName string, dt
 	return
 }
 
+func extractProjectDashboardDatasourceAndPath(requestPath string) (projectName string, dashboardName string, dtsName string, path string, err error) {
+	matchingGroups := dashboardProxyMatcher.FindAllStringSubmatch(requestPath, -1)
+	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 3 {
+		return "", "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+	}
+	projectName = matchingGroups[0][1]
+	dashboardName = matchingGroups[0][2]
+	dtsName = matchingGroups[0][3]
+	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
+	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
+	path = "/"
+	if len(matchingGroups[0]) > 4 && len(matchingGroups[0][4]) > 0 {
+		path = matchingGroups[0][4]
+	}
+	return
+}
+
 type Proxy struct {
+	Dashboard    dashboard.DAO
 	Secret       secret.DAO
 	GlobalSecret globalsecret.DAO
 	DTS          datasource.DAO
@@ -84,15 +104,19 @@ func (e *Proxy) Proxy() echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			requestPath := c.Request().URL.Path
 			globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
-			localDatasourceMatch := projectProxyMatcher.MatchString(requestPath)
-			if !globalDatasourceMatch && !localDatasourceMatch {
+			projectDatasourceMatch := projectProxyMatcher.MatchString(requestPath)
+			dashboardDatasourceMatch := dashboardProxyMatcher.MatchString(requestPath)
+			if !globalDatasourceMatch && !projectDatasourceMatch && !dashboardDatasourceMatch {
 				// this is likely a request for the API itself
 				return next(c)
 			}
 			if globalDatasourceMatch {
 				return e.proxyGlobalDatasource(c)
 			}
-			return e.proxyProjectDatasource(c)
+			if projectDatasourceMatch {
+				return e.proxyProjectDatasource(c)
+			}
+			return e.proxyDashboardDatasource(c)
 		}
 	}
 }
@@ -133,6 +157,24 @@ func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
+func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
+	projectName, dashboardName, dtsName, path, err := extractProjectDashboardDatasourceAndPath(ctx.Request().URL.Path)
+	if err != nil {
+		return err
+	}
+	dts, err := e.getDashboardDatasource(projectName, dashboardName, dtsName)
+	if err != nil {
+		return err
+	}
+	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+		return e.getProjectSecret(projectName, dtsName, name)
+	})
+	if err != nil {
+		return err
+	}
+	return pr.serve(ctx)
+}
+
 func (e *Proxy) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	dts, err := e.GlobalDTS.Get(name)
 	if err != nil {
@@ -145,6 +187,7 @@ func (e *Proxy) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	}
 	return dts.Spec, nil
 }
+
 func (e *Proxy) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
 	dts, err := e.DTS.Get(projectName, name)
 	if err != nil {
@@ -156,6 +199,24 @@ func (e *Proxy) getProjectDatasource(projectName string, name string) (v1.Dataso
 		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
 	}
 	return dts.Spec, nil
+}
+
+func (e *Proxy) getDashboardDatasource(projectName string, dashboardName string, name string) (v1.DatasourceSpec, error) {
+	db, err := e.Dashboard.Get(projectName, dashboardName)
+	if err != nil {
+		if databaseModel.IsKeyNotFound(err) {
+			logrus.Debugf("unable to find the Dashboard %q in project %q", dashboardName, projectName)
+			return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+		}
+		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
+		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+	}
+	dtsSpec, ok := db.Spec.Datasources[name]
+	if !ok {
+		logrus.Debugf("unable to find the Datasource %q from Dashboard %q in project %q", name, dashboardName, projectName)
+		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+	}
+	return *dtsSpec, nil
 }
 
 func (e *Proxy) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {

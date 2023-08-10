@@ -45,5 +45,21 @@
         }
       }
     }
+  },
+  {
+    "kind": "Datasource",
+    "metadata": {
+      "name": "PrometheusDemoBrowser",
+      "project": "perses"
+    },
+    "spec": {
+      "default": false,
+      "plugin": {
+        "kind": "PrometheusDatasource",
+        "spec": {
+          "direct_url": "https://prometheus.demo.do.prometheus.io"
+        }
+      }
+    }
   }
 ]

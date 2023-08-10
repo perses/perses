@@ -60,7 +60,7 @@ function insertResourceData() {
 }
 
 function injectAllData() {
-  insertResourceData ./data/localdatasource.json true
+  insertResourceData ./data/projectdatasource.json true
   insertResourceData ./data/dashboard.json true
   insertResourceData ./data/project.json
   insertResourceData ./data/globaldatasource.json

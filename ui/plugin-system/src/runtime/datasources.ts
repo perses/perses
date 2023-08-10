@@ -25,13 +25,21 @@ export interface DatasourceStore {
   getDatasourceClient<Client>(selector: DatasourceSelector): Promise<Client>;
 
   /**
-   * Gets a list of datasource metadata for a plugin kind.
+   * Gets a list of datasource selection items for a plugin kind.
    */
-  listDatasourceMetadata(datasourcePluginKind: string): Promise<DatasourceMetadata[]>;
+  listDatasourceSelectItems(datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]>;
 }
 
-export interface DatasourceMetadata {
+export interface DatasourceSelectItemGroup {
+  group?: string;
+  editLink?: string;
+  items: DatasourceSelectItem[];
+}
+
+export interface DatasourceSelectItem {
   name: string;
+  overridden?: boolean;
+  overriding?: boolean;
   selector: DatasourceSelector;
 }
 
@@ -46,12 +54,14 @@ export function useDatasourceStore() {
 }
 
 /**
- * Lists all available Datasource instances for a given datasource plugin kind. Returns a list with the name of that
- * instance, as well as its DatasourceSelector for referencing it.
+ * Lists all available Datasource selection items for a given datasource plugin kind.
+ * Returns a list, with all information that can be used in a datasource selection context (group, name, selector, kind, ...)
  */
-export function useListDatasources(datasourcePluginKind: string) {
-  const { listDatasourceMetadata } = useDatasourceStore();
-  return useQuery(['listDatasourceMetadata', datasourcePluginKind], () => listDatasourceMetadata(datasourcePluginKind));
+export function useListDatasourceSelectItems(datasourcePluginKind: string) {
+  const { listDatasourceSelectItems } = useDatasourceStore();
+  return useQuery(['listDatasourceSelectItems', datasourcePluginKind], () =>
+    listDatasourceSelectItems(datasourcePluginKind)
+  );
 }
 
 /**

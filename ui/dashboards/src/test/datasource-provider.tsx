@@ -39,12 +39,13 @@ export const prometheusDemo: GlobalDatasource = {
 export const defaultDatasourceProps: Pick<DatasourceStoreProviderProps, 'datasourceApi' | 'dashboardResource'> = {
   dashboardResource: getTestDashboard(),
   datasourceApi: {
+    buildProxyUrl: () => '',
     getDatasource: () => {
       return Promise.resolve(undefined);
     },
     getGlobalDatasource: (selector) => {
       if (selector.kind === 'PrometheusDatasource') {
-        return Promise.resolve({ resource: prometheusDemo, proxyUrl: prometheusDemoUrl });
+        return Promise.resolve(prometheusDemo);
       }
 
       return Promise.resolve(undefined);
