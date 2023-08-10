@@ -136,7 +136,7 @@ export function AdminTabs(props: AdminTabsProps) {
 
   const navigate = useNavigate();
 
-  const [value, setValue] = useState((initialTab ?? datasourcesTabIndex).toLowerCase());
+  const [value, setValue] = useState((initialTab ?? variablesTabIndex).toLowerCase());
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);

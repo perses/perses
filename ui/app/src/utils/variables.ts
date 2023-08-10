@@ -12,57 +12,8 @@
 // limitations under the License.
 
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { TextVariableSpec, Variable, VariableDefinition } from '@perses-dev/core';
+import { Variable } from '@perses-dev/core';
 import { ExternalVariableSource } from '../model/variables';
-
-export function getBuiltinVariableDefinitions(): VariableDefinition[] {
-  return [
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__dashboard',
-        value: '$__dashboard',
-        display: {
-          description: 'The name of the current dashboard',
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__project',
-        value: '$__project',
-        display: {
-          description: 'The name of the current dashboard project',
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__from',
-        value: '$__from',
-        display: {
-          description: 'Start time of the current time range in unix millisecond epoch',
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-    {
-      kind: 'TextVariable',
-      spec: {
-        name: '__to',
-        value: '$__to',
-        display: {
-          description: 'End time of the current time range in unix millisecond epoch',
-          hidden: true,
-        },
-      } as TextVariableSpec,
-    },
-  ];
-}
 
 export function buildProjectVariableDefinition(projectName: string, variables: Variable[]): ExternalVariableDefinition {
   return {
@@ -83,19 +34,6 @@ export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVa
       description: 'Variables defined at global level. Can be overridden by any local/project variable of same name.',
     },
     ...buildExternalVariableDefinition('global', variables),
-  };
-}
-
-export function buildBuiltinVariableDefinition(variables: VariableDefinition[]): ExternalVariableDefinition {
-  return {
-    source: 'builtin',
-    tooltip: {
-      title: 'Builtin variables',
-      description: 'Variables computed when rendering the dashboard.',
-    },
-    hideActions: true,
-    hideSwitch: true,
-    definitions: variables,
   };
 }
 

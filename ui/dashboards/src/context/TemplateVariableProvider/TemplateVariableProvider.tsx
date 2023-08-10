@@ -174,8 +174,30 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
   }, [originalValues, definitions, externalDefinitions]);
 
   const allBuiltinVariables = { ...builtinVariables };
-  allBuiltinVariables['__from'] = () => absoluteTimeRange.start.valueOf().toString();
-  allBuiltinVariables['__to'] = () => absoluteTimeRange.end.valueOf().toString();
+  allBuiltinVariables['__from'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__from',
+      value: () => absoluteTimeRange.start.valueOf().toString(),
+      display: {
+        name: '__from',
+        description: 'Start time of the current time range in unix millisecond epoch',
+        hidden: true,
+      },
+    },
+  };
+  allBuiltinVariables['__to'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__to',
+      value: () => absoluteTimeRange.end.valueOf().toString(),
+      display: {
+        name: '__to',
+        description: 'End time of the current time range in unix millisecond epoch',
+        hidden: true,
+      },
+    },
+  };
 
   return (
     <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
@@ -328,13 +350,11 @@ export type ExternalVariableDefinition = {
     description?: string;
   };
   editLink?: string;
-  hideActions?: boolean;
-  hideSwitch?: boolean;
   definitions: VariableDefinition[];
 };
 
 export interface TemplateVariableProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
   /**
    * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.

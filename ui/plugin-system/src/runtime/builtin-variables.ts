@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo } from 'react';
+import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { VariableStateMap } from './template-variables';
 
-export type BuiltinVariables = Record<string, () => string>;
+export type BuiltinVariables = Record<string, BuiltinVariableDefinition>;
 
 export type BuiltinVariableSrv = {
   variables: BuiltinVariables;
@@ -35,9 +36,9 @@ export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
   const states = useMemo(() => {
     const values: VariableStateMap = {};
     for (const key in variables) {
-      const value = variables[key];
-      if (value !== undefined) {
-        values[key] = { loading: false, value: value() };
+      const variable = variables[key];
+      if (variable !== undefined) {
+        values[key] = { loading: false, value: variable.spec.value() };
       }
     }
     return values;
@@ -59,4 +60,9 @@ export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
   }
 
   return values;
+}
+
+export function useBuiltinVariableDefinitions(): BuiltinVariableDefinition[] {
+  const { variables } = useBuiltinVariableContext();
+  return Object.values(variables).map((v) => v);
 }

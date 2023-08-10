@@ -29,9 +29,12 @@ import {
   styled,
   capitalize,
   Tooltip,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { VariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
@@ -39,6 +42,8 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
+import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
+
 import { Action, VariableEditForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
@@ -66,6 +71,7 @@ function getValidation(variableDefinitions: VariableDefinition[]) {
 export function VariableEditor(props: {
   variableDefinitions: VariableDefinition[];
   externalVariableDefinitions: ExternalVariableDefinition[];
+  builtinVariableDefinitions: BuiltinVariableDefinition[];
   onChange: (variableDefinitions: VariableDefinition[]) => void;
   onCancel: () => void;
 }) {
@@ -74,6 +80,7 @@ export function VariableEditor(props: {
   const [variableFormAction, setVariableFormAction] = useState<Action>('update');
 
   const externalVariableDefinitions = props.externalVariableDefinitions;
+  const builtinVariableDefinitions = props.builtinVariableDefinitions;
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const [variableState] = useMemo(() => {
     return [hydrateTemplateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
@@ -280,16 +287,29 @@ export function VariableEditor(props: {
                   </Button>
                 </Box>
               </Stack>
-
-              {externalVariableDefinitions.length > 0 &&
-                !externalVariableDefinitions.every((v) => v.definitions.length === 0) && (
-                  <Stack padding={2} spacing={3} bgcolor={(theme) => theme.palette.background.lighter}>
-                    {externalVariableDefinitions.map(
-                      (extVar) =>
-                        extVar.definitions.length > 0 && (
-                          <Stack key={extVar.source}>
-                            <Stack flexDirection="row" alignItems="center" justifyContent="start">
-                              {extVar.tooltip && (
+              {externalVariableDefinitions &&
+                !externalVariableDefinitions.every((v) => v.definitions.length === 0) &&
+                externalVariableDefinitions.map(
+                  (extVar) =>
+                    extVar.definitions.length > 0 && (
+                      <Accordion
+                        sx={(theme) => ({
+                          '.MuiAccordionSummary-root': {
+                            backgroundColor: theme.palette.background.lighter,
+                          },
+                          '.MuiAccordionDetails-root': {
+                            backgroundColor: theme.palette.background.lighter,
+                          },
+                        })}
+                      >
+                        <AccordionSummary
+                          expandIcon={<ExpandMoreIcon />}
+                          aria-controls={extVar.source}
+                          id={extVar.source}
+                        >
+                          <Stack flexDirection="row" alignItems="center" justifyContent="start">
+                            <>
+                              {extVar.tooltip ? (
                                 <Typography variant="h2">
                                   <InfoTooltip
                                     title={extVar.tooltip.title || ''}
@@ -298,77 +318,127 @@ export function VariableEditor(props: {
                                     <span>{capitalize(extVar.source)} Variables</span>
                                   </InfoTooltip>
                                 </Typography>
-                              )}
-                              {!extVar.tooltip && (
+                              ) : (
                                 <Typography variant="h2">{capitalize(extVar.source)} Variables</Typography>
                               )}
                               {extVar.editLink && (
                                 <IconButton href={extVar.editLink} target="_blank">
-                                  <OpenInNewIcon />
+                                  <OpenInNewIcon fontSize="small" />
                                 </IconButton>
                               )}
-                            </Stack>
-                            <TableContainer>
-                              <Table sx={{ minWidth: 650 }} aria-label="table of external variables">
-                                <TableHead>
-                                  <TableRow>
-                                    {!extVar.hideSwitch && <TableCell>Visibility</TableCell>}
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Type</TableCell>
-                                    <TableCell>Description</TableCell>
-                                    {!extVar.hideActions && <TableCell align="right">Actions</TableCell>}
-                                  </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                  {extVar.definitions.map((v) => (
-                                    <TableRow key={v.spec.name}>
-                                      {!extVar.hideSwitch && (
-                                        <TableCell component="th" scope="row">
-                                          <Switch checked={v.spec.display?.hidden !== true} disabled />
-                                        </TableCell>
-                                      )}
-                                      <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                                        <VariableName
-                                          name={v.spec.name}
-                                          state={variableState.get({ name: v.spec.name, source: extVar.source })}
-                                        />
-                                      </TableCell>
-                                      <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
-                                      <TableCell>{v.spec.display?.description ?? ''}</TableCell>
-                                      {!extVar.hideActions && (
-                                        <TableCell align="right">
-                                          <Tooltip title="Override">
-                                            <IconButton
-                                              onClick={() => overrideVariable(v)}
-                                              disabled={!!variableState.get({ name: v.spec.name })}
-                                            >
-                                              <ContentDuplicate />
-                                            </IconButton>
-                                          </Tooltip>
-                                          <IconButton disabled>
-                                            <ArrowUp />
-                                          </IconButton>
-                                          <IconButton disabled>
-                                            <ArrowDown />
-                                          </IconButton>
-                                          <IconButton disabled>
-                                            <PencilIcon />
-                                          </IconButton>
-                                          <IconButton disabled>
-                                            <TrashIcon />
-                                          </IconButton>
-                                        </TableCell>
-                                      )}
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </TableContainer>
+                            </>
                           </Stack>
-                        )
-                    )}
-                  </Stack>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                          <TableContainer>
+                            <Table sx={{ minWidth: 650 }} aria-label="table of external variables">
+                              <TableHead>
+                                <TableRow>
+                                  <TableCell>Visibility</TableCell>
+                                  <TableCell>Name</TableCell>
+                                  <TableCell>Type</TableCell>
+                                  <TableCell>Description</TableCell>
+                                  <TableCell align="right">Actions</TableCell>
+                                </TableRow>
+                              </TableHead>
+                              <TableBody>
+                                {extVar.definitions.map((v) => (
+                                  <TableRow key={v.spec.name}>
+                                    <TableCell component="th" scope="row">
+                                      <Switch checked={v.spec.display?.hidden !== true} disabled />
+                                    </TableCell>
+
+                                    <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                                      <VariableName
+                                        name={v.spec.name}
+                                        state={variableState.get({ name: v.spec.name, source: extVar.source })}
+                                      />
+                                    </TableCell>
+                                    <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                                    <TableCell>{v.spec.display?.description ?? ''}</TableCell>
+                                    <TableCell align="right">
+                                      <Tooltip title="Override">
+                                        <IconButton
+                                          onClick={() => overrideVariable(v)}
+                                          disabled={!!variableState.get({ name: v.spec.name })}
+                                        >
+                                          <ContentDuplicate />
+                                        </IconButton>
+                                      </Tooltip>
+                                      <IconButton disabled>
+                                        <ArrowUp />
+                                      </IconButton>
+                                      <IconButton disabled>
+                                        <ArrowDown />
+                                      </IconButton>
+                                      <IconButton disabled>
+                                        <PencilIcon />
+                                      </IconButton>
+                                      <IconButton disabled>
+                                        <TrashIcon />
+                                      </IconButton>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </TableContainer>
+                        </AccordionDetails>
+                      </Accordion>
+                    )
                 )}
+              {builtinVariableDefinitions && (
+                <>
+                  <Accordion
+                    sx={(theme) => ({
+                      '.MuiAccordionSummary-root': {
+                        backgroundColor: theme.palette.background.lighter,
+                      },
+                      '.MuiAccordionDetails-root': {
+                        backgroundColor: theme.palette.background.lighter,
+                      },
+                    })}
+                  >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="builtin" id="builtin">
+                      <Typography variant="h2">
+                        <InfoTooltip
+                          title="Builtin Variables"
+                          description="Variables computed during dashboard rendering."
+                        >
+                          <span>Builtin Variables</span>
+                        </InfoTooltip>
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <TableContainer>
+                        <Table sx={{ minWidth: 650 }} aria-label="table of external variables">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>Name</TableCell>
+                              <TableCell>Type</TableCell>
+                              <TableCell>Description</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {builtinVariableDefinitions.map((v) => (
+                              <TableRow key={v.spec.name}>
+                                <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                                  <VariableName
+                                    name={v.spec.name}
+                                    state={variableState.get({ name: v.spec.name, source: 'builtin' })}
+                                  />
+                                </TableCell>
+                                <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                                <TableCell>{v.spec.display?.description ?? ''}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </AccordionDetails>
+                  </Accordion>
+                </>
+              )}
             </Stack>
           </Box>
         </>
