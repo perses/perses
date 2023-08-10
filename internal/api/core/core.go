@@ -15,7 +15,9 @@ package core
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core/middleware"
@@ -62,6 +64,10 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
 		APIRegistration(persesFrontend).
+		GzipSkipper(func(c echo.Context) bool {
+			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
+			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
+		}).
 		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
