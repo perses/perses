@@ -11,10 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
+import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
+import {
+  DashboardResource,
+  getDashboardExtendedDisplayName,
+  renameDashboardDialogValidationSchema,
+  RenameDashboardValidationType,
+} from '@perses-dev/core';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 
 interface RenameDashboardDialogProps {
@@ -34,35 +41,23 @@ interface RenameDashboardDialogProps {
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<RenameDashboardValidationType>({
+    resolver: zodResolver(renameDashboardDialogValidationSchema),
+    mode: 'onBlur',
+  });
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
-  const [name, setName] = useState<string>(getDashboardDisplayName(dashboard));
-  const [error, setError] = useState<string>('');
-
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    if (!e.target.value) {
-      setError('Required');
-    } else {
-      setError('');
-    }
-  }, []);
-
-  // Reinitialize form for next time the dialog is opened
-  const resetForm = useCallback(() => {
-    setName('');
-    setError('');
-  }, []);
-
-  const handleSubmit = useCallback(() => {
-    if (!name) {
-      return;
-    }
+  const onSubmit: SubmitHandler<RenameDashboardValidationType> = (data) => {
     if (dashboard.spec.display) {
-      dashboard.spec.display.name = name;
+      dashboard.spec.display.name = data.dashboardName;
     } else {
-      dashboard.spec.display = { name: name };
+      dashboard.spec.display = { name: data.dashboardName };
     }
 
     updateDashboardMutation.mutate(dashboard, {
@@ -70,47 +65,47 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
         successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
         onClose();
         if (onSuccess) {
-          onSuccess(name);
+          onSuccess(data.dashboardName);
         }
-        resetForm();
       },
       onError: (err) => {
         exceptionSnackbar(err);
         throw err;
       },
     });
-  }, [dashboard, exceptionSnackbar, name, onClose, onSuccess, resetForm, successSnackbar, updateDashboardMutation]);
+  };
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     onClose();
-    resetForm();
-  }, [onClose, resetForm]);
+    reset();
+  };
 
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Rename Dashboard</Dialog.Header>
-      <Dialog.Content>
-        <TextField
-          required
-          margin="dense"
-          id="name"
-          label="Name"
-          type="text"
-          fullWidth
-          onChange={handleChange}
-          value={name}
-          error={!!error}
-          helperText={error}
-        />
-      </Dialog.Content>
-      <Dialog.Actions>
-        <Button variant="contained" disabled={!!error} onClick={handleSubmit}>
-          Rename
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={handleClose}>
-          Cancel
-        </Button>
-      </Dialog.Actions>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Dialog.Content>
+          <TextField
+            required
+            margin="dense"
+            id="name"
+            label="Name"
+            type="text"
+            fullWidth
+            error={!!errors.dashboardName}
+            helperText={errors.dashboardName?.message}
+            {...register('dashboardName')}
+          />
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button variant="contained" disabled={!isValid} type="submit">
+            Rename
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </form>
     </Dialog>
   );
 };

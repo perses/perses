@@ -11,29 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+import { z } from 'zod';
 
-import (
-	"fmt"
-	"regexp"
-)
-
-var idRegexp = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
-var keyMaxLength = 75
-
-// ValidateID checks for forbidden items in substring used inside id
-func ValidateID(name string) error {
-	if len(name) == 0 {
-		return fmt.Errorf("name cannot be empty")
-	}
-
-	if len(name) > keyMaxLength {
-		return fmt.Errorf("cannot contain more than %d characters", keyMaxLength)
-	}
-
-	if !idRegexp.MatchString(name) {
-		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, idRegexp.String())
-	}
-
-	return nil
-}
+export const resourceIdValidationSchema = z
+  .string()
+  .min(1, { message: 'Name is required' })
+  .max(75, { message: 'Must be 75 or fewer characters long' })
+  .regex(new RegExp('^[a-zA-Z0-9_.-]+$'), {
+    message: 'Must only contains alphanumerical characters and special characters _ . -',
+  });

@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
+import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { ProjectResource } from '@perses-dev/core';
+import { projectNameValidationSchema, ProjectNameValidationType, ProjectResource } from '@perses-dev/core';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAddProjectMutation } from '../../model/project-client';
 
 interface CreateProjectDialogProps {
@@ -33,35 +35,21 @@ interface CreateProjectDialogProps {
 export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
 
-  const [name, setName] = useState<string>('');
-  const [error, setError] = useState<string>('');
-
-  // Called every time the user type in the form
-  const handleNameFormChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setName(e.target.value);
-      if (!e.target.value) {
-        setError('Required');
-      } else if (!/^[a-zA-Z0-9_.:-]+$/.exec(e.target.value)) {
-        setError('Allowed special characters are _ . : -');
-      } else {
-        setError('');
-      }
-      // TODO: Verify the non-existence of the project, using a debounce (300ms?) to not call it too many
-    },
-    [setName, setError]
-  );
-
-  // Reinitialize form for next time the dialog is opened
-  const handleNameFormReset = useCallback(() => {
-    setName('');
-    setError('');
-  }, [setName, setError]);
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<ProjectNameValidationType>({
+    resolver: zodResolver(projectNameValidationSchema),
+    mode: 'onBlur',
+  });
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const mutation = useAddProjectMutation();
-  const handleSubmit = useCallback(() => {
-    mutation.mutate(name, {
+
+  const onSubmit: SubmitHandler<ProjectNameValidationType> = (data) => {
+    mutation.mutate(data.name, {
       onSuccess: (entity: ProjectResource) => {
         successSnackbar(`project ${entity.metadata.name} was successfully created`);
         onClose();
@@ -72,42 +60,41 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
       onError: (err) => {
         exceptionSnackbar(err);
       },
-      onSettled: () => {
-        handleNameFormReset();
-      },
     });
-  }, [mutation, name, successSnackbar, exceptionSnackbar, onSuccess, onClose, handleNameFormReset]);
+  };
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     onClose();
-    handleNameFormReset();
-  }, [onClose, handleNameFormReset]);
-
+    reset();
+  };
   return (
     <Dialog open={open} onClose={handleClose}>
       <Dialog.Header>Add Project</Dialog.Header>
-      <Dialog.Content>
-        <TextField
-          required
-          margin="dense"
-          id="name"
-          label="Name"
-          type="text"
-          fullWidth
-          onChange={handleNameFormChange}
-          value={name}
-          error={!!error}
-          helperText={error}
-        />
-      </Dialog.Content>
-      <Dialog.Actions>
-        <Button variant="contained" type="submit" disabled={!!error} onClick={handleSubmit}>
-          Add
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={handleClose}>
-          Cancel
-        </Button>
-      </Dialog.Actions>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Dialog.Content>
+          <>
+            <TextField
+              required
+              margin="dense"
+              id="name"
+              label="Name"
+              type="text"
+              fullWidth
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name')}
+            />
+          </>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button variant="contained" type="submit" disabled={!isValid}>
+            Add
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </form>
     </Dialog>
   );
 };

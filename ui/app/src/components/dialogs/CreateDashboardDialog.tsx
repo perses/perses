@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ChangeEvent, Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
-import { Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField } from '@mui/material';
+import { Dispatch, DispatchWithoutAction } from 'react';
+import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { DashboardSelector } from '@perses-dev/core';
+import {
+  createDashboardDialogValidationSchema,
+  CreateDashboardValidationType,
+  DashboardSelector,
+} from '@perses-dev/core';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface CreateDashboardProps {
   open: boolean;
@@ -35,102 +41,78 @@ interface CreateDashboardProps {
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projectOptions, onClose, onSuccess } = props;
 
-  const [projectName, setProjectName] = useState<string>(projectOptions[0] ?? '');
-  const [projectError, setProjectError] = useState<string>('');
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<CreateDashboardValidationType>({
+    resolver: zodResolver(createDashboardDialogValidationSchema),
+    mode: 'onBlur',
+  });
 
-  const [dashboardName, setDashboardName] = useState<string>('');
-  const [dashboardError, setDashboardError] = useState<string>('');
-
-  const handleProjectChange = useCallback((e: SelectChangeEvent) => {
-    setProjectName(e.target.value);
-    if (!e.target.value) {
-      setProjectError('Required');
-    } else {
-      setProjectError('');
-    }
-  }, []);
-
-  const handleDashboardChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setDashboardName(e.target.value);
-    if (!e.target.value) {
-      setDashboardError('Required');
-    } else {
-      setDashboardError('');
-    }
-  }, []);
-
-  // Reinitialize form for next time the dialog is opened
-  const resetForm = useCallback(() => {
-    setDashboardName('');
-    setDashboardError('');
-  }, []);
-
-  const handleSubmit = useCallback(() => {
-    if (projectName && dashboardName) {
-      onClose();
-      if (onSuccess) {
-        onSuccess({ project: projectName, dashboard: dashboardName } as DashboardSelector);
-      }
-      resetForm();
-    }
-  }, [dashboardName, onClose, onSuccess, projectName, resetForm]);
-
-  const handleClose = useCallback(() => {
+  const onSubmit: SubmitHandler<CreateDashboardValidationType> = (data) => {
     onClose();
-    resetForm();
-  }, [onClose, resetForm]);
+    if (onSuccess) {
+      onSuccess({ project: data.projectName, dashboard: data.dashboardName } as DashboardSelector);
+    }
+  };
 
+  const handleClose = () => {
+    onClose();
+    reset();
+  };
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Create Dashboard</Dialog.Header>
-      <Dialog.Content>
-        <Stack gap={1}>
-          {projectOptions && projectOptions.length > 0 && (
-            <FormControl size="small" fullWidth>
-              <InputLabel id="project-name-id">Project name</InputLabel>
-              <Select
-                labelId="project-name-id"
-                required
-                id="project"
-                label="Project name"
-                type="text"
-                fullWidth
-                onChange={handleProjectChange}
-                value={projectName}
-                error={!!projectError}
-              >
-                {projectOptions.map((option) => {
-                  return (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
-          )}
-          <TextField
-            required
-            margin="dense"
-            id="name"
-            label="Dashboard Name"
-            type="text"
-            fullWidth
-            onChange={handleDashboardChange}
-            value={dashboardName}
-            error={!!dashboardError}
-            helperText={dashboardError}
-          />
-        </Stack>
-      </Dialog.Content>
-      <Dialog.Actions>
-        <Button variant="contained" disabled={!!dashboardError} onClick={handleSubmit}>
-          Add
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={handleClose}>
-          Cancel
-        </Button>
-      </Dialog.Actions>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Dialog.Content>
+          <Stack gap={1}>
+            {projectOptions && projectOptions.length > 0 && (
+              <FormControl size="small" fullWidth>
+                <InputLabel id="project-name-id">Project name</InputLabel>
+                <Select
+                  labelId="project-name-id"
+                  required
+                  id="project"
+                  label="Project name"
+                  type="text"
+                  fullWidth
+                  error={!!errors.projectName}
+                  {...register('projectName')}
+                >
+                  {projectOptions.map((option) => {
+                    return (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+              </FormControl>
+            )}
+            <TextField
+              required
+              margin="dense"
+              id="name"
+              label="Dashboard Name"
+              type="text"
+              fullWidth
+              error={!!errors.dashboardName}
+              helperText={errors.dashboardName?.message}
+              {...register('dashboardName')}
+            />
+          </Stack>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button variant="contained" disabled={!isValid} type="submit">
+            Add
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </form>
     </Dialog>
   );
 };
