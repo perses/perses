@@ -15,18 +15,19 @@ package utils
 
 import (
 	"fmt"
-	"reflect"
-	"regexp"
-	"strconv"
-
 	"github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"golang.org/x/exp/slices"
+	"reflect"
+	"regexp"
+	"strconv"
 )
 
-var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$([a-zA-Z0-9_-]+)`)
+// Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
+// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
+var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$(\w+)`)
 
 type VariableGroup struct {
 	Variables []string
@@ -166,7 +167,11 @@ func buildVariableDependencies(variables []dashboard.Variable, projectVariables 
 	// At the end, if the undefined dependency is not empty, then we send an error for the first one.
 	for byVar, usedVars := range undefinedDeps {
 		for _, usedVar := range usedVars {
-			return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", usedVar, byVar)
+			// Checking if the variable is not a builting variable
+			isBuiltinVar := v1.IsBuiltinVariable(usedVar)
+			if !isBuiltinVar {
+				return nil, fmt.Errorf("variable %q is used in the variable %q but not defined", usedVar, byVar)
+			}
 		}
 	}
 

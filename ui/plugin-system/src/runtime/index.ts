@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './builtin-variables';
 export * from './datasources';
 export * from './plugin-registry';
 export * from './template-variables';

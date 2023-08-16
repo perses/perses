@@ -15,6 +15,7 @@ package variable
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/validate"
 
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
@@ -46,7 +47,7 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 }
 
 func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
-	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+	if err := validate.Variable(entity, s.sch); err != nil {
 		return nil, shared.HandleBadRequestError(err.Error())
 	}
 	// Update the time contains in the entity

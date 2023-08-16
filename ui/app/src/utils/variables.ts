@@ -36,6 +36,7 @@ export function buildGlobalVariableDefinition(variables: Variable[]): ExternalVa
     ...buildExternalVariableDefinition('global', variables),
   };
 }
+
 /**
  * Build the definition of the external variables from the variable resources collected from the API.
  * @param source the source of external variables. Used in view only, to display and discriminate from other sources.

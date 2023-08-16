@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
@@ -22,6 +22,9 @@ import {
   VariableState,
   VariableStoreStateMap,
   VariableOption,
+  BuiltinVariableContext,
+  useTimeRange,
+  BuiltinVariables,
 } from '@perses-dev/plugin-system';
 import { DEFAULT_ALL_VALUE as ALL_VALUE, VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
@@ -136,10 +139,16 @@ export function useTemplateVariableStore() {
   return useStore(store);
 }
 
-function PluginProvider({ children }: { children: React.ReactNode }) {
+interface PluginProviderProps {
+  children: ReactNode;
+  builtinVariables?: BuiltinVariables;
+}
+
+function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
   const originalValues = useTemplateVariableValues();
   const definitions = useTemplateVariableDefinitions();
   const externalDefinitions = useTemplateExternalVariableDefinitions();
+  const { absoluteTimeRange } = useTimeRange();
 
   const values = useMemo(() => {
     const contextValues: VariableStateMap = {};
@@ -164,7 +173,37 @@ function PluginProvider({ children }: { children: React.ReactNode }) {
     return contextValues;
   }, [originalValues, definitions, externalDefinitions]);
 
-  return <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>;
+  const allBuiltinVariables = { ...builtinVariables };
+  allBuiltinVariables['__from'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__from',
+      value: () => absoluteTimeRange.start.valueOf().toString(),
+      display: {
+        name: '__from',
+        description: 'Start time of the current time range in unix millisecond epoch',
+        hidden: true,
+      },
+    },
+  };
+  allBuiltinVariables['__to'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__to',
+      value: () => absoluteTimeRange.end.valueOf().toString(),
+      display: {
+        name: '__to',
+        description: 'End time of the current time range in unix millisecond epoch',
+        hidden: true,
+      },
+    },
+  };
+
+  return (
+    <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
+      <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>
+    </BuiltinVariableContext.Provider>
+  );
 }
 
 interface TemplateVariableSrvArgs {
@@ -315,7 +354,7 @@ export type ExternalVariableDefinition = {
 };
 
 export interface TemplateVariableProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
   /**
    * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.
@@ -326,12 +365,14 @@ export interface TemplateVariableProviderProps {
    * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
    */
   externalVariableDefinitions?: ExternalVariableDefinition[];
+  builtinVariables?: BuiltinVariables;
 }
 
 export function TemplateVariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
+  builtinVariables = {},
 }: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
@@ -341,7 +382,7 @@ export function TemplateVariableProvider({
 
   return (
     <TemplateVariableStoreContext.Provider value={store}>
-      <PluginProvider>{children}</PluginProvider>
+      <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
     </TemplateVariableStoreContext.Provider>
   );
 }

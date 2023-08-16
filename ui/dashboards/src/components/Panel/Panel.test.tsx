@@ -14,6 +14,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
+import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
 import { TemplateVariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
@@ -42,19 +43,21 @@ describe('Panel', () => {
     definition ??= createTestPanel();
 
     renderWithContext(
-      <TemplateVariableProvider
-        initialVariableDefinitions={[
-          {
-            kind: 'TextVariable',
-            spec: {
-              name: 'foo',
-              value: 'bar ',
+      <TimeRangeProvider initialTimeRange={{ pastDuration: '1h' }}>
+        <TemplateVariableProvider
+          initialVariableDefinitions={[
+            {
+              kind: 'TextVariable',
+              spec: {
+                name: 'foo',
+                value: 'bar ',
+              },
             },
-          },
-        ]}
-      >
-        <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
-      </TemplateVariableProvider>
+          ]}
+        >
+          <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+        </TemplateVariableProvider>
+      </TimeRangeProvider>
     );
   };
 

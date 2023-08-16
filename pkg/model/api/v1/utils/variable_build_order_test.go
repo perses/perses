@@ -73,6 +73,26 @@ func TestBuildVariableDependencies(t *testing.T) {
 			result: map[string][]string{},
 		},
 		{
+			title: "query variable with builtin variable used",
+			variables: []dashboard.Variable{
+				{
+					Kind: variable.KindList,
+					Spec: &dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{
+							Plugin: common.Plugin{
+								Kind: "PrometheusPromQLVariable",
+								Spec: map[string]interface{}{
+									"expr": "vector($__to)",
+								},
+							},
+						},
+						Name: "myVariable",
+					},
+				},
+			},
+			result: map[string][]string{},
+		},
+		{
 			title: "query variable with variable used",
 			variables: []dashboard.Variable{
 				{

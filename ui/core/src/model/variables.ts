@@ -47,7 +47,15 @@ export interface ListVariableSpec<PluginSpec> extends VariableSpec {
   plugin: Definition<PluginSpec>;
 }
 
-export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
+export interface BuiltinVariableDefinition extends Definition<BuiltinVariableSpec> {
+  kind: 'BuiltinVariable';
+}
+
+export interface BuiltinVariableSpec extends VariableSpec {
+  value: () => string;
+}
+
+export type VariableDefinition = TextVariableDefinition | ListVariableDefinition | BuiltinVariableDefinition;
 
 /**
  * A variable that belongs to a project.

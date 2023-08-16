@@ -16,11 +16,16 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
-
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"gopkg.in/yaml.v2"
+	"regexp"
 )
+
+type VariableInterface interface {
+	GetMetadata() modelAPI.Metadata
+	GetVarSpec() VariableSpec
+}
 
 type VariableSpec struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
@@ -81,6 +86,10 @@ func (v *GlobalVariable) GetKind() string {
 	return string(v.Kind)
 }
 
+func (v *GlobalVariable) GetVarSpec() VariableSpec {
+	return v.Spec
+}
+
 func (v *GlobalVariable) GetSpec() interface{} {
 	return v.Spec
 }
@@ -101,6 +110,17 @@ func (v *Variable) GetKind() string {
 	return string(v.Kind)
 }
 
+func (v *Variable) GetVarSpec() VariableSpec {
+	return v.Spec
+}
+
 func (v *Variable) GetSpec() interface{} {
 	return v.Spec
+}
+
+// IsBuiltinVariable check if variable name is a builtin variable
+func IsBuiltinVariable(variableName string) bool {
+	// A variable is considered as builtin variable if there is the prefix __
+	var builtinVariablePrefixRegexp = regexp.MustCompile(`^__`)
+	return builtinVariablePrefixRegexp.MatchString(variableName)
 }

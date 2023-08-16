@@ -15,8 +15,8 @@ import { useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { VariableDefinition } from '@perses-dev/core';
-
+import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT } from '../../constants';
 import {
   ExternalVariableDefinition,
@@ -52,6 +52,7 @@ export function EditVariablesButton({
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
   const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
+  const builtinVariableDefinitions: BuiltinVariableDefinition[] = useBuiltinVariableDefinitions();
   const { setVariableDefinitions } = useTemplateVariableActions();
 
   const openVariableEditor = () => {
@@ -86,6 +87,7 @@ export function EditVariablesButton({
         <VariableEditor
           variableDefinitions={variableDefinitions}
           externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariableDefinitions}
           onCancel={closeVariableEditor}
           onChange={(variables: VariableDefinition[]) => {
             setVariableDefinitions(variables);

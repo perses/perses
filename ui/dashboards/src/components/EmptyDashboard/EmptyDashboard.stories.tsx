@@ -16,13 +16,20 @@ import { EmptyDashboard } from '@perses-dev/dashboards';
 import { Button } from '@mui/material';
 import { action } from '@storybook/addon-actions';
 import ViewDashboardVariantOutline from 'mdi-material-ui/ViewDashboardVariantOutline';
-import { WithPluginRegistry } from '@perses-dev/plugin-system/src/stories/shared-utils';
+import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 import { WithTemplateVariables, WithDashboard, EMPTY_DASHBOARD_RESOURCE } from '../../stories/decorators';
 
 const meta: Meta<typeof EmptyDashboard> = {
   component: EmptyDashboard,
-  decorators: [WithTemplateVariables, WithDashboard, WithPluginRegistry, WithQueryClient, WithQueryParams],
+  decorators: [
+    WithTemplateVariables,
+    WithTimeRange,
+    WithDashboard,
+    WithPluginRegistry,
+    WithQueryClient,
+    WithQueryParams,
+  ],
 };
 
 export default meta;

@@ -126,7 +126,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 				if err := o.apiClient.Validate().GlobalVariable(entity); err != nil {
 					return err
 				}
-			} else if err := o.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+			} else if err := validate.Variable(entity, o.sch); err != nil {
 				return err
 			}
 		case *modelV1.Variable:
@@ -134,7 +134,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 				if err := o.apiClient.Validate().Variable(entity); err != nil {
 					return err
 				}
-			} else if err := o.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+			} else if err := validate.Variable(entity, o.sch); err != nil {
 				return err
 			}
 		}

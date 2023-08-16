@@ -12,9 +12,14 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
+import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
-import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
+import {
+  BuiltinVariables,
+  TimeRangeProvider,
+  useInitialRefreshInterval,
+  useInitialTimeRange,
+} from '@perses-dev/plugin-system';
 import {
   TemplateVariableProvider,
   DashboardProvider,
@@ -54,6 +59,33 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
 
+  const dashboardBuiltinVariables: BuiltinVariables = {
+    __dashboard: {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__dashboard',
+        value: () => dashboardResource.metadata.name,
+        display: {
+          name: '__dashboard',
+          description: 'The name of the current dashboard',
+          hidden: true,
+        },
+      },
+    } as BuiltinVariableDefinition,
+    __project: {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__project',
+        value: () => dashboardResource.metadata.project,
+        display: {
+          name: '__project',
+          description: 'The name of the current dashboard project',
+          hidden: true,
+        },
+      },
+    } as BuiltinVariableDefinition,
+  };
+
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
@@ -65,6 +97,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           <TemplateVariableProvider
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
+            builtinVariables={dashboardBuiltinVariables}
           >
             <Box
               sx={combineSx(
