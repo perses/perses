@@ -9,6 +9,7 @@ be found in [GOVERNANCE.md](GOVERNANCE.md).
 |-------------------|-----------------------------------------------------|------------------|
 | Antoine Thebaud   | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
 | Augustin Husson   | [nexucis](https://github.com/Nexucis)               | Amadeus IT Group |
+| Celian Garcia     | [celian-garcia](https://github.com/celian-garcia)   | Amadeus IT Group |
 | Christine Donovan | [cndonovan](https://github.com/cndonovan)           | Chronosphere     |
 | Eunice Wong       | [eunicorn](https://github.com/eunicorn)             | Chronosphere     |
 | Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus IT Group |
