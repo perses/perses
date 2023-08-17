@@ -4,12 +4,12 @@
 -->
 
 # Description
+
 <!-- Context useful to a reviewer -->
 
-
 # Screenshots
-<!-- If there are UI changes -->
 
+<!-- If there are UI changes -->
 
 # Checklist
 
