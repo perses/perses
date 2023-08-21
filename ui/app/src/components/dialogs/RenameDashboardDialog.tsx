@@ -14,15 +14,11 @@
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import {
-  DashboardResource,
-  getDashboardExtendedDisplayName,
-  renameDashboardDialogValidationSchema,
-  RenameDashboardValidationType,
-} from '@perses-dev/core';
+import { DashboardResource, getDashboardExtendedDisplayName } from '@perses-dev/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
+import { renameDashboardDialogValidationSchema, RenameDashboardValidationType } from '../../validation';
 
 interface RenameDashboardDialogProps {
   dashboard: DashboardResource;
@@ -53,7 +49,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
 
-  const onSubmit: SubmitHandler<RenameDashboardValidationType> = (data) => {
+  const processForm: SubmitHandler<RenameDashboardValidationType> = (data) => {
     if (dashboard.spec.display) {
       dashboard.spec.display.name = data.dashboardName;
     } else {
@@ -83,7 +79,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Rename Dashboard</Dialog.Header>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(processForm)}>
         <Dialog.Content>
           <TextField
             required

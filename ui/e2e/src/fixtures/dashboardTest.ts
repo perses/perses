@@ -105,7 +105,7 @@ function shouldIgnoreConsoleError(message: ConsoleMessage) {
 function generateDuplicateDashboardName(dashboardName: string, testTitle: string, retry: number) {
   // Replaces any characters that are not allowed in dashboard names with
   // underscores.
-  const normalizedTitle = testTitle.replace(/[^a-zA-Z0-9_.:-]+/g, '_');
+  const normalizedTitle = testTitle.replace(/[^a-zA-Z0-9_.-]+/g, '_');
 
   return [dashboardName, normalizedTitle, retry].join('__');
 }

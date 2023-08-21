@@ -32,7 +32,7 @@ function generateMetadataName(name: string): string {
   return name
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-zA-Z0-9_.:-]/g, '_');
+    .replace(/[^a-zA-Z0-9_.-]/g, '_');
 }
 
 /**

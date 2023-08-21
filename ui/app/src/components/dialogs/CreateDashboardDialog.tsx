@@ -14,13 +14,10 @@
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import {
-  createDashboardDialogValidationSchema,
-  CreateDashboardValidationType,
-  DashboardSelector,
-} from '@perses-dev/core';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { DashboardSelector } from '@perses-dev/core';
+import { createDashboardDialogValidationSchema, CreateDashboardValidationType } from '../../validation';
 
 interface CreateDashboardProps {
   open: boolean;
@@ -51,7 +48,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
     mode: 'onBlur',
   });
 
-  const onSubmit: SubmitHandler<CreateDashboardValidationType> = (data) => {
+  const processForm: SubmitHandler<CreateDashboardValidationType> = (data) => {
     onClose();
     if (onSuccess) {
       onSuccess({ project: data.projectName, dashboard: data.dashboardName } as DashboardSelector);
@@ -65,7 +62,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Create Dashboard</Dialog.Header>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(processForm)}>
         <Dialog.Content>
           <Stack gap={1}>
             {projectOptions && projectOptions.length > 0 && (

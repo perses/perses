@@ -11,6 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './model';
-export * from './utils';
+import { z } from 'zod';
+
+export const resourceIdValidationSchema = z
+  .string()
+  .min(1, { message: 'Required' })
+  .max(75, { message: 'Must be 75 or fewer characters long' })
+  .regex(/^[a-zA-Z0-9_.-]+$/, {
+    message: 'Must only contains alphanumerical characters and special characters _ . -',
+  });

@@ -11,6 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './model';
-export * from './utils';
+import { z } from 'zod';
+
+export const variableEditValidationSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Required' })
+    .regex(/\w+/, { message: 'Must only contains alphanumerical characters and underscores' }),
+  title: z.string().optional(), // display name
+  description: z.string().optional(),
+  kind: z.string().min(1, { message: 'Required' }),
+});
+
+export type VariableEditValidationType = z.infer<typeof variableEditValidationSchema>;

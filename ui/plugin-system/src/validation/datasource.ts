@@ -11,6 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './model';
-export * from './utils';
+import { z } from 'zod';
+import { resourceIdValidationSchema } from './resource';
+
+export const datasourceEditValidationSchema = z.object({
+  name: resourceIdValidationSchema,
+  title: z.string().optional(), // display name
+  description: z.string().optional(),
+});
+
+export type DatasourceEditValidationType = z.infer<typeof datasourceEditValidationSchema>;

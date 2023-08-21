@@ -303,7 +303,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             method: 'POST',
           },
           {
-            endpointPattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
+            endpointPattern: '/api/v1/label/([a-zA-Z0-9_.-]+)/values',
             method: 'GET',
           },
         ],

@@ -14,28 +14,14 @@
 import { useImmer } from 'use-immer';
 import { Display, Datasource } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useIsReadonly } from '@perses-dev/app/src/model/config-client';
 import { PluginEditor } from '../PluginEditor';
 import { Action, getSubmitText, getTitleAction } from '../../utils';
-
-// TODO: Replace with proper validation library
-function getValidation(state: Datasource) {
-  /** Name validation */
-  let name = null;
-  if (!state.metadata.name) {
-    name = 'Name is required';
-  }
-  // name can only contain alphanumeric characters and underscores and no spaces
-  if (state.metadata.name && !/^[a-zA-Z0-9_-]+$/.test(state.metadata.name)) {
-    name = 'Name can only contain alphanumeric characters, underscores, and dashes';
-  }
-
-  return {
-    name,
-    isValid: !name,
-  };
-}
+import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
 
 /**
  * This preprocessing ensures that we always have a defined object for the `display` property
@@ -72,19 +58,26 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   const [state, setState] = useImmer(patchedInitialDatasource);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
-  const validation = useMemo(() => getValidation(state), [state]);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
+  const isReadonly = useIsReadonly();
 
-  // When saving, remove the display property if ever display.name is empty, then pass the value upstream
-  const handleSave = () => {
-    onSave({
-      ...state,
-      spec: {
-        ...state.spec,
-        display: state.spec.display?.name !== '' ? state.spec.display : undefined,
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<DatasourceEditValidationType>({
+    resolver: zodResolver(datasourceEditValidationSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      name: state.metadata.name,
+      title: state.spec.display?.name,
+      description: state.spec.display?.description,
+    },
+  });
+
+  const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
+    onSave(state);
   };
 
   // When the user clicks on cancel, ask for discard approval if anything was changed
@@ -97,7 +90,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   }, [state, patchedInitialDatasource, setDiscardDialogOpened, onClose]);
 
   return (
-    <>
+    <form onSubmit={handleSubmit(processForm)}>
       <Box
         sx={{
           display: 'flex',
@@ -110,7 +103,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' && (
             <>
-              <Button disabled={!validation.isValid} variant="contained" onClick={() => setAction('update')}>
+              <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                 Edit
               </Button>
               <Button color="error" variant="outlined" onClick={onDelete}>
@@ -134,7 +127,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           )}
           {action !== 'read' && (
             <>
-              <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
+              <Button type="submit" disabled={!isValid} variant="contained">
                 {submitText}
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
@@ -149,15 +142,15 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           <Grid item xs={4}>
             <TextField
               required
-              error={!!validation.name}
               fullWidth
               label="Name"
-              value={state.metadata.name}
               InputProps={{
                 disabled: action === 'update',
                 readOnly: action === 'read',
               }}
-              helperText={validation.name}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name')}
               onChange={(v) => {
                 setState((draft) => {
                   draft.metadata.name = v.target.value;
@@ -169,10 +162,12 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
             <TextField
               fullWidth
               label="Display Label"
-              value={state.spec.display?.name}
               InputProps={{
                 readOnly: action === 'read',
               }}
+              error={!!errors.title}
+              helperText={errors.title?.message}
+              {...register('title')}
               onChange={(v) => {
                 setState((draft) => {
                   if (draft.spec.display) {
@@ -186,10 +181,12 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
             <TextField
               fullWidth
               label="Description"
-              value={state.spec.display?.description}
               InputProps={{
                 readOnly: action === 'read',
               }}
+              error={!!errors.description}
+              helperText={errors.description?.message}
+              {...register('description')}
               onChange={(v) => {
                 setState((draft) => {
                   if (draft.spec.display) {
@@ -248,6 +245,6 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           onClose();
         }}
       />
-    </>
+    </form>
   );
 }

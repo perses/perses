@@ -31,29 +31,15 @@ import {
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useIsReadonly } from '@perses-dev/app/src/model/config-client';
 import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
+import { variableEditValidationSchema, VariableEditValidationType } from '../../../validation';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
-
-// TODO: Replace with proper validation library
-function getValidation(state: ReturnType<typeof getInitialState>) {
-  /** Name validation */
-  let name = null;
-  if (!state.name) {
-    name = 'Name is required';
-  }
-  // name can only contain alphanumeric characters and underscores and no spaces
-  if (state.name && !/^[a-zA-Z0-9_-]+$/.test(state.name)) {
-    name = 'Name can only contain alphanumeric characters, underscores, and dashes';
-  }
-
-  return {
-    name,
-    isValid: !name,
-  };
-}
 
 function FallbackPreview() {
   return <div>Error previewing values</div>;
@@ -73,10 +59,10 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
 
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);
-  const validation = useMemo(() => getValidation(state), [state]);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [action, setAction] = useState(initialAction);
+  const isReadonly = useIsReadonly();
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);
@@ -94,6 +80,20 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<VariableEditValidationType>({
+    resolver: zodResolver(variableEditValidationSchema),
+    mode: 'onBlur',
+    defaultValues: state,
+  });
+
+  const processForm: SubmitHandler<VariableEditValidationType> = () => {
+    onSave(getVariableDefinitionFromState(state));
+  };
+
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
@@ -107,7 +107,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   }, [state, initialState, setDiscardDialogOpened, onClose]);
 
   return (
-    <>
+    <form onSubmit={handleSubmit(processForm)}>
       <Box
         sx={{
           display: 'flex',
@@ -120,7 +120,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' && (
             <>
-              <Button disabled={!validation.isValid} variant="contained" onClick={() => setAction('update')}>
+              <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                 Edit
               </Button>
               <Button color="error" variant="outlined" onClick={onDelete}>
@@ -144,13 +144,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
           )}
           {action !== 'read' && (
             <>
-              <Button
-                disabled={!validation.isValid}
-                variant="contained"
-                onClick={() => {
-                  onSave(getVariableDefinitionFromState(state));
-                }}
-              >
+              <Button type="submit" disabled={!isValid} variant="contained">
                 {submitText}
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
@@ -165,15 +159,15 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
           <Grid item xs={8}>
             <TextField
               required
-              error={!!validation.name}
               fullWidth
               label="Name"
-              value={state.name}
-              helperText={validation.name}
               InputProps={{
                 disabled: action === 'update',
                 readOnly: action === 'read',
               }}
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register('name')}
               onChange={(v) => {
                 setState((draft) => {
                   draft.name = v.target.value;
@@ -185,10 +179,12 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
             <TextField
               fullWidth
               label="Display Label"
-              value={state.title || ''}
               InputProps={{
                 readOnly: action === 'read',
               }}
+              error={!!errors.title}
+              helperText={errors.title?.message}
+              {...register('title')}
               onChange={(v) => {
                 setState((draft) => {
                   draft.title = v.target.value;
@@ -200,10 +196,12 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
             <TextField
               fullWidth
               label="Description"
-              value={state.description}
               InputProps={{
                 readOnly: action === 'read',
               }}
+              error={!!errors.description}
+              helperText={errors.description?.message}
+              {...register('description')}
               onChange={(v) => {
                 setState((draft) => {
                   draft.description = v.target.value;
@@ -218,8 +216,9 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 labelId="variable-type-select-label"
                 id="variable-type-select"
                 label="Type"
-                value={state.kind}
                 readOnly={action === 'read'}
+                error={!!errors.kind}
+                {...register('kind')}
                 onChange={(v) => {
                   setState((draft) => {
                     draft.kind = v.target.value as VariableEditorState['kind'];
@@ -414,6 +413,6 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
           onClose();
         }}
       />
-    </>
+    </form>
   );
 }

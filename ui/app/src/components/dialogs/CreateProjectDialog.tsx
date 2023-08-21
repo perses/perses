@@ -14,10 +14,11 @@
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { projectNameValidationSchema, ProjectNameValidationType, ProjectResource } from '@perses-dev/core';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import { ProjectResource } from '@perses-dev/core';
 import { useAddProjectMutation } from '../../model/project-client';
+import { projectNameValidationSchema, ProjectNameValidationType } from '../../validation';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -48,7 +49,7 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const mutation = useAddProjectMutation();
 
-  const onSubmit: SubmitHandler<ProjectNameValidationType> = (data) => {
+  const processForm: SubmitHandler<ProjectNameValidationType> = (data) => {
     mutation.mutate(data.name, {
       onSuccess: (entity: ProjectResource) => {
         successSnackbar(`project ${entity.metadata.name} was successfully created`);
@@ -70,7 +71,7 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   return (
     <Dialog open={open} onClose={handleClose}>
       <Dialog.Header>Add Project</Dialog.Header>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(processForm)}>
         <Dialog.Content>
           <>
             <TextField
