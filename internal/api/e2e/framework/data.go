@@ -30,6 +30,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
@@ -82,6 +83,20 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		upsertFunc = func() error {
 			return persistenceManager.GetGlobalVariable().Update(entity)
 		}
+	case *v1.Secret:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetSecret().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetSecret().Update(entity)
+		}
+	case *v1.GlobalSecret:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetGlobalSecret().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetGlobalSecret().Update(entity)
+		}
 	default:
 		t.Fatalf("%T is not managed", object)
 	}
@@ -117,12 +132,26 @@ func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.
 	}
 }
 
-func NewProject(name string) *v1.Project {
-	entity := &v1.Project{
-		Kind: v1.KindProject,
+func newProjectMetadata(projectName string, name string) v1.ProjectMetadata {
+	return v1.ProjectMetadata{
 		Metadata: v1.Metadata{
 			Name: name,
-		}}
+		},
+		Project: projectName,
+	}
+}
+
+func newMetadata(name string) v1.Metadata {
+	return v1.Metadata{
+		Name: name,
+	}
+}
+
+func NewProject(name string) *v1.Project {
+	entity := &v1.Project{
+		Kind:     v1.KindProject,
+		Metadata: newMetadata(name),
+	}
 	entity.Metadata.CreateNow()
 	return entity
 }
@@ -189,14 +218,9 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 
 func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource {
 	entity := &v1.Datasource{
-		Kind: v1.KindDatasource,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: name,
-			},
-			Project: projectName,
-		},
-		Spec: newDatasourceSpec(t),
+		Kind:     v1.KindDatasource,
+		Metadata: newProjectMetadata(projectName, name),
+		Spec:     newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
 	return entity
@@ -204,11 +228,9 @@ func NewDatasource(t *testing.T, projectName string, name string) *v1.Datasource
 
 func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 	entity := &v1.GlobalDatasource{
-		Kind: v1.KindGlobalDatasource,
-		Metadata: v1.Metadata{
-			Name: name,
-		},
-		Spec: newDatasourceSpec(t),
+		Kind:     v1.KindGlobalDatasource,
+		Metadata: newMetadata(name),
+		Spec:     newDatasourceSpec(t),
 	}
 	entity.Metadata.CreateNow()
 	return entity
@@ -216,13 +238,8 @@ func NewGlobalDatasource(t *testing.T, name string) *v1.GlobalDatasource {
 
 func NewVariable(projectName string, name string) *v1.Variable {
 	entity := &v1.Variable{
-		Kind: v1.KindVariable,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: name,
-			},
-			Project: projectName,
-		},
+		Kind:     v1.KindVariable,
+		Metadata: newProjectMetadata(projectName, name),
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
@@ -243,10 +260,8 @@ func NewVariable(projectName string, name string) *v1.Variable {
 
 func NewGlobalVariable(name string) *v1.GlobalVariable {
 	entity := &v1.GlobalVariable{
-		Kind: v1.KindGlobalVariable,
-		Metadata: v1.Metadata{
-			Name: name,
-		},
+		Kind:     v1.KindGlobalVariable,
+		Metadata: newMetadata(name),
 		Spec: v1.VariableSpec{
 			Kind: variable.KindList,
 			Spec: &variable.ListSpec{
@@ -283,4 +298,35 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	dashboard.Metadata.Name = name
 	dashboard.Metadata.Project = projectName
 	return dashboard
+}
+
+func newSecretSpec() v1.SecretSpec {
+	return v1.SecretSpec{
+		BasicAuth: &secret.BasicAuth{
+			Username: "Basil",
+			Password: "Detective",
+		},
+		Authorization: nil,
+		TLSConfig:     secret.TLSConfig{},
+	}
+}
+
+func NewSecret(projectName string, name string) *v1.Secret {
+	entity := &v1.Secret{
+		Kind:     v1.KindSecret,
+		Metadata: newProjectMetadata(projectName, name),
+		Spec:     newSecretSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewGlobalSecret(name string) *v1.GlobalSecret {
+	entity := &v1.GlobalSecret{
+		Kind:     v1.KindGlobalSecret,
+		Metadata: newMetadata(name),
+		Spec:     newSecretSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
 }

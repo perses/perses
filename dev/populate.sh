@@ -25,6 +25,10 @@ function getKindID() {
     echo "datasources"
   elif [ "${kind}" = "Dashboard" ]; then
     echo "dashboards"
+  elif [ "${kind}" = "GlobalSecret" ]; then
+    echo "globalsecrets"
+  elif [ "${kind}" = "Secret" ]; then
+    echo "secrets"
   fi
 }
 
@@ -60,6 +64,8 @@ function injectAllData() {
   insertResourceData ./data/dashboard.json true
   insertResourceData ./data/project.json
   insertResourceData ./data/globaldatasource.json
+  insertResourceData ./data/globalsecret.json
+  insertResourceData ./data/secret.json
 }
 
 injectAllData

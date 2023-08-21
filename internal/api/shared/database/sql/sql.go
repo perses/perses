@@ -28,11 +28,13 @@ import (
 
 const (
 	tableGlobalDatasource = "globaldatasource"
+	tableGlobalSecret     = "globalsecret"
 	tableGlobalVariable   = "globalvariable"
 	tableProject          = "project"
 	tableDashboard        = "dashboard"
 	tableFolder           = "folder"
 	tableDatasource       = "datasource"
+	tableSecret           = "secret"
 	tableVariable         = "variable"
 
 	colID      = "id"
@@ -51,10 +53,14 @@ func getTableName(kind modelV1.Kind) (string, error) {
 		return tableFolder, nil
 	case modelV1.KindGlobalDatasource:
 		return tableGlobalDatasource, nil
+	case modelV1.KindGlobalSecret:
+		return tableGlobalSecret, nil
 	case modelV1.KindGlobalVariable:
 		return tableGlobalVariable, nil
 	case modelV1.KindProject:
 		return tableProject, nil
+	case modelV1.KindSecret:
+		return tableSecret, nil
 	case modelV1.KindVariable:
 		return tableVariable, nil
 	default:
@@ -81,12 +87,14 @@ type DAO struct {
 func (d *DAO) Init() error {
 	tables := []string{
 		d.createResourceTable(tableGlobalDatasource),
+		d.createResourceTable(tableGlobalSecret),
 		d.createResourceTable(tableGlobalVariable),
 		d.createResourceTable(tableProject),
 
 		d.createProjectResourceTable(tableDashboard),
 		d.createProjectResourceTable(tableFolder),
 		d.createProjectResourceTable(tableDatasource),
+		d.createProjectResourceTable(tableSecret),
 		d.createProjectResourceTable(tableVariable),
 	}
 

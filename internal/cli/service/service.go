@@ -60,6 +60,10 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 		return &globalDatasource{
 			apiClient: apiClient.V1().GlobalDatasource(),
 		}, nil
+	case modelV1.KindGlobalSecret:
+		return &globalSecret{
+			apiClient: apiClient.V1().GlobalSecret(),
+		}, nil
 	case modelV1.KindGlobalVariable:
 		return &globalVariable{
 			apiClient: apiClient.V1().GlobalVariable(),
@@ -67,6 +71,10 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 	case modelV1.KindProject:
 		return &project{
 			apiClient: apiClient.V1().Project(),
+		}, nil
+	case modelV1.KindSecret:
+		return &secret{
+			apiClient: apiClient.V1().Secret(projectName),
 		}, nil
 	case modelV1.KindVariable:
 		return &variable{

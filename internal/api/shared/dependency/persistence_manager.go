@@ -19,17 +19,21 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	globalSecretImpl "github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	globalVariableImpl "github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/database"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -40,10 +44,12 @@ type PersistenceManager interface {
 	GetDatasource() datasource.DAO
 	GetFolder() folder.DAO
 	GetGlobalDatasource() globaldatasource.DAO
+	GetGlobalSecret() globalsecret.DAO
 	GetGlobalVariable() globalvariable.DAO
 	GetHealth() health.DAO
 	GetPersesDAO() databaseModel.DAO
 	GetProject() project.DAO
+	GetSecret() secret.DAO
 	GetVariable() variable.DAO
 }
 
@@ -53,10 +59,12 @@ type persistence struct {
 	datasource       datasource.DAO
 	folder           folder.DAO
 	globalDatasource globaldatasource.DAO
+	globalSecret     globalsecret.DAO
 	globalVariable   globalvariable.DAO
 	health           health.DAO
 	perses           databaseModel.DAO
 	project          project.DAO
+	secret           secret.DAO
 	variable         variable.DAO
 }
 
@@ -69,19 +77,23 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
 	folderDAO := folderImpl.NewDAO(persesDAO)
 	globalDatatasourceDAO := globalDatasourceImpl.NewDAO(persesDAO)
+	globalSecretDAO := globalSecretImpl.NewDAO(persesDAO)
 	globalVariableDAO := globalVariableImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
+	secretDAO := secretImpl.NewDAO(persesDAO)
 	variableDAO := variableImpl.NewDAO(persesDAO)
 	return &persistence{
 		dashboard:        dashboardDAO,
 		datasource:       datasourceDAO,
 		folder:           folderDAO,
 		globalDatasource: globalDatatasourceDAO,
+		globalSecret:     globalSecretDAO,
 		globalVariable:   globalVariableDAO,
 		health:           healthDAO,
 		perses:           persesDAO,
 		project:          projectDAO,
+		secret:           secretDAO,
 		variable:         variableDAO,
 	}, nil
 }
@@ -102,6 +114,10 @@ func (p *persistence) GetGlobalDatasource() globaldatasource.DAO {
 	return p.globalDatasource
 }
 
+func (p *persistence) GetGlobalSecret() globalsecret.DAO {
+	return p.globalSecret
+}
+
 func (p *persistence) GetGlobalVariable() globalvariable.DAO {
 	return p.globalVariable
 }
@@ -116,6 +132,10 @@ func (p *persistence) GetPersesDAO() databaseModel.DAO {
 
 func (p *persistence) GetProject() project.DAO {
 	return p.project
+}
+
+func (p *persistence) GetSecret() secret.DAO {
+	return p.secret
 }
 
 func (p *persistence) GetVariable() variable.DAO {

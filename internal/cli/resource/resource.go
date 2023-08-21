@@ -62,6 +62,14 @@ var resources = []resource{
 		},
 	},
 	{
+		kind:      modelV1.KindGlobalSecret,
+		shortTerm: "gs",
+		aliases: []string{
+			"globalSecrets",
+			"gscrt",
+		},
+	},
+	{
 		kind:      modelV1.KindGlobalVariable,
 		shortTerm: "gv",
 		aliases: []string{
@@ -75,6 +83,13 @@ var resources = []resource{
 		kind: modelV1.KindProject,
 		aliases: []string{
 			"projects",
+		},
+	},
+	{
+		kind: modelV1.KindSecret,
+		aliases: []string{
+			"secrets",
+			"scrt",
 		},
 	},
 	{
@@ -101,7 +116,7 @@ func HandleSuccessMessage(writer io.Writer, kind modelV1.Kind, project string, g
 // Returns false otherwise.
 func IsGlobal(kind modelV1.Kind) bool {
 	switch kind {
-	case modelV1.KindProject, modelV1.KindGlobalDatasource, modelV1.KindGlobalVariable:
+	case modelV1.KindProject, modelV1.KindGlobalDatasource, modelV1.KindGlobalSecret, modelV1.KindGlobalVariable:
 		return true
 	default:
 		return false

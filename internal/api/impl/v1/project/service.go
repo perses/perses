@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -34,15 +35,17 @@ type service struct {
 	folderDAO     folder.DAO
 	datasourceDAO datasource.DAO
 	dashboardDAO  dashboard.DAO
+	secretDAO     secret.DAO
 	variableDAO   variable.DAO
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, variableDAO variable.DAO) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, secretDAO secret.DAO, variableDAO variable.DAO) project.Service {
 	return &service{
 		dao:           dao,
 		folderDAO:     folderDAO,
 		datasourceDAO: datasourceDAO,
 		dashboardDAO:  dashboardDAO,
+		secretDAO:     secretDAO,
 		variableDAO:   variableDAO,
 	}
 }
@@ -100,6 +103,10 @@ func (s *service) Delete(parameters shared.Parameters) error {
 	}
 	if err := s.datasourceDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all datasources")
+		return err
+	}
+	if err := s.secretDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all secrets")
 		return err
 	}
 	if err := s.variableDAO.DeleteAll(projectName); err != nil {

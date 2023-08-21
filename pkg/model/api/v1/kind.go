@@ -28,7 +28,9 @@ const (
 	KindFolder           Kind = "Folder"
 	KindGlobalDatasource Kind = "GlobalDatasource"
 	KindGlobalVariable   Kind = "GlobalVariable"
+	KindGlobalSecret     Kind = "GlobalSecret"
 	KindProject          Kind = "Project"
+	KindSecret           Kind = "Secret"
 	KindVariable         Kind = "Variable"
 )
 
@@ -37,8 +39,10 @@ var KindMap = map[Kind]bool{
 	KindDatasource:       true,
 	KindFolder:           true,
 	KindGlobalDatasource: true,
+	KindGlobalSecret:     true,
 	KindGlobalVariable:   true,
 	KindProject:          true,
+	KindSecret:           true,
 	KindVariable:         true,
 }
 
@@ -47,8 +51,10 @@ var PluralKindMap = map[Kind]string{
 	KindDatasource:       "datasources",
 	KindFolder:           "folders",
 	KindGlobalDatasource: "globaldatasources",
+	KindGlobalSecret:     "globalsecrets",
 	KindGlobalVariable:   "globalvariables",
 	KindProject:          "projects",
+	KindSecret:           "secrets",
 	KindVariable:         "variables",
 }
 
@@ -99,10 +105,14 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Folder{}, nil
 	case KindGlobalDatasource:
 		return &GlobalDatasource{}, nil
+	case KindGlobalSecret:
+		return &GlobalSecret{}, nil
 	case KindGlobalVariable:
 		return &GlobalVariable{}, nil
 	case KindProject:
 		return &Project{}, nil
+	case KindSecret:
+		return &Secret{}, nil
 	case KindVariable:
 		return &Variable{}, nil
 	default:
