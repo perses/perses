@@ -66,7 +66,7 @@ function ViewDashboard() {
     datasourceApi.listDatasources(projectName);
     datasourceApi.listGlobalDatasources();
   }, [datasourceApi, projectName]);
-  const { isLoading } = useDashboard(projectName, dashboardName);
+  const { isLoading, error } = useDashboard(projectName, dashboardName);
   let { data } = useDashboard(projectName, dashboardName);
   const isReadonly = useIsReadonly();
 
@@ -161,6 +161,10 @@ function ViewDashboard() {
   }, [actionRef, navigate, projectName]);
 
   if (isLoading) return null;
+  if (error !== null && actionRef.current !== CreateAction) {
+    exceptionSnackbar(error);
+    navigate(`/projects/${projectName}`);
+  }
   if (isLoadingProjectVars || isLoadingGlobalVars) return null;
 
   if (!data || data.spec === undefined || isReadonly === undefined) return null;

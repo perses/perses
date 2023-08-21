@@ -18,6 +18,7 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import HomeView from './views/home/HomeView';
 import MigrateView from './views/MigrateView';
 import AdminView from './views/admin/AdminView';
+import GuardedProjectRoute from './GuardedProjectRoute';
 // Other routes are lazy-loaded for code-splitting
 // -> TODO follow same naming convention for all Views? (aka have the "View" term be either always a prefix or always a suffix).
 const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
@@ -33,10 +34,12 @@ function Router() {
           <Route path="/admin/:tab" element={<AdminView />} />
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
-          <Route path="/projects/:projectName" element={<ViewProject />} />
-          <Route path="/projects/:projectName/:tab" element={<ViewProject />} />
-          <Route path="/projects/:projectName/dashboards/:dashboardName" element={<ViewDashboard />} />
-          <Route path="/projects/:projectName/dashboards/:dashboardName/:action" element={<ViewDashboard />} />
+          <Route path="/projects/:projectName" element={<GuardedProjectRoute />}>
+            <Route path="" element={<ViewProject />} />
+            <Route path=":tab" element={<ViewProject />} />
+            <Route path="dashboards/:dashboardName" element={<ViewDashboard />} />
+            <Route path="dashboards/:dashboardName/:action" element={<ViewDashboard />} />
+          </Route>
           <Route path="/" element={<HomeView />} />
         </Routes>
       </Suspense>

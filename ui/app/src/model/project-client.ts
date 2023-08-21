@@ -112,3 +112,11 @@ export function useDeleteProjectMutation() {
     },
   });
 }
+
+export function fetchProject(name: string) {
+  const url = buildURL({
+    resource: resource,
+    name: name,
+  });
+  return fetchJson<ProjectResource>(url);
+}

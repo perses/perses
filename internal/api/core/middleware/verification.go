@@ -39,16 +39,16 @@ type partialObject struct {
 func CheckProject(svc project.Service) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// we don't need to verify if a project exists in case we are in a PUT / GET / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
+			// we don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
 			// Also, we avoid an additional query to the DB like that.
 			// In case the body is nil, then there is nothing to do about it as well
-			if c.Request().Method != http.MethodPost || c.Request().Body == nil {
+			method := c.Request().Method
+			if (method != http.MethodPost && method != http.MethodGet) || c.Request().Body == nil {
 				return next(c)
 			}
 			projectName := shared.GetProjectParameter(c)
-			if len(projectName) == 0 {
-				// It's possible the HTTP Path doesn't contain the project because the user is calling the root endpoint
-				// to create a new dashboard for example.
+			if len(projectName) == 0 && method == http.MethodPost {
+				// It's possible the HTTP Path doesn't contain the project because the user is calling the root endpoint to create a new resource.
 				// So we need to ensure the project name exists in the resource, which is why we will partially decode the body to get the project name.
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
 				for _, path := range shared.ProjectResourcePathList {
