@@ -100,10 +100,10 @@ export function useDeleteProjectMutation() {
       });
     },
     onSuccess: (name) => {
-      queryClient.removeQueries([resource, name]);
+      queryClient.removeQueries([...key, name]);
 
-      const dependingKeys = dependingResources.map((resource) => buildQueryKey({ resource, parent: name }));
-      dependingKeys.forEach((k) => queryClient.removeQueries(k));
+      const dependingKeys = dependingResources.map((resource) => buildQueryKey({ resource }));
+      dependingKeys.forEach((k) => queryClient.removeQueries([...k, name]));
 
       return Promise.all([
         ...dependingKeys.map((k) => queryClient.invalidateQueries(k)),
