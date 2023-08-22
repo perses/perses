@@ -46,8 +46,8 @@ func NewService(dao dashboard.DAO, sch schemas.Schemas, globalVarDAO globalvaria
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if dashboardObject, ok := entity.(*v1.Dashboard); ok {
-		return s.create(dashboardObject)
+	if object, ok := entity.(*v1.Dashboard); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
 }
@@ -67,8 +67,8 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if dashboardObject, ok := entity.(*v1.Dashboard); ok {
-		return s.update(dashboardObject, parameters)
+	if object, ok := entity.(*v1.Dashboard); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
 }

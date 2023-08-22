@@ -36,8 +36,8 @@ func NewService(dao globalsecret.DAO) globalsecret.Service {
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.GlobalSecret); ok {
-		return s.create(projectObject)
+	if object, ok := entity.(*v1.GlobalSecret); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalSecret format, received '%T'", entity))
 }
@@ -52,8 +52,8 @@ func (s *service) create(entity *v1.GlobalSecret) (*v1.GlobalSecret, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.GlobalSecret); ok {
-		return s.update(projectObject, parameters)
+	if object, ok := entity.(*v1.GlobalSecret); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalSecret format, received '%T'", entity))
 }

@@ -51,8 +51,8 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.Project); ok {
-		return s.create(projectObject)
+	if object, ok := entity.(*v1.Project); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
@@ -67,8 +67,8 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.Project); ok {
-		return s.update(projectObject, parameters)
+	if object, ok := entity.(*v1.Project); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }

@@ -15,6 +15,7 @@ package variable
 
 import (
 	"fmt"
+
 	"github.com/perses/perses/internal/api/shared/validate"
 
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -40,8 +41,8 @@ func NewService(dao variable.DAO, sch schemas.Schemas) variable.Service {
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if variableObject, ok := entity.(*v1.Variable); ok {
-		return s.create(variableObject)
+	if object, ok := entity.(*v1.Variable); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Variable format, received '%T'", entity))
 }
@@ -59,8 +60,8 @@ func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if VariableObject, ok := entity.(*v1.Variable); ok {
-		return s.update(VariableObject, parameters)
+	if object, ok := entity.(*v1.Variable); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Variable format, received '%T'", entity))
 }

@@ -39,8 +39,8 @@ func NewService(dao globalvariable.DAO, sch schemas.Schemas) globalvariable.Serv
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if datasourceObject, ok := entity.(*v1.GlobalVariable); ok {
-		return s.create(datasourceObject)
+	if object, ok := entity.(*v1.GlobalVariable); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Globalvariable format, received '%T'", entity))
 }
@@ -59,8 +59,8 @@ func (s *service) create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error) 
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if DatasourceObject, ok := entity.(*v1.GlobalVariable); ok {
-		return s.update(DatasourceObject, parameters)
+	if object, ok := entity.(*v1.GlobalVariable); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Globalvariable format, received '%T'", entity))
 }
