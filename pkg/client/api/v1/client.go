@@ -25,9 +25,11 @@ type ClientInterface interface {
 	Datasource(project string) DatasourceInterface
 	Folder(project string) FolderInterface
 	GlobalDatasource() GlobalDatasourceInterface
+	GlobalSecret() GlobalSecretInterface
 	GlobalVariable() GlobalVariableInterface
 	Health() HealthInterface
 	Project() ProjectInterface
+	Secret(project string) SecretInterface
 	Variable(project string) VariableInterface
 }
 
@@ -62,6 +64,10 @@ func (c *client) GlobalDatasource() GlobalDatasourceInterface {
 	return newGlobalDatasource(c.restClient)
 }
 
+func (c *client) GlobalSecret() GlobalSecretInterface {
+	return newGlobalSecret(c.restClient)
+}
+
 func (c *client) GlobalVariable() GlobalVariableInterface {
 	return newGlobalVariable(c.restClient)
 }
@@ -72,6 +78,10 @@ func (c *client) Health() HealthInterface {
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
+}
+
+func (c *client) Secret(project string) SecretInterface {
+	return newSecret(c.restClient, project)
 }
 
 func (c *client) Variable(project string) VariableInterface {

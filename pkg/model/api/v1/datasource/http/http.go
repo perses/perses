@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"reflect"
 	"strings"
 
@@ -69,107 +68,6 @@ func (h *AllowedEndpoint) validate() error {
 		h.Method != http.MethodPut &&
 		h.Method != http.MethodPatch {
 		return fmt.Errorf("%q is not a valid http method. Current supported HTTP method: %s, %s, %s, %s, %s", h.Method, http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodPut, http.MethodPatch)
-	}
-	return nil
-}
-
-type BasicAuth struct {
-	Username string `json:"username" yaml:"username"`
-	Password string `json:"password" yaml:"password,omitempty"`
-	// PasswordFile is a path to a file that contains a password
-	PasswordFile string `json:"password_file" yaml:"password_file,omitempty"`
-}
-
-func (b *BasicAuth) UnmarshalJSON(data []byte) error {
-	var tmp BasicAuth
-	type plain BasicAuth
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*b = tmp
-	return nil
-}
-
-func (b *BasicAuth) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp BasicAuth
-	type plain BasicAuth
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*b = tmp
-	return nil
-}
-
-func (b *BasicAuth) GetPassword() (string, error) {
-	if len(b.PasswordFile) > 0 {
-		data, err := os.ReadFile(b.PasswordFile)
-		if err != nil {
-			return "", err
-		}
-		return string(data), nil
-	}
-	return b.Password, nil
-}
-
-func (b *BasicAuth) validate() error {
-	if len(b.Username) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
-		return fmt.Errorf("when using basic_auth, username and password/password_file cannot be empty")
-	}
-	if len(b.PasswordFile) > 0 {
-		// Read the file to verify it exists
-		_, err := os.ReadFile(b.PasswordFile)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-type Auth struct {
-	InsecureTLS bool       `json:"insecure_tls,omitempty" yaml:"insecure_tls,omitempty"`
-	BearerToken string     `json:"bearer_token,omitempty" yaml:"bearer_token,omitempty"`
-	BasicAuth   *BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
-	CaCert      string     `json:"ca_cert,omitempty" yaml:"ca_cert,omitempty"`
-}
-
-func (b *Auth) UnmarshalJSON(data []byte) error {
-	var tmp Auth
-	type plain Auth
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*b = tmp
-	return nil
-}
-
-func (b *Auth) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Auth
-	type plain Auth
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*b = tmp
-	return nil
-}
-
-func (b *Auth) validate() error {
-	if len(b.BearerToken) == 0 && b.BasicAuth == nil && len(b.CaCert) == 0 {
-		return fmt.Errorf("no authentication choosen")
-	}
-	if len(b.BearerToken) > 0 && b.BasicAuth != nil {
-		return fmt.Errorf("basic_auth and bearer_token set at the same time")
 	}
 	return nil
 }

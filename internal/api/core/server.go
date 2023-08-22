@@ -23,9 +23,11 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	"github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
+	"github.com/perses/perses/internal/api/impl/v1/secret"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/shared"
@@ -49,9 +51,11 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
 		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
 		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
+		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), readonly),
 		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject(), readonly),
+		secret.NewEndpoint(serviceManager.GetSecret(), readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), readonly),
 	}
 	apiEndpoints := []endpoint{

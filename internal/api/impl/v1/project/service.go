@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -34,22 +35,24 @@ type service struct {
 	folderDAO     folder.DAO
 	datasourceDAO datasource.DAO
 	dashboardDAO  dashboard.DAO
+	secretDAO     secret.DAO
 	variableDAO   variable.DAO
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, variableDAO variable.DAO) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, secretDAO secret.DAO, variableDAO variable.DAO) project.Service {
 	return &service{
 		dao:           dao,
 		folderDAO:     folderDAO,
 		datasourceDAO: datasourceDAO,
 		dashboardDAO:  dashboardDAO,
+		secretDAO:     secretDAO,
 		variableDAO:   variableDAO,
 	}
 }
 
 func (s *service) Create(entity api.Entity) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.Project); ok {
-		return s.create(projectObject)
+	if object, ok := entity.(*v1.Project); ok {
+		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
@@ -64,8 +67,8 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
-	if projectObject, ok := entity.(*v1.Project); ok {
-		return s.update(projectObject, parameters)
+	if object, ok := entity.(*v1.Project); ok {
+		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
@@ -100,6 +103,10 @@ func (s *service) Delete(parameters shared.Parameters) error {
 	}
 	if err := s.datasourceDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all datasources")
+		return err
+	}
+	if err := s.secretDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all secrets")
 		return err
 	}
 	if err := s.variableDAO.DeleteAll(projectName); err != nil {

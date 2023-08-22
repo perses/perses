@@ -31,14 +31,16 @@ const (
 	PathDatasource       = "datasources"
 	PathFolder           = "folders"
 	PathGlobalDatasource = "globaldatasources"
+	PathGlobalSecret     = "globalsecrets"
 	PathGlobalVariable   = "globalvariables"
 	PathProject          = "projects"
+	PathSecret           = "secrets"
 	PathVariable         = "variables"
 )
 
 // ProjectResourcePathList is containing the list of the resource path that are part of a project.
 var ProjectResourcePathList = []string{
-	PathDashboard, PathDatasource, PathFolder, PathVariable,
+	PathDashboard, PathDatasource, PathFolder, PathSecret, PathVariable,
 }
 
 func getNameParameter(ctx echo.Context) string {
