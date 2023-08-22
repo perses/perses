@@ -102,6 +102,29 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
   return DURATION_REGEX.test(maybeDuration);
 }
 
+export function formatDuration(duration: Duration): string {
+  const result: string[] = [];
+  if (duration.years) {
+    result.push(`${duration.years}y`);
+  }
+  if (duration.weeks) {
+    result.push(`${duration.weeks}w`);
+  }
+  if (duration.days) {
+    result.push(`${duration.days}d`);
+  }
+  if (duration.hours) {
+    result.push(`${duration.hours}h`);
+  }
+  if (duration.minutes) {
+    result.push(`${duration.minutes}m`);
+  }
+  if (duration.seconds) {
+    result.push(`${duration.seconds}s`);
+  }
+  return result.join(' ');
+}
+
 const DEFAULT_STEP_MS = 15000;
 
 const ROUNDED_STEP_INTERVALS = [
