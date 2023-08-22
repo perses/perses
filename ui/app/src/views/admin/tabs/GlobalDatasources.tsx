@@ -17,7 +17,6 @@ import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
 import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
 import {
-  useCreateGlobalDatasourceMutation,
   useDeleteGlobalDatasourceMutation,
   useGlobalDatasourceList,
   useUpdateGlobalDatasourceMutation,
@@ -33,30 +32,8 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
   const { data, isLoading } = useGlobalDatasourceList();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
   const deleteDatasourceMutation = useDeleteGlobalDatasourceMutation();
   const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
-
-  const handleDatasourceCreate = useCallback(
-    (datasource: GlobalDatasource): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: GlobalDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`
-            );
-            resolve();
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            reject();
-            throw err;
-          },
-        });
-      });
-    },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
-  );
 
   const handleDatasourceUpdate = useCallback(
     (datasource: GlobalDatasource): Promise<void> => {
@@ -105,7 +82,6 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
       <DatasourceList
         data={data || []}
         hideToolbar={hideToolbar}
-        onCreate={handleDatasourceCreate}
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
         isLoading={isLoading}

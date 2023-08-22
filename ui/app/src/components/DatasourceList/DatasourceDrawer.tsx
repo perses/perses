@@ -17,21 +17,19 @@ import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
-import { DatasourceEditorForm } from './DatasourceEditorForm';
-
-export type ActionStr = 'Create' | 'Update';
+import { Action, DatasourceEditorForm } from './DatasourceEditorForm';
 
 interface DatasourceDrawerProps<T extends Datasource> {
   datasource: T;
   isOpen: boolean;
-  saveActionStr: ActionStr;
+  action: Action;
   onSave: Dispatch<T>;
   onDelete?: DispatchWithPromise<T>;
   onClose: DispatchWithoutAction;
 }
 
 export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, saveActionStr, onSave, onClose, onDelete } = props;
+  const { datasource, isOpen, action, onSave, onClose, onDelete } = props;
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
 
   // When user clicks out of the drawer, do not close it, just do nothing
@@ -55,12 +53,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           {isOpen && (
             <DatasourceEditorForm
               initialDatasource={datasource}
-              saveActionStr={saveActionStr}
+              action={action}
               onSave={onSave}
               onClose={onClose}
-              onDelete={
-                saveActionStr == 'Update' && onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined
-              }
+              onDelete={action == 'update' && onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
             />
           )}
         </PluginRegistry>

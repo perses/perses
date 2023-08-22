@@ -17,13 +17,13 @@ import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { useIsReadonly } from '../../model/config-client';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 
 export interface DatasourceListProperties<T extends Datasource> {
   data: T[];
   hideToolbar?: boolean;
-  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -34,14 +34,14 @@ export interface DatasourceListProperties<T extends Datasource> {
  * Display datasources in a table style.
  * @param props.data Contains all datasources to display
  * @param props.hideToolbar Hide toolbar if enabled
- * @param props.onCreate Event received when a 'create' action has been requested
  * @param props.onUpdate Event received when an 'update' action has been requested
  * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
 export function DatasourceList<T extends Datasource>(props: DatasourceListProperties<T>) {
-  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
+  const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
+  const isReadonly = useIsReadonly();
 
   const findDatasource = useCallback(
     (name: string, project?: string) => {
@@ -72,18 +72,10 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
 
   const handleDatasourceUpdate = useCallback(
     async (datasource: T) => {
-      if (targetedDatasource != undefined && datasource.metadata.name != targetedDatasource.metadata.name) {
-        // In this case "move" the datasource, aka create it with the new name & remove the former one
-        // We do this because we can't just do a PUT call in that case (results in "document not found" error)
-        // TODO: create + delete calls should be bundled together so that we avoid the case where only one would succeed
-        await onCreate(datasource);
-        await onDelete(targetedDatasource);
-      } else {
-        await onUpdate(datasource);
-      }
+      await onUpdate(datasource);
       setEditDatasourceFormStateOpened(false);
     },
-    [onCreate, onUpdate, onDelete, targetedDatasource]
+    [onUpdate]
   );
 
   const handleRowClick = useCallback(
@@ -159,7 +151,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         <DatasourceDrawer
           datasource={targetedDatasource}
           isOpen={isEditDatasourceFormStateOpened}
-          saveActionStr="Update"
+          action={isReadonly ? 'read' : 'update'}
           onSave={handleDatasourceUpdate}
           onDelete={onDelete}
           onClose={() => setEditDatasourceFormStateOpened(false)}
