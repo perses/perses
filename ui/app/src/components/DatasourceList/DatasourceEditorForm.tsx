@@ -13,7 +13,18 @@
 
 import { useImmer } from 'use-immer';
 import { Display, Datasource } from '@perses-dev/core';
-import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Divider,
+  FormControlLabel,
+  Grid,
+  Stack,
+  Switch,
+  TextField,
+  Typography,
+  capitalize,
+} from '@mui/material';
 import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import { PluginEditor } from '@perses-dev/plugin-system';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
@@ -63,22 +74,31 @@ function getInitialState<T extends Datasource>(datasource: T): T {
   };
 }
 
+export type Action = 'read' | 'create' | 'update';
+
 interface DatasourceEditorFormProps<T extends Datasource> {
   initialDatasource: T;
-  saveActionStr: string;
+  action: Action;
   onSave: Dispatch<T>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
-  const { initialDatasource, saveActionStr, onSave, onClose, onDelete } = props;
+  const { initialDatasource, action, onSave, onClose, onDelete } = props;
 
   const patchedInitialDatasource = getInitialState(initialDatasource);
   const [state, setState] = useImmer(patchedInitialDatasource);
   const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
   const isReadonly = useIsReadonly();
   const validation = useMemo(() => getValidation(state), [state]);
+
+  const title = useMemo(() => {
+    if (action === 'read') return 'View Datasource';
+    if (action === 'create') return 'Create Datasource';
+    if (action === 'update') return 'Edit Datasource';
+    return '';
+  }, [action]);
 
   // When saving, remove the display property if ever display.name is empty, then pass the value upstream
   const handleSave = () => {
@@ -109,13 +129,15 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">{saveActionStr} Datasource</Typography>
+        <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          <Button disabled={isReadonly || !validation.isValid} variant="contained" onClick={handleSave}>
-            {saveActionStr}
-          </Button>
+          {!isReadonly && (
+            <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
+              {capitalize(action)}
+            </Button>
+          )}
           <Button color="secondary" variant="outlined" onClick={handleCancel}>
-            Cancel
+            {isReadonly ? 'Close' : 'Cancel'}
           </Button>
           {onDelete && (
             <Button disabled={isReadonly} color="error" variant="outlined" onClick={onDelete}>
@@ -134,7 +156,8 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               label="Name"
               value={state.metadata.name}
               InputProps={{
-                readOnly: isReadonly,
+                disabled: action === 'update',
+                readOnly: action === 'read',
               }}
               helperText={validation.name}
               onChange={(v) => {
