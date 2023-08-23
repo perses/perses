@@ -42,10 +42,9 @@ type api struct {
 	echoUtils.Register
 	apiV1Endpoints []endpoint
 	apiEndpoints   []endpoint
-	proxyEndpoint  endpoint
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Readonly
 	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
@@ -67,22 +66,11 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
-		proxyEndpoint: &proxyEndpoint{
-			secret:       persistenceManager.GetSecret(),
-			globalSecret: persistenceManager.GetGlobalSecret(),
-			dts:          persistenceManager.GetDatasource(), globalDTS: persistenceManager.GetGlobalDatasource(),
-		},
 	}
 }
 
 func (a *api) RegisterRoute(e *echo.Echo) {
-	a.registerProxyRoute(e)
 	a.registerAPIV1Route(e)
-}
-
-func (a *api) registerProxyRoute(e *echo.Echo) {
-	proxyGroup := e.Group("/proxy")
-	a.proxyEndpoint.RegisterRoutes(proxyGroup)
 }
 
 func (a *api) registerAPIV1Route(e *echo.Echo) {

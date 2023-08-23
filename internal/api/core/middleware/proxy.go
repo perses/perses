@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package core
+package middleware
 
 import (
 	"crypto/tls"
@@ -19,7 +19,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"strings"
+	"regexp"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,6 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
-	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
@@ -35,43 +34,82 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	globalProxyMatcher  = regexp.MustCompile(`/proxy/globaldatasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+	projectProxyMatcher = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
+)
+
 // TODO cache the request to the database
 
-func extractDatasourcePath(ctx echo.Context, split string) string {
-	// We split the path in two different part separated by the name of the datasource (usually).
-	// What is coming after the name of the datasource will be the path that should be used for the query
-	pathSplit := strings.SplitN(ctx.Path(), split, 2)
-	if len(pathSplit) == 2 {
-		return pathSplit[1]
+func extractGlobalDatasourceAndPath(ctx echo.Context) (dtsName string, path string, err error) {
+	requestPath := ctx.Request().URL.Path
+	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
+	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
+		return "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
 	}
+	dtsName = matchingGroups[0][1]
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
-	return "/"
+	path = "/"
+	if len(matchingGroups[0]) > 2 {
+		path = matchingGroups[0][2]
+	}
+	return
 }
 
-type proxyEndpoint struct {
-	secret       secret.DAO
-	globalSecret globalsecret.DAO
-	dts          datasource.DAO
-	globalDTS    globaldatasource.DAO
+func extractProjectDatasourcePath(ctx echo.Context) (projectName string, dtsName string, path string, err error) {
+	requestPath := ctx.Request().URL.Path
+	matchingGroups := projectProxyMatcher.FindAllStringSubmatch(requestPath, -1)
+	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
+		return "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
+	}
+	projectName = matchingGroups[0][1]
+	dtsName = matchingGroups[0][2]
+	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
+	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
+	path = "/"
+	if len(matchingGroups[0]) > 3 {
+		path = matchingGroups[0][3]
+	}
+	return
 }
 
-func (e *proxyEndpoint) RegisterRoutes(g *echo.Group) {
-	// /proxy/globaldatasources/:name
-	g.Any(fmt.Sprintf("/%s/:%s/*", shared.PathGlobalDatasource, shared.ParamName), e.proxyGlobalDatasource)
-	// /proxy/projects/:project/datasources/:name
-	g.Any(fmt.Sprintf("/%s/:%s/%s/:%s/*", shared.PathProject, shared.ParamProject, shared.PathDatasource, shared.ParamName), e.proxyProjectDatasource)
+type Proxy struct {
+	Secret       secret.DAO
+	GlobalSecret globalsecret.DAO
+	DTS          datasource.DAO
+	GlobalDTS    globaldatasource.DAO
 }
 
-func (e *proxyEndpoint) proxyGlobalDatasource(ctx echo.Context) error {
-	parameter := shared.ExtractParameters(ctx)
-	path := extractDatasourcePath(ctx, parameter.Name)
-	dts, err := e.getGlobalDatasource(parameter.Name)
+func (e *Proxy) Proxy() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			requestPath := c.Request().URL.Path
+			globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
+			localDatasourceMatch := projectProxyMatcher.MatchString(requestPath)
+			if !globalDatasourceMatch && !localDatasourceMatch {
+				// this is likely a request for the API itself
+				return next(c)
+			}
+			if globalDatasourceMatch {
+				return e.proxyGlobalDatasource(c)
+			}
+			return e.proxyProjectDatasource(c)
+		}
+	}
+}
+
+func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
+	dtsName, path, err := extractGlobalDatasourceAndPath(ctx)
+	if err != nil {
+		return err
+	}
+	dts, err := e.getGlobalDatasource(dtsName)
 	if err != nil {
 		return err
 	}
 	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(parameter.Name, name)
+		return e.getGlobalSecret(dtsName, name)
 	})
 	if err != nil {
 		return err
@@ -79,15 +117,17 @@ func (e *proxyEndpoint) proxyGlobalDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *proxyEndpoint) proxyProjectDatasource(ctx echo.Context) error {
-	parameter := shared.ExtractParameters(ctx)
-	path := extractDatasourcePath(ctx, parameter.Name)
-	dts, err := e.getProjectDatasource(parameter.Project, parameter.Name)
+func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
+	projectName, dtsName, path, err := extractProjectDatasourcePath(ctx)
+	if err != nil {
+		return err
+	}
+	dts, err := e.getProjectDatasource(projectName, dtsName)
 	if err != nil {
 		return err
 	}
 	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(parameter.Project, parameter.Name, name)
+		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
 		return err
@@ -95,8 +135,8 @@ func (e *proxyEndpoint) proxyProjectDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *proxyEndpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
-	dts, err := e.globalDTS.Get(name)
+func (e *Proxy) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
+	dts, err := e.GlobalDTS.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
@@ -107,8 +147,8 @@ func (e *proxyEndpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, err
 	}
 	return dts.Spec, nil
 }
-func (e *proxyEndpoint) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
-	dts, err := e.dts.Get(projectName, name)
+func (e *Proxy) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
+	dts, err := e.DTS.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", name, projectName)
@@ -120,8 +160,8 @@ func (e *proxyEndpoint) getProjectDatasource(projectName string, name string) (v
 	return dts.Spec, nil
 }
 
-func (e *proxyEndpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
-	scrt, err := e.globalSecret.Get(name)
+func (e *Proxy) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
+	scrt, err := e.GlobalSecret.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
@@ -133,8 +173,8 @@ func (e *proxyEndpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, e
 	return &scrt.Spec, nil
 }
 
-func (e *proxyEndpoint) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
-	scrt, err := e.secret.Get(projectName, name)
+func (e *Proxy) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
+	scrt, err := e.Secret.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
