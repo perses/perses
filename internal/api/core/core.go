@@ -41,7 +41,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to initialize the service manager: %w", err)
 	}
-	persesAPI := NewPersesAPI(serviceManager, conf)
+	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
@@ -68,7 +68,6 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
 		}).
-		Middleware(middleware.Proxy(persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource())).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 	return runner, persistenceManager, nil

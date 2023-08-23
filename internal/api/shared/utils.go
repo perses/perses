@@ -43,7 +43,7 @@ var ProjectResourcePathList = []string{
 	PathDashboard, PathDatasource, PathFolder, PathSecret, PathVariable,
 }
 
-func getNameParameter(ctx echo.Context) string {
+func GetNameParameter(ctx echo.Context) string {
 	return ctx.Param(ParamName)
 }
 

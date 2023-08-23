@@ -128,10 +128,7 @@ func (h *Config) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
-	if err := h.validate(tmp); err != nil {
-		return err
-	}
-	return nil
+	return h.validate(tmp)
 }
 
 func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -139,10 +136,7 @@ func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := unmarshal(&tmp); err != nil {
 		return err
 	}
-	if err := h.validate(tmp); err != nil {
-		return err
-	}
-	return nil
+	return h.validate(tmp)
 }
 
 func (h *Config) validate(conf tmpHTTPConfig) error {
