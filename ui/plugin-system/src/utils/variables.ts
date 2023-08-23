@@ -51,8 +51,8 @@ export function replaceTemplateVariable(text: string, varName: string, templateV
 // This regular expression is designed to identify variable references in a template string.
 // It supports two formats for referencing variables:
 // 1. $variableName - This is a simpler format, and the regular expression captures the variable name (\w+ matches one or more word characters).
-// 2. ${variableName} - Useful for suffixed variables (.i.e: __range_ms is).
-// 2. [COMING SOON] ${variableName:value} - This is a more complex format that allows specifying a format function as well.
+// 2. ${variableName} - This is a more complex format and the regular expression captures the variable name (\w+ matches one or more word characters) in the curly braces.
+// 3. [COMING SOON] ${variableName:value} - This is a more complex format that allows specifying a format function as well.
 // TODO: Fix this lint error
 // eslint-disable-next-line no-useless-escape
 const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
@@ -70,8 +70,7 @@ export const parseTemplateVariables = (text: string) => {
       if (match[1]) {
         // \$(\w+)\
         matches.add(match[1]);
-      }
-      if (match[2]) {
+      } else if (match[2]) {
         // \${(\w+)}\
         matches.add(match[2]);
       }

@@ -13,6 +13,13 @@
 
 import { Duration, sub } from 'date-fns';
 
+const ONE_SECOND_IN_MS = 1000;
+const ONE_MINUTE_IN_MS = 60000;
+const ONE_HOUR_IN_MS = 3600000;
+const ONE_DAY_IN_MS = 86400000; // assuming a day has always 24h
+const ONE_WEEK_IN_MS = 604800000; // assuming a week has always 7d
+const ONE_YEAR_IN_MS = 31536000000; // assuming a year has always 365d
+
 export type UnixTimeMs = number;
 
 export type DateTimeFormat = number | string;
@@ -102,6 +109,31 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
   return DURATION_REGEX.test(maybeDuration);
 }
 
+export function intervalToPrometheusDuration(timeRange: AbsoluteTimeRange): Duration {
+  let durationInMs = timeRange.end.valueOf() - timeRange.start.valueOf();
+  const years = Math.trunc(durationInMs / ONE_YEAR_IN_MS);
+  if (years > 0) durationInMs -= years * ONE_YEAR_IN_MS;
+  const weeks = Math.trunc(durationInMs / ONE_WEEK_IN_MS);
+  if (weeks > 0) durationInMs -= weeks * ONE_WEEK_IN_MS;
+  const days = Math.trunc(durationInMs / ONE_DAY_IN_MS);
+  if (days > 0) durationInMs -= days * ONE_DAY_IN_MS;
+  const hours = Math.trunc(durationInMs / ONE_HOUR_IN_MS);
+  if (hours > 0) durationInMs -= hours * ONE_HOUR_IN_MS;
+  const minutes = Math.trunc(durationInMs / ONE_MINUTE_IN_MS);
+  if (minutes > 0) durationInMs -= minutes * ONE_MINUTE_IN_MS;
+  const seconds = Math.trunc(durationInMs / ONE_SECOND_IN_MS);
+
+  return {
+    years: years,
+    months: 0,
+    weeks: weeks,
+    days: days,
+    hours: hours,
+    minutes: minutes,
+    seconds: seconds,
+  };
+}
+
 export function formatDuration(duration: Duration): string {
   const result: string[] = [];
   if (duration.years) {
@@ -141,51 +173,51 @@ const ROUNDED_STEP_INTERVALS = [
   // max: 0.75s
   { maxMs: 750, roundedStepMs: 500, display: '0.5s' },
   // max: 1.5s
-  { maxMs: 1500, roundedStepMs: 1000, display: '1s' },
+  { maxMs: ONE_SECOND_IN_MS * 1.5, roundedStepMs: ONE_SECOND_IN_MS, display: '1s' },
   // max: 3.5s
-  { maxMs: 3500, roundedStepMs: 2000, display: '2s' },
+  { maxMs: ONE_SECOND_IN_MS * 3.5, roundedStepMs: ONE_SECOND_IN_MS * 2, display: '2s' },
   // max: 7.5s
-  { maxMs: 7500, roundedStepMs: 5000, display: '5s' },
+  { maxMs: ONE_SECOND_IN_MS * 7.5, roundedStepMs: ONE_SECOND_IN_MS * 5, display: '5s' },
   // max: 12.5s
-  { maxMs: 12500, roundedStepMs: 10000, display: '10s' },
+  { maxMs: ONE_SECOND_IN_MS * 12.5, roundedStepMs: ONE_SECOND_IN_MS * 10, display: '10s' },
   // max: 17.5s
-  { maxMs: 17500, roundedStepMs: 15000, display: '15s' },
+  { maxMs: ONE_SECOND_IN_MS * 17.5, roundedStepMs: ONE_SECOND_IN_MS * 15, display: '15s' },
   // max: 25s
-  { maxMs: 25000, roundedStepMs: 20000, display: '20s' },
+  { maxMs: ONE_SECOND_IN_MS * 25, roundedStepMs: ONE_SECOND_IN_MS * 20, display: '20s' },
   // max: 45s
-  { maxMs: 45000, roundedStepMs: 30000, display: '30s' },
+  { maxMs: ONE_SECOND_IN_MS * 45, roundedStepMs: ONE_SECOND_IN_MS * 30, display: '30s' },
   // max: 1.5m
-  { maxMs: 90000, roundedStepMs: 60000, display: '1m' },
+  { maxMs: ONE_MINUTE_IN_MS * 1.5, roundedStepMs: ONE_MINUTE_IN_MS, display: '1m' },
   // max: 3.5m
-  { maxMs: 210000, roundedStepMs: 120000, display: '2m' },
+  { maxMs: ONE_MINUTE_IN_MS * 3.5, roundedStepMs: ONE_MINUTE_IN_MS * 2, display: '2m' },
   // max: 7.5m
-  { maxMs: 450000, roundedStepMs: 300000, display: '5m' },
+  { maxMs: ONE_MINUTE_IN_MS * 7.5, roundedStepMs: ONE_MINUTE_IN_MS * 5, display: '5m' },
   // max: 12.5m
-  { maxMs: 750000, roundedStepMs: 600000, display: '10m' },
+  { maxMs: ONE_MINUTE_IN_MS * 12.5, roundedStepMs: ONE_MINUTE_IN_MS * 10, display: '10m' },
   // max: 12.5m
-  { maxMs: 1050000, roundedStepMs: 900000, display: '15m' },
+  { maxMs: ONE_MINUTE_IN_MS * 12.5, roundedStepMs: ONE_MINUTE_IN_MS * 15, display: '15m' },
   // max: 25m
-  { maxMs: 1500000, roundedStepMs: 1200000, display: '20m' },
+  { maxMs: ONE_MINUTE_IN_MS * 25, roundedStepMs: ONE_MINUTE_IN_MS * 20, display: '20m' },
   // max: 45m
-  { maxMs: 2700000, roundedStepMs: 1800000, display: '30m' },
+  { maxMs: ONE_MINUTE_IN_MS * 45, roundedStepMs: ONE_MINUTE_IN_MS * 30, display: '30m' },
   // max: 1.5h
-  { maxMs: 5400000, roundedStepMs: 3600000, display: '1h' },
+  { maxMs: ONE_HOUR_IN_MS * 1.5, roundedStepMs: ONE_HOUR_IN_MS, display: '1h' },
   // max: 2.5h
-  { maxMs: 9000000, roundedStepMs: 7200000, display: '2h' },
+  { maxMs: ONE_HOUR_IN_MS * 2.5, roundedStepMs: ONE_HOUR_IN_MS * 2, display: '2h' },
   // max: 4.5h
-  { maxMs: 16200000, roundedStepMs: 10800000, display: '3h' },
+  { maxMs: ONE_HOUR_IN_MS * 4.5, roundedStepMs: ONE_HOUR_IN_MS * 3, display: '3h' },
   // max: 9h
-  { maxMs: 32400000, roundedStepMs: 21600000, display: '6h' },
+  { maxMs: ONE_HOUR_IN_MS * 9, roundedStepMs: ONE_HOUR_IN_MS * 6, display: '6h' },
   // max: 1d
-  { maxMs: 86400000, roundedStepMs: 43200000, display: '12h' },
+  { maxMs: ONE_DAY_IN_MS, roundedStepMs: ONE_HOUR_IN_MS * 12, display: '12h' },
   // max: 1w
-  { maxMs: 604800000, roundedStepMs: 86400000, display: '1d' },
+  { maxMs: ONE_WEEK_IN_MS, roundedStepMs: ONE_DAY_IN_MS, display: '1d' },
   // max: 3w
-  { maxMs: 1814400000, roundedStepMs: 604800000, display: '1w' },
+  { maxMs: ONE_WEEK_IN_MS * 3, roundedStepMs: ONE_WEEK_IN_MS, display: '1w' },
   // max: 6w
-  { maxMs: 3628800000, roundedStepMs: 2592000000, display: '30d' },
+  { maxMs: ONE_WEEK_IN_MS * 6, roundedStepMs: ONE_DAY_IN_MS * 30, display: '30d' },
   // max: 2y
-  { maxMs: 63072000000, roundedStepMs: 31536000000, display: '1y' },
+  { maxMs: ONE_YEAR_IN_MS * 2, roundedStepMs: ONE_YEAR_IN_MS, display: '1y' },
 ];
 
 /**

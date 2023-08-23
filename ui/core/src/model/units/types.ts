@@ -14,6 +14,7 @@
 // Common types needed across individual unit groups and the overall combined
 // units.
 
+import { AbsoluteTimeRange, DurationString } from '../time';
 import { UnitOptions } from './units';
 
 export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes'] as const;
@@ -65,4 +66,14 @@ export interface UnitTestCase {
   value: number;
   unit: UnitOptions;
   expected: string;
+}
+
+export interface IntervalTestCase {
+  timeRange: AbsoluteTimeRange;
+  expected: Duration;
+}
+
+export interface FormatTestCase {
+  duration: Duration;
+  expected: DurationString;
 }

@@ -83,7 +83,7 @@ export enum PersesTimeToIntlTime {
 const TIME_UNITS_IN_SECONDS: Record<TimeUnitKind, number> = {
   Years: 31536000, // 365 days
   Months: 2592000, // 30 days
-  Weeks: 604800,
+  Weeks: 604800, // 7 days
   Days: 86400,
   Hours: 3600,
   Minutes: 60,

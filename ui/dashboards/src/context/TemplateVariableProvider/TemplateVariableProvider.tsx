@@ -32,8 +32,8 @@ import {
   VariableValue,
   VariableDefinition,
   formatDuration,
+  intervalToPrometheusDuration,
 } from '@perses-dev/core';
-import { intervalToDuration } from 'date-fns';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -209,7 +209,7 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
     kind: 'BuiltinVariable',
     spec: {
       name: '__range',
-      value: () => formatDuration(intervalToDuration(absoluteTimeRange)),
+      value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
       display: {
         name: '__range',
         description: 'The range for the current dashboard in human readable format',
