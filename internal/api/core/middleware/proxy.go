@@ -28,6 +28,7 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -142,6 +143,7 @@ func newProxy(spec v1.DatasourceSpec, path string) (proxy, error) {
 
 type httpProxy struct {
 	config *datasourceHTTP.Config
+	secret *v1.SecretSpec
 	path   string
 }
 
@@ -176,7 +178,11 @@ func (h *httpProxy) serve(c echo.Context) error {
 		proxyErr = err
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues
-	reverseProxy.Transport = h.prepareTransport()
+	var transportErr error
+	reverseProxy.Transport, transportErr = h.prepareTransport()
+	if transportErr != nil {
+		return transportErr
+	}
 	// Reverse proxy request.
 	reverseProxy.ServeHTTP(res, req)
 	// Return any error handled during proxying request.
@@ -205,10 +211,29 @@ func (h *httpProxy) prepareRequest(c echo.Context) {
 			req.Header.Set(k, v)
 		}
 	}
+	h.setupAuthentication(req)
 }
 
-func (h *httpProxy) prepareTransport() *http.Transport {
-	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+func (h *httpProxy) setupAuthentication(req *http.Request) {
+	if h.secret == nil {
+		return
+	}
+	basicAuth := h.secret.BasicAuth
+	if basicAuth != nil {
+		req.SetBasicAuth(basicAuth.Username, basicAuth.Password)
+	}
+	auth := h.secret.Authorization
+	if auth != nil {
+		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, auth.Credentials))
+	}
+}
+
+func (h *httpProxy) prepareTransport() (*http.Transport, error) {
+	tlsConfig, err := h.prepareTLSConfig()
+	if err != nil {
+		logrus.WithError(err).Error("unable to build the tls config")
+		return nil, echo.NewHTTPError(http.StatusBadGateway, "unable build the tls config")
+	}
 	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -219,5 +244,24 @@ func (h *httpProxy) prepareTransport() *http.Transport {
 		IdleConnTimeout:     90 * time.Second,
 		ForceAttemptHTTP2:   true,
 		TLSClientConfig:     tlsConfig,
+	}, nil
+}
+
+func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
+	if h.secret == nil {
+		return &tls.Config{MinVersion: tls.VersionTLS10}, nil
 	}
+	cfg := &promConfig.TLSConfig{
+		CA:                 h.secret.TLSConfig.CA,
+		Cert:               h.secret.TLSConfig.Cert,
+		Key:                promConfig.Secret(h.secret.TLSConfig.Key),
+		CAFile:             h.secret.TLSConfig.CAFile,
+		CertFile:           h.secret.TLSConfig.CertFile,
+		KeyFile:            h.secret.TLSConfig.KeyFile,
+		ServerName:         h.secret.TLSConfig.ServerName,
+		InsecureSkipVerify: h.secret.TLSConfig.InsecureSkipVerify,
+		MinVersion:         promConfig.TLSVersions["TLS10"],
+		MaxVersion:         promConfig.TLSVersions["TLS13"],
+	}
+	return promConfig.NewTLSConfig(cfg)
 }
