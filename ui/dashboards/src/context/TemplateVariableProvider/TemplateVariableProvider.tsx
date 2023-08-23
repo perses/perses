@@ -26,7 +26,14 @@ import {
   useTimeRange,
   BuiltinVariables,
 } from '@perses-dev/plugin-system';
-import { DEFAULT_ALL_VALUE as ALL_VALUE, VariableName, VariableValue, VariableDefinition } from '@perses-dev/core';
+import {
+  DEFAULT_ALL_VALUE as ALL_VALUE,
+  VariableName,
+  VariableValue,
+  VariableDefinition,
+  formatDuration,
+  intervalToPrometheusDuration,
+} from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -194,6 +201,42 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
       display: {
         name: '__to',
         description: 'End time of the current time range in unix millisecond epoch',
+        hidden: true,
+      },
+    },
+  };
+  allBuiltinVariables['__range'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__range',
+      value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
+      display: {
+        name: '__range',
+        description: 'The range for the current dashboard in human readable format',
+        hidden: true,
+      },
+    },
+  };
+  allBuiltinVariables['__range_s'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__range_s',
+      value: () => ((absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()) / 1000).toString(),
+      display: {
+        name: '__range_s',
+        description: 'The range for the current dashboard in second',
+        hidden: true,
+      },
+    },
+  };
+  allBuiltinVariables['__range_ms'] = {
+    kind: 'BuiltinVariable',
+    spec: {
+      name: '__range_ms',
+      value: () => (absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()).toString(),
+      display: {
+        name: '__range_ms',
+        description: 'The range for the current dashboard in millisecond',
         hidden: true,
       },
     },
