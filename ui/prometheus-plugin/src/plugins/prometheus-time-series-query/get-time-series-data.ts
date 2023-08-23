@@ -29,8 +29,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   spec,
   context
 ) => {
-  // Register timeseries specific builtin variables
-
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     // Do not make a request to the backend, instead return an empty TimeSeriesData
     return { series: [] };
@@ -50,7 +48,6 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   end = alignedEnd;
 
   // Replace template variable placeholders in PromQL query
-
   let query = spec.query.replace('$__rate_interval', `15s`);
   query = replaceTemplateVariables(query, context.variableState);
 
