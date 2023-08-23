@@ -156,8 +156,8 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               label="Name"
               value={state.metadata.name}
               InputProps={{
-                disabled: !isReadonly && action !== 'create',
-                readOnly: isReadonly,
+                disabled: action === 'update',
+                readOnly: action === 'read',
               }}
               helperText={validation.name}
               onChange={(v) => {

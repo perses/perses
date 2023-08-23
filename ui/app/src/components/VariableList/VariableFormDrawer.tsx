@@ -60,8 +60,15 @@ export function VariableFormDrawer<T extends Variable>(props: VariableFormDrawer
 
   const initialTimeRange = useInitialTimeRange('1h');
 
+  // When user clicks out of the drawer, do not close it, just do nothing
+  // This is a quick-win solution to avoid losing draft changes
+  // -> TODO find a way to enable closing by clicking-out, with a discard confirmation modal popping up
+  const handleClickOut = () => {
+    /* do nothing */
+  };
+
   return (
-    <Drawer isOpen={isOpen} onClose={onClose} data-testid="variable-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
           pluginLoader={bundledPluginLoader}

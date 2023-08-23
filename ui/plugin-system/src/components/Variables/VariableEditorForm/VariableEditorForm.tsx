@@ -147,7 +147,8 @@ export function VariableEditForm(props: VariableEditFormProps) {
               value={state.name}
               helperText={validation.name}
               InputProps={{
-                readOnly: action === 'update' || action === 'read',
+                disabled: action === 'update',
+                readOnly: action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {

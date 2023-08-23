@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Datasource, DispatchWithPromise } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
+import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
@@ -34,10 +34,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
 
   // When user clicks out of the drawer, do not close it, just do nothing
   // This is a quick-win solution to avoid losing draft changes
-  // -> TODO allow closing by clicking-out without being too sensitive to missclicks
-  const handleClickOut = useCallback(() => {
-    return;
-  }, []);
+  // -> TODO find a way to enable closing by clicking-out, with a discard confirmation modal popping up
+  const handleClickOut = () => {
+    /* do nothing */
+  };
 
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
