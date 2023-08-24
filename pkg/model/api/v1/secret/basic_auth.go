@@ -19,6 +19,25 @@ import (
 	"os"
 )
 
+// PublicBasicAuth is the public struct of BasicAuth.
+// It's used when the API returns a response to a request
+type PublicBasicAuth struct {
+	Username     string `json:"username" yaml:"username"`
+	Password     Hidden `json:"password,omitempty" yaml:"password,omitempty"`
+	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
+}
+
+func NewPublicBasicAuth(b *BasicAuth) *PublicBasicAuth {
+	if b == nil {
+		return nil
+	}
+	return &PublicBasicAuth{
+		Username:     b.Username,
+		Password:     Hidden(b.Password),
+		PasswordFile: b.PasswordFile,
+	}
+}
+
 type BasicAuth struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`

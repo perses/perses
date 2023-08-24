@@ -42,13 +42,13 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Secret format, received '%T'", entity))
 }
 
-func (s *service) create(entity *v1.Secret) (*v1.Secret, error) {
+func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
-	return entity, nil
+	return v1.NewPublicSecret(entity), nil
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
@@ -58,7 +58,7 @@ func (s *service) Update(entity api.Entity, parameters shared.Parameters) (inter
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Secret format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.Secret, error) {
+func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.PublicSecret, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Secret %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -79,7 +79,7 @@ func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.S
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the Secret %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
-	return entity, nil
+	return v1.NewPublicSecret(entity), nil
 }
 
 func (s *service) Delete(parameters shared.Parameters) error {
@@ -87,9 +87,21 @@ func (s *service) Delete(parameters shared.Parameters) error {
 }
 
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
-	return s.dao.Get(parameters.Project, parameters.Name)
+	scrt, err := s.dao.Get(parameters.Project, parameters.Name)
+	if err != nil {
+		return nil, err
+	}
+	return v1.NewPublicSecret(scrt), nil
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
-	return s.dao.List(q)
+	l, err := s.dao.List(q)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*v1.PublicSecret, 0, len(l))
+	for _, scrt := range l {
+		result = append(result, v1.NewPublicSecret(scrt))
+	}
+	return result, nil
 }
