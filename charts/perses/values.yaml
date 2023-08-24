@@ -2,60 +2,60 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## Override name of the chart used in Kubernetes object names.
-##
+# -- Override name of the chart used in Kubernetes object names.
 nameOverride: ""
 
-## Override fully qualified app name
-##
+# -- Override fully qualified app name
 fullnameOverride: ""
 
 ## Image of Perses
 ##
 image:
+  # -- Perses image repository and name
   name: "persesdev/perses"
-  # Overrides the image tag whose default is the chart appVersion.
+
+  # -- Overrides the image tag whose default is the chart appVersion.
   version: ""
+
+  # -- Default image pull policy
   pullPolicy: IfNotPresent
 
-## Service account for Perses to use.
-## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-##
+# -- Service account for Perses to use.
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
+  # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
-## Expose the Perses service to be accessed from outside the cluster (LoadBalancer service).
-## or access it from within the cluster (ClusterIP service). Set the service type and the port to serve it.
-## ref: http://kubernetes.io/docs/user-guide/services/
-##
+# -- Expose the Perses service to be accessed from outside the cluster (LoadBalancer service).
+# or access it from within the cluster (ClusterIP service). Set the service type and the port to serve it.
 service:
+  # -- Annotations to add to the service
   annotations: {}
+  # -- Labeles to add to the service
   labels: {}
+  # -- Service Type
   type: "ClusterIP"
+  # -- Service Port
   port: 8080
+  # -- Perses running port
   targetPort: 8080
 
-## Statefulset Annotations
-##
+# -- Statefulset Annotations
 annotations: {}
 
-## Number of pod replicas.
-##
+# -- Number of pod replicas.
 replicas: 1
 
-## Log level for Perses be configured in
-##
+# -- Log level for Perses be configured in
+# available options "panic", "error", "warning", "info", "debug", "trace"
 logLevel: info
 
-## Liveness probe configuration
-## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-##
+# -- Liveness probe configuration
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
   enabled: true
   initialDelaySeconds: 10
@@ -64,9 +64,8 @@ livenessProbe:
   successThreshold: 1
   failureThreshold: 5
 
-## Readiness probe configuration
-## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
-##
+# -- Readiness probe configuration
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 readinessProbe:
   enabled: true
   initialDelaySeconds: 5
@@ -75,39 +74,40 @@ readinessProbe:
   successThreshold: 1
   failureThreshold: 5
 
-## Resource limits & requests.
-## Update according to your own use case as these values might be too low for a typical deployment.
-## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-##
+# -- Resource limits & requests.
+# Update according to your own use case as these values might be too low for a typical deployment.
+# ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}
 
-## Perses configuration file
-## ref: https://github.com/perses/perses/blob/main/docs/configuration.md
-##
+# -- Perses configuration file
+# ref: https://github.com/perses/perses/blob/main/docs/configuration.md
 config:
-  ## Annotations for config secret
-  ##
+  # -- Annotations for config secret
   annotations: {}
 
-  ## Configure Perses instance as readonly
-  ##
+  # -- Configure Perses instance as readonly
   readOnly: false
 
+  # -- Schemas paths
   schemas:
     panels_path: "/etc/perses/schemas/panels"
     queries_path: "/etc/perses/schemas/queries"
     datasources_path: "/etc/perses/schemas/datasources"
     variables_path: "/etc/perses/schemas/variables"
 
+  # -- Important dashboards list
   important_dashboards:
     []
     # - project: "perses"
     #   dashboard: "Demo"
 
+  # -- Database config based on data base type
   database:
+    # -- file system configs
     file:
       folder: /etc/perses/storage
       extension: yaml
+    # -- SQL Config
     sql:
       {}
       # user: "user"
@@ -117,61 +117,48 @@ config:
       # db_name: "perses"
       # allow_native_passwords: true
 
-## Persistence parameters
-##
+# -- Persistence parameters
 persistence:
-  ## If disabled it will use a emptydir volume
-  ##
+  # -- If disabled it will use a emptydir volume
   enabled: false
 
-  ## Specify the `storageClass` used to provision the volume
-  ##
+  # -- Specify the `storageClass` used to provision the volume
   storageClass: ""
-  ## PVC Access Modes for data volume
-  ##
+
+  # -- PVC Access Modes for data volume
   accessModes:
     - ReadWriteOnce
-  ## PVC Storage Request for data volume
-  ##
+
+  # -- PVC Storage Request for data volume
   size: 8Gi
-  ## Labels for the PVC
-  ##
+
+  # -- Labels for the PVC
   labels: {}
-  ## Annotations for the PVC
-  ##
+  # -- Annotations for the PVC
   annotations: {}
 
-## Configure the ingress resource that allows you to access Thanos Query Frontend
-## ref: https://kubernetes.io/docs/user-guide/ingress/
-##
+# -- Configure the ingress resource that allows you to access Thanos Query Frontend
+# ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  ## Enable ingress controller resource
-  ##
+  # -- Enable ingress controller resource
   enabled: false
-  ## Default host for the ingress resource
-  ##
+
+  # -- Default host for the ingress resource
   hostname: perses.local
-  ## IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
-  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
-  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
-  ##
+
+  # -- IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  # This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  # ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  #
   ingressClassName: ""
-  ## Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
-  ## For a full list of possible ingress annotations, please see
-  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
-  ## Use this parameter to set the required annotations for cert-manager, see
-  ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
-  ##
-  ## e.g:
-  ## annotations:
-  ##   kubernetes.io/ingress.class: nginx
-  ##   cert-manager.io/cluster-issuer: cluster-issuer-name
-  ##
+
+  # -- Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+  # For a full list of possible ingress annotations, please see
+  # ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
   annotations: {}
 
-  ## Ingress path
-  ##
+  # -- Ingress path
   path: /
-  ## Ingress path type
-  ##
+
+  # -- Ingress path type
   pathType: Prefix

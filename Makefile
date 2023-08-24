@@ -187,3 +187,8 @@ update-npm-deps:
 upgrade-npm-deps:
 	@echo ">> upgrading npm dependencies"
 	./scripts/npm-deps.sh "latest"
+
+.PHONY: update-helm-readme
+update-helm-readme:
+	@docker run --rm --volume "$$(pwd)/charts/perses:/helm-docs" -u $$(id -u) jnorwood/helm-docs:latest
+	@make fmt-docs
