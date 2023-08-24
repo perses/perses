@@ -41,8 +41,7 @@ var (
 
 // TODO cache the request to the database
 
-func extractGlobalDatasourceAndPath(ctx echo.Context) (dtsName string, path string, err error) {
-	requestPath := ctx.Request().URL.Path
+func extractGlobalDatasourceAndPath(requestPath string) (dtsName string, path string, err error) {
 	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 1 {
 		return "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
@@ -51,14 +50,13 @@ func extractGlobalDatasourceAndPath(ctx echo.Context) (dtsName string, path stri
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
 	path = "/"
-	if len(matchingGroups[0]) > 2 {
+	if len(matchingGroups[0]) > 2 && len(matchingGroups[0][2]) > 0 {
 		path = matchingGroups[0][2]
 	}
 	return
 }
 
-func extractProjectDatasourcePath(ctx echo.Context) (projectName string, dtsName string, path string, err error) {
-	requestPath := ctx.Request().URL.Path
+func extractProjectDatasourceAndPath(requestPath string) (projectName string, dtsName string, path string, err error) {
 	matchingGroups := projectProxyMatcher.FindAllStringSubmatch(requestPath, -1)
 	if len(matchingGroups) > 1 || len(matchingGroups[0]) <= 2 {
 		return "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
@@ -68,7 +66,7 @@ func extractProjectDatasourcePath(ctx echo.Context) (projectName string, dtsName
 	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
 	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
 	path = "/"
-	if len(matchingGroups[0]) > 3 {
+	if len(matchingGroups[0]) > 3 && len(matchingGroups[0][3]) > 0 {
 		path = matchingGroups[0][3]
 	}
 	return
@@ -100,7 +98,7 @@ func (e *Proxy) Proxy() echo.MiddlewareFunc {
 }
 
 func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
-	dtsName, path, err := extractGlobalDatasourceAndPath(ctx)
+	dtsName, path, err := extractGlobalDatasourceAndPath(ctx.Request().URL.Path)
 	if err != nil {
 		return err
 	}
@@ -118,7 +116,7 @@ func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
 }
 
 func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
-	projectName, dtsName, path, err := extractProjectDatasourcePath(ctx)
+	projectName, dtsName, path, err := extractProjectDatasourceAndPath(ctx.Request().URL.Path)
 	if err != nil {
 		return err
 	}
