@@ -38,12 +38,12 @@ func New(sch schemas.Schemas, dashboard dashboard.Service) *Endpoint {
 }
 
 func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	path := "/validate"
-	g.POST(fmt.Sprintf("%s/%s", path, shared.PathDashboard), e.ValidateDashboard)
-	g.POST(fmt.Sprintf("%s/%s", path, shared.PathDatasource), e.ValidateDatasource)
-	g.POST(fmt.Sprintf("%s/%s", path, shared.PathGlobalDatasource), e.ValidateGlobalDatasource)
-	g.POST(fmt.Sprintf("%s/%s", path, shared.PathVariable), e.ValidateVariable)
-	g.POST(fmt.Sprintf("%s/%s", path, shared.PathGlobalVariable), e.ValidateGlobalVariable)
+	group := g.Group("/validate")
+	group.POST(fmt.Sprintf("/%s", shared.PathDashboard), e.ValidateDashboard)
+	group.POST(fmt.Sprintf("/%s", shared.PathDatasource), e.ValidateDatasource)
+	group.POST(fmt.Sprintf("/%s", shared.PathGlobalDatasource), e.ValidateGlobalDatasource)
+	group.POST(fmt.Sprintf("/%s", shared.PathVariable), e.ValidateVariable)
+	group.POST(fmt.Sprintf("/%s", shared.PathGlobalVariable), e.ValidateGlobalVariable)
 }
 
 func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {

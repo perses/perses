@@ -26,10 +26,10 @@ type Parameters struct {
 	Name    string
 }
 
-func extractParameters(ctx echo.Context) Parameters {
+func ExtractParameters(ctx echo.Context) Parameters {
 	return Parameters{
 		Project: GetProjectParameter(ctx),
-		Name:    getNameParameter(ctx),
+		Name:    GetNameParameter(ctx),
 	}
 }
 
@@ -77,7 +77,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
 		return err
@@ -86,7 +86,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.service.Delete(parameters); err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	entity, err := t.service.Get(parameters)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	result, err := t.service.List(q, parameters)
 	if err != nil {
 		return err

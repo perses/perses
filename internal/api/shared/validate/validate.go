@@ -15,8 +15,9 @@ package validate
 
 import (
 	"fmt"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"regexp"
+
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 
 	"github.com/perses/perses/internal/api/shared/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -52,9 +53,7 @@ func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.S
 		return err
 	}
 	if list != nil {
-		if err := validateUnicityOfDefaultDTS(entity, list); err != nil {
-			return err
-		}
+		return validateUnicityOfDefaultDTS(entity, list)
 	}
 	return nil
 }
@@ -63,10 +62,7 @@ func Variable(entity modelV1.VariableInterface, sch schemas.Schemas) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
 	}
-	if err := sch.ValidateGlobalVariable(entity.GetVarSpec()); err != nil {
-		return err
-	}
-	return nil
+	return sch.ValidateGlobalVariable(entity.GetVarSpec())
 }
 
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
