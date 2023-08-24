@@ -26,9 +26,9 @@ import {
   capitalize,
 } from '@mui/material';
 import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
-import { PluginEditor } from '@perses-dev/plugin-system';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
-import { useIsReadonly } from '../../model/config-client';
+import { PluginEditor } from '../PluginEditor';
+import { Action } from '../../utils';
 
 // TODO: Replace with proper validation library
 function getValidation(state: Datasource) {
@@ -74,8 +74,6 @@ function getInitialState<T extends Datasource>(datasource: T): T {
   };
 }
 
-export type Action = 'read' | 'create' | 'update';
-
 interface DatasourceEditorFormProps<T extends Datasource> {
   initialDatasource: T;
   action: Action;
@@ -90,7 +88,6 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   const patchedInitialDatasource = getInitialState(initialDatasource);
   const [state, setState] = useImmer(patchedInitialDatasource);
   const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
-  const isReadonly = useIsReadonly();
   const validation = useMemo(() => getValidation(state), [state]);
 
   const title = useMemo(() => {
@@ -131,16 +128,16 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
       >
         <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {!isReadonly && (
+          {action !== 'read' && (
             <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
               {capitalize(action)}
             </Button>
           )}
           <Button color="secondary" variant="outlined" onClick={handleCancel}>
-            {isReadonly ? 'Close' : 'Cancel'}
+            {action === 'read' ? 'Close' : 'Cancel'}
           </Button>
           {onDelete && (
-            <Button disabled={isReadonly} color="error" variant="outlined" onClick={onDelete}>
+            <Button disabled={action === 'read'} color="error" variant="outlined" onClick={onDelete}>
               Delete
             </Button>
           )}
@@ -173,7 +170,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               label="Display Label"
               value={state.spec.display?.name}
               InputProps={{
-                readOnly: isReadonly,
+                readOnly: action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {
@@ -190,7 +187,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               label="Description"
               value={state.spec.display?.description}
               InputProps={{
-                readOnly: isReadonly,
+                readOnly: action === 'read',
               }}
               onChange={(v) => {
                 setState((draft) => {
@@ -207,7 +204,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                 control={
                   <Switch
                     checked={state.spec.default}
-                    readOnly={isReadonly}
+                    readOnly={action === 'read'}
                     onChange={(v) => {
                       setState((draft) => {
                         draft.spec.default = v.target.checked;
@@ -232,7 +229,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           pluginType="Datasource"
           pluginKindLabel="Source"
           value={state.spec.plugin}
-          isReadonly={isReadonly}
+          isReadonly={action === 'read'}
           onChange={(v) => {
             setState((draft) => {
               draft.spec.plugin = v;

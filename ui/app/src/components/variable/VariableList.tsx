@@ -24,7 +24,7 @@ import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { useIsReadonly } from '../../model/config-client';
 import { DeleteVariableDialog } from '../dialogs';
 import { VariableDataGrid, Row } from './VariableDataGrid';
-import { VariableFormDrawer } from './VariableFormDrawer';
+import { VariableDrawer } from './VariableDrawer';
 
 export interface VariableListProperties<T extends Variable> {
   data: T[];
@@ -44,7 +44,7 @@ export interface VariableListProperties<T extends Variable> {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function VariablesList<T extends Variable>(props: VariableListProperties<T>) {
+export function VariableList<T extends Variable>(props: VariableListProperties<T>) {
   const { data, hideToolbar, isLoading, initialState, onUpdate, onDelete } = props;
 
   const isReadonly = useIsReadonly();
@@ -218,13 +218,13 @@ export function VariablesList<T extends Variable>(props: VariableListProperties<
       </Stack>
       {targetedVariable && (
         <>
-          <VariableFormDrawer
+          <VariableDrawer
             variable={targetedVariable}
             isOpen={isViewVariableFormStateOpened}
             onClose={() => setViewVariableFormStateOpened(false)}
             action="read"
           />
-          <VariableFormDrawer
+          <VariableDrawer
             variable={targetedVariable}
             isOpen={isEditVariableFormStateOpened}
             onChange={(v: T) => onUpdate(v).then(() => setEditVariableFormStateOpened(false))}

@@ -24,10 +24,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
-import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
+import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
-import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
+import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 
@@ -90,7 +90,7 @@ function TabButton(props: TabButtonProps) {
             variant="contained"
             onClick={() => setOpenCreateVariableDrawerState(true)}
           />
-          <VariableFormDrawer
+          <VariableDrawer
             variable={{
               kind: 'GlobalVariable',
               metadata: {

@@ -44,7 +44,7 @@ import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
-import { Action, VariableEditForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import { Action, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
@@ -179,7 +179,7 @@ export function VariableEditor(props: {
   return (
     <>
       {currentEditingVariableDefinition && (
-        <VariableEditForm
+        <VariableEditorForm
           initialVariableDefinition={currentEditingVariableDefinition}
           onChange={(definition) => {
             setVariableDefinitions((draft) => {

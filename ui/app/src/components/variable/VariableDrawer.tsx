@@ -20,12 +20,12 @@ import {
   PluginRegistry,
   TimeRangeProvider,
   useInitialTimeRange,
-  VariableEditForm,
+  VariableEditorForm,
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 
-interface VariableFormDrawerProps<T extends Variable> {
+interface VariableDrawerProps<T extends Variable> {
   variable: T;
   isOpen: boolean;
   onChange?: Dispatch<T>;
@@ -33,7 +33,7 @@ interface VariableFormDrawerProps<T extends Variable> {
   action: Action;
 }
 
-export function VariableFormDrawer<T extends Variable>(props: VariableFormDrawerProps<T>) {
+export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>) {
   const { variable, isOpen, onChange, onClose, action } = props;
   const projectName = getVariableProject(variable);
 
@@ -80,7 +80,7 @@ export function VariableFormDrawer<T extends Variable>(props: VariableFormDrawer
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
             <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
               <TemplateVariableProvider initialVariableDefinitions={[]}>
-                <VariableEditForm
+                <VariableEditorForm
                   initialVariableDefinition={variableDef}
                   onChange={handleChange}
                   onCancel={onClose}

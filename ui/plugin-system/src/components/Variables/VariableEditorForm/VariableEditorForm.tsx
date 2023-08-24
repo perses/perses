@@ -32,6 +32,7 @@ import {
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
+import { Action } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
@@ -59,16 +60,14 @@ function FallbackPreview() {
   return <div>Error previewing values</div>;
 }
 
-export type Action = 'create' | 'read' | 'update';
-
-interface VariableEditFormProps {
+interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
   onChange: (def: VariableDefinition) => void;
   onCancel: () => void;
   action?: Action;
 }
 
-export function VariableEditForm(props: VariableEditFormProps) {
+export function VariableEditorForm(props: VariableEditorFormProps) {
   const { initialVariableDefinition, onChange, onCancel, action = 'update' } = props;
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);

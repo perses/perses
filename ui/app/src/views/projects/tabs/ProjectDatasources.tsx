@@ -20,7 +20,7 @@ import {
   useDeleteDatasourceMutation,
   useUpdateDatasourceMutation,
 } from '../../../model/datasource-client';
-import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import { DatasourceList } from '../../../components/datasource/DatasourceList';
 
 interface ProjectDatasourcesProps {
   projectName: string;

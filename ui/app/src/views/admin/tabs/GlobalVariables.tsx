@@ -16,7 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { getVariableExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
-import { VariablesList } from '../../../components/VariableList/VariablesList';
+import { VariableList } from '../../../components/variable/VariableList';
 import {
   useDeleteGlobalVariableMutation,
   useGlobalVariableList,
@@ -83,7 +83,7 @@ export function GlobalVariables(props: GlobalVariablesProps) {
 
   return (
     <Card id={id}>
-      <VariablesList
+      <VariableList
         data={data ?? []}
         isLoading={isLoading}
         onUpdate={handleVariableUpdate}
