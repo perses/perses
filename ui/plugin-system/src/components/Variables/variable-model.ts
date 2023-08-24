@@ -98,6 +98,6 @@ export function getVariableValuesKey(v: VariableStateMap) {
 }
 
 export const VARIABLE_TYPES = [
-  { label: 'list', kind: 'ListVariable' },
+  { label: 'List', kind: 'ListVariable' },
   { label: 'Text', kind: 'TextVariable' },
 ] as const;

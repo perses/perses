@@ -84,6 +84,46 @@ export function ViewDashboard(props: ViewDashboardProps) {
         },
       },
     } as BuiltinVariableDefinition,
+    // TODO: retrieve plugin specific builtin var definitions automatically from loaded plugins
+    __interval: {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__interval',
+        value: () => '$__interval', // will be overriden by supported plugins
+        display: {
+          name: '__interval',
+          description:
+            'Interval that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval. RESERVED TO PROMETHEUS QUERIES ONLY!',
+          hidden: true,
+        },
+      },
+    },
+    __interval_ms: {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__interval_ms',
+        value: () => '$__interval_ms', // will be overriden by supported plugins
+        display: {
+          name: '__interval_ms',
+          description:
+            'Interval in millisecond that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval. RESERVED TO PROMETHEUS QUERIES ONLY!',
+          hidden: true,
+        },
+      },
+    },
+    __rate_interval: {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__rate_interval',
+        value: () => '$__rate_interval', // will be overriden by supported plugins
+        display: {
+          name: '__rate_interval',
+          description:
+            "Interval at least four times the value of the scrape interval, it avoid problems specific to Prometheus when using 'rate' and 'increase' functions. RESERVED TO PROMETHEUS QUERIES ONLY!",
+          hidden: true,
+        },
+      },
+    },
   };
 
   return (

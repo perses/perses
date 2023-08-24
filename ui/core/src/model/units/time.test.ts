@@ -315,6 +315,18 @@ const FORMAT_DURATION_TESTS: FormatTestCase[] = [
     } as Duration,
     expected: '1d',
   },
+  {
+    duration: {
+      years: 0,
+      months: 0,
+      weeks: 0,
+      days: 1,
+      hours: 0,
+      minutes: 0,
+      seconds: 0.255,
+    } as Duration,
+    expected: '1d 255ms',
+  },
 ];
 describe('formatDuration', () => {
   it.each(FORMAT_DURATION_TESTS)(
