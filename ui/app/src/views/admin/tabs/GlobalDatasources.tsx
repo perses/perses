@@ -15,7 +15,7 @@ import { Card } from '@mui/material';
 import { getDatasourceDisplayName, GlobalDatasource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
-import { DatasourceList } from '../../../components/DatasourceList/DatasourceList';
+import { DatasourceList } from '../../../components/datasource/DatasourceList';
 import {
   useDeleteGlobalDatasourceMutation,
   useGlobalDatasourceList,

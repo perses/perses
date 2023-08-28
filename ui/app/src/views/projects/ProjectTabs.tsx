@@ -27,8 +27,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog } from '../../components/dialogs';
-import { VariableFormDrawer } from '../../components/VariableList/VariableFormDrawer';
-import { DatasourceDrawer } from '../../components/DatasourceList/DatasourceDrawer';
+import { VariableDrawer } from '../../components/variable/VariableDrawer';
+import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
@@ -111,7 +111,7 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton text="Add Variable" variant="contained" onClick={() => setOpenCreateVariableDrawerState(true)} />
-          <VariableFormDrawer
+          <VariableDrawer
             variable={{
               kind: 'Variable',
               metadata: {

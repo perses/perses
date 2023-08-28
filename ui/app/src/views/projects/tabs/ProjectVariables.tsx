@@ -15,7 +15,7 @@ import { Card } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { getVariableExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { VariablesList } from '../../../components/VariableList/VariablesList';
+import { VariableList } from '../../../components/variable/VariableList';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { useDeleteVariableMutation, useUpdateVariableMutation, useVariableList } from '../../../model/variable-client';
 
@@ -81,7 +81,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
 
   return (
     <Card id={id}>
-      <VariablesList
+      <VariableList
         data={data ?? []}
         isLoading={isLoading}
         onUpdate={handleVariableUpdate}

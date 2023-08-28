@@ -14,10 +14,9 @@
 import { Datasource, DispatchWithPromise } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
+import { Action, DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
-import { Action, DatasourceEditorForm } from './DatasourceEditorForm';
 
 interface DatasourceDrawerProps<T extends Datasource> {
   datasource: T;
