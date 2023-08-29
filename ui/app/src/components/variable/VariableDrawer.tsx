@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition, Variable, getVariableProject } from '@perses-dev/core';
+import { DispatchWithPromise, VariableDefinition, Variable, getVariableProject } from '@perses-dev/core';
 import React, { Dispatch, DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
 import { DatasourceStoreProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -24,18 +24,21 @@ import {
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
+import { DeleteVariableDialog } from '../dialogs/DeleteVariableDialog';
 
 interface VariableDrawerProps<T extends Variable> {
   variable: T;
   isOpen: boolean;
-  onChange?: Dispatch<T>;
-  onClose: DispatchWithoutAction;
   action: Action;
+  onSave: Dispatch<T>;
+  onDelete?: DispatchWithPromise<T>;
+  onClose: DispatchWithoutAction;
 }
 
 export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>) {
-  const { variable, isOpen, onChange, onClose, action } = props;
+  const { variable, isOpen, action, onSave, onDelete, onClose } = props;
   const projectName = getVariableProject(variable);
+  const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
   useEffect(() => {
@@ -50,19 +53,18 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
     return result;
   }, [variable]);
 
-  const handleChange = (definition: VariableDefinition) => {
+  const handleSave = (definition: VariableDefinition) => {
     variable.spec = definition;
     variable.metadata.name = definition.spec.name;
-    if (onChange) {
-      onChange(variable);
+    if (onSave) {
+      onSave(variable);
     }
   };
 
   const initialTimeRange = useInitialTimeRange('1h');
 
-  // When user clicks out of the drawer, do not close it, just do nothing
-  // This is a quick-win solution to avoid losing draft changes
-  // -> TODO find a way to enable closing by clicking-out, with a discard confirmation modal popping up
+  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
+  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
   const handleClickOut = () => {
     /* do nothing */
   };
@@ -82,14 +84,28 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
               <TemplateVariableProvider initialVariableDefinitions={[]}>
                 <VariableEditorForm
                   initialVariableDefinition={variableDef}
-                  onChange={handleChange}
-                  onCancel={onClose}
-                  action={action}
+                  initialAction={action}
+                  onSave={handleSave}
+                  onClose={onClose}
+                  onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
                 />
               </TemplateVariableProvider>
             </TimeRangeProvider>
           </DatasourceStoreProvider>
         </PluginRegistry>
+        {onDelete && (
+          <DeleteVariableDialog
+            open={isDeleteVariableDialogStateOpened}
+            onClose={() => setDeleteVariableDialogStateOpened(false)}
+            onSubmit={(v) =>
+              onDelete(v).then(() => {
+                setDeleteVariableDialogStateOpened(false);
+                onClose();
+              })
+            }
+            variable={variable}
+          />
+        )}
       </ErrorBoundary>
     </Drawer>
   );

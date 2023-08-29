@@ -13,18 +13,7 @@
 
 import { useImmer } from 'use-immer';
 import { Display, Datasource } from '@perses-dev/core';
-import {
-  Box,
-  Button,
-  Divider,
-  FormControlLabel,
-  Grid,
-  Stack,
-  Switch,
-  TextField,
-  Typography,
-  capitalize,
-} from '@mui/material';
+import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { PluginEditor } from '../PluginEditor';
@@ -76,18 +65,19 @@ function getInitialState<T extends Datasource>(datasource: T): T {
 
 interface DatasourceEditorFormProps<T extends Datasource> {
   initialDatasource: T;
-  action: Action;
+  initialAction: Action;
   onSave: Dispatch<T>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
-  const { initialDatasource, action, onSave, onClose, onDelete } = props;
+  const { initialDatasource, initialAction, onSave, onClose, onDelete } = props;
 
   const patchedInitialDatasource = getInitialState(initialDatasource);
   const [state, setState] = useImmer(patchedInitialDatasource);
-  const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
+  const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
+  const [action, setAction] = useState(initialAction);
   const validation = useMemo(() => getValidation(state), [state]);
 
   const title = useMemo(() => {
@@ -111,11 +101,12 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   // When the user clicks on cancel, ask for discard approval if anything was changed
   const handleCancel = useCallback(() => {
     if (JSON.stringify(patchedInitialDatasource) !== JSON.stringify(state)) {
-      setDiscardDialogStateOpened(true);
+      setDiscardDialogOpened(true);
     } else {
       onClose();
     }
-  }, [state, patchedInitialDatasource, setDiscardDialogStateOpened, onClose]);
+  }, [state, patchedInitialDatasource, setDiscardDialogOpened, onClose]);
+
   return (
     <>
       <Box
@@ -128,18 +119,39 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
       >
         <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action !== 'read' && (
-            <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
-              {capitalize(action)}
-            </Button>
+          {action === 'read' && (
+            <>
+              <Button disabled={!validation.isValid} variant="contained" onClick={() => setAction('update')}>
+                Edit
+              </Button>
+              <Button color="error" variant="outlined" onClick={onDelete}>
+                Delete
+              </Button>
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={(theme) => ({
+                  borderColor: theme.palette.grey['500'],
+                  '&.MuiDivider-root': {
+                    marginLeft: 2,
+                    marginRight: 1,
+                  },
+                })}
+              />
+              <Button color="secondary" variant="outlined" onClick={onClose}>
+                Close
+              </Button>
+            </>
           )}
-          <Button color="secondary" variant="outlined" onClick={handleCancel}>
-            {action === 'read' ? 'Close' : 'Cancel'}
-          </Button>
-          {onDelete && (
-            <Button disabled={action === 'read'} color="error" variant="outlined" onClick={onDelete}>
-              Delete
-            </Button>
+          {action !== 'read' && (
+            <>
+              <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
+                Save
+              </Button>
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </>
           )}
         </Stack>
       </Box>
@@ -206,6 +218,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     checked={state.spec.default}
                     readOnly={action === 'read'}
                     onChange={(v) => {
+                      if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                       setState((draft) => {
                         draft.spec.default = v.target.checked;
                       });
@@ -239,10 +252,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
       </Box>
       <DiscardChangesConfirmationDialog
         description="Are you sure you want to discard your changes? Changes cannot be recovered."
-        isOpen={isDiscardDialogStateOpened}
-        onCancel={() => setDiscardDialogStateOpened(false)}
+        isOpen={isDiscardDialogOpened}
+        onCancel={() => setDiscardDialogOpened(false)}
         onDiscardChanges={() => {
-          setDiscardDialogStateOpened(false);
+          setDiscardDialogOpened(false);
           onClose();
         }}
       />

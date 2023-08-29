@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,7 +27,6 @@ import {
   ClickAwayListener,
   Divider,
   Select,
-  capitalize,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
@@ -62,18 +61,21 @@ function FallbackPreview() {
 
 interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
-  onChange: (def: VariableDefinition) => void;
-  onCancel: () => void;
-  action?: Action;
+  initialAction: Action;
+  onSave: (def: VariableDefinition) => void;
+  onClose: () => void;
+  onDelete?: DispatchWithoutAction;
 }
 
 export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, onChange, onCancel, action = 'update' } = props;
+  const { initialVariableDefinition, initialAction, onSave, onClose, onDelete } = props;
+
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);
   const validation = useMemo(() => getValidation(state), [state]);
-  const [isDiscardDialogStateOpened, setDiscardDialogStateOpened] = useState<boolean>(false);
+  const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState(0);
+  const [action, setAction] = useState(initialAction);
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);
@@ -100,12 +102,12 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   const handleCancel = useCallback(() => {
-    if (action === 'create' || (action === 'update' && JSON.stringify(initialState) !== JSON.stringify(state))) {
-      setDiscardDialogStateOpened(true);
+    if (JSON.stringify(initialState) !== JSON.stringify(state)) {
+      setDiscardDialogOpened(true);
     } else {
-      onCancel();
+      onClose();
     }
-  }, [state, initialState, action, setDiscardDialogStateOpened, onCancel]);
+  }, [state, initialState, setDiscardDialogOpened, onClose]);
 
   return (
     <>
@@ -119,20 +121,46 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
       >
         <Typography variant="h2">{title}</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action !== 'read' && (
-            <Button
-              disabled={!validation.isValid}
-              variant="contained"
-              onClick={() => {
-                onChange(getVariableDefinitionFromState(state));
-              }}
-            >
-              {capitalize(action)}
-            </Button>
+          {action === 'read' && (
+            <>
+              <Button disabled={!validation.isValid} variant="contained" onClick={() => setAction('update')}>
+                Edit
+              </Button>
+              <Button color="error" variant="outlined" onClick={onDelete}>
+                Delete
+              </Button>
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={(theme) => ({
+                  borderColor: theme.palette.grey['500'],
+                  '&.MuiDivider-root': {
+                    marginLeft: 2,
+                    marginRight: 1,
+                  },
+                })}
+              />
+              <Button color="secondary" variant="outlined" onClick={onClose}>
+                Close
+              </Button>
+            </>
           )}
-          <Button color="secondary" variant="outlined" onClick={handleCancel}>
-            {action === 'read' ? 'Close' : 'Cancel'}
-          </Button>
+          {action !== 'read' && (
+            <>
+              <Button
+                disabled={!validation.isValid}
+                variant="contained"
+                onClick={() => {
+                  onSave(getVariableDefinitionFromState(state));
+                }}
+              >
+                Save
+              </Button>
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </>
+          )}
         </Stack>
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
@@ -365,13 +393,13 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
       </Box>
       <DiscardChangesConfirmationDialog
         description="Are you sure you want to discard these changes? Changes cannot be recovered."
-        isOpen={isDiscardDialogStateOpened}
+        isOpen={isDiscardDialogOpened}
         onCancel={() => {
-          setDiscardDialogStateOpened(false);
+          setDiscardDialogOpened(false);
         }}
         onDiscardChanges={() => {
-          setDiscardDialogStateOpened(false);
-          onCancel();
+          setDiscardDialogOpened(false);
+          onClose();
         }}
       />
     </>

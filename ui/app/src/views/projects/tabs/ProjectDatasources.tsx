@@ -42,9 +42,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       return new Promise((resolve, reject) => {
         updateDatasourceMutation.mutate(datasource, {
           onSuccess: (updatedDatasource: ProjectDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
-            );
+            successSnackbar(`Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`);
             resolve();
           },
           onError: (err) => {
@@ -63,9 +61,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       return new Promise((resolve, reject) => {
         deleteDatasourceMutation.mutate(datasource, {
           onSuccess: (deletedDatasource: ProjectDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`
-            );
+            successSnackbar(`Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`);
             resolve();
           },
           onError: (err) => {
@@ -92,6 +88,8 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
             columnVisibilityModel: {
               project: false,
               version: false,
+              createdAt: false,
+              updatedAt: false,
             },
           },
         }}

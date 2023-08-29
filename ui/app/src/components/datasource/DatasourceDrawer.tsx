@@ -31,9 +31,8 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
   const { datasource, isOpen, action, onSave, onClose, onDelete } = props;
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
 
-  // When user clicks out of the drawer, do not close it, just do nothing
-  // This is a quick-win solution to avoid losing draft changes
-  // -> TODO find a way to enable closing by clicking-out, with a discard confirmation modal popping up
+  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
+  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
   const handleClickOut = () => {
     /* do nothing */
   };
@@ -52,10 +51,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           {isOpen && (
             <DatasourceEditorForm
               initialDatasource={datasource}
-              action={action}
+              initialAction={action}
               onSave={onSave}
               onClose={onClose}
-              onDelete={action == 'update' && onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
             />
           )}
         </PluginRegistry>

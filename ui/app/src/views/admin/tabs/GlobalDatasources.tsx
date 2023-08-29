@@ -90,6 +90,8 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
             columnVisibilityModel: {
               project: false,
               version: false,
+              createdAt: false,
+              updatedAt: false,
             },
           },
         }}

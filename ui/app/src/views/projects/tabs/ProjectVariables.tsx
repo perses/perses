@@ -45,7 +45,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
         updateVariableMutation.mutate(variable, {
           onSuccess: (updatedVariable: Variable) => {
             successSnackbar(
-              `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully updated`
+              `Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully updated`
             );
             resolve();
           },
@@ -65,7 +65,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: Variable) => {
             successSnackbar(
-              `Global Variable ${getVariableExtendedDisplayName(deletedVariable)} has been successfully deleted`
+              `Variable ${getVariableExtendedDisplayName(deletedVariable)} has been successfully deleted`
             );
             resolve();
           },
