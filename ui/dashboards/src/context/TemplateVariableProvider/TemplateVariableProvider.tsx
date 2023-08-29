@@ -180,7 +180,7 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
     return contextValues;
   }, [originalValues, definitions, externalDefinitions]);
 
-  const allBuiltinVariables = { ...builtinVariables };
+  const allBuiltinVariables = builtinVariables ?? {};
   allBuiltinVariables['__from'] = {
     kind: 'BuiltinVariable',
     spec: {

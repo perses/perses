@@ -13,6 +13,7 @@
 
 import { createContext, useContext } from 'react';
 import { useQuery, useQueries, UseQueryOptions } from '@tanstack/react-query';
+import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadata, PluginType } from '../model';
 
 export interface PluginRegistryContextType {
@@ -81,4 +82,19 @@ type UseListPluginMetadataOptions = Omit<
 export function useListPluginMetadata(pluginType: PluginType, options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
   return useQuery(['listPluginMetadata', pluginType], () => listPluginMetadata(pluginType), options);
+}
+
+export async function usePluginBuiltinVariableDefinitions() {
+  const { getPlugin, listPluginMetadata } = usePluginRegistry();
+
+  const datasources = await listPluginMetadata('Datasource');
+  const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
+  let result: BuiltinVariableDefinition[] = [];
+  for (const kind of datasourceKinds) {
+    const plugin = await getPlugin('Datasource', kind);
+    if (plugin.getBuiltinVariableDefinitions) {
+      result = result.concat(plugin.getBuiltinVariableDefinitions());
+    }
+  }
+  return result;
 }
