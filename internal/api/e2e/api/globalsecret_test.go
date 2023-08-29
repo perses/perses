@@ -24,7 +24,7 @@ import (
 )
 
 func TestMainScenarioGlobalSecret(t *testing.T) {
-	e2eframework.MainTestScenario(t, shared.PathGlobalSecret, func(name string) api.Entity {
+	e2eframework.WriteTestScenario(t, shared.PathGlobalSecret, func(name string) api.Entity {
 		return e2eframework.NewGlobalSecret(name)
 	})
 }
