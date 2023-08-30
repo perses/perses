@@ -91,7 +91,7 @@ export class PanelEditor {
     await openColorPickerButton.click();
   }
 
-  async toggleThresholdModes(mode: 'Absolute' | 'Percent') {
-    await this.container.getByRole('button', { name: mode === 'Percent' ? 'percent' : 'absolute' }).click();
+  async toggleThresholdModes(mode: 'absolute' | 'percent') {
+    await this.container.getByRole('button', { name: mode === 'percent' ? 'Percent' : 'Absolute' }).click();
   }
 }

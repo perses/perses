@@ -145,7 +145,7 @@ describe('ThresholdsEditor', () => {
     userEvent.click(percentageButton);
     expect(onChange).toHaveBeenCalledWith(
       produce(thresholds, (draft) => {
-        draft.mode = 'Percent';
+        draft.mode = 'percent';
       })
     );
 

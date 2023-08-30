@@ -41,7 +41,7 @@ import (
 	show_points?:   "auto" | "always"
 	palette?:       #palette
 	point_radius?:  number & >=0 & <=6
-	stack?:         "all" | "percent" // TODO: Percent option is disabled until support is added
+	stack?:         "all" | "percent" // TODO: percent option is disabled until support is added
 	connect_nulls?: bool
 }
 

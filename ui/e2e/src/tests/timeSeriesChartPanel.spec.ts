@@ -131,7 +131,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
       await panelEditor.addThreshold();
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '50');
-      await panelEditor.toggleThresholdModes('Percent');
+      await panelEditor.toggleThresholdModes('percent');
       await panelEditor.container
         .getByRole('spinbutton', {
           name: 'Max',

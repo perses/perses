@@ -61,7 +61,7 @@ export function ThresholdInput({
           }
         }}
         InputProps={{
-          endAdornment: mode === 'Percent' ? <Box paddingX={1}>%</Box> : undefined,
+          endAdornment: mode === 'percent' ? <Box paddingX={1}>%</Box> : undefined,
         }}
       />
       <IconButton aria-label={`delete threshold ${label}`} size="small" onClick={onDelete}>

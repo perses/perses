@@ -148,7 +148,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
   };
 
   const handleModeChange = (event: React.MouseEvent, value: string): void => {
-    const mode = value === 'Percent' ? 'Percent' : undefined;
+    const mode = value === 'percent' ? 'percent' : undefined;
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
@@ -178,14 +178,14 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
           <ToggleButtonGroup
             exclusive
             disabled={disablePercentMode}
-            value={thresholds?.mode ?? 'Absolute'}
+            value={thresholds?.mode ?? 'absolute'}
             onChange={handleModeChange}
             sx={{ height: '36px', marginLeft: 'auto' }}
           >
-            <ToggleButton aria-label="absolute" value="Absolute" sx={{ fontWeight: 500 }}>
+            <ToggleButton aria-label="absolute" value="absolute" sx={{ fontWeight: 500 }}>
               Absolute
             </ToggleButton>
-            <ToggleButton aria-label="percent" value="Percent" sx={{ fontWeight: 500 }}>
+            <ToggleButton aria-label="percent" value="percent" sx={{ fontWeight: 500 }}>
               Percent
             </ToggleButton>
           </ToggleButtonGroup>

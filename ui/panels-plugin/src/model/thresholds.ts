@@ -34,7 +34,7 @@ export function convertThresholds(
     // color segments must be decimal between 0 and 1
     const segmentMax = 1;
     const valuesArr: number[] = thresholds.steps.map((step: StepOptions) => {
-      if (thresholds.mode === 'Percent') {
+      if (thresholds.mode === 'percent') {
         return step.value / 100;
       }
       return step.value / max;
