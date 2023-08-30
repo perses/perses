@@ -48,6 +48,7 @@ import { Action, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@pers
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
+import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
 function getVariableLabelByKind(kind: string) {
   return VARIABLE_TYPES.find((variableType) => variableType.kind === kind)?.label;
@@ -389,56 +390,7 @@ export function VariableEditor(props: {
                     )
                 )}
               {builtinVariableDefinitions && (
-                <>
-                  <Accordion
-                    sx={(theme) => ({
-                      '.MuiAccordionSummary-root': {
-                        backgroundColor: theme.palette.background.lighter,
-                      },
-                      '.MuiAccordionDetails-root': {
-                        backgroundColor: theme.palette.background.lighter,
-                      },
-                    })}
-                  >
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="builtin" id="builtin">
-                      <Typography variant="h2">
-                        <InfoTooltip
-                          title="Builtin Variables"
-                          description="Variables computed during dashboard rendering."
-                        >
-                          <span>Builtin Variables</span>
-                        </InfoTooltip>
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <TableContainer>
-                        <Table sx={{ minWidth: 650 }} aria-label="table of external variables">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>Name</TableCell>
-                              <TableCell>Source</TableCell>
-                              <TableCell>Description</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {builtinVariableDefinitions.map((v) => (
-                              <TableRow key={v.spec.name}>
-                                <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                                  <VariableName
-                                    name={v.spec.name}
-                                    state={variableState.get({ name: v.spec.name, source: 'builtin' })}
-                                  />
-                                </TableCell>
-                                <TableCell>{v.spec.source}</TableCell>
-                                <TableCell>{v.spec.display?.description ?? ''}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </AccordionDetails>
-                  </Accordion>
-                </>
+                <BuiltinVariableAccordions builtinVariableDefinitions={builtinVariableDefinitions} />
               )}
             </Stack>
           </Box>

@@ -60,7 +60,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__interval',
           description:
-            'Interval that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval. RESERVED TO PROMETHEUS QUERIES ONLY!',
+            'Interval that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
           hidden: true,
         },
       },
@@ -74,7 +74,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__interval_ms',
           description:
-            'Interval in millisecond that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval. RESERVED TO PROMETHEUS QUERIES ONLY!',
+            'Interval in millisecond that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
           hidden: true,
         },
       },
@@ -88,7 +88,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__rate_interval',
           description:
-            "Interval at least four times the value of the scrape interval, it avoid problems specific to Prometheus when using 'rate' and 'increase' functions. RESERVED TO PROMETHEUS QUERIES ONLY!",
+            "Interval at least four times the value of the scrape interval, it avoid problems specific to Prometheus when using 'rate' and 'increase' functions.",
           hidden: true,
         },
       },
