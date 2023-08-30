@@ -16,7 +16,7 @@ import { Locator } from '@playwright/test';
 export class DatasourceEditor {
   readonly container: Locator;
 
-  readonly createButton: Locator;
+  readonly saveButton: Locator;
 
   readonly nameInput: Locator;
   readonly displayLabelInput: Locator;
@@ -27,7 +27,7 @@ export class DatasourceEditor {
   constructor(container: Locator) {
     this.container = container;
 
-    this.createButton = container.getByRole('button', { name: 'Create' });
+    this.saveButton = container.getByRole('button', { name: 'Save' });
 
     this.nameInput = container.getByLabel('Name');
     this.displayLabelInput = container.getByLabel('Display Label');

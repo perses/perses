@@ -77,7 +77,7 @@ test.describe('ProjectView', () => {
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
     await variableEditor.selectSource('Custom List');
-    await variableEditor.createButton.click();
+    await variableEditor.saveButton.click();
 
     await expect(projectPage.variableList).toContainText('$list_var');
   });
@@ -94,7 +94,7 @@ test.describe('ProjectView', () => {
     await datasourceEditor.setDisplayLabel('My personal datasource');
     await datasourceEditor.setDescription('This is a datasource for personal use');
     await datasourceEditor.setDefault(false);
-    await datasourceEditor.createButton.click();
+    await datasourceEditor.saveButton.click();
 
     await expect(projectPage.datasourceList).toContainText('my_ds');
   });
