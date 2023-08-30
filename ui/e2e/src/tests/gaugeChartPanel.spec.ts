@@ -77,7 +77,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await dashboardPage.startEditing();
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
-        await panelEditor.toggleThresholdModes('Percent');
+        await panelEditor.toggleThresholdModes('percent');
         await panelEditor.editThreshold('T1', '50');
         await panelEditor.container.getByLabel('Max').fill('200');
       });

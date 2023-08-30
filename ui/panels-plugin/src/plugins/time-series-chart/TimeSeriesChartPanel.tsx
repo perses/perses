@@ -246,7 +246,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           color: thresholdLineColor,
           value:
             // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
-            thresholds.mode === 'Percent'
+            thresholds.mode === 'percent'
               ? convertPercentThreshold(step.value, timeChartData, y_axis?.max, y_axis?.min)
               : step.value,
         };
