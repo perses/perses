@@ -18,8 +18,8 @@ export class VariableEditor {
   readonly container: Locator;
 
   readonly addVariableButton: Locator;
-  readonly createButton: Locator;
-  readonly updateButton: Locator;
+  readonly saveButton: Locator;
+  readonly addButton: Locator;
   readonly applyButton: Locator;
 
   readonly table: Locator;
@@ -33,8 +33,8 @@ export class VariableEditor {
     this.container = container;
 
     this.addVariableButton = container.getByRole('button', { name: 'Add Variable' });
-    this.createButton = container.getByRole('button', { name: 'Create' });
-    this.updateButton = container.getByRole('button', { name: 'Update' });
+    this.saveButton = container.getByRole('button', { name: 'Save' });
+    this.addButton = container.getByRole('button', { name: 'Add' });
     this.applyButton = container.getByRole('button', { name: 'Apply' });
 
     this.table = container.getByRole('table', {

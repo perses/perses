@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
+import { Action } from '@perses-dev/plugin-system';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -46,7 +47,6 @@ export interface VariableListProperties<T extends Variable> {
  */
 export function VariableList<T extends Variable>(props: VariableListProperties<T>) {
   const { data, hideToolbar, isLoading, initialState, onUpdate, onDelete } = props;
-
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
 
@@ -74,14 +74,15 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
   }, [data]);
 
   const [targetedVariable, setTargetedVariable] = useState<T>();
-  const [isViewVariableFormStateOpened, setViewVariableFormStateOpened] = useState<boolean>(false);
-  const [isEditVariableFormStateOpened, setEditVariableFormStateOpened] = useState<boolean>(false);
-  const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
+  const [action, setAction] = useState<Action>('read');
+  const [isVariableDrawerOpened, setVariableDrawerOpened] = useState<boolean>(false);
+  const [isDeleteVariableDialogOpened, setDeleteVariableDialogOpened] = useState<boolean>(false);
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedVariable(findVariable(name, project));
-      setViewVariableFormStateOpened(true);
+      setAction('read');
+      setVariableDrawerOpened(true);
     },
     [findVariable]
   );
@@ -94,11 +95,12 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
     [infoSnackbar]
   );
 
-  const handleRenameButtonClick = useCallback(
+  const handleEditButtonClick = useCallback(
     (name: string, project?: string) => () => {
       const variable = findVariable(name, project);
       setTargetedVariable(variable);
-      setEditVariableFormStateOpened(true);
+      setAction('update');
+      setVariableDrawerOpened(true);
     },
     [findVariable]
   );
@@ -106,7 +108,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
   const handleDeleteButtonClick = useCallback(
     (name: string, project?: string) => () => {
       setTargetedVariable(findVariable(name, project));
-      setDeleteVariableDialogStateOpened(true);
+      setDeleteVariableDialogOpened(true);
     },
     [findVariable]
   );
@@ -189,7 +191,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
             icon={<PencilIcon />}
             label="Rename"
             disabled={isReadonly}
-            onClick={handleRenameButtonClick(params.row.name, params.row.project)}
+            onClick={handleEditButtonClick(params.row.name, params.row.project)}
           />,
           <GridActionsCellItem
             key={params.id + '-delete'}
@@ -201,7 +203,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
         ],
       },
     ],
-    [isReadonly, handleRenameButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
+    [isReadonly, handleEditButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
   );
 
   return (
@@ -220,21 +222,16 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
         <>
           <VariableDrawer
             variable={targetedVariable}
-            isOpen={isViewVariableFormStateOpened}
-            onClose={() => setViewVariableFormStateOpened(false)}
-            action="read"
-          />
-          <VariableDrawer
-            variable={targetedVariable}
-            isOpen={isEditVariableFormStateOpened}
-            onChange={(v: T) => onUpdate(v).then(() => setEditVariableFormStateOpened(false))}
-            onClose={() => setEditVariableFormStateOpened(false)}
-            action="update"
+            isOpen={isVariableDrawerOpened}
+            action={action}
+            onSave={(v: T) => onUpdate(v).then(() => setVariableDrawerOpened(false))}
+            onDelete={onDelete}
+            onClose={() => setVariableDrawerOpened(false)}
           />
           <DeleteVariableDialog
-            open={isDeleteVariableDialogStateOpened}
-            onClose={() => setDeleteVariableDialogStateOpened(false)}
-            onSubmit={(v) => onDelete(v).then(() => setDeleteVariableDialogStateOpened(false))}
+            open={isDeleteVariableDialogOpened}
+            onClose={() => setDeleteVariableDialogOpened(false)}
+            onSubmit={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
             variable={targetedVariable}
           />
         </>

@@ -50,9 +50,9 @@ function TabButton(props: TabButtonProps) {
   const createDatasourceMutation = useCreateDatasourceMutation(props.projectName);
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
-  const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
-  const [isCreateDatasourceDrawerStateOpened, setCreateDatasourceDrawerStateOpened] = useState(false);
+  const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
+  const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
+  const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
@@ -63,7 +63,7 @@ function TabButton(props: TabButtonProps) {
       createVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
           successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`);
-          setOpenCreateVariableDrawerState(false);
+          setVariableDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -79,7 +79,7 @@ function TabButton(props: TabButtonProps) {
       createDatasourceMutation.mutate(datasource, {
         onSuccess: (createdDatasource: ProjectDatasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setCreateDatasourceDrawerStateOpened(false);
+          setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -94,15 +94,11 @@ function TabButton(props: TabButtonProps) {
     case dashboardsTabIndex:
       return (
         <>
-          <CRUDButton
-            text="Add Dashboard"
-            variant="contained"
-            onClick={() => setOpenCreateDashboardDialogState(true)}
-          />
+          <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setCreateDashboardDialogOpened(true)} />
           <CreateDashboardDialog
-            open={openCreateDashboardDialogState}
+            open={isCreateDashboardDialogOpened}
             projectOptions={[props.projectName]}
-            onClose={() => setOpenCreateDashboardDialogState(false)}
+            onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
           />
         </>
@@ -110,7 +106,7 @@ function TabButton(props: TabButtonProps) {
     case variablesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Variable" variant="contained" onClick={() => setOpenCreateVariableDrawerState(true)} />
+          <CRUDButton text="Add Variable" variant="contained" onClick={() => setVariableDrawerOpened(true)} />
           <VariableDrawer
             variable={{
               kind: 'Variable',
@@ -126,9 +122,9 @@ function TabButton(props: TabButtonProps) {
                 },
               },
             }}
-            isOpen={openCreateVariableDrawerState}
-            onChange={handleVariableCreation}
-            onClose={() => setOpenCreateVariableDrawerState(false)}
+            isOpen={isVariableDrawerOpened}
+            onSave={handleVariableCreation}
+            onClose={() => setVariableDrawerOpened(false)}
             action="create"
           />
         </>
@@ -136,11 +132,7 @@ function TabButton(props: TabButtonProps) {
     case datasourcesTabIndex:
       return (
         <>
-          <CRUDButton
-            text="Add Datasource"
-            variant="contained"
-            onClick={() => setCreateDatasourceDrawerStateOpened(true)}
-          />
+          <CRUDButton text="Add Datasource" variant="contained" onClick={() => setDatasourceDrawerOpened(true)} />
           <DatasourceDrawer
             datasource={{
               kind: 'Datasource',
@@ -157,10 +149,10 @@ function TabButton(props: TabButtonProps) {
                 },
               },
             }}
-            isOpen={isCreateDatasourceDrawerStateOpened}
+            isOpen={isDatasourceDrawerOpened}
             action="create"
             onSave={handleDatasourceCreation}
-            onClose={() => setCreateDatasourceDrawerStateOpened(false)}
+            onClose={() => setDatasourceDrawerOpened(false)}
           />
         </>
       );

@@ -12,12 +12,16 @@
 // limitations under the License.
 
 import { getDatasourceDisplayName, getMetadataProject, Datasource, DispatchWithPromise } from '@perses-dev/core';
+import { Action } from '@perses-dev/plugin-system';
 import { Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { useIsReadonly } from '../../model/config-client';
+import { DeleteDatasourceDialog } from '../dialogs';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 
@@ -59,21 +63,24 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
           project: getMetadataProject(datasource.metadata),
           name: datasource.metadata.name,
           displayName: getDatasourceDisplayName(datasource),
+          description: datasource.spec.display?.description,
+          type: datasource.spec.plugin.kind,
           version: datasource.metadata.version,
           createdAt: datasource.metadata.created_at,
           updatedAt: datasource.metadata.updated_at,
-          type: datasource.spec.plugin.kind,
         } as Row)
     );
   }, [data]);
 
   const [targetedDatasource, setTargetedDatasource] = useState<T>();
-  const [isEditDatasourceFormStateOpened, setEditDatasourceFormStateOpened] = useState<boolean>(false);
+  const [action, setAction] = useState<Action>('read');
+  const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState<boolean>(false);
+  const [isDeleteDatasourceDialogOpened, setDeleteDatasourceDialogOpened] = useState<boolean>(false);
 
   const handleDatasourceUpdate = useCallback(
     async (datasource: T) => {
       await onUpdate(datasource);
-      setEditDatasourceFormStateOpened(false);
+      setDatasourceDrawerOpened(false);
     },
     [onUpdate]
   );
@@ -81,7 +88,26 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedDatasource(findDatasource(name, project));
-      setEditDatasourceFormStateOpened(true);
+      setAction('read');
+      setDatasourceDrawerOpened(true);
+    },
+    [findDatasource]
+  );
+
+  const handleEditButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const datasource = findDatasource(name, project);
+      setTargetedDatasource(datasource);
+      setAction('update');
+      setDatasourceDrawerOpened(true);
+    },
+    [findDatasource]
+  );
+
+  const handleDeleteButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      setTargetedDatasource(findDatasource(name, project));
+      setDeleteDatasourceDialogOpened(true);
     },
     [findDatasource]
   );
@@ -89,7 +115,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'type', headerName: 'Type', type: 'string', flex: 2 },
+      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
       {
         field: 'name',
         headerName: 'Name',
@@ -97,7 +123,6 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         flex: 2,
         renderCell: (params) => <pre>{params.value}</pre>,
       },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
       {
         field: 'version',
         headerName: 'Version',
@@ -107,6 +132,8 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         flex: 1,
         minWidth: 80,
       },
+      { field: 'description', headerName: 'Description', type: 'string', flex: 3, minWidth: 300 },
+      { field: 'type', headerName: 'Type', type: 'string', flex: 2 },
       {
         field: 'createdAt',
         headerName: 'Creation Date',
@@ -133,8 +160,31 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
           </Tooltip>
         ),
       },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        type: 'actions',
+        flex: 0.5,
+        minWidth: 100,
+        getActions: (params: GridRowParams<Row>) => [
+          <GridActionsCellItem
+            key={params.id + '-edit'}
+            icon={<PencilIcon />}
+            label="Rename"
+            disabled={isReadonly}
+            onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <GridActionsCellItem
+            key={params.id + '-delete'}
+            icon={<DeleteIcon />}
+            label="Delete"
+            disabled={isReadonly}
+            onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
+          />,
+        ],
+      },
     ],
-    []
+    [isReadonly, handleEditButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -148,14 +198,22 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         onRowClick={handleRowClick}
       />
       {targetedDatasource && (
-        <DatasourceDrawer
-          datasource={targetedDatasource}
-          isOpen={isEditDatasourceFormStateOpened}
-          action={isReadonly ? 'read' : 'update'}
-          onSave={handleDatasourceUpdate}
-          onDelete={onDelete}
-          onClose={() => setEditDatasourceFormStateOpened(false)}
-        />
+        <>
+          <DatasourceDrawer
+            datasource={targetedDatasource}
+            isOpen={isDatasourceDrawerOpened}
+            action={action}
+            onSave={(v: T) => handleDatasourceUpdate(v).then(() => setDatasourceDrawerOpened(false))}
+            onDelete={onDelete}
+            onClose={() => setDatasourceDrawerOpened(false)}
+          />
+          <DeleteDatasourceDialog
+            open={isDeleteDatasourceDialogOpened}
+            onClose={() => setDeleteDatasourceDialogOpened(false)}
+            onSubmit={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
+            datasource={targetedDatasource}
+          />
+        </>
       )}
     </Stack>
   );

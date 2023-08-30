@@ -181,19 +181,20 @@ export function VariableEditor(props: {
       {currentEditingVariableDefinition && (
         <VariableEditorForm
           initialVariableDefinition={currentEditingVariableDefinition}
-          onChange={(definition) => {
+          initialAction={variableFormAction}
+          isDraft={true}
+          onSave={(definition: VariableDefinition) => {
             setVariableDefinitions((draft) => {
               draft[variableEditIdx] = definition;
               setVariableEditIdx(null);
             });
           }}
-          onCancel={() => {
+          onClose={() => {
             if (variableFormAction === 'create') {
               removeVariable(variableEditIdx);
             }
             setVariableEditIdx(null);
           }}
-          action={variableFormAction}
         />
       )}
       {!currentEditingVariableDefinition && (

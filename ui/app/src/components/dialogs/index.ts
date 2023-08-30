@@ -14,6 +14,7 @@
 export * from './CreateDashboardDialog';
 export * from './CreateProjectDialog';
 export * from './DeleteDashboardDialog';
+export * from './DeleteDatasourceDialog';
 export * from './DeleteProjectDialog';
 export * from './DeleteVariableDialog';
 export * from './RenameDashboardDialog';

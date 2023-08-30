@@ -39,22 +39,22 @@ interface TabButtonProps {
 }
 
 function TabButton(props: TabButtonProps) {
-  const createDatasourceMutation = useCreateGlobalDatasourceMutation();
+  const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalVariableMutation = useCreateGlobalVariableMutation();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const [isCreateGlobalDatasourceDrawerStateOpened, setCreateGlobalDatasourceFormStateOpened] = useState(false);
-  const [openCreateVariableDrawerState, setOpenCreateVariableDrawerState] = useState(false);
+  const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
+  const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
 
-  const handleVariableCreation = useCallback(
+  const handleGlobalVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
       createGlobalVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: GlobalVariableResource) => {
           successSnackbar(
             `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`
           );
-          setOpenCreateVariableDrawerState(false);
+          setVariableDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -67,10 +67,10 @@ function TabButton(props: TabButtonProps) {
 
   const handleGlobalDatasourceCreation = useCallback(
     (datasource: GlobalDatasource) => {
-      createDatasourceMutation.mutate(datasource, {
+      createGlobalDatasourceMutation.mutate(datasource, {
         onSuccess: (createdDatasource: GlobalDatasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setCreateGlobalDatasourceFormStateOpened(false);
+          setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -78,18 +78,14 @@ function TabButton(props: TabButtonProps) {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation]
   );
 
   switch (props.index) {
     case variablesTabIndex:
       return (
         <>
-          <CRUDButton
-            text="Add Global Variable"
-            variant="contained"
-            onClick={() => setOpenCreateVariableDrawerState(true)}
-          />
+          <CRUDButton text="Add Global Variable" variant="contained" onClick={() => setVariableDrawerOpened(true)} />
           <VariableDrawer
             variable={{
               kind: 'GlobalVariable',
@@ -104,10 +100,10 @@ function TabButton(props: TabButtonProps) {
                 },
               },
             }}
-            isOpen={openCreateVariableDrawerState}
-            onChange={handleVariableCreation}
-            onClose={() => setOpenCreateVariableDrawerState(false)}
+            isOpen={isVariableDrawerOpened}
             action="create"
+            onSave={handleGlobalVariableCreation}
+            onClose={() => setVariableDrawerOpened(false)}
           />
         </>
       );
@@ -117,7 +113,7 @@ function TabButton(props: TabButtonProps) {
           <CRUDButton
             text="Add Global Datasource"
             variant="contained"
-            onClick={() => setCreateGlobalDatasourceFormStateOpened(true)}
+            onClick={() => setDatasourceDrawerOpened(true)}
           />
           <DatasourceDrawer
             datasource={{
@@ -134,10 +130,10 @@ function TabButton(props: TabButtonProps) {
                 },
               },
             }}
-            isOpen={isCreateGlobalDatasourceDrawerStateOpened}
+            isOpen={isDatasourceDrawerOpened}
             action="create"
             onSave={handleGlobalDatasourceCreation}
-            onClose={() => setCreateGlobalDatasourceFormStateOpened(false)}
+            onClose={() => setDatasourceDrawerOpened(false)}
           />
         </>
       );
