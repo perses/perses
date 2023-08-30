@@ -24,7 +24,6 @@ import {
   VariableOption,
   BuiltinVariableContext,
   useTimeRange,
-  BuiltinVariables,
 } from '@perses-dev/plugin-system';
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
@@ -33,6 +32,7 @@ import {
   VariableDefinition,
   formatDuration,
   intervalToPrometheusDuration,
+  BuiltinVariableDefinition,
 } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateTemplateVariableStates } from './hydrationUtils';
@@ -148,7 +148,7 @@ export function useTemplateVariableStore() {
 
 interface PluginProviderProps {
   children: ReactNode;
-  builtinVariables?: BuiltinVariables;
+  builtinVariables?: BuiltinVariableDefinition[];
 }
 
 function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
@@ -180,67 +180,74 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
     return contextValues;
   }, [originalValues, definitions, externalDefinitions]);
 
-  const allBuiltinVariables = builtinVariables ?? {};
-  allBuiltinVariables['__from'] = {
-    kind: 'BuiltinVariable',
-    spec: {
-      name: '__from',
-      value: () => absoluteTimeRange.start.valueOf().toString(),
-      display: {
+  const allBuiltinVariables: BuiltinVariableDefinition[] = [
+    {
+      kind: 'BuiltinVariable',
+      spec: {
         name: '__from',
-        description: 'Start time of the current time range in unix millisecond epoch',
-        hidden: true,
+        value: () => absoluteTimeRange.start.valueOf().toString(),
+        source: 'Dashboard',
+        display: {
+          name: '__from',
+          description: 'Start time of the current time range in unix millisecond epoch',
+          hidden: true,
+        },
       },
     },
-  };
-  allBuiltinVariables['__to'] = {
-    kind: 'BuiltinVariable',
-    spec: {
-      name: '__to',
-      value: () => absoluteTimeRange.end.valueOf().toString(),
-      display: {
+    {
+      kind: 'BuiltinVariable',
+      spec: {
         name: '__to',
-        description: 'End time of the current time range in unix millisecond epoch',
-        hidden: true,
+        value: () => absoluteTimeRange.end.valueOf().toString(),
+        source: 'Dashboard',
+        display: {
+          name: '__to',
+          description: 'End time of the current time range in unix millisecond epoch',
+          hidden: true,
+        },
       },
     },
-  };
-  allBuiltinVariables['__range'] = {
-    kind: 'BuiltinVariable',
-    spec: {
-      name: '__range',
-      value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
-      display: {
+    {
+      kind: 'BuiltinVariable',
+      spec: {
         name: '__range',
-        description: 'The range for the current dashboard in human readable format',
-        hidden: true,
+        value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
+        source: 'Dashboard',
+        display: {
+          name: '__range',
+          description: 'The range for the current dashboard in human readable format',
+          hidden: true,
+        },
       },
     },
-  };
-  allBuiltinVariables['__range_s'] = {
-    kind: 'BuiltinVariable',
-    spec: {
-      name: '__range_s',
-      value: () => ((absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()) / 1000).toString(),
-      display: {
+    {
+      kind: 'BuiltinVariable',
+      spec: {
         name: '__range_s',
-        description: 'The range for the current dashboard in second',
-        hidden: true,
+        value: () => ((absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()) / 1000).toString(),
+        source: 'Dashboard',
+        display: {
+          name: '__range_s',
+          description: 'The range for the current dashboard in second',
+          hidden: true,
+        },
       },
     },
-  };
-  allBuiltinVariables['__range_ms'] = {
-    kind: 'BuiltinVariable',
-    spec: {
-      name: '__range_ms',
-      value: () => (absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()).toString(),
-      display: {
+    {
+      kind: 'BuiltinVariable',
+      spec: {
         name: '__range_ms',
-        description: 'The range for the current dashboard in millisecond',
-        hidden: true,
+        value: () => (absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()).toString(),
+        source: 'Dashboard',
+        display: {
+          name: '__range_ms',
+          description: 'The range for the current dashboard in millisecond',
+          hidden: true,
+        },
       },
     },
-  };
+  ];
+  builtinVariables?.forEach((def) => allBuiltinVariables.push(def));
 
   return (
     <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
@@ -408,14 +415,14 @@ export interface TemplateVariableProviderProps {
    * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
    */
   externalVariableDefinitions?: ExternalVariableDefinition[];
-  builtinVariables?: BuiltinVariables;
+  builtinVariables?: BuiltinVariableDefinition[];
 }
 
 export function TemplateVariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  builtinVariables = {},
+  builtinVariables = [],
 }: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);

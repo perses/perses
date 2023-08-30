@@ -84,17 +84,19 @@ export function useListPluginMetadata(pluginType: PluginType, options?: UseListP
   return useQuery(['listPluginMetadata', pluginType], () => listPluginMetadata(pluginType), options);
 }
 
-export async function usePluginBuiltinVariableDefinitions() {
+export function usePluginBuiltinVariableDefinitions() {
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
-  const datasources = await listPluginMetadata('Datasource');
-  const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
-  let result: BuiltinVariableDefinition[] = [];
-  for (const kind of datasourceKinds) {
-    const plugin = await getPlugin('Datasource', kind);
-    if (plugin.getBuiltinVariableDefinitions) {
-      result = result.concat(plugin.getBuiltinVariableDefinitions());
+  return useQuery(['usePluginBuiltinVariableDefinitions'], async () => {
+    const datasources = await listPluginMetadata('Datasource');
+    const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
+    const result: BuiltinVariableDefinition[] = [];
+    for (const kind of datasourceKinds) {
+      const plugin = await getPlugin('Datasource', kind);
+      if (plugin.getBuiltinVariableDefinitions) {
+        plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
+      }
     }
-  }
-  return result;
+    return result;
+  });
 }

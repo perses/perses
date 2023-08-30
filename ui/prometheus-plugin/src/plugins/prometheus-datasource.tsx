@@ -55,7 +55,8 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
       kind: 'BuiltinVariable',
       spec: {
         name: '__interval',
-        value: () => '$__interval', // will be overriden by supported plugins
+        value: () => '$__interval', // will be overriden when time series query is called
+        source: 'Prometheus',
         display: {
           name: '__interval',
           description:
@@ -68,7 +69,8 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
       kind: 'BuiltinVariable',
       spec: {
         name: '__interval_ms',
-        value: () => '$__interval_ms', // will be overriden by supported plugins
+        value: () => '$__interval_ms', // will be overriden when time series query is called
+        source: 'Prometheus',
         display: {
           name: '__interval_ms',
           description:
@@ -81,7 +83,8 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
       kind: 'BuiltinVariable',
       spec: {
         name: '__rate_interval',
-        value: () => '$__rate_interval', // will be overriden by supported plugins
+        value: () => '$__rate_interval', // will be overriden when time series query is called
+        source: 'Prometheus',
         display: {
           name: '__rate_interval',
           description:

@@ -15,12 +15,12 @@ import { Box, BoxProps } from '@mui/material';
 import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
-  BuiltinVariables,
   TimeRangeProvider,
   useInitialRefreshInterval,
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
+import { useEffect, useMemo, useState } from 'react';
 import {
   TemplateVariableProvider,
   DashboardProvider,
@@ -59,39 +59,72 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const dashboardRefreshInterval = spec.refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
-  const pluginBuiltinVariables = usePluginBuiltinVariableDefinitions();
+  const { data } = usePluginBuiltinVariableDefinitions();
 
-  const dashboardBuiltinVariables: BuiltinVariables = {
-    __dashboard: {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__dashboard',
-        value: () => dashboardResource.metadata.name,
-        display: {
+  // Contains plugin builtin variables after promise is resolved
+  // const [builtinVariables, setBuiltinVariables] = useState<BuiltinVariableDefinition[]>([
+  //   {
+  //     kind: 'BuiltinVariable',
+  //     spec: {
+  //       name: '__dashboard',
+  //       value: () => dashboardResource.metadata.name,
+  //       source: 'Dashboard',
+  //       display: {
+  //         name: '__dashboard',
+  //         description: 'The name of the current dashboard',
+  //         hidden: true,
+  //       },
+  //     },
+  //   } as BuiltinVariableDefinition,
+  //   {
+  //     kind: 'BuiltinVariable',
+  //     spec: {
+  //       name: '__project',
+  //       value: () => dashboardResource.metadata.project,
+  //       source: 'Dashboard',
+  //       display: {
+  //         name: '__project',
+  //         description: 'The name of the current dashboard project',
+  //         hidden: true,
+  //       },
+  //     },
+  //   } as BuiltinVariableDefinition,
+  // ]);
+
+  const builtinVariables = useMemo(() => {
+    const result = [
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__dashboard',
-          description: 'The name of the current dashboard',
-          hidden: true,
+          value: () => dashboardResource.metadata.name,
+          source: 'Dashboard',
+          display: {
+            name: '__dashboard',
+            description: 'The name of the current dashboard',
+            hidden: true,
+          },
         },
-      },
-    } as BuiltinVariableDefinition,
-    __project: {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__project',
-        value: () => dashboardResource.metadata.project,
-        display: {
+      } as BuiltinVariableDefinition,
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__project',
-          description: 'The name of the current dashboard project',
-          hidden: true,
+          value: () => dashboardResource.metadata.project,
+          source: 'Dashboard',
+          display: {
+            name: '__project',
+            description: 'The name of the current dashboard project',
+            hidden: true,
+          },
         },
-      },
-    } as BuiltinVariableDefinition,
-  };
-
-  // Registering builtin variable definition from loaded plugins
-  pluginBuiltinVariables.then((definitions: BuiltinVariableDefinition[]) =>
-    definitions.forEach((def) => (dashboardBuiltinVariables[def.spec.name] = def))
-  );
+      } as BuiltinVariableDefinition,
+    ];
+    if (data) {
+      data.forEach((def: BuiltinVariableDefinition) => result.push(def));
+    }
+    return result;
+  }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
@@ -104,7 +137,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           <TemplateVariableProvider
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
-            builtinVariables={dashboardBuiltinVariables}
+            builtinVariables={builtinVariables}
           >
             <Box
               sx={combineSx(

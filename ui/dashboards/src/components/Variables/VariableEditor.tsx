@@ -416,7 +416,7 @@ export function VariableEditor(props: {
                           <TableHead>
                             <TableRow>
                               <TableCell>Name</TableCell>
-                              <TableCell>Type</TableCell>
+                              <TableCell>Source</TableCell>
                               <TableCell>Description</TableCell>
                             </TableRow>
                           </TableHead>
@@ -429,7 +429,7 @@ export function VariableEditor(props: {
                                     state={variableState.get({ name: v.spec.name, source: 'builtin' })}
                                   />
                                 </TableCell>
-                                <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
+                                <TableCell>{v.spec.source}</TableCell>
                                 <TableCell>{v.spec.display?.description ?? ''}</TableCell>
                               </TableRow>
                             ))}
