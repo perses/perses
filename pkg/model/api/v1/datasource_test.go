@@ -28,7 +28,7 @@ import (
 func TestUnmarshalJSONDatasource(t *testing.T) {
 	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
 	pluginSpec := &datasource.Prometheus{
-		Proxy: datasourceHTTP.Proxy{
+		Proxy: &datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
 			Spec: datasourceHTTP.Config{
 				URL: u,
@@ -99,7 +99,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 func TestUnmarshalYAMLLayout(t *testing.T) {
 	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
 	pluginSpec := &datasource.Prometheus{
-		Proxy: datasourceHTTP.Proxy{
+		Proxy: &datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
 			Spec: datasourceHTTP.Config{
 				URL: u,

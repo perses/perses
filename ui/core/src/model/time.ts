@@ -101,6 +101,17 @@ export function parseDurationString(durationString: string): Duration {
   };
 }
 
+export function durationToMs(duration: Duration): number {
+  return (
+    (duration.years ?? 0) * ONE_YEAR_IN_MS +
+    (duration.weeks ?? 0) * ONE_WEEK_IN_MS +
+    (duration.days ?? 0) * ONE_DAY_IN_MS +
+    (duration.hours ?? 0) * ONE_HOUR_IN_MS +
+    (duration.minutes ?? 0) * ONE_MINUTE_IN_MS +
+    (duration.seconds ?? 0) * ONE_SECOND_IN_MS
+  );
+}
+
 /**
  * Returns true if the given string is a valid DurationString.
  */

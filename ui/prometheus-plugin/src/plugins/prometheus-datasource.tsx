@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition, RequestHeaders } from '@perses-dev/core';
+import { BuiltinVariableDefinition, DurationString, RequestHeaders } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 import {
@@ -22,6 +22,7 @@ import {
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
   headers?: RequestHeaders;
+  scrape_interval?: DurationString;
 }
 
 /**

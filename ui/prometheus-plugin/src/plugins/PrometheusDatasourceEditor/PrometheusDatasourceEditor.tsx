@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
 import { Grid, IconButton, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
@@ -63,6 +63,19 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               readOnly: isReadonly,
             }}
             onChange={(e) => onChange({ ...value, direct_url: e.target.value })}
+          />
+          <Typography py={2} variant="h4">
+            Prometheus Settings
+          </Typography>
+          <TextField
+            fullWidth
+            label="Scrape Interval"
+            value={value.scrape_interval || ''}
+            placeholder="Default: 15s"
+            InputProps={{
+              readOnly: isReadonly,
+            }}
+            onChange={(e) => onChange({ ...value, scrape_interval: e.target.value as DurationString })}
           />
         </>
       ),
@@ -252,6 +265,19 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                 }),
               })
             }
+          />
+          <Typography py={2} variant="h4">
+            Prometheus Settings
+          </Typography>
+          <TextField
+            fullWidth
+            label="Scrape Interval"
+            value={value.scrape_interval || ''}
+            placeholder="Default: 15s"
+            InputProps={{
+              readOnly: isReadonly,
+            }}
+            onChange={(e) => onChange({ ...value, scrape_interval: e.target.value as DurationString })}
           />
         </>
       ),

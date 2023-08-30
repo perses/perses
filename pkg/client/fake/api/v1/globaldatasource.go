@@ -38,7 +38,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 				Plugin: common.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
-						Proxy: http.Proxy{
+						Proxy: &http.Proxy{
 							Kind: "HTTPProxy",
 							Spec: http.Config{
 								URL: u,
@@ -73,7 +73,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 				Plugin: common.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
-						Proxy: http.Proxy{
+						Proxy: &http.Proxy{
 							Kind: "HTTPProxy",
 							Spec: http.Config{
 								URL: localURL,

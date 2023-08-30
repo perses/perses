@@ -20,7 +20,7 @@ import {
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   TemplateVariableProvider,
   DashboardProvider,
@@ -60,36 +60,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
-
-  // Contains plugin builtin variables after promise is resolved
-  // const [builtinVariables, setBuiltinVariables] = useState<BuiltinVariableDefinition[]>([
-  //   {
-  //     kind: 'BuiltinVariable',
-  //     spec: {
-  //       name: '__dashboard',
-  //       value: () => dashboardResource.metadata.name,
-  //       source: 'Dashboard',
-  //       display: {
-  //         name: '__dashboard',
-  //         description: 'The name of the current dashboard',
-  //         hidden: true,
-  //       },
-  //     },
-  //   } as BuiltinVariableDefinition,
-  //   {
-  //     kind: 'BuiltinVariable',
-  //     spec: {
-  //       name: '__project',
-  //       value: () => dashboardResource.metadata.project,
-  //       source: 'Dashboard',
-  //       display: {
-  //         name: '__project',
-  //         description: 'The name of the current dashboard project',
-  //         hidden: true,
-  //       },
-  //     },
-  //   } as BuiltinVariableDefinition,
-  // ]);
 
   const builtinVariables = useMemo(() => {
     const result = [
