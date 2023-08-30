@@ -12,3 +12,18 @@
 // limitations under the License.
 
 export type Action = 'create' | 'read' | 'update';
+
+export function getTitleAction(action: Action, isDraft: boolean): string {
+  if (action === 'read') return 'View';
+  if (isDraft && action === 'create') return 'Add';
+  if (!isDraft && action === 'create') return 'Create';
+  if (action === 'update') return 'Edit';
+  return '';
+}
+
+export function getSubmitText(action: Action, isDraft: boolean): string {
+  if (isDraft && action === 'create') return 'Add';
+  if (isDraft && action === 'update') return 'Apply';
+  if (!isDraft) return 'Save';
+  return '';
+}

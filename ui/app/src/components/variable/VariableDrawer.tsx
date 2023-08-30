@@ -85,6 +85,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                 <VariableEditorForm
                   initialVariableDefinition={variableDef}
                   initialAction={action}
+                  isDraft={false}
                   onSave={handleSave}
                   onClose={onClose}
                   onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}

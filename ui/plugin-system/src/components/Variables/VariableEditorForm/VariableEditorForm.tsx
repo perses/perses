@@ -31,7 +31,7 @@ import {
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
-import { Action } from '../../../utils';
+import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
@@ -62,13 +62,14 @@ function FallbackPreview() {
 interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
   initialAction: Action;
+  isDraft: boolean;
   onSave: (def: VariableDefinition) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
 export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, initialAction, onSave, onClose, onDelete } = props;
+  const { initialVariableDefinition, initialAction, isDraft, onSave, onClose, onDelete } = props;
 
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);
@@ -90,12 +91,8 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [previewKey]);
 
-  const title = useMemo(() => {
-    if (action === 'read') return 'View Variable';
-    if (action === 'create') return 'Create Variable';
-    if (action === 'update') return 'Edit Variable';
-    return '';
-  }, [action]);
+  const titleAction = getTitleAction(action, isDraft);
+  const submitText = getSubmitText(action, isDraft);
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -119,7 +116,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">{title}</Typography>
+        <Typography variant="h2">{titleAction} Variable</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' && (
             <>
@@ -154,7 +151,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   onSave(getVariableDefinitionFromState(state));
                 }}
               >
-                Save
+                {submitText}
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel

@@ -182,6 +182,7 @@ export function VariableEditor(props: {
         <VariableEditorForm
           initialVariableDefinition={currentEditingVariableDefinition}
           initialAction={variableFormAction}
+          isDraft={true}
           onSave={(definition: VariableDefinition) => {
             setVariableDefinitions((draft) => {
               draft[variableEditIdx] = definition;

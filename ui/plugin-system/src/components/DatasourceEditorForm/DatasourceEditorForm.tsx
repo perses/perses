@@ -17,7 +17,7 @@ import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField,
 import { Dispatch, DispatchWithoutAction, useCallback, useMemo, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { PluginEditor } from '../PluginEditor';
-import { Action } from '../../utils';
+import { Action, getSubmitText, getTitleAction } from '../../utils';
 
 // TODO: Replace with proper validation library
 function getValidation(state: Datasource) {
@@ -66,26 +66,22 @@ function getInitialState<T extends Datasource>(datasource: T): T {
 interface DatasourceEditorFormProps<T extends Datasource> {
   initialDatasource: T;
   initialAction: Action;
+  isDraft: boolean;
   onSave: Dispatch<T>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
-  const { initialDatasource, initialAction, onSave, onClose, onDelete } = props;
+  const { initialDatasource, initialAction, isDraft, onSave, onClose, onDelete } = props;
 
   const patchedInitialDatasource = getInitialState(initialDatasource);
   const [state, setState] = useImmer(patchedInitialDatasource);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
   const validation = useMemo(() => getValidation(state), [state]);
-
-  const title = useMemo(() => {
-    if (action === 'read') return 'View Datasource';
-    if (action === 'create') return 'Create Datasource';
-    if (action === 'update') return 'Edit Datasource';
-    return '';
-  }, [action]);
+  const titleAction = getTitleAction(action, isDraft);
+  const submitText = getSubmitText(action, isDraft);
 
   // When saving, remove the display property if ever display.name is empty, then pass the value upstream
   const handleSave = () => {
@@ -117,7 +113,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">{title}</Typography>
+        <Typography variant="h2">{titleAction} Datasource</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' && (
             <>
@@ -146,7 +142,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           {action !== 'read' && (
             <>
               <Button disabled={!validation.isValid} variant="contained" onClick={handleSave}>
-                Save
+                {submitText}
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel

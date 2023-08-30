@@ -52,6 +52,7 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
             <DatasourceEditorForm
               initialDatasource={datasource}
               initialAction={action}
+              isDraft={false}
               onSave={onSave}
               onClose={onClose}
               onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
