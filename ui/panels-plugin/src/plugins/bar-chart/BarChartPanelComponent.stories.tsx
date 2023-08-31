@@ -20,6 +20,7 @@ import {
   WithTimeRange,
   WithPluginSystemTemplateVariables,
   WithPluginSystemDatasourceStore,
+  WithPluginSystemBuiltinVariables,
 } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { mockTimeSeriesResponseWithManySeries } from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
@@ -90,6 +91,7 @@ const meta: Meta<typeof BarChart.PanelComponent> = {
   },
   decorators: [
     WithDataQueries,
+    WithPluginSystemBuiltinVariables,
     WithPluginSystemTemplateVariables,
     WithPluginSystemDatasourceStore,
     WithPluginRegistry,
