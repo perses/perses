@@ -85,7 +85,7 @@ func validateAllDashboards(sch schemas.Schemas) {
 
 func validateAllDatasources(sch schemas.Schemas) {
 	logrus.Info("validate all datasources in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "localdatasource.json"))
+	data, err := os.ReadFile(path.Join("dev", "data", "projectdatasource.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}

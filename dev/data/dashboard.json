@@ -10,6 +10,22 @@
     },
     "spec": {
       "duration": "5m",
+      "datasources": {
+        "PrometheusLocal": {
+          "default": false,
+          "plugin": {
+            "kind": "PrometheusDatasource",
+            "spec": {
+              "proxy": {
+                "kind": "HTTPProxy",
+                "spec": {
+                  "url": "http://localhost:9090"
+                }
+              }
+            }
+          }
+        }
+      },
       "variables": [
         {
           "kind": "ListVariable",
