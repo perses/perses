@@ -13,16 +13,23 @@
 
 import { produce } from 'immer';
 import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
-import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
 import {
   DEFAULT_PROM,
+  DurationString,
   isDefaultPromSelector,
   isPrometheusDatasourceSelector,
   PROM_DATASOURCE_KIND,
   PrometheusClient,
 } from '../../model';
 import { PromQLEditor } from '../../components';
-import { PrometheusTimeSeriesQueryEditorProps, useQueryState, useFormatState } from './query-editor-model';
+import { PrometheusDatasourceSpec } from '../prometheus-datasource';
+import {
+  PrometheusTimeSeriesQueryEditorProps,
+  useQueryState,
+  useFormatState,
+  useMinStepState,
+} from './query-editor-model';
 
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
@@ -34,9 +41,15 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const promURL = client?.options.datasourceUrl;
+  const { data: datasourceResource } = useDatasource(selectedDatasource);
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
+  const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
+  const minStepPlaceholder =
+    minStep ??
+    (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrape_interval) ??
+    '15s';
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {
@@ -73,15 +86,26 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
       />
-      <TextField
-        fullWidth
-        label="Legend Name"
-        placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
-        helperText="Set the name for each series in the legend and the tooltip."
-        value={format ?? ''}
-        onChange={(e) => handleFormatChange(e.target.value)}
-        onBlur={handleFormatBlur}
-      />
+      <Stack direction="row" spacing={2}>
+        <TextField
+          fullWidth
+          label="Legend Name"
+          placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
+          helperText="Name for each series in the legend and the tooltip."
+          value={format ?? ''}
+          onChange={(e) => handleFormatChange(e.target.value)}
+          onBlur={handleFormatBlur}
+        />
+        <TextField
+          label="Min Step"
+          placeholder={minStepPlaceholder}
+          helperText="Step parameter of the query. Used by $__interval and $__rate_interval too."
+          value={minStep}
+          onChange={(e) => handleMinStepChange(e.target.value as DurationString)}
+          onBlur={handleMinStepBlur}
+          sx={{ width: '250px' }}
+        />
+      </Stack>
     </Stack>
   );
 }

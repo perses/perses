@@ -71,3 +71,8 @@ export function useDatasourceClient<Client>(selector: DatasourceSelector) {
   const store = useDatasourceStore();
   return useQuery<Client>(['getDatasourceClient', selector], () => store.getDatasourceClient<Client>(selector));
 }
+
+export function useDatasource(selector: DatasourceSelector) {
+  const store = useDatasourceStore();
+  return useQuery(['getDatasource', selector], () => store.getDatasource(selector));
+}

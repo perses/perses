@@ -71,7 +71,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   // The $__rate_interval variable is meant to be used in the rate function.
   // It is defined as max($__interval + Scrape interval, 4 * Scrape interval), where Scrape interval is the Min step setting (a setting per PromQL query),
   // if any is set, and otherwise the Scrape interval as set in the Prometheus datasource
-  const scrapeInterval = (minStep ?? datasourceScrapeInterval) * 1000; // TODO: retrieve it from Prometheus datasource config (hardcoded to 15s for now)
+  const scrapeInterval = (minStep ?? datasourceScrapeInterval) * 1000;
   const rateInterval = Math.max(interval + scrapeInterval, 4 * scrapeInterval);
   query = replaceTemplateVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateInterval)));
   query = replaceTemplateVariables(query, context.variableState);

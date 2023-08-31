@@ -163,7 +163,7 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 	}
 
 	pluginSpec := &datasource.Prometheus{
-		Proxy: datasourceHTTP.Proxy{
+		Proxy: &datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
 			Spec: datasourceHTTP.Config{
 				URL: promURL,

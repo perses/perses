@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import { produce } from 'immer';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { DurationString } from '@perses-dev/core';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export type PrometheusTimeSeriesQueryEditorProps = OptionsEditorProps<PrometheusTimeSeriesQuerySpec>;
@@ -87,4 +88,36 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
   };
 
   return { format, handleFormatChange, handleFormatBlur };
+}
+
+/**
+ * Hook to manage `min_step` state to ensure panel preview does not rerender until text input is blurred
+ */
+export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps) {
+  const { onChange, value } = props;
+
+  // TODO: reusable hook or helper util instead of duplicating from useQueryState
+  const [minStep, setMinStep] = useState(value.min_step);
+  const [lastSyncedMinStep, setLastSyncedMinStep] = useState(value.min_step);
+  if (value.min_step !== lastSyncedMinStep) {
+    setMinStep(value.min_step);
+    setLastSyncedMinStep(value.min_step);
+  }
+
+  // Update our local state as the user types
+  const handleMinStepChange = (e: DurationString) => {
+    setMinStep(e);
+  };
+
+  // Propagate changes to the panel preview component when min_step TextField is blurred
+  const handleMinStepBlur = () => {
+    setLastSyncedMinStep(minStep);
+    onChange(
+      produce(value, (draft) => {
+        draft.min_step = minStep;
+      })
+    );
+  };
+
+  return { minStep, handleMinStepChange, handleMinStepBlur };
 }
