@@ -178,7 +178,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
     "display": {
       "name": "my awesome variable"
     },
-    "default_value": "default",
+    "defaultValue": "default",
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
@@ -222,8 +222,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
     "display": {
       "name": "my awesome variable"
     },
-    "allow_multiple" : true,
-    "default_value": ["default1", "default2"],
+    "allowMultiple" : true,
+    "defaultValue": ["default1", "default2"],
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
@@ -396,7 +396,7 @@ spec:
   name: "MyList"
   display:
     name: "my awesome variable"
-  default_value: "default"
+  defaultValue: "default"
   plugin:
     kind: "PrometheusLabelValuesVariable"
     spec:
@@ -433,8 +433,8 @@ spec:
   name: "MyList"
   display:
     name: "my awesome variable"
-  allow_multiple: true
-  default_value:
+  allowMultiple: true
+  defaultValue:
     - "default1"
     - "default2"
   plugin:
@@ -585,8 +585,8 @@ func TestMarshalListVariable(t *testing.T) {
       "name": "my awesome variable",
       "hidden": false
     },
-    "allow_all_value": false,
-    "allow_multiple": false,
+    "allowAllValue": false,
+    "allowMultiple": false,
     "plugin": {
       "kind": "PrometheusLabelNamesVariable",
       "spec": {}
@@ -622,8 +622,8 @@ func TestMarshalListVariable(t *testing.T) {
       "name": "my awesome variable",
       "hidden": false
     },
-    "allow_all_value": false,
-    "allow_multiple": false,
+    "allowAllValue": false,
+    "allowMultiple": false,
     "plugin": {
       "kind": "PrometheusLabelNamesVariable",
       "spec": {
@@ -664,8 +664,8 @@ func TestMarshalListVariable(t *testing.T) {
       "name": "my awesome variable",
       "hidden": false
     },
-    "allow_all_value": false,
-    "allow_multiple": false,
+    "allowAllValue": false,
+    "allowMultiple": false,
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
@@ -708,9 +708,9 @@ func TestMarshalListVariable(t *testing.T) {
       "name": "my awesome variable",
       "hidden": false
     },
-    "default_value": "default",
-    "allow_all_value": false,
-    "allow_multiple": false,
+    "defaultValue": "default",
+    "allowAllValue": false,
+    "allowMultiple": false,
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
@@ -754,12 +754,12 @@ func TestMarshalListVariable(t *testing.T) {
       "name": "my awesome variable",
       "hidden": false
     },
-    "default_value": [
+    "defaultValue": [
       "default1",
       "default2"
     ],
-    "allow_all_value": false,
-    "allow_multiple": true,
+    "allowAllValue": false,
+    "allowMultiple": true,
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {

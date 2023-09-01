@@ -23,9 +23,9 @@ describe('checkSavedDefaultVariableStatus', () => {
         kind: 'ListVariable',
         spec: {
           name: 'interval',
-          default_value: '1m',
-          allow_all_value: false,
-          allow_multiple: false,
+          defaultValue: '1m',
+          allowAllValue: false,
+          allowMultiple: false,
           plugin: {
             kind: 'StaticListVariable',
             spec: {
@@ -42,9 +42,9 @@ describe('checkSavedDefaultVariableStatus', () => {
             name: 'Test display label',
             hidden: false,
           },
-          default_value: 'second list value',
-          allow_all_value: true,
-          allow_multiple: false,
+          defaultValue: 'second list value',
+          allowAllValue: true,
+          allowMultiple: false,
           plugin: {
             kind: 'StaticListVariable',
             spec: {
@@ -115,7 +115,7 @@ describe('checkSavedDefaultVariableStatus', () => {
             value: 'last list value',
           },
         ],
-        default_value: 'test list value',
+        defaultValue: 'test list value',
       }
     );
     variableState.set(
@@ -135,9 +135,9 @@ describe('checkSavedDefaultVariableStatus', () => {
         kind: 'ListVariable',
         spec: {
           name: 'interval',
-          default_value: '5m',
-          allow_all_value: false,
-          allow_multiple: false,
+          defaultValue: '5m',
+          allowAllValue: false,
+          allowMultiple: false,
           plugin: {
             kind: 'StaticListVariable',
             spec: {
@@ -152,7 +152,7 @@ describe('checkSavedDefaultVariableStatus', () => {
       { name: 'interval' },
       {
         value: '5m',
-        default_value: '5m',
+        defaultValue: '5m',
         loading: false,
         options: [
           {
@@ -175,8 +175,8 @@ describe('checkSavedDefaultVariableStatus', () => {
       {
         kind: 'ListVariable',
         spec: {
-          allow_all_value: false,
-          allow_multiple: false,
+          allowAllValue: false,
+          allowMultiple: false,
           plugin: {
             kind: 'StaticListVariable',
             spec: {

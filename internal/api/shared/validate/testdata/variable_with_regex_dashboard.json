@@ -21,15 +21,13 @@
             "name": "IaaS location",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": [
-                "thanos_build_info{stack=~\"\\\\w{4}\"}"
-              ]
+              "matchers": ["thanos_build_info{stack=~\"\\\\w{4}\"}"]
             }
           }
         }
@@ -42,15 +40,13 @@
             "name": "Stack (label_values)",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "label_name": "stack",
-              "matchers": [
-                "thanos_build_info{stack=~\"$iaas_loc.*\"}"
-              ]
+              "matchers": ["thanos_build_info{stack=~\"$iaas_loc.*\"}"]
             }
           }
         }
@@ -63,8 +59,8 @@
             "name": "Stack (query_result)",
             "hidden": false
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {

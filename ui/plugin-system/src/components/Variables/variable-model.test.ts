@@ -18,7 +18,7 @@ describe('filterVariableList', () => {
   const testSuite = [
     {
       title: 'basic case',
-      capturing_regexp: /([^-]*)-host-([^-]*)/g,
+      capturingRegexp: /([^-]*)-host-([^-]*)/g,
       originalValues: [
         { label: 'l1', value: 'us1-host-ahdix' },
         { label: 'l2', value: 'us1-host-diua' },
@@ -33,7 +33,7 @@ describe('filterVariableList', () => {
     },
     {
       title: 'duplicate captured value',
-      capturing_regexp: /prometheus-(.+):\d+/g,
+      capturingRegexp: /prometheus-(.+):\d+/g,
       originalValues: [
         { label: 'l1', value: 'prometheus-app:9090' },
         { label: 'l2', value: 'prometheus-app:9091' },
@@ -49,9 +49,9 @@ describe('filterVariableList', () => {
       ],
     },
   ];
-  testSuite.forEach(({ title, capturing_regexp, originalValues, result }) => {
+  testSuite.forEach(({ title, capturingRegexp, originalValues, result }) => {
     it(title, () => {
-      expect(filterVariableList(originalValues, capturing_regexp)).toEqual(result);
+      expect(filterVariableList(originalValues, capturingRegexp)).toEqual(result);
     });
   });
 });

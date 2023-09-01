@@ -173,9 +173,9 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
             name: 'Instance',
             hidden: false,
           },
-          allow_all_value: true,
-          allow_multiple: true,
-          default_value: ['$__all'],
+          allowAllValue: true,
+          allowMultiple: true,
+          defaultValue: ['$__all'],
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
@@ -188,9 +188,9 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
         kind: 'ListVariable',
         spec: {
           name: 'interval',
-          default_value: '5m',
-          allow_all_value: false,
-          allow_multiple: false,
+          defaultValue: '5m',
+          allowAllValue: false,
+          allowMultiple: false,
           plugin: {
             kind: 'StaticListVariable',
             spec: { values: ['1m', '5m'] },

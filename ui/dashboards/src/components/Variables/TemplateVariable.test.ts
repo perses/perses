@@ -43,8 +43,8 @@ function allOption(): VariableOption {
 interface TestParams {
   description: string;
   input: {
-    allow_multiple: boolean;
-    allow_all_value: boolean;
+    allowMultiple: boolean;
+    allowAllValue: boolean;
     value: VariableValue;
     isFetchingOptions: boolean;
     fetchedOptions: VariableOption[];
@@ -63,8 +63,8 @@ describe('useListVariableState', () => {
     {
       description: '[!ALL][!MULTIPLE] is fetching',
       input: {
-        allow_multiple: false,
-        allow_all_value: false,
+        allowMultiple: false,
+        allowAllValue: false,
         value: 'hello',
         isFetchingOptions: true,
         fetchedOptions: [option('hello')],
@@ -80,8 +80,8 @@ describe('useListVariableState', () => {
     {
       description: '[!ALL][!MULTIPLE] state.value is in options',
       input: {
-        allow_multiple: false,
-        allow_all_value: false,
+        allowMultiple: false,
+        allowAllValue: false,
         value: 'hello',
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -97,8 +97,8 @@ describe('useListVariableState', () => {
     {
       description: '[ALL][MULTIPLE] state.value is in options',
       input: {
-        allow_multiple: true,
-        allow_all_value: true,
+        allowMultiple: true,
+        allowAllValue: true,
         value: 'hello',
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -114,8 +114,8 @@ describe('useListVariableState', () => {
     {
       description: '[!ALL][!MULTIPLE] state.value is null',
       input: {
-        allow_multiple: false,
-        allow_all_value: false,
+        allowMultiple: false,
+        allowAllValue: false,
         value: null,
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -131,8 +131,8 @@ describe('useListVariableState', () => {
     {
       description: '[ALL][MULTIPLE] state.value is null',
       input: {
-        allow_multiple: true,
-        allow_all_value: true,
+        allowMultiple: true,
+        allowAllValue: true,
         value: null,
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -148,8 +148,8 @@ describe('useListVariableState', () => {
     {
       description: '[!ALL][!MULTIPLE] state.value is not in options',
       input: {
-        allow_multiple: false,
-        allow_all_value: false,
+        allowMultiple: false,
+        allowAllValue: false,
         value: 'test',
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -165,8 +165,8 @@ describe('useListVariableState', () => {
     {
       description: '[ALL][MULTIPLE] state.value is not in options',
       input: {
-        allow_multiple: true,
-        allow_all_value: true,
+        allowMultiple: true,
+        allowAllValue: true,
         value: 'test',
         isFetchingOptions: false,
         fetchedOptions: [option('hello')],
@@ -185,8 +185,8 @@ describe('useListVariableState', () => {
         {
           name: 'myVar', // unused by the hook
           plugin: { spec: {}, kind: 'unknown-plugin' }, // unused by the hook
-          allow_multiple: params.input.allow_multiple,
-          allow_all_value: params.input.allow_all_value,
+          allowMultiple: params.input.allowMultiple,
+          allowAllValue: params.input.allowAllValue,
         },
         {
           value: params.input.value,

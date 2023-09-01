@@ -21,8 +21,8 @@
             "name": "PaaS",
             "hidden": true
           },
-          "allow_all_value": false,
-          "allow_multiple": false,
+          "allowAllValue": false,
+          "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
