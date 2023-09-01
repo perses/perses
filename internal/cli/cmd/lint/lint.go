@@ -20,7 +20,7 @@ import (
 	apiConfig "github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
-	"github.com/perses/perses/internal/cli/cmd"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
