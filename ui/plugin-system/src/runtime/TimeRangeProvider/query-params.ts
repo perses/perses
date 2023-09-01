@@ -213,7 +213,7 @@ export function useSetRefreshIntervalParams(
   const { refresh } = query;
 
   useEffect(() => {
-    // when dashboard loaded with no params, default to dashboard duration
+    // when dashboard loaded with no params, default to dashboard refresh interval
     if (enabledURLParams && !paramsLoaded && !refresh) {
       setQuery({ refresh: initialRefreshInterval });
       setParamsLoaded(true);

@@ -48,12 +48,13 @@ type DashboardSpec struct {
 	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 	// Datasources is an optional list of datasource definition.
 	Datasources map[string]*DatasourceSpec `json:"datasources,omitempty" yaml:"datasources,omitempty"`
-	// Duration is the default time you would like to use to looking in the past when getting data to fill the
-	// dashboard
-	Duration  model.Duration       `json:"duration" yaml:"duration"`
-	Variables []dashboard.Variable `json:"variables,omitempty" yaml:"variables,omitempty"`
-	Panels    map[string]*Panel    `json:"panels" yaml:"panels"`
-	Layouts   []dashboard.Layout   `json:"layouts" yaml:"layouts"`
+	Variables   []dashboard.Variable       `json:"variables,omitempty" yaml:"variables,omitempty"`
+	Panels      map[string]*Panel          `json:"panels" yaml:"panels"`
+	Layouts     []dashboard.Layout         `json:"layouts" yaml:"layouts"`
+	// Duration is the default time range to use when getting data to fill the dashboard
+	Duration model.Duration `json:"duration" yaml:"duration"`
+	// RefreshInterval is the default refresh interval to use when landing on the dashboard
+	RefreshInterval model.Duration `json:"refreshInterval,omitempty" yaml:"refreshInterval,omitempty"`
 }
 
 func (d *DashboardSpec) UnmarshalJSON(data []byte) error {
