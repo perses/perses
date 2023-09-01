@@ -18,7 +18,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/perses/perses/internal/cli/cmd"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"

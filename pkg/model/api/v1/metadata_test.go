@@ -38,7 +38,8 @@ func TestKind_validateError(t *testing.T) {
 			resultError: fmt.Errorf("unknown kind \"unknown\" used"),
 		},
 	}
-	for _, test := range testSuites {
+	for i := range testSuites {
+		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
 			assert.Equal(t, test.resultError, (&test.kind).validate())
 		})
@@ -55,7 +56,8 @@ func TestKind_validate(t *testing.T) {
 			kind:  KindProject,
 		},
 	}
-	for _, test := range testSuites {
+	for i := range testSuites {
+		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
 			assert.NoError(t, (&test.kind).validate())
 		})

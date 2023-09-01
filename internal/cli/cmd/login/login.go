@@ -18,7 +18,7 @@ import (
 	"io"
 	"net/url"
 
-	"github.com/perses/perses/internal/cli/cmd"
+	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
