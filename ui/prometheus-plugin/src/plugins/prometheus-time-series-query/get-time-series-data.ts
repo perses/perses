@@ -51,7 +51,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
   const minStep = getDurationStringSeconds(spec.min_step) ?? datasourceScrapeInterval;
   const timeRange = getPrometheusTimeRange(context.timeRange);
-  const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
+  const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
   // Align the time range so that it's a multiple of the step
   let { start, end } = timeRange;
