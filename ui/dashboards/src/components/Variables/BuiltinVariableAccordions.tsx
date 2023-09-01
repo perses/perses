@@ -60,7 +60,7 @@ export function BuiltinVariableAccordions({ builtinVariableDefinitions }: Builti
     <>
       {sources.map((source) => (
         <Accordion
-          key="source"
+          key={source}
           sx={(theme) => ({
             '.MuiAccordionSummary-root': {
               backgroundColor: theme.palette.background.lighter,
@@ -91,7 +91,7 @@ export function BuiltinVariableAccordions({ builtinVariableDefinitions }: Builti
                 </TableHead>
                 <TableBody>
                   {(builtinVariablesBySource[source] ?? []).map((v) => (
-                    <TableRow key={v.spec.name}>
+                    <TableRow key={source + '-' + v.spec.name}>
                       <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
                         {v.spec.name}
                       </TableCell>
