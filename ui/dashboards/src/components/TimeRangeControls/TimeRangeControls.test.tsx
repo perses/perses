@@ -18,7 +18,7 @@ import { screen, act } from '@testing-library/react';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
 import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps } from '../../context';
+import { DashboardProvider, DashboardStoreProps, TemplateVariableProvider } from '../../context';
 import { TimeRangeControls } from './TimeRangeControls';
 
 const history = createMemoryHistory({
@@ -44,7 +44,9 @@ describe('TimeRangeControls', () => {
           initialTimeRange={testDefaultTimeRange}
           enabledURLParams={testURLParams}
         >
-          <TimeRangeControls />
+          <TemplateVariableProvider>
+            <TimeRangeControls />
+          </TemplateVariableProvider>
         </TimeRangeProvider>
       </DashboardProvider>,
       undefined,

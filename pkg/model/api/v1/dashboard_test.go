@@ -49,7 +49,6 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Duration:  model.Duration(6 * time.Hour),
 					Variables: nil,
 					Panels: map[string]*Panel{
 						"MyPanel": {
@@ -87,6 +86,8 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
+					Duration:        model.Duration(6 * time.Hour),
+					RefreshInterval: model.Duration(20 * time.Second),
 				},
 			},
 			result: `{
@@ -99,7 +100,6 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "duration": "6h",
     "panels": {
       "MyPanel": {
         "kind": "Panel",
@@ -136,7 +136,9 @@ func TestMarshalDashboard(t *testing.T) {
           ]
         }
       }
-    ]
+    ],
+    "duration": "6h",
+    "refreshInterval": "20s"
   }
 }`,
 		},
@@ -151,7 +153,6 @@ func TestMarshalDashboard(t *testing.T) {
 					Project: "perses",
 				},
 				Spec: DashboardSpec{
-					Duration: model.Duration(6 * time.Hour),
 					Variables: []dashboard.Variable{
 						{
 							Kind: variable.KindList,
@@ -223,6 +224,8 @@ func TestMarshalDashboard(t *testing.T) {
 							},
 						},
 					},
+					Duration:        model.Duration(6 * time.Hour),
+					RefreshInterval: model.Duration(15 * time.Second),
 				},
 			},
 			result: `{
@@ -235,7 +238,6 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "duration": "6h",
     "variables": [
       {
         "kind": "ListVariable",
@@ -307,7 +309,9 @@ func TestMarshalDashboard(t *testing.T) {
           ]
         }
       }
-    ]
+    ],
+    "duration": "6h",
+    "refreshInterval": "15s"
   }
 }`,
 		},
@@ -331,7 +335,6 @@ func TestUnmarshallDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
-    "duration": "6h",
     "variables": [
       {
         "kind": "ListVariable",
@@ -399,7 +402,9 @@ func TestUnmarshallDashboard(t *testing.T) {
           ]
         }
       }
-    ]
+    ],
+    "duration": "6h",
+    "refreshInterval": "30s"
   }
 }`
 
@@ -429,7 +434,6 @@ func TestUnmarshallDashboard(t *testing.T) {
 			Project: "perses",
 		},
 		Spec: DashboardSpec{
-			Duration: model.Duration(6 * time.Hour),
 			Variables: []dashboard.Variable{
 				{
 					Kind: variable.KindList,
@@ -486,6 +490,8 @@ func TestUnmarshallDashboard(t *testing.T) {
 					},
 				},
 			},
+			Duration:        model.Duration(6 * time.Hour),
+			RefreshInterval: model.Duration(30 * time.Second),
 		},
 	}
 	result := &Dashboard{}

@@ -15,10 +15,12 @@ import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
 import { DateTimeRangePicker, RefreshIntervalPicker, InfoTooltip, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { isDurationString } from '@perses-dev/core';
+import { isDurationString, DurationString } from '@perses-dev/core';
+import { useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboardDuration } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
+import { useDashboard } from '../../context/useDashboard';
 
 export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
@@ -62,6 +64,7 @@ export function TimeRangeControls({
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
   // TODO: Remove this since it couples to the dashboard context
   const dashboardDuration = useDashboardDuration();
+  const { dashboard, setDashboard } = useDashboard();
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
@@ -75,6 +78,21 @@ export function TimeRangeControls({
       });
     }
   }
+
+  // set the new refresh interval both in the dashboard context & as query param
+  const handleRefreshIntervalChange = useCallback(
+    (duration: DurationString) => {
+      setDashboard({
+        ...dashboard,
+        spec: {
+          ...dashboard.spec,
+          refreshInterval: duration,
+        },
+      });
+      setRefreshInterval(duration);
+    },
+    [dashboard, setDashboard, setRefreshInterval]
+  );
 
   return (
     <Stack direction="row" spacing={1}>
@@ -92,7 +110,7 @@ export function TimeRangeControls({
         <RefreshIntervalPicker
           timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
           value={refreshInterval}
-          onChange={setRefreshInterval}
+          onChange={handleRefreshIntervalChange}
           height={height}
         />
       )}
