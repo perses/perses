@@ -3279,14 +3279,14 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "Table",
-                  "position": "Bottom",
+                  "mode": "table",
+                  "position": "bottom",
                   "values": [
-                    "Mean",
-                    "FirstNumber",
-                    "LastNumber",
-                    "Min",
-                    "Max"
+                    "mean",
+                    "first-number",
+                    "last-number",
+                    "min",
+                    "max"
                   ]
                 }
               }
@@ -3316,13 +3316,10 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "legend": {
-                  "mode": "Table",
-                  "position": "Right",
-                  "size": "Small",
-                  "values": [
-                    "Mean",
-                    "LastNumber"
-                  ]
+                  "mode": "table",
+                  "position": "right",
+                  "size": "small",
+                  "values": ["mean", "last-number"]
                 }
               }
             },
@@ -3417,8 +3414,8 @@
               "name": "Job",
               "hidden": false
             },
-            "allow_all_value": false,
-            "allow_multiple": false,
+            "allowAllValue": false,
+            "allowMultiple": false,
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -3436,8 +3433,8 @@
               "name": "Host:",
               "hidden": false
             },
-            "allow_all_value": false,
-            "allow_multiple": false,
+            "allowAllValue": false,
+            "allowMultiple": false,
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
@@ -3455,8 +3452,8 @@
               "name": "diskdevices",
               "hidden": true
             },
-            "allow_all_value": false,
-            "allow_multiple": false,
+            "allowAllValue": false,
+            "allowMultiple": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": {
@@ -3469,9 +3466,9 @@
         {
           "kind": "ListVariable",
           "spec": {
-            "default_value": "1m",
-            "allow_all_value": false,
-            "allow_multiple": false,
+            "defaultValue": "1m",
+            "allowAllValue": false,
+            "allowMultiple": false,
             "plugin": {
               "kind": "StaticListVariable",
               "spec": { "values": ["1m", "5m"] }

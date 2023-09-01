@@ -31,7 +31,7 @@ export type VariableState = {
    * If a local variable is overriding an external variable, external var will have the flag ``overridden=true``.
    */
   overridden?: boolean;
-  default_value?: VariableValue;
+  defaultValue?: VariableValue;
 };
 
 export type VariableStateMap = Record<string, VariableState>;
