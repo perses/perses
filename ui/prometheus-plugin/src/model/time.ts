@@ -56,7 +56,7 @@ export function getRangeStep(timeRange: PrometheusTimeRange, minStepSeconds = 15
  * Converts a DurationString to seconds, rounding down.
  */
 export function getDurationStringSeconds(durationString?: DurationString) {
-  if (durationString === undefined) return undefined;
+  if (!durationString) return undefined;
 
   const duration = parseDurationString(durationString);
   const ms = milliseconds(duration);
