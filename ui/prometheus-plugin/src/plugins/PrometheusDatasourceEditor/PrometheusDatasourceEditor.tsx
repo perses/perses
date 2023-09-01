@@ -17,7 +17,7 @@ import { Grid, IconButton, TextField, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { PrometheusDatasourceSpec } from './types';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 export interface PrometheusDatasourceEditorProps {
   value: PrometheusDatasourceSpec;
@@ -71,7 +71,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             fullWidth
             label="Scrape Interval"
             value={value.scrape_interval || ''}
-            placeholder="Default: 15s"
+            placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
             InputProps={{
               readOnly: isReadonly,
             }}
@@ -273,7 +273,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             fullWidth
             label="Scrape Interval"
             value={value.scrape_interval || ''}
-            placeholder="Default: 15s"
+            placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
             InputProps={{
               readOnly: isReadonly,
             }}

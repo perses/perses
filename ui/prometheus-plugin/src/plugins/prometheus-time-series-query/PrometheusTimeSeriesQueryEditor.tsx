@@ -24,6 +24,7 @@ import {
 } from '../../model';
 import { PromQLEditor } from '../../components';
 import { PrometheusDatasourceSpec } from '../prometheus-datasource';
+import { DEFAULT_SCRAPE_INTERVAL } from '../PrometheusDatasourceEditor';
 import {
   PrometheusTimeSeriesQueryEditorProps,
   useQueryState,
@@ -49,7 +50,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const minStepPlaceholder =
     minStep ??
     (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrape_interval) ??
-    '15s';
+    DEFAULT_SCRAPE_INTERVAL;
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isPrometheusDatasourceSelector(next)) {

@@ -13,11 +13,13 @@
 
 import { DurationString, RequestHeaders } from '@perses-dev/core';
 
+export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
+
 // TODO: unify this one with the other PrometheusDatasourceSpec used for datasource store manipulation
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
   proxy?: HTTPProxy;
-  scrape_interval?: DurationString; // default to 15s
+  scrape_interval?: DurationString; // default to 1m
 }
 
 export interface HTTPProxy {

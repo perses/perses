@@ -23,7 +23,7 @@ import { PrometheusTimeSeriesQuery } from './';
 
 const datasource: PrometheusDatasourceSpec = {
   direct_url: '/test',
-  scrape_interval: '15s',
+  scrape_interval: '1m',
 };
 
 const promStubClient = PrometheusDatasource.createClient(datasource, {});
