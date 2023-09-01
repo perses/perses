@@ -301,7 +301,7 @@ const FORMAT_DURATION_TESTS: FormatTestCase[] = [
       minutes: 5,
       seconds: 4,
     } as Duration,
-    expected: '10y 8w 7d 6h 5m 4s',
+    expected: '10y8w7d6h5m4s',
   },
   {
     duration: {
@@ -325,7 +325,7 @@ const FORMAT_DURATION_TESTS: FormatTestCase[] = [
       minutes: 0,
       seconds: 0.255,
     } as Duration,
-    expected: '1d 255ms',
+    expected: '1d255ms',
   },
 ];
 describe('formatDuration', () => {

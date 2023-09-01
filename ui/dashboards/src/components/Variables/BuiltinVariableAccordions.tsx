@@ -39,9 +39,9 @@ export function BuiltinVariableAccordions({ builtinVariableDefinitions }: Builti
       const value = result[definition.spec.source];
       if (value) {
         value.push(definition);
-      } else {
-        result[definition.spec.source] = [definition];
+        continue;
       }
+      result[definition.spec.source] = [definition];
     }
     return result;
   }, [builtinVariableDefinitions]);

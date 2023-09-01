@@ -13,7 +13,6 @@
 
 import {
   DatasourceSpec,
-  durationToMs,
   formatDuration,
   msToPrometheusDuration,
   Notice,
@@ -21,7 +20,7 @@ import {
   TimeSeriesData,
 } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceTemplateVariables, replaceTemplateVariable } from '@perses-dev/plugin-system';
-import { fromUnixTime } from 'date-fns';
+import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   parseValueTuple,
   PrometheusClient,
@@ -47,7 +46,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     spec.datasource ?? DEFAULT_PROM
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const datasourceScrapeInterval = Math.trunc(
-    durationToMs(parseDurationString(datasource.plugin.spec.scrape_interval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+    milliseconds(parseDurationString(datasource.plugin.spec.scrape_interval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
 
   const minStep = getDurationStringSeconds(spec.min_step) ?? datasourceScrapeInterval;
