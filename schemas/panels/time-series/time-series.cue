@@ -17,17 +17,17 @@ import (
 	"github.com/perses/perses/schemas/common"
 )
 
-#legend_value: common.#calculation
+#legendValue: common.#calculation
 
 #legend: {
 	position: "bottom" | "right"
 	mode?:    "list" | "table"
 	size?:    "small" | "medium"
-	values?: [...#legend_value]
+	values?: [...#legendValue]
 }
 
 #tooltip: {
-	enable_pinning?: bool
+	enablePinning?: bool
 }
 
 #palette: {
@@ -35,17 +35,17 @@ import (
 }
 
 #visual: {
-	display?:       "line" | "bar"
-	line_width?:    number & >=0.25 & <=3
-	area_opacity?:  number & >=0 & <=1
-	show_points?:   "auto" | "always"
-	palette?:       #palette
-	point_radius?:  number & >=0 & <=6
-	stack?:         "all" | "percent" // TODO: percent option is disabled until support is added
-	connect_nulls?: bool
+	display?:      "line" | "bar"
+	lineWidth?:    number & >=0.25 & <=3
+	areaOpacity?:  number & >=0 & <=1
+	showPoints?:   "auto" | "always"
+	palette?:      #palette
+	pointRadius?:  number & >=0 & <=6
+	stack?:        "all" | "percent" // TODO: percent option is disabled until support is added
+	connectNulls?: bool
 }
 
-#y_axis: {
+#yAxis: {
 	show?:  bool
 	label?: string
 	unit?:  common.#unit
@@ -57,7 +57,7 @@ kind: "TimeSeriesChart"
 spec: close({
 	legend?:     #legend
 	tooltip?:    #tooltip
-	y_axis?:     #y_axis
+	yAxis?:      #yAxis
 	thresholds?: common.#thresholds
 	visual?:     #visual
 })

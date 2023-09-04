@@ -8,14 +8,14 @@ if #var.type == "query" {
         kind:          "PrometheusPromQLVariable"
         spec: {
             expr:       regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[1]
-            label_name: regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[2]
+            labelName: regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[2]
         }
     }
     if #var.query.query !~ #qResRegexp {
         kind:          "PrometheusPromQLVariable"
         spec: {
             expr:       #cleanedQuery
-            label_name: "migration_from_grafana_not_supported"
+            labelName: "migration_from_grafana_not_supported"
         }
     }
 },

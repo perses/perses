@@ -108,7 +108,7 @@ const meta: Meta<typeof TimeChart> = {
     },
     unit: {
       kind: 'Decimal' as const,
-      decimal_places: 2,
+      decimalPlaces: 2,
       abbreviate: true,
     },
     tooltipConfig: DEFAULT_TOOLTIP_CONFIG,

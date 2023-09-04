@@ -29,7 +29,7 @@ export const PrometheusTimeSeriesQuery: TimeSeriesQueryPlugin<PrometheusTimeSeri
   dependsOn: (spec) => {
     // Variables can be used in the query and/or in the legend format string
     const queryVariables = parseTemplateVariables(spec.query);
-    const legendVariables = parseTemplateVariables(spec.series_name_format || '');
+    const legendVariables = parseTemplateVariables(spec.seriesNameFormat || '');
     const allVariables = [...new Set([...queryVariables, ...legendVariables])];
     return {
       variables: allVariables,

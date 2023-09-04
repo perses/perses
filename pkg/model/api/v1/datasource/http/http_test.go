@@ -92,7 +92,7 @@ func TestUnmarshalJSONAllowedEndpoint(t *testing.T) {
 			title: "simple endpoint",
 			jason: `
 {
-  "endpoint_pattern": "/api/v1/labels",
+  "endpointPattern": "/api/v1/labels",
   "method": "POST"
 }
 `,
@@ -105,7 +105,7 @@ func TestUnmarshalJSONAllowedEndpoint(t *testing.T) {
 			title: "complex endpoint patter",
 			jason: `
 {
-  "endpoint_pattern": "^/?api/v./[a-zA-Z0-9]$",
+  "endpointPattern": "^/?api/v./[a-zA-Z0-9]$",
   "method": "POST"
 }
 `,
@@ -133,7 +133,7 @@ func TestUnmarshalYAMLAllowedEndpoint(t *testing.T) {
 		{
 			title: "simple endpoint",
 			yamele: `
-endpoint_pattern: "/api/v1/labels"
+endpointPattern: "/api/v1/labels"
 method: "POST"
 `,
 			result: AllowedEndpoint{
@@ -144,7 +144,7 @@ method: "POST"
 		{
 			title: "complex endpoint patter",
 			yamele: `
-endpoint_pattern: "^/?api/v./[a-zA-Z0-9]$"
+endpointPattern: "^/?api/v./[a-zA-Z0-9]$"
 method: "POST"
 `,
 			result: AllowedEndpoint{
@@ -175,7 +175,7 @@ func TestMarshalJSONAllowedEndpoint(t *testing.T) {
 				Method:          http.MethodPost,
 			},
 			result: `{
-  "endpoint_pattern": "/api/v1/labels",
+  "endpointPattern": "/api/v1/labels",
   "method": "POST"
 }`,
 		},
@@ -186,7 +186,7 @@ func TestMarshalJSONAllowedEndpoint(t *testing.T) {
 				Method:          http.MethodPost,
 			},
 			result: `{
-  "endpoint_pattern": "^/?api/v./[a-zA-Z0-9]$",
+  "endpointPattern": "^/?api/v./[a-zA-Z0-9]$",
   "method": "POST"
 }`,
 		},
@@ -212,7 +212,7 @@ func TestMarshalYAMLAllowedEndpoint(t *testing.T) {
 				EndpointPattern: common.MustNewRegexp("/api/v1/labels"),
 				Method:          http.MethodPost,
 			},
-			result: `endpoint_pattern: /api/v1/labels
+			result: `endpointPattern: /api/v1/labels
 method: POST
 `,
 		},
@@ -222,7 +222,7 @@ method: POST
 				EndpointPattern: common.MustNewRegexp("^/?api/v./[a-zA-Z0-9]$"),
 				Method:          http.MethodPost,
 			},
-			result: `endpoint_pattern: ^/?api/v./[a-zA-Z0-9]$
+			result: `endpointPattern: ^/?api/v./[a-zA-Z0-9]$
 method: POST
 `,
 		},
@@ -267,7 +267,7 @@ func TestValidateAndExtract(t *testing.T) {
 
 	// Check and Validate HTTPProxy when it is hidden in a map of interface
 	uglyStruct := map[string]interface{}{
-		"direct_url": "",
+		"directUrl": "",
 		"proxy": map[string]interface{}{
 			"kind": "HTTPProxy",
 			"spec": map[string]interface{}{

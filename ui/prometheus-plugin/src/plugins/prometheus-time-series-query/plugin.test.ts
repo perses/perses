@@ -22,8 +22,8 @@ import { PrometheusDatasource, PrometheusDatasourceSpec } from '../prometheus-da
 import { PrometheusTimeSeriesQuery } from './';
 
 const datasource: PrometheusDatasourceSpec = {
-  direct_url: '/test',
-  scrape_interval: '1m',
+  directUrl: '/test',
+  scrapeInterval: '1m',
 };
 
 const promStubClient = PrometheusDatasource.createClient(datasource, {});
@@ -85,14 +85,14 @@ describe('PrometheusTimeSeriesQuery', () => {
     const { variables } = PrometheusTimeSeriesQuery.dependsOn(
       {
         query: 'sum(up{job="$job"}) by ($instance)',
-        series_name_format: `$foo - label`,
+        seriesNameFormat: `$foo - label`,
       },
       createStubContext()
     );
     expect(variables).toEqual(['job', 'instance', 'foo']);
   });
 
-  it('should replace variables in series_name_format', async () => {
+  it('should replace variables in seriesNameFormat', async () => {
     const ctx = createStubContext();
     ctx.variableState = {
       foo: {
@@ -104,7 +104,7 @@ describe('PrometheusTimeSeriesQuery', () => {
     const results = await PrometheusTimeSeriesQuery.getTimeSeriesData(
       {
         query: 'sum(up{job="$job"}) by ($instance)',
-        series_name_format: `$foo - format`,
+        seriesNameFormat: `$foo - format`,
       },
       ctx
     );

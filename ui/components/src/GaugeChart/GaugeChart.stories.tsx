@@ -36,7 +36,7 @@ export const Primary: Story = {
     width: 400,
     data: { value: 63.87333983413257, label: '{env="demo",instance="demo.do.prometheus.io:9100",job="node"}' },
     unit: {
-      decimal_places: 1,
+      decimalPlaces: 1,
       kind: 'Percent',
     },
     max: 100,
@@ -60,7 +60,7 @@ export const NullValue: Story = {
     width: 400,
     data: { value: null, label: '{env="demo",instance="demo.do.prometheus.io:9100",job="node"}' },
     unit: {
-      decimal_places: 1,
+      decimalPlaces: 1,
       kind: 'Percent',
     },
     max: 100,

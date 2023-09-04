@@ -37,7 +37,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
   const {
     thresholds: { defaultColor, palette },
   } = chartsTheme;
-  const defaultThresholdColor = thresholds?.default_color ?? defaultColor;
+  const defaultThresholdColor = thresholds?.defaultColor ?? defaultColor;
 
   const [steps, setSteps] = useState(thresholds?.steps);
   useEffect(() => {
@@ -83,12 +83,12 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
-          draft.default_color = color;
+          draft.defaultColor = color;
         })
       );
     } else {
       onChange({
-        default_color: color,
+        defaultColor: color,
       });
     }
   };

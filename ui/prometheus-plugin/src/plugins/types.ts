@@ -22,14 +22,14 @@ export type PrometheusLabelNamesVariableOptions = PrometheusVariableOptionsBase 
 };
 
 export type PrometheusLabelValuesVariableOptions = PrometheusVariableOptionsBase & {
-  label_name: string;
+  labelName: string;
   matchers?: string[];
 };
 
 export type PrometheusPromQLVariableOptions = PrometheusVariableOptionsBase & {
   // expr is the PromQL expression.
   expr: string;
-  // label_name is the name of the label that will be used after the PromQL query is performed to select the label value.
+  // labelName is the name of the label that will be used after the PromQL query is performed to select the label value.
   // Note: This field is not part of the Prometheus API.
-  label_name: string;
+  labelName: string;
 };

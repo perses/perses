@@ -75,9 +75,9 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
       <TextField
         label="Label Name"
         required
-        value={props.value.label_name}
+        value={props.value.labelName}
         onChange={(e) => {
-          props.onChange({ ...props.value, label_name: e.target.value });
+          props.onChange({ ...props.value, labelName: e.target.value });
         }}
         InputProps={{
           readOnly: props.isReadonly,
@@ -183,22 +183,22 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
       />
       <TextField
         label="Label Name"
-        value={props.value.label_name}
+        value={props.value.labelName}
         InputProps={{
           readOnly: props.isReadonly,
         }}
         onChange={(e) => {
-          props.onChange({ ...props.value, label_name: e.target.value });
+          props.onChange({ ...props.value, labelName: e.target.value });
         }}
       />
     </Stack>
   );
 }
 
-function capturingMatrix(matrix: MatrixData, label_name: string): string[] {
+function capturingMatrix(matrix: MatrixData, labelName: string): string[] {
   const captured = new Set<string>();
   for (const sample of matrix.result) {
-    const value = sample.metric[label_name];
+    const value = sample.metric[labelName];
     if (value !== undefined) {
       captured.add(value);
     }
@@ -206,10 +206,10 @@ function capturingMatrix(matrix: MatrixData, label_name: string): string[] {
   return Array.from(captured.values());
 }
 
-function capturingVector(vector: VectorData, label_name: string): string[] {
+function capturingVector(vector: VectorData, labelName: string): string[] {
   const captured = new Set<string>();
   for (const sample of vector.result) {
-    const value = sample.metric[label_name];
+    const value = sample.metric[labelName];
     if (value !== undefined) {
       captured.add(value);
     }
@@ -257,7 +257,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
     const { data: options } = await client.labelValues({
-      labelName: replaceTemplateVariables(pluginDef.label_name, ctx.variables),
+      labelName: replaceTemplateVariables(pluginDef.labelName, ctx.variables),
       'match[]': match,
       ...timeRange,
     });
@@ -271,11 +271,11 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
         spec.matchers
           ?.map((m) => parseTemplateVariables(m))
           .flat()
-          .concat(parseTemplateVariables(spec.label_name)) || [],
+          .concat(parseTemplateVariables(spec.labelName)) || [],
     };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
-  createInitialOptions: () => ({ label_name: '' }),
+  createInitialOptions: () => ({ labelName: '' }),
 };
 
 export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOptions> = {
@@ -285,7 +285,7 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
     const { data: options } = await client.instantQuery({
       query: replaceTemplateVariables(spec.expr, ctx.variables),
     });
-    const labelName = replaceTemplateVariables(spec.label_name, ctx.variables);
+    const labelName = replaceTemplateVariables(spec.labelName, ctx.variables);
     let values: string[] = [];
     if (options?.resultType === 'matrix') {
       values = capturingMatrix(options, labelName);
@@ -298,8 +298,8 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
     };
   },
   dependsOn: (spec) => {
-    return { variables: parseTemplateVariables(spec.expr).concat(parseTemplateVariables(spec.label_name)) };
+    return { variables: parseTemplateVariables(spec.expr).concat(parseTemplateVariables(spec.labelName)) };
   },
   OptionsEditorComponent: PrometheusPromQLVariableEditor,
-  createInitialOptions: () => ({ expr: '', label_name: '' }),
+  createInitialOptions: () => ({ expr: '', labelName: '' }),
 };

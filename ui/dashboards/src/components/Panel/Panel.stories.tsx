@@ -126,12 +126,12 @@ const customAxisPanel: PanelDefinition = {
     plugin: {
       kind: 'TimeSeriesChart',
       spec: {
-        y_axis: {
+        yAxis: {
           show: true,
           label: 'Axis Label',
           unit: {
             kind: 'Decimal',
-            decimal_places: 1,
+            decimalPlaces: 1,
             abbreviate: true,
           },
           max: 1200,

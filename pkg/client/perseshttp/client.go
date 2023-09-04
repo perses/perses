@@ -35,7 +35,7 @@ type BasicAuth struct {
 
 func (b *BasicAuth) Verify() error {
 	if len(b.User) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
-		return fmt.Errorf("when using basic_auth, user or password cannot be empty")
+		return fmt.Errorf("when using basicAuth, user or password cannot be empty")
 	}
 	if len(b.PasswordFile) > 0 {
 		// Read the file and load the password contained
@@ -53,7 +53,7 @@ type RestConfigClient struct {
 	URL         string            `json:"url" yaml:"url"`
 	InsecureTLS bool              `json:"insecure_tls,omitempty" yaml:"insecure_tls,omitempty"`
 	Token       string            `json:"token,omitempty" yaml:"token,omitempty"`
-	BasicAuth   *BasicAuth        `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	BasicAuth   *BasicAuth        `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
 	Headers     map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 }
 

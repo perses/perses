@@ -18,8 +18,8 @@ export const EMPTY_DASHBOARD_RESOURCE: DashboardResource = {
   metadata: {
     name: 'My Dashboard',
     project: 'Storybook',
-    created_at: '2021-11-09T00:00:00Z',
-    updated_at: '2021-11-09T00:00:00Z',
+    createdAt: '2021-11-09T00:00:00Z',
+    updatedAt: '2021-11-09T00:00:00Z',
     version: 0,
   },
   spec: {

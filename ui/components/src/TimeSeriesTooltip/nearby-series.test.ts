@@ -62,7 +62,7 @@ describe('legacyCheckforNearbySeries', () => {
   it('should return nearby series data for points nearby the cursor', () => {
     const decimalUnit: UnitOptions = {
       kind: 'Decimal',
-      decimal_places: 2,
+      decimalPlaces: 2,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(
       nearbySeriesOutput
@@ -76,7 +76,7 @@ describe('legacyCheckforNearbySeries', () => {
     }
     const percentFormattedUnit: UnitOptions = {
       kind: 'PercentDecimal',
-      decimal_places: 0,
+      decimalPlaces: 0,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
       percentFormattedOutput

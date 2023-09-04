@@ -53,7 +53,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   const handleYAxisChange: YAxisOptionsEditorProps['onChange'] = (newYAxis) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
-        draft.y_axis = newYAxis;
+        draft.yAxis = newYAxis;
       })
     );
   };
@@ -75,7 +75,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
-        <YAxisOptionsEditor value={value.y_axis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />
+        <YAxisOptionsEditor value={value.yAxis ?? DEFAULT_Y_AXIS} onChange={handleYAxisChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
@@ -87,7 +87,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
               onChange(
                 produce(value, (draft: TimeSeriesChartOptions) => {
                   // reset button removes all optional panel options
-                  draft.y_axis = undefined;
+                  draft.yAxis = undefined;
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;

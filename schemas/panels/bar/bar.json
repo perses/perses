@@ -4,7 +4,7 @@
     "calculation": "last-number",
     "unit": {
       "kind": "Percent",
-      "decimal_places": 2
+      "decimalPlaces": 2
     },
     "sort": "desc",
     "mode": "value"

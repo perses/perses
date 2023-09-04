@@ -52,7 +52,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			},
 		},
 		{
-			title: "query variable by label_names",
+			title: "query variable by label names",
 			jason: `
 {
   "kind": "ListVariable",
@@ -86,7 +86,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 			},
 		},
 		{
-			title: "query variable by label_names with matcher",
+			title: "query variable by label names with matcher",
 			jason: `
 {
   "kind": "ListVariable",
@@ -139,7 +139,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]
@@ -159,8 +159,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -182,7 +182,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]
@@ -203,8 +203,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -227,7 +227,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]
@@ -249,8 +249,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -293,7 +293,7 @@ spec:
 			},
 		},
 		{
-			title: "query variable by label_names",
+			title: "query variable by label names",
 			yamele: `
 kind: "ListVariable"
 spec:
@@ -320,7 +320,7 @@ spec:
 			},
 		},
 		{
-			title: "query variable by label_names with matcher",
+			title: "query variable by label names with matcher",
 			yamele: `
 kind: "ListVariable"
 spec:
@@ -364,7 +364,7 @@ spec:
   plugin:
     kind: "PrometheusLabelValuesVariable"
     spec:
-      label_name: "instance"
+      labelName: "instance"
       matchers:
         - "up"
 `,
@@ -379,8 +379,8 @@ spec:
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[interface{}]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -400,7 +400,7 @@ spec:
   plugin:
     kind: "PrometheusLabelValuesVariable"
     spec:
-      label_name: "instance"
+      labelName: "instance"
       matchers:
         - "up"
 `,
@@ -416,8 +416,8 @@ spec:
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[interface{}]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -440,7 +440,7 @@ spec:
   plugin:
     kind: "PrometheusLabelValuesVariable"
     spec:
-      label_name: "instance"
+      labelName: "instance"
       matchers:
         - "up"
 `,
@@ -457,8 +457,8 @@ spec:
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[interface{}]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -561,7 +561,7 @@ func TestMarshalListVariable(t *testing.T) {
 }`,
 		},
 		{
-			title: "query variable by label_names",
+			title: "query variable by label names",
 			variable: Variable{
 				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
@@ -596,7 +596,7 @@ func TestMarshalListVariable(t *testing.T) {
 }`,
 		},
 		{
-			title: "query variable by label_names with matcher",
+			title: "query variable by label names with matcher",
 			variable: Variable{
 				Kind: variable.KindList,
 				Spec: &ListVariableSpec{
@@ -649,8 +649,8 @@ func TestMarshalListVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -669,7 +669,7 @@ func TestMarshalListVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]
@@ -693,8 +693,8 @@ func TestMarshalListVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -714,7 +714,7 @@ func TestMarshalListVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]
@@ -739,8 +739,8 @@ func TestMarshalListVariable(t *testing.T) {
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
 							Spec: map[string]interface{}{
-								"label_name": "instance",
-								"matchers":   []interface{}{"up"},
+								"labelName": "instance",
+								"matchers":  []interface{}{"up"},
 							},
 						},
 					},
@@ -763,7 +763,7 @@ func TestMarshalListVariable(t *testing.T) {
     "plugin": {
       "kind": "PrometheusLabelValuesVariable",
       "spec": {
-        "label_name": "instance",
+        "labelName": "instance",
         "matchers": [
           "up"
         ]

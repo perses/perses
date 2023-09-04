@@ -52,8 +52,8 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
           name: datedDashboard.dashboard.metadata.name,
           displayName: getDashboardDisplayName(datedDashboard.dashboard),
           version: datedDashboard.dashboard.metadata.version,
-          createdAt: datedDashboard.dashboard.metadata.created_at,
-          updatedAt: datedDashboard.dashboard.metadata.updated_at,
+          createdAt: datedDashboard.dashboard.metadata.createdAt,
+          updatedAt: datedDashboard.dashboard.metadata.updatedAt,
           viewedAt: datedDashboard.date,
         } as Row)
     );

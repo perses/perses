@@ -54,8 +54,8 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'TestAll',
-    created_at: '2023-03-17T20:13:03.570631Z',
-    updated_at: '2023-03-17T20:13:03.570631Z',
+    createdAt: '2023-03-17T20:13:03.570631Z',
+    updatedAt: '2023-03-17T20:13:03.570631Z',
     version: 0,
     project: 'testing',
   },
@@ -119,10 +119,10 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
               legend: {
                 position: 'right',
               },
-              y_axis: {
+              yAxis: {
                 unit: {
                   kind: 'PercentDecimal',
-                  decimal_places: 0,
+                  decimalPlaces: 0,
                 },
               },
             },
@@ -179,7 +179,7 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
-              label_name: 'instance',
+              labelName: 'instance',
             },
           },
         },
@@ -294,8 +294,8 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'TimeSeriesChartPanel',
-    created_at: '2022-12-21T00:00:00Z',
-    updated_at: '2023-01-25T17:43:56.745494Z',
+    createdAt: '2022-12-21T00:00:00Z',
+    updatedAt: '2023-01-25T17:43:56.745494Z',
     version: 3,
     project: 'testing',
   },
@@ -311,7 +311,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              visual: { connect_nulls: true, show_points: 'always' },
+              visual: { connectNulls: true, showPoints: 'always' },
             },
           },
           queries: [
@@ -337,7 +337,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              visual: { area_opacity: 0.5, connect_nulls: false, line_width: 3, point_radius: 6 },
+              visual: { areaOpacity: 0.5, connectNulls: false, lineWidth: 3, pointRadius: 6 },
             },
           },
           queries: [
@@ -433,7 +433,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                   spec: {
                     datasource: { kind: 'PrometheusDatasource', name: 'PrometheusDemo' },
                     query: 'up{job="grafana",instance="demo.do.prometheus.io:3000"}',
-                    series_name_format: 'formatted series name example - {{job}} job - instance {{instance}}',
+                    seriesNameFormat: 'formatted series name example - {{job}} job - instance {{instance}}',
                   },
                 },
               },
@@ -475,7 +475,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
               legend: {
                 position: 'right',
               },
-              visual: { connect_nulls: true },
+              visual: { connectNulls: true },
             },
           },
           queries: [
@@ -509,7 +509,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
               },
               visual: {
                 palette: { kind: 'Categorical' },
-                connect_nulls: true,
+                connectNulls: true,
               },
             },
           },
@@ -634,8 +634,8 @@ const TIMESERIES_BENCHMARKS_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'TimeSeriesChartPanel',
-    created_at: '2022-12-21T00:00:00Z',
-    updated_at: '2023-01-25T17:43:56.745494Z',
+    createdAt: '2022-12-21T00:00:00Z',
+    updatedAt: '2023-01-25T17:43:56.745494Z',
     version: 3,
     project: 'testing',
   },
@@ -924,8 +924,8 @@ const TIMESERIES_MOCK_DATA_DASHBOARD_RESOURCE: DashboardResource = {
   kind: 'Dashboard',
   metadata: {
     name: 'TimeSeriesChartPanel',
-    created_at: '2022-12-21T00:00:00Z',
-    updated_at: '2023-01-25T17:43:56.745494Z',
+    createdAt: '2022-12-21T00:00:00Z',
+    updatedAt: '2023-01-25T17:43:56.745494Z',
     version: 3,
     project: 'testing',
   },

@@ -83,7 +83,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     );
   };
 
-  // ensures decimal_places defaults to correct value
+  // ensures decimalPlaces defaults to correct value
   const unit = merge({}, DEFAULT_UNIT, value.unit);
 
   return (

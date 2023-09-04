@@ -25,8 +25,8 @@ func NewMetadata(name string) *Metadata {
 
 type Metadata struct {
 	Name      string    `json:"name" yaml:"name"`
-	CreatedAt time.Time `json:"created_at" yaml:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" yaml:"updated_at"`
+	CreatedAt time.Time `json:"createdAt" yaml:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
 	Version   uint64    `json:"version" yaml:"version"`
 }
 

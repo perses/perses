@@ -218,7 +218,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 							Plugin: common.Plugin{
 								Kind: "PrometheusLabelValuesVariable",
 								Spec: map[string]interface{}{
-									"label_name": "$foo",
+									"labelName": "$foo",
 									"matchers": []interface{}{
 										"$foo{$bar='test'}",
 									},
@@ -385,8 +385,8 @@ func TestBuildVariableDependencies(t *testing.T) {
 							Plugin: common.Plugin{
 								Kind: "PrometheusPromQLVariable",
 								Spec: map[string]interface{}{
-									"expr":       "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
-									"label_name": "prometheus",
+									"expr":      "group by(prometheus) (label_replace(kube_statefulset_labels{$filter_platform,stack=~\"$PaaS\",$filter_kube_sts,stack=~\"$PaaS\",namespace=~\"$extlabels_prometheus_namespace\"},\"prometheus\",\"$1\",\"label_app_kubernetes_io_instance\",\"([^-]+)-?.*\"))",
+									"labelName": "prometheus",
 								},
 							},
 						},

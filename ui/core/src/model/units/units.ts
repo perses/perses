@@ -40,7 +40,7 @@ export const UNIT_CONFIG = {
 
 export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions | BytesUnitOptions;
 
-type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimal_places?: number } ? UnitOpt : never;
+type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasAbbreviate<UnitOpt> = UnitOpt extends { abbreviate?: boolean } ? UnitOpt : never;
 
 export function formatValue(value: number, unitOptions?: UnitOptions): string {
@@ -101,7 +101,7 @@ export function isBytesUnit(unitOptions: UnitOptions): unitOptions is BytesUnitO
 export function isUnitWithDecimalPlaces(unitOptions: UnitOptions): unitOptions is HasDecimalPlaces<UnitOptions> {
   const groupConfig = getUnitGroupConfig(unitOptions);
 
-  return !!groupConfig.decimal_places;
+  return !!groupConfig.decimalPlaces;
 }
 
 export function isUnitWithAbbreviate(unitOptions: UnitOptions): unitOptions is HasAbbreviate<UnitOptions> {

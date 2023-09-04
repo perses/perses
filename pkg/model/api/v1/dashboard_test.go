@@ -27,8 +27,8 @@ import (
 )
 
 type TimeSeriesSpec struct {
-	// TODO: show_legend needs to be removed in favor of new spec
-	ShowLegend bool     `json:"show_legend" yaml:"show_legend"`
+	// TODO: showLegend needs to be removed in favor of new spec
+	ShowLegend bool     `json:"showLegend" yaml:"showLegend"`
 	Lines      []string `json:"lines" yaml:"lines"`
 }
 
@@ -94,8 +94,8 @@ func TestMarshalDashboard(t *testing.T) {
   "kind": "Dashboard",
   "metadata": {
     "name": "SimpleDashboard",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "version": 0,
     "project": "perses"
   },
@@ -110,7 +110,7 @@ func TestMarshalDashboard(t *testing.T) {
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "show_legend": false,
+              "showLegend": false,
               "lines": [
                 "up"
               ]
@@ -177,7 +177,7 @@ func TestMarshalDashboard(t *testing.T) {
 									Plugin: common.Plugin{
 										Kind: "PrometheusLabelValuesVariable",
 										Spec: map[string]interface{}{
-											"label_name": "$labelName",
+											"labelName": "$labelName",
 											"matchers": []string{
 												"up",
 											},
@@ -232,8 +232,8 @@ func TestMarshalDashboard(t *testing.T) {
   "kind": "Dashboard",
   "metadata": {
     "name": "SimpleDashboard",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "version": 0,
     "project": "perses"
   },
@@ -263,7 +263,7 @@ func TestMarshalDashboard(t *testing.T) {
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "$labelName",
+              "labelName": "$labelName",
               "matchers": [
                 "up"
               ]
@@ -283,7 +283,7 @@ func TestMarshalDashboard(t *testing.T) {
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "show_legend": false,
+              "showLegend": false,
               "lines": [
                 "up"
               ]
@@ -330,8 +330,8 @@ func TestUnmarshallDashboard(t *testing.T) {
   "kind": "Dashboard",
   "metadata": {
     "name": "SimpleDashboard",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "project": "perses"
   },
   "spec": {
@@ -357,7 +357,7 @@ func TestUnmarshallDashboard(t *testing.T) {
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "$labelName",
+              "labelName": "$labelName",
               "matchers": [
                 "up"
               ]
@@ -376,7 +376,7 @@ func TestUnmarshallDashboard(t *testing.T) {
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "show_legend": false,
+              "showLegend": false,
               "lines": [
                 "up"
               ]
@@ -420,7 +420,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 					"lines": []interface{}{
 						"up",
 					},
-					"show_legend": false,
+					"showLegend": false,
 				},
 			},
 		},
@@ -458,7 +458,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 							Plugin: common.Plugin{
 								Kind: "PrometheusLabelValuesVariable",
 								Spec: map[string]interface{}{
-									"label_name": "$labelName",
+									"labelName": "$labelName",
 									"matchers": []interface{}{
 										"up",
 									},

@@ -75,13 +75,13 @@ export function getLineSeries(
   visual: TimeSeriesChartVisualOptions,
   paletteColor?: string
 ): LegacyTimeSeries {
-  const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
-  const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+  const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
+  const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   let showPoints = data !== undefined && data.length <= HIDE_DATAPOINTS_LIMIT;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'always') {
+  if (visual.showPoints === 'always') {
     showPoints = true;
   }
 
@@ -90,7 +90,7 @@ export function getLineSeries(
     id: id,
     name: formattedName,
     data: data,
-    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
     stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
@@ -103,12 +103,12 @@ export function getLineSeries(
       opacity: 0.8,
     },
     areaStyle: {
-      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+      opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
@@ -134,14 +134,14 @@ export function getTimeSeries(
   timeScale: TimeScale,
   paletteColor: string
 ): TimeSeriesOption {
-  const lineWidth = visual.line_width ?? DEFAULT_LINE_WIDTH;
-  const pointRadius = visual.point_radius ?? DEFAULT_POINT_RADIUS;
+  const lineWidth = visual.lineWidth ?? DEFAULT_LINE_WIDTH;
+  const pointRadius = visual.pointRadius ?? DEFAULT_POINT_RADIUS;
 
   // Shows datapoint symbols when selected time range is roughly 15 minutes or less
   const minuteMs = 60000;
   let showPoints = timeScale.rangeMs <= minuteMs * 15;
   // Allows overriding default behavior and opt-in to always show all symbols (can hurt performance)
-  if (visual.show_points === 'always') {
+  if (visual.showPoints === 'always') {
     showPoints = true;
   }
 
@@ -165,7 +165,7 @@ export function getTimeSeries(
     id: id,
     datasetIndex,
     name: formattedName,
-    connectNulls: visual.connect_nulls ?? DEFAULT_CONNECT_NULLS,
+    connectNulls: visual.connectNulls ?? DEFAULT_CONNECT_NULLS,
     color: paletteColor,
     stack: visual.stack === 'all' ? visual.stack : undefined,
     sampling: 'lttb',
@@ -178,12 +178,12 @@ export function getTimeSeries(
       opacity: 0.8,
     },
     areaStyle: {
-      opacity: visual.area_opacity ?? DEFAULT_AREA_OPACITY,
+      opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
     },
     // https://echarts.apache.org/en/option.html#series-line.emphasis
     emphasis: {
       focus: 'series',
-      disabled: visual.area_opacity !== undefined && visual.area_opacity > 0, // prevents flicker when moving cursor between shaded regions
+      disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
         width: lineWidth + 1.5,
         opacity: 1,
@@ -284,7 +284,7 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]) {
 }
 
 /**
- * Converts Perses panel y_axis from dashboard spec to ECharts supported yAxis options
+ * Converts Perses panel yAxis from dashboard spec to ECharts supported yAxis options
  */
 export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {

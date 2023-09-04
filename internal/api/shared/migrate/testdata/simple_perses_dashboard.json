@@ -2,8 +2,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "xRV24sBVk",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "version": 0,
     "project": ""
   },
@@ -62,7 +62,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": []
             }
           }
@@ -82,7 +82,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": ["thanos_build_info"]
             }
           }
@@ -102,7 +102,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": ["thanos_build_info{stack=~\"erd.+\"}"]
             }
           }
@@ -122,7 +122,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": ["thanos_build_info{stack=~\"$lv1\"}"]
             }
           }
@@ -206,7 +206,7 @@
             "kind": "PrometheusPromQLVariable",
             "spec": {
               "expr": "group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"})",
-              "label_name": "type"
+              "labelName": "type"
             }
           }
         }
@@ -226,7 +226,7 @@
             "kind": "PrometheusPromQLVariable",
             "spec": {
               "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
-              "label_name": "type"
+              "labelName": "type"
             }
           }
         }
@@ -246,7 +246,7 @@
             "kind": "PrometheusPromQLVariable",
             "spec": {
               "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
-              "label_name": "migration_from_grafana_not_supported"
+              "labelName": "migration_from_grafana_not_supported"
             }
           }
         }

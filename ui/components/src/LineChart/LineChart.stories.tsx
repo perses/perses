@@ -46,7 +46,7 @@ const meta: Meta<typeof LineChart> = {
     },
     unit: {
       kind: 'Decimal' as const,
-      decimal_places: 2,
+      decimalPlaces: 2,
       abbreviate: true,
     },
     grid: {

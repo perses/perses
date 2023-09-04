@@ -16,23 +16,23 @@ package common
 #unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
 
 #timeUnit: {
-	kind:            "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
-	decimal_places?: number
+	kind:           "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
+	decimalPlaces?: number
 }
 
 #percentUnit: {
-	kind:            "Percent" | "PercentDecimal"
-	decimal_places?: number
+	kind:           "Percent" | "PercentDecimal"
+	decimalPlaces?: number
 }
 
 #decimalUnit: {
-	kind:            "Decimal"
-	decimal_places?: number
-	abbreviate?:     bool
+	kind:           "Decimal"
+	decimalPlaces?: number
+	abbreviate?:    bool
 }
 
 #bytesUnit: {
-	kind:            "Bytes"
-	decimal_places?: number
-	abbreviate?:     bool
+	kind:           "Bytes"
+	decimalPlaces?: number
+	abbreviate?:    bool
 }

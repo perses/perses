@@ -20,15 +20,15 @@ export const prometheusDemo: GlobalDatasource = {
   kind: 'GlobalDatasource',
   metadata: {
     name: 'PrometheusDemo',
-    created_at: '0001-01-01T00:00:00Z',
-    updated_at: '0001-01-01T00:00:00Z',
+    createdAt: '0001-01-01T00:00:00Z',
+    updatedAt: '0001-01-01T00:00:00Z',
     version: 0,
   },
   spec: {
     default: true,
     plugin: {
       kind: 'PrometheusDatasource',
-      spec: { direct_url: prometheusDemoUrl },
+      spec: { directUrl: prometheusDemoUrl },
     },
   },
 } as const;

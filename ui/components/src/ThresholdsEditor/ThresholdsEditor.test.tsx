@@ -128,12 +128,12 @@ describe('ThresholdsEditor', () => {
       expect(onChange).toHaveBeenCalledTimes(2);
       expect(onChange.mock.calls[0][0]).toStrictEqual(
         produce(thresholds, (draft) => {
-          draft.default_color = '#6a4';
+          draft.defaultColor = '#6a4';
         })
       );
       expect(onChange.mock.calls[1][0]).toStrictEqual(
         produce(thresholds, (draft) => {
-          draft.default_color = '#6a44eb';
+          draft.defaultColor = '#6a44eb';
         })
       );
     });

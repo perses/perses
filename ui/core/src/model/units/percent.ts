@@ -19,11 +19,11 @@ const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
 type PercentUnitKind = (typeof percentUnitKinds)[number];
 export type PercentUnitOptions = {
   kind: PercentUnitKind;
-  decimal_places?: number;
+  decimalPlaces?: number;
 };
 export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Percent',
-  decimal_places: true,
+  decimalPlaces: true,
 };
 const PERCENT_GROUP = 'Percent';
 export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> = {
@@ -44,15 +44,15 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
-export function formatPercent(value: number, { kind, decimal_places }: PercentUnitOptions): string {
+export function formatPercent(value: number, { kind, decimalPlaces }: PercentUnitOptions): string {
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'percent',
     useGrouping: true,
   };
 
-  if (hasDecimalPlaces(decimal_places)) {
-    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
-    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  if (hasDecimalPlaces(decimalPlaces)) {
+    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
   } else {
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }

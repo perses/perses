@@ -23,6 +23,6 @@ spec: close({
 		kind:  prometheus.kind
 		name?: string
 	}
-	label_name: string
+	labelName: string
 	matchers?: [...string]
 })

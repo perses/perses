@@ -31,7 +31,7 @@ export type UnitGroupConfig = {
   /**
    * When true, the unit group supports setting decimal places.
    */
-  decimal_places?: boolean;
+  decimalPlaces?: boolean;
   /**
    * When true, the unit group supports enabling abbreviate.
    */

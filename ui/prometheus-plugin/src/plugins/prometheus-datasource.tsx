@@ -20,22 +20,22 @@ import {
 } from './PrometheusDatasourceEditor';
 
 export interface PrometheusDatasourceSpec {
-  direct_url?: string;
+  directUrl?: string;
   headers?: RequestHeaders;
-  scrape_interval?: DurationString;
+  scrapeInterval?: DurationString;
 }
 
 /**
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { direct_url, headers: specHeaders } = spec;
+  const { directUrl, headers: specHeaders } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
-  const datasourceUrl = direct_url ?? proxyUrl;
+  const datasourceUrl = directUrl ?? proxyUrl;
   if (datasourceUrl === undefined) {
-    throw new Error('No URL specified for Prometheus client. You can use direct_url in the spec to configure it.');
+    throw new Error('No URL specified for Prometheus client. You can use directUrl in the spec to configure it.');
   }
 
   // Could think about this becoming a class, although it definitely doesn't have to be
@@ -101,5 +101,5 @@ export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpecFull
   createClient,
   getBuiltinVariableDefinitions,
   OptionsEditorComponent: PrometheusDatasourceEditor,
-  createInitialOptions: () => ({ direct_url: '' }),
+  createInitialOptions: () => ({ directUrl: '' }),
 };
