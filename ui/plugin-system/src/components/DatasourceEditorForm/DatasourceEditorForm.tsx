@@ -230,7 +230,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           </Grid>
         </Grid>
         <Divider />
-        <Typography py={1} variant="subtitle1">
+        <Typography py={1} variant="h3">
           Plugin Options
         </Typography>
         <PluginEditor

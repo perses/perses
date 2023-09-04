@@ -89,7 +89,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__rate_interval',
           description:
-            "Interval at least four times the value of the scrape interval, it avoid problems specific to Prometheus when using 'rate' and 'increase' functions.",
+            "Interval at least four times the value of the scrape interval. It avoids problems specific to Prometheus when using 'rate' and 'increase' functions.",
           hidden: true,
         },
       },

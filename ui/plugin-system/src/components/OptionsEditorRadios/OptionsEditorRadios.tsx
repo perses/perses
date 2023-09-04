@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControl, FormControlLabel, Radio, RadioGroup, RadioGroupProps, Box, Typography } from '@mui/material';
-import { useState } from 'react';
+import { FormControl, FormControlLabel, Radio, RadioGroup, RadioGroupProps, Box } from '@mui/material';
+import { ReactNode, useState } from 'react';
 import { OptionsEditorTabPanel } from '../OptionsEditorTabPanel';
 
 export type OptionsEditorRadio = {
@@ -20,7 +20,7 @@ export type OptionsEditorRadio = {
   /**
    * Content rendered when the tab is active.
    */
-  content: React.ReactNode;
+  content: ReactNode;
 };
 
 export type OptionsEditorRadiosProps = {
@@ -44,9 +44,6 @@ export const OptionsEditorRadios = (props: OptionsEditorRadiosProps) => {
     <>
       <Box sx={{ borderBottom: 1, borderColor: (theme) => theme.palette.divider }}>
         <FormControl>
-          <Typography variant="overline" component="h4">
-            Mode:
-          </Typography>
           <RadioGroup
             row
             defaultValue={defaultTab}
