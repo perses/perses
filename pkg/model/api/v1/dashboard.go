@@ -24,10 +24,48 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+type PanelDisplay struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
+}
+
+func (d *PanelDisplay) UnmarshalJSON(data []byte) error {
+	var tmp PanelDisplay
+	type plain PanelDisplay
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *PanelDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp PanelDisplay
+	type plain PanelDisplay
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*d = tmp
+	return nil
+}
+
+func (d *PanelDisplay) validate() error {
+	if len(d.Name) == 0 {
+		return fmt.Errorf("display.name cannot be empty")
+	}
+	return nil
+}
+
 type PanelSpec struct {
-	Display common.Display `json:"display" yaml:"display"`
-	Plugin  common.Plugin  `json:"plugin" yaml:"plugin"`
-	Queries []Query        `json:"queries,omitempty" yaml:"queries,omitempty"`
+	Display PanelDisplay  `json:"display" yaml:"display"`
+	Plugin  common.Plugin `json:"plugin" yaml:"plugin"`
+	Queries []Query       `json:"queries,omitempty" yaml:"queries,omitempty"`
 }
 
 type Panel struct {

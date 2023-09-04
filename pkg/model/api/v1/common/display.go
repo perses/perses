@@ -13,45 +13,7 @@
 
 package common
 
-import (
-	"encoding/json"
-	"fmt"
-)
-
 type Display struct {
-	Name        string `json:"name" yaml:"name"`
+	Name        string `json:"name,omitempty" yaml:"name,omitempty"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-}
-
-func (d *Display) UnmarshalJSON(data []byte) error {
-	var tmp Display
-	type plain Display
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *Display) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Display
-	type plain Display
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*d = tmp
-	return nil
-}
-
-func (d *Display) validate() error {
-	if len(d.Name) == 0 {
-		return fmt.Errorf("display.name cannot be empty")
-	}
-	return nil
 }
