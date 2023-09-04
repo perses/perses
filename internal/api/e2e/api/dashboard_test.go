@@ -33,7 +33,7 @@ import (
 func TestMainScenarioDashboard(t *testing.T) {
 	e2eframework.MainTestScenarioWithProject(t, shared.PathDashboard, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewDashboard(t, projectName, name)
-	})
+	}, nil)
 }
 
 func TestCreateDashboardWithWrongName(t *testing.T) {

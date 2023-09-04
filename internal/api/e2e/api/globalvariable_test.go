@@ -26,5 +26,5 @@ import (
 func TestMainScenarioGlobalVariable(t *testing.T) {
 	e2eframework.MainTestScenario(t, shared.PathGlobalVariable, func(name string) api.Entity {
 		return e2eframework.NewGlobalVariable(name)
-	})
+	}, nil)
 }

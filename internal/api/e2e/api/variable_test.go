@@ -26,5 +26,5 @@ import (
 func TestMainScenarioVariable(t *testing.T) {
 	e2eframework.MainTestScenarioWithProject(t, shared.PathVariable, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewVariable(projectName, name)
-	})
+	}, nil)
 }

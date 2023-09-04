@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func WriteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+func WriteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity, expectedEntity func(name string) modelAPI.Entity) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -87,7 +87,14 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 				t.Fatal(unmarshalErr)
 			}
 
-			assert.Equal(t, result.GetSpec(), entity.GetSpec())
+			var expectedResult modelAPI.Entity
+			if expectedEntity != nil {
+				expectedResult = expectedEntity(entity.GetMetadata().GetName())
+			} else {
+				expectedResult = entity
+			}
+
+			assert.Equal(t, expectedResult.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -120,9 +127,9 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 	})
 }
 
-func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity, expectedEntity func(name string) modelAPI.Entity) {
 
-	WriteTestScenario(t, path, creator)
+	WriteTestScenario(t, path, creator, expectedEntity)
 
 	// Retrieval tests : Check all different GET methods
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
@@ -169,7 +176,7 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 	})
 }
 
-func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity), expectedEntity func(projectName string, name string) modelAPI.Entity) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -241,7 +248,14 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 				t.Fatal(unmarshalErr)
 			}
 
-			assert.Equal(t, result.GetSpec(), entity.GetSpec())
+			var expectedResult modelAPI.Entity
+			if expectedEntity != nil {
+				expectedResult = expectedEntity(parent.GetMetadata().GetName(), entity.GetMetadata().GetName())
+			} else {
+				expectedResult = entity
+			}
+
+			assert.Equal(t, expectedResult.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -270,8 +284,8 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 	})
 }
 
-func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
-	WriteTestScenarioWithProject(t, path, creator)
+func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity), expectedEntity func(projectName string, name string) modelAPI.Entity) {
+	WriteTestScenarioWithProject(t, path, creator, expectedEntity)
 
 	// Retrieval tests : Check all different GET methods specifying the parent
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {

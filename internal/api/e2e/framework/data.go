@@ -321,11 +321,31 @@ func NewSecret(projectName string, name string) *v1.Secret {
 	return entity
 }
 
+func NewPublicSecret(projectName string, name string) *v1.PublicSecret {
+	entity := &v1.PublicSecret{
+		Kind:     v1.KindSecret,
+		Metadata: newProjectMetadata(projectName, name),
+		Spec:     v1.NewPublicSecretSpec(newSecretSpec()),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
 func NewGlobalSecret(name string) *v1.GlobalSecret {
 	entity := &v1.GlobalSecret{
 		Kind:     v1.KindGlobalSecret,
 		Metadata: newMetadata(name),
 		Spec:     newSecretSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
+	entity := &v1.PublicGlobalSecret{
+		Kind:     v1.KindGlobalSecret,
+		Metadata: newMetadata(name),
+		Spec:     v1.NewPublicSecretSpec(newSecretSpec()),
 	}
 	entity.Metadata.CreateNow()
 	return entity

@@ -26,5 +26,7 @@ import (
 func TestMainScenarioSecret(t *testing.T) {
 	e2eframework.WriteTestScenarioWithProject(t, shared.PathSecret, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewSecret(projectName, name)
+	}, func(projectName string, name string) api.Entity {
+		return e2eframework.NewPublicSecret(projectName, name)
 	})
 }
