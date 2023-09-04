@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
 import { Grid, IconButton, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { PrometheusDatasourceSpec } from './types';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 export interface PrometheusDatasourceEditorProps {
   value: PrometheusDatasourceSpec;
@@ -93,14 +93,14 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               })
             }
           />
-          <Typography py={2} variant="h4">
+          <Typography variant="h4" mt={2} mb={1}>
             Allowed endpoints
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.allowed_endpoints &&
+            {value.proxy?.spec.allowed_endpoints ? (
               value.proxy.spec.allowed_endpoints.map(({ endpoint_pattern, method }, i) => {
                 return (
-                  <React.Fragment key={i}>
+                  <Fragment key={i}>
                     <Grid item xs={8}>
                       <TextField
                         disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
@@ -123,18 +123,23 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         }}
                       />
                     </Grid>
-                  </React.Fragment>
+                  </Fragment>
                 );
-              })}
+              })
+            ) : (
+              <Grid item xs={4}>
+                <Typography>None</Typography> {/* TODO: in edit mode, allow user to add endpoints */}
+              </Grid>
+            )}
           </Grid>
-          <Typography pb={2} variant="h4">
+          <Typography variant="h4" mb={1}>
             Request Headers
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.headers !== undefined &&
+            {value.proxy?.spec.headers &&
               Object.keys(value.proxy.spec.headers).map((headerName, i) => {
                 return (
-                  <React.Fragment key={i}>
+                  <Fragment key={i}>
                     <Grid item xs={4}>
                       <TextField
                         fullWidth
@@ -206,7 +211,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         <MinusIcon />
                       </IconButton>
                     </Grid>
-                  </React.Fragment>
+                  </Fragment>
                 );
               })}
             <Grid item xs={12} sx={{ paddingTop: '5px !important' }}>
@@ -324,6 +329,29 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   };
 
   return (
-    <OptionsEditorRadios isReadonly={isReadonly} tabs={tabs} defaultTab={defaultTab} onModeChange={handleModeChange} />
+    <>
+      <Typography variant="h4" mb={1}>
+        General Settings
+      </Typography>
+      <TextField
+        fullWidth
+        label="Scrape Interval"
+        value={value.scrape_interval || ''}
+        placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
+        InputProps={{
+          readOnly: isReadonly,
+        }}
+        onChange={(e) => onChange({ ...value, scrape_interval: e.target.value as DurationString })}
+      />
+      <Typography variant="h4" mt={2}>
+        HTTP Settings
+      </Typography>
+      <OptionsEditorRadios
+        isReadonly={isReadonly}
+        tabs={tabs}
+        defaultTab={defaultTab}
+        onModeChange={handleModeChange}
+      />
+    </>
   );
 }

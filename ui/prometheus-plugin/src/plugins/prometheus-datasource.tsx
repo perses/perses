@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { BuiltinVariableDefinition, DurationString, RequestHeaders } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 import {
@@ -22,6 +22,7 @@ import {
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
   headers?: RequestHeaders;
+  scrape_interval?: DurationString;
 }
 
 /**
@@ -49,8 +50,56 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
   };
 };
 
+const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
+  return [
+    {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__interval',
+        value: () => '$__interval', // will be overriden when time series query is called
+        source: 'Prometheus',
+        display: {
+          name: '__interval',
+          description:
+            'Interval that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
+          hidden: true,
+        },
+      },
+    },
+    {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__interval_ms',
+        value: () => '$__interval_ms', // will be overriden when time series query is called
+        source: 'Prometheus',
+        display: {
+          name: '__interval_ms',
+          description:
+            'Interval in millisecond that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
+          hidden: true,
+        },
+      },
+    },
+    {
+      kind: 'BuiltinVariable',
+      spec: {
+        name: '__rate_interval',
+        value: () => '$__rate_interval', // will be overriden when time series query is called
+        source: 'Prometheus',
+        display: {
+          name: '__rate_interval',
+          description:
+            "Interval at least four times the value of the scrape interval. It avoids problems specific to Prometheus when using 'rate' and 'increase' functions.",
+          hidden: true,
+        },
+      },
+    },
+  ] as BuiltinVariableDefinition[];
+};
+
 export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpecFull, PrometheusClient> = {
   createClient,
+  getBuiltinVariableDefinitions,
   OptionsEditorComponent: PrometheusDatasourceEditor,
   createInitialOptions: () => ({ direct_url: '' }),
 };

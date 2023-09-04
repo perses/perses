@@ -19,6 +19,7 @@ import {
   WithTimeRange,
   WithPluginSystemTemplateVariables,
   WithPluginSystemDatasourceStore,
+  WithPluginSystemBuiltinVariables,
 } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { mockTimeSeriesResponseWithManySeries } from '@perses-dev/internal-utils';
 import {
@@ -112,6 +113,7 @@ const meta: Meta<typeof TimeSeriesChart.PanelComponent> = {
   },
   decorators: [
     WithDataQueries,
+    WithPluginSystemBuiltinVariables,
     WithPluginSystemTemplateVariables,
     WithPluginSystemDatasourceStore,
     WithPluginRegistry,

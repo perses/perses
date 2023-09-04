@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders } from '@perses-dev/core';
+import { DurationString, RequestHeaders } from '@perses-dev/core';
 
-// TODO unify this one with the other PrometheusDatasourceSpec used for datasource store manipulation
+export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
+
+// TODO: unify this one with the other PrometheusDatasourceSpec used for datasource store manipulation
 export interface PrometheusDatasourceSpec {
   direct_url?: string;
   proxy?: HTTPProxy;
+  scrape_interval?: DurationString; // default to 1m
 }
 
 export interface HTTPProxy {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
+import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/core';
 import { Plugin } from './plugin-base';
 
 /**
@@ -19,6 +19,8 @@ import { Plugin } from './plugin-base';
  */
 export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends Plugin<Spec> {
   createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
+  // Provide builtin variable definitions available on the datasource. Optional
+  getBuiltinVariableDefinitions?: () => BuiltinVariableDefinition[];
 }
 
 export interface DatasourceClientOptions {

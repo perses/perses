@@ -11,9 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Notice, TimeSeriesData } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, replaceTemplateVariables } from '@perses-dev/plugin-system';
-import { fromUnixTime } from 'date-fns';
+import {
+  DatasourceSpec,
+  formatDuration,
+  msToPrometheusDuration,
+  Notice,
+  parseDurationString,
+  TimeSeriesData,
+} from '@perses-dev/core';
+import { TimeSeriesQueryPlugin, replaceTemplateVariables, replaceTemplateVariable } from '@perses-dev/plugin-system';
+import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   parseValueTuple,
   PrometheusClient,
@@ -23,6 +30,7 @@ import {
   DEFAULT_PROM,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../PrometheusDatasourceEditor';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
@@ -34,9 +42,16 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     return { series: [] };
   }
 
-  const minStep = getDurationStringSeconds(spec.min_step);
+  const datasource = (await context.datasourceStore.getDatasource(
+    spec.datasource ?? DEFAULT_PROM
+  )) as DatasourceSpec<PrometheusDatasourceSpec>;
+  const datasourceScrapeInterval = Math.trunc(
+    milliseconds(parseDurationString(datasource.plugin.spec.scrape_interval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+  );
+
+  const minStep = getDurationStringSeconds(spec.min_step) ?? datasourceScrapeInterval;
   const timeRange = getPrometheusTimeRange(context.timeRange);
-  const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs);
+  const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
   // Align the time range so that it's a multiple of the step
   let { start, end } = timeRange;
@@ -48,7 +63,16 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   end = alignedEnd;
 
   // Replace template variable placeholders in PromQL query
-  let query = spec.query.replace('$__rate_interval', `15s`);
+  const intervalMs = context.suggestedStepMs ?? step * 1000; // Step is in seconds
+  let query = replaceTemplateVariable(spec.query, '__interval_ms', intervalMs.toString());
+  query = replaceTemplateVariable(spec.query, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
+
+  const scrapeIntervalMs = minStep * 1000;
+  // The $__rate_interval variable is meant to be used in the rate function.
+  // It is defined as max($__interval + Scrape interval, 4 * Scrape interval), where Scrape interval is the Min step setting (a setting per PromQL query),
+  // if any is set, and otherwise the Scrape interval as set in the Prometheus datasource
+  const rateIntervalMs = Math.max(intervalMs + scrapeIntervalMs, 4 * scrapeIntervalMs);
+  query = replaceTemplateVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateIntervalMs)));
   query = replaceTemplateVariables(query, context.variableState);
 
   let seriesNameFormat = spec.series_name_format;

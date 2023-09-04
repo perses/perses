@@ -110,7 +110,11 @@ export function isDurationString(maybeDuration: string): maybeDuration is Durati
 }
 
 export function intervalToPrometheusDuration(timeRange: AbsoluteTimeRange): Duration {
-  let durationInMs = timeRange.end.valueOf() - timeRange.start.valueOf();
+  const durationInMs = timeRange.end.valueOf() - timeRange.start.valueOf();
+  return msToPrometheusDuration(durationInMs);
+}
+
+export function msToPrometheusDuration(durationInMs: number): Duration {
   const years = Math.trunc(durationInMs / ONE_YEAR_IN_MS);
   if (years > 0) durationInMs -= years * ONE_YEAR_IN_MS;
   const weeks = Math.trunc(durationInMs / ONE_WEEK_IN_MS);
@@ -121,7 +125,6 @@ export function intervalToPrometheusDuration(timeRange: AbsoluteTimeRange): Dura
   if (hours > 0) durationInMs -= hours * ONE_HOUR_IN_MS;
   const minutes = Math.trunc(durationInMs / ONE_MINUTE_IN_MS);
   if (minutes > 0) durationInMs -= minutes * ONE_MINUTE_IN_MS;
-  const seconds = Math.trunc(durationInMs / ONE_SECOND_IN_MS);
 
   return {
     years: years,
@@ -130,11 +133,11 @@ export function intervalToPrometheusDuration(timeRange: AbsoluteTimeRange): Dura
     days: days,
     hours: hours,
     minutes: minutes,
-    seconds: seconds,
+    seconds: durationInMs / 1000,
   };
 }
 
-export function formatDuration(duration: Duration): string {
+export function formatDuration(duration: Duration): DurationString {
   const result: string[] = [];
   if (duration.years) {
     result.push(`${duration.years}y`);
@@ -152,9 +155,16 @@ export function formatDuration(duration: Duration): string {
     result.push(`${duration.minutes}m`);
   }
   if (duration.seconds) {
-    result.push(`${duration.seconds}s`);
+    const seconds = Math.trunc(duration.seconds);
+    if (seconds) {
+      result.push(`${seconds}s`);
+    }
+    const ms = (duration.seconds - seconds) * 1000;
+    if (ms) {
+      result.push(`${ms}ms`);
+    }
   }
-  return result.join(' ');
+  return result.join('') as DurationString;
 }
 
 const DEFAULT_STEP_MS = 15000;

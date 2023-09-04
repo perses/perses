@@ -53,6 +53,7 @@ export interface BuiltinVariableDefinition extends Definition<BuiltinVariableSpe
 
 export interface BuiltinVariableSpec extends VariableSpec {
   value: () => string;
+  source: string;
 }
 
 export type VariableDefinition = TextVariableDefinition | ListVariableDefinition | BuiltinVariableDefinition;

@@ -15,10 +15,8 @@ import { createContext, useContext, useMemo } from 'react';
 import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { VariableStateMap } from './template-variables';
 
-export type BuiltinVariables = Record<string, BuiltinVariableDefinition>;
-
 export type BuiltinVariableSrv = {
-  variables: BuiltinVariables;
+  variables: BuiltinVariableDefinition[];
 };
 
 export const BuiltinVariableContext = createContext<BuiltinVariableSrv | undefined>(undefined);
@@ -35,11 +33,8 @@ export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
   const { variables } = useBuiltinVariableContext();
   const states = useMemo(() => {
     const values: VariableStateMap = {};
-    for (const key in variables) {
-      const variable = variables[key];
-      if (variable !== undefined) {
-        values[key] = { loading: false, value: variable.spec.value() };
-      }
+    for (const variable of variables) {
+      values[variable.spec.name] = { loading: false, value: variable.spec.value() };
     }
     return values;
   }, [variables]);
@@ -64,5 +59,5 @@ export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
 
 export function useBuiltinVariableDefinitions(): BuiltinVariableDefinition[] {
   const { variables } = useBuiltinVariableContext();
-  return Object.values(variables).map((v) => v);
+  return variables;
 }

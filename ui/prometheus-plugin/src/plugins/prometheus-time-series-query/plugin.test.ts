@@ -12,19 +12,21 @@
 // limitations under the License.
 
 // TODO: This should be fixed globally in the test setup
+import { DatasourceSpec } from '@perses-dev/core';
+
 jest.mock('echarts/core');
 
 import { TimeSeriesQueryContext } from '@perses-dev/plugin-system';
 import { RangeQueryResponse } from '../../model';
-import { PrometheusDatasource } from '../prometheus-datasource';
+import { PrometheusDatasource, PrometheusDatasourceSpec } from '../prometheus-datasource';
 import { PrometheusTimeSeriesQuery } from './';
 
-const promStubClient = PrometheusDatasource.createClient(
-  {
-    direct_url: '/test',
-  },
-  {}
-);
+const datasource: PrometheusDatasourceSpec = {
+  direct_url: '/test',
+  scrape_interval: '1m',
+};
+
+const promStubClient = PrometheusDatasource.createClient(datasource, {});
 
 // Mock range query
 promStubClient.rangeQuery = jest.fn(async () => {
@@ -49,10 +51,20 @@ const getDatasourceClient: jest.Mock = jest.fn(() => {
   return promStubClient;
 });
 
+const getDatasource: jest.Mock = jest.fn((): DatasourceSpec<PrometheusDatasourceSpec> => {
+  return {
+    default: false,
+    plugin: {
+      kind: 'PrometheusDatasource',
+      spec: datasource,
+    },
+  };
+});
+
 const createStubContext = () => {
   const stubTimeSeriesContext: TimeSeriesQueryContext = {
     datasourceStore: {
-      getDatasource: jest.fn(),
+      getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
       listDatasourceSelectItems: jest.fn(),
     },

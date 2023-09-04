@@ -13,6 +13,7 @@
 
 export * from './WithDataQueries';
 export * from './WithPluginRegistry';
+export * from './WithPluginSystemBuiltinVariables';
 export * from './WithPluginSystemDatasourceStore';
 export * from './WithPluginSystemTemplateVariables';
 export * from './WithTimeRange';
