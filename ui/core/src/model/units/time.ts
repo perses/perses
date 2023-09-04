@@ -19,12 +19,12 @@ const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'W
 type TimeUnitKind = (typeof timeUnitKinds)[number];
 export type TimeUnitOptions = {
   kind: TimeUnitKind;
-  decimal_places?: number;
+  decimalPlaces?: number;
 };
 const TIME_GROUP = 'Time';
 export const TIME_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Time',
-  decimal_places: true,
+  decimalPlaces: true,
 };
 export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnitKind, UnitConfig>> = {
   Milliseconds: {
@@ -128,7 +128,7 @@ function isMonthOrYear(kind: TimeUnitKind): boolean {
   return kind === 'Months' || kind === 'Years';
 }
 
-export function formatTime(value: number, { kind, decimal_places }: TimeUnitOptions): string {
+export function formatTime(value: number, { kind, decimalPlaces }: TimeUnitOptions): string {
   if (value === 0) return '0s';
 
   const results = getValueAndKindForNaturalNumbers(value, kind);
@@ -139,9 +139,9 @@ export function formatTime(value: number, { kind, decimal_places }: TimeUnitOpti
     unitDisplay: isMonthOrYear(results.kind) ? 'long' : 'narrow',
   };
 
-  if (hasDecimalPlaces(decimal_places)) {
-    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
-    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  if (hasDecimalPlaces(decimalPlaces)) {
+    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
   } else {
     formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
   }

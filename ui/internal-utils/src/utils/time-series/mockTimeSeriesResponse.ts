@@ -110,7 +110,7 @@ export function mockTimeSeriesResponseWithNullValues({
       values: [...Array(totalDatapoints)].map((_, i) => {
         const timestamp = i < totalDatapoints - 1 ? startTimeS + i * stepSize : endTimeS;
         let value: string | null = '100';
-        // to test visual.connect_nulls option
+        // to test visual.connectNulls option
         if (i > 50 && i < 100) {
           value = null;
         }

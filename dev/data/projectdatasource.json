@@ -14,29 +14,29 @@
             "kind": "HTTPProxy",
             "spec": {
               "url": "https://prometheus.demo.do.prometheus.io",
-              "allowed_endpoints": [
+              "allowedEndpoints": [
                 {
-                  "endpoint_pattern": "/api/v1/labels",
+                  "endpointPattern": "/api/v1/labels",
                   "method": "POST"
                 },
                 {
-                  "endpoint_pattern": "/api/v1/series",
+                  "endpointPattern": "/api/v1/series",
                   "method": "POST"
                 },
                 {
-                  "endpoint_pattern": "/api/v1/metadata",
+                  "endpointPattern": "/api/v1/metadata",
                   "method": "GET"
                 },
                 {
-                  "endpoint_pattern": "/api/v1/query",
+                  "endpointPattern": "/api/v1/query",
                   "method": "POST"
                 },
                 {
-                  "endpoint_pattern": "/api/v1/query_range",
+                  "endpointPattern": "/api/v1/query_range",
                   "method": "POST"
                 },
                 {
-                  "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                  "endpointPattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
                   "method": "GET"
                 }
               ]
@@ -57,7 +57,7 @@
       "plugin": {
         "kind": "PrometheusDatasource",
         "spec": {
-          "direct_url": "https://prometheus.demo.do.prometheus.io"
+          "directUrl": "https://prometheus.demo.do.prometheus.io"
         }
       }
     }

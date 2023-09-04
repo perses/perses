@@ -29,7 +29,7 @@
       "plugin": {
         "kind": "PrometheusDatasource",
         "spec": {
-          "direct_url": "https://prometheus.demo.do.prometheus.io"
+          "directUrl": "https://prometheus.demo.do.prometheus.io"
         }
       }
     }

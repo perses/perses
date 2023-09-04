@@ -85,7 +85,7 @@ export function BarChart(props: BarChartProps) {
                 params.data[1] &&
                 formatValue(params.data[1], {
                   kind: 'Percent',
-                  decimal_places: unit.decimal_places,
+                  decimalPlaces: unit.decimalPlaces,
                 })
               );
             }

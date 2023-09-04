@@ -46,10 +46,10 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     spec.datasource ?? DEFAULT_PROM
   )) as DatasourceSpec<PrometheusDatasourceSpec>;
   const datasourceScrapeInterval = Math.trunc(
-    milliseconds(parseDurationString(datasource.plugin.spec.scrape_interval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
+    milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
 
-  const minStep = getDurationStringSeconds(spec.min_step) ?? datasourceScrapeInterval;
+  const minStep = getDurationStringSeconds(spec.minStep) ?? datasourceScrapeInterval;
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 
@@ -75,7 +75,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   query = replaceTemplateVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateIntervalMs)));
   query = replaceTemplateVariables(query, context.variableState);
 
-  let seriesNameFormat = spec.series_name_format;
+  let seriesNameFormat = spec.seriesNameFormat;
   // if series name format is defined, replace template variable placeholders in series name format
   if (seriesNameFormat) {
     seriesNameFormat = replaceTemplateVariables(seriesNameFormat, context.variableState);
@@ -117,7 +117,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     series: result.map((value) => {
       const { metric, values } = value;
 
-      // Account for series_name_format from query editor when determining name to show in legend, tooltip, etc.
+      // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
       const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
 
       return {

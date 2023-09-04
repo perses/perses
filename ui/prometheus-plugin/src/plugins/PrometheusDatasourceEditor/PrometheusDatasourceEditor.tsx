@@ -58,11 +58,11 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
           <TextField
             fullWidth
             label="URL"
-            value={value.direct_url || ''}
+            value={value.directUrl || ''}
             InputProps={{
               readOnly: isReadonly,
             }}
-            onChange={(e) => onChange({ ...value, direct_url: e.target.value })}
+            onChange={(e) => onChange({ ...value, directUrl: e.target.value })}
           />
         </>
       ),
@@ -97,8 +97,8 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             Allowed endpoints
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.allowed_endpoints ? (
-              value.proxy.spec.allowed_endpoints.map(({ endpoint_pattern, method }, i) => {
+            {value.proxy?.spec.allowedEndpoints ? (
+              value.proxy.spec.allowedEndpoints.map(({ endpointPattern, method }, i) => {
                 return (
                   <Fragment key={i}>
                     <Grid item xs={8}>
@@ -106,7 +106,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
                         fullWidth
                         label="Endpoint pattern"
-                        value={endpoint_pattern}
+                        value={endpointPattern}
                         InputProps={{
                           readOnly: isReadonly,
                         }}
@@ -273,37 +273,37 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const defaultTab = value.proxy ? proxyModeId : directModeId;
 
   const initialSpecDirect: PrometheusDatasourceSpec = {
-    direct_url: '',
+    directUrl: '',
   };
 
   const initialSpecProxy: PrometheusDatasourceSpec = {
     proxy: {
       kind: 'HTTPProxy',
       spec: {
-        allowed_endpoints: [
+        allowedEndpoints: [
           // hardcoded list of allowed endpoints for now since those are enforced by the backend
           {
-            endpoint_pattern: '/api/v1/labels',
+            endpointPattern: '/api/v1/labels',
             method: 'POST',
           },
           {
-            endpoint_pattern: '/api/v1/series',
+            endpointPattern: '/api/v1/series',
             method: 'POST',
           },
           {
-            endpoint_pattern: '/api/v1/metadata',
+            endpointPattern: '/api/v1/metadata',
             method: 'GET',
           },
           {
-            endpoint_pattern: '/api/v1/query',
+            endpointPattern: '/api/v1/query',
             method: 'POST',
           },
           {
-            endpoint_pattern: '/api/v1/query_range',
+            endpointPattern: '/api/v1/query_range',
             method: 'POST',
           },
           {
-            endpoint_pattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
+            endpointPattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
             method: 'GET',
           },
         ],
@@ -336,12 +336,12 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       <TextField
         fullWidth
         label="Scrape Interval"
-        value={value.scrape_interval || ''}
+        value={value.scrapeInterval || ''}
         placeholder={`Default: ${DEFAULT_SCRAPE_INTERVAL}`}
         InputProps={{
           readOnly: isReadonly,
         }}
-        onChange={(e) => onChange({ ...value, scrape_interval: e.target.value as DurationString })}
+        onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
       />
       <Typography variant="h4" mt={2}>
         HTTP Settings

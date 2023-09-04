@@ -26,7 +26,7 @@ export interface TimeSeriesChartDefinition extends Definition<TimeSeriesChartOpt
  */
 export interface TimeSeriesChartOptions {
   legend?: LegendSpecOptions;
-  y_axis?: TimeSeriesChartYAxisOptions;
+  yAxis?: TimeSeriesChartYAxisOptions;
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
   tooltip?: TooltipSpecOptions;
@@ -43,7 +43,7 @@ export interface TimeSeriesChartYAxisOptions {
 }
 
 export interface TooltipSpecOptions {
-  enable_pinning: boolean;
+  enablePinning: boolean;
 }
 
 export interface TimeSeriesChartPaletteOptions {
@@ -53,13 +53,13 @@ export interface TimeSeriesChartPaletteOptions {
 
 export type TimeSeriesChartVisualOptions = {
   display?: 'line' | 'bar';
-  line_width?: number;
-  area_opacity?: number;
-  show_points?: 'auto' | 'always';
+  lineWidth?: number;
+  areaOpacity?: number;
+  showPoints?: 'auto' | 'always';
   palette?: TimeSeriesChartPaletteOptions;
-  point_radius?: number;
+  pointRadius?: number;
   stack?: StackOptions;
-  connect_nulls?: boolean;
+  connectNulls?: boolean;
 };
 
 export const DEFAULT_UNIT: UnitOptions = {
@@ -93,10 +93,10 @@ export const DEFAULT_POINT_RADIUS = DEFAULT_LINE_WIDTH + POINT_SIZE_OFFSET;
 export const DEFAULT_CONNECT_NULLS = false;
 
 export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
-  line_width: DEFAULT_LINE_WIDTH,
-  area_opacity: DEFAULT_AREA_OPACITY,
-  point_radius: DEFAULT_POINT_RADIUS,
-  connect_nulls: DEFAULT_CONNECT_NULLS,
+  lineWidth: DEFAULT_LINE_WIDTH,
+  areaOpacity: DEFAULT_AREA_OPACITY,
+  pointRadius: DEFAULT_POINT_RADIUS,
+  connectNulls: DEFAULT_CONNECT_NULLS,
 };
 
 // Controls how often static threshold values should be plotted so threshold data shows
@@ -104,21 +104,21 @@ export const DEFAULT_VISUAL: TimeSeriesChartVisualOptions = {
 export const THRESHOLD_PLOT_INTERVAL = 15;
 
 export const VISUAL_CONFIG = {
-  line_width: {
+  lineWidth: {
     label: 'Line Width',
     testId: 'slider-line-width',
     min: 0.25,
     max: 3,
     step: 0.25,
   },
-  point_radius: {
+  pointRadius: {
     label: 'Point Radius',
     testId: 'slider-point-radius',
     min: 0,
     max: 6,
     step: 0.25,
   },
-  area_opacity: {
+  areaOpacity: {
     label: 'Area Opacity',
     testId: 'slider-area-opacity',
     min: 0,
@@ -128,7 +128,7 @@ export const VISUAL_CONFIG = {
   stack: {
     label: 'Stack Series',
   },
-  connect_nulls: {
+  connectNulls: {
     label: 'Connect Nulls',
   },
 };

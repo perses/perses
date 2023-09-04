@@ -21,14 +21,14 @@ describe('VisualOptionsEditor', () => {
   };
 
   const getLineWidthSlider = () => {
-    return screen.getByTestId(VISUAL_CONFIG.line_width.testId);
+    return screen.getByTestId(VISUAL_CONFIG.lineWidth.testId);
   };
 
   it('can update the line width visual option', () => {
     const onChange = jest.fn();
-    renderVisualOptionsEditor({ line_width: 3, point_radius: 2 }, onChange);
+    renderVisualOptionsEditor({ lineWidth: 3, pointRadius: 2 }, onChange);
 
-    expect(screen.getByText(VISUAL_CONFIG.line_width.label)).toBeInTheDocument();
+    expect(screen.getByText(VISUAL_CONFIG.lineWidth.label)).toBeInTheDocument();
 
     const sliderInput = getLineWidthSlider();
 
@@ -50,6 +50,6 @@ describe('VisualOptionsEditor', () => {
 
     // to move slider and update visual options
     fireEvent.mouseDown(sliderInput, { clientX: 220, clientY: 100 });
-    expect(onChange).toHaveBeenCalledWith({ line_width: 1.25, point_radius: 2.75 });
+    expect(onChange).toHaveBeenCalledWith({ lineWidth: 1.25, pointRadius: 2.75 });
   });
 });

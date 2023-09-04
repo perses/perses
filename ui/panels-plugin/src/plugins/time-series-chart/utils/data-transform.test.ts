@@ -43,13 +43,13 @@ describe('convertPercentThreshold', () => {
 });
 
 describe('convertPanelYAxis', () => {
-  it('should convert a Perses y_axis spec to the ECharts equivalent', () => {
+  it('should convert a Perses yAxis spec to the ECharts equivalent', () => {
     const persesAxis: TimeSeriesChartYAxisOptions = {
       show: true,
       label: 'Axis Label',
       unit: {
         kind: 'PercentDecimal',
-        decimal_places: 0,
+        decimalPlaces: 0,
       },
       min: 0.1,
       max: 1,

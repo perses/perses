@@ -19,12 +19,12 @@ const decimalUnitKinds = ['Decimal'] as const;
 type DecimalUnitKind = (typeof decimalUnitKinds)[number];
 export type DecimalUnitOptions = {
   kind: DecimalUnitKind;
-  decimal_places?: number;
+  decimalPlaces?: number;
   abbreviate?: boolean;
 };
 export const DECIMAL_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Decimal',
-  decimal_places: true,
+  decimalPlaces: true,
   abbreviate: true,
 };
 export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> = {
@@ -34,7 +34,7 @@ export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> 
   },
 };
 
-export function formatDecimal(value: number, { abbreviate, decimal_places }: DecimalUnitOptions): string {
+export function formatDecimal(value: number, { abbreviate, decimalPlaces }: DecimalUnitOptions): string {
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
     useGrouping: true,
@@ -44,9 +44,9 @@ export function formatDecimal(value: number, { abbreviate, decimal_places }: Dec
     formatterOptions.notation = 'compact';
   }
 
-  if (hasDecimalPlaces(decimal_places)) {
-    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
-    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+  if (hasDecimalPlaces(decimalPlaces)) {
+    formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
+    formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
   } else {
     if (shouldAbbreviate(abbreviate)) {
       formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;

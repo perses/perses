@@ -25,7 +25,7 @@ import (
 )
 
 type AllowedEndpoint struct {
-	EndpointPattern common.Regexp `json:"endpoint_pattern" yaml:"endpoint_pattern"`
+	EndpointPattern common.Regexp `json:"endpointPattern" yaml:"endpointPattern"`
 	Method          string        `json:"method" yaml:"method"`
 }
 
@@ -77,7 +77,7 @@ type Config struct {
 	URL *url.URL `json:"url" yaml:"url"`
 	// AllowedEndpoints is a list of tuple of http method and http endpoint that will be accessible.
 	// If not set, then everything is accessible.
-	AllowedEndpoints []AllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
+	AllowedEndpoints []AllowedEndpoint `json:"allowedEndpoints,omitempty" yaml:"allowedEndpoints,omitempty"`
 	// Headers can be used to provide additional header that needs to be forwarded when requesting the datasource
 	// When defined, it's impossible to set the value of Access with 'browser'
 	Headers map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
@@ -90,7 +90,7 @@ type Config struct {
 // It shouldn't be used for other purpose.
 type tmpHTTPConfig struct {
 	URL              string            `json:"url" yaml:"url"`
-	AllowedEndpoints []AllowedEndpoint `json:"allowed_endpoints,omitempty" yaml:"allowed_endpoints,omitempty"`
+	AllowedEndpoints []AllowedEndpoint `json:"allowedEndpoints,omitempty" yaml:"allowedEndpoints,omitempty"`
 	Headers          map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 	Secret           string            `json:"secret,omitempty" yaml:"secret,omitempty"`
 }

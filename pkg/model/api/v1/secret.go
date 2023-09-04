@@ -22,7 +22,7 @@ import (
 )
 
 type SecretSpec struct {
-	BasicAuth *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
+	BasicAuth *secret.BasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `yaml:"authorization,omitempty" json:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
@@ -57,10 +57,10 @@ func (s *SecretSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (s *SecretSpec) validate() error {
 	if s.BasicAuth == nil && s.Authorization == nil {
-		return fmt.Errorf("at most one of basic_auth and authorization must be configured")
+		return fmt.Errorf("at most one of basicAuth and authorization must be configured")
 	}
 	if s.BasicAuth != nil && s.Authorization != nil {
-		return fmt.Errorf("basic_auth and authorization are mutually exclusive, use one of them")
+		return fmt.Errorf("basicAuth and authorization are mutually exclusive, use one of them")
 	}
 	return nil
 }

@@ -19,36 +19,36 @@ import (
 
 kind: "PrometheusDatasource"
 spec: {
-	direct_url?: string
-	proxy?:      commonProxy.#HTTPProxy & {
+	directUrl?: string
+	proxy?:     commonProxy.#HTTPProxy & {
 		spec: {
-			allowed_endpoints: [
+			allowedEndpoints: [
 				{
-					endpoint_pattern: "/api/v1/labels"
-					method:           "POST"
+					endpointPattern: "/api/v1/labels"
+					method:          "POST"
 				},
 				{
-					endpoint_pattern: "/api/v1/series"
-					method:           "POST"
+					endpointPattern: "/api/v1/series"
+					method:          "POST"
 				},
 				{
-					endpoint_pattern: "/api/v1/metadata"
-					method:           "GET"
+					endpointPattern: "/api/v1/metadata"
+					method:          "GET"
 				},
 				{
-					endpoint_pattern: "/api/v1/query"
-					method:           "POST"
+					endpointPattern: "/api/v1/query"
+					method:          "POST"
 				},
 				{
-					endpoint_pattern: "/api/v1/query_range"
-					method:           "POST"
+					endpointPattern: "/api/v1/query_range"
+					method:          "POST"
 				},
 				{
-					endpoint_pattern: "/api/v1/label/([a-zA-Z0-9_-]+)/values"
-					method:           "GET"
+					endpointPattern: "/api/v1/label/([a-zA-Z0-9_-]+)/values"
+					method:          "GET"
 				},
 			]
 		}
 	}
-	scrape_interval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
 }

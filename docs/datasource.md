@@ -227,10 +227,10 @@ interface HTTPProxySpec extends commonProxySpec {
     // url is the url of datasource. It is not the url of the proxy.
     // Once the discovery configuration is available, url won't be mandatory anymore.
     url: string;
-    // allowed_endpoints is a list of tuples of http methods and http endpoints that will be accessible.
+    // allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
     // Leave it empty if you don't want to restrict the access to the datasource.
-    allowed_endpoints?: {
-        endpoint_pattern: RegExp;
+    allowedEndpoints?: {
+        endpointPattern: RegExp;
         method: 'POST' | 'PUT' | 'PATCH' | 'GET' | 'DELETE'
     }[];
     // headers can be used to provide additional headers that need to be forwarded when requesting the datasource
@@ -243,10 +243,10 @@ interface HTTPProxy {
 }
 
 interface PrometheusDatasourceSpec {
-    // direct_url is the url of the datasource.
+    // directUrl is the url of the datasource.
     // Leave it empty if you don't want to access the datasource directly from the UI.
     // Use proxy, if you want to access the datasource through the Perses' server.
-    direct_url?: string;
+    directUrl?: string;
     // proxy is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI. 
     proxy?: HTTPProxy;
 }
@@ -266,7 +266,7 @@ A simple Prometheus datasource would be
     "plugin": {
       "kind": "PrometheusDatasource",
       "spec": {
-        "direct_url": "https://prometheus.demo.do.prometheus.io"
+        "directUrl": "https://prometheus.demo.do.prometheus.io"
       }
     }
   }
@@ -291,29 +291,29 @@ A more complex one:
           "kind": "HTTPProxy",
           "spec": {
             "url": "https://prometheus.demo.do.prometheus.io",
-            "allowed_endpoints": [
+            "allowedEndpoints": [
               {
-                "endpoint_pattern": "/api/v1/labels",
+                "endpointPattern": "/api/v1/labels",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/series",
+                "endpointPattern": "/api/v1/series",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/metadata",
+                "endpointPattern": "/api/v1/metadata",
                 "method": "GET"
               },
               {
-                "endpoint_pattern": "/api/v1/query",
+                "endpointPattern": "/api/v1/query",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/query_range",
+                "endpointPattern": "/api/v1/query_range",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                "endpointPattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
                 "method": "GET"
               }
             ],
@@ -383,7 +383,7 @@ another field in the selector like `level` which will indicate at what level the
 As described before, you can provide a proxy configuration that will be used by the Perses server to redirect any
 queries to the datasource.
 
-It means in case of the Prometheus datasource, if the field `direct_url` is not set, then the FE needs to use the Perses
+It means in case of the Prometheus datasource, if the field `directUrl` is not set, then the FE needs to use the Perses
 server to contact the datasource. For that the FE will have to determinate which URL should be used to contact the
 Perses server based on what kind of datasource is used.
 

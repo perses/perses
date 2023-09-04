@@ -137,7 +137,7 @@ function MigrateView() {
           disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
           startIcon={<AutoFix />}
           onClick={() => {
-            migrateMutation.mutate({ input: grafanaInput, grafana_dashboard: grafanaDashboard });
+            migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: grafanaDashboard });
           }}
         >
           Migrate

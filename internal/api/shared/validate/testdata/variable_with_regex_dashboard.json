@@ -2,8 +2,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "dlDJrcf4z",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "version": 0,
     "project": ""
   },
@@ -26,7 +26,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": ["thanos_build_info{stack=~\"\\\\w{4}\"}"]
             }
           }
@@ -45,7 +45,7 @@
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
-              "label_name": "stack",
+              "labelName": "stack",
               "matchers": ["thanos_build_info{stack=~\"$iaas_loc.*\"}"]
             }
           }
@@ -65,7 +65,7 @@
             "kind": "PrometheusPromQLVariable",
             "spec": {
               "expr": "group by (stack) (thanos_build_info{stack=~\"$iaas_loc.*\"})",
-              "label_name": "stack"
+              "labelName": "stack"
             }
           }
         }

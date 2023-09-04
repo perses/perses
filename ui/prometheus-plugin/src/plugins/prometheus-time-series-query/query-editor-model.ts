@@ -59,17 +59,17 @@ export function useQueryState(props: PrometheusTimeSeriesQueryEditorProps) {
 }
 
 /**
- * Hook to manage `series_name_format` state to ensure panel preview does not rerender until text input is blurred
+ * Hook to manage `seriesNameFormat` state to ensure panel preview does not rerender until text input is blurred
  */
 export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
 
   // TODO: reusable hook or helper util instead of duplicating from useQueryState
-  const [format, setFormat] = useState(value.series_name_format);
-  const [lastSyncedFormat, setLastSyncedFormat] = useState(value.series_name_format);
-  if (value.series_name_format !== lastSyncedFormat) {
-    setFormat(value.series_name_format);
-    setLastSyncedFormat(value.series_name_format);
+  const [format, setFormat] = useState(value.seriesNameFormat);
+  const [lastSyncedFormat, setLastSyncedFormat] = useState(value.seriesNameFormat);
+  if (value.seriesNameFormat !== lastSyncedFormat) {
+    setFormat(value.seriesNameFormat);
+    setLastSyncedFormat(value.seriesNameFormat);
   }
 
   // Update our local state as the user types
@@ -77,12 +77,12 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
     setFormat(e);
   };
 
-  // Propagate changes to the panel preview component when series_name_format TextField is blurred
+  // Propagate changes to the panel preview component when seriesNameFormat TextField is blurred
   const handleFormatBlur = () => {
     setLastSyncedFormat(format);
     onChange(
       produce(value, (draft) => {
-        draft.series_name_format = format;
+        draft.seriesNameFormat = format;
       })
     );
   };
@@ -91,17 +91,17 @@ export function useFormatState(props: PrometheusTimeSeriesQueryEditorProps) {
 }
 
 /**
- * Hook to manage `min_step` state to ensure panel preview does not rerender until text input is blurred
+ * Hook to manage `minStep` state to ensure panel preview does not rerender until text input is blurred
  */
 export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps) {
   const { onChange, value } = props;
 
   // TODO: reusable hook or helper util instead of duplicating from useQueryState
-  const [minStep, setMinStep] = useState(value.min_step);
-  const [lastSyncedMinStep, setLastSyncedMinStep] = useState(value.min_step);
-  if (value.min_step !== lastSyncedMinStep) {
-    setMinStep(value.min_step);
-    setLastSyncedMinStep(value.min_step);
+  const [minStep, setMinStep] = useState(value.minStep);
+  const [lastSyncedMinStep, setLastSyncedMinStep] = useState(value.minStep);
+  if (value.minStep !== lastSyncedMinStep) {
+    setMinStep(value.minStep);
+    setLastSyncedMinStep(value.minStep);
   }
 
   // Update our local state as the user types
@@ -109,12 +109,12 @@ export function useMinStepState(props: PrometheusTimeSeriesQueryEditorProps) {
     setMinStep(e);
   };
 
-  // Propagate changes to the panel preview component when min_step TextField is blurred
+  // Propagate changes to the panel preview component when minStep TextField is blurred
   const handleMinStepBlur = () => {
     setLastSyncedMinStep(minStep);
     onChange(
       produce(value, (draft) => {
-        draft.min_step = minStep;
+        draft.minStep = minStep;
       })
     );
   };

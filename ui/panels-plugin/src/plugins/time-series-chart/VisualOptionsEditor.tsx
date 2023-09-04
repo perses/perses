@@ -37,8 +37,8 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
     onChange({
       ...value,
-      line_width: newValue,
-      point_radius: symbolSize,
+      lineWidth: newValue,
+      pointRadius: symbolSize,
     });
   };
 
@@ -46,7 +46,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     onChange({
       ...value,
-      area_opacity: newValue,
+      areaOpacity: newValue,
     });
   };
 
@@ -83,32 +83,32 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         }
       />
       <OptionsEditorControl
-        label={VISUAL_CONFIG.line_width.label}
+        label={VISUAL_CONFIG.lineWidth.label}
         control={
           <Slider
-            data-testid={VISUAL_CONFIG.line_width.testId}
-            value={value.line_width ?? DEFAULT_LINE_WIDTH}
+            data-testid={VISUAL_CONFIG.lineWidth.testId}
+            value={value.lineWidth ?? DEFAULT_LINE_WIDTH}
             valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.line_width.step}
+            step={VISUAL_CONFIG.lineWidth.step}
             marks
-            min={VISUAL_CONFIG.line_width.min}
-            max={VISUAL_CONFIG.line_width.max}
+            min={VISUAL_CONFIG.lineWidth.min}
+            max={VISUAL_CONFIG.lineWidth.max}
             disabled={value.display === 'bar'}
             onChange={handleLineWidthChange}
           />
         }
       />
       <OptionsEditorControl
-        label={VISUAL_CONFIG.area_opacity.label}
+        label={VISUAL_CONFIG.areaOpacity.label}
         control={
           <Slider
-            data-testid={VISUAL_CONFIG.area_opacity.testId}
-            value={value.area_opacity ?? DEFAULT_AREA_OPACITY}
+            data-testid={VISUAL_CONFIG.areaOpacity.testId}
+            value={value.areaOpacity ?? DEFAULT_AREA_OPACITY}
             valueLabelDisplay="auto"
-            step={VISUAL_CONFIG.area_opacity.step}
+            step={VISUAL_CONFIG.areaOpacity.step}
             marks
-            min={VISUAL_CONFIG.area_opacity.min}
-            max={VISUAL_CONFIG.area_opacity.max}
+            min={VISUAL_CONFIG.areaOpacity.min}
+            max={VISUAL_CONFIG.areaOpacity.max}
             disabled={value.display === 'bar'}
             onChange={handleAreaOpacityChange}
           />
@@ -129,8 +129,8 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
                 stack: newValue.id === 'none' ? undefined : newValue.id, // stack is optional so remove property when 'None' is selected
               };
               // stacked area chart preset to automatically set area under a curve shading
-              if (newValue.id === 'all' && !value.area_opacity) {
-                updatedValue.area_opacity = 0.3;
+              if (newValue.id === 'all' && !value.areaOpacity) {
+                updatedValue.areaOpacity = 0.3;
               }
               onChange(updatedValue);
             }}
@@ -140,15 +140,15 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
         }
       />
       <OptionsEditorControl
-        label={VISUAL_CONFIG.connect_nulls.label}
+        label={VISUAL_CONFIG.connectNulls.label}
         control={
           <Switch
-            checked={value.connect_nulls ?? DEFAULT_CONNECT_NULLS}
+            checked={value.connectNulls ?? DEFAULT_CONNECT_NULLS}
             disabled={value.display === 'bar'}
             onChange={(e) => {
               onChange({
                 ...value,
-                connect_nulls: e.target.checked,
+                connectNulls: e.target.checked,
               });
             }}
           />

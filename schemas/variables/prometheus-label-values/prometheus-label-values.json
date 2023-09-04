@@ -2,7 +2,7 @@
 {
   "kind": "PrometheusLabelValuesVariable",
   "spec": {
-    "label_name": "job",
+    "labelName": "job",
     "matchers": [
       "up{job=\"$job\"}"
     ]

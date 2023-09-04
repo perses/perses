@@ -77,7 +77,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { thresholds, y_axis, tooltip },
+    spec: { thresholds, yAxis, tooltip },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -114,13 +114,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       : undefined;
 
   // TODO: add support for y_axis_alt.unit
-  const unit = props.spec.y_axis?.unit ?? DEFAULT_UNIT;
+  const unit = props.spec.yAxis?.unit ?? DEFAULT_UNIT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
   const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
   // convert Perses dashboard format to be ECharts compatible
-  const echartsYAxis = convertPanelYAxis(y_axis);
+  const echartsYAxis = convertPanelYAxis(yAxis);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
@@ -175,7 +175,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           return { timeChartData: [], timeSeriesMapping: [], legendItems: [] };
         }
 
-        // Format is determined by series_name_format in query spec
+        // Format is determined by seriesNameFormat in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
         // Color is used for line, tooltip, and legend
@@ -238,16 +238,16 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       // These are styled with predefined colors and a dashed style to look different than series from query results.
       // Regular series are used instead of markLines since thresholds currently show in our React TimeSeriesTooltip.
       const thresholdsColors = chartsTheme.thresholds;
-      const defaultThresholdColor = thresholds.default_color ?? thresholdsColors.defaultColor;
+      const defaultThresholdColor = thresholds.defaultColor ?? thresholdsColors.defaultColor;
       thresholds.steps.forEach((step: StepOptions, index: number) => {
         const stepPaletteColor = thresholdsColors.palette[index] ?? defaultThresholdColor;
         const thresholdLineColor = step.color ?? stepPaletteColor;
         const stepOption: StepOptions = {
           color: thresholdLineColor,
           value:
-            // y_axis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
+            // yAxis is passed here since it corresponds to dashboard JSON instead of the already converted ECharts yAxis
             thresholds.mode === 'percent'
-              ? convertPercentThreshold(step.value, timeChartData, y_axis?.max, y_axis?.min)
+              ? convertPercentThreshold(step.value, timeChartData, yAxis?.max, yAxis?.min)
               : step.value,
         };
         const thresholdName = step.name ?? `Threshold ${index + 1}`;
@@ -276,7 +276,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       timeSeriesMapping,
       legendItems,
     };
-  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, y_axis?.max, y_axis?.min]);
+  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, yAxis?.max, yAxis?.min]);
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
@@ -345,7 +345,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   // override default spacing, see: https://echarts.apache.org/en/option.html#grid
-  const gridLeft = y_axis && y_axis.label ? 30 : 20;
+  const gridLeft = yAxis && yAxis.label ? 30 : 20;
   const gridOverrides: GridComponentOption = {
     left: !echartsYAxis.show ? 0 : gridLeft,
     right: 20,
@@ -364,8 +364,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   let enablePinning = true;
   if (isStackedBar) {
     enablePinning = false;
-  } else if (tooltip?.enable_pinning !== undefined) {
-    enablePinning = tooltip.enable_pinning;
+  } else if (tooltip?.enablePinning !== undefined) {
+    enablePinning = tooltip.enablePinning;
   }
   const tooltipConfig: TooltipConfig = {
     ...DEFAULT_TOOLTIP_CONFIG,
@@ -404,7 +404,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         {({ height, width }) => {
           return (
             <Box sx={{ height, width }}>
-              {y_axis && y_axis.show && y_axis.label && <YAxisLabel name={y_axis.label} height={height} />}
+              {yAxis && yAxis.show && yAxis.label && <YAxisLabel name={yAxis.label} height={height} />}
               <TimeChart
                 ref={chartRef}
                 height={height}

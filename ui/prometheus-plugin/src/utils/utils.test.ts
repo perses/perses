@@ -81,12 +81,12 @@ describe('getFormattedPrometheusSeriesName', () => {
     expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(output);
   });
 
-  it('should show a metric with empty labels with the appropriate series_name_format', () => {
+  it('should show a metric with empty labels with the appropriate seriesNameFormat', () => {
     const query = 'up';
     const metric = {};
-    const series_name_format = 'Custom series name';
+    const seriesNameFormat = 'Custom series name';
     const output = { name: query, formattedName: 'Custom series name' };
-    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+    expect(getFormattedPrometheusSeriesName(query, metric, seriesNameFormat)).toEqual(output);
   });
 
   it('should show correct formatted series name when labels are populated', () => {
@@ -97,12 +97,12 @@ describe('getFormattedPrometheusSeriesName', () => {
       instance: 'demo.do.prometheus.io:9100',
       job: 'node',
     };
-    const series_name_format = 'custom example {{env}} {{instance}} {{job}}';
+    const seriesNameFormat = 'custom example {{env}} {{instance}} {{job}}';
     const output = {
       formattedName: 'custom example demo demo.do.prometheus.io:9100 node',
       name: 'node_memory_Buffers_bytes{env="demo",instance="demo.do.prometheus.io:9100",job="node"}',
     };
-    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+    expect(getFormattedPrometheusSeriesName(query, metric, seriesNameFormat)).toEqual(output);
   });
 
   it('should show an empty string when no corresponding label values returned', () => {
@@ -110,12 +110,12 @@ describe('getFormattedPrometheusSeriesName', () => {
     const metric = {
       job: 'node',
     };
-    const series_name_format = 'test{{fake}}';
+    const seriesNameFormat = 'test{{fake}}';
     const output = {
       formattedName: 'test',
       name: '{job="node"}',
     };
-    expect(getFormattedPrometheusSeriesName(query, metric, series_name_format)).toEqual(output);
+    expect(getFormattedPrometheusSeriesName(query, metric, seriesNameFormat)).toEqual(output);
   });
 
   it('should correctly handle invalid label value case', () => {
@@ -123,12 +123,12 @@ describe('getFormattedPrometheusSeriesName', () => {
     const metric = {
       job: 99,
     };
-    const series_name_format = 'job - {{job}}';
+    const seriesNameFormat = 'job - {{job}}';
     const output = {
       formattedName: 'job - 99',
       name: '{job="99"}',
     };
-    expect(getFormattedPrometheusSeriesName(query, metric as unknown as Metric, series_name_format)).toEqual(output);
+    expect(getFormattedPrometheusSeriesName(query, metric as unknown as Metric, seriesNameFormat)).toEqual(output);
   });
 
   it('should show correct raw series name', () => {

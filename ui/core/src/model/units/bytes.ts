@@ -31,12 +31,12 @@ const bytesUnitKinds = ['Bytes'] as const;
 type BytesUnitKind = (typeof bytesUnitKinds)[number];
 export type BytesUnitOptions = {
   kind: BytesUnitKind;
-  decimal_places?: number;
+  decimalPlaces?: number;
   abbreviate?: boolean;
 };
 export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Bytes',
-  decimal_places: true,
+  decimalPlaces: true,
   abbreviate: true,
 };
 export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
@@ -46,7 +46,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
   },
 };
 
-export function formatBytes(bytes: number, { abbreviate, decimal_places }: BytesUnitOptions) {
+export function formatBytes(bytes: number, { abbreviate, decimalPlaces }: BytesUnitOptions) {
   // If we're showing the entire value, we can use Intl.NumberFormat.
   if (!shouldAbbreviate(abbreviate) || Math.abs(bytes) < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {
@@ -56,9 +56,9 @@ export function formatBytes(bytes: number, { abbreviate, decimal_places }: Bytes
       useGrouping: true,
     };
 
-    if (hasDecimalPlaces(decimal_places)) {
-      formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimal_places);
-      formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimal_places);
+    if (hasDecimalPlaces(decimalPlaces)) {
+      formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
+      formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
     } else {
       // This can happen if bytes is between -1000 and 1000
       if (shouldAbbreviate(abbreviate)) {
@@ -75,10 +75,10 @@ export function formatBytes(bytes: number, { abbreviate, decimal_places }: Bytes
     output: 'byte',
     base: 'decimal',
     spaceSeparated: true,
-    mantissa: hasDecimalPlaces(decimal_places) ? decimal_places : DEFAULT_NUMBRO_MANTISSA,
+    mantissa: hasDecimalPlaces(decimalPlaces) ? decimalPlaces : DEFAULT_NUMBRO_MANTISSA,
     // trimMantissa trims trailing 0s
-    trimMantissa: !hasDecimalPlaces(decimal_places),
+    trimMantissa: !hasDecimalPlaces(decimalPlaces),
     // optionalMantissa excludes all the decimal places if they're all zeros
-    optionalMantissa: !hasDecimalPlaces(decimal_places),
+    optionalMantissa: !hasDecimalPlaces(decimalPlaces),
   });
 }

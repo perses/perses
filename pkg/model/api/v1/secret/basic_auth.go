@@ -65,10 +65,10 @@ func (b *BasicAuth) GetPassword() (string, error) {
 
 func (b *BasicAuth) validate() error {
 	if len(b.Username) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
-		return fmt.Errorf("when using basic_auth, username and password/password_file cannot be empty")
+		return fmt.Errorf("when using basicAuth, username and password/password_file cannot be empty")
 	}
 	if len(b.Password) > 0 && len(b.PasswordFile) > 0 {
-		return fmt.Errorf("at most one of basic_auth password & password_file must be configured")
+		return fmt.Errorf("at most one of basicAuth password & password_file must be configured")
 	}
 	if len(b.PasswordFile) > 0 {
 		// Read the file to verify it exists

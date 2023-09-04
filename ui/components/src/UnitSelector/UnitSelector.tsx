@@ -40,16 +40,16 @@ const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
   .filter((config) => !config.disableSelectorOption);
 
 const DECIMAL_PLACES_OPTIONS = [
-  { id: 'default', label: 'Default', decimal_places: undefined },
-  { id: '0', label: '0', decimal_places: 0 },
-  { id: '1', label: '1', decimal_places: 1 },
-  { id: '2', label: '2', decimal_places: 2 },
-  { id: '3', label: '3', decimal_places: 3 },
-  { id: '4', label: '4', decimal_places: 4 },
+  { id: 'default', label: 'Default', decimalPlaces: undefined },
+  { id: '0', label: '0', decimalPlaces: 0 },
+  { id: '1', label: '1', decimalPlaces: 1 },
+  { id: '2', label: '2', decimalPlaces: 2 },
+  { id: '3', label: '3', decimalPlaces: 3 },
+  { id: '4', label: '4', decimalPlaces: 4 },
 ];
 
-function getOptionByDecimalPlaces(decimal_places?: number) {
-  return DECIMAL_PLACES_OPTIONS.find((o) => o.decimal_places === decimal_places);
+function getOptionByDecimalPlaces(decimalPlaces?: number) {
+  return DECIMAL_PLACES_OPTIONS.find((o) => o.decimalPlaces === decimalPlaces);
 }
 
 export function UnitSelector({ value, onChange, disabled = false }: UnitSelectorProps) {
@@ -62,11 +62,11 @@ export function UnitSelector({ value, onChange, disabled = false }: UnitSelector
     });
   };
 
-  const handleDecimalPlacesChange = (_: unknown, { decimal_places }: { decimal_places: number | undefined }) => {
+  const handleDecimalPlacesChange = (_: unknown, { decimalPlaces }: { decimalPlaces: number | undefined }) => {
     if (hasDecimalPlaces) {
       onChange({
         ...value,
-        decimal_places: decimal_places,
+        decimalPlaces: decimalPlaces,
       });
     }
   };
@@ -111,7 +111,7 @@ export function UnitSelector({ value, onChange, disabled = false }: UnitSelector
         label="Decimals"
         control={
           <SettingsAutocomplete
-            value={getOptionByDecimalPlaces(value.decimal_places)}
+            value={getOptionByDecimalPlaces(value.decimalPlaces)}
             options={DECIMAL_PLACES_OPTIONS}
             getOptionLabel={(o) => o.label}
             onChange={handleDecimalPlacesChange}

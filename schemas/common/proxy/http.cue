@@ -14,8 +14,8 @@
 package proxy
 
 #HTTPAllowedEndpoint: {
-	endpoint_pattern: string
-	method:           "POST" | "PUT" | "PATCH" | "GET" | "DELETE"
+	endpointPattern: string
+	method:          "POST" | "PUT" | "PATCH" | "GET" | "DELETE"
 }
 
 #HTTPProxy: {
@@ -24,9 +24,9 @@ package proxy
 		// url is the url of the datasource. It is not the url of the proxy.
 		// The Perses server is the proxy, so it needs to know where to redirect the request.
 		url: string
-		// allowed_endpoints is a list of tuples of http methods and http endpoints that will be accessible.
+		// allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
 		// Leave it empty if you don't want to restrict the access to the datasource.
-		allowed_endpoints?: [ ...#HTTPAllowedEndpoint]
+		allowedEndpoints?: [ ...#HTTPAllowedEndpoint]
 		// headers can be used to provide additional headers that need to be forwarded when requesting the datasource
 		headers?: {[string]: string}
 		// secret is the name of the secret that should be used for the proxy or discovery configuration

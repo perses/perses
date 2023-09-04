@@ -1,14 +1,14 @@
 {
   "kind": "TimeSeriesChart",
   "spec": {
-    "y_axis": {
+    "yAxis": {
       "show": true,
       "label": "CPU",
       "min": 0.2,
       "max": 0.4,
       "unit": {
         "kind": "Decimal",
-        "decimal_places": 2
+        "decimalPlaces": 2
       }
     },
     "legend": {
@@ -28,8 +28,8 @@
     },
     "visual": {
       "display": "line",
-      "line_width": 2,
-      "point_radius": 3
+      "lineWidth": 2,
+      "pointRadius": 3
     }
   }
 }

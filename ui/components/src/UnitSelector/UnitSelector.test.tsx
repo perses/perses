@@ -77,7 +77,7 @@ describe('UnitSelector', () => {
 
   it('can change the decimal places by clicking', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimal_places: 0, abbreviate: true }, onChange);
+    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 0, abbreviate: true }, onChange);
 
     userEvent.click(getDecimalPlacesSelector());
     const decimalPlacesOption = screen.getByRole('option', {
@@ -87,7 +87,7 @@ describe('UnitSelector', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
-      decimal_places: undefined,
+      decimalPlaces: undefined,
       abbreviate: true,
     });
   });
@@ -110,33 +110,33 @@ describe('UnitSelector', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Percent',
-      decimal_places: 3,
+      decimalPlaces: 3,
     });
   });
 
   it('can change abbreviate by clicking', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimal_places: 3, abbreviate: true }, onChange);
+    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 3, abbreviate: true }, onChange);
 
     userEvent.click(getAbbreviateSwitch());
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
-      decimal_places: 3,
+      decimalPlaces: 3,
       abbreviate: false,
     });
   });
 
   it('can change abbreviate using a keyboard', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimal_places: 0 }, onChange);
+    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 0 }, onChange);
 
     userEvent.tab();
     userEvent.keyboard('{space}');
 
     expect(onChange).toHaveBeenCalledWith({
       kind: 'Decimal',
-      decimal_places: 0,
+      decimalPlaces: 0,
       abbreviate: false,
     });
   });

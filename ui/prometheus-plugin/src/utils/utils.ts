@@ -15,7 +15,7 @@ import { isEmptyObject } from '@perses-dev/core';
 import { Metric } from '../model/api-types';
 
 /**
- * Types for metric labels, used in series_name_format implementation
+ * Types for metric labels, used in seriesNameFormat implementation
  */
 export type SeriesLabels = Record<string, string>;
 
@@ -93,7 +93,7 @@ export function getFormattedPrometheusSeriesName(query: string, metric: Metric, 
     name = query;
   }
 
-  // Query editor allows you to define an optional series_name_format property.
+  // Query editor allows you to define an optional seriesNameFormat property.
   // This controls the regex used to customize legend and tooltip display.
   const formattedName = formatter ? formatSeriesName(formatter, metric) : name;
   return { name, formattedName };

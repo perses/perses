@@ -59,8 +59,8 @@ export function DashboardList(props: DashboardListProperties) {
           name: dashboard.metadata.name,
           displayName: getDashboardDisplayName(dashboard),
           version: dashboard.metadata.version,
-          createdAt: dashboard.metadata.created_at,
-          updatedAt: dashboard.metadata.updated_at,
+          createdAt: dashboard.metadata.createdAt,
+          updatedAt: dashboard.metadata.updatedAt,
         } as Row)
     );
   }, [dashboardList]);

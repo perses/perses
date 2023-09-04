@@ -18,8 +18,8 @@ const testDashboard: DashboardResource = {
   metadata: {
     name: 'Node Stats',
     project: 'perses',
-    created_at: '2021-11-09',
-    updated_at: '2021-11-09',
+    createdAt: '2021-11-09',
+    updatedAt: '2021-11-09',
     version: 0,
   },
   spec: {

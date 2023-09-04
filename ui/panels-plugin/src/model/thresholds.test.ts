@@ -27,7 +27,7 @@ describe('convertThresholds', () => {
 
     // example of unit.kind Percent conversion
     const percentInput = {
-      default_color: '#000',
+      defaultColor: '#000',
       steps: [
         {
           value: 85,
@@ -43,7 +43,7 @@ describe('convertThresholds', () => {
 
     // example of unit.kind PercentDecimal conversion
     const percentDecimalInput = {
-      default_color: '#000',
+      defaultColor: '#000',
       steps: [
         {
           value: 0.85,
@@ -85,7 +85,7 @@ describe('convertThresholds', () => {
       [1, '#FF0000'],
     ];
     const percentInput = {
-      default_color: '#000',
+      defaultColor: '#000',
       steps: [
         {
           value: 50,
@@ -105,7 +105,7 @@ describe('convertThresholds', () => {
       [1, '#FF0000'],
     ];
     const percentDecimalInput = {
-      default_color: '#000',
+      defaultColor: '#000',
       steps: [
         {
           value: 0.5,

@@ -17,9 +17,9 @@ export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
 
 // TODO: unify this one with the other PrometheusDatasourceSpec used for datasource store manipulation
 export interface PrometheusDatasourceSpec {
-  direct_url?: string;
+  directUrl?: string;
   proxy?: HTTPProxy;
-  scrape_interval?: DurationString; // default to 1m
+  scrapeInterval?: DurationString; // default to 1m
 }
 
 export interface HTTPProxy {
@@ -30,9 +30,9 @@ export interface HTTPProxySpec {
   // url is the url of the datasource. It is not the url of the proxy.
   // The Perses server is the proxy, so it needs to know where to redirect the request.
   url: string;
-  // allowed_endpoints is a list of tuples of http methods and http endpoints that will be accessible.
+  // allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
   // Leave it empty if you don't want to restrict the access to the datasource.
-  allowed_endpoints?: HTTPAllowedEndpoint[];
+  allowedEndpoints?: HTTPAllowedEndpoint[];
   // headers can be used to provide additional headers that need to be forwarded when requesting the datasource
   headers?: RequestHeaders;
   // secret is the name of the secret that should be used for the proxy or discovery configuration
@@ -41,6 +41,6 @@ export interface HTTPProxySpec {
 }
 
 export interface HTTPAllowedEndpoint {
-  endpoint_pattern: string;
+  endpointPattern: string;
   method: string;
 }

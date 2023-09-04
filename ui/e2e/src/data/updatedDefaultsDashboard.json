@@ -2,8 +2,8 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "EditJson",
-    "created_at": "2022-12-21T00:00:00Z",
-    "updated_at": "2023-02-07T00:28:57.658905Z",
+    "createdAt": "2022-12-21T00:00:00Z",
+    "updatedAt": "2023-02-07T00:28:57.658905Z",
     "version": 1,
     "project": "testing"
   },

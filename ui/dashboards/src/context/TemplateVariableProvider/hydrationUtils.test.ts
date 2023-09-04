@@ -32,7 +32,7 @@ describe('hydrateTemplateVariableStates', () => {
           plugin: {
             kind: 'PrometheusLabelValuesVariable',
             spec: {
-              label_name: 'instance',
+              labelName: 'instance',
             },
           },
         },

@@ -22,7 +22,7 @@ export function getColorFromThresholds(
   value?: number | null
 ) {
   // thresholds color takes priority over other colors
-  const defaultColor = thresholds?.default_color ?? chartsTheme.thresholds.defaultColor;
+  const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
 
   if (thresholds === undefined) {
     return defaultColor;

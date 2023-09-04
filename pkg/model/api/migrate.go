@@ -20,7 +20,7 @@ import (
 
 type Migrate struct {
 	Input            map[string]string `json:"input,omitempty"`
-	GrafanaDashboard json.RawMessage   `json:"grafana_dashboard"`
+	GrafanaDashboard json.RawMessage   `json:"grafanaDashboard"`
 }
 
 func (m *Migrate) UnmarshalJSON(data []byte) error {
@@ -38,7 +38,7 @@ func (m *Migrate) UnmarshalJSON(data []byte) error {
 
 func (m *Migrate) validate() error {
 	if len(m.GrafanaDashboard) == 0 {
-		return fmt.Errorf("grafana_dashboard cannot be empty")
+		return fmt.Errorf("grafanaDashboard cannot be empty")
 	}
 	return nil
 }

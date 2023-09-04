@@ -4,8 +4,8 @@
     "metadata": {
       "name": "Demo",
       "project": "perses",
-      "created_at": "2021-11-09T00:00:00Z",
-      "updated_at": "2021-11-09T00:00:00Z",
+      "createdAt": "2021-11-09T00:00:00Z",
+      "updatedAt": "2021-11-09T00:00:00Z",
       "version": 0
     },
     "spec": {
@@ -36,7 +36,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "job"
+                "labelName": "job"
               }
             }
           }
@@ -50,7 +50,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "instance",
+                "labelName": "instance",
                 "matchers": ["up{job=~\"$job\"}"]
               }
             }
@@ -102,7 +102,7 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes",
                     "abbreviate": true
@@ -132,7 +132,7 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "unit": { "kind": "Decimal" }
                 },
                 "legend": {
@@ -147,7 +147,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Node memory - {{device}} {{instance}}",
+                      "seriesNameFormat": "Node memory - {{device}} {{instance}}",
                       "query": "1 - node_filesystem_free_bytes{job='$job',instance=~'$instance',fstype!=\"rootfs\",mountpoint!~\"/(run|var).*\",mountpoint!=\"\"} / node_filesystem_size_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -166,7 +166,7 @@
                 "legend": {
                   "position": "bottom"
                 },
-                "y_axis": {
+                "yAxis": {
                   "show": true,
                   "unit": {
                     "kind": "Bytes",
@@ -182,7 +182,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Node memory total",
+                      "seriesNameFormat": "Node memory total",
                       "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -194,7 +194,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Memory (buffers) - {{instance}}",
+                      "seriesNameFormat": "Memory (buffers) - {{instance}}",
                       "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -206,7 +206,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Cached Bytes",
+                      "seriesNameFormat": "Cached Bytes",
                       "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -218,7 +218,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "MemFree Bytes",
+                      "seriesNameFormat": "MemFree Bytes",
                       "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -237,8 +237,8 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
-                  "unit": { "kind": "Decimal", "decimal_places": 2 }
+                "yAxis": {
+                  "unit": { "kind": "Decimal", "decimalPlaces": 2 }
                 },
                 "legend": {
                   "position": "right"
@@ -253,7 +253,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "node_load15{instance=~\"(demo.do.prometheus.io:9100)\",job='$job'}",
-                      "series_name_format": "Test {{job}} {{instance}}"
+                      "seriesNameFormat": "Test {{job}} {{instance}}"
                     }
                   }
                 }
@@ -274,8 +274,8 @@
                 "legend": {
                   "position": "right"
                 },
-                "y_axis": {
-                  "unit": { "kind": "PercentDecimal", "decimal_places": 1 }
+                "yAxis": {
+                  "unit": { "kind": "PercentDecimal", "decimalPlaces": 1 }
                 },
                 "thresholds": {
                   "steps": [
@@ -316,12 +316,12 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "show": false,
                   "label": "CPU Label",
                   "unit": {
                     "kind": "PercentDecimal",
-                    "decimal_places": 0
+                    "decimalPlaces": 0
                   }
                 },
                 "legend": {
@@ -339,7 +339,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                      "seriesNameFormat": "{{mode}} mode - {{job}} {{instance}}",
                       "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
                     }
                   }
@@ -372,7 +372,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "{{mode}} mode - {{job}} {{instance}}",
+                      "seriesNameFormat": "{{mode}} mode - {{job}} {{instance}}",
                       "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[$interval]))"
                     }
                   }
@@ -391,7 +391,7 @@
                 "calculation": "mean",
                 "unit": {
                   "kind": "Decimal",
-                  "decimal_places": 1,
+                  "decimalPlaces": 1,
                   "abbreviate": true
                 }
               }
@@ -481,7 +481,7 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Bytes", "decimal_places": 1 }
+                "unit": { "kind": "Bytes", "decimalPlaces": 1 }
               }
             },
             "queries": [
@@ -509,7 +509,7 @@
                 "calculation": "sum",
                 "unit": {
                   "kind": "Decimal",
-                  "decimal_places": 2,
+                  "decimalPlaces": 2,
                   "abbreviate": true
                 },
                 "sparkline": { "color": "#e65013", "width": 1.5 }
@@ -600,7 +600,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "PercentDecimal", "decimal_places": 1 },
+                "unit": { "kind": "PercentDecimal", "decimalPlaces": 1 },
                 "thresholds": {
                   "steps": [
                     {
@@ -771,8 +771,8 @@
     "metadata": {
       "name": "Benchmark",
       "project": "perses",
-      "created_at": "2021-11-09T00:00:00Z",
-      "updated_at": "2021-11-09T00:00:00Z",
+      "createdAt": "2021-11-09T00:00:00Z",
+      "updatedAt": "2021-11-09T00:00:00Z",
       "version": 0
     },
     "spec": {
@@ -788,7 +788,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "job"
+                "labelName": "job"
               }
             }
           }
@@ -803,7 +803,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "instance",
+                "labelName": "instance",
                 "matchers": ["up{job=~\"$job\"}"]
               }
             }
@@ -871,10 +871,10 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Decimal",
-                    "decimal_places": 4
+                    "decimalPlaces": 4
                   }
                 }
               }
@@ -903,10 +903,10 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal",
-                    "decimal_places": 0
+                    "decimalPlaces": 0
                   }
                 }
               }
@@ -936,7 +936,7 @@
                 "legend": {
                   "position": "bottom"
                 },
-                "y_axis": {
+                "yAxis": {
                   "show": true,
                   "unit": {
                     "kind": "Bytes",
@@ -952,7 +952,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Node memory total",
+                      "seriesNameFormat": "Node memory total",
                       "query": "node_memory_MemTotal_bytes{job='$job',instance=~'$instance'} - node_memory_MemFree_bytes{job='$job',instance=~'$instance'} - node_memory_Buffers_bytes{job='$job',instance=~'$instance'} - node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -964,7 +964,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Memory (buffers) - {{instance}}",
+                      "seriesNameFormat": "Memory (buffers) - {{instance}}",
                       "query": "node_memory_Buffers_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -976,7 +976,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Cached Bytes",
+                      "seriesNameFormat": "Cached Bytes",
                       "query": "node_memory_Cached_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -988,7 +988,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "MemFree Bytes",
+                      "seriesNameFormat": "MemFree Bytes",
                       "query": "node_memory_MemFree_bytes{job='$job',instance=~'$instance'}"
                     }
                   }
@@ -1007,11 +1007,11 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
+                "yAxis": {
                   "show": true,
                   "unit": {
                     "kind": "Percent",
-                    "decimal_places": 1
+                    "decimalPlaces": 1
                   }
                 },
                 "thresholds": {
@@ -1061,8 +1061,8 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "y_axis": {
-                  "unit": { "kind": "PercentDecimal", "decimal_places": 0 }
+                "yAxis": {
+                  "unit": { "kind": "PercentDecimal", "decimalPlaces": 0 }
                 },
                 "legend": {
                   "position": "bottom"
@@ -1079,7 +1079,7 @@
                   "plugin": {
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
-                      "series_name_format": "Custom {{job}} - {{device}} {{instance}}",
+                      "seriesNameFormat": "Custom {{job}} - {{device}} {{instance}}",
                       "query": "avg without (cpu)(rate(node_cpu_seconds_total{job='$job',instance=~'$instance',mode!=\"idle\"}[$interval]))"
                     }
                   }
@@ -1100,7 +1100,7 @@
                 "calculation": "mean",
                 "unit": {
                   "kind": "Decimal",
-                  "decimal_places": 1,
+                  "decimalPlaces": 1,
                   "abbreviate": true
                 }
               }
@@ -1164,7 +1164,7 @@
                 "calculation": "last-number",
                 "unit": {
                   "kind": "Bytes",
-                  "decimal_places": 1
+                  "decimalPlaces": 1
                 }
               }
             },
@@ -1195,7 +1195,7 @@
                 "calculation": "sum",
                 "unit": {
                   "kind": "Decimal",
-                  "decimal_places": 2,
+                  "decimalPlaces": 2,
                   "abbreviate": true
                 },
                 "sparkline": {
@@ -1305,7 +1305,7 @@
                 "calculation": "last-number",
                 "unit": {
                   "kind": "PercentDecimal",
-                  "decimal_places": 1
+                  "decimalPlaces": 1
                 },
                 "thresholds": {
                   "steps": [
@@ -1574,8 +1574,8 @@
     "metadata": {
       "name": "PanelGroups",
       "project": "testing",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2022-12-21T00:00:00Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2022-12-21T00:00:00Z",
       "version": 0
     },
     "spec": {
@@ -1629,8 +1629,8 @@
     "metadata": {
       "name": "Panels",
       "project": "testing",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2022-12-21T00:00:00Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2022-12-21T00:00:00Z",
       "version": 0
     },
     "spec": {
@@ -1696,8 +1696,8 @@
     "metadata": {
       "name": "Variables",
       "project": "testing",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2022-12-21T00:00:00Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2022-12-21T00:00:00Z",
       "version": 0
     },
     "spec": {
@@ -1762,8 +1762,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "MarkdownPanel",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-01-26T20:03:02.724739Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-01-26T20:03:02.724739Z",
       "version": 3,
       "project": "testing"
     },
@@ -1936,8 +1936,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "TimeSeriesChartPanel",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-01-25T17:43:56.745494Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-01-25T17:43:56.745494Z",
       "version": 3,
       "project": "testing"
     },
@@ -2067,7 +2067,7 @@
                         "name": "PrometheusDemo"
                       },
                       "query": "up{job=\"grafana\",instance=\"demo.do.prometheus.io:3000\"}",
-                      "series_name_format": "formatted series name example - {{job}} job - instance {{instance}}"
+                      "seriesNameFormat": "formatted series name example - {{job}} job - instance {{instance}}"
                     }
                   }
                 }
@@ -2086,10 +2086,10 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "visual": {
-                  "area_opacity": 0.5,
-                  "point_radius": 6,
-                  "line_width": 3,
-                  "connect_nulls": false
+                  "areaOpacity": 0.5,
+                  "pointRadius": 6,
+                  "lineWidth": 3,
+                  "connectNulls": false
                 }
               }
             },
@@ -2123,8 +2123,8 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "visual": {
-                  "show_points": "always",
-                  "connect_nulls": true
+                  "showPoints": "always",
+                  "connectNulls": true
                 }
               }
             },
@@ -2219,8 +2219,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "GaugeChartPanel",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-01-26T17:29:46.991965Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-01-26T17:29:46.991965Z",
       "version": 5,
       "project": "testing"
     },
@@ -2296,8 +2296,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "StatChartPanel",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-06-09T17:57:49.291171Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-06-09T17:57:49.291171Z",
       "version": 13,
       "project": "testing"
     },
@@ -2328,7 +2328,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
-                      "series_name_format": "{{mode}} mode "
+                      "seriesNameFormat": "{{mode}} mode "
                     }
                   }
                 }
@@ -2348,7 +2348,7 @@
                 "calculation": "mean",
                 "unit": {
                   "abbreviate": false,
-                  "decimal_places": 2,
+                  "decimalPlaces": 2,
                   "kind": "Decimal"
                 }
               }
@@ -2361,7 +2361,7 @@
                     "kind": "PrometheusTimeSeriesQuery",
                     "spec": {
                       "query": "avg without (cpu)(rate(node_cpu_seconds_total{job=\"node\",instance=~\"demo.do.prometheus.io:9100\",mode!=\"nice\",mode!=\"steal\",mode!=\"irq\"}[5m]))",
-                      "series_name_format": "{{mode}} mode "
+                      "seriesNameFormat": "{{mode}} mode "
                     }
                   }
                 }
@@ -2490,8 +2490,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "DuplicatePanels",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-02-07T00:28:57.658905Z",
       "version": 14,
       "project": "testing"
     },
@@ -2996,8 +2996,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "EditJson",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-02-07T00:28:57.658905Z",
       "version": 1,
       "project": "testing"
     },
@@ -3098,8 +3098,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "Defaults",
-      "created_at": "2022-12-21T00:00:00Z",
-      "updated_at": "2023-02-07T00:28:57.658905Z",
+      "createdAt": "2022-12-21T00:00:00Z",
+      "updatedAt": "2023-02-07T00:28:57.658905Z",
       "version": 1,
       "project": "testing"
     },
@@ -3200,8 +3200,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "TimeSeriesChartLegends",
-      "created_at": "2023-05-15T18:47:36.711505Z",
-      "updated_at": "2023-06-07T21:55:11.91758Z",
+      "createdAt": "2023-05-15T18:47:36.711505Z",
+      "updatedAt": "2023-06-07T21:55:11.91758Z",
       "version": 9,
       "project": "testing"
     },
@@ -3396,8 +3396,8 @@
     "kind": "Dashboard",
     "metadata": {
       "name": "NodeExporter",
-      "created_at": "2023-07-26T00:00:00Z",
-      "updated_at": "2023-07-26T00:00:00Z",
+      "createdAt": "2023-07-26T00:00:00Z",
+      "updatedAt": "2023-07-26T00:00:00Z",
       "version": 0,
       "project": "perses"
     },
@@ -3419,7 +3419,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "job",
+                "labelName": "job",
                 "matchers": ["node_uname_info"]
               }
             },
@@ -3438,7 +3438,7 @@
             "plugin": {
               "kind": "PrometheusLabelValuesVariable",
               "spec": {
-                "label_name": "instance",
+                "labelName": "instance",
                 "matchers": ["node_uname_info{job=\"$job\"}"]
               }
             },
@@ -4182,7 +4182,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }
@@ -4349,7 +4349,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal"
                   }
@@ -4514,7 +4514,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -4969,7 +4969,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -5021,7 +5021,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -5973,7 +5973,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -6959,7 +6959,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }
@@ -7070,7 +7070,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal"
                   }
@@ -7198,7 +7198,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -7374,7 +7374,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Percent"
                   }
@@ -7422,7 +7422,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal"
                   }
@@ -7575,7 +7575,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -7801,7 +7801,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -7965,7 +7965,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal"
                   }
@@ -8013,7 +8013,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "PercentDecimal"
                   }
@@ -8076,7 +8076,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8139,7 +8139,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8275,7 +8275,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8338,7 +8338,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8416,7 +8416,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8479,7 +8479,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8527,7 +8527,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8620,7 +8620,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8698,7 +8698,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8791,7 +8791,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8854,7 +8854,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8932,7 +8932,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -8980,7 +8980,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -9043,7 +9043,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -9338,7 +9338,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }
@@ -9517,7 +9517,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }
@@ -9724,7 +9724,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Bytes"
                   }
@@ -9875,7 +9875,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }
@@ -10256,7 +10256,7 @@
                     }
                   ]
                 },
-                "y_axis": {
+                "yAxis": {
                   "unit": {
                     "kind": "Seconds"
                   }

@@ -27,7 +27,7 @@ export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
 export function StatChartPanel(props: StatChartPanelProps) {
   const {
-    spec: { calculation, unit, sparkline, thresholds, value_font_size: valueFontSize },
+    spec: { calculation, unit, sparkline, thresholds, valueFontSize: valueFontSize },
     contentDimensions,
   } = props;
 

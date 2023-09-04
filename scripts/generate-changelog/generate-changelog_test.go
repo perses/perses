@@ -166,7 +166,7 @@ func TestGenerateChangelog(t *testing.T) {
 					"legend options editor UX improvements (#845)",
 					"Make it possible to adjust the height of the time range controls (#829)",
 				},
-				bugfixes:        []string{"Fix time units display, allow decimal_places to be used (#837)"},
+				bugfixes:        []string{"Fix time units display, allow decimalPlaces to be used (#837)"},
 				breakingChanges: []string{"legend.position now required in time series panel (#848)"},
 				unknown:         []string{"Use exact versions for internal npm dependencies (#846)", "Support snapshot UI releases (#844)"},
 			},
@@ -175,7 +175,7 @@ func TestGenerateChangelog(t *testing.T) {
 - [ENHANCEMENT] Variable UX fixes (#842)
 - [ENHANCEMENT] legend options editor UX improvements (#845)
 - [ENHANCEMENT] Make it possible to adjust the height of the time range controls (#829)
-- [BUGFIX] Fix time units display, allow decimal_places to be used (#837)
+- [BUGFIX] Fix time units display, allow decimalPlaces to be used (#837)
 - [BREAKINGCHANGE] legend.position now required in time series panel (#848)
 
 [//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>

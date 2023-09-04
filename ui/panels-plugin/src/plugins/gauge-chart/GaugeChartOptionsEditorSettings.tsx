@@ -52,7 +52,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     );
   };
 
-  // ensures decimal_places defaults to correct value
+  // ensures decimalPlaces defaults to correct value
   const unit = merge({}, DEFAULT_UNIT, value.unit);
 
   // max only needs to be set explicitly for units other than Percent and PercentDecimal

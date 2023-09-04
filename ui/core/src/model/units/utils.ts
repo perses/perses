@@ -15,8 +15,8 @@ export function shouldAbbreviate(abbreviate?: boolean) {
   return abbreviate !== false;
 }
 
-export function hasDecimalPlaces(decimal_places?: number) {
-  return typeof decimal_places === 'number';
+export function hasDecimalPlaces(decimalPlaces?: number) {
+  return typeof decimalPlaces === 'number';
 }
 
 // Avoids maximumFractionDigits out-of-range error.

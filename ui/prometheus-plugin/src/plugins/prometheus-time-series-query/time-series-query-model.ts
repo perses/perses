@@ -19,8 +19,8 @@ import { PrometheusDatasourceSelector, TemplateString } from '../../model';
  */
 export interface PrometheusTimeSeriesQuerySpec {
   query: TemplateString;
-  series_name_format?: string;
-  min_step?: DurationString;
+  seriesNameFormat?: string;
+  minStep?: DurationString;
   resolution?: number;
   datasource?: PrometheusDatasourceSelector;
 }

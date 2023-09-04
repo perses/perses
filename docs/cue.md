@@ -15,7 +15,7 @@ package <variable type> // e.g package prometheusLabelValues
 
 kind: "<Variable name>" // e.g kind: "PrometheusLabelValuesVariable"
 spec: close({
-	label_name: string
+	labelName: string
 	matchers: [...string]
 })
 ```
@@ -61,7 +61,7 @@ spec: {
     kind: "<Datasource type>" // e.g kind: "PrometheusDatasource"
   }
   query:       string
-  min_step?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+  minStep?:   =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
   resolution?: number
 }
 ```

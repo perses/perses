@@ -4,7 +4,7 @@
     "calculation": "sum",
     "unit": {
       "kind": "Decimal",
-      "decimal_places": 2,
+      "decimalPlaces": 2,
       "abbreviate": true
     },
     "sparkline": {

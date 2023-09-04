@@ -144,8 +144,8 @@ $ percli describe dts PrometheusDemo
 kind: Datasource
 metadata:
   name: PrometheusDemo
-  created_at: 0001-01-01T00:00:00Z
-  updated_at: 0001-01-01T00:00:00Z
+  createdAt: 0001-01-01T00:00:00Z
+  updatedAt: 0001-01-01T00:00:00Z
   project: perses
 spec:
   default: false
@@ -155,18 +155,18 @@ spec:
       proxy:
         kind: HTTPProxy
         spec:
-          allowed_endpoints:
-          - endpoint_pattern: /api/v1/labels
+          allowedEndpoints:
+          - endpointPattern: /api/v1/labels
             method: POST
-          - endpoint_pattern: /api/v1/series
+          - endpointPattern: /api/v1/series
             method: POST
-          - endpoint_pattern: /api/v1/metadata
+          - endpointPattern: /api/v1/metadata
             method: GET
-          - endpoint_pattern: /api/v1/query
+          - endpointPattern: /api/v1/query
             method: POST
-          - endpoint_pattern: /api/v1/query_range
+          - endpointPattern: /api/v1/query_range
             method: POST
-          - endpoint_pattern: /api/v1/label/([a-zA-Z0-9_-]+)/values
+          - endpointPattern: /api/v1/label/([a-zA-Z0-9_-]+)/values
             method: GET
           url: https://prometheus.demo.do.prometheus.io
 ```
@@ -180,8 +180,8 @@ $ percli describe dts PrometheusDemo -ojson | jq
   "kind": "Datasource",
   "metadata": {
     "name": "PrometheusDemo",
-    "created_at": "0001-01-01T00:00:00Z",
-    "updated_at": "0001-01-01T00:00:00Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "project": "perses"
   },
   "spec": {
@@ -192,29 +192,29 @@ $ percli describe dts PrometheusDemo -ojson | jq
         "proxy": {
           "kind": "HTTPProxy",
           "spec": {
-            "allowed_endpoints": [
+            "allowedEndpoints": [
               {
-                "endpoint_pattern": "/api/v1/labels",
+                "endpointPattern": "/api/v1/labels",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/series",
+                "endpointPattern": "/api/v1/series",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/metadata",
+                "endpointPattern": "/api/v1/metadata",
                 "method": "GET"
               },
               {
-                "endpoint_pattern": "/api/v1/query",
+                "endpointPattern": "/api/v1/query",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/query_range",
+                "endpointPattern": "/api/v1/query_range",
                 "method": "POST"
               },
               {
-                "endpoint_pattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
+                "endpointPattern": "/api/v1/label/([a-zA-Z0-9_-]+)/values",
                 "method": "GET"
               }
             ],
@@ -278,8 +278,8 @@ $ percli migrate -f ./grafana_dashboard.json --online
 kind: Dashboard
 metadata:
   name: rYdddlPWk
-  created_at: 0001-01-01T00:00:00Z
-  updated_at: 0001-01-01T00:00:00Z
+  createdAt: 0001-01-01T00:00:00Z
+  updatedAt: 0001-01-01T00:00:00Z
   project: ""
 spec:
   display:
@@ -313,7 +313,7 @@ spec:
       plugin:
         kind: PrometheusLabelValuesVariable
         spec:
-          label_name: job
+          labelName: job
           matchers: []
 [...]
 ```

@@ -32,8 +32,8 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
     kind: 'PluginModule',
     metadata: {
       name: 'Fake Plugin Module for Tests',
-      created_at: '',
-      updated_at: '',
+      createdAt: '',
+      updatedAt: '',
       version: 0,
     },
     spec: {

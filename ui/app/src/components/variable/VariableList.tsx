@@ -67,8 +67,8 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
           description: variable.spec.spec.display?.description,
           type: variable.spec.kind,
           version: variable.metadata.version,
-          createdAt: variable.metadata.created_at,
-          updatedAt: variable.metadata.updated_at,
+          createdAt: variable.metadata.createdAt,
+          updatedAt: variable.metadata.updatedAt,
         } as Row)
     );
   }, [data]);

@@ -70,7 +70,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   const handleFontSizeChange: FontSizeSelectorProps['onChange'] = (fontSize: FontSizeOption) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
-        draft.value_font_size = fontSize;
+        draft.valueFontSize = fontSize;
       })
     );
   };
@@ -85,7 +85,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           />
           <UnitSelector value={value.unit} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
-          <FontSizeSelector value={value.value_font_size} onChange={handleFontSizeChange} />
+          <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

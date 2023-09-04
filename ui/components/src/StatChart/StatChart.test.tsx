@@ -51,7 +51,7 @@ describe('StatChart', () => {
   it('render default options (no sparkline)', () => {
     const unit: UnitOptions = {
       kind: 'Decimal',
-      decimal_places: 2,
+      decimalPlaces: 2,
     };
     renderChart(unit);
     expect(screen.getByText('7.73')).toBeInTheDocument();

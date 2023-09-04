@@ -40,7 +40,7 @@ const FakeDataSourcePlugin: DatasourcePlugin = {
   OptionsEditorComponent: () => {
     return <div>Edit options here</div>;
   },
-  createInitialOptions: () => ({ direct_url: '' }),
+  createInitialOptions: () => ({ directUrl: '' }),
 };
 
 const MOCK_DS_PLUGIN: MockPlugin = {

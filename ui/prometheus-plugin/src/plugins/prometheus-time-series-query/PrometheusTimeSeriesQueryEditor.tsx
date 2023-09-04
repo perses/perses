@@ -49,7 +49,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
     minStep ??
-    (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrape_interval) ??
+    (datasourceResource && (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).scrapeInterval) ??
     DEFAULT_SCRAPE_INTERVAL;
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {

@@ -19,11 +19,11 @@ import (
 
 kind: "StatChart"
 spec: close({
-	calculation:      common.#calculation
-	unit?:            common.#unit
-	thresholds?:      common.#thresholds
-	sparkline?:       #sparkline
-	value_font_size?: number
+	calculation:    common.#calculation
+	unit?:          common.#unit
+	thresholds?:    common.#thresholds
+	sparkline?:     #sparkline
+	valueFontSize?: number
 
 	#sparkline: {
 		color?: string
