@@ -1,6 +1,7 @@
 ---
 name: Bug report
 description: Create a report to help us improve.
+labels: [ "bug" ]
 body:
   - type: markdown
     attributes:
@@ -33,13 +34,11 @@ body:
       label: System information
       description: insert output of `uname -srm` here, or operating system version
       placeholder: e.g. Linux 5.16.15 x86_64
-  - type: textarea
+  - type: input
     attributes:
       label: Perses version
       description: Insert the Perses version here.
-      render: text
-      placeholder: |
-        e.g. 0.39.0
+      placeholder: e.g. 0.39.0
   - type: textarea
     attributes:
       label: Perses configuration file
