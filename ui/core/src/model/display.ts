@@ -12,6 +12,6 @@
 // limitations under the License.
 
 export interface Display {
-  name: string;
+  name?: string;
   description?: string;
 }

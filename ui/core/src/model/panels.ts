@@ -12,14 +12,19 @@
 // limitations under the License.
 
 import { Definition, UnknownSpec } from './definitions';
-import { Display } from './display';
 import { QueryDefinition } from './query';
+
+export interface PanelDisplay {
+  name: string;
+  description?: string;
+}
+
 export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {
   kind: 'Panel';
 }
 
 export interface PanelSpec<PluginSpec> {
-  display: Display;
+  display: PanelDisplay;
   plugin: Definition<PluginSpec>;
   queries?: QueryDefinition[];
 }

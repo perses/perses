@@ -43,16 +43,9 @@ function getValidation(state: Datasource) {
  */
 function getInitialState<T extends Datasource>(datasource: T): T {
   const patchedDisplay: Display = {
-    name: '',
-    description: '',
+    name: datasource.spec.display?.name ?? '',
+    description: datasource.spec.display?.description ?? '',
   };
-
-  if (datasource.spec.display) {
-    patchedDisplay.name = datasource.spec.display.name;
-    if (datasource.spec.display.description) {
-      patchedDisplay.description = datasource.spec.display.description;
-    }
-  }
 
   return {
     ...datasource,
