@@ -311,6 +311,15 @@ func newSecretSpec() v1.SecretSpec {
 	}
 }
 
+func newPublicSecretSpec() v1.PublicSecretSpec {
+	return v1.PublicSecretSpec{
+		BasicAuth: &secret.PublicBasicAuth{
+			Username: "Basil",
+			Password: "<secret>",
+		},
+	}
+}
+
 func NewSecret(projectName string, name string) *v1.Secret {
 	entity := &v1.Secret{
 		Kind:     v1.KindSecret,
@@ -325,7 +334,7 @@ func NewPublicSecret(projectName string, name string) *v1.PublicSecret {
 	entity := &v1.PublicSecret{
 		Kind:     v1.KindSecret,
 		Metadata: newProjectMetadata(projectName, name),
-		Spec:     v1.NewPublicSecretSpec(newSecretSpec()),
+		Spec:     newPublicSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
 	return entity
@@ -345,7 +354,7 @@ func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
 	entity := &v1.PublicGlobalSecret{
 		Kind:     v1.KindGlobalSecret,
 		Metadata: newMetadata(name),
-		Spec:     v1.NewPublicSecretSpec(newSecretSpec()),
+		Spec:     newPublicSecretSpec(),
 	}
 	entity.Metadata.CreateNow()
 	return entity

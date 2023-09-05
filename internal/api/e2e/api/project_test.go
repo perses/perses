@@ -32,7 +32,7 @@ import (
 func TestMainScenarioProject(t *testing.T) {
 	e2eframework.MainTestScenario(t, shared.PathProject, func(name string) api.Entity {
 		return e2eframework.NewProject(name)
-	}, nil)
+	})
 }
 
 func TestDeleteProjectWithSubResources(t *testing.T) {

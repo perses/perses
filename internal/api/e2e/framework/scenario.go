@@ -30,7 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func WriteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity, expectedEntity func(name string) modelAPI.Entity) {
+func CreateTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -58,6 +58,56 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 			return []modelAPI.Entity{entity}
 		})
 	})
+}
+
+func DeleteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+	// Deletion test
+	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			entity := creator("myResource")
+			CreateAndWaitUntilEntityExists(t, manager, entity)
+
+			// For obscure reason, the check that entity exists can pass and not the deletion. As the deletion fails
+			// silently, the GET right after can then return an unexpected 200. So we do an explicit wait to make sure
+			// that the resource is well saved before delete
+			time.Sleep(3 * time.Second)
+
+			expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+				Expect().
+				Status(http.StatusNoContent)
+			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{}
+		})
+	})
+}
+
+func NotFoundTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+	// "404 - Not found" tests
+	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			entity := creator("not-existing")
+
+			expect.GET(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.PUT(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.DELETE(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{}
+		})
+	})
+}
+
+func WriteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+	CreateTestScenario(t, path, creator)
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
@@ -87,14 +137,7 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 				t.Fatal(unmarshalErr)
 			}
 
-			var expectedResult modelAPI.Entity
-			if expectedEntity != nil {
-				expectedResult = expectedEntity(entity.GetMetadata().GetName())
-			} else {
-				expectedResult = entity
-			}
-
-			assert.Equal(t, expectedResult.GetSpec(), result.GetSpec())
+			assert.Equal(t, entity.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -104,32 +147,12 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 		})
 	})
 
-	// Deletion test
-	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			entity := creator("myResource")
-			CreateAndWaitUntilEntityExists(t, manager, entity)
-
-			// For obscure reason, the check that entity exists can pass and not the deletion. As the deletion fails
-			// silently, the GET right after can then return an unexpected 200. So we do an explicit wait to make sure
-			// that the resource is well saved before delete
-			time.Sleep(3 * time.Second)
-
-			expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
-				Expect().
-				Status(http.StatusNoContent)
-			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
-				Expect().
-				Status(http.StatusNotFound)
-
-			return []modelAPI.Entity{}
-		})
-	})
+	DeleteTestScenario(t, path, creator)
 }
 
-func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity, expectedEntity func(name string) modelAPI.Entity) {
+func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
 
-	WriteTestScenario(t, path, creator, expectedEntity)
+	WriteTestScenario(t, path, creator)
 
 	// Retrieval tests : Check all different GET methods
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
@@ -155,28 +178,10 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 		})
 	})
 
-	// "404 - Not found" tests
-	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			entity := creator("not-existing")
-
-			expect.GET(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
-				Expect().
-				Status(http.StatusNotFound)
-			expect.PUT(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
-				WithJSON(entity).
-				Expect().
-				Status(http.StatusNotFound)
-			expect.DELETE(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
-				Expect().
-				Status(http.StatusNotFound)
-
-			return []modelAPI.Entity{}
-		})
-	})
+	NotFoundTestScenario(t, path, creator)
 }
 
-func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity), expectedEntity func(projectName string, name string) modelAPI.Entity) {
+func CreateTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -220,6 +225,54 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 			return []modelAPI.Entity{parent, entity}
 		})
 	})
+}
+
+func DeleteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// Deletion test
+	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			parent, entity := creator("myParentResource", "myResource")
+			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
+
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+				Expect().
+				Status(http.StatusNoContent)
+
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{parent}
+		})
+	})
+}
+
+func NotFoundTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// "404 - Not found" tests
+	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			parent, entity := creator("myParentResource", "not-exisiting")
+			CreateAndWaitUntilEntityExists(t, manager, parent)
+
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusNotFound)
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+				WithJSON(entity).
+				Expect().
+				Status(http.StatusNotFound)
+
+			return []modelAPI.Entity{parent}
+		})
+	})
+}
+
+func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	CreateTestScenarioWithProject(t, path, creator)
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
@@ -248,14 +301,7 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 				t.Fatal(unmarshalErr)
 			}
 
-			var expectedResult modelAPI.Entity
-			if expectedEntity != nil {
-				expectedResult = expectedEntity(parent.GetMetadata().GetName(), entity.GetMetadata().GetName())
-			} else {
-				expectedResult = entity
-			}
-
-			assert.Equal(t, expectedResult.GetSpec(), result.GetSpec())
+			assert.Equal(t, entity.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -265,27 +311,11 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 		})
 	})
 
-	// Deletion test
-	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent, entity := creator("myParentResource", "myResource")
-			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
-
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
-				Expect().
-				Status(http.StatusNoContent)
-
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
-				Expect().
-				Status(http.StatusNotFound)
-
-			return []modelAPI.Entity{parent}
-		})
-	})
+	DeleteTestScenarioWithProject(t, path, creator)
 }
 
-func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity), expectedEntity func(projectName string, name string) modelAPI.Entity) {
-	WriteTestScenarioWithProject(t, path, creator, expectedEntity)
+func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	WriteTestScenarioWithProject(t, path, creator)
 
 	// Retrieval tests : Check all different GET methods specifying the parent
 	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
@@ -331,31 +361,11 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusOK).
-				JSON().Array().Contains(entity1, entity2)
+				JSON().Array().ContainsAll(entity1, entity2)
 
 			return []modelAPI.Entity{parent1, parent2, entity1, entity2}
 		})
 	})
 
-	// "404 - Not found" tests
-	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent, entity := creator("myParentResource", "not-exisiting")
-			CreateAndWaitUntilEntityExists(t, manager, parent)
-
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
-				Expect().
-				Status(http.StatusNotFound)
-			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
-				WithJSON(entity).
-				Expect().
-				Status(http.StatusNotFound)
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
-				WithJSON(entity).
-				Expect().
-				Status(http.StatusNotFound)
-
-			return []modelAPI.Entity{parent}
-		})
-	})
+	NotFoundTestScenarioWithProject(t, path, creator)
 }

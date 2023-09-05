@@ -26,5 +26,5 @@ import (
 func TestMainScenarioGlobalDatasource(t *testing.T) {
 	e2eframework.MainTestScenario(t, shared.PathGlobalDatasource, func(name string) api.Entity {
 		return e2eframework.NewGlobalDatasource(t, name)
-	}, nil)
+	})
 }

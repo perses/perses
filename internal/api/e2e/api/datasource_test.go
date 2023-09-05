@@ -30,7 +30,7 @@ import (
 func TestMainScenarioDatasource(t *testing.T) {
 	e2eframework.MainTestScenarioWithProject(t, shared.PathDatasource, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewDatasource(t, projectName, name)
-	}, nil)
+	})
 }
 
 func TestCreateDatasourceWithEmptyProjectName(t *testing.T) {
