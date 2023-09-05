@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -26,12 +27,14 @@ import (
 
 type service struct {
 	secret.Service
-	dao secret.DAO
+	dao    secret.DAO
+	crypto crypto.Crypto
 }
 
-func NewService(dao secret.DAO) secret.Service {
+func NewService(dao secret.DAO, crypto crypto.Crypto) secret.Service {
 	return &service{
-		dao: dao,
+		dao:    dao,
+		crypto: crypto,
 	}
 }
 
@@ -45,6 +48,10 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
+	if err := s.crypto.Encrypt(&entity.Spec); err != nil {
+		logrus.WithError(err).Errorf("unable to encrypt the secret spec")
+		return nil, shared.InternalError
+	}
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
@@ -75,6 +82,11 @@ func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.P
 		return nil, err
 	}
 	entity.Metadata.Update(oldEntity.Metadata)
+
+	if encryptErr := s.crypto.Encrypt(&entity.Spec); encryptErr != nil {
+		logrus.WithError(encryptErr).Errorf("unable to encrypt the secret spec")
+		return nil, shared.InternalError
+	}
 	if updateErr := s.dao.Update(entity); updateErr != nil {
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the Secret %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr

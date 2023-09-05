@@ -14,7 +14,12 @@
 package config
 
 import (
+	"encoding/hex"
+	"fmt"
+	"os"
+
 	"github.com/perses/common/config"
+	promConfig "github.com/prometheus/common/config"
 )
 
 type dashboardSelector struct {
@@ -26,7 +31,9 @@ type dashboardSelector struct {
 
 type Config struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
-	Readonly bool `json:"readonly" yaml:"readonly"`
+	Readonly          bool              `json:"readonly" yaml:"readonly"`
+	EncryptionKey     promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
+	EncryptionKeyFile string            `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database" yaml:"database"`
 	// Schemas contains the configuration to get access to the CUE schemas
@@ -35,6 +42,25 @@ type Config struct {
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// Information contains markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
+}
+
+func (c *Config) Verify() error {
+	if len(c.EncryptionKey) == 0 && len(c.EncryptionKeyFile) == 0 {
+		return fmt.Errorf("encryption_key or encryption_key_file must be provided")
+	}
+	if len(c.EncryptionKey) > 0 && len(c.EncryptionKeyFile) > 0 {
+		return fmt.Errorf("encryption_key and encryption_key_file are mutually exclusive. Use one or the other not both at the same time")
+	}
+	if len(c.EncryptionKeyFile) > 0 {
+		// Read the file and load the password contained
+		data, err := os.ReadFile(c.EncryptionKeyFile)
+		if err != nil {
+			return err
+		}
+		c.EncryptionKey = promConfig.Secret(data)
+	}
+	c.EncryptionKey = promConfig.Secret(hex.EncodeToString([]byte(c.EncryptionKey)))
+	return nil
 }
 
 func Resolve(configFile string) (Config, error) {

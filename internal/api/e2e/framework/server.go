@@ -16,6 +16,7 @@
 package e2eframework
 
 import (
+	"encoding/hex"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -26,10 +27,11 @@ import (
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
-	test "github.com/perses/perses/internal/test"
+	"github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
+	promConfig "github.com/prometheus/common/config"
 )
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
@@ -53,6 +55,7 @@ func defaultFileConfig() *config.File {
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	projectPath := test.GetRepositoryPath()
 	conf := config.Config{
+		EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
 			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),

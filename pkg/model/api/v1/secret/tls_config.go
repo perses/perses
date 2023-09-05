@@ -13,9 +13,6 @@
 
 package secret
 
-// TODO hash every string to store it + add validation
-// See the prometheus common config
-
 // PublicTLSConfig is the public struct of TLSConfig.
 // It's used when the API returns a response to a request
 type PublicTLSConfig struct {

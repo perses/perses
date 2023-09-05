@@ -37,11 +37,13 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
 )
 
 type ServiceManager interface {
+	GetCrypto() crypto.Crypto
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
 	GetFolder() folder.Service
@@ -58,6 +60,7 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
+	crypto           crypto.Crypto
 	dashboard        dashboard.Service
 	datasource       datasource.Service
 	folder           folder.Service
@@ -73,6 +76,10 @@ type service struct {
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
+	cryptoService, err := crypto.New(string(conf.EncryptionKey))
+	if err != nil {
+		return nil, err
+	}
 	schemasService, err := schemas.New(conf.Schemas)
 	if err != nil {
 		return nil, err
@@ -86,12 +93,13 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
-	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret())
+	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable())
-	secretService := secretImpl.NewService(dao.GetSecret())
+	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	return &service{
+		crypto:           cryptoService,
 		dashboard:        dashboardService,
 		datasource:       datasourceService,
 		folder:           folderService,
@@ -105,6 +113,10 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		secret:           secretService,
 		variable:         variableService,
 	}, nil
+}
+
+func (s *service) GetCrypto() crypto.Crypto {
+	return s.crypto
 }
 
 func (s *service) GetDashboard() dashboard.Service {

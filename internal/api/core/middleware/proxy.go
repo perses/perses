@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
@@ -97,6 +98,7 @@ type Proxy struct {
 	GlobalSecret globalsecret.DAO
 	DTS          datasource.DAO
 	GlobalDTS    globaldatasource.DAO
+	crypto       crypto.Crypto
 }
 
 func (e *Proxy) Proxy() echo.MiddlewareFunc {
@@ -130,7 +132,7 @@ func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getGlobalSecret(dtsName, name)
 	})
 	if err != nil {
@@ -148,7 +150,7 @@ func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -166,7 +168,7 @@ func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -249,7 +251,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(spec v1.DatasourceSpec, path string, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, err := datasourceHTTP.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
@@ -260,6 +262,10 @@ func newProxy(spec v1.DatasourceSpec, path string, retrieveSecret func(name stri
 		scrt, err = retrieveSecret(cfg.Secret)
 		if err == nil {
 			return nil, err
+		}
+		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			logrus.WithError(err).Errorf("unable to decrypt the secret")
+			return nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
 	if cfg != nil {
