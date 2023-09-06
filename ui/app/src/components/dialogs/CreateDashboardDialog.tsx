@@ -88,6 +88,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
                 </Select>
               </FormControl>
             )}
+            {/* TODO: fix autofill when creating dashboard from project view */}
             <TextField
               required
               margin="dense"

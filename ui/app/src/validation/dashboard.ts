@@ -14,10 +14,7 @@
 import { z } from 'zod';
 import { resourceIdValidationSchema } from './resource';
 
-const dashboardNameValidationSchema = z
-  .string()
-  .min(1, { message: 'Name is required' })
-  .max(75, { message: 'Must be 75 or fewer characters long' });
+const dashboardNameValidationSchema = z.string().nonempty('Required').max(75, 'Must be 75 or fewer characters long');
 
 export const createDashboardDialogValidationSchema = z.object({
   projectName: resourceIdValidationSchema,

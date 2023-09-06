@@ -148,6 +148,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                 disabled: action === 'update',
                 readOnly: action === 'read',
               }}
+              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
               error={!!errors.name}
               helperText={errors.name?.message}
               {...register('name')}
@@ -165,6 +166,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               InputProps={{
                 readOnly: action === 'read',
               }}
+              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
               error={!!errors.title}
               helperText={errors.title?.message}
               {...register('title')}
@@ -184,6 +186,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               InputProps={{
                 readOnly: action === 'read',
               }}
+              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
               error={!!errors.description}
               helperText={errors.description?.message}
               {...register('description')}

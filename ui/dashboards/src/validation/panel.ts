@@ -13,11 +13,11 @@
 
 import { z } from 'zod';
 
-export const variableEditValidationSchema = z.object({
-  name: z.string().nonempty('Required').regex(/\w+/, 'Must only contains alphanumerical characters and underscores'),
-  title: z.string().optional(), // display name
+export const panelEditorValidationSchema = z.object({
+  name: z.string().nonempty('Required'),
+  group: z.string().nonempty('Required'),
   description: z.string().optional(),
-  kind: z.string().nonempty('Required'),
+  type: z.string().nonempty('Required'),
 });
 
-export type VariableEditValidationType = z.infer<typeof variableEditValidationSchema>;
+export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

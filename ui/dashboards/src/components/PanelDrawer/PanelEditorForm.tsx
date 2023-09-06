@@ -61,6 +61,24 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     },
   });
 
+  // const {
+  //   register,
+  //   handleSubmit,
+  //   formState: { errors, isValid },
+  // } = useForm<DatasourceEditValidationType>({
+  //   resolver: zodResolver(datasourceEditValidationSchema),
+  //   mode: 'onBlur',
+  //   defaultValues: {
+  //     name: state.metadata.name,
+  //     title: state.spec.display?.name,
+  //     description: state.spec.display?.description,
+  //   },
+  // });
+  //
+  // const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
+  //   onChange(state);
+  // };
+
   // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
   const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
     const { value } = e.target;

@@ -11,13 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-
-export const variableEditValidationSchema = z.object({
-  name: z.string().nonempty('Required').regex(/\w+/, 'Must only contains alphanumerical characters and underscores'),
-  title: z.string().optional(), // display name
-  description: z.string().optional(),
-  kind: z.string().nonempty('Required'),
-});
-
-export type VariableEditValidationType = z.infer<typeof variableEditValidationSchema>;
+export * from './panel';
