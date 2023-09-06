@@ -16,6 +16,7 @@ package secret
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -69,6 +70,17 @@ func (a *Authorization) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	*a = tmp
 	return nil
+}
+
+func (a *Authorization) GetCredentials() (string, error) {
+	if len(a.CredentialsFile) > 0 {
+		data, err := os.ReadFile(a.CredentialsFile)
+		if err != nil {
+			return "", err
+		}
+		return string(data), nil
+	}
+	return a.Credentials, nil
 }
 
 func (a *Authorization) validate() error {

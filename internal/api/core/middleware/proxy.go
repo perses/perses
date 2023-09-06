@@ -300,7 +300,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
-	h.prepareRequest(c)
+	if err := h.prepareRequest(c); err != nil {
+		logrus.WithError(err).Errorf("unable to prepare the request")
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
@@ -326,7 +329,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	return proxyErr
 }
 
-func (h *httpProxy) prepareRequest(c echo.Context) {
+func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
@@ -348,21 +351,30 @@ func (h *httpProxy) prepareRequest(c echo.Context) {
 			req.Header.Set(k, v)
 		}
 	}
-	h.setupAuthentication(req)
+	return h.setupAuthentication(req)
 }
 
-func (h *httpProxy) setupAuthentication(req *http.Request) {
+func (h *httpProxy) setupAuthentication(req *http.Request) error {
 	if h.secret == nil {
-		return
+		return nil
 	}
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
-		req.SetBasicAuth(basicAuth.Username, basicAuth.Password)
+		password, err := basicAuth.GetPassword()
+		if err != nil {
+			return err
+		}
+		req.SetBasicAuth(basicAuth.Username, password)
 	}
 	auth := h.secret.Authorization
 	if auth != nil {
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, auth.Credentials))
+		credential, err := auth.GetCredentials()
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
 	}
+	return nil
 }
 
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {
