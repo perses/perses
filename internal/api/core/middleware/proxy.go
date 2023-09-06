@@ -98,7 +98,7 @@ type Proxy struct {
 	GlobalSecret globalsecret.DAO
 	DTS          datasource.DAO
 	GlobalDTS    globaldatasource.DAO
-	crypto       crypto.Crypto
+	Crypto       crypto.Crypto
 }
 
 func (e *Proxy) Proxy() echo.MiddlewareFunc {
@@ -132,7 +132,7 @@ func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getGlobalSecret(dtsName, name)
 	})
 	if err != nil {
@@ -150,7 +150,7 @@ func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -168,7 +168,7 @@ func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {

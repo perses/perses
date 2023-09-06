@@ -49,6 +49,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		GlobalSecret: persistenceManager.GetGlobalSecret(),
 		DTS:          persistenceManager.GetDatasource(),
 		GlobalDTS:    persistenceManager.GetGlobalDatasource(),
+		Crypto:       serviceManager.GetCrypto(),
 	}
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
