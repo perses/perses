@@ -35,7 +35,7 @@
   "dependencies": {
     "@codemirror/lang-json": "^6.0.1",
     "@fontsource/lato": "^4.5.10",
-    "@mui/x-date-pickers": "^5.0.0-beta.1",
+    "@mui/x-date-pickers": "^6.12.1",
     "@perses-dev/core": "0.39.0",
     "@tanstack/react-table": "^8.9.1",
     "@uiw/react-codemirror": "^4.19.1",
