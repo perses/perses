@@ -13,26 +13,26 @@
 
 package common
 
-#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat
 
-#timeUnit: {
-	kind:           "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
+#timeFormat: {
+	unit:           "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
 	decimalPlaces?: number
 }
 
-#percentUnit: {
-	kind:           "Percent" | "PercentDecimal"
+#percentFormat: {
+	unit:           "percent" | "percent-decimal"
 	decimalPlaces?: number
 }
 
-#decimalUnit: {
-	kind:           "Decimal"
-	decimalPlaces?: number
-	abbreviate?:    bool
+#decimalFormat: {
+	unit:            "decimal"
+	decimalPlaces?:  number
+	shortValues?: bool
 }
 
-#bytesUnit: {
-	kind:           "Bytes"
-	decimalPlaces?: number
-	abbreviate?:    bool
+#bytesFormat: {
+	unit:            "bytes"
+	decimalPlaces?:  number
+	shortValues?: bool
 }
