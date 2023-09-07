@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
@@ -97,6 +98,7 @@ type Proxy struct {
 	GlobalSecret globalsecret.DAO
 	DTS          datasource.DAO
 	GlobalDTS    globaldatasource.DAO
+	Crypto       crypto.Crypto
 }
 
 func (e *Proxy) Proxy() echo.MiddlewareFunc {
@@ -130,7 +132,7 @@ func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getGlobalSecret(dtsName, name)
 	})
 	if err != nil {
@@ -148,7 +150,7 @@ func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -166,7 +168,7 @@ func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, func(name string) (*v1.SecretSpec, error) {
+	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -249,7 +251,7 @@ type proxy interface {
 	serve(c echo.Context) error
 }
 
-func newProxy(spec v1.DatasourceSpec, path string, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
+func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retrieveSecret func(name string) (*v1.SecretSpec, error)) (proxy, error) {
 	cfg, err := datasourceHTTP.ValidateAndExtract(spec.Plugin.Spec)
 	if err != nil {
 		logrus.WithError(err).Error("unable to build or find the http config in the datasource")
@@ -260,6 +262,10 @@ func newProxy(spec v1.DatasourceSpec, path string, retrieveSecret func(name stri
 		scrt, err = retrieveSecret(cfg.Secret)
 		if err == nil {
 			return nil, err
+		}
+		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
+			logrus.WithError(err).Errorf("unable to decrypt the secret")
+			return nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
 	if cfg != nil {
@@ -294,7 +300,10 @@ func (h *httpProxy) serve(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
-	h.prepareRequest(c)
+	if err := h.prepareRequest(c); err != nil {
+		logrus.WithError(err).Errorf("unable to prepare the request")
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
 
 	// redirect the request to the datasource
 	req.URL.Path = h.path
@@ -320,7 +329,7 @@ func (h *httpProxy) serve(c echo.Context) error {
 	return proxyErr
 }
 
-func (h *httpProxy) prepareRequest(c echo.Context) {
+func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
 	// We have to modify the HOST of the request in order to match the host of the targetURL
 	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
@@ -342,21 +351,30 @@ func (h *httpProxy) prepareRequest(c echo.Context) {
 			req.Header.Set(k, v)
 		}
 	}
-	h.setupAuthentication(req)
+	return h.setupAuthentication(req)
 }
 
-func (h *httpProxy) setupAuthentication(req *http.Request) {
+func (h *httpProxy) setupAuthentication(req *http.Request) error {
 	if h.secret == nil {
-		return
+		return nil
 	}
 	basicAuth := h.secret.BasicAuth
 	if basicAuth != nil {
-		req.SetBasicAuth(basicAuth.Username, basicAuth.Password)
+		password, err := basicAuth.GetPassword()
+		if err != nil {
+			return err
+		}
+		req.SetBasicAuth(basicAuth.Username, password)
 	}
 	auth := h.secret.Authorization
 	if auth != nil {
-		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, auth.Credentials))
+		credential, err := auth.GetCredentials()
+		if err != nil {
+			return err
+		}
+		req.Header.Set("Authorization", fmt.Sprintf("%s %s", auth.Type, credential))
 	}
+	return nil
 }
 
 func (h *httpProxy) prepareTransport() (*http.Transport, error) {

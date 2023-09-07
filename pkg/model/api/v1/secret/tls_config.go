@@ -13,8 +13,31 @@
 
 package secret
 
-// TODO hash every string to store it + add validation
-// See the prometheus common config
+// PublicTLSConfig is the public struct of TLSConfig.
+// It's used when the API returns a response to a request
+type PublicTLSConfig struct {
+	CA                 Hidden `yaml:"ca,omitempty" json:"ca,omitempty"`
+	Cert               Hidden `yaml:"cert,omitempty" json:"cert,omitempty"`
+	Key                Hidden `yaml:"key,omitempty" json:"key,omitempty"`
+	CAFile             string `yaml:"ca_file,omitempty" json:"ca_file,omitempty"`
+	CertFile           string `yaml:"cert_file,omitempty" json:"cert_file,omitempty"`
+	KeyFile            string `yaml:"key_file,omitempty" json:"key_file,omitempty"`
+	ServerName         string `yaml:"server_name,omitempty" json:"server_name,omitempty"`
+	InsecureSkipVerify bool   `yaml:"insecure_skip_verify" json:"insecure_skip_verify"`
+}
+
+func NewPublicTLSConfig(t TLSConfig) PublicTLSConfig {
+	return PublicTLSConfig{
+		CA:                 Hidden(t.CA),
+		Cert:               Hidden(t.Cert),
+		Key:                Hidden(t.Key),
+		CAFile:             t.CAFile,
+		CertFile:           t.CertFile,
+		KeyFile:            t.KeyFile,
+		ServerName:         t.ServerName,
+		InsecureSkipVerify: t.InsecureSkipVerify,
+	}
+}
 
 type TLSConfig struct {
 	// Text of the CA cert to use for the targets.

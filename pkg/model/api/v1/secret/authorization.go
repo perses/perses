@@ -16,14 +16,34 @@ package secret
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 )
 
+// PublicAuthorization is the public struct of Authorization.
+// It's used when the API returns a response to a request
+type PublicAuthorization struct {
+	Type            string `json:"type" yaml:"type"`
+	Credentials     Hidden `json:"credentials,omitempty" yaml:"credentials,omitempty"`
+	CredentialsFile string `json:"credentials_file,omitempty" yaml:"credentials_file,omitempty"`
+}
+
+func NewPublicAuthorization(a *Authorization) *PublicAuthorization {
+	if a == nil {
+		return nil
+	}
+	return &PublicAuthorization{
+		Type:            a.Type,
+		Credentials:     Hidden(a.Credentials),
+		CredentialsFile: a.CredentialsFile,
+	}
+}
+
 // Authorization contains HTTP authorization credentials.
 type Authorization struct {
-	Type            string `yaml:"type,omitempty" json:"type,omitempty"`
-	Credentials     string `yaml:"credentials,omitempty" json:"credentials,omitempty"`
-	CredentialsFile string `yaml:"credentials_file,omitempty" json:"credentials_file,omitempty"`
+	Type            string `json:"type,omitempty" yaml:"type,omitempty"`
+	Credentials     string `json:"credentials,omitempty" yaml:"credentials,omitempty"`
+	CredentialsFile string `json:"credentials_file,omitempty" yaml:"credentials_file,omitempty"`
 }
 
 func (a *Authorization) UnmarshalJSON(data []byte) error {
@@ -50,6 +70,17 @@ func (a *Authorization) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 	*a = tmp
 	return nil
+}
+
+func (a *Authorization) GetCredentials() (string, error) {
+	if len(a.CredentialsFile) > 0 {
+		data, err := os.ReadFile(a.CredentialsFile)
+		if err != nil {
+			return "", err
+		}
+		return string(data), nil
+	}
+	return a.Credentials, nil
 }
 
 func (a *Authorization) validate() error {

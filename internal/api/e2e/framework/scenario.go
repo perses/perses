@@ -30,8 +30,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
-
+func CreateTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -59,31 +58,33 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 			return []modelAPI.Entity{entity}
 		})
 	})
+}
 
-	// Retrieval tests : Check all different GET methods
-	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
+func DeleteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+	// Deletion test
+	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
-			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
+
+			// For obscure reason, the check that entity exists can pass and not the deletion. As the deletion fails
+			// silently, the GET right after can then return an unexpected 200. So we do an explicit wait to make sure
+			// that the resource is well saved before delete
 			time.Sleep(3 * time.Second)
 
-			// Check the retrieval of the entity among all the others
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusOK).
-				JSON().Array().Contains(entity)
-
-			// Check the retrieval of the entity by name
+				Status(http.StatusNoContent)
 			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusOK).
-				JSON().Equal(entity)
+				Status(http.StatusNotFound)
 
-			return []modelAPI.Entity{entity}
+			return []modelAPI.Entity{}
 		})
 	})
+}
 
+func NotFoundTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -103,6 +104,10 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 			return []modelAPI.Entity{}
 		})
 	})
+}
+
+func WriteTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+	CreateTestScenario(t, path, creator)
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
@@ -132,7 +137,7 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 				t.Fatal(unmarshalErr)
 			}
 
-			assert.Equal(t, result.GetSpec(), entity.GetSpec())
+			assert.Equal(t, entity.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -142,30 +147,41 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 		})
 	})
 
-	// Deletion test
-	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
+	DeleteTestScenario(t, path, creator)
+}
+
+func MainTestScenario(t *testing.T, path string, creator func(name string) modelAPI.Entity) {
+
+	WriteTestScenario(t, path, creator)
+
+	// Retrieval tests : Check all different GET methods
+	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
-
-			// For obscure reason, the check that entity exists can pass and not the deletion. As the deletion fails
-			// silently, the GET right after can then return an unexpected 200. So we do an explicit wait to make sure
-			// that the resource is well saved before delete
+			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
 			time.Sleep(3 * time.Second)
 
-			expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			// Check the retrieval of the entity among all the others
+			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
 				Expect().
-				Status(http.StatusNoContent)
+				Status(http.StatusOK).
+				JSON().Array().ContainsAny(entity)
+
+			// Check the retrieval of the entity by name
 			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusNotFound)
+				Status(http.StatusOK).
+				JSON().IsEqual(entity)
 
-			return []modelAPI.Entity{}
+			return []modelAPI.Entity{entity}
 		})
 	})
+
+	NotFoundTestScenario(t, path, creator)
 }
 
-func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+func CreateTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// Creation test : Perform the POST request
 	t.Run("Creation", func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -209,57 +225,29 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			return []modelAPI.Entity{parent, entity}
 		})
 	})
+}
 
-	// Retrieval tests : Check all different GET methods specifying the parent
-	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
+func DeleteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	// Deletion test
+	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent, entity := creator("myProject", "myResource")
+			parent, entity := creator("myParentResource", "myResource")
 			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
-			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
-			time.Sleep(3 * time.Second)
-
-			// Check the retrieval of the entity among all the others
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusOK).
-				JSON().Array().Contains(entity)
+				Status(http.StatusNoContent)
 
-			// Check again if we get the list by project, the entity is still there.
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
-				Expect().
-				Status(http.StatusOK).
-				JSON().Array().Contains(entity)
-
-			// Check the retrieval of the entity by name
 			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusOK).
-				JSON().Equal(entity)
+				Status(http.StatusNotFound)
 
-			return []modelAPI.Entity{parent, entity}
+			return []modelAPI.Entity{parent}
 		})
 	})
+}
 
-	// Global Retrieval tests : Check GET methods without specifying the parent
-	t.Run(fmt.Sprintf("Global Retrieval tests (%s)", path), func(t *testing.T) {
-		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent1, entity1 := creator("myProject1", "myResource1")
-			parent2, entity2 := creator("myProject2", "myResource2")
-			CreateAndWaitUntilEntitiesExist(t, manager, parent1, parent2, entity1, entity2)
-
-			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
-			time.Sleep(3 * time.Second)
-
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
-				Expect().
-				Status(http.StatusOK).
-				JSON().Array().Contains(entity1, entity2)
-
-			return []modelAPI.Entity{parent1, parent2, entity1, entity2}
-		})
-	})
-
+func NotFoundTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
@@ -281,6 +269,10 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			return []modelAPI.Entity{parent}
 		})
 	})
+}
+
+func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	CreateTestScenarioWithProject(t, path, creator)
 
 	// Update test
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
@@ -309,7 +301,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 				t.Fatal(unmarshalErr)
 			}
 
-			assert.Equal(t, result.GetSpec(), entity.GetSpec())
+			assert.Equal(t, entity.GetSpec(), result.GetSpec())
 
 			getFunc, _ := CreateGetFunc(t, manager, entity)
 			// check the document exists in the db
@@ -319,22 +311,61 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 		})
 	})
 
-	// Deletion test
-	t.Run(fmt.Sprintf("Deletion test (%s)", path), func(t *testing.T) {
+	DeleteTestScenarioWithProject(t, path, creator)
+}
+
+func MainTestScenarioWithProject(t *testing.T, path string, creator func(projectName string, name string) (modelAPI.Entity, modelAPI.Entity)) {
+	WriteTestScenarioWithProject(t, path, creator)
+
+	// Retrieval tests : Check all different GET methods specifying the parent
+	t.Run(fmt.Sprintf("Retrieval tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent, entity := creator("myParentResource", "myResource")
+			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
-				Expect().
-				Status(http.StatusNoContent)
+			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
+			time.Sleep(3 * time.Second)
 
+			// Check the retrieval of the entity among all the others
+			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+				Expect().
+				Status(http.StatusOK).
+				JSON().Array().ContainsAll(entity)
+
+			// Check again if we get the list by project, the entity is still there.
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+				Expect().
+				Status(http.StatusOK).
+				JSON().Array().ContainsAll(entity)
+
+			// Check the retrieval of the entity by name
 			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
-				Status(http.StatusNotFound)
+				Status(http.StatusOK).
+				JSON().IsEqual(entity)
 
-			return []modelAPI.Entity{parent}
+			return []modelAPI.Entity{parent, entity}
 		})
 	})
 
+	// Global Retrieval tests : Check GET methods without specifying the parent
+	t.Run(fmt.Sprintf("Global Retrieval tests (%s)", path), func(t *testing.T) {
+		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			parent1, entity1 := creator("myProject1", "myResource1")
+			parent2, entity2 := creator("myProject2", "myResource2")
+			CreateAndWaitUntilEntitiesExist(t, manager, parent1, parent2, entity1, entity2)
+
+			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
+			time.Sleep(3 * time.Second)
+
+			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+				Expect().
+				Status(http.StatusOK).
+				JSON().Array().ContainsAll(entity1, entity2)
+
+			return []modelAPI.Entity{parent1, parent2, entity1, entity2}
+		})
+	})
+
+	NotFoundTestScenarioWithProject(t, path, creator)
 }
