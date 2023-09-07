@@ -18,6 +18,7 @@ export const datasourceEditValidationSchema = z.object({
   name: resourceIdValidationSchema,
   title: z.string().optional(), // display name
   description: z.string().optional(),
+  default: z.boolean(),
 });
 
 export type DatasourceEditValidationType = z.infer<typeof datasourceEditValidationSchema>;

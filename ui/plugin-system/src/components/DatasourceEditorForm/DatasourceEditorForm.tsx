@@ -16,7 +16,7 @@ import { Display, Datasource } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import React, { Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useIsReadonly } from '@perses-dev/app/src/model/config-client';
 import { PluginEditor } from '../PluginEditor';
@@ -62,17 +62,14 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   const submitText = getSubmitText(action, isDraft);
   const isReadonly = useIsReadonly();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<DatasourceEditValidationType>({
+  const form = useForm<DatasourceEditValidationType>({
     resolver: zodResolver(datasourceEditValidationSchema),
     mode: 'onBlur',
     defaultValues: {
       name: state.metadata.name,
       title: state.spec.display?.name,
       description: state.spec.display?.description,
+      default: state.spec.default,
     },
   });
 
@@ -90,164 +87,194 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   }, [state, patchedInitialDatasource, setDiscardDialogOpened, onClose]);
 
   return (
-    <form onSubmit={handleSubmit(processForm)}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: (theme) => theme.spacing(1, 2),
-          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-        }}
-      >
-        <Typography variant="h2">{titleAction} Datasource</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' && (
-            <>
-              <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          )}
-          {action !== 'read' && (
-            <>
-              <Button type="submit" disabled={!isValid} variant="contained">
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
-      </Box>
-      <Box padding={2} sx={{ overflowY: 'scroll' }}>
-        <Grid container spacing={2} mb={2}>
-          <Grid item xs={4}>
-            <TextField
-              required
-              fullWidth
-              label="Name"
-              InputProps={{
-                disabled: action === 'update',
-                readOnly: action === 'read',
-              }}
-              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-              error={!!errors.name}
-              helperText={errors.name?.message}
-              {...register('name')}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.metadata.name = v.target.value;
-                });
-              }}
-            />
-          </Grid>
-          <Grid item xs={8}>
-            <TextField
-              fullWidth
-              label="Display Label"
-              InputProps={{
-                readOnly: action === 'read',
-              }}
-              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-              error={!!errors.title}
-              helperText={errors.title?.message}
-              {...register('title')}
-              onChange={(v) => {
-                setState((draft) => {
-                  if (draft.spec.display) {
-                    draft.spec.display.name = v.target.value;
-                  }
-                });
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Description"
-              InputProps={{
-                readOnly: action === 'read',
-              }}
-              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-              error={!!errors.description}
-              helperText={errors.description?.message}
-              {...register('description')}
-              onChange={(v) => {
-                setState((draft) => {
-                  if (draft.spec.display) {
-                    draft.spec.display.description = v.target.value;
-                  }
-                });
-              }}
-            />
-          </Grid>
-          <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
-            <Stack>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={state.spec.default}
-                    readOnly={action === 'read'}
-                    onChange={(v) => {
-                      if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(processForm)}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: (theme) => theme.spacing(1, 2),
+            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+          }}
+        >
+          <Typography variant="h2">{titleAction} Datasource</Typography>
+          <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+            {action === 'read' && (
+              <>
+                <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
+                  Edit
+                </Button>
+                <Button color="error" variant="outlined" onClick={onDelete}>
+                  Delete
+                </Button>
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={(theme) => ({
+                    borderColor: theme.palette.grey['500'],
+                    '&.MuiDivider-root': {
+                      marginLeft: 2,
+                      marginRight: 1,
+                    },
+                  })}
+                />
+                <Button color="secondary" variant="outlined" onClick={onClose}>
+                  Close
+                </Button>
+              </>
+            )}
+            {action !== 'read' && (
+              <>
+                <Button type="submit" variant="contained" disabled={!form.formState.isValid}>
+                  {submitText}
+                </Button>
+                <Button color="secondary" variant="outlined" onClick={handleCancel}>
+                  Cancel
+                </Button>
+              </>
+            )}
+          </Stack>
+        </Box>
+        <Box padding={2} sx={{ overflowY: 'scroll' }}>
+          <Grid container spacing={2} mb={2}>
+            <Grid item xs={4}>
+              <Controller
+                name="name"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    required
+                    fullWidth
+                    name="name"
+                    label="Name"
+                    InputProps={{
+                      disabled: action === 'update',
+                      readOnly: action === 'read',
+                    }}
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
                       setState((draft) => {
-                        draft.spec.default = v.target.checked;
+                        draft.metadata.name = event.target.value;
                       });
+                      field.onChange(event);
                     }}
                   />
-                }
-                label="Set as default"
+                )}
               />
-              <Typography variant="caption">
-                Whether this datasource should be the default {state.spec.plugin.kind} to be used
-              </Typography>
-            </Stack>
+            </Grid>
+            <Grid item xs={8}>
+              <Controller
+                name="title"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    name="title"
+                    label="Display Label"
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      setState((draft) => {
+                        if (draft.spec.display) {
+                          draft.spec.display.name = event.target.value;
+                        }
+                      });
+                      field.onChange(event);
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name="description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    name="description"
+                    label="Description"
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      setState((draft) => {
+                        if (draft.spec.display) {
+                          draft.spec.display.description = event.target.value;
+                        }
+                      });
+                      field.onChange(event);
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
+              <Stack>
+                <Controller
+                  name="default"
+                  render={({ field }) => (
+                    <FormControlLabel
+                      {...field}
+                      control={
+                        <Switch
+                          checked={state.spec.default}
+                          readOnly={action === 'read'}
+                          onChange={(event) => {
+                            if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                            setState((draft) => {
+                              draft.spec.default = event.target.checked;
+                            });
+                            field.onChange(event);
+                          }}
+                        />
+                      }
+                      label="Set as default"
+                    />
+                  )}
+                />
+                <Typography variant="caption">
+                  Whether this datasource should be the default {state.spec.plugin.kind} to be used
+                </Typography>
+              </Stack>
+            </Grid>
           </Grid>
-        </Grid>
-        <Divider />
-        <Typography py={1} variant="h3">
-          Plugin Options
-        </Typography>
-        <PluginEditor
-          width="100%"
-          pluginType="Datasource"
-          pluginKindLabel="Source"
-          value={state.spec.plugin}
-          isReadonly={action === 'read'}
-          onChange={(v) => {
-            setState((draft) => {
-              draft.spec.plugin = v;
-            });
+          <Divider />
+          <Typography py={1} variant="h3">
+            Plugin Options
+          </Typography>
+          <PluginEditor
+            width="100%"
+            pluginType="Datasource"
+            pluginKindLabel="Source"
+            value={state.spec.plugin}
+            isReadonly={action === 'read'}
+            onChange={(v) => {
+              setState((draft) => {
+                draft.spec.plugin = v;
+              });
+            }}
+          />
+        </Box>
+        <DiscardChangesConfirmationDialog
+          description="Are you sure you want to discard your changes? Changes cannot be recovered."
+          isOpen={isDiscardDialogOpened}
+          onCancel={() => setDiscardDialogOpened(false)}
+          onDiscardChanges={() => {
+            setDiscardDialogOpened(false);
+            onClose();
           }}
         />
-      </Box>
-      <DiscardChangesConfirmationDialog
-        description="Are you sure you want to discard your changes? Changes cannot be recovered."
-        isOpen={isDiscardDialogOpened}
-        onCancel={() => setDiscardDialogOpened(false)}
-        onDiscardChanges={() => {
-          setDiscardDialogOpened(false);
-          onClose();
-        }}
-      />
-    </form>
+      </form>
+    </FormProvider>
   );
 }
