@@ -77,7 +77,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
     onSave(state);
   };
 
-  // When the user clicks on cancel, ask for discard approval if anything was changed
+  // When user click on cancel, several possibilities:
+  // - create action: ask for discard approval
+  // - update action: ask for discard approval if changed
+  // - read action: don´t ask for discard approval
   const handleCancel = useCallback(() => {
     if (JSON.stringify(patchedInitialDatasource) !== JSON.stringify(state)) {
       setDiscardDialogOpened(true);
@@ -155,10 +158,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     onChange={(event) => {
+                      field.onChange(event);
                       setState((draft) => {
                         draft.metadata.name = event.target.value;
                       });
-                      field.onChange(event);
                     }}
                   />
                 )}
@@ -181,11 +184,11 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     helperText={fieldState.error?.message}
                     onChange={(event) => {
                       setState((draft) => {
+                        field.onChange(event);
                         if (draft.spec.display) {
                           draft.spec.display.name = event.target.value;
                         }
                       });
-                      field.onChange(event);
                     }}
                   />
                 )}
@@ -207,12 +210,12 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     onChange={(event) => {
+                      field.onChange(event);
                       setState((draft) => {
                         if (draft.spec.display) {
                           draft.spec.display.description = event.target.value;
                         }
                       });
-                      field.onChange(event);
                     }}
                   />
                 )}
@@ -231,10 +234,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                           readOnly={action === 'read'}
                           onChange={(event) => {
                             if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                            field.onChange(event);
                             setState((draft) => {
                               draft.spec.default = event.target.checked;
                             });
-                            field.onChange(event);
                           }}
                         />
                       }
