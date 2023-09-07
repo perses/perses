@@ -26,13 +26,13 @@ package common
 }
 
 #decimalFormat: {
-	unit:            "decimal"
-	decimalPlaces?:  number
-	shortValues?: bool
+	unit:           "decimal"
+	decimalPlaces?: number
+	shortValues?:   bool
 }
 
 #bytesFormat: {
-	unit:            "bytes"
-	decimalPlaces?:  number
-	shortValues?: bool
+	unit:           "bytes"
+	decimalPlaces?: number
+	shortValues?:   bool
 }

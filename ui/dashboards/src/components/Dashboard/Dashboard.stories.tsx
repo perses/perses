@@ -120,8 +120,8 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
                 position: 'right',
               },
               yAxis: {
-                unit: {
-                  kind: 'PercentDecimal',
+                format: {
+                  unit: 'percent-decimal',
                   decimalPlaces: 0,
                 },
               },

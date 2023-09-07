@@ -19,7 +19,12 @@ import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { GaugeChart, GaugeSeries, useChartsTheme } from '@perses-dev/components';
 import { CalculationsMap, DEFAULT_CALCULATION } from '@perses-dev/core';
 import { convertThresholds, defaultThresholdInput } from '../../model/thresholds';
-import { GaugeChartOptions, DEFAULT_UNIT, DEFAULT_MAX_PERCENT, DEFAULT_MAX_PERCENT_DECIMAL } from './gauge-chart-model';
+import {
+  GaugeChartOptions,
+  DEFAULT_FORMAT,
+  DEFAULT_MAX_PERCENT,
+  DEFAULT_MAX_PERCENT_DECIMAL,
+} from './gauge-chart-model';
 
 const EMPTY_GAUGE_SERIES: GaugeSeries = { label: '', value: null };
 const GAUGE_MIN_WIDTH = 90;
@@ -35,8 +40,8 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
 
   const { queryResults, isLoading } = useDataQueries('TimeSeriesQuery');
 
-  // ensures all default unit properties set if undef
-  const unit = merge({}, DEFAULT_UNIT, pluginSpec.unit);
+  // ensures all default format properties set if undef
+  const format = merge({}, DEFAULT_FORMAT, pluginSpec.format);
 
   const thresholds = pluginSpec.thresholds ?? defaultThresholdInput;
 
@@ -81,13 +86,13 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
   // needed for end value of last threshold color segment
   let thresholdMax = max;
   if (thresholdMax === undefined) {
-    if (unit.kind === 'Percent') {
+    if (format.unit === 'percent') {
       thresholdMax = DEFAULT_MAX_PERCENT;
     } else {
       thresholdMax = DEFAULT_MAX_PERCENT_DECIMAL;
     }
   }
-  const axisLineColors = convertThresholds(thresholds, unit, thresholdMax, thresholdsColors);
+  const axisLineColors = convertThresholds(thresholds, format, thresholdMax, thresholdsColors);
 
   const axisLine: GaugeSeriesOption['axisLine'] = {
     show: true,
@@ -104,7 +109,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
         width={contentDimensions.width}
         height={contentDimensions.height}
         data={EMPTY_GAUGE_SERIES}
-        unit={unit}
+        format={format}
         axisLine={axisLine}
         max={thresholdMax}
       />
@@ -138,7 +143,7 @@ export function GaugeChartPanel(props: GaugeChartPanelProps) {
               width={chartWidth}
               height={contentDimensions.height}
               data={series}
-              unit={unit}
+              format={format}
               axisLine={axisLine}
               max={thresholdMax}
             />

@@ -66,8 +66,8 @@ const meta: Meta<typeof PanelOptionsEditorWrapper> = {
           kind: 'BarChart',
           spec: {
             calculation: 'first',
-            unit: {
-              kind: 'Decimal',
+            format: {
+              unit: 'decimal',
             },
             sort: 'desc',
             mode: 'value',

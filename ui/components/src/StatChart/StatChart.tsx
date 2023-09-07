@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { formatValue, UnitOptions } from '@perses-dev/core';
+import { formatValue, FormatOptions } from '@perses-dev/core';
 import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
@@ -41,7 +41,7 @@ export interface StatChartProps {
   width: number;
   height: number;
   data: StatChartData;
-  unit: UnitOptions;
+  format: FormatOptions;
   color?: string;
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
@@ -49,14 +49,14 @@ export interface StatChartProps {
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, unit, color, sparkline, showSeriesName, valueFontSize } = props;
+  const { width, height, data, format, color, sparkline, showSeriesName, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
 
   let formattedValue = '';
   if (data.calculatedValue === null) {
     formattedValue = 'null';
   } else if (typeof data.calculatedValue === 'number') {
-    formattedValue = formatValue(data.calculatedValue, unit);
+    formattedValue = formatValue(data.calculatedValue, format);
   }
 
   const containerPadding = chartsTheme.container.padding.default;
@@ -134,7 +134,7 @@ export function StatChart(props: StatChartProps) {
         show: false,
         min: (value: { min: number; max: number }) => {
           if (value.min >= 0 && value.min <= 1) {
-            // helps with PercentDecimal units, or datasets that return 0 or 1 booleans
+            // helps with percent-decimal units, or datasets that return 0 or 1 booleans
             return 0;
           }
           return value.min;

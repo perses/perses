@@ -103,9 +103,9 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes",
-                    "abbreviate": true
+                  "format": {
+                    "unit": "bytes",
+                    "shortValues": true
                   }
                 }
               }
@@ -133,7 +133,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": { "kind": "Decimal" }
+                  "format": { "unit": "decimal" }
                 },
                 "legend": {
                   "position": "right"
@@ -168,9 +168,9 @@
                 },
                 "yAxis": {
                   "show": true,
-                  "unit": {
-                    "kind": "Bytes",
-                    "abbreviate": true
+                  "format": {
+                    "unit": "bytes",
+                    "shortValues": true
                   }
                 }
               }
@@ -238,7 +238,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": { "kind": "Decimal", "decimalPlaces": 2 }
+                  "format": { "unit": "decimal", "decimalPlaces": 2 }
                 },
                 "legend": {
                   "position": "right"
@@ -275,7 +275,7 @@
                   "position": "right"
                 },
                 "yAxis": {
-                  "unit": { "kind": "PercentDecimal", "decimalPlaces": 1 }
+                  "format": { "unit": "percent-decimal", "decimalPlaces": 1 }
                 },
                 "thresholds": {
                   "steps": [
@@ -319,8 +319,8 @@
                 "yAxis": {
                   "show": false,
                   "label": "CPU Label",
-                  "unit": {
-                    "kind": "PercentDecimal",
+                  "format": {
+                    "unit": "percent-decimal",
                     "decimalPlaces": 0
                   }
                 },
@@ -359,7 +359,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "PercentDecimal" },
+                "format": { "unit": "percent-decimal" },
                 "thresholds": {
                   "steps": [{ "value": 0.2 }, { "value": 0.35 }]
                 }
@@ -389,10 +389,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "mean",
-                "unit": {
-                  "kind": "Decimal",
+                "format": {
+                  "unit": "decimal",
                   "decimalPlaces": 1,
-                  "abbreviate": true
+                  "shortValues": true
                 }
               }
             },
@@ -422,7 +422,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Percent" },
+                "format": { "unit": "percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
             },
@@ -452,7 +452,7 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Percent" }
+                "format": { "unit": "percent" }
               }
             },
             "queries": [
@@ -481,7 +481,7 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Bytes", "decimalPlaces": 1 }
+                "format": { "unit": "bytes", "decimalPlaces": 1 }
               }
             },
             "queries": [
@@ -507,10 +507,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "sum",
-                "unit": {
-                  "kind": "Decimal",
+                "format": {
+                  "unit": "decimal",
                   "decimalPlaces": 2,
-                  "abbreviate": true
+                  "shortValues": true
                 },
                 "sparkline": { "color": "#e65013", "width": 1.5 }
               }
@@ -541,7 +541,7 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "mean",
-                "unit": { "kind": "Percent" }
+                "format": { "unit": "percent" }
               }
             },
             "queries": [
@@ -570,7 +570,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Percent" },
+                "format": { "unit": "percent" },
                 "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
               }
             },
@@ -600,7 +600,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "PercentDecimal", "decimalPlaces": 1 },
+                "format": { "unit": "percent-decimal", "decimalPlaces": 1 },
                 "thresholds": {
                   "steps": [
                     {
@@ -638,7 +638,7 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": { "kind": "Bytes" },
+                "format": { "unit": "bytes" },
                 "max": 95000000,
                 "thresholds": {
                   "steps": [{ "value": 71000000 }, { "value": 82000000 }]
@@ -872,8 +872,8 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": {
-                    "kind": "Decimal",
+                  "format": {
+                    "unit": "decimal",
                     "decimalPlaces": 4
                   }
                 }
@@ -904,8 +904,8 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal",
+                  "format": {
+                    "unit": "percent-decimal",
                     "decimalPlaces": 0
                   }
                 }
@@ -938,9 +938,9 @@
                 },
                 "yAxis": {
                   "show": true,
-                  "unit": {
-                    "kind": "Bytes",
-                    "abbreviate": true
+                  "format": {
+                    "unit": "bytes",
+                    "shortValues": true
                   }
                 }
               }
@@ -1009,8 +1009,8 @@
               "spec": {
                 "yAxis": {
                   "show": true,
-                  "unit": {
-                    "kind": "Percent",
+                  "format": {
+                    "unit": "percent",
                     "decimalPlaces": 1
                   }
                 },
@@ -1062,7 +1062,7 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "unit": { "kind": "PercentDecimal", "decimalPlaces": 0 }
+                  "format": { "unit": "percent-decimal", "decimalPlaces": 0 }
                 },
                 "legend": {
                   "position": "bottom"
@@ -1098,10 +1098,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "mean",
-                "unit": {
-                  "kind": "Decimal",
+                "format": {
+                  "unit": "decimal",
                   "decimalPlaces": 1,
-                  "abbreviate": true
+                  "shortValues": true
                 }
               }
             },
@@ -1131,8 +1131,8 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -1162,8 +1162,8 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "Bytes",
+                "format": {
+                  "unit": "bytes",
                   "decimalPlaces": 1
                 }
               }
@@ -1193,10 +1193,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "sum",
-                "unit": {
-                  "kind": "Decimal",
+                "format": {
+                  "unit": "decimal",
                   "decimalPlaces": 2,
-                  "abbreviate": true
+                  "shortValues": true
                 },
                 "sparkline": {
                   "color": "#e65013",
@@ -1231,8 +1231,8 @@
               "spec": {
                 "sparkline": {},
                 "calculation": "mean",
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -1262,8 +1262,8 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 },
                 "thresholds": {
                   "steps": [
@@ -1303,8 +1303,8 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "PercentDecimal",
+                "format": {
+                  "unit": "percent-decimal",
                   "decimalPlaces": 1
                 },
                 "thresholds": {
@@ -1346,8 +1346,8 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "Decimal"
+                "format": {
+                  "unit": "decimal"
                 },
                 "max": 95000000,
                 "thresholds": {
@@ -2245,8 +2245,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -2314,9 +2314,9 @@
               "spec": {
                 "calculation": "mean",
                 "sparkline": {},
-                "unit": {
-                  "abbreviate": false,
-                  "kind": "Decimal"
+                "format": {
+                  "shortValues": false,
+                  "unit": "decimal"
                 }
               }
             },
@@ -2346,10 +2346,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "mean",
-                "unit": {
-                  "abbreviate": false,
+                "format": {
+                  "shortValues": false,
                   "decimalPlaces": 2,
-                  "kind": "Decimal"
+                  "unit": "decimal"
                 }
               }
             },
@@ -2380,8 +2380,8 @@
               "spec": {
                 "calculation": "last-number",
                 "sparkline": {},
-                "unit": {
-                  "kind": "Decimal"
+                "format": {
+                  "unit": "decimal"
                 }
               }
             },
@@ -2410,8 +2410,8 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "unit": {
-                  "kind": "Decimal"
+                "format": {
+                  "unit": "decimal"
                 }
               }
             },
@@ -3506,8 +3506,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3558,8 +3558,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3605,8 +3605,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Bytes"
+                "format": {
+                  "unit": "bytes"
                 }
               }
             },
@@ -3657,8 +3657,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3709,8 +3709,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3776,8 +3776,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3828,8 +3828,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Percent"
+                "format": {
+                  "unit": "percent"
                 }
               }
             },
@@ -3919,8 +3919,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Seconds"
+                "format": {
+                  "unit": "seconds"
                 }
               }
             },
@@ -3970,8 +3970,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Bytes"
+                "format": {
+                  "unit": "bytes"
                 }
               }
             },
@@ -4017,8 +4017,8 @@
                     }
                   ]
                 },
-                "unit": {
-                  "kind": "Bytes"
+                "format": {
+                  "unit": "bytes"
                 }
               }
             },
@@ -4183,8 +4183,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }
@@ -4350,8 +4350,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal"
+                  "format": {
+                    "unit": "percent-decimal"
                   }
                 }
               }
@@ -4515,8 +4515,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -4970,8 +4970,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -5022,8 +5022,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -5974,8 +5974,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -6960,8 +6960,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }
@@ -7071,8 +7071,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal"
+                  "format": {
+                    "unit": "percent-decimal"
                   }
                 }
               }
@@ -7199,8 +7199,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -7375,8 +7375,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Percent"
+                  "format": {
+                    "unit": "percent"
                   }
                 }
               }
@@ -7423,8 +7423,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal"
+                  "format": {
+                    "unit": "percent-decimal"
                   }
                 }
               }
@@ -7576,8 +7576,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -7802,8 +7802,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -7966,8 +7966,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal"
+                  "format": {
+                    "unit": "percent-decimal"
                   }
                 }
               }
@@ -8014,8 +8014,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "PercentDecimal"
+                  "format": {
+                    "unit": "percent-decimal"
                   }
                 }
               }
@@ -8077,8 +8077,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8140,8 +8140,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8276,8 +8276,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8339,8 +8339,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8417,8 +8417,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8480,8 +8480,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8528,8 +8528,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8621,8 +8621,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8699,8 +8699,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8792,8 +8792,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8855,8 +8855,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8933,8 +8933,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -8981,8 +8981,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -9044,8 +9044,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -9339,8 +9339,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }
@@ -9518,8 +9518,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }
@@ -9725,8 +9725,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Bytes"
+                  "format": {
+                    "unit": "bytes"
                   }
                 }
               }
@@ -9876,8 +9876,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }
@@ -10257,8 +10257,8 @@
                   ]
                 },
                 "yAxis": {
-                  "unit": {
-                    "kind": "Seconds"
+                  "format": {
+                    "unit": "seconds"
                   }
                 }
               }

@@ -15,7 +15,7 @@ import numbro from 'numbro';
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
 /**
  * We consider the units for bytes to be powers of 1000.
@@ -27,28 +27,28 @@ import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils'
 
 const DEFAULT_NUMBRO_MANTISSA = 2;
 
-const bytesUnitKinds = ['Bytes'] as const;
-type BytesUnitKind = (typeof bytesUnitKinds)[number];
-export type BytesUnitOptions = {
-  kind: BytesUnitKind;
+const bytesUnits = ['bytes'] as const;
+type BytesUnit = (typeof bytesUnits)[number];
+export type BytesFormatOptions = {
+  unit: BytesUnit;
   decimalPlaces?: number;
-  abbreviate?: boolean;
+  shortValues?: boolean;
 };
 export const BYTES_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Bytes',
   decimalPlaces: true,
-  abbreviate: true,
+  shortValues: true,
 };
-export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnitKind, UnitConfig>> = {
-  Bytes: {
+export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnit, UnitConfig>> = {
+  bytes: {
     group: 'Bytes',
     label: 'Bytes',
   },
 };
 
-export function formatBytes(bytes: number, { abbreviate, decimalPlaces }: BytesUnitOptions) {
+export function formatBytes(bytes: number, { shortValues, decimalPlaces }: BytesFormatOptions) {
   // If we're showing the entire value, we can use Intl.NumberFormat.
-  if (!shouldAbbreviate(abbreviate) || Math.abs(bytes) < 1000) {
+  if (!shouldShortenValues(shortValues) || Math.abs(bytes) < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {
       style: 'unit',
       unit: 'byte',
@@ -61,7 +61,7 @@ export function formatBytes(bytes: number, { abbreviate, decimalPlaces }: BytesU
       formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
     } else {
       // This can happen if bytes is between -1000 and 1000
-      if (shouldAbbreviate(abbreviate)) {
+      if (shouldShortenValues(shortValues)) {
         formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
       }
     }
@@ -69,7 +69,7 @@ export function formatBytes(bytes: number, { abbreviate, decimalPlaces }: BytesU
     return formatter.format(bytes);
   }
 
-  // If we're showing the "abbreviated" value, we use numbro.
+  // If we're showing the shorten value, we use numbro.
   // numbro is able to add units like KB, MB, GB, etc. correctly.
   return numbro(bytes).format({
     output: 'byte',

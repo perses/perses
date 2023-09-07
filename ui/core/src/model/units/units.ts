@@ -11,10 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatBytes, BytesUnitOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
-import { formatDecimal, DecimalUnitOptions, DECIMAL_GROUP_CONFIG, DECIMAL_UNIT_CONFIG } from './decimal';
-import { formatPercent, PercentUnitOptions, PERCENT_GROUP_CONFIG, PERCENT_UNIT_CONFIG } from './percent';
-import { formatTime, TimeUnitOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
+import { formatBytes, BytesFormatOptions as BytesFormatOptions, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
+import {
+  formatDecimal,
+  DecimalFormatOptions as DecimalFormatOptions,
+  DECIMAL_GROUP_CONFIG,
+  DECIMAL_UNIT_CONFIG,
+} from './decimal';
+import {
+  formatPercent,
+  PercentFormatOptions as PercentFormatOptions,
+  PERCENT_GROUP_CONFIG,
+  PERCENT_UNIT_CONFIG,
+} from './percent';
+import { formatTime, TimeFormatOptions as TimeFormatOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
 import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
 
 /**
@@ -38,74 +48,76 @@ export const UNIT_CONFIG = {
   ...BYTES_UNIT_CONFIG,
 } as const;
 
-export type UnitOptions = TimeUnitOptions | PercentUnitOptions | DecimalUnitOptions | BytesUnitOptions;
+export type FormatOptions = TimeFormatOptions | PercentFormatOptions | DecimalFormatOptions | BytesFormatOptions;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
-type HasAbbreviate<UnitOpt> = UnitOpt extends { abbreviate?: boolean } ? UnitOpt : never;
+type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
 
-export function formatValue(value: number, unitOptions?: UnitOptions): string {
-  if (unitOptions === undefined) {
+export function formatValue(value: number, formatOptions?: FormatOptions): string {
+  if (formatOptions === undefined) {
     return value.toString();
   }
 
-  if (isBytesUnit(unitOptions)) {
-    return formatBytes(value, unitOptions);
+  if (isBytesUnit(formatOptions)) {
+    return formatBytes(value, formatOptions);
   }
 
-  if (isDecimalUnit(unitOptions)) {
-    return formatDecimal(value, unitOptions);
+  if (isDecimalUnit(formatOptions)) {
+    return formatDecimal(value, formatOptions);
   }
 
-  if (isPercentUnit(unitOptions)) {
-    return formatPercent(value, unitOptions);
+  if (isPercentUnit(formatOptions)) {
+    return formatPercent(value, formatOptions);
   }
 
-  if (isTimeUnit(unitOptions)) {
-    return formatTime(value, unitOptions);
+  if (isTimeUnit(formatOptions)) {
+    return formatTime(value, formatOptions);
   }
 
-  const exhaustive: never = unitOptions;
+  const exhaustive: never = formatOptions;
   throw new Error(`Unknown unit options ${exhaustive}`);
 }
 
-export function getUnitKindConfig(unitOptions: UnitOptions): UnitConfig {
-  return UNIT_CONFIG[unitOptions.kind];
+export function getUnitConfig(formatOptions: FormatOptions): UnitConfig {
+  return UNIT_CONFIG[formatOptions.unit];
 }
 
-export function getUnitGroup(unitOptions: UnitOptions): UnitGroup {
-  return getUnitKindConfig(unitOptions).group;
+export function getUnitGroup(formatOptions: FormatOptions): UnitGroup {
+  return getUnitConfig(formatOptions).group;
 }
 
-export function getUnitGroupConfig(unitOptions: UnitOptions): UnitGroupConfig {
-  const unitConfig = getUnitKindConfig(unitOptions);
+export function getUnitGroupConfig(formatOptions: FormatOptions): UnitGroupConfig {
+  const unitConfig = getUnitConfig(formatOptions);
   return UNIT_GROUP_CONFIG[unitConfig.group];
 }
 
 // Type guards
-export function isTimeUnit(unitOptions: UnitOptions): unitOptions is TimeUnitOptions {
-  return getUnitGroup(unitOptions) === 'Time';
+export function isTimeUnit(formatOptions: FormatOptions): formatOptions is TimeFormatOptions {
+  return getUnitGroup(formatOptions) === 'Time';
 }
 
-export function isPercentUnit(unitOptions: UnitOptions): unitOptions is PercentUnitOptions {
-  return getUnitGroup(unitOptions) === 'Percent';
+export function isPercentUnit(formatOptions: FormatOptions): formatOptions is PercentFormatOptions {
+  return getUnitGroup(formatOptions) === 'Percent';
 }
 
-export function isDecimalUnit(unitOptions: UnitOptions): unitOptions is DecimalUnitOptions {
-  return getUnitGroup(unitOptions) === 'Decimal';
+export function isDecimalUnit(formatOptions: FormatOptions): formatOptions is DecimalFormatOptions {
+  return getUnitGroup(formatOptions) === 'Decimal';
 }
 
-export function isBytesUnit(unitOptions: UnitOptions): unitOptions is BytesUnitOptions {
-  return getUnitGroup(unitOptions) === 'Bytes';
+export function isBytesUnit(formatOptions: FormatOptions): formatOptions is BytesFormatOptions {
+  return getUnitGroup(formatOptions) === 'Bytes';
 }
 
-export function isUnitWithDecimalPlaces(unitOptions: UnitOptions): unitOptions is HasDecimalPlaces<UnitOptions> {
-  const groupConfig = getUnitGroupConfig(unitOptions);
+export function isUnitWithDecimalPlaces(
+  formatOptions: FormatOptions
+): formatOptions is HasDecimalPlaces<FormatOptions> {
+  const groupConfig = getUnitGroupConfig(formatOptions);
 
   return !!groupConfig.decimalPlaces;
 }
 
-export function isUnitWithAbbreviate(unitOptions: UnitOptions): unitOptions is HasAbbreviate<UnitOptions> {
-  const groupConfig = getUnitGroupConfig(unitOptions);
+export function isUnitWithShortValues(formatOptions: FormatOptions): formatOptions is HasShortValues<FormatOptions> {
+  const groupConfig = getUnitGroupConfig(formatOptions);
 
-  return !!groupConfig.abbreviate;
+  return !!groupConfig.shortValues;
 }

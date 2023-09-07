@@ -20,7 +20,7 @@ import (
 kind: "BarChart"
 spec: close({
 	calculation: common.#calculation
-	unit?:       common.#unit
+	format?:     common.#format
 	sort?:       "asc" | "desc"
 	mode?:       "value" | "percentage"
 })

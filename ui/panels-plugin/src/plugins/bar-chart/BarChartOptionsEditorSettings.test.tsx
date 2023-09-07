@@ -24,8 +24,8 @@ describe('BarChartOptionsEditorSettings', () => {
         <BarChartOptionsEditorSettings
           value={
             value ?? {
-              unit: {
-                kind: 'Decimal',
+              format: {
+                unit: 'decimal',
               },
               calculation: 'first',
               sort: 'desc',
@@ -49,8 +49,8 @@ describe('BarChartOptionsEditorSettings', () => {
     userEvent.click(yearOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        unit: {
-          kind: 'Years',
+        format: {
+          unit: 'years',
         },
       })
     );
@@ -106,8 +106,8 @@ describe('BarChartOptionsEditorSettings', () => {
 
   it('percentage mode is disabled when unit is percent', () => {
     renderBarChartOptionsEditorSettings({
-      unit: {
-        kind: 'Percent',
+      format: {
+        unit: 'percent',
       },
       calculation: 'first',
       sort: 'desc',
@@ -123,8 +123,8 @@ describe('BarChartOptionsEditorSettings', () => {
 
   it('unit selector is disabled when mode is percentage', () => {
     renderBarChartOptionsEditorSettings({
-      unit: {
-        kind: 'Decimal',
+      format: {
+        unit: 'decimal',
       },
       calculation: 'first',
       sort: 'desc',
@@ -138,8 +138,8 @@ describe('BarChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderBarChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Years',
+        format: {
+          unit: 'years',
         },
         calculation: 'first',
         sort: 'asc',
@@ -151,9 +151,9 @@ describe('BarChartOptionsEditorSettings', () => {
     userEvent.click(resetButton);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        unit: {
-          kind: 'Decimal',
-          abbreviate: true,
+        format: {
+          unit: 'decimal',
+          shortValues: true,
         },
         calculation: 'last-number',
         sort: 'desc',

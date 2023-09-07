@@ -56,7 +56,7 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              unit: { kind: '%' },
+              format: { unit: '%' },
             },
           },
           queries: [
@@ -82,7 +82,7 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              unit: { kind: 'Bytes' },
+              format: { unit: 'bytes' },
             },
           },
           queries: [
@@ -142,7 +142,7 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              unit: { kind: 'Percent' },
+              format: { unit: 'percent' },
             },
           },
           queries: [
@@ -168,7 +168,7 @@ const testDashboard: DashboardResource = {
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
-              unit: { kind: 'Percent' },
+              format: { unit: 'percent' },
             },
           },
           queries: [

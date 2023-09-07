@@ -15,23 +15,23 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
-const percentUnitKinds = ['Percent', 'PercentDecimal', '%'] as const;
-type PercentUnitKind = (typeof percentUnitKinds)[number];
-export type PercentUnitOptions = {
-  kind: PercentUnitKind;
+const percentUnits = ['percent', 'percent-decimal', '%'] as const;
+type PercentUnit = (typeof percentUnits)[number];
+export type PercentFormatOptions = {
+  unit: PercentUnit;
   decimalPlaces?: number;
 };
 export const PERCENT_GROUP_CONFIG: UnitGroupConfig = {
-  label: 'Percent',
+  label: 'percent',
   decimalPlaces: true,
 };
 const PERCENT_GROUP = 'Percent';
-export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> = {
-  Percent: {
+export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnit, UnitConfig>> = {
+  percent: {
     group: PERCENT_GROUP,
     label: 'Percent (0-100)',
   },
-  PercentDecimal: {
+  'percent-decimal': {
     group: PERCENT_GROUP,
     label: 'Percent (0.0-1.0)',
   },
@@ -44,7 +44,7 @@ export const PERCENT_UNIT_CONFIG: Readonly<Record<PercentUnitKind, UnitConfig>> 
   },
 };
 
-export function formatPercent(value: number, { kind, decimalPlaces }: PercentUnitOptions): string {
+export function formatPercent(value: number, { unit, decimalPlaces }: PercentFormatOptions): string {
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'percent',
     useGrouping: true,
@@ -58,7 +58,7 @@ export function formatPercent(value: number, { kind, decimalPlaces }: PercentUni
   }
 
   // Intl.NumberFormat translates 0 -> 0%, 0.5 -> 50%, 1 -> 100%, etc.
-  if (kind === 'Percent') {
+  if (unit === 'percent') {
     value = value / 100;
   }
 

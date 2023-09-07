@@ -13,14 +13,14 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { UnitOptions } from '@perses-dev/core';
-import { UnitSelector } from './UnitSelector';
+import { FormatOptions } from '@perses-dev/core';
+import { FormatControls } from './FormatControls';
 
-describe('UnitSelector', () => {
-  const renderUnitSelector = (value: UnitOptions, onChange = jest.fn()) => {
+describe('FormatControls', () => {
+  const renderFormatControls = (value: FormatOptions, onChange = jest.fn()) => {
     render(
       <div>
-        <UnitSelector value={value} onChange={onChange} />
+        <FormatControls value={value} onChange={onChange} />
       </div>
     );
   };
@@ -33,13 +33,13 @@ describe('UnitSelector', () => {
     return screen.getByRole('combobox', { name: 'Decimals' });
   };
 
-  const getAbbreviateSwitch = () => {
-    return screen.getByRole('checkbox', { name: 'Abbreviate' });
+  const getShortValuesSwitch = () => {
+    return screen.getByRole('checkbox', { name: 'Short values' });
   };
 
-  it('can change the unit kind by clicking', () => {
+  it('can change the unit by clicking', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Minutes' }, onChange);
+    renderFormatControls({ unit: 'minutes' }, onChange);
 
     const unitSelector = getUnitSelector();
     userEvent.click(unitSelector);
@@ -49,13 +49,13 @@ describe('UnitSelector', () => {
     userEvent.click(decimalOption);
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Decimal',
+      unit: 'decimal',
     });
   });
 
-  it('can change the unit kind using a keyboard', () => {
+  it('can change the unit using a keyboard', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Bytes' }, onChange);
+    renderFormatControls({ unit: 'bytes' }, onChange);
 
     const unitSelector = getUnitSelector();
     userEvent.tab();
@@ -71,13 +71,13 @@ describe('UnitSelector', () => {
     userEvent.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Years',
+      unit: 'years',
     });
   });
 
   it('can change the decimal places by clicking', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 0, abbreviate: true }, onChange);
+    renderFormatControls({ unit: 'decimal', decimalPlaces: 0, shortValues: true }, onChange);
 
     userEvent.click(getDecimalPlacesSelector());
     const decimalPlacesOption = screen.getByRole('option', {
@@ -86,15 +86,15 @@ describe('UnitSelector', () => {
     userEvent.click(decimalPlacesOption);
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Decimal',
+      unit: 'decimal',
       decimalPlaces: undefined,
-      abbreviate: true,
+      shortValues: true,
     });
   });
 
   it('can change the decimal places using a keyboard', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Percent' }, onChange);
+    renderFormatControls({ unit: 'percent' }, onChange);
 
     const decimalPlacesSelector = getDecimalPlacesSelector();
     userEvent.tab();
@@ -109,84 +109,84 @@ describe('UnitSelector', () => {
     userEvent.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Percent',
+      unit: 'percent',
       decimalPlaces: 3,
     });
   });
 
-  it('can change abbreviate by clicking', () => {
+  it('can change shortValues by clicking', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 3, abbreviate: true }, onChange);
+    renderFormatControls({ unit: 'decimal', decimalPlaces: 3, shortValues: true }, onChange);
 
-    userEvent.click(getAbbreviateSwitch());
+    userEvent.click(getShortValuesSwitch());
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Decimal',
+      unit: 'decimal',
       decimalPlaces: 3,
-      abbreviate: false,
+      shortValues: false,
     });
   });
 
-  it('can change abbreviate using a keyboard', () => {
+  it('can change shortValues using a keyboard', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal', decimalPlaces: 0 }, onChange);
+    renderFormatControls({ unit: 'decimal', decimalPlaces: 0 }, onChange);
 
     userEvent.tab();
     userEvent.keyboard('{space}');
 
     expect(onChange).toHaveBeenCalledWith({
-      kind: 'Decimal',
+      unit: 'decimal',
       decimalPlaces: 0,
-      abbreviate: false,
+      shortValues: false,
     });
   });
 
   describe('with a time unit selected', () => {
-    it('does not allow the user to set abbreviate', () => {
-      renderUnitSelector({ kind: 'Minutes' });
-      expect(getAbbreviateSwitch()).toBeDisabled();
+    it('does not allow the user to set shortValues', () => {
+      renderFormatControls({ unit: 'minutes' });
+      expect(getShortValuesSwitch()).toBeDisabled();
     });
   });
 
   describe('with a percent unit selected', () => {
     it('allows the user to modify the decimal places', () => {
-      renderUnitSelector({ kind: 'Percent' });
+      renderFormatControls({ unit: 'percent' });
       expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
-    it('does not allow the user to set abbreviate', () => {
-      renderUnitSelector({ kind: 'PercentDecimal' });
-      expect(getAbbreviateSwitch()).toBeDisabled();
+    it('does not allow the user to set shortValues', () => {
+      renderFormatControls({ unit: 'percent-decimal' });
+      expect(getShortValuesSwitch()).toBeDisabled();
     });
   });
 
   describe('with a decimal unit selected', () => {
     it('allows the user to modify the decimal places', () => {
-      renderUnitSelector({ kind: 'Decimal' });
+      renderFormatControls({ unit: 'decimal' });
       expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
-    it('allows the user to set abbreviate', () => {
-      renderUnitSelector({ kind: 'Decimal' });
-      expect(getAbbreviateSwitch()).toBeEnabled();
+    it('allows the user to set shortValues', () => {
+      renderFormatControls({ unit: 'decimal' });
+      expect(getShortValuesSwitch()).toBeEnabled();
     });
   });
 
   describe('with a bytes unit selected', () => {
     it('allows the user to modify the decimal places', () => {
-      renderUnitSelector({ kind: 'Bytes' });
+      renderFormatControls({ unit: 'bytes' });
       expect(getDecimalPlacesSelector()).toBeEnabled();
     });
 
-    it('allows the user to set abbreviate', () => {
-      renderUnitSelector({ kind: 'Bytes' });
-      expect(getAbbreviateSwitch()).toBeEnabled();
+    it('allows the user to set shortValues', () => {
+      renderFormatControls({ unit: 'bytes' });
+      expect(getShortValuesSwitch()).toBeEnabled();
     });
   });
 
   it('should not show an option for disabled units', () => {
     const onChange = jest.fn();
-    renderUnitSelector({ kind: 'Decimal' }, onChange);
+    renderFormatControls({ unit: 'decimal' }, onChange);
 
     userEvent.click(getUnitSelector());
     const percentShorthandOption = screen.queryByRole('option', {

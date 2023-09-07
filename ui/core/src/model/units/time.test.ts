@@ -25,169 +25,169 @@ import { UnitTestCase } from './types';
 const TIME_TESTS: UnitTestCase[] = [
   {
     value: 0,
-    unit: { kind: 'Milliseconds' },
+    format: { unit: 'milliseconds' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Seconds' },
+    format: { unit: 'seconds' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Minutes' },
+    format: { unit: 'minutes' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Hours' },
+    format: { unit: 'hours' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Days' },
+    format: { unit: 'days' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Weeks' },
+    format: { unit: 'weeks' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Months' },
+    format: { unit: 'months' },
     expected: '0s',
   },
   {
     value: 0,
-    unit: { kind: 'Years' },
+    format: { unit: 'years' },
     expected: '0s',
   },
   {
     value: 0.001,
-    unit: { kind: 'Milliseconds' },
+    format: { unit: 'milliseconds' },
     expected: '0.001ms',
   },
   {
     value: 0.001,
-    unit: { kind: 'Seconds' },
+    format: { unit: 'seconds' },
     expected: '1ms',
   },
   {
     value: 0.001,
-    unit: { kind: 'Minutes' },
+    format: { unit: 'minutes' },
     expected: '60ms',
   },
   {
     value: 0.001,
-    unit: { kind: 'Hours' },
+    format: { unit: 'hours' },
     expected: '3.6s',
   },
   {
     value: 0.001,
-    unit: { kind: 'Days' },
+    format: { unit: 'days' },
     expected: '1.44m',
   },
   {
     value: 0.001,
-    unit: { kind: 'Weeks' },
+    format: { unit: 'weeks' },
     expected: '10.1m',
   },
   {
     value: 0.001,
-    unit: { kind: 'Months' },
+    format: { unit: 'months' },
     expected: '43.2m',
   },
   {
     value: 0.001,
-    unit: { kind: 'Years' },
+    format: { unit: 'years' },
     expected: '8.76h',
   },
   {
     value: 1,
-    unit: { kind: 'Milliseconds' },
+    format: { unit: 'milliseconds' },
     expected: '1ms',
   },
   {
     value: 1,
-    unit: { kind: 'Seconds' },
+    format: { unit: 'seconds' },
     expected: '1s',
   },
   {
     value: 1,
-    unit: { kind: 'Minutes' },
+    format: { unit: 'minutes' },
     expected: '1m',
   },
   {
     value: 1,
-    unit: { kind: 'Hours' },
+    format: { unit: 'hours' },
     expected: '1h',
   },
   {
     value: 1,
-    unit: { kind: 'Days' },
+    format: { unit: 'days' },
     expected: '1d',
   },
   {
     value: 1,
-    unit: { kind: 'Weeks' },
+    format: { unit: 'weeks' },
     expected: '1w',
   },
   {
     value: 1,
-    unit: { kind: 'Months' },
+    format: { unit: 'months' },
     expected: '1 month',
   },
   {
     value: 1,
-    unit: { kind: 'Years' },
+    format: { unit: 'years' },
     expected: '1 year',
   },
   {
     value: 100,
-    unit: { kind: 'Milliseconds' },
+    format: { unit: 'milliseconds' },
     expected: '100ms',
   },
   {
     value: 100,
-    unit: { kind: 'Seconds' },
+    format: { unit: 'seconds' },
     expected: '1.67m',
   },
   {
     value: 100,
-    unit: { kind: 'Minutes' },
+    format: { unit: 'minutes' },
     expected: '1.67h',
   },
   {
     value: 100,
-    unit: { kind: 'Hours' },
+    format: { unit: 'hours' },
     expected: '4.17d',
   },
   {
     value: 100,
-    unit: { kind: 'Days' },
+    format: { unit: 'days' },
     expected: '3.33 months',
   },
   {
     value: 100,
-    unit: { kind: 'Weeks' },
+    format: { unit: 'weeks' },
     expected: '1.92 years',
   },
   {
     value: 100,
-    unit: { kind: 'Months' },
+    format: { unit: 'months' },
     expected: '8.22 years',
   },
   {
     value: 100,
-    unit: { kind: 'Years' },
+    format: { unit: 'years' },
     expected: '100 years',
   },
 ];
 describe('formatValue', () => {
-  it.each(TIME_TESTS)('returns $expected when $value formatted as $unit', (args: UnitTestCase) => {
-    const { value, unit, expected } = args;
-    expect(formatValue(value, unit)).toEqual(expected);
+  it.each(TIME_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
+    const { value, format: format, expected } = args;
+    expect(formatValue(value, format)).toEqual(expected);
   });
 });
 

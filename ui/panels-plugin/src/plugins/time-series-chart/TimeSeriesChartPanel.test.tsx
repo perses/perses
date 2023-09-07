@@ -62,7 +62,7 @@ const TEST_TIME_SERIES_PANEL: TimeSeriesChartProps = {
       position: 'right',
     },
     yAxis: {
-      unit: { kind: 'Decimal', decimalPlaces: 2 },
+      format: { unit: 'decimal', decimalPlaces: 2 },
     },
   },
 };

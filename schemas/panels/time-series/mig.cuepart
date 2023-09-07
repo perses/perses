@@ -34,8 +34,8 @@ if #panel.type == "timeseries" || #panel.type == "graph" {
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
         if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
             yAxis: {
-                unit: {
-                  kind: #mapping.unit[#unitPath]
+                format: {
+                    unit: #mapping.unit[#unitPath]
                 }
             }
         }

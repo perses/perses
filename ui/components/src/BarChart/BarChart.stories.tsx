@@ -62,7 +62,7 @@ export const Primary: Story = {
     width: 600,
     height: 300,
     data: DEFAULT_DATA,
-    unit: { abbreviate: false, kind: 'Decimal' },
+    format: { unit: 'decimal', shortValues: false },
   },
 };
 
@@ -71,6 +71,6 @@ export const NoData: Story = {
     width: 600,
     height: 300,
     data: undefined,
-    unit: { abbreviate: false, kind: 'Decimal' },
+    format: { unit: 'decimal', shortValues: false },
   },
 };

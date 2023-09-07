@@ -13,7 +13,7 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
-import { formatValue, TimeSeriesValueTuple, UnitOptions, TimeSeries } from '@perses-dev/core';
+import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@perses-dev/core';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData } from './tooltip-model';
@@ -47,7 +47,7 @@ export function checkforNearbyTimeSeries(
   pointInGrid: number[],
   yBuffer: number,
   chart: EChartsInstance,
-  unit?: UnitOptions
+  format?: FormatOptions
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -141,7 +141,7 @@ export function checkforNearbyTimeSeries(
                   seriesIndex: seriesIdx,
                 });
               }
-              const formattedY = formatValue(yValue, unit);
+              const formattedY = formatValue(yValue, format);
               currentNearbySeriesData.push({
                 seriesIdx: seriesIdx,
                 datumIdx: datumIdx,
@@ -182,7 +182,7 @@ export function legacyCheckforNearbySeries(
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
-  unit?: UnitOptions
+  format?: FormatOptions
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -234,7 +234,7 @@ export function legacyCheckforNearbySeries(
 
               // determine whether to convert timestamp to ms, see: https://stackoverflow.com/a/23982005/17575201
               const xValueMilliSeconds = xValue > 99999999999 ? xValue : xValue * 1000;
-              const formattedY = formatValue(yValue, unit);
+              const formattedY = formatValue(yValue, format);
               currentNearbySeriesData.push({
                 seriesIdx: seriesIdx,
                 datumIdx: datumIdx,
@@ -294,7 +294,7 @@ export function getNearbySeriesData({
   data,
   seriesMapping,
   chart,
-  unit,
+  format,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
@@ -302,7 +302,7 @@ export function getNearbySeriesData({
   data: TimeSeries[];
   seriesMapping: TimeChartSeriesMapping;
   chart?: EChartsInstance;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   showAllSeries?: boolean;
 }) {
   if (chart === undefined || mousePos === null) return [];
@@ -338,7 +338,7 @@ export function getNearbySeriesData({
     const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-    return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, unit);
+    return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, format);
   }
 
   return [];
@@ -353,14 +353,14 @@ export function legacyGetNearbySeriesData({
   pinnedPos,
   chartData,
   chart,
-  unit,
+  format,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
   chartData: EChartsDataFormat;
   chart?: EChartsInstance;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   showAllSeries?: boolean;
 }) {
   if (chart === undefined || mousePos === null) return [];
@@ -397,7 +397,7 @@ export function legacyGetNearbySeriesData({
   if (chart.containPixel('grid', pointInPixel)) {
     const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
     if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, chart, unit);
+      return legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, chart, format);
     }
   }
 

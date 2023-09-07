@@ -51,7 +51,7 @@ import {
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
-  DEFAULT_UNIT,
+  DEFAULT_FORMAT,
   DEFAULT_VISUAL,
   THRESHOLD_PLOT_INTERVAL,
 } from './time-series-chart-model';
@@ -113,8 +113,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       ? merge({}, DEFAULT_LEGEND, props.spec.legend)
       : undefined;
 
-  // TODO: add support for y_axis_alt.unit
-  const unit = props.spec.yAxis?.unit ?? DEFAULT_UNIT;
+  // TODO: add support for y_axis_alt.format
+  const format = props.spec.yAxis?.format ?? DEFAULT_FORMAT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
@@ -301,7 +301,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           align: 'right',
           cell: ({ getValue }) => {
             const cellValue = getValue();
-            return typeof cellValue === 'number' && unit ? formatValue(cellValue, unit) : cellValue;
+            return typeof cellValue === 'number' && format ? formatValue(cellValue, format) : cellValue;
           },
           cellDescription: true,
           enableSorting: true,
@@ -310,7 +310,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
       return columns;
     }, [] as Array<TableColumnConfig<LegendItem>>);
-  }, [legend?.values, unit]);
+  }, [legend?.values, format]);
 
   if (adjustedContentDimensions === undefined) {
     return null;
@@ -412,7 +412,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
                 seriesMapping={timeSeriesMapping}
                 timeScale={timeScale}
                 yAxis={echartsYAxis}
-                unit={unit}
+                format={format}
                 grid={gridOverrides}
                 isStackedBar={isStackedBar}
                 tooltipConfig={tooltipConfig}

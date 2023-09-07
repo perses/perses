@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { ModeOption, SortOption } from '@perses-dev/components';
-import { CalculationType, DEFAULT_CALCULATION, Definition, UnitOptions } from '@perses-dev/core';
+import { CalculationType, DEFAULT_CALCULATION, Definition, FormatOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export const DEFAULT_UNIT: UnitOptions = { kind: 'Decimal', abbreviate: true };
+export const DEFAULT_FORMAT: FormatOptions = { unit: 'decimal', shortValues: true };
 export const DEFAULT_SORT: SortOption = 'desc';
 export const DEFAULT_MODE: ModeOption = 'value';
 
@@ -31,7 +31,7 @@ export interface BarChartDefinition extends Definition<BarChartOptions> {
  */
 export interface BarChartOptions {
   calculation: CalculationType;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   sort?: SortOption;
   mode?: ModeOption;
 }
@@ -44,7 +44,7 @@ export type BarChartOptionsEditorProps = OptionsEditorProps<BarChartOptions>;
 export function createInitialBarChartOptions(): BarChartOptions {
   return {
     calculation: DEFAULT_CALCULATION,
-    unit: DEFAULT_UNIT,
+    format: DEFAULT_FORMAT,
     sort: DEFAULT_SORT,
     mode: DEFAULT_MODE,
   };

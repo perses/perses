@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Portal, Stack } from '@mui/material';
-import { UnitOptions } from '@perses-dev/core';
+import { FormatOptions } from '@perses-dev/core';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { memo, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
@@ -36,7 +36,7 @@ export interface TimeSeriesTooltipProps {
   chartData: EChartsDataFormat;
   enablePinning?: boolean;
   wrapLabels?: boolean;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   onUnpinClick?: () => void;
   pinnedPos: CursorCoordinates | null;
   /**
@@ -51,7 +51,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   chartData,
   enablePinning = true,
   wrapLabels,
-  unit,
+  format,
   onUnpinClick,
   pinnedPos,
   containerId,
@@ -77,7 +77,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
     chartData,
     pinnedPos,
     chart,
-    unit,
+    format,
     showAllSeries,
   });
   if (nearbySeries.length === 0) {

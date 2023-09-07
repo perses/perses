@@ -7,15 +7,15 @@ import (
 #mapping: {
     // mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
     unit: {
-        ms: "Milliseconds"
-        s: "Seconds"
-        m: "Minutes"
-        h: "Hours"
-        d: "Days"
-        percent: "Percent"
-        percentunit: "PercentDecimal"
-        bytes: "Bytes"
-        decbytes: "Bytes"
+        ms: "milliseconds"
+        s: "seconds"
+        m: "minutes"
+        h: "hours"
+        d: "days"
+        percent: "percent"
+        percentunit: "percent-decimal"
+        bytes: "bytes"
+        decbytes: "bytes"
     }
     // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
     calc: {

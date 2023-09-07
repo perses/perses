@@ -78,10 +78,10 @@ const meta: Meta<typeof ContentWithLegend> = {
         yAxis={{
           show: true,
         }}
-        unit={{
-          kind: 'Decimal' as const,
+        format={{
+          unit: 'decimal' as const,
           decimalPlaces: 2,
-          abbreviate: true,
+          shortValues: true,
         }}
       />
     ),

@@ -129,10 +129,10 @@ const customAxisPanel: PanelDefinition = {
         yAxis: {
           show: true,
           label: 'Axis Label',
-          unit: {
-            kind: 'Decimal',
+          format: {
+            unit: 'decimal',
             decimalPlaces: 1,
-            abbreviate: true,
+            shortValues: true,
           },
           max: 1200,
         },

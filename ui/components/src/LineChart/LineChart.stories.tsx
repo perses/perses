@@ -44,10 +44,10 @@ const meta: Meta<typeof LineChart> = {
     yAxis: {
       show: true,
     },
-    unit: {
-      kind: 'Decimal' as const,
+    format: {
+      unit: 'decimal' as const,
       decimalPlaces: 2,
-      abbreviate: true,
+      shortValues: true,
     },
     grid: {
       left: 20,

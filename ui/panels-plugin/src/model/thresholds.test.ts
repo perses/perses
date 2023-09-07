@@ -25,7 +25,7 @@ describe('convertThresholds', () => {
       [1, '#FF0000'],
     ];
 
-    // example of unit.kind Percent conversion
+    // example of format.unit percent conversion
     const percentInput = {
       defaultColor: '#000',
       steps: [
@@ -39,9 +39,9 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentInput, { kind: 'Percent' }, 100, thresholdsColors)).toEqual(gaugePercentOutput);
+    expect(convertThresholds(percentInput, { unit: 'percent' }, 100, thresholdsColors)).toEqual(gaugePercentOutput);
 
-    // example of unit.kind PercentDecimal conversion
+    // example of format.unit percent-decimal conversion
     const percentDecimalInput = {
       defaultColor: '#000',
       steps: [
@@ -55,11 +55,11 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentDecimalInput, { kind: 'PercentDecimal' }, 1, thresholdsColors)).toEqual(
+    expect(convertThresholds(percentDecimalInput, { unit: 'percent-decimal' }, 1, thresholdsColors)).toEqual(
       gaugePercentOutput
     );
 
-    // example of unit.kind Bytes conversion
+    // example of format.unit bytes conversion
     const bytesInput = {
       steps: [
         {
@@ -75,7 +75,7 @@ describe('convertThresholds', () => {
       [0.9, thresholdsColors.palette[0]],
       [1, thresholdsColors.palette[1]],
     ];
-    expect(convertThresholds(bytesInput, { kind: 'Bytes' }, 10000, thresholdsColors)).toEqual(bytesOutput);
+    expect(convertThresholds(bytesInput, { unit: 'bytes' }, 10000, thresholdsColors)).toEqual(bytesOutput);
   });
 
   it('should account for custom max', () => {
@@ -97,7 +97,7 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentInput, { kind: 'Percent' }, 200, thresholdsColors)).toEqual(percentOutput);
+    expect(convertThresholds(percentInput, { unit: 'percent' }, 200, thresholdsColors)).toEqual(percentOutput);
 
     const percentDecimalOutput = [
       [0.05, '#000'],
@@ -117,7 +117,7 @@ describe('convertThresholds', () => {
         },
       ],
     };
-    expect(convertThresholds(percentDecimalInput, { kind: 'PercentDecimal' }, 10, thresholdsColors)).toEqual(
+    expect(convertThresholds(percentDecimalInput, { unit: 'percent-decimal' }, 10, thresholdsColors)).toEqual(
       percentDecimalOutput
     );
   });

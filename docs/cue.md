@@ -37,7 +37,7 @@ kind: "<Panel name>" // e.g kind: "TimeSeriesChart",
 spec: {
 	queries: [...#ts_query]
 	legend?:      #legend
-	unit?:        common.#unit
+	format?:      common.#format
 	thresholds?:  common.#thresholds
 }
 ```

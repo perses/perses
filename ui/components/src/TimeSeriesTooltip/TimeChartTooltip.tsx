@@ -14,7 +14,7 @@
 import { memo, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { UnitOptions, TimeSeries } from '@perses-dev/core';
+import { FormatOptions, TimeSeries } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, FALLBACK_CHART_WIDTH, useMousePosition } from './tooltip-model';
@@ -35,7 +35,7 @@ export interface TimeChartTooltipProps {
    */
   containerId?: string;
   onUnpinClick?: () => void;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   wrapLabels?: boolean;
 }
 
@@ -46,7 +46,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   seriesMapping,
   enablePinning = true,
   wrapLabels,
-  unit,
+  format,
   onUnpinClick,
   pinnedPos,
 }: TimeChartTooltipProps) {
@@ -81,7 +81,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     seriesMapping,
     pinnedPos,
     chart,
-    unit,
+    format,
     showAllSeries,
   });
   if (nearbySeries.length === 0) {

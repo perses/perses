@@ -13,12 +13,12 @@
 
 import merge from 'lodash/merge';
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
-import { formatValue, UnitOptions } from '@perses-dev/core';
+import { formatValue, FormatOptions } from '@perses-dev/core';
 
 /*
  * Populate yAxis or xAxis properties, returns an Array since multiple axes will be supported in the future
  */
-export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOption, unit?: UnitOptions) {
+export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOption, unit?: FormatOptions) {
   // TODO: support alternate yAxis that shows on right side
   const AXIS_DEFAULT = {
     type: 'value',

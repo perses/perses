@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType, Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { CalculationType, Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
 import { FontSizeOption } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
@@ -24,7 +24,7 @@ export interface StatChartDefinition extends Definition<StatChartOptions> {
 
 export interface StatChartOptions {
   calculation: CalculationType;
-  unit: UnitOptions;
+  format: FormatOptions;
   thresholds?: ThresholdOptions;
   sparkline?: StatChartSparklineOptions;
   valueFontSize?: FontSizeOption;
@@ -40,8 +40,8 @@ export type StatChartOptionsEditorProps = OptionsEditorProps<StatChartOptions>;
 export function createInitialStatChartOptions(): StatChartOptions {
   return {
     calculation: 'last-number',
-    unit: {
-      kind: 'Decimal',
+    format: {
+      unit: 'decimal',
     },
     sparkline: {},
   };

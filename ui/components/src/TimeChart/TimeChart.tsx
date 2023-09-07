@@ -17,7 +17,7 @@ import merge from 'lodash/merge';
 import isEqual from 'lodash/isEqual';
 import { DatasetOption } from 'echarts/types/dist/shared';
 import { utcToZonedTime } from 'date-fns-tz';
-import { getCommonTimeScale, TimeScale, UnitOptions, TimeSeries } from '@perses-dev/core';
+import { getCommonTimeScale, TimeScale, FormatOptions, TimeSeries } from '@perses-dev/core';
 import type {
   EChartsCoreOption,
   GridComponentOption,
@@ -76,7 +76,7 @@ export interface TimeChartProps {
   seriesMapping: TimeChartSeriesMapping;
   timeScale?: TimeScale;
   yAxis?: YAXisComponentOption;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   grid?: GridComponentOption;
   tooltipConfig?: TooltipConfig;
   noDataVariant?: 'chart' | 'message';
@@ -94,7 +94,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     seriesMapping,
     timeScale: timeScaleProp,
     yAxis,
-    unit,
+    format,
     grid,
     isStackedBar = false,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
@@ -223,7 +223,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           snap: false, // important so shared crosshair does not lag
         },
       },
-      yAxis: getFormattedAxis(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, format),
       animation: false,
       tooltip: {
         show: true,
@@ -262,7 +262,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     seriesMapping,
     timeScale,
     yAxis,
-    unit,
+    format,
     grid,
     noDataOption,
     __experimentalEChartsOptionsOverride,
@@ -431,7 +431,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             wrapLabels={tooltipConfig.wrapLabels}
             enablePinning={isPinningEnabled}
             pinnedPos={tooltipPinnedCoords}
-            unit={unit}
+            format={format}
             onUnpinClick={() => {
               // Unpins tooltip when clicking Pin icon in TooltipHeader.
               setTooltipPinnedCoords(null);
