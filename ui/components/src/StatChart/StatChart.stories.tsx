@@ -434,7 +434,7 @@ const meta: Meta<typeof StatChart> = {
     width: 600,
     height: 300,
     data: DEFAULT_DATA,
-    unit: { abbreviate: false, kind: 'Decimal' },
+    format: { unit: 'decimal', shortValues: false },
     sparkline: { lineStyle: { width: 2, color: '#1976d2', opacity: 1 }, areaStyle: { color: '#1976d2', opacity: 0.4 } },
   },
   render: (args) => <StatChartWrapper {...args} />,

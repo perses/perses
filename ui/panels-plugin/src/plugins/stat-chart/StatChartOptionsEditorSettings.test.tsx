@@ -30,8 +30,8 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Minutes',
+        format: {
+          unit: 'minutes',
         },
         calculation: 'last',
       },
@@ -45,8 +45,8 @@ describe('StatChartOptionsEditorSettings', () => {
     userEvent.click(percentOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        unit: {
-          kind: 'Percent',
+        format: {
+          unit: 'percent',
         },
       })
     );
@@ -56,8 +56,8 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Days',
+        format: {
+          unit: 'days',
         },
         calculation: 'sum',
       },
@@ -80,8 +80,8 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Days',
+        format: {
+          unit: 'days',
         },
         calculation: 'sum',
       },
@@ -102,8 +102,8 @@ describe('StatChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderStatChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Days',
+        format: {
+          unit: 'days',
         },
         calculation: 'sum',
         sparkline: {

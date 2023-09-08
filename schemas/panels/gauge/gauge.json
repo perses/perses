@@ -2,8 +2,8 @@
   "kind": "GaugeChart",
   "spec": {
     "calculation": "last-number",
-    "unit": {
-      "kind": "Percent",
+    "format": {
+      "unit": "percent",
       "decimalPlaces": 2
     },
     "thresholds": {

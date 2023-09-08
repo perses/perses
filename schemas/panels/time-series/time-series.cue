@@ -46,11 +46,11 @@ import (
 }
 
 #yAxis: {
-	show?:  bool
-	label?: string
-	unit?:  common.#unit
-	min?:   number
-	max?:   number
+	show?:   bool
+	label?:  string
+	format?: common.#format
+	min?:    number
+	max?:    number
 }
 
 kind: "TimeSeriesChart"

@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CalculationType, Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { CalculationType, Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export const DEFAULT_UNIT: UnitOptions = { kind: 'PercentDecimal' };
+export const DEFAULT_FORMAT: FormatOptions = { unit: 'percent-decimal' };
 export const DEFAULT_MAX_PERCENT = 100;
 export const DEFAULT_MAX_PERCENT_DECIMAL = 1;
 
@@ -30,7 +30,7 @@ export interface GaugeChartDefinition extends Definition<GaugeChartOptions> {
  */
 export interface GaugeChartOptions {
   calculation: CalculationType;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   thresholds?: ThresholdOptions;
   max?: number;
 }
@@ -43,7 +43,7 @@ export type GaugeChartOptionsEditorProps = OptionsEditorProps<GaugeChartOptions>
 export function createInitialGaugeChartOptions(): GaugeChartOptions {
   return {
     calculation: 'last-number',
-    unit: DEFAULT_UNIT,
+    format: DEFAULT_FORMAT,
     thresholds: {
       steps: [
         {

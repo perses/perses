@@ -11,7 +11,7 @@ Note: axisLine prop supports same options as [corresponding ECharts property her
   width={contentDimensions.width}
   height={contentDimensions.height}
   data={chartData}
-  unit={unit}
+  format={format}
   axisLine={axisLine}
 />
 ```

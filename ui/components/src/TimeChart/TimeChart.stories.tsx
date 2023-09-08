@@ -106,10 +106,10 @@ const meta: Meta<typeof TimeChart> = {
     yAxis: {
       show: true,
     },
-    unit: {
-      kind: 'Decimal' as const,
+    format: {
+      unit: 'decimal' as const,
       decimalPlaces: 2,
-      abbreviate: true,
+      shortValues: true,
     },
     tooltipConfig: DEFAULT_TOOLTIP_CONFIG,
     grid: {
@@ -319,9 +319,9 @@ export const StackedBar: Story = {
       show: true,
       min: 400000000,
     },
-    unit: {
-      kind: 'Decimal',
-      abbreviate: true,
+    format: {
+      unit: 'decimal',
+      shortValues: true,
     },
     tooltipConfig: { wrapLabels: true, enablePinning: false },
     grid: {

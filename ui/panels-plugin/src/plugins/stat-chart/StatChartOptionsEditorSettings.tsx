@@ -15,8 +15,8 @@ import { produce } from 'immer';
 import { Switch, SwitchProps } from '@mui/material';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import {
-  UnitSelector,
-  UnitSelectorProps,
+  FormatControls,
+  FormatControlsProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -40,10 +40,10 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
     );
   };
 
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
+  const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
-        draft.unit = newUnit;
+        draft.format = newFormat;
       })
     );
   };
@@ -83,7 +83,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
             label="Sparkline"
             control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
           />
-          <UnitSelector value={value.unit} onChange={handleUnitChange} />
+          <FormatControls value={value.format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
         </OptionsEditorGroup>

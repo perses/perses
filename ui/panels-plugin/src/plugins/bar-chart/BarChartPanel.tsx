@@ -23,7 +23,7 @@ export type BarChartPanelProps = PanelProps<BarChartOptions>;
 
 export function BarChartPanel(props: BarChartPanelProps) {
   const {
-    spec: { calculation, unit, sort, mode },
+    spec: { calculation, format, sort, mode },
     contentDimensions,
   } = props;
 
@@ -78,7 +78,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
         width={contentDimensions.width - PADDING * 2}
         height={contentDimensions.height - PADDING * 2}
         data={barChartData}
-        unit={unit}
+        format={format}
         mode={mode}
       />
     </Box>

@@ -8,8 +8,8 @@ if #panel.type == "stat" {
         ][0]
         #unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
         if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
-            unit: {
-                kind: #mapping.unit[#unitPath]
+            format: {
+                unit: #mapping.unit[#unitPath]
             }
         }
         if #panel.fieldConfig.defaults.thresholds != _|_ {

@@ -320,8 +320,8 @@
                   }
                 ]
               },
-              "unit": {
-                "kind": "Hours"
+              "format": {
+                "unit": "hours"
               }
             }
           },

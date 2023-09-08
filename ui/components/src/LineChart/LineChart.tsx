@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { forwardRef, MouseEvent, useImperativeHandle, useMemo, useRef, useState } from 'react';
-import { UnitOptions } from '@perses-dev/core';
+import { FormatOptions } from '@perses-dev/core';
 import { Box } from '@mui/material';
 import type {
   EChartsCoreOption,
@@ -69,7 +69,7 @@ export interface LineChartProps {
   height: number;
   data: EChartsDataFormat;
   yAxis?: YAXisComponentOption;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   grid?: GridComponentOption;
   legend?: LegendComponentOption;
   tooltipConfig?: TooltipConfig;
@@ -85,7 +85,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
     height,
     data,
     yAxis,
-    unit,
+    format,
     grid,
     legend,
     tooltipConfig = DEFAULT_TOOLTIP_CONFIG,
@@ -185,7 +185,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           },
         },
       },
-      yAxis: getFormattedAxis(yAxis, unit),
+      yAxis: getFormattedAxis(yAxis, format),
       animation: false,
       tooltip: {
         show: true,
@@ -216,7 +216,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
       return __experimentalEChartsOptionsOverride(option);
     }
     return option;
-  }, [data, yAxis, unit, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
+  }, [data, yAxis, format, grid, legend, noDataOption, timeZone, __experimentalEChartsOptionsOverride, noDataVariant]);
 
   return (
     <Box
@@ -307,7 +307,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
             wrapLabels={tooltipConfig.wrapLabels}
             enablePinning={tooltipConfig.enablePinning}
             pinnedPos={tooltipPinnedCoords}
-            unit={unit}
+            format={format}
             onUnpinClick={() => {
               setTooltipPinnedCoords(null);
             }}

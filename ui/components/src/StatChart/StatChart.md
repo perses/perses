@@ -11,7 +11,7 @@ Note: sparkline prop supports the same options as [ECharts 'line' series type](h
   width={contentDimensions.width}
   height={contentDimensions.height}
   data={chartData}
-  unit={unit}
+  format={format}
   sparkline={sparklineOptions}
 />
 ```

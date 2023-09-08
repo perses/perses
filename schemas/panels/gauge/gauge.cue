@@ -20,7 +20,7 @@ import (
 kind: "GaugeChart"
 spec: close({
 	calculation: common.#calculation
-	unit?:       common.#unit
+	format?:     common.#format
 	thresholds?: common.#thresholds
 	max?:        number // determines end value of last threshold color segment when unit is not a percent
 })

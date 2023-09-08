@@ -15,7 +15,7 @@
 // units.
 
 import { AbsoluteTimeRange, DurationString } from '../time';
-import { UnitOptions } from './units';
+import { FormatOptions } from './units';
 
 export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes'] as const;
 export type UnitGroup = (typeof UNIT_GROUPS)[number];
@@ -33,9 +33,9 @@ export type UnitGroupConfig = {
    */
   decimalPlaces?: boolean;
   /**
-   * When true, the unit group supports enabling abbreviate.
+   * When true, the unit group supports enabling shortValues.
    */
-  abbreviate?: boolean;
+  shortValues?: boolean;
 };
 
 /**
@@ -64,7 +64,7 @@ export type UnitConfig = {
  */
 export interface UnitTestCase {
   value: number;
-  unit: UnitOptions;
+  format: FormatOptions;
   expected: string;
 }
 

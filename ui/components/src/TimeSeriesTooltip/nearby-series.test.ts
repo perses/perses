@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnitOptions } from '@perses-dev/core';
+import { FormatOptions } from '@perses-dev/core';
 import { EChartsDataFormat } from '../model';
 import { legacyCheckforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
 
@@ -60,8 +60,8 @@ describe('legacyCheckforNearbySeries', () => {
   ];
 
   it('should return nearby series data for points nearby the cursor', () => {
-    const decimalUnit: UnitOptions = {
-      kind: 'Decimal',
+    const decimalUnit: FormatOptions = {
+      unit: 'decimal',
       decimalPlaces: 2,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(
@@ -74,8 +74,8 @@ describe('legacyCheckforNearbySeries', () => {
     if (percentFormattedOutput[0]) {
       percentFormattedOutput[0].formattedY = '5%';
     }
-    const percentFormattedUnit: UnitOptions = {
-      kind: 'PercentDecimal',
+    const percentFormattedUnit: FormatOptions = {
+      unit: 'percent-decimal',
       decimalPlaces: 0,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(

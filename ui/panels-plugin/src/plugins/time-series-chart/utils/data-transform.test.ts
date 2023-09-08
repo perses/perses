@@ -47,8 +47,8 @@ describe('convertPanelYAxis', () => {
     const persesAxis: TimeSeriesChartYAxisOptions = {
       show: true,
       label: 'Axis Label',
-      unit: {
-        kind: 'PercentDecimal',
+      format: {
+        unit: 'percent-decimal',
         decimalPlaces: 0,
       },
       min: 0.1,

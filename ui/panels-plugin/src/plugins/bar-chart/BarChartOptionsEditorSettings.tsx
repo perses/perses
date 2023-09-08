@@ -15,8 +15,8 @@ import merge from 'lodash/merge';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import {
-  UnitSelector,
-  UnitSelectorProps,
+  FormatControls,
+  FormatControlsProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -27,12 +27,12 @@ import {
   ModeOption,
   SortOption,
 } from '@perses-dev/components';
-import { CalculationType, DEFAULT_CALCULATION, isPercentUnit, UnitOptions } from '@perses-dev/core';
+import { CalculationType, DEFAULT_CALCULATION, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import { Button } from '@mui/material';
 import {
   BarChartOptions,
   BarChartOptionsEditorProps,
-  DEFAULT_UNIT,
+  DEFAULT_FORMAT,
   DEFAULT_SORT,
   DEFAULT_MODE,
 } from './bar-chart-model';
@@ -48,10 +48,10 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     );
   };
 
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit: UnitOptions) => {
+  const handleUnitChange: FormatControlsProps['onChange'] = (newFormat: FormatOptions) => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
-        draft.unit = newUnit;
+        draft.format = newFormat;
       })
     );
   };
@@ -76,7 +76,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.calculation = DEFAULT_CALCULATION;
-        draft.unit = DEFAULT_UNIT;
+        draft.format = DEFAULT_FORMAT;
         draft.sort = DEFAULT_SORT;
         draft.mode = DEFAULT_MODE;
       })
@@ -84,16 +84,16 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
   };
 
   // ensures decimalPlaces defaults to correct value
-  const unit = merge({}, DEFAULT_UNIT, value.unit);
+  const format = merge({}, DEFAULT_FORMAT, value.format);
 
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
-          <UnitSelector value={unit} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
+          <FormatControls value={format} onChange={handleUnitChange} disabled={value.mode === 'percentage'} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <SortSelector value={value.sort} onChange={handleSortChange} />
-          <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(unit)} />
+          <ModeSelector value={value.mode} onChange={handleModeChange} disablePercentageMode={isPercentUnit(format)} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
       <OptionsEditorColumn>

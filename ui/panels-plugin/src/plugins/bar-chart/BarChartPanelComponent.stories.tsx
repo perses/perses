@@ -116,7 +116,7 @@ export const Primary: Story = {
     },
     spec: {
       calculation: DEFAULT_CALCULATION,
-      unit: { abbreviate: false, kind: 'Decimal' },
+      format: { unit: 'decimal', shortValues: false },
       sort: 'desc',
       mode: 'percentage',
     },

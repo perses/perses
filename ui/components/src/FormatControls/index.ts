@@ -11,28 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
-
-#unit: #timeUnit | #percentUnit | #decimalUnit | #bytesUnit
-
-#timeUnit: {
-	kind:           "Milliseconds" | "Seconds" | "Minutes" | "Hours" | "Days" | "Weeks" | "Months" | "Years"
-	decimalPlaces?: number
-}
-
-#percentUnit: {
-	kind:           "Percent" | "PercentDecimal"
-	decimalPlaces?: number
-}
-
-#decimalUnit: {
-	kind:           "Decimal"
-	decimalPlaces?: number
-	abbreviate?:    bool
-}
-
-#bytesUnit: {
-	kind:           "Bytes"
-	decimalPlaces?: number
-	abbreviate?:    bool
-}
+export * from './FormatControls';

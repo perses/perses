@@ -13,34 +13,34 @@
 
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
-import { hasDecimalPlaces, limitDecimalPlaces, shouldAbbreviate } from './utils';
+import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
-const decimalUnitKinds = ['Decimal'] as const;
-type DecimalUnitKind = (typeof decimalUnitKinds)[number];
-export type DecimalUnitOptions = {
-  kind: DecimalUnitKind;
+const decimalUnits = ['decimal'] as const;
+type DecimalUnit = (typeof decimalUnits)[number];
+export type DecimalFormatOptions = {
+  unit: DecimalUnit;
   decimalPlaces?: number;
-  abbreviate?: boolean;
+  shortValues?: boolean;
 };
 export const DECIMAL_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Decimal',
   decimalPlaces: true,
-  abbreviate: true,
+  shortValues: true,
 };
-export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnitKind, UnitConfig>> = {
-  Decimal: {
+export const DECIMAL_UNIT_CONFIG: Readonly<Record<DecimalUnit, UnitConfig>> = {
+  decimal: {
     group: 'Decimal',
     label: 'Decimal',
   },
 };
 
-export function formatDecimal(value: number, { abbreviate, decimalPlaces }: DecimalUnitOptions): string {
+export function formatDecimal(value: number, { shortValues, decimalPlaces }: DecimalFormatOptions): string {
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
     useGrouping: true,
   };
 
-  if (shouldAbbreviate(abbreviate)) {
+  if (shouldShortenValues(shortValues)) {
     formatterOptions.notation = 'compact';
   }
 
@@ -48,7 +48,7 @@ export function formatDecimal(value: number, { abbreviate, decimalPlaces }: Deci
     formatterOptions.minimumFractionDigits = limitDecimalPlaces(decimalPlaces);
     formatterOptions.maximumFractionDigits = limitDecimalPlaces(decimalPlaces);
   } else {
-    if (shouldAbbreviate(abbreviate)) {
+    if (shouldShortenValues(shortValues)) {
       formatterOptions.maximumSignificantDigits = MAX_SIGNIFICANT_DIGITS;
     }
   }

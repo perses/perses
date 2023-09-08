@@ -12,28 +12,28 @@
 // limitations under the License.
 import { Switch, SwitchProps } from '@mui/material';
 import {
-  shouldAbbreviate,
-  UnitOptions,
+  shouldShortenValues,
+  FormatOptions,
   UNIT_CONFIG,
   UnitConfig,
   isUnitWithDecimalPlaces,
-  isUnitWithAbbreviate,
+  isUnitWithShortValues,
 } from '@perses-dev/core';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
-export interface UnitSelectorProps {
-  value: UnitOptions;
-  onChange: (unit: UnitOptions) => void;
+export interface FormatControlsProps {
+  value: FormatOptions;
+  onChange: (unit: FormatOptions) => void;
   disabled?: boolean;
 }
 
-type AutocompleteKindOption = UnitConfig & { id: UnitOptions['kind'] };
+type AutocompleteUnitOption = UnitConfig & { id: FormatOptions['unit'] };
 
-const KIND_OPTIONS: AutocompleteKindOption[] = Object.entries(UNIT_CONFIG)
+const KIND_OPTIONS: AutocompleteUnitOption[] = Object.entries(UNIT_CONFIG)
   .map(([id, config]) => {
     return {
-      id: id as UnitOptions['kind'],
+      id: id as FormatOptions['unit'],
       ...config,
     };
   })
@@ -52,13 +52,13 @@ function getOptionByDecimalPlaces(decimalPlaces?: number) {
   return DECIMAL_PLACES_OPTIONS.find((o) => o.decimalPlaces === decimalPlaces);
 }
 
-export function UnitSelector({ value, onChange, disabled = false }: UnitSelectorProps) {
+export function FormatControls({ value, onChange, disabled = false }: FormatControlsProps) {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
-  const hasAbbreviate = isUnitWithAbbreviate(value);
+  const hasShortValues = isUnitWithShortValues(value);
 
-  const handleKindChange = (_: unknown, newValue: AutocompleteKindOption) => {
+  const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption) => {
     onChange({
-      kind: newValue.id,
+      unit: newValue.id,
     });
   };
 
@@ -71,26 +71,26 @@ export function UnitSelector({ value, onChange, disabled = false }: UnitSelector
     }
   };
 
-  const handleAbbreviateChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
-    if (hasAbbreviate) {
+  const handleShortValuesChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
+    if (hasShortValues) {
       onChange({
         ...value,
-        abbreviate: checked,
+        shortValues: checked,
       });
     }
   };
 
-  const kindConfig = UNIT_CONFIG[value.kind];
+  const unitConfig = UNIT_CONFIG[value.unit];
 
   return (
     <>
       <OptionsEditorControl
-        label="Abbreviate"
+        label="Short values"
         control={
           <Switch
-            checked={hasAbbreviate ? shouldAbbreviate(value.abbreviate) : false}
-            onChange={handleAbbreviateChange}
-            disabled={!hasAbbreviate}
+            checked={hasShortValues ? shouldShortenValues(value.shortValues) : false}
+            onChange={handleShortValuesChange}
+            disabled={!hasShortValues}
           />
         }
       />
@@ -98,7 +98,7 @@ export function UnitSelector({ value, onChange, disabled = false }: UnitSelector
         label="Unit"
         control={
           <SettingsAutocomplete
-            value={{ id: value.kind, ...kindConfig }}
+            value={{ id: value.unit, ...unitConfig }}
             options={KIND_OPTIONS}
             groupBy={(option) => option.group}
             onChange={handleKindChange}

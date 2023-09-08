@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { UnitOptions } from '@perses-dev/core';
+import { FormatOptions } from '@perses-dev/core';
 import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
 import { StatChart, StatChartData } from './StatChart';
@@ -22,14 +22,19 @@ jest.mock('./calculateFontSize', () => ({
 }));
 
 describe('StatChart', () => {
-  const renderChart = (unit: UnitOptions) => {
+  const renderChart = (format: FormatOptions) => {
     const contentDimensions = {
       width: 200,
       height: 200,
     };
     render(
       <ChartsProvider chartsTheme={testChartsTheme} enablePinning={false}>
-        <StatChart width={contentDimensions.width} height={contentDimensions.height} data={mockStatData} unit={unit} />
+        <StatChart
+          width={contentDimensions.width}
+          height={contentDimensions.height}
+          data={mockStatData}
+          format={format}
+        />
       </ChartsProvider>
     );
   };
@@ -49,35 +54,35 @@ describe('StatChart', () => {
   };
 
   it('render default options (no sparkline)', () => {
-    const unit: UnitOptions = {
-      kind: 'Decimal',
+    const format: FormatOptions = {
+      unit: 'decimal',
       decimalPlaces: 2,
     };
-    renderChart(unit);
+    renderChart(format);
     expect(screen.getByText('7.73')).toBeInTheDocument();
   });
 
   it('show value with bytes unit formatting', () => {
-    const unit: UnitOptions = {
-      kind: 'Bytes',
+    const format: FormatOptions = {
+      unit: 'bytes',
     };
-    renderChart(unit);
+    renderChart(format);
     expect(screen.getByText('7.73 bytes')).toBeInTheDocument();
   });
 
   it('show value with seconds time unit formatting', () => {
-    const unit: UnitOptions = {
-      kind: 'Seconds',
+    const format: FormatOptions = {
+      unit: 'seconds',
     };
-    renderChart(unit);
+    renderChart(format);
     expect(screen.getByText('7.73s')).toBeInTheDocument();
   });
 
   it('show value with months time unit formatting', () => {
-    const unit: UnitOptions = {
-      kind: 'Months',
+    const format: FormatOptions = {
+      unit: 'months',
     };
-    renderChart(unit);
+    renderChart(format);
     expect(screen.getByText('7.73 months')).toBeInTheDocument();
   });
 });

@@ -16,8 +16,8 @@ import { TextField } from '@mui/material';
 import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import {
-  UnitSelector,
-  UnitSelectorProps,
+  FormatControls,
+  FormatControlsProps,
   OptionsEditorGroup,
   OptionsEditorGrid,
   OptionsEditorColumn,
@@ -27,7 +27,7 @@ import {
 import { ThresholdOptions } from '@perses-dev/core';
 import {
   GaugeChartOptions,
-  DEFAULT_UNIT,
+  DEFAULT_FORMAT,
   DEFAULT_MAX_PERCENT,
   DEFAULT_MAX_PERCENT_DECIMAL,
   GaugeChartOptionsEditorProps,
@@ -44,22 +44,22 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     );
   };
 
-  const handleUnitChange: UnitSelectorProps['onChange'] = (newUnit) => {
+  const handleUnitChange: FormatControlsProps['onChange'] = (newFormat) => {
     onChange(
       produce(value, (draft: GaugeChartOptions) => {
-        draft.unit = newUnit;
+        draft.format = newFormat;
       })
     );
   };
 
   // ensures decimalPlaces defaults to correct value
-  const unit = merge({}, DEFAULT_UNIT, value.unit);
+  const format = merge({}, DEFAULT_FORMAT, value.format);
 
-  // max only needs to be set explicitly for units other than Percent and PercentDecimal
+  // max only needs to be set explicitly for units other than percent and percent-decimal
   let maxPlaceholder = 'Enter value';
-  if (unit.kind === 'Percent') {
+  if (format.unit === 'percent') {
     maxPlaceholder = DEFAULT_MAX_PERCENT.toString();
-  } else if (unit.kind === 'PercentDecimal') {
+  } else if (format.unit === 'percent-decimal') {
     maxPlaceholder = DEFAULT_MAX_PERCENT_DECIMAL.toString();
   }
 
@@ -75,7 +75,7 @@ export function GaugeChartOptionsEditorSettings(props: GaugeChartOptionsEditorPr
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Misc">
-          <UnitSelector value={unit} onChange={handleUnitChange} />
+          <FormatControls value={format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <OptionsEditorControl
             label="Max"

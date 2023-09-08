@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo } from 'react';
-import { UnitOptions, formatValue } from '@perses-dev/core';
+import { FormatOptions, formatValue } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { BarChart as EChartsBarChart } from 'echarts/charts';
 import { GridComponent, DatasetComponent, TitleComponent, TooltipComponent } from 'echarts/components';
@@ -37,12 +37,12 @@ export interface BarChartProps {
   width: number;
   height: number;
   data: BarChartData[] | null;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   mode?: ModeOption;
 }
 
 export function BarChart(props: BarChartProps) {
-  const { width, height, data, unit = { kind: 'Decimal' }, mode = 'value' } = props;
+  const { width, height, data, format = { unit: 'decimal' }, mode = 'value' } = props;
   const chartsTheme = useChartsTheme();
 
   const option: EChartsCoreOption = useMemo(() => {
@@ -63,7 +63,7 @@ export function BarChart(props: BarChartProps) {
           source: source,
         },
       ],
-      xAxis: getFormattedAxis({}, unit),
+      xAxis: getFormattedAxis({}, format),
       yAxis: {
         type: 'category',
         splitLine: {
@@ -84,12 +84,12 @@ export function BarChart(props: BarChartProps) {
               return (
                 params.data[1] &&
                 formatValue(params.data[1], {
-                  kind: 'Percent',
-                  decimalPlaces: unit.decimalPlaces,
+                  unit: 'percent',
+                  decimalPlaces: format.decimalPlaces,
                 })
               );
             }
-            return params.data[1] && formatValue(params.data[1], unit);
+            return params.data[1] && formatValue(params.data[1], format);
           },
           barMinWidth: BAR_WIN_WIDTH,
           barCategoryGap: BAR_GAP,
@@ -103,7 +103,7 @@ export function BarChart(props: BarChartProps) {
         appendToBody: true,
         confine: true,
         formatter: (params: { name: string; data: number[] }) =>
-          params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], unit)}`,
+          params.data[1] && `<b>${params.name}</b> &emsp; ${formatValue(params.data[1], format)}`,
       },
       // increase distance between grid and container to prevent y axis labels from getting cut off
       grid: {
@@ -111,7 +111,7 @@ export function BarChart(props: BarChartProps) {
         right: '5%',
       },
     };
-  }, [data, chartsTheme, width, mode, unit]);
+  }, [data, chartsTheme, width, mode, format]);
 
   return (
     <Box sx={{ width: width, height: height, overflow: 'auto' }}>

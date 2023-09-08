@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatValue, useDeepMemo, UnitOptions } from '@perses-dev/core';
+import { formatValue, useDeepMemo, FormatOptions } from '@perses-dev/core';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { GaugeChart as EChartsGaugeChart, GaugeSeriesOption } from 'echarts/charts';
 import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
@@ -37,13 +37,13 @@ export interface GaugeChartProps {
   width: number;
   height: number;
   data: GaugeSeries;
-  unit: UnitOptions;
+  format: FormatOptions;
   axisLine: GaugeSeriesOption['axisLine'];
   max?: number;
 }
 
 export function GaugeChart(props: GaugeChartProps) {
-  const { width, height, data, unit, axisLine, max } = props;
+  const { width, height, data, format, axisLine, max } = props;
   const chartsTheme = useChartsTheme();
 
   // useDeepMemo ensures value size util does not rerun everytime you hover on the chart
@@ -51,7 +51,7 @@ export function GaugeChart(props: GaugeChartProps) {
     if (data.value === undefined) return chartsTheme.noDataOption;
 
     // adjusts fontSize depending on number of characters
-    const valueSizeClamp = getResponsiveValueSize(data.value, unit, width, height);
+    const valueSizeClamp = getResponsiveValueSize(data.value, format, width, height);
 
     return {
       title: {
@@ -158,7 +158,7 @@ export function GaugeChart(props: GaugeChartProps) {
                   // `null` from a true `NaN` case.
                   () => 'null'
                 : (value: number) => {
-                    return formatValue(value, unit);
+                    return formatValue(value, format);
                   },
           },
           data: [
@@ -180,7 +180,7 @@ export function GaugeChart(props: GaugeChartProps) {
         },
       ],
     };
-  }, [data, width, height, chartsTheme, unit, axisLine, max]);
+  }, [data, width, height, chartsTheme, format, axisLine, max]);
 
   return (
     <EChart
@@ -199,11 +199,11 @@ export function GaugeChart(props: GaugeChartProps) {
  * Responsive font size depending on number of characters, clamp used
  * to ensure size stays within given range
  */
-export function getResponsiveValueSize(value: number | null, unit: UnitOptions, width: number, height: number) {
+export function getResponsiveValueSize(value: number | null, format: FormatOptions, width: number, height: number) {
   const MIN_SIZE = 3;
   const MAX_SIZE = 24;
   const SIZE_MULTIPLIER = 0.7;
-  const formattedValue = typeof value === 'number' ? formatValue(value, unit) : `${value}`;
+  const formattedValue = typeof value === 'number' ? formatValue(value, format) : `${value}`;
   const valueCharacters = formattedValue.length ?? 2;
   const valueSize = (Math.min(width, height) / valueCharacters) * SIZE_MULTIPLIER;
   return `clamp(${MIN_SIZE}px, ${valueSize}px, ${MAX_SIZE}px)`;

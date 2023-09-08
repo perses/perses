@@ -20,7 +20,7 @@ import (
 kind: "StatChart"
 spec: close({
 	calculation:    common.#calculation
-	unit?:          common.#unit
+	format?:        common.#format
 	thresholds?:    common.#thresholds
 	sparkline?:     #sparkline
 	valueFontSize?: number

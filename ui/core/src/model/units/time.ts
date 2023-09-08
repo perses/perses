@@ -15,10 +15,10 @@ import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces } from './utils';
 
-const timeUnitKinds = ['Milliseconds', 'Seconds', 'Minutes', 'Hours', 'Days', 'Weeks', 'Months', 'Years'] as const;
-type TimeUnitKind = (typeof timeUnitKinds)[number];
-export type TimeUnitOptions = {
-  kind: TimeUnitKind;
+const timeUnits = ['milliseconds', 'seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'] as const;
+type TimeUnits = (typeof timeUnits)[number];
+export type TimeFormatOptions = {
+  unit: TimeUnits;
   decimalPlaces?: number;
 };
 const TIME_GROUP = 'Time';
@@ -26,36 +26,36 @@ export const TIME_GROUP_CONFIG: UnitGroupConfig = {
   label: 'Time',
   decimalPlaces: true,
 };
-export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnitKind, UnitConfig>> = {
-  Milliseconds: {
+export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnits, UnitConfig>> = {
+  milliseconds: {
     group: TIME_GROUP,
     label: 'Milliseconds',
   },
-  Seconds: {
+  seconds: {
     group: TIME_GROUP,
     label: 'Seconds',
   },
-  Minutes: {
+  minutes: {
     group: TIME_GROUP,
     label: 'Minutes',
   },
-  Hours: {
+  hours: {
     group: TIME_GROUP,
     label: 'Hours',
   },
-  Days: {
+  days: {
     group: TIME_GROUP,
     label: 'Days',
   },
-  Weeks: {
+  weeks: {
     group: TIME_GROUP,
     label: 'Weeks',
   },
-  Months: {
+  months: {
     group: TIME_GROUP,
     label: 'Months',
   },
-  Years: {
+  years: {
     group: TIME_GROUP,
     label: 'Years',
   },
@@ -64,14 +64,14 @@ export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnitKind, UnitConfig>> = {
 // Mapping of time units to what Intl.NumberFormat formatter expects
 // https://v8.dev/features/intl-numberformat#units
 export enum PersesTimeToIntlTime {
-  Milliseconds = 'millisecond',
-  Seconds = 'second',
-  Minutes = 'minute',
-  Hours = 'hour',
-  Days = 'day',
-  Weeks = 'week',
-  Months = 'month',
-  Years = 'year',
+  milliseconds = 'millisecond',
+  seconds = 'second',
+  minutes = 'minute',
+  hours = 'hour',
+  days = 'day',
+  weeks = 'week',
+  months = 'month',
+  years = 'year',
 }
 
 /**
@@ -80,63 +80,63 @@ export enum PersesTimeToIntlTime {
  * For precision with months and years, we would need more complex algorithms and/or external libraries.
  * However, we expect that measurements in months and years will be rare.
  */
-const TIME_UNITS_IN_SECONDS: Record<TimeUnitKind, number> = {
-  Years: 31536000, // 365 days
-  Months: 2592000, // 30 days
-  Weeks: 604800, // 7 days
-  Days: 86400,
-  Hours: 3600,
-  Minutes: 60,
-  Seconds: 1,
-  Milliseconds: 0.001,
+const TIME_UNITS_IN_SECONDS: Record<TimeUnits, number> = {
+  years: 31536000, // 365 days
+  months: 2592000, // 30 days
+  weeks: 604800, // 7 days
+  days: 86400,
+  hours: 3600,
+  minutes: 60,
+  seconds: 1,
+  milliseconds: 0.001,
 };
 
-const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnitKind[] = [
-  'Years',
-  'Months',
-  'Weeks',
-  'Days',
-  'Hours',
-  'Minutes',
-  'Seconds',
-  'Milliseconds',
+const LARGEST_TO_SMALLEST_TIME_UNITS: TimeUnits[] = [
+  'years',
+  'months',
+  'weeks',
+  'days',
+  'hours',
+  'minutes',
+  'seconds',
+  'milliseconds',
 ];
 
 /**
  * Choose the first time unit that produces a number greater than 1, starting from the biggest time unit.
  */
-function getValueAndKindForNaturalNumbers(value: number, kind: TimeUnitKind): { value: number; kind: TimeUnitKind } {
-  const valueInSeconds = value * TIME_UNITS_IN_SECONDS[kind];
+function getValueAndKindForNaturalNumbers(value: number, unit: TimeUnits): { value: number; unit: TimeUnits } {
+  const valueInSeconds = value * TIME_UNITS_IN_SECONDS[unit];
 
   // Initialize for TS
-  const largestTimeUnit = LARGEST_TO_SMALLEST_TIME_UNITS[0] || 'Years';
-  let timeUnit: TimeUnitKind = largestTimeUnit;
+  const largestTimeUnit = LARGEST_TO_SMALLEST_TIME_UNITS[0] || 'years';
+  let timeUnit: TimeUnits = largestTimeUnit;
   let valueInTimeUnit: number = valueInSeconds / TIME_UNITS_IN_SECONDS[largestTimeUnit];
 
   for (timeUnit of LARGEST_TO_SMALLEST_TIME_UNITS) {
     valueInTimeUnit = valueInSeconds / TIME_UNITS_IN_SECONDS[timeUnit];
     if (valueInTimeUnit >= 1) {
-      return { value: valueInTimeUnit, kind: timeUnit };
+      return { value: valueInTimeUnit, unit: timeUnit };
     }
   }
 
   // If we didn't find a time unit, we have to settle for the smallest time unit (which is the last time unit).
-  return { value: valueInTimeUnit, kind: timeUnit };
+  return { value: valueInTimeUnit, unit: timeUnit };
 }
 
-function isMonthOrYear(kind: TimeUnitKind): boolean {
-  return kind === 'Months' || kind === 'Years';
+function isMonthOrYear(unit: TimeUnits): boolean {
+  return unit === 'months' || unit === 'years';
 }
 
-export function formatTime(value: number, { kind, decimalPlaces }: TimeUnitOptions): string {
+export function formatTime(value: number, { unit, decimalPlaces }: TimeFormatOptions): string {
   if (value === 0) return '0s';
 
-  const results = getValueAndKindForNaturalNumbers(value, kind);
+  const results = getValueAndKindForNaturalNumbers(value, unit);
 
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'unit',
-    unit: PersesTimeToIntlTime[results.kind],
-    unitDisplay: isMonthOrYear(results.kind) ? 'long' : 'narrow',
+    unit: PersesTimeToIntlTime[results.unit],
+    unitDisplay: isMonthOrYear(results.unit) ? 'long' : 'narrow',
   };
 
   if (hasDecimalPlaces(decimalPlaces)) {

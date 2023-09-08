@@ -11,4 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './UnitSelector';
+package common
+
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat
+
+#timeFormat: {
+	unit:           "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
+	decimalPlaces?: number
+}
+
+#percentFormat: {
+	unit:           "percent" | "percent-decimal"
+	decimalPlaces?: number
+}
+
+#decimalFormat: {
+	unit:           "decimal"
+	decimalPlaces?: number
+	shortValues?:   bool
+}
+
+#bytesFormat: {
+	unit:           "bytes"
+	decimalPlaces?: number
+	shortValues?:   bool
+}

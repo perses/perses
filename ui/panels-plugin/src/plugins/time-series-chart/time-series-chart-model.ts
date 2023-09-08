@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { Definition, ThresholdOptions, FormatOptions } from '@perses-dev/core';
 import { OptionsEditorProps, LegendSpecOptions } from '@perses-dev/plugin-system';
 
 /**
@@ -37,7 +37,7 @@ export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesCha
 export interface TimeSeriesChartYAxisOptions {
   show?: boolean;
   label?: string;
-  unit?: UnitOptions;
+  format?: FormatOptions;
   min?: number;
   max?: number;
 }
@@ -62,15 +62,15 @@ export type TimeSeriesChartVisualOptions = {
   connectNulls?: boolean;
 };
 
-export const DEFAULT_UNIT: UnitOptions = {
-  kind: 'Decimal',
-  abbreviate: true,
+export const DEFAULT_FORMAT: FormatOptions = {
+  unit: 'decimal',
+  shortValues: true,
 };
 
 export const DEFAULT_Y_AXIS: TimeSeriesChartYAxisOptions = {
   show: true,
   label: '',
-  unit: DEFAULT_UNIT,
+  format: DEFAULT_FORMAT,
   min: undefined,
   max: undefined,
 };

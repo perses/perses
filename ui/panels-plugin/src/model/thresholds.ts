@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StepOptions, ThresholdColorPalette, ThresholdOptions, UnitOptions } from '@perses-dev/core';
+import { StepOptions, ThresholdColorPalette, ThresholdOptions, FormatOptions } from '@perses-dev/core';
 import zip from 'lodash/zip';
 
 export type GaugeColorStop = [number, string];
@@ -22,7 +22,7 @@ export const defaultThresholdInput: ThresholdOptions = { steps: [{ value: 0 }] }
 
 export function convertThresholds(
   thresholds: ThresholdOptions,
-  unit: UnitOptions,
+  unit: FormatOptions,
   max: number,
   palette: ThresholdColorPalette
 ): EChartsAxisLineColors {

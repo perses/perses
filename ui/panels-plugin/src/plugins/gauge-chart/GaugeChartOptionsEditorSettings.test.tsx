@@ -30,8 +30,8 @@ describe('GaugeChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderGaugeChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Decimal',
+        format: {
+          unit: 'decimal',
         },
         calculation: 'first',
       },
@@ -45,8 +45,8 @@ describe('GaugeChartOptionsEditorSettings', () => {
     userEvent.click(yearOption);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({
-        unit: {
-          kind: 'Years',
+        format: {
+          unit: 'years',
         },
       })
     );
@@ -56,8 +56,8 @@ describe('GaugeChartOptionsEditorSettings', () => {
     const onChange = jest.fn();
     renderGaugeChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Days',
+        format: {
+          unit: 'days',
         },
         calculation: 'first',
       },
@@ -83,8 +83,8 @@ describe('GaugeChartOptionsEditorSettings', () => {
     });
     renderGaugeChartOptionsEditorSettings(
       {
-        unit: {
-          kind: 'Decimal',
+        format: {
+          unit: 'decimal',
         },
         max: 1,
         calculation: 'last-number',
