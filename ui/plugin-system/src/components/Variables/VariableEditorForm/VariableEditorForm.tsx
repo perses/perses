@@ -18,15 +18,12 @@ import {
   Switch,
   TextField,
   Grid,
-  FormControl,
   FormControlLabel,
-  InputLabel,
   MenuItem,
   Button,
   Stack,
   ClickAwayListener,
   Divider,
-  Select,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
@@ -115,7 +112,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
         >
           <Typography variant="h2">{titleAction} Variable</Typography>
           <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-            {action === 'read' && (
+            {action === 'read' ? (
               <>
                 <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                   Edit
@@ -138,8 +135,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   Close
                 </Button>
               </>
-            )}
-            {action !== 'read' && (
+            ) : (
               <>
                 <Button type="submit" variant="contained" disabled={!form.formState.isValid}>
                   {submitText}
@@ -225,35 +221,34 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               />
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel id="variable-type-select-label">Type</InputLabel>
-                {/* TODO: not working */}
-                <Controller
-                  name="type"
-                  render={({ field, fieldState }) => (
-                    <Select
-                      {...field}
-                      labelId="variable-type-select-label"
-                      id="variable-type-select"
-                      label="Type"
-                      readOnly={action === 'read'}
-                      error={!!fieldState.error}
-                      onChange={(event) => {
-                        field.onChange(event);
-                        setState((draft) => {
-                          draft.kind = event.target.value as VariableEditorState['kind'];
-                        });
-                      }}
-                    >
-                      {VARIABLE_TYPES.map((v) => (
-                        <MenuItem key={v.kind} value={v.kind}>
-                          {v.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  )}
-                />
-              </FormControl>
+              <Controller
+                name="kind"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    fullWidth
+                    label="Type"
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      setState((draft) => {
+                        draft.kind = event.target.value as VariableEditorState['kind'];
+                      });
+                    }}
+                  >
+                    {VARIABLE_TYPES.map((v) => (
+                      <MenuItem key={v.kind} value={v.kind}>
+                        {v.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
             </Grid>
           </Grid>
 

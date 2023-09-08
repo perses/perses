@@ -102,7 +102,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
         >
           <Typography variant="h2">{titleAction} Datasource</Typography>
           <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-            {action === 'read' && (
+            {action === 'read' ? (
               <>
                 <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                   Edit
@@ -125,8 +125,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                   Close
                 </Button>
               </>
-            )}
-            {action !== 'read' && (
+            ) : (
               <>
                 <Button type="submit" variant="contained" disabled={!form.formState.isValid}>
                   {submitText}

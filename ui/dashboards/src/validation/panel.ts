@@ -15,7 +15,7 @@ import { z } from 'zod';
 
 export const panelEditorValidationSchema = z.object({
   name: z.string().nonempty('Required'),
-  group: z.string().nonempty('Required'),
+  groupId: z.number(),
   description: z.string().optional(),
   type: z.string().nonempty('Required'),
 });
