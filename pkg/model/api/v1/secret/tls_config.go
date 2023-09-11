@@ -19,11 +19,11 @@ type PublicTLSConfig struct {
 	CA                 Hidden `yaml:"ca,omitempty" json:"ca,omitempty"`
 	Cert               Hidden `yaml:"cert,omitempty" json:"cert,omitempty"`
 	Key                Hidden `yaml:"key,omitempty" json:"key,omitempty"`
-	CAFile             string `yaml:"ca_file,omitempty" json:"ca_file,omitempty"`
-	CertFile           string `yaml:"cert_file,omitempty" json:"cert_file,omitempty"`
-	KeyFile            string `yaml:"key_file,omitempty" json:"key_file,omitempty"`
-	ServerName         string `yaml:"server_name,omitempty" json:"server_name,omitempty"`
-	InsecureSkipVerify bool   `yaml:"insecure_skip_verify" json:"insecure_skip_verify"`
+	CAFile             string `yaml:"caFile,omitempty" json:"caFile,omitempty"`
+	CertFile           string `yaml:"certFile,omitempty" json:"certFile,omitempty"`
+	KeyFile            string `yaml:"keyFile,omitempty" json:"keyFile,omitempty"`
+	ServerName         string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
+	InsecureSkipVerify bool   `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
 }
 
 func NewPublicTLSConfig(t TLSConfig) PublicTLSConfig {
@@ -47,13 +47,13 @@ type TLSConfig struct {
 	// Text of the client key file for the targets.
 	Key string `yaml:"key,omitempty" json:"key,omitempty"`
 	// The CA cert to use for the targets.
-	CAFile string `yaml:"ca_file,omitempty" json:"ca_file,omitempty"`
+	CAFile string `yaml:"caFile,omitempty" json:"caFile,omitempty"`
 	// The client cert file for the targets.
-	CertFile string `yaml:"cert_file,omitempty" json:"cert_file,omitempty"`
+	CertFile string `yaml:"certFile,omitempty" json:"certFile,omitempty"`
 	// The client key file for the targets.
-	KeyFile string `yaml:"key_file,omitempty" json:"key_file,omitempty"`
+	KeyFile string `yaml:"keyFile,omitempty" json:"keyFile,omitempty"`
 	// Used to verify the hostname for the targets.
-	ServerName string `yaml:"server_name,omitempty" json:"server_name,omitempty"`
+	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
 	// Disable target certificate validation.
-	InsecureSkipVerify bool `yaml:"insecure_skip_verify" json:"insecure_skip_verify"`
+	InsecureSkipVerify bool `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
 }

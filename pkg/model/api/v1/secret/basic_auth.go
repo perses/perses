@@ -24,7 +24,7 @@ import (
 type PublicBasicAuth struct {
 	Username     string `json:"username" yaml:"username"`
 	Password     Hidden `json:"password,omitempty" yaml:"password,omitempty"`
-	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
+	PasswordFile string `json:"passwordFile,omitempty" yaml:"passwordFile,omitempty"`
 }
 
 func NewPublicBasicAuth(b *BasicAuth) *PublicBasicAuth {
@@ -42,7 +42,7 @@ type BasicAuth struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
 	// PasswordFile is a path to a file that contains a password
-	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
+	PasswordFile string `json:"passwordFile,omitempty" yaml:"passwordFile,omitempty"`
 }
 
 func (b *BasicAuth) UnmarshalJSON(data []byte) error {
