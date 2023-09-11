@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, FormControl, FormHelperText, InputLabel } from '@mui/material';
+import { Box } from '@mui/material';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -30,19 +30,20 @@ export function PluginEditor(props: PluginEditorProps) {
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
-      <FormControl margin="dense" fullWidth={false} disabled={isLoading} error={error !== null} sx={{ mb: 1 }}>
-        {/* TODO: How to ensure ids are unique? */}
-        <InputLabel id="plugin-kind-label">{pluginKindLabel}</InputLabel>
-        <PluginKindSelect
-          labelId="plugin-kind-label"
-          label={pluginKindLabel}
-          pluginType={pluginType}
-          value={pendingKind !== '' ? pendingKind : value.kind}
-          readOnly={isReadonly}
-          onChange={onKindChange}
-        />
-        <FormHelperText>{error?.message ?? ''}</FormHelperText>
-      </FormControl>
+      {/* TODO: How to ensure ids are unique? */}
+      <PluginKindSelect
+        fullWidth={false}
+        sx={{ mb: 1 }}
+        margin="dense"
+        label={pluginKindLabel}
+        pluginType={pluginType}
+        disabled={isLoading}
+        value={pendingKind !== '' ? pendingKind : value.kind}
+        InputProps={{ readOnly: isReadonly }}
+        error={!!error}
+        helperText={error?.message}
+        onChange={onKindChange}
+      />
       <PluginSpecEditor
         pluginType={pluginType}
         pluginKind={value.kind}

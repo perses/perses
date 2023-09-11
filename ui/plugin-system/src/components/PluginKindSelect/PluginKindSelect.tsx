@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Select, SelectProps, MenuItem } from '@mui/material';
+import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 
-export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'children'> {
+export interface PluginKindSelectProps extends Omit<TextFieldProps, 'children'> {
   pluginType: PluginType;
 }
 
@@ -32,12 +32,12 @@ export function PluginKindSelect(props: PluginKindSelectProps) {
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <Select sx={{ minWidth: 120 }} {...others} value={value}>
+    <TextField select sx={{ minWidth: 120 }} {...others} value={value}>
       {data?.map((metadata) => (
         <MenuItem key={metadata.kind} value={metadata.kind}>
           {metadata.display.name}
         </MenuItem>
       ))}
-    </Select>
+    </TextField>
   );
 }

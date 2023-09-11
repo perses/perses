@@ -88,7 +88,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       name: initialPanelDef.spec.display.name,
       groupId: initialGroupId,
       description: initialPanelDef.spec.display.description,
-      type: initialPanelDef.spec.plugin.kind,
+      type: pluginEditor.pendingKind ? pluginEditor.pendingKind : plugin.kind,
     },
   });
 
@@ -215,19 +215,25 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               />
             </Grid>
             <Grid item xs={4}>
-              {/* TODO: validation */}
-              <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
-                <InputLabel id="panel-type-label">Type</InputLabel>
-                <PluginKindSelect
-                  pluginType="Panel"
-                  required
-                  labelId="panel-type-label"
-                  label="Type"
-                  value={pluginEditor.pendingKind ? pluginEditor.pendingKind : plugin.kind}
-                  onChange={pluginEditor.onKindChange}
-                />
-              </FormControl>
-              <FormHelperText>{pluginEditor.error?.message ?? ''}</FormHelperText>
+              <Controller
+                name="type"
+                render={({ field, fieldState }) => (
+                  <PluginKindSelect
+                    {...field}
+                    pluginType="Panel"
+                    required
+                    fullWidth
+                    label="Type"
+                    disabled={pluginEditor.isLoading}
+                    error={!!pluginEditor.error || !!fieldState.error}
+                    helperText={pluginEditor.error?.message ?? fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      pluginEditor.onKindChange(event);
+                    }}
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12}>
               <Typography variant="h4" marginBottom={1}>
