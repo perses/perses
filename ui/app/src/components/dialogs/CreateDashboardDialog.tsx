@@ -17,7 +17,7 @@ import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DashboardSelector } from '@perses-dev/core';
-import { createDashboardDialogValidationSchema, CreateDashboardValidationType } from '../../validation';
+import { CreateDashboardValidationType, useDashboardValidationSchema } from '../../validation';
 
 interface CreateDashboardProps {
   open: boolean;
@@ -39,8 +39,10 @@ interface CreateDashboardProps {
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projectOptions, hideProjectSelect, onClose, onSuccess } = props;
 
+  const schemaValidation = useDashboardValidationSchema();
+
   const form = useForm<CreateDashboardValidationType>({
-    resolver: zodResolver(createDashboardDialogValidationSchema),
+    resolver: zodResolver(schemaValidation),
     mode: 'onBlur',
     defaultValues: { dashboardName: '', projectName: projectOptions[0] },
   });
@@ -89,7 +91,6 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
                   )}
                 />
               )}
-              {/* TODO: fix autofill when creating dashboard from project view */}
               <Controller
                 name="dashboardName"
                 render={({ field, fieldState }) => (

@@ -12,7 +12,11 @@
 // limitations under the License.
 
 import { z } from 'zod';
+import { useMemo } from 'react';
+import { useProjectList } from '../model/project-client';
+import { useDashboardList } from '../model/dashboard-client';
 import { resourceIdValidationSchema } from './resource';
+import { projectNameValidationSchema } from './project';
 
 const dashboardNameValidationSchema = z.string().nonempty('Required').max(75, 'Must be 75 or fewer characters long');
 
@@ -26,3 +30,24 @@ export const renameDashboardDialogValidationSchema = z.object({
   dashboardName: dashboardNameValidationSchema,
 });
 export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialogValidationSchema>;
+
+export function useDashboardValidationSchema(projectName?: string) {
+  const dashboards = useDashboardList(projectName);
+
+  return useMemo(() => {
+    return createDashboardDialogValidationSchema.refine(
+      (schema) => {
+        return (
+          (dashboards.data ?? []).filter(
+            (dashboard) =>
+              dashboard.metadata.project === schema.projectName && dashboard.metadata.name === schema.dashboardName // TODO: add converter support
+          ).length === 0
+        );
+      },
+      (schema) => ({
+        message: `Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
+        path: ['dashboardName'],
+      })
+    );
+  }, [dashboards.data]);
+}

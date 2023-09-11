@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { ProjectResource } from '@perses-dev/core';
 import { useAddProjectMutation } from '../../model/project-client';
-import { projectNameValidationSchema, ProjectNameValidationType } from '../../validation';
+import { ProjectNameValidationType, useProjectValidationSchema } from '../../validation';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -36,8 +36,10 @@ interface CreateProjectDialogProps {
 export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
 
+  const validationSchema = useProjectValidationSchema();
+
   const form = useForm<ProjectNameValidationType>({
-    resolver: zodResolver(projectNameValidationSchema),
+    resolver: zodResolver(validationSchema),
     mode: 'onBlur',
   });
 
