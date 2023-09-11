@@ -33,9 +33,9 @@ import (
 func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
 	switch m := metadata.(type) {
 	case *modelV1.ProjectMetadata:
-		return fmt.Sprintf("/%s/%s/%s", modelV1.PluralKindMap[kind], m.Project, m.Name), nil
+		return path.Join(modelV1.PluralKindMap[kind], m.Project, m.Name), nil
 	case *modelV1.Metadata:
-		return fmt.Sprintf("/%s/%s", modelV1.PluralKindMap[kind], m.Name), nil
+		return path.Join(modelV1.PluralKindMap[kind], m.Name), nil
 	}
 	return "", fmt.Errorf("metadata %T not managed", metadata)
 }
@@ -86,7 +86,16 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		}
 		return err
 	}
-	return d.unmarshal(data, entity)
+	if unMarshalErr := d.unmarshal(data, entity); unMarshalErr != nil {
+		return unMarshalErr
+	}
+	// This last check is here to verify that we get the accurate document.
+	// On macOS the filesystem is not case-sensitive regarding the search. So if you have a document named "foo",
+	// it will be returned if are looking for "Foo", "FoO" etc.
+	if entity.GetMetadata().GetName() != metadata.GetName() {
+		return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
+	}
+	return nil
 }
 func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	typeParameter := reflect.TypeOf(slice)
