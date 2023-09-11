@@ -13,6 +13,7 @@
 
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   CircularProgress,
@@ -27,11 +28,12 @@ import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
 import Import from 'mdi-material-ui/Import';
 import { ChangeEvent, useState } from 'react';
-import { JSONEditor } from '@perses-dev/components';
+import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboardMutation } from '../model/dashboard-client';
 import { useIsReadonly } from '../model/config-client';
+import { useProjectList } from '../model/project-client';
 
 interface GrafanaLightDashboard {
   // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
@@ -53,6 +55,8 @@ function MigrateView() {
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
+  const { exceptionSnackbar } = useSnackbar();
+  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files === null) {
@@ -148,18 +152,27 @@ function MigrateView() {
             {migrateMutation.error.message}
           </Alert>
         )}
-        {migrateMutation.isSuccess && (
-          <Stack direction={'row'} spacing={1}>
+        {!isLoading && data !== undefined && data !== null && migrateMutation.isSuccess && (
+          <Stack direction={'row'}>
             <Box width={'80%'}>
               <JSONEditor value={migrateMutation.data} maxHeight={'50rem'} width={'100%'} />
             </Box>
-            <Stack spacing={1}>
-              <TextField
-                required
-                label={'Project Name'}
-                onBlur={(event) => {
-                  setProjectName(event.target.value);
-                }}
+            <Stack width={'100%'}>
+              <Autocomplete
+                disablePortal
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    required
+                    label="project name"
+                    onBlur={(event) => {
+                      setProjectName(event.target.value);
+                    }}
+                  />
+                )}
+                options={data.map((project) => {
+                  return project.metadata.name;
+                })}
               />
               <Button
                 variant="contained"
