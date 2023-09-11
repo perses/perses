@@ -31,7 +31,8 @@ import (
 }
 
 #palette: {
-	kind: "Auto" | "Categorical"
+	mode: "auto" | "categorical"
+	// colors: [...string]; // TODO: add colors to override ECharts theme
 }
 
 #visual: {

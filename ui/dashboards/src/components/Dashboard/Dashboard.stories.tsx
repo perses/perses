@@ -468,7 +468,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
       ColorPaletteAuto: {
         kind: 'Panel',
         spec: {
-          display: { name: 'Auto Palette (Many Series)', description: 'Time series chart with Auto palette example' },
+          display: { name: 'Auto Palette (Many Series)', description: 'Time series chart with auto palette example' },
           plugin: {
             kind: 'TimeSeriesChart',
             spec: {
@@ -499,7 +499,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
         spec: {
           display: {
             name: 'Categorical Palette (Default)',
-            description: 'Time series chart with Categorical palette example',
+            description: 'Time series chart with categorical palette example',
           },
           plugin: {
             kind: 'TimeSeriesChart',
@@ -508,7 +508,7 @@ const TIMESERIES_EXAMPLE_DASHBOARD_RESOURCE: DashboardResource = {
                 position: 'right',
               },
               visual: {
-                palette: { kind: 'Categorical' },
+                palette: { mode: 'categorical' },
                 connectNulls: true,
               },
             },

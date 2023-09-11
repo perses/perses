@@ -76,7 +76,7 @@ describe('getSeriesColor', () => {
   it('should return color from the generative Auto palette when visual option is defined', () => {
     const visualOptionAuto: TimeSeriesChartVisualOptions = {
       palette: {
-        kind: 'Auto',
+        mode: 'auto',
       },
     };
     const props: SeriesColorProps = {
@@ -94,7 +94,7 @@ describe('getSeriesColor', () => {
   it('should return color from the Categorical palette when visual option is defined', () => {
     const visualOptionCategorical: TimeSeriesChartVisualOptions = {
       palette: {
-        kind: 'Categorical',
+        mode: 'categorical',
       },
     };
     const props: SeriesColorProps = {
