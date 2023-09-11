@@ -38,6 +38,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { VariableEditorState } from '@perses-dev/plugin-system/dist/components/Variables/VariableEditorForm/variable-editor-form-model';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { panelEditorValidationSchema, PanelEditorValidationType } from '../../validation';
@@ -111,15 +112,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     }
   }
 
-  // Ignore string values (which would be an "empty" value from the Select) since we don't allow them to unset it
-  const handleGroupChange: SelectProps<number>['onChange'] = (e) => {
-    const { value } = e.target;
-    if (typeof value === 'string') {
-      return;
-    }
-    setGroupId(value);
-  };
-
   const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
     const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
     // if panel plugin kind and spec are modified, then need to save current spec
@@ -129,7 +121,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     ) {
       pluginEditor.rememberCurrentSpecState();
     }
-
     setPanelDefinition(nextPanelDef);
   };
 
@@ -180,17 +171,30 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               />
             </Grid>
             <Grid item xs={4}>
-              <FormControl fullWidth>
-                <InputLabel id="select-group">Group</InputLabel>
-                {/* TODO: validation */}
-                <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
-                  {panelGroups.map((panelGroup, index) => (
-                    <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                      {panelGroup.title ?? `Group ${index + 1}`}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <Controller
+                name="groupId"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    required
+                    fullWidth
+                    label="Group"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
+                      setGroupId(+event.target.value);
+                    }}
+                  >
+                    {panelGroups.map((panelGroup, index) => (
+                      <MenuItem key={panelGroup.id} value={panelGroup.id}>
+                        {panelGroup.title ?? `Group ${index + 1}`}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
             </Grid>
             <Grid item xs={8}>
               <Controller
