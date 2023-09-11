@@ -47,7 +47,7 @@ export interface TooltipSpecOptions {
 }
 
 export interface TimeSeriesChartPaletteOptions {
-  kind: 'Auto' | 'Categorical';
+  mode: 'auto' | 'categorical';
   // colors: string []; // TODO: add colors to override ECharts theme
 }
 

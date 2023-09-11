@@ -35,12 +35,12 @@ export function getSeriesColor(props: SeriesColorProps) {
       : muiPrimaryColor;
 
   // Explicit way to opt-in to generative palette with consistent colors for same series names.
-  if (visual.palette?.kind === 'Auto') {
+  if (visual.palette?.mode === 'auto') {
     return getAutoPaletteColor(seriesName, fallbackColor);
   }
 
   // Explicit way to always cycle through classical palette instead of changing when based on number of series.
-  if (visual.palette?.kind === 'Categorical') {
+  if (visual.palette?.mode === 'categorical') {
     return getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor);
   }
 
