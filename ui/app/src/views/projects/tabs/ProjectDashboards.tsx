@@ -11,14 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useNavigate } from 'react-router-dom';
-import { Box, Card } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { useCallback, useState } from 'react';
-import { DashboardSelector } from '@perses-dev/core';
+import { Card } from '@mui/material';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
-import { CreateDashboardDialog } from '../../../components/dialogs';
 
 interface ProjectDashboardsProps {
   projectName: string;
@@ -27,44 +22,24 @@ interface ProjectDashboardsProps {
 }
 
 export function ProjectDashboards(props: ProjectDashboardsProps) {
-  const navigate = useNavigate();
-
-  const [openCreateDashboardDialogState, setOpenCreateDashboardDialogState] = useState(false);
-
   const { data, isLoading } = useDashboardList(props.projectName);
 
-  const handleDashboardCreation = useCallback(
-    (dashboardSelector: DashboardSelector) =>
-      navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard }),
-    [navigate]
-  );
-
   return (
-    <Box id={props.id}>
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <Card>
-          <DashboardList
-            dashboardList={data ?? []}
-            hideToolbar={props.hideToolbar}
-            isLoading={isLoading}
-            initialState={{
-              columns: {
-                columnVisibilityModel: {
-                  id: false,
-                  project: false,
-                  version: false,
-                },
-              },
-            }}
-          />
-        </Card>
-      </ErrorBoundary>
-      <CreateDashboardDialog
-        open={openCreateDashboardDialogState}
-        projectOptions={[props.projectName]}
-        onClose={() => setOpenCreateDashboardDialogState(false)}
-        onSuccess={handleDashboardCreation}
+    <Card id={props.id}>
+      <DashboardList
+        dashboardList={data ?? []}
+        hideToolbar={props.hideToolbar}
+        isLoading={isLoading}
+        initialState={{
+          columns: {
+            columnVisibilityModel: {
+              id: false,
+              project: false,
+              version: false,
+            },
+          },
+        }}
       />
-    </Box>
+    </Card>
   );
 }

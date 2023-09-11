@@ -14,8 +14,8 @@
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, getDashboardExtendedDisplayName } from '@perses-dev/core';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
 import { renameDashboardDialogValidationSchema, RenameDashboardValidationType } from '../../validation';
@@ -37,14 +37,10 @@ interface RenameDashboardDialogProps {
  */
 export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;
-  const {
-    register,
-    reset,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<RenameDashboardValidationType>({
+  const form = useForm<RenameDashboardValidationType>({
     resolver: zodResolver(renameDashboardDialogValidationSchema),
     mode: 'onBlur',
+    defaultValues: { dashboardName: getDashboardDisplayName(dashboard) },
   });
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
@@ -73,35 +69,42 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
 
   const handleClose = () => {
     onClose();
-    reset();
+    form.reset();
   };
 
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
       <Dialog.Header>Rename Dashboard</Dialog.Header>
-      <form onSubmit={handleSubmit(processForm)}>
-        <Dialog.Content>
-          <TextField
-            required
-            margin="dense"
-            id="name"
-            label="Name"
-            type="text"
-            fullWidth
-            error={!!errors.dashboardName}
-            helperText={errors.dashboardName?.message}
-            {...register('dashboardName')}
-          />
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button variant="contained" disabled={!isValid} type="submit">
-            Rename
-          </Button>
-          <Button variant="outlined" color="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-        </Dialog.Actions>
-      </form>
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(processForm)}>
+          <Dialog.Content>
+            <Controller
+              name="dashboardName"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  margin="dense"
+                  id="name"
+                  label="Name"
+                  type="text"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button variant="contained" disabled={!form.formState.isValid} type="submit">
+              Rename
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </Dialog.Actions>
+        </form>
+      </FormProvider>
     </Dialog>
   );
 };

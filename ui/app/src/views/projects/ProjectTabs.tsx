@@ -98,6 +98,7 @@ function TabButton(props: TabButtonProps) {
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
             projectOptions={[props.projectName]}
+            hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
           />

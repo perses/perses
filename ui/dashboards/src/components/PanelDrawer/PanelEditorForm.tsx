@@ -182,6 +182,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             <Grid item xs={4}>
               <FormControl fullWidth>
                 <InputLabel id="select-group">Group</InputLabel>
+                {/* TODO: validation */}
                 <Select required labelId="select-group" label="Group" value={groupId} onChange={handleGroupChange}>
                   {panelGroups.map((panelGroup, index) => (
                     <MenuItem key={panelGroup.id} value={panelGroup.id}>
@@ -210,6 +211,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
               />
             </Grid>
             <Grid item xs={4}>
+              {/* TODO: validation */}
               <FormControl fullWidth disabled={pluginEditor.isLoading} error={pluginEditor.error !== null}>
                 <InputLabel id="panel-type-label">Type</InputLabel>
                 <PluginKindSelect

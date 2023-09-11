@@ -15,7 +15,7 @@ import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { ProjectResource } from '@perses-dev/core';
 import { useAddProjectMutation } from '../../model/project-client';
 import { projectNameValidationSchema, ProjectNameValidationType } from '../../validation';
@@ -36,12 +36,7 @@ interface CreateProjectDialogProps {
 export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
 
-  const {
-    register,
-    reset,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<ProjectNameValidationType>({
+  const form = useForm<ProjectNameValidationType>({
     resolver: zodResolver(projectNameValidationSchema),
     mode: 'onBlur',
   });
@@ -66,36 +61,41 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
 
   const handleClose = () => {
     onClose();
-    reset();
+    form.reset();
   };
   return (
     <Dialog open={open} onClose={handleClose}>
       <Dialog.Header>Add Project</Dialog.Header>
-      <form onSubmit={handleSubmit(processForm)}>
-        <Dialog.Content>
-          <>
-            <TextField
-              required
-              margin="dense"
-              id="name"
-              label="Name"
-              type="text"
-              fullWidth
-              error={!!errors.name}
-              helperText={errors.name?.message}
-              {...register('name')}
+      <FormProvider {...form}>
+        <form onSubmit={form.handleSubmit(processForm)}>
+          <Dialog.Content>
+            <Controller
+              name="name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  margin="dense"
+                  id="name"
+                  label="Name"
+                  type="text"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
             />
-          </>
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button variant="contained" type="submit" disabled={!isValid}>
-            Add
-          </Button>
-          <Button variant="outlined" color="secondary" onClick={handleClose}>
-            Cancel
-          </Button>
-        </Dialog.Actions>
-      </form>
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button variant="contained" type="submit" disabled={!form.formState.isValid}>
+              Add
+            </Button>
+            <Button variant="outlined" color="secondary" onClick={handleClose}>
+              Cancel
+            </Button>
+          </Dialog.Actions>
+        </form>
+      </FormProvider>
     </Dialog>
   );
 };
