@@ -86,11 +86,11 @@ function MigrateView() {
   return (
     <Container maxWidth="md" sx={{ marginY: 2 }}>
       <Stack direction="row" alignItems="center" gap={1} mb={2}>
-        <AutoFix fontSize={'large'} />
+        <AutoFix fontSize="large" />
         <Typography variant="h1">Migrate</Typography>
       </Stack>
-      <Stack direction={'column'} spacing={1} mt={2}>
-        <Alert variant={'outlined'} severity={'warning'}>
+      <Stack direction="column" spacing={1} mt={2}>
+        <Alert variant="outlined" severity="warning">
           <Typography>
             As we do not support every feature from Grafana, the migration to Perses can only be partial. For example,
             unsupported panels are replaced by &quot;placeholder&quot; Markdown panels, to at least preserve the
@@ -148,14 +148,14 @@ function MigrateView() {
         </Button>
         {migrateMutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
         {migrateMutation.isError && (
-          <Alert variant={'outlined'} severity={'error'}>
+          <Alert variant="outlined" severity="error">
             {migrateMutation.error.message}
           </Alert>
         )}
         {!isLoading && data !== undefined && data !== null && migrateMutation.isSuccess && (
-          <Stack direction={'row'}>
+          <Stack direction="row">
             <Box width={'80%'}>
-              <JSONEditor value={migrateMutation.data} maxHeight={'50rem'} width={'100%'} />
+              <JSONEditor value={migrateMutation.data} maxHeight="50rem" width="100%" />
             </Box>
             <Stack width={'100%'}>
               <Autocomplete
@@ -164,7 +164,7 @@ function MigrateView() {
                   <TextField
                     {...params}
                     required
-                    label="project name"
+                    label="Project name"
                     onBlur={(event) => {
                       setProjectName(event.target.value);
                     }}
@@ -183,12 +183,12 @@ function MigrateView() {
                 Import
               </Button>
               {dashboardMutation.isError && (
-                <Alert variant={'outlined'} severity={'error'}>
+                <Alert variant="outlined" severity="error">
                   {dashboardMutation.error.message}
                 </Alert>
               )}
               {isReadonly && (
-                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                <Alert severity="warning" sx={{ backgroundColor: 'transparent', padding: 0 }}>
                   Dashboard managed via code only.
                 </Alert>
               )}
