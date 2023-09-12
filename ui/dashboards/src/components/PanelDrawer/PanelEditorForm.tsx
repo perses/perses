@@ -12,20 +12,7 @@
 // limitations under the License.
 
 import React, { useState } from 'react';
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectProps,
-  Stack,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { PanelDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
@@ -38,7 +25,6 @@ import {
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { VariableEditorState } from '@perses-dev/plugin-system/dist/components/Variables/VariableEditorForm/variable-editor-form-model';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
 import { panelEditorValidationSchema, PanelEditorValidationType } from '../../validation';
