@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useMemo, useState } from 'react';
-import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
+import { Box, LinearProgress, TextField, Autocomplete, Checkbox } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -29,6 +29,18 @@ type TemplateVariableProps = {
   name: VariableName;
   source?: string;
 };
+
+function variableOptionToVariableValue(options: VariableOption | VariableOption[] | null): VariableValue {
+  if (options === null) {
+    return null;
+  }
+  if (Array.isArray(options)) {
+    return options.map((v) => {
+      return v.value;
+    });
+  }
+  return options.value;
+}
 
 export function TemplateVariable({ name, source }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name, source);
@@ -147,44 +159,24 @@ function ListVariable({ name, source }: TemplateVariableProps) {
 
   return (
     <Box display={'flex'}>
-      <FormControl fullWidth>
-        <InputLabel id={name}>{title}</InputLabel>
-        <Select
-          sx={{ minWidth: 100, maxWidth: 250 }}
-          id={name}
-          label={title}
-          value={selectedValue}
-          onChange={(e) => {
-            // Must be selected
-            if (e.target.value === null || e.target.value.length === 0) {
-              if (allowAllValue) {
-                setVariableValue(name, DEFAULT_ALL_VALUE, source);
-              }
-              return;
-            }
-            setVariableValue(name, e.target.value as VariableValue, source);
-          }}
-          multiple={allowMultiple}
-        >
-          {loading && (
-            <MenuItem value="loading" disabled>
-              Loading
-            </MenuItem>
-          )}
-
-          {viewOptions.length === 0 && (
-            <MenuItem value="empty" disabled>
-              No options
-            </MenuItem>
-          )}
-          {viewOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
-        {loading && <LinearProgress />}
-      </FormControl>
+      <Autocomplete
+        disablePortal
+        disableCloseOnSelect={allowMultiple}
+        multiple={allowMultiple}
+        fullWidth
+        onChange={(e, value) => {
+          // Must be selected
+          if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
+            setVariableValue(name, DEFAULT_ALL_VALUE, source);
+            return;
+          }
+          setVariableValue(name, variableOptionToVariableValue(value), source);
+        }}
+        options={viewOptions}
+        getOptionLabel={(option) => option.label}
+        renderInput={(params) => <TextField {...params} value={selectedValue} label={title} />}
+      />
+      {loading && <LinearProgress />}
     </Box>
   );
 }
