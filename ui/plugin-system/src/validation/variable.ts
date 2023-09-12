@@ -14,7 +14,11 @@
 import { z } from 'zod';
 
 export const variableEditValidationSchema = z.object({
-  name: z.string().nonempty('Required').regex(/\w+/, 'Must only contains alphanumerical characters and underscores'),
+  name: z
+    .string()
+    .nonempty('Required')
+    .regex(/\w+/, 'Must only contains alphanumerical characters and underscores')
+    .refine((val) => val.startsWith('__'), 'Prefix __ is reserved to builtin variables!'),
   title: z.string().optional(), // display name
   description: z.string().optional(),
   kind: z.string().nonempty('Required'),
