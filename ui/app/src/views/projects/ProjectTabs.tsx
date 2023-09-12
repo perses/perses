@@ -62,7 +62,7 @@ function TabButton(props: TabButtonProps) {
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`);
+          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`);
           setVariableDrawerOpened(false);
         },
         onError: (err) => {
