@@ -149,11 +149,11 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     fullWidth
                     name="name"
                     label="Name"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       disabled: action === 'update',
                       readOnly: action === 'read',
                     }}
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     onChange={(event) => {
@@ -175,10 +175,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     fullWidth
                     name="title"
                     label="Display Label"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     onChange={(event) => {
@@ -202,10 +202,10 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                     fullWidth
                     name="description"
                     label="Description"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     onChange={(event) => {

@@ -158,6 +158,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     required
                     fullWidth
                     label="Name"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       disabled: action === 'update',
                       readOnly: action === 'read',
@@ -182,6 +183,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     {...field}
                     fullWidth
                     label="Display Label"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
@@ -205,6 +207,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     {...field}
                     fullWidth
                     label="Description"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
@@ -229,6 +232,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     {...field}
                     fullWidth
                     label="Type"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
@@ -266,6 +270,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 <TextField
                   label="Value"
                   value={state.textVariableFields.value}
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
                     readOnly: action === 'read',
                   }}
@@ -334,6 +339,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   <TextField
                     label="Capturing Regexp Filter"
                     value={state.listVariableFields.capturingRegexp || ''}
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
@@ -399,6 +405,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     <TextField
                       label="Custom All Value"
                       value={state.listVariableFields.customAllValue}
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                       InputProps={{
                         readOnly: action === 'read',
                       }}
