@@ -131,11 +131,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
             </Button>
           </Stack>
         </Box>
-        <Box
-          component="form"
-          id={panelEditorFormId}
-          sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}
-        >
+        <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
           <Grid container spacing={2}>
             <Grid item xs={8}>
               <Controller
