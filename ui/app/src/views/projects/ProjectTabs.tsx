@@ -55,7 +55,7 @@ function TabButton(props: TabButtonProps) {
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
-    navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
   const handleVariableCreation = useCallback(

@@ -35,7 +35,7 @@ export function ProjectDashboards(props: ProjectDashboardsProps) {
 
   const handleDashboardCreation = useCallback(
     (dashboardSelector: DashboardSelector) =>
-      navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`),
+      navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard }),
     [navigate]
   );
 

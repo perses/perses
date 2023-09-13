@@ -18,18 +18,24 @@ import { useTimeRange } from '@perses-dev/plugin-system';
 import { useEditJsonDialog } from '../../context/DashboardProvider';
 import { useDashboard } from '../../context/useDashboard';
 
-export const EditJsonDialog = () => {
+export interface EditJsonDialogProps {
+  disableMetadataEdition?: boolean;
+}
+
+export const EditJsonDialog = (props: EditJsonDialogProps) => {
+  const { disableMetadataEdition } = props;
   const { editJsonDialog, closeEditJsonDialog } = useEditJsonDialog();
 
   return (
     <Dialog open={!!editJsonDialog?.isOpen} scroll="paper" fullWidth maxWidth="lg">
-      <Dialog.Header onClose={() => closeEditJsonDialog()}>Edit Dashboard</Dialog.Header>
-      {editJsonDialog?.isOpen && <EditJsonDialogForm />}
+      <Dialog.Header onClose={() => closeEditJsonDialog()}>Edit Dashboard JSON</Dialog.Header>
+      {editJsonDialog?.isOpen && <EditJsonDialogForm disableMetadataEdition={disableMetadataEdition} />}
     </Dialog>
   );
 };
 
-const EditJsonDialogForm = () => {
+const EditJsonDialogForm = (props: EditJsonDialogProps) => {
+  const { disableMetadataEdition } = props;
   const { closeEditJsonDialog } = useEditJsonDialog();
   const { setTimeRange, setRefreshInterval } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
@@ -46,9 +52,11 @@ const EditJsonDialogForm = () => {
   return (
     <Dialog.Form onSubmit={handleApply}>
       <Dialog.Content sx={{ width: '100%' }}>
-        <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
-          Metadata cannot be modified or saved.
-        </Alert>
+        {disableMetadataEdition && (
+          <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
+            Metadata cannot be modified or saved.
+          </Alert>
+        )}
         <FormControl fullWidth>
           <JSONEditor
             minHeight="300px"

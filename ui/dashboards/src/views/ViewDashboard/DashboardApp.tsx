@@ -37,6 +37,7 @@ export interface DashboardAppProps {
   onDiscard?: (entity: DashboardResource) => void;
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
+  isCreating?: boolean;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {
@@ -48,6 +49,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
     onDiscard,
     initialVariableIsSticky,
     isReadonly,
+    isCreating,
   } = props;
 
   const chartsTheme = useChartsTheme();
@@ -127,7 +129,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
         <DashboardDiscardChangesConfirmationDialog />
-        <EditJsonDialog />
+        <EditJsonDialog disableMetadataEdition={!isCreating} />
         <SaveChangesConfirmationDialog />
       </Box>
     </Box>
