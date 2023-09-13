@@ -34,6 +34,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
   externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
+  isCreating?: boolean;
 }
 
 /**
@@ -51,6 +52,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
     initialVariableIsSticky,
     isReadonly,
     isEditing,
+    isCreating,
     sx,
     ...others
   } = props;
@@ -131,6 +133,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                   onDiscard={onDiscard}
                   initialVariableIsSticky={initialVariableIsSticky}
                   isReadonly={isReadonly}
+                  isCreating={isCreating}
                 />
               </ErrorBoundary>
             </Box>

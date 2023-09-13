@@ -52,7 +52,7 @@ function TabButton(props: TabButtonProps) {
       createGlobalVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: GlobalVariableResource) => {
           successSnackbar(
-            `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`
+            `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`
           );
           setVariableDrawerOpened(false);
         },

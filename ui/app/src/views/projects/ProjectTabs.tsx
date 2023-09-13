@@ -55,14 +55,14 @@ function TabButton(props: TabButtonProps) {
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
-    navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
   const handleVariableCreation = useCallback(
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} have been successfully created`);
+          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`);
           setVariableDrawerOpened(false);
         },
         onError: (err) => {

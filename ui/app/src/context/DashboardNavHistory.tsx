@@ -55,6 +55,10 @@ function historyReducer(history: DashboardNavHistoryItem[], resource: { project:
   return history;
 }
 
+/**
+ * NB: NavHistory is used to feed the "Recent dashboards" section
+ */
+
 export function useNavHistory(): DashboardNavHistoryItem[] {
   const ctx = useContext(NavHistoryContext);
   if (ctx === undefined) {

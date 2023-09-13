@@ -37,7 +37,7 @@ function HomeView() {
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
-    navigate(`/projects/${dashboardSelector.project}/dashboards/${dashboardSelector.dashboard}/create`);
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
 
   // Open/Close management for dialogs
   const [isAddProjectDialogOpen, setIsAddProjectDialogOpen] = useState(false);

@@ -16,18 +16,18 @@ import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import HomeView from './views/home/HomeView';
-import MigrateView from './views/MigrateView';
-import AdminView from './views/admin/AdminView';
-import GuardedProjectRoute from './GuardedProjectRoute';
 // Other routes are lazy-loaded for code-splitting
-// -> TODO follow same naming convention for all Views? (aka have the "View" term be either always a prefix or always a suffix).
-const ViewDashboard = lazy(() => import('./views/ViewDashboard'));
-const ViewProject = lazy(() => import('./views/projects/ProjectView'));
+const MigrateView = lazy(() => import('./views/MigrateView'));
+const AdminView = lazy(() => import('./views/admin/AdminView'));
+const GuardedProjectRoute = lazy(() => import('./GuardedProjectRoute'));
+const ProjectView = lazy(() => import('./views/projects/ProjectView'));
+const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
+const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
 
 function Router() {
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      {/* TODO: What sort of loading fallback to we want? */}
+      {/* TODO: What sort of loading fallback do we want? */}
       <Suspense>
         <Routes>
           <Route path="/admin" element={<AdminView />} />
@@ -35,10 +35,10 @@ function Router() {
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
           <Route path="/projects/:projectName" element={<GuardedProjectRoute />}>
-            <Route path="" element={<ViewProject />} />
-            <Route path=":tab" element={<ViewProject />} />
-            <Route path="dashboards/:dashboardName" element={<ViewDashboard />} />
-            <Route path="dashboards/:dashboardName/:action" element={<ViewDashboard />} />
+            <Route path="" element={<ProjectView />} />
+            <Route path=":tab" element={<ProjectView />} />
+            <Route path="dashboard/new" element={<CreateDashboardView />} />
+            <Route path="dashboards/:dashboardName" element={<DashboardView />} />
           </Route>
           <Route path="/" element={<HomeView />} />
         </Routes>
