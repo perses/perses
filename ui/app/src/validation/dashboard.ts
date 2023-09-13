@@ -13,10 +13,8 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { useProjectList } from '../model/project-client';
 import { useDashboardList } from '../model/dashboard-client';
 import { resourceIdValidationSchema } from './resource';
-import { projectNameValidationSchema } from './project';
 
 const dashboardNameValidationSchema = z.string().nonempty('Required').max(75, 'Must be 75 or fewer characters long');
 

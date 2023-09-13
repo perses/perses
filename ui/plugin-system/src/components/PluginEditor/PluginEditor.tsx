@@ -33,7 +33,7 @@ export function PluginEditor(props: PluginEditorProps) {
       {/* TODO: How to ensure ids are unique? */}
       <PluginKindSelect
         fullWidth={false}
-        sx={{ mb: 1 }}
+        sx={{ mb: 1, minWidth: 120 }}
         margin="dense"
         label={pluginKindLabel}
         pluginType={pluginType}

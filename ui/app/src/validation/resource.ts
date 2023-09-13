@@ -17,4 +17,4 @@ export const resourceIdValidationSchema = z
   .string()
   .nonempty('Required')
   .max(75, 'Must be 75 or fewer characters long')
-  .regex(new RegExp('^[a-zA-Z0-9_.-]+$'), 'Must only contains alphanumerical characters and special characters _ . -');
+  .regex(/^[a-zA-Z0-9_.-]+$/, 'Must only contains alphanumerical characters and special characters _ . -');
