@@ -25,9 +25,6 @@ export const PanelDrawer = () => {
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
-  const handleClose = () => {
-    setIsClosing(true);
-  };
 
   // Drawer is open if we have a model and we're not transitioning out
   const isOpen = panelEditor !== undefined && isClosing === false;
@@ -41,6 +38,16 @@ export const PanelDrawer = () => {
     setIsClosing(true);
   }
 
+  const handleClose = () => {
+    setIsClosing(true);
+  };
+
+  // Don't call closeDrawer on the store until the Drawer has completely transitioned out and reset close state
+  const handleExited = () => {
+    panelEditor?.close();
+    setIsClosing(false);
+  };
+
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
   const handleClickOut = () => {
@@ -48,7 +55,7 @@ export const PanelDrawer = () => {
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="panel-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
       {panelEditor && (
         <PanelEditorForm
