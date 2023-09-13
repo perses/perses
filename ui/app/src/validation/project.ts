@@ -13,8 +13,8 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
+import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { useProjectList } from '../model/project-client';
-import { resourceIdValidationSchema } from './resource';
 
 export const projectNameValidationSchema = z.object({
   name: resourceIdValidationSchema,

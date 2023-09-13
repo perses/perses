@@ -30,7 +30,6 @@ export function PluginEditor(props: PluginEditorProps) {
   const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
-      {/* TODO: How to ensure ids are unique? */}
       <PluginKindSelect
         fullWidth={false}
         sx={{ mb: 1, minWidth: 120 }}

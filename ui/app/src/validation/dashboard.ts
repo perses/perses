@@ -13,8 +13,9 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
+import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { useDashboardList } from '../model/dashboard-client';
-import { resourceIdValidationSchema } from './resource';
+import { generateMetadataName } from '../utils/metadata';
 
 const dashboardNameValidationSchema = z.string().nonempty('Required').max(75, 'Must be 75 or fewer characters long');
 
@@ -38,7 +39,8 @@ export function useDashboardValidationSchema(projectName?: string) {
         return (
           (dashboards.data ?? []).filter(
             (dashboard) =>
-              dashboard.metadata.project === schema.projectName && dashboard.metadata.name === schema.dashboardName // TODO: add converter support
+              dashboard.metadata.project === schema.projectName &&
+              dashboard.metadata.name === generateMetadataName(schema.dashboardName)
           ).length === 0
         );
       },
