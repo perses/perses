@@ -30,7 +30,6 @@ import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useIsReadonly } from '@perses-dev/app/src/model/config-client';
 import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
@@ -46,20 +45,20 @@ interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
   initialAction: Action;
   isDraft: boolean;
+  isReadonly?: boolean;
   onSave: (def: VariableDefinition) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
 export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, initialAction, isDraft, onSave, onClose, onDelete } = props;
+  const { initialVariableDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [action, setAction] = useState(initialAction);
-  const isReadonly = useIsReadonly();
 
   const refreshPreview = () => {
     setPreviewKey((prev) => prev + 1);

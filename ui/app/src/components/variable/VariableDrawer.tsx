@@ -30,13 +30,14 @@ interface VariableDrawerProps<T extends Variable> {
   variable: T;
   isOpen: boolean;
   action: Action;
+  isReadonly?: boolean;
   onSave: Dispatch<T>;
   onDelete?: DispatchWithPromise<T>;
   onClose: DispatchWithoutAction;
 }
 
 export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>) {
-  const { variable, isOpen, action, onSave, onDelete, onClose } = props;
+  const { variable, isOpen, action, isReadonly, onSave, onDelete, onClose } = props;
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
@@ -86,6 +87,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                   initialVariableDefinition={variableDef}
                   initialAction={action}
                   isDraft={false}
+                  isReadonly={isReadonly}
                   onSave={handleSave}
                   onClose={onClose}
                   onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}

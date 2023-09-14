@@ -224,6 +224,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
             variable={targetedVariable}
             isOpen={isVariableDrawerOpened}
             action={action}
+            isReadonly={isReadonly}
             onSave={(v: T) => onUpdate(v).then(() => setVariableDrawerOpened(false))}
             onDelete={onDelete}
             onClose={() => setVariableDrawerOpened(false)}

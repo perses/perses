@@ -28,6 +28,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
+import { useIsReadonly } from '../../model/config-client';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 
@@ -41,11 +42,11 @@ interface TabButtonProps {
 function TabButton(props: TabButtonProps) {
   const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalVariableMutation = useCreateGlobalVariableMutation();
-
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
+  const isReadonly = useIsReadonly();
 
   const handleGlobalVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
@@ -102,6 +103,7 @@ function TabButton(props: TabButtonProps) {
             }}
             isOpen={isVariableDrawerOpened}
             action="create"
+            isReadonly={isReadonly}
             onSave={handleGlobalVariableCreation}
             onClose={() => setVariableDrawerOpened(false)}
           />
@@ -132,6 +134,7 @@ function TabButton(props: TabButtonProps) {
             }}
             isOpen={isDatasourceDrawerOpened}
             action="create"
+            isReadonly={isReadonly}
             onSave={handleGlobalDatasourceCreation}
             onClose={() => setDatasourceDrawerOpened(false)}
           />

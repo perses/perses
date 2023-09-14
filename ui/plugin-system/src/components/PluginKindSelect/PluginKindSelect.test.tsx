@@ -25,7 +25,7 @@ describe('PluginKindSelect', () => {
   const openSelect = async () => {
     const select = screen.getByRole('button');
     userEvent.click(select);
-    const options = await screen.findAllByRole('option');
+    const options = await screen.findAllByTestId('option');
     return options;
   };
 

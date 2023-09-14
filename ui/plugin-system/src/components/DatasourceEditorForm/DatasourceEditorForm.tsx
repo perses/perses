@@ -18,7 +18,6 @@ import React, { Dispatch, DispatchWithoutAction, useCallback, useState } from 'r
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useIsReadonly } from '@perses-dev/app/src/model/config-client';
 import { PluginEditor } from '../PluginEditor';
 import { Action, getSubmitText, getTitleAction } from '../../utils';
 import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
@@ -46,13 +45,14 @@ interface DatasourceEditorFormProps<T extends Datasource> {
   initialDatasource: T;
   initialAction: Action;
   isDraft: boolean;
+  isReadonly?: boolean;
   onSave: Dispatch<T>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
-  const { initialDatasource, initialAction, isDraft, onSave, onClose, onDelete } = props;
+  const { initialDatasource, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
   const patchedInitialDatasource = getInitialState(initialDatasource);
   const [state, setState] = useImmer(patchedInitialDatasource);
@@ -60,7 +60,6 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
-  const isReadonly = useIsReadonly();
 
   const form = useForm<DatasourceEditValidationType>({
     resolver: zodResolver(datasourceEditValidationSchema),
