@@ -16,6 +16,7 @@ import { TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
 export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const textVariableFields = {
     value: (initialVariableDefinition as TextVariableDefinition).spec.value ?? '',
+    constant: (initialVariableDefinition as TextVariableDefinition).spec.constant ?? false,
   };
 
   const listVariableFields = {

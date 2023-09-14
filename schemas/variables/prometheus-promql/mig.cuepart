@@ -7,7 +7,7 @@ if #var.type == "query" {
     if #var.query.query =~ #qResRegexp {
         kind:          "PrometheusPromQLVariable"
         spec: {
-            expr:       regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[1]
+            expr:      regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[1]
             labelName: regexp.FindSubmatch(#qResRegexp, #cleanedQuery)[2]
         }
     }

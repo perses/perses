@@ -32,6 +32,7 @@ export interface TextVariableDefinition extends Definition<TextVariableSpec> {
 
 export interface TextVariableSpec extends VariableSpec {
   value: string;
+  constant?: boolean;
 }
 
 export interface ListVariableDefinition<PluginSpec = UnknownSpec> extends Definition<ListVariableSpec<PluginSpec>> {

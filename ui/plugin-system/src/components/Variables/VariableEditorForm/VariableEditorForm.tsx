@@ -259,6 +259,21 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   });
                 }}
               />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={state.textVariableFields.constant ?? false}
+                    readOnly={action === 'read'}
+                    onChange={(e) => {
+                      if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                      setState((draft) => {
+                        draft.textVariableFields.constant = e.target.checked;
+                      });
+                    }}
+                  />
+                }
+                label="Constant"
+              />
             </Stack>
           </>
         )}

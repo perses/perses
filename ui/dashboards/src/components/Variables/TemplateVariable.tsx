@@ -17,6 +17,7 @@ import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
   ListVariableSpec,
+  TextVariableDefinition,
   UnknownSpec,
   VariableName,
   VariableValue,
@@ -190,7 +191,9 @@ function ListVariable({ name, source }: TemplateVariableProps) {
 }
 
 function TextVariable({ name, source }: TemplateVariableProps) {
-  const { state, definition } = useTemplateVariable(name, source);
+  const ctx = useTemplateVariable(name, source);
+  const state = ctx.state;
+  const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const { setVariableValue } = useTemplateVariableActions();
 
@@ -205,6 +208,9 @@ function TextVariable({ name, source }: TemplateVariableProps) {
       onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}
       label={definition?.spec.display?.name ?? name}
+      InputProps={{
+        readOnly: definition?.spec.constant ?? false,
+      }}
     />
   );
 }
