@@ -59,7 +59,7 @@ export const PanelDrawer = () => {
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
       {panelEditor && (
         <PanelEditorForm
-          initialAction="update"
+          initialAction={panelEditor.mode}
           initialValues={panelEditor.initialValues}
           onSave={handleSave}
           onClose={handleClose}
