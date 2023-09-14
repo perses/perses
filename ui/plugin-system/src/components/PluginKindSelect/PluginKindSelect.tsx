@@ -36,7 +36,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
     <TextField select inputRef={ref} {...others} value={value}>
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
       {data?.map((metadata) => (
-        <MenuItem key={metadata.kind} value={metadata.kind}>
+        <MenuItem data-testid="option" key={metadata.kind} value={metadata.kind}>
           {metadata.display.name}
         </MenuItem>
       ))}
