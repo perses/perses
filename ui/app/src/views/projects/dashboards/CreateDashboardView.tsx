@@ -32,7 +32,7 @@ function CreateDashboardView() {
   const location = useLocation();
   const dashboardName = location.state;
 
-  if (projectName === undefined || dashboardName === undefined) {
+  if (!projectName || !dashboardName) {
     throw new Error('Unable to get the dashboard or project name');
   }
 

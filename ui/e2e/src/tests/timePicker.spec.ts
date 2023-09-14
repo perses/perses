@@ -32,7 +32,7 @@ test.describe('Time Picker', () => {
       await dashboardPage.timePicker.click();
 
       await page.getByRole('option', { name: 'Custom time range' }).click();
-      await page.getByRole('button', { name: 'Feb 4, 2023' }).click();
+      await page.locator('data-timestamp=1693778400000').click(); // 4 Fev 2023
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
@@ -56,7 +56,8 @@ test.describe('Time Picker', () => {
           force: true,
         });
 
-      await page.getByRole('button', { name: 'Feb 9, 2023' }).click();
+      await page.locator('data-timestamp=1694210400000').click(); // 9 Fev 2023
+
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
       // eslint-disable-next-line playwright/no-force-option
