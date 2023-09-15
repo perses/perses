@@ -33,7 +33,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <TextField select inputRef={ref} {...others} value={value}>
+    <TextField select inputRef={ref} {...others} value={value} data-testid="plugin-kind-select">
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
       {data?.map((metadata) => (
         <MenuItem data-testid="option" key={metadata.kind} value={metadata.kind}>

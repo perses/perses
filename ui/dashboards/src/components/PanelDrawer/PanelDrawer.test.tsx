@@ -43,6 +43,14 @@ describe('Panel Drawer', () => {
     return storeApi;
   };
 
+  // Opens the select and waits for loading to finish (i.e. options to appear)
+  const openKindSelect = async () => {
+    const select = screen.getByTestId('plugin-kind-select');
+    userEvent.click(select);
+    const options = await screen.findAllByTestId('option');
+    return options;
+  };
+
   it('should add new panel', async () => {
     const storeApi = renderPanelDrawer();
 
@@ -51,6 +59,10 @@ describe('Panel Drawer', () => {
 
     const nameInput = await screen.findByLabelText(/Name/);
     userEvent.type(nameInput, 'New Panel');
+
+    await openKindSelect(); // TODO: fix by mocking? => PluginKindSelect is empty
+    const option = screen.getByTestId('option');
+    userEvent.click(option);
     userEvent.click(screen.getByText('Add'));
 
     // TODO: Assert drawer is closed?

@@ -32,7 +32,7 @@ test.describe('Time Picker', () => {
       await dashboardPage.timePicker.click();
 
       await page.getByRole('option', { name: 'Custom time range' }).click();
-      await page.locator('data-timestamp=1693778400000').click(); // 4 Fev 2023
+      await page.getByRole('gridcell', { name: '4', exact: true }).click(); // 4 Fev 2023
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
@@ -56,7 +56,7 @@ test.describe('Time Picker', () => {
           force: true,
         });
 
-      await page.locator('data-timestamp=1694210400000').click(); // 9 Fev 2023
+      await page.getByRole('gridcell', { name: '9', exact: true }).click(); // 9 Fev 2023
 
       // The a11y markup on this clock face is really hard to work with, so using
       // a rare forced click here.
