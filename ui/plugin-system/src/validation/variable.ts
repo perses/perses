@@ -18,7 +18,7 @@ export const variableEditValidationSchema = z.object({
     .string()
     .nonempty('Required')
     .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
-    .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables!'),
+    .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
   title: z.string().optional(), // display name
   description: z.string().optional(),
   kind: z.string().nonempty('Required'),
