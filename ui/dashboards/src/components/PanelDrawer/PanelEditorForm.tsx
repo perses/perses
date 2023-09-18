@@ -112,147 +112,145 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   return (
     <FormProvider {...form}>
-      <form style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: (theme) => theme.spacing(1, 2),
-            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="h2">{titleAction} Panel</Typography>
-          <Stack direction="row" spacing={1} marginLeft="auto">
-            <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
-              {submitText}
-            </Button>
-            <Button color="secondary" variant="outlined" onClick={handleCancel}>
-              Cancel
-            </Button>
-          </Stack>
-        </Box>
-        <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
-          <Grid container spacing={2}>
-            <Grid item xs={8}>
-              <Controller
-                name="name"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label="Name"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setName(event.target.value);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                name="groupId"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    select
-                    {...field}
-                    required
-                    fullWidth
-                    label="Group"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setGroupId(+event.target.value);
-                    }}
-                  >
-                    {panelGroups.map((panelGroup, index) => (
-                      <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                        {panelGroup.title ?? `Group ${index + 1}`}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-            <Grid item xs={8}>
-              <Controller
-                name="description"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Description"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setDescription(event.target.value);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                name="type"
-                render={({ field, fieldState }) => (
-                  <PluginKindSelect
-                    {...field}
-                    pluginType="Panel"
-                    required
-                    fullWidth
-                    label="Type"
-                    disabled={pluginEditor.isLoading}
-                    error={!!pluginEditor.error || !!fieldState.error}
-                    helperText={pluginEditor.error?.message ?? fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      pluginEditor.onKindChange(event);
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="h4" marginBottom={1}>
-                Preview
-              </Typography>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <PanelPreview panelDefinition={panelDefinition} />
-              </ErrorBoundary>
-            </Grid>
-            <Grid item xs={12}>
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <PanelSpecEditor
-                  panelDefinition={panelDefinition}
-                  onJSONChange={handlePanelDefinitionChange}
-                  onQueriesChange={(queries) => {
-                    setQueries(queries);
-                  }}
-                  onPluginSpecChange={(spec) => {
-                    pluginEditor.onSpecChange(spec);
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: (theme) => theme.spacing(1, 2),
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Typography variant="h2">{titleAction} Panel</Typography>
+        <Stack direction="row" spacing={1} marginLeft="auto">
+          <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
+            {submitText}
+          </Button>
+          <Button color="secondary" variant="outlined" onClick={handleCancel}>
+            Cancel
+          </Button>
+        </Stack>
+      </Box>
+      <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
+        <Grid container spacing={2}>
+          <Grid item xs={8}>
+            <Controller
+              name="name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  fullWidth
+                  label="Name"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setName(event.target.value);
                   }}
                 />
-              </ErrorBoundary>
-            </Grid>
+              )}
+            />
           </Grid>
-        </Box>
-        <DiscardChangesConfirmationDialog
-          description="You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered."
-          isOpen={isDiscardDialogOpened}
-          onCancel={() => {
-            setDiscardDialogOpened(false);
-          }}
-          onDiscardChanges={() => {
-            setDiscardDialogOpened(false);
-            onClose();
-          }}
-        />
-      </form>
+          <Grid item xs={4}>
+            <Controller
+              name="groupId"
+              render={({ field, fieldState }) => (
+                <TextField
+                  select
+                  {...field}
+                  required
+                  fullWidth
+                  label="Group"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setGroupId(+event.target.value);
+                  }}
+                >
+                  {panelGroups.map((panelGroup, index) => (
+                    <MenuItem key={panelGroup.id} value={panelGroup.id}>
+                      {panelGroup.title ?? `Group ${index + 1}`}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={8}>
+            <Controller
+              name="description"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Description"
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setDescription(event.target.value);
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="type"
+              render={({ field, fieldState }) => (
+                <PluginKindSelect
+                  {...field}
+                  pluginType="Panel"
+                  required
+                  fullWidth
+                  label="Type"
+                  disabled={pluginEditor.isLoading}
+                  error={!!pluginEditor.error || !!fieldState.error}
+                  helperText={pluginEditor.error?.message ?? fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    pluginEditor.onKindChange(event);
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="h4" marginBottom={1}>
+              Preview
+            </Typography>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <PanelPreview panelDefinition={panelDefinition} />
+            </ErrorBoundary>
+          </Grid>
+          <Grid item xs={12}>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <PanelSpecEditor
+                panelDefinition={panelDefinition}
+                onJSONChange={handlePanelDefinitionChange}
+                onQueriesChange={(queries) => {
+                  setQueries(queries);
+                }}
+                onPluginSpecChange={(spec) => {
+                  pluginEditor.onSpecChange(spec);
+                }}
+              />
+            </ErrorBoundary>
+          </Grid>
+        </Grid>
+      </Box>
+      <DiscardChangesConfirmationDialog
+        description="You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered."
+        isOpen={isDiscardDialogOpened}
+        onCancel={() => {
+          setDiscardDialogOpened(false);
+        }}
+        onDiscardChanges={() => {
+          setDiscardDialogOpened(false);
+          onClose();
+        }}
+      />
     </FormProvider>
   );
 }

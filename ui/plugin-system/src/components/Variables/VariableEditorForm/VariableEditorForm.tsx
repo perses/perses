@@ -100,249 +100,314 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
 
   return (
     <FormProvider {...form}>
-      <form style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: (theme) => theme.spacing(1, 2),
-            borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="h2">{titleAction} Variable</Typography>
-          <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-            {action === 'read' ? (
-              <>
-                <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                  Edit
-                </Button>
-                <Button color="error" variant="outlined" onClick={onDelete}>
-                  Delete
-                </Button>
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={(theme) => ({
-                    borderColor: theme.palette.grey['500'],
-                    '&.MuiDivider-root': {
-                      marginLeft: 2,
-                      marginRight: 1,
-                    },
-                  })}
-                />
-                <Button color="secondary" variant="outlined" onClick={onClose}>
-                  Close
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={!form.formState.isValid}
-                  onClick={form.handleSubmit(processForm)}
-                >
-                  {submitText}
-                </Button>
-                <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                  Cancel
-                </Button>
-              </>
-            )}
-          </Stack>
-        </Box>
-        <Box padding={2} sx={{ overflowY: 'scroll' }}>
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={8}>
-              <Controller
-                name="name"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    required
-                    fullWidth
-                    label="Name"
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                    InputProps={{
-                      disabled: action === 'update',
-                      readOnly: action === 'read',
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setState((draft) => {
-                        draft.name = event.target.value;
-                      });
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                name="title"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Display Label"
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                    InputProps={{
-                      readOnly: action === 'read',
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setState((draft) => {
-                        draft.title = event.target.value;
-                      });
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={8}>
-              <Controller
-                name="description"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Description"
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                    InputProps={{
-                      readOnly: action === 'read',
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setState((draft) => {
-                        draft.description = event.target.value;
-                      });
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                name="kind"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    select
-                    {...field}
-                    fullWidth
-                    label="Type"
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                    InputProps={{
-                      readOnly: action === 'read',
-                    }}
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      setState((draft) => {
-                        draft.kind = event.target.value as VariableEditorState['kind'];
-                      });
-                    }}
-                  >
-                    {VARIABLE_TYPES.map((v) => (
-                      <MenuItem key={v.kind} value={v.kind}>
-                        {v.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-          </Grid>
-
-          <Divider />
-
-          {state.kind === 'TextVariable' && (
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: (theme) => theme.spacing(1, 2),
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        }}
+      >
+        <Typography variant="h2">{titleAction} Variable</Typography>
+        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
+          {action === 'read' ? (
             <>
-              <Typography py={1} variant="subtitle1">
-                Text Options
-              </Typography>
-              <Stack spacing={2}>
-                <Box>
-                  <VariablePreview values={[state.textVariableFields.value]} />
-                </Box>
+              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
+                Edit
+              </Button>
+              <Button color="error" variant="outlined" onClick={onDelete}>
+                Delete
+              </Button>
+              <Divider
+                orientation="vertical"
+                flexItem
+                sx={(theme) => ({
+                  borderColor: theme.palette.grey['500'],
+                  '&.MuiDivider-root': {
+                    marginLeft: 2,
+                    marginRight: 1,
+                  },
+                })}
+              />
+              <Button color="secondary" variant="outlined" onClick={onClose}>
+                Close
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={!form.formState.isValid}
+                onClick={form.handleSubmit(processForm)}
+              >
+                {submitText}
+              </Button>
+              <Button color="secondary" variant="outlined" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </>
+          )}
+        </Stack>
+      </Box>
+      <Box padding={2} sx={{ overflowY: 'scroll' }}>
+        <Grid container spacing={2} mb={2}>
+          <Grid item xs={8}>
+            <Controller
+              name="name"
+              render={({ field, fieldState }) => (
                 <TextField
-                  label="Value"
-                  value={state.textVariableFields.value}
+                  {...field}
+                  required
+                  fullWidth
+                  label="Name"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    disabled: action === 'update',
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.name = event.target.value;
+                    });
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="title"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Display Label"
                   InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
                     readOnly: action === 'read',
                   }}
-                  onChange={(v) => {
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
                     setState((draft) => {
-                      draft.textVariableFields.value = v.target.value;
+                      draft.title = event.target.value;
                     });
                   }}
                 />
+              )}
+            />
+          </Grid>
+          <Grid item xs={8}>
+            <Controller
+              name="description"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Description"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.description = event.target.value;
+                    });
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="kind"
+              render={({ field, fieldState }) => (
+                <TextField
+                  select
+                  {...field}
+                  fullWidth
+                  label="Type"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.kind = event.target.value as VariableEditorState['kind'];
+                    });
+                  }}
+                >
+                  {VARIABLE_TYPES.map((v) => (
+                    <MenuItem key={v.kind} value={v.kind}>
+                      {v.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+        </Grid>
+
+        <Divider />
+
+        {state.kind === 'TextVariable' && (
+          <>
+            <Typography py={1} variant="subtitle1">
+              Text Options
+            </Typography>
+            <Stack spacing={2}>
+              <Box>
+                <VariablePreview values={[state.textVariableFields.value]} />
+              </Box>
+              <TextField
+                label="Value"
+                value={state.textVariableFields.value}
+                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                InputProps={{
+                  readOnly: action === 'read',
+                }}
+                onChange={(v) => {
+                  setState((draft) => {
+                    draft.textVariableFields.value = v.target.value;
+                  });
+                }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={state.textVariableFields.constant ?? false}
+                    readOnly={action === 'read'}
+                    onChange={(e) => {
+                      if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                      setState((draft) => {
+                        draft.textVariableFields.constant = e.target.checked;
+                      });
+                    }}
+                  />
+                }
+                label="Constant"
+              />
+            </Stack>
+          </>
+        )}
+
+        {state.kind === 'ListVariable' && (
+          <>
+            <Typography py={1} variant="subtitle1">
+              List Options
+            </Typography>
+            <Stack spacing={2} mb={2}>
+              {state.listVariableFields.plugin.kind ? (
+                <Box>
+                  <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
+                    <VariableListPreview definition={previewSpec} onRefresh={refreshPreview} />
+                  </ErrorBoundary>
+                </Box>
+              ) : (
+                <VariablePreview isLoading={true} />
+              )}
+
+              <Stack>
+                {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
+                <ClickAwayListener onClickAway={() => refreshPreview()}>
+                  <Box />
+                </ClickAwayListener>
+                {/** */}
+                <PluginEditor
+                  width="100%"
+                  pluginType="Variable"
+                  pluginKindLabel="Source"
+                  value={state.listVariableFields.plugin}
+                  isReadonly={action === 'read'}
+                  onChange={(val) => {
+                    setState((draft) => {
+                      draft.listVariableFields.plugin = val;
+                    });
+                  }}
+                />
+              </Stack>
+
+              <Stack>
+                <TextField
+                  label="Capturing Regexp Filter"
+                  value={state.listVariableFields.capturingRegexp || ''}
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  onChange={(e) => {
+                    setState((draft) => {
+                      if (e.target.value) {
+                        // TODO: do a better fix, if empty string => it should skip the filter
+                        draft.listVariableFields.capturingRegexp = e.target.value;
+                      } else {
+                        draft.listVariableFields.capturingRegexp = undefined;
+                      }
+                    });
+                  }}
+                  helperText="Optional, if you want to filter on captured result."
+                />
+              </Stack>
+            </Stack>
+
+            <Divider />
+
+            <Typography py={1} variant="subtitle1">
+              Dropdown Options
+            </Typography>
+            <Stack spacing="2">
+              <Stack>
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={state.textVariableFields.constant ?? false}
+                      checked={state.listVariableFields.allowMultiple}
                       readOnly={action === 'read'}
                       onChange={(e) => {
                         if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                         setState((draft) => {
-                          draft.textVariableFields.constant = e.target.checked;
+                          draft.listVariableFields.allowMultiple = e.target.checked;
                         });
                       }}
                     />
                   }
-                  label="Constant"
+                  label="Allow Multiple Values"
                 />
+                <Typography variant="caption">Enables multiple values to be selected at the same time</Typography>
               </Stack>
-            </>
-          )}
-
-          {state.kind === 'ListVariable' && (
-            <>
-              <Typography py={1} variant="subtitle1">
-                List Options
-              </Typography>
-              <Stack spacing={2} mb={2}>
-                {state.listVariableFields.plugin.kind ? (
-                  <Box>
-                    <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
-                      <VariableListPreview definition={previewSpec} onRefresh={refreshPreview} />
-                    </ErrorBoundary>
-                  </Box>
-                ) : (
-                  <VariablePreview isLoading={true} />
-                )}
-
-                <Stack>
-                  {/** Hack?: Cool technique to refresh the preview to simulate onBlur event */}
-                  <ClickAwayListener onClickAway={() => refreshPreview()}>
-                    <Box />
-                  </ClickAwayListener>
-                  {/** */}
-                  <PluginEditor
-                    width="100%"
-                    pluginType="Variable"
-                    pluginKindLabel="Source"
-                    value={state.listVariableFields.plugin}
-                    isReadonly={action === 'read'}
-                    onChange={(val) => {
-                      setState((draft) => {
-                        draft.listVariableFields.plugin = val;
-                      });
-                    }}
-                  />
-                </Stack>
-
-                <Stack>
+              <Stack>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={state.listVariableFields.allowAll}
+                      readOnly={action === 'read'}
+                      onChange={(e) => {
+                        if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                        setState((draft) => {
+                          draft.listVariableFields.allowAll = e.target.checked;
+                        });
+                      }}
+                    />
+                  }
+                  label="Allow All option"
+                />
+                <Typography mb={1} variant="caption">
+                  Enables an option to include all variable values
+                </Typography>
+                {state.listVariableFields.allowAll && (
                   <TextField
-                    label="Capturing Regexp Filter"
-                    value={state.listVariableFields.capturingRegexp || ''}
+                    label="Custom All Value"
+                    value={state.listVariableFields.customAllValue}
                     InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
@@ -350,98 +415,31 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     onChange={(e) => {
                       setState((draft) => {
                         if (e.target.value) {
-                          // TODO: do a better fix, if empty string => it should skip the filter
-                          draft.listVariableFields.capturingRegexp = e.target.value;
+                          draft.listVariableFields.customAllValue = e.target.value;
                         } else {
-                          draft.listVariableFields.capturingRegexp = undefined;
+                          draft.listVariableFields.customAllValue = undefined;
                         }
                       });
                     }}
-                    helperText="Optional, if you want to filter on captured result."
+                    helperText="When All is selected, this value will be used"
                   />
-                </Stack>
+                )}
               </Stack>
-
-              <Divider />
-
-              <Typography py={1} variant="subtitle1">
-                Dropdown Options
-              </Typography>
-              <Stack spacing="2">
-                <Stack>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={state.listVariableFields.allowMultiple}
-                        readOnly={action === 'read'}
-                        onChange={(e) => {
-                          if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
-                          setState((draft) => {
-                            draft.listVariableFields.allowMultiple = e.target.checked;
-                          });
-                        }}
-                      />
-                    }
-                    label="Allow Multiple Values"
-                  />
-                  <Typography variant="caption">Enables multiple values to be selected at the same time</Typography>
-                </Stack>
-                <Stack>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={state.listVariableFields.allowAll}
-                        readOnly={action === 'read'}
-                        onChange={(e) => {
-                          if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
-                          setState((draft) => {
-                            draft.listVariableFields.allowAll = e.target.checked;
-                          });
-                        }}
-                      />
-                    }
-                    label="Allow All option"
-                  />
-                  <Typography mb={1} variant="caption">
-                    Enables an option to include all variable values
-                  </Typography>
-                  {state.listVariableFields.allowAll && (
-                    <TextField
-                      label="Custom All Value"
-                      value={state.listVariableFields.customAllValue}
-                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                      InputProps={{
-                        readOnly: action === 'read',
-                      }}
-                      onChange={(e) => {
-                        setState((draft) => {
-                          if (e.target.value) {
-                            draft.listVariableFields.customAllValue = e.target.value;
-                          } else {
-                            draft.listVariableFields.customAllValue = undefined;
-                          }
-                        });
-                      }}
-                      helperText="When All is selected, this value will be used"
-                    />
-                  )}
-                </Stack>
-              </Stack>
-            </>
-          )}
-        </Box>
-        <DiscardChangesConfirmationDialog
-          description="Are you sure you want to discard these changes? Changes cannot be recovered."
-          isOpen={isDiscardDialogOpened}
-          onCancel={() => {
-            setDiscardDialogOpened(false);
-          }}
-          onDiscardChanges={() => {
-            setDiscardDialogOpened(false);
-            onClose();
-          }}
-        />
-      </form>
+            </Stack>
+          </>
+        )}
+      </Box>
+      <DiscardChangesConfirmationDialog
+        description="Are you sure you want to discard these changes? Changes cannot be recovered."
+        isOpen={isDiscardDialogOpened}
+        onCancel={() => {
+          setDiscardDialogOpened(false);
+        }}
+        onDiscardChanges={() => {
+          setDiscardDialogOpened(false);
+          onClose();
+        }}
+      />
     </FormProvider>
   );
 }
