@@ -90,7 +90,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(processForm)}>
+      <form style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box
           sx={{
             display: 'flex',
@@ -103,7 +103,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
             {action === 'read' ? (
               <>
-                <Button type="submit" disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
+                <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                   Edit
                 </Button>
                 <Button color="error" variant="outlined" onClick={onDelete}>
@@ -126,7 +126,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               </>
             ) : (
               <>
-                <Button type="submit" variant="contained" disabled={!form.formState.isValid}>
+                <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
                   {submitText}
                 </Button>
                 <Button color="secondary" variant="outlined" onClick={handleCancel}>

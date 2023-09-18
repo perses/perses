@@ -23,7 +23,7 @@ import {
   getTitleAction,
   getSubmitText,
 } from '@perses-dev/plugin-system';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
@@ -78,10 +78,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     },
   });
 
-  function processForm() {
+  const processForm: SubmitHandler<PanelEditorValidationType> = () => {
     const values: PanelEditorValues = { groupId, panelDefinition };
     onSave(values);
-  }
+  };
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -112,7 +112,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(processForm)}>
+      <form style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <Box
           sx={{
             display: 'flex',
@@ -123,7 +123,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         >
           <Typography variant="h2">{titleAction} Panel</Typography>
           <Stack direction="row" spacing={1} marginLeft="auto">
-            <Button type="submit" variant="contained" disabled={!form.formState.isValid}>
+            <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
               {submitText}
             </Button>
             <Button color="secondary" variant="outlined" onClick={handleCancel}>
