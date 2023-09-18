@@ -11,29 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
-
-import (
-	"fmt"
-	"regexp"
-)
-
-var idRegexp = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
-var keyMaxLength = 75
-
-// ValidateID checks for forbidden items in substring used inside id
-func ValidateID(name string) error {
-	if len(name) == 0 {
-		return fmt.Errorf("name cannot be empty")
-	}
-
-	if len(name) > keyMaxLength {
-		return fmt.Errorf("cannot contain more than %d characters", keyMaxLength)
-	}
-
-	if !idRegexp.MatchString(name) {
-		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, idRegexp.String())
-	}
-
-	return nil
+/**
+ * Generated a resource name valid for the API.
+ * By removing accents from alpha characters and replace specials character by underscores.
+ * @param name
+ */
+export function generateMetadataName(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/[^a-zA-Z0-9_.-]/g, '_');
 }

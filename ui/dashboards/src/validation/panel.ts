@@ -11,29 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+import { z } from 'zod';
 
-import (
-	"fmt"
-	"regexp"
-)
+export const panelEditorValidationSchema = z.object({
+  name: z.string().nonempty('Required'),
+  groupId: z.number(),
+  description: z.string().optional(),
+  type: z.string().nonempty('Required'),
+});
 
-var idRegexp = regexp.MustCompile("^[a-zA-Z0-9_.-]+$")
-var keyMaxLength = 75
-
-// ValidateID checks for forbidden items in substring used inside id
-func ValidateID(name string) error {
-	if len(name) == 0 {
-		return fmt.Errorf("name cannot be empty")
-	}
-
-	if len(name) > keyMaxLength {
-		return fmt.Errorf("cannot contain more than %d characters", keyMaxLength)
-	}
-
-	if !idRegexp.MatchString(name) {
-		return fmt.Errorf("%q is not a correct name. It should match the regexp: %s", name, idRegexp.String())
-	}
-
-	return nil
-}
+export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

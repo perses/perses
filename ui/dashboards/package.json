@@ -37,6 +37,7 @@
     "immer": "^9.0.15",
     "mdi-material-ui": "^7.4.0",
     "react-grid-layout": "^1.3.4",
+    "react-hook-form": "^7.46.1",
     "react-intersection-observer": "^9.4.0",
     "use-immer": "^0.7.0",
     "use-query-params": "^2.1.1",

@@ -31,6 +31,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
+import { useIsReadonly } from '../../model/config-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
@@ -53,6 +54,7 @@ function TabButton(props: TabButtonProps) {
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
+  const isReadonly = useIsReadonly();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
@@ -98,6 +100,7 @@ function TabButton(props: TabButtonProps) {
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
             projectOptions={[props.projectName]}
+            hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
           />
@@ -123,9 +126,10 @@ function TabButton(props: TabButtonProps) {
               },
             }}
             isOpen={isVariableDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
             onSave={handleVariableCreation}
             onClose={() => setVariableDrawerOpened(false)}
-            action="create"
           />
         </>
       );
@@ -151,6 +155,7 @@ function TabButton(props: TabButtonProps) {
             }}
             isOpen={isDatasourceDrawerOpened}
             action="create"
+            isReadonly={isReadonly}
             onSave={handleDatasourceCreation}
             onClose={() => setDatasourceDrawerOpened(false)}
           />

@@ -12,91 +12,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from 'react';
-import { Stack, Box, Button, Typography } from '@mui/material';
+import { useState } from 'react';
 import { Drawer } from '@perses-dev/components';
-import { PanelEditorValues, useDiscardChangesConfirmationDialog, usePanelEditor } from '../../context';
-import { PanelEditorForm, PanelEditorFormProps } from './PanelEditorForm';
+import { PanelEditorValues, usePanelEditor } from '../../context';
+import { PanelEditorForm } from './PanelEditorForm';
 
 /**
  * The Add/Edit panel drawer for editing a panel's options.
  */
 export const PanelDrawer = () => {
   const panelEditor = usePanelEditor();
-  const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
-    useDiscardChangesConfirmationDialog();
-
-  const [values, setValues] = useState<PanelEditorValues | undefined>(undefined);
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
-  const handleClose = () => {
-    const isModified = JSON.stringify(panelEditor?.initialValues) !== JSON.stringify(values);
-    if (isModified) {
-      openDiscardChangesConfirmationDialog({
-        onDiscardChanges: () => {
-          closeDiscardChangesConfirmationDialog();
-          setIsClosing(true);
-        },
-        onCancel: () => {
-          closeDiscardChangesConfirmationDialog();
-        },
-        description:
-          'You have unapplied changes in this panel. Are you sure you want to discard these changes? Changes cannot be recovered.',
-      });
-    } else {
-      setIsClosing(true);
-    }
-  };
-
-  // Don't call closeDrawer on the store until the Drawer has completely transitioned out
-  const handleExited = () => {
-    panelEditor?.close();
-    setIsClosing(false);
-  };
 
   // Drawer is open if we have a model and we're not transitioning out
   const isOpen = panelEditor !== undefined && isClosing === false;
 
-  const handleSubmit = () => {
+  function handleSave(values: PanelEditorValues) {
     // This shouldn't happen since we don't render the submit button until we have a model, but check to make TS happy
     if (panelEditor === undefined || values === undefined) {
       throw new Error('Cannot apply changes');
     }
     panelEditor.applyChanges(values);
     setIsClosing(true);
+  }
+
+  const handleClose = () => {
+    setIsClosing(true);
   };
 
-  const handleChange: PanelEditorFormProps['onChange'] = useCallback((values) => {
-    setValues(values);
-  }, []);
+  // Don't call closeDrawer on the store until the Drawer has completely transitioned out and reset close state
+  const handleExited = () => {
+    panelEditor?.close();
+    setIsClosing(false);
+  };
+
+  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
+  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
+  const handleClickOut = () => {
+    /* do nothing */
+  };
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClose} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} SlideProps={{ onExited: handleExited }} data-testid="panel-editor">
       {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
-      {panelEditor !== undefined && (
-        <>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              padding: (theme) => theme.spacing(1, 2),
-              borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
-            }}
-          >
-            <Typography variant="h2">{panelEditor.mode} Panel</Typography>
-            <Stack direction="row" spacing={1} marginLeft="auto">
-              {/* Using the 'form' attribute lets us have a submit button like this outside the form element */}
-              <Button type="submit" variant="contained" onClick={handleSubmit}>
-                {panelEditor.mode === 'Add' ? 'Add' : 'Apply'}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Stack>
-          </Box>
-          <PanelEditorForm initialValues={panelEditor.initialValues} onChange={handleChange} />
-        </>
+      {panelEditor && (
+        <PanelEditorForm
+          initialAction={panelEditor.mode}
+          initialValues={panelEditor.initialValues}
+          onSave={handleSave}
+          onClose={handleClose}
+        />
       )}
     </Drawer>
   );

@@ -22,13 +22,14 @@ interface DatasourceDrawerProps<T extends Datasource> {
   datasource: T;
   isOpen: boolean;
   action: Action;
+  isReadonly?: boolean;
   onSave: Dispatch<T>;
   onDelete?: DispatchWithPromise<T>;
   onClose: DispatchWithoutAction;
 }
 
 export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, action, onSave, onClose, onDelete } = props;
+  const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
@@ -53,6 +54,7 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
               initialDatasource={datasource}
               initialAction={action}
               isDraft={false}
+              isReadonly={isReadonly}
               onSave={onSave}
               onClose={onClose}
               onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}

@@ -21,19 +21,8 @@ import {
 } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
+import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
-
-/**
- * Generated a resource name valid for the API.
- * By removing accents from alpha characters and replace specials character by underscores.
- * @param name
- */
-function generateMetadataName(name: string): string {
-  return name
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .replace(/[^a-zA-Z0-9_.:-]/g, '_');
-}
 
 /**
  * The View for creating a new Dashboard.
@@ -43,7 +32,7 @@ function CreateDashboardView() {
   const location = useLocation();
   const dashboardName = location.state;
 
-  if (projectName === undefined || dashboardName === undefined) {
+  if (!projectName || !dashboardName) {
     throw new Error('Unable to get the dashboard or project name');
   }
 

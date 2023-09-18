@@ -110,18 +110,12 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: Abs
           <Box
             sx={(theme) => ({
               // TODO: create separate reusable calendar component
-              '.MuiPickerStaticWrapper-content': {
+              '.MuiPickersLayout-contentWrapper': {
                 backgroundColor: theme.palette.background.default,
-              },
-              // reposition AM and PM buttons
-              '.MuiIconButton-sizeMedium': {
-                top: 80,
-                bottom: 'auto',
-                margin: theme.spacing(0, 3),
               },
             })}
           >
-            <Typography variant="h3" padding={1}>
+            <Typography variant="h3" padding={1} paddingLeft={2}>
               Select Start Time
             </Typography>
             <StaticDateTimePicker
@@ -136,25 +130,18 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: Abs
               onAccept={() => {
                 setShowStartCalendar(false);
               }}
-              renderInput={(params) => <TextField {...params} />}
             />
           </Box>
         )}
         {!showStartCalendar && (
           <Box
             sx={(theme) => ({
-              '.MuiPickerStaticWrapper-content': {
+              '.MuiPickersLayout-contentWrapper': {
                 backgroundColor: theme.palette.background.default,
-              },
-              // reposition AM and PM buttons
-              '.MuiIconButton-sizeMedium': {
-                top: 80,
-                bottom: 'auto',
-                margin: theme.spacing(0, 3),
               },
             })}
           >
-            <Typography variant="h3" padding={1}>
+            <Typography variant="h3" padding={1} paddingLeft={2}>
               Select End Time
             </Typography>
             <StaticDateTimePicker
@@ -172,7 +159,6 @@ export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: Abs
                 setShowStartCalendar(true);
                 onChangeEndTime(newValue);
               }}
-              renderInput={(params) => <TextField {...params} />}
             />
           </Box>
         )}

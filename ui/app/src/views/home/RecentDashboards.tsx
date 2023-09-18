@@ -38,7 +38,12 @@ function RecentDashboardsMosaic() {
   return (
     <>
       {data.map((datedDashboard) => (
-        <Grid key={datedDashboard.dashboard.metadata.name} item xs={6} lg={4}>
+        <Grid
+          key={`${datedDashboard.dashboard.metadata.project}-${datedDashboard.dashboard.metadata.name}`}
+          item
+          xs={6}
+          lg={4}
+        >
           <DashboardCard dashboard={datedDashboard.dashboard}></DashboardCard>
         </Grid>
       ))}

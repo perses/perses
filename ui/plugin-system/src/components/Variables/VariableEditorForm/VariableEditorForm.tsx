@@ -18,42 +18,24 @@ import {
   Switch,
   TextField,
   Grid,
-  FormControl,
   FormControlLabel,
-  InputLabel,
   MenuItem,
   Button,
   Stack,
   ClickAwayListener,
   Divider,
-  Select,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
+import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
+import { variableEditValidationSchema, VariableEditValidationType } from '../../../validation';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
-
-// TODO: Replace with proper validation library
-function getValidation(state: ReturnType<typeof getInitialState>) {
-  /** Name validation */
-  let name = null;
-  if (!state.name) {
-    name = 'Name is required';
-  }
-  // name can only contain alphanumeric characters and underscores and no spaces
-  if (state.name && !/^[a-zA-Z0-9_-]+$/.test(state.name)) {
-    name = 'Name can only contain alphanumeric characters, underscores, and dashes';
-  }
-
-  return {
-    name,
-    isValid: !name,
-  };
-}
 
 function FallbackPreview() {
   return <div>Error previewing values</div>;
@@ -63,17 +45,17 @@ interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
   initialAction: Action;
   isDraft: boolean;
+  isReadonly?: boolean;
   onSave: (def: VariableDefinition) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
 export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, initialAction, isDraft, onSave, onClose, onDelete } = props;
+  const { initialVariableDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
   const initialState = getInitialState(initialVariableDefinition);
   const [state, setState] = useImmer(initialState);
-  const validation = useMemo(() => getValidation(state), [state]);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [action, setAction] = useState(initialAction);
@@ -94,6 +76,16 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
+  const form = useForm<VariableEditValidationType>({
+    resolver: zodResolver(variableEditValidationSchema),
+    mode: 'onBlur',
+    defaultValues: state,
+  });
+
+  const processForm: SubmitHandler<VariableEditValidationType> = () => {
+    onSave(getVariableDefinitionFromState(state));
+  };
+
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
@@ -107,7 +99,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   }, [state, initialState, setDiscardDialogOpened, onClose]);
 
   return (
-    <>
+    <FormProvider {...form}>
       <Box
         sx={{
           display: 'flex',
@@ -118,9 +110,9 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
       >
         <Typography variant="h2">{titleAction} Variable</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' && (
+          {action === 'read' ? (
             <>
-              <Button disabled={!validation.isValid} variant="contained" onClick={() => setAction('update')}>
+              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                 Edit
               </Button>
               <Button color="error" variant="outlined" onClick={onDelete}>
@@ -141,15 +133,13 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 Close
               </Button>
             </>
-          )}
-          {action !== 'read' && (
+          ) : (
             <>
               <Button
-                disabled={!validation.isValid}
+                type="submit"
                 variant="contained"
-                onClick={() => {
-                  onSave(getVariableDefinitionFromState(state));
-                }}
+                disabled={!form.formState.isValid}
+                onClick={form.handleSubmit(processForm)}
               >
                 {submitText}
               </Button>
@@ -163,76 +153,109 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
         <Grid container spacing={2} mb={2}>
           <Grid item xs={8}>
-            <TextField
-              required
-              error={!!validation.name}
-              fullWidth
-              label="Name"
-              value={state.name}
-              helperText={validation.name}
-              InputProps={{
-                disabled: action === 'update',
-                readOnly: action === 'read',
-              }}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.name = v.target.value;
-                });
-              }}
+            <Controller
+              name="name"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  fullWidth
+                  label="Name"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    disabled: action === 'update',
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.name = event.target.value;
+                    });
+                  }}
+                />
+              )}
             />
           </Grid>
           <Grid item xs={4}>
-            <TextField
-              fullWidth
-              label="Display Label"
-              value={state.title || ''}
-              InputProps={{
-                readOnly: action === 'read',
-              }}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.title = v.target.value;
-                });
-              }}
+            <Controller
+              name="title"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Display Label"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.title = event.target.value;
+                    });
+                  }}
+                />
+              )}
             />
           </Grid>
           <Grid item xs={8}>
-            <TextField
-              fullWidth
-              label="Description"
-              value={state.description}
-              InputProps={{
-                readOnly: action === 'read',
-              }}
-              onChange={(v) => {
-                setState((draft) => {
-                  draft.description = v.target.value;
-                });
-              }}
+            <Controller
+              name="description"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Description"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.description = event.target.value;
+                    });
+                  }}
+                />
+              )}
             />
           </Grid>
           <Grid item xs={4}>
-            <FormControl fullWidth>
-              <InputLabel id="variable-type-select-label">Type</InputLabel>
-              <Select
-                labelId="variable-type-select-label"
-                id="variable-type-select"
-                label="Type"
-                value={state.kind}
-                readOnly={action === 'read'}
-                onChange={(v) => {
-                  setState((draft) => {
-                    draft.kind = v.target.value as VariableEditorState['kind'];
-                  });
-                }}
-              >
-                {VARIABLE_TYPES.map((v) => (
-                  <MenuItem key={v.kind} value={v.kind}>
-                    {v.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Controller
+              name="kind"
+              render={({ field, fieldState }) => (
+                <TextField
+                  select
+                  {...field}
+                  fullWidth
+                  label="Type"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                  onChange={(event) => {
+                    field.onChange(event);
+                    setState((draft) => {
+                      draft.kind = event.target.value as VariableEditorState['kind'];
+                    });
+                  }}
+                >
+                  {VARIABLE_TYPES.map((v) => (
+                    <MenuItem key={v.kind} value={v.kind}>
+                      {v.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
           </Grid>
         </Grid>
 
@@ -250,6 +273,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               <TextField
                 label="Value"
                 value={state.textVariableFields.value}
+                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                 InputProps={{
                   readOnly: action === 'read',
                 }}
@@ -318,6 +342,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 <TextField
                   label="Capturing Regexp Filter"
                   value={state.listVariableFields.capturingRegexp || ''}
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
                     readOnly: action === 'read',
                   }}
@@ -383,6 +408,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   <TextField
                     label="Custom All Value"
                     value={state.listVariableFields.customAllValue}
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                     InputProps={{
                       readOnly: action === 'read',
                     }}
@@ -414,6 +440,6 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
           onClose();
         }}
       />
-    </>
+    </FormProvider>
   );
 }

@@ -47,16 +47,16 @@ describe('PluginEditor', () => {
 
   // Opens the PluginKindSelect and waits for loading to finish (i.e. options to appear)
   const openPluginKind = async () => {
-    const select = screen.getByRole('button', { name: 'Variable Type' });
+    const select = screen.getByLabelText('Variable Type');
     userEvent.click(select);
-    const options = await screen.findAllByRole('option');
+    const options = await screen.findAllByTestId('option');
     return options;
   };
 
   it('shows plugin kind and spec editor', async () => {
     renderComponent();
 
-    const pluginKind = screen.getByRole('button', { name: 'Variable Type' });
+    const pluginKind = screen.getByLabelText('Variable Type');
     await waitFor(() => expect(pluginKind).toHaveTextContent('Ernie Variable'));
     const specEditor = await screen.findByLabelText('ErnieVariable editor');
     expect(specEditor).toHaveValue('Option1Value');
@@ -117,7 +117,7 @@ describe('PluginEditor', () => {
       });
 
       // Wait for default panel kind to load.
-      const pluginKind = screen.getByRole('button', { name: 'Variable Type' });
+      const pluginKind = screen.getByLabelText('Variable Type');
       await waitFor(() => expect(pluginKind).toHaveTextContent('Ernie Variable 1'));
     });
 
@@ -129,7 +129,7 @@ describe('PluginEditor', () => {
       });
 
       // Wait for specified panel kind to load.
-      const pluginKind = screen.getByRole('button', { name: 'Variable Type' });
+      const pluginKind = screen.getByLabelText('Variable Type');
       await waitFor(() => expect(pluginKind).toHaveTextContent('Ernie Variable 2'));
     });
   });

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Select, SelectProps, MenuItem } from '@mui/material';
+import { MenuItem, TextField, TextFieldProps } from '@mui/material';
+import { forwardRef } from 'react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 
-export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'children'> {
+export interface PluginKindSelectProps extends Omit<TextFieldProps, 'children'> {
   pluginType: PluginType;
 }
 
@@ -23,7 +24,7 @@ export interface PluginKindSelectProps extends Omit<SelectProps<string>, 'childr
  * Displays a MUI Select input for selecting a plugin's kind from a list of all the available plugins of a specific
  * plugin type. (e.g. "Show a list of all the Panel plugins" or "Show a list of all the Variable plugins").
  */
-export function PluginKindSelect(props: PluginKindSelectProps) {
+export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) => {
   const { pluginType, value: propValue, ...others } = props;
   const { data, isLoading } = useListPluginMetadata(pluginType);
 
@@ -32,12 +33,14 @@ export function PluginKindSelect(props: PluginKindSelectProps) {
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <Select sx={{ minWidth: 120 }} {...others} value={value}>
+    <TextField select inputRef={ref} {...others} value={value} data-testid="plugin-kind-select">
+      {isLoading && <MenuItem value="">Loading...</MenuItem>}
       {data?.map((metadata) => (
-        <MenuItem key={metadata.kind} value={metadata.kind}>
+        <MenuItem data-testid="option" key={metadata.kind} value={metadata.kind}>
           {metadata.display.name}
         </MenuItem>
       ))}
-    </Select>
+    </TextField>
   );
-}
+});
+PluginKindSelect.displayName = 'PluginKindSelect';

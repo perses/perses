@@ -13,6 +13,7 @@
 
 import { PanelDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
+import { Action } from '@perses-dev/plugin-system';
 import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import {
@@ -55,7 +56,7 @@ export interface PanelEditorState {
   /**
    * Whether we're adding a new panel, or editing an existing panel.
    */
-  mode: 'Add' | 'Edit';
+  mode: Action;
 
   /**
    * Initial values for the things that can be edited about a panel.
@@ -112,7 +113,7 @@ export function createPanelEditorSlice(): StateCreator<
       }
 
       const editorState: PanelEditorState = {
-        mode: 'Edit',
+        mode: 'update',
         initialValues: {
           groupId: panelGroupItemId.panelGroupId,
           panelDefinition: panelToEdit,
@@ -183,7 +184,7 @@ export function createPanelEditorSlice(): StateCreator<
       }
 
       const editorState: PanelEditorState = {
-        mode: 'Add',
+        mode: 'create',
         initialValues: {
           groupId: panelGroupId,
           panelDefinition: get().initialValues?.panelDefinition ?? createPanelDefinition(),

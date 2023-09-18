@@ -62,6 +62,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             InputProps={{
               readOnly: isReadonly,
             }}
+            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
             onChange={(e) => onChange({ ...value, directUrl: e.target.value })}
           />
         </>
@@ -78,6 +79,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             InputProps={{
               readOnly: isReadonly,
             }}
+            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
             onChange={(e) =>
               onChange({
                 ...value,
@@ -110,6 +112,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         InputProps={{
                           readOnly: isReadonly,
                         }}
+                        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                       />
                     </Grid>
                     <Grid item xs={4}>
@@ -121,6 +124,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         InputProps={{
                           readOnly: isReadonly,
                         }}
+                        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                       />
                     </Grid>
                   </Fragment>
@@ -148,6 +152,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         InputProps={{
                           readOnly: isReadonly,
                         }}
+                        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                         onChange={(e) =>
                           onChange({
                             ...value,
@@ -172,6 +177,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         InputProps={{
                           readOnly: isReadonly,
                         }}
+                        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                         onChange={(e) =>
                           onChange({
                             ...value,
@@ -243,6 +249,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             InputProps={{
               readOnly: isReadonly,
             }}
+            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
             onChange={(e) =>
               onChange({
                 ...value,
@@ -341,6 +348,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
         InputProps={{
           readOnly: isReadonly,
         }}
+        InputLabelProps={{ shrink: isReadonly ? true : undefined }}
         onChange={(e) => onChange({ ...value, scrapeInterval: e.target.value as DurationString })}
       />
       <Typography variant="h4" mt={2}>
