@@ -61,10 +61,45 @@ spec: {
             kind: "TextVariable"
             spec: {
                 name: grafanaVar.name
+                display: {
+                    name: [ // switch
+                        if grafanaVar.label != _|_ if grafanaVar.label != "" {
+                            grafanaVar.label
+                        },
+                        grafanaVar.name
+                    ][0]
+                    if grafanaVar.description != _|_ {
+                        description: grafanaVar.description
+                    }
+                    hidden: true
+                }
+                constant: true
                 value: grafanaVar.query
             }
         }
-        if grafanaVar.type != "constant" {
+        if grafanaVar.type == "textbox" {
+            kind: "TextVariable"
+            spec: {
+                name: grafanaVar.name
+                display: {
+                    name: [ // switch
+                        if grafanaVar.label != _|_ if grafanaVar.label != "" {
+                            grafanaVar.label
+                        },
+                        grafanaVar.name
+                    ][0]
+                    if grafanaVar.description != _|_ {
+                        description: grafanaVar.description
+                    }
+                    if grafanaVar.hide > 0 {
+                        hidden: true
+                    }
+                }
+                constant: false
+                value: grafanaVar.query
+            }
+        }
+        if grafanaVar.type != "constant" && grafanaVar.type != "textbox" {
             kind: "ListVariable"
             spec: {
                 name: grafanaVar.name
@@ -85,7 +120,7 @@ spec: {
                     }
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
-                allowMultiple: *grafanaVar.multi | false       // the default value tackles the case of variables of type `interval` that don't have such field
+                allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
                 // defaultValue: nothing to map to this field
                 #var: grafanaVar
                 plugin: [ // switch

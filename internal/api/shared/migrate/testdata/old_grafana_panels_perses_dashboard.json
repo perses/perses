@@ -11,12 +11,10 @@
     "display": {
       "name": "queues-test"
     },
-    "duration": "1h",
     "variables": [
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "datasource",
           "display": {
             "name": "PaaS",
             "hidden": true
@@ -26,9 +24,15 @@
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": ["grafana", "migration", "not", "supported"]
+              "values": [
+                "grafana",
+                "migration",
+                "not",
+                "supported"
+              ]
             }
-          }
+          },
+          "name": "datasource"
         }
       }
     ],
@@ -72,9 +76,13 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom",
                 "mode": "table",
-                "values": ["min", "max", "mean"]
+                "position": "bottom",
+                "values": [
+                  "min",
+                  "max",
+                  "mean"
+                ]
               }
             }
           },
@@ -158,6 +166,7 @@
           ]
         }
       }
-    ]
+    ],
+    "duration": "1h"
   }
 }

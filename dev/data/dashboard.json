@@ -62,11 +62,20 @@
             "name": "interval",
             "plugin": {
               "kind": "StaticListVariable",
-              "spec": { "values": ["1m", "5m"] }
+              "spec": {
+                "values": ["1m", "5m"]
+              }
             }
           }
         },
-        { "kind": "TextVariable", "spec": { "name": "text", "value": "test" } }
+        { 
+          "kind": "TextVariable",
+          "spec": {
+            "name": "text",
+            "value": "test",
+            "constant": true
+          }
+        }
       ],
       "panels": {
         "defaultTimeSeriesChart": {
@@ -3059,7 +3068,8 @@
               "name": "Text variable",
               "hidden": false
             },
-            "value": "initial value"
+            "value": "initial value",
+            "constant": false
           }
         }
       ],

@@ -11,47 +11,46 @@
     "display": {
       "name": "Perses testing / Simple grafana dashboard"
     },
-    "duration": "1h",
     "variables": [
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "listVar",
+          "display": {
+            "name": "My Custom Variable",
+            "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
+            "hidden": false
+          },
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": ["one", "two", "three"]
+              "values": [
+                "one",
+                "two",
+                "three"
+              ]
             }
-          }
+          },
+          "name": "MyCustom"
         }
       },
       {
         "kind": "TextVariable",
         "spec": {
-          "name": "myConst",
-          "value": "HelloWorld"
+          "display": {
+            "name": "My Constant Variable",
+            "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
+            "hidden": true
+          },
+          "value": "const_val",
+          "constant": true,
+          "name": "MyConst"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "firstNames",
-          "allowAllValue": false,
-          "allowMultiple": false,
-          "plugin": {
-            "kind": "StaticListVariable",
-            "spec": {
-              "values": ["alice", "bob", "chris"]
-            }
-          }
-        }
-      },
-      {
-        "kind": "ListVariable",
-        "spec": {
-          "name": "lv1",
           "display": {
             "name": "Stack",
             "description": "Label values, 1rst flavor",
@@ -65,13 +64,13 @@
               "labelName": "stack",
               "matchers": []
             }
-          }
+          },
+          "name": "lv1"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "lv2",
           "display": {
             "name": "Stack with Metric",
             "description": "Label values, 2nd flavor",
@@ -83,15 +82,17 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "labelName": "stack",
-              "matchers": ["thanos_build_info"]
+              "matchers": [
+                "thanos_build_info"
+              ]
             }
-          }
+          },
+          "name": "lv2"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "lv3",
           "display": {
             "name": "Stack with Timeserie",
             "description": "Label values, 3rd flavor",
@@ -103,15 +104,17 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "labelName": "stack",
-              "matchers": ["thanos_build_info{stack=~\"erd.+\"}"]
+              "matchers": [
+                "thanos_build_info{stack=~\"erd.+\"}"
+              ]
             }
-          }
+          },
+          "name": "lv3"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "lv4",
           "display": {
             "name": "Stack with Timeserie reusing other variable",
             "description": "Label values, 4th flavor",
@@ -123,15 +126,17 @@
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
               "labelName": "stack",
-              "matchers": ["thanos_build_info{stack=~\"$lv1\"}"]
+              "matchers": [
+                "thanos_build_info{stack=~\"$lv1\"}"
+              ]
             }
-          }
+          },
+          "name": "lv4"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "interval",
           "display": {
             "name": "interval",
             "description": "ad hoc filter",
@@ -155,16 +160,16 @@
                 "30d"
               ]
             }
-          }
+          },
+          "name": "interval"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "AHF",
           "display": {
-            "name": "AHF",
-            "description": "adHocFilter",
+            "name": "My Ad hoc filter",
+            "description": "This ad-hoc filter should be replaced by a placeholder in the migration since it's not supported in Perses yet",
             "hidden": false
           },
           "allowAllValue": false,
@@ -172,15 +177,20 @@
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
-              "values": ["grafana", "migration", "not", "supported"]
+              "values": [
+                "grafana",
+                "migration",
+                "not",
+                "supported"
+              ]
             }
-          }
+          },
+          "name": "AdHocFilter"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "LabelNamesTest",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -188,13 +198,13 @@
             "spec": {
               "matchers": []
             }
-          }
+          },
+          "name": "LabelNamesTest"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "queryResVar",
           "display": {
             "name": "Query Result Variable",
             "description": "variable using query_result clause",
@@ -208,13 +218,13 @@
               "expr": "group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"})",
               "labelName": "type"
             }
-          }
+          },
+          "name": "queryResVar"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "queryResVarVolatile",
           "display": {
             "name": "queryResVarVolatile",
             "description": "query result var for volatile series (relies $__range global var)",
@@ -228,13 +238,13 @@
               "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
               "labelName": "type"
             }
-          }
+          },
+          "name": "queryResVarVolatile"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "queryResVarOther",
           "display": {
             "name": "queryResVarOther",
             "description": "query result var with no <aggr> by clause",
@@ -248,7 +258,20 @@
               "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
               "labelName": "migration_from_grafana_not_supported"
             }
-          }
+          },
+          "name": "queryResVarOther"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "display": {
+            "name": "My Text Box Variable",
+            "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false",
+            "hidden": false
+          },
+          "value": "<placeholder text>",
+          "name": "MyTextBox"
         }
       }
     ],
@@ -308,6 +331,9 @@
             "kind": "GaugeChart",
             "spec": {
               "calculation": "last-number",
+              "format": {
+                "unit": "hours"
+              },
               "thresholds": {
                 "steps": [
                   {
@@ -319,9 +345,6 @@
                     "value": 80
                   }
                 ]
-              },
-              "format": {
-                "unit": "hours"
               }
             }
           },
@@ -355,8 +378,8 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom",
                 "mode": "list",
+                "position": "bottom",
                 "values": [
                   "min",
                   "max",
@@ -412,16 +435,12 @@
             "kind": "TimeSeriesChart",
             "spec": {
               "legend": {
-                "position": "bottom",
                 "mode": "table",
+                "position": "bottom",
                 "values": []
               },
               "thresholds": {
                 "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
                   {
                     "color": "red",
                     "value": 80
@@ -553,6 +572,7 @@
           ]
         }
       }
-    ]
+    ],
+    "duration": "1h"
   }
 }

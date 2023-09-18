@@ -74,6 +74,7 @@ describe('checkSavedDefaultVariableStatus', () => {
             name: 'Text display',
             hidden: false,
           },
+          constant: true,
           value: 'first text value',
         },
       },
@@ -210,6 +211,7 @@ describe('checkSavedDefaultVariableStatus', () => {
             name: 'Text display',
             hidden: false,
           },
+          constant: true,
           value: 'first text value',
         },
       },
@@ -269,6 +271,7 @@ describe('checkSavedDefaultVariableStatus', () => {
               display: {
                 name: 'Greetings(project)',
               },
+              constant: false,
               value: 'hello',
             },
           },
@@ -291,6 +294,7 @@ describe('checkSavedDefaultVariableStatus', () => {
               display: {
                 name: 'Greetings(global)',
               },
+              constant: true,
               value: 'hello',
             },
           },
@@ -320,6 +324,7 @@ describe('checkSavedDefaultVariableStatus', () => {
           display: {
             name: 'Greetings(project)',
           },
+          constant: false,
           value: 'hello',
         },
       },
@@ -337,6 +342,7 @@ describe('checkSavedDefaultVariableStatus', () => {
           display: {
             name: 'Greetings(global)',
           },
+          constant: true,
           value: 'hello',
         },
       },

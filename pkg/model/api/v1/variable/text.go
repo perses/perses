@@ -18,8 +18,9 @@ import (
 )
 
 type TextSpec struct {
-	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
-	Value   string   `json:"value" yaml:"value"`
+	Display  *Display `json:"display,omitempty" yaml:"display,omitempty"`
+	Value    string   `json:"value" yaml:"value"`
+	Constant bool     `json:"constant,omitempty" yaml:"constant,omitempty"`
 }
 
 func (v *TextSpec) Validate() error {

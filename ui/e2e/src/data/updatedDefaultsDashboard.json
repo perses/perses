@@ -118,6 +118,7 @@
             "name": "Text variable",
             "hidden": false
           },
+          "constant": true,
           "value": "initial value"
         }
       }

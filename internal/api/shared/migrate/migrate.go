@@ -168,13 +168,15 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 		logrus.WithError(err).Trace("Unable to compile the migration schema using the received dashboard to resolve the paths")
 		return nil, shared.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses dashboard: %s", err))
 	}
-	logrus.Tracef("final value: %#v", mappingVal)
+	logrus.Tracef("final migration schema: %#v", mappingVal)
 
 	// marshall to JSON then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
 	persesDashboardJSON, err := json.Marshal(mappingVal)
 	if err != nil {
 		return nil, fmt.Errorf("%w: Unable to marshall CUE Value to json: %s", shared.InternalError, err)
 	}
+	logrus.Tracef("perses dashboard as JSON: %s", string(persesDashboardJSON))
+
 	var persesDashboard v1.Dashboard
 	err = json.Unmarshal(persesDashboardJSON, &persesDashboard)
 	if err != nil {

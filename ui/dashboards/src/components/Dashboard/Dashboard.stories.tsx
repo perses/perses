@@ -164,7 +164,14 @@ const DEFAULT_ALL_DASHBOARD: DashboardResource = {
       },
     ],
     variables: [
-      { kind: 'TextVariable', spec: { name: 'job', value: 'node' } },
+      {
+        kind: 'TextVariable',
+        spec: {
+          name: 'job',
+          value: 'node',
+          constant: true,
+        },
+      },
       {
         kind: 'ListVariable',
         spec: {

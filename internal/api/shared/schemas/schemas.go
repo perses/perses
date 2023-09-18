@@ -190,9 +190,9 @@ func (s *sch) ValidateGlobalVariable(v modelV1.VariableSpec) error {
 	return s.ValidateVariable(listVariableSpec.Plugin, "")
 }
 
-// ValidateDashboardVariables verify a list of variables defines in a dashboard.
+// ValidateDashboardVariables verify a list of variables defined in a dashboard.
 // The variables are matched against the known list of CUE definitions (schemas)
-// This applies to the ListVariable type only (TextVariable is skipped)
+// This applies to the ListVariable type only (TextVariable is skipped as there are no plugins for this kind)
 // If no schema matches for at least 1 variable, the validation fails.
 func (s *sch) ValidateDashboardVariables(variables []dashboard.Variable) error {
 	if s.vars == nil {

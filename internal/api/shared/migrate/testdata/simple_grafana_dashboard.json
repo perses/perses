@@ -79,7 +79,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.3",
+      "pluginVersion": "9.5.8",
       "targets": [
         {
           "datasource": {
@@ -144,7 +144,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.4.3",
+      "pluginVersion": "9.5.8",
       "targets": [
         {
           "datasource": {
@@ -319,8 +319,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -474,10 +473,12 @@
           "text": "one",
           "value": "one"
         },
+        "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
         "hide": 0,
         "includeAll": false,
+        "label": "My Custom Variable",
         "multi": false,
-        "name": "listVar",
+        "name": "MyCustom",
         "options": [
           {
             "selected": true,
@@ -500,42 +501,13 @@
         "type": "custom"
       },
       {
+        "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
         "hide": 2,
-        "name": "myConst",
-        "query": "HelloWorld",
+        "label": "My Constant Variable",
+        "name": "MyConst",
+        "query": "const_val",
         "skipUrlSync": false,
         "type": "constant"
-      },
-      {
-        "current": {
-          "selected": false,
-          "text": "alice",
-          "value": "alice"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "multi": false,
-        "name": "firstNames",
-        "options": [
-          {
-            "selected": true,
-            "text": "alice",
-            "value": "alice"
-          },
-          {
-            "selected": false,
-            "text": "bob",
-            "value": "bob"
-          },
-          {
-            "selected": false,
-            "text": "chris",
-            "value": "chris"
-          }
-        ],
-        "query": "alice,bob,chris",
-        "skipUrlSync": false,
-        "type": "custom"
       },
       {
         "current": {
@@ -723,10 +695,11 @@
           "type": "prometheus",
           "uid": "argos-world"
         },
-        "description": "adHocFilter",
+        "description": "This ad-hoc filter should be replaced by a placeholder in the migration since it's not supported in Perses yet",
         "filters": [],
         "hide": 0,
-        "name": "AHF",
+        "label": "My Ad hoc filter",
+        "name": "AdHocFilter",
         "skipUrlSync": false,
         "type": "adhoc"
       },
@@ -787,8 +760,8 @@
       {
         "current": {
           "selected": false,
-          "text": "{type=\"ACUS\"} 1 1680018176000",
-          "value": "{type=\"ACUS\"} 1 1680018176000"
+          "text": "{type=\"OBE\"} 1 1694769404000",
+          "value": "{type=\"OBE\"} 1 1694769404000"
         },
         "datasource": {
           "type": "prometheus",
@@ -837,6 +810,27 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "<placeholder text>",
+          "value": "<placeholder text>"
+        },
+        "description": "This Text box variable should be translated into a TextVariable in Perses, with constant flag set to false",
+        "hide": 0,
+        "label": "My Text Box Variable",
+        "name": "MyTextBox",
+        "options": [
+          {
+            "selected": true,
+            "text": "<placeholder text>",
+            "value": "<placeholder text>"
+          }
+        ],
+        "query": "<placeholder text>",
+        "skipUrlSync": false,
+        "type": "textbox"
       }
     ]
   },
@@ -848,6 +842,6 @@
   "timezone": "",
   "title": "Perses testing / Simple grafana dashboard",
   "uid": "xRV24sBVk",
-  "version": 2,
+  "version": 6,
   "weekStart": ""
 }

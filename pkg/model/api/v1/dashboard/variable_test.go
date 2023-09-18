@@ -37,7 +37,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
   "kind": "TextVariable",
   "spec": {
     "name": "SimpleText",
-    "value": "value"
+    "value": "value",
+	"constant": true
   }
 }
 `,
@@ -45,7 +46,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 				Kind: variable.KindText,
 				Spec: &TextVariableSpec{
 					TextSpec: variable.TextSpec{
-						Value: "value",
+						Value:    "value",
+						Constant: true,
 					},
 					Name: "SimpleText",
 				},
@@ -281,12 +283,14 @@ kind: "TextVariable"
 spec:
   name: "SimpleText"
   value: "value"
+  constant: true
 `,
 			result: &Variable{
 				Kind: variable.KindText,
 				Spec: &TextVariableSpec{
 					TextSpec: variable.TextSpec{
-						Value: "value",
+						Value:    "value",
+						Constant: true,
 					},
 					Name: "SimpleText",
 				},
