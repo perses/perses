@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, LinearProgress, TextField, Autocomplete, Checkbox } from '@mui/material';
+import { Box, LinearProgress, TextField, Autocomplete } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
