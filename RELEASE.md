@@ -75,7 +75,7 @@ Create a branch that follows the naming pattern `release/v<X.Y>` and includes th
   in general, and on the addition to the changelog, in particular.
   - It's also helpful to drop a link to the release PR in #perses-dev on Matrix to get extra visibility.
 - Address any necessary feedback.
-- Once the pull request is approved, merge the it into the release branch.
+- Once the pull request is approved, merge it into the release branch.
 
 ### 2. Create release tag and validate release
 
