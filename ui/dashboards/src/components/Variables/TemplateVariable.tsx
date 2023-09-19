@@ -151,7 +151,6 @@ function ListVariable({ name, source }: TemplateVariableProps) {
       <FormControl fullWidth>
         <InputLabel id={name}>{title}</InputLabel>
         <Select
-          sx={{ minWidth: 100, maxWidth: 250 }}
           id={name}
           label={title}
           value={selectedValue}
