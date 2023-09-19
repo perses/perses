@@ -22,7 +22,7 @@ import {
 import { TemplateVariable } from './TemplateVariable';
 
 const VARIABLE_INPUT_MIN_WIDTH = '120px';
-const VARIABLE_INPUT_MAX_WIDTH = '240px';
+const VARIABLE_INPUT_MAX_WIDTH = '500px';
 
 export function TemplateVariableList() {
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
