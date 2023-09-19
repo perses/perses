@@ -28,12 +28,12 @@ import {
 import { useImmer } from 'use-immer';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
-import { variableEditValidationSchema, VariableEditValidationType } from '../../../validation';
+import { useValidation } from '../../../validation';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
 
@@ -76,15 +76,16 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<VariableEditValidationType>({
-    resolver: zodResolver(variableEditValidationSchema),
+  const validation = useValidation();
+  const form = useForm({
+    resolver: zodResolver(validation.variableEditorFormSchema),
     mode: 'onBlur',
     defaultValues: state,
   });
 
-  const processForm: SubmitHandler<VariableEditValidationType> = () => {
+  function processForm() {
     onSave(getVariableDefinitionFromState(state));
-  };
+  }
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval

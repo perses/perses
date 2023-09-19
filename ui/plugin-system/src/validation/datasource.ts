@@ -20,5 +20,3 @@ export const datasourceEditValidationSchema = z.object({
   description: z.string().optional(),
   default: z.boolean(),
 });
-
-export type DatasourceEditValidationType = z.infer<typeof datasourceEditValidationSchema>;

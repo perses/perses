@@ -23,5 +23,3 @@ export const variableEditValidationSchema = z.object({
   description: z.string().optional(),
   kind: z.string().nonempty('Required'),
 });
-
-export type VariableEditValidationType = z.infer<typeof variableEditValidationSchema>;

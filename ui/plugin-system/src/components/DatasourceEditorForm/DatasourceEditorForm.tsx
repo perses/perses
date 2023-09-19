@@ -16,11 +16,11 @@ import { Display, Datasource } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import React, { Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { Action, getSubmitText, getTitleAction } from '../../utils';
-import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
+import { useValidation } from '../../validation';
 
 /**
  * This preprocessing ensures that we always have a defined object for the `display` property
@@ -61,8 +61,9 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<DatasourceEditValidationType>({
-    resolver: zodResolver(datasourceEditValidationSchema),
+  const validation = useValidation();
+  const form = useForm({
+    resolver: zodResolver(validation.datasourceEditorFormSchema),
     mode: 'onBlur',
     defaultValues: {
       name: state.metadata.name,
@@ -72,9 +73,9 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
     },
   });
 
-  const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
+  function processForm() {
     onSave(state);
-  };
+  }
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
