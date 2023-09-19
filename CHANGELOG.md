@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.40.0 / 2023-09-19
+
+- [FEATURE] Add metadata validation for project, dashboard, datasource and variable on the UI (#1416)
+- [FEATURE] Display name is optional for variables (#1414)
+- [FEATURE] Add builtin variables ($__interval, $interval_ms and $__rate_interval) (#1379)
+- [FEATURE] Add $__range(_ms/_s) builtin variables + add support for curly bracket variables + fix prefixed variables by other variable name (#1376)
+- [FEATURE] Support secret CRUD on the API side (#1373)
+- [FEATURE] Add builtin variables ($__dashboard, $__project, $__from, $__to) (#1344)
+- [FEATURE] Add templating to issues (#1358)
+- [FEATURE] Global Datasource CRUD + DRY refactoring (#1339)
+- [FEATURE] Global Variables CRUD (#1328)
+- [ENHANCEMENT] Increase max width for variable dropdowns (#1434)
+- [ENHANCEMENT] Remove annoying double scroll on Edit JSON dialog (#1433)
+- [ENHANCEMENT] Add new `constant` boolean field to the TextVariable to dis/allow user input + improve grafana migration for Constant & TextBox variables accordingly (#1428)
+- [ENHANCEMENT] Autocomplete project name in the migration page (#1425)
+- [ENHANCEMENT] Hide and encrypt sensitive data coming from the datasource spec (#1378)
+- [ENHANCEMENT] Reconcile variables & datasources CRUD (#1400)
+- [ENHANCEMENT] Use secret in the proxy (#1377)
+- [ENHANCEMENT] Add a new key password_file in the sql config (#1371)
+- [ENHANCEMENT] Skip gzip compression when using the proxy (#1361)
+- [BUGFIX] dedicated route for dashboard creation to fix wrong redirections (#1426)
+- [BUGFIX] Fix the way to get an unique document. It is now case sensitive (#1424)
+- [BUGFIX] Align camelCase json value in secret (#1422)
+- [BUGFIX] Fix panel preview unresponsive after query error (#1418)
+- [BUGFIX] Fix saved changes to refresh interval not preserved (#1407)
+- [BUGFIX] Fix BE/FE misalignement on threshold datamodel #1389 (#1404)
+- [BUGFIX] Fix dashboard save button staying disabled after failing to save dashboard #1357 (#1398)
+- [BUGFIX] Fix reloading /admin route in react (#1386)
+- [BUGFIX] datasource form: make name readonly after creation + fix wrong titles/names in readonly mode (#1374)
+- [BUGFIX] Delete project does not refresh the list
+- [BUGFIX] Fix direct link with unknown project redirect now to the home page (#1366)
+- [BUGFIX] Default selection for variables of type list (#1351)
+- [BUGFIX] Hanging preview state when adding a new list variable before Source selected (#1355)
+- [BUGFIX] Fix no lazy loading after adding DataQueriesProvider (#1340)
+- [BREAKINGCHANGE] rename palette's `kind` + change its value to kebab-case (#1421)
+- [BREAKINGCHANGE] Move unit inside new `format` obj + change to kebab case + `abbreviate` renamed as `shortValues` (#1278)
+- [BREAKINGCHANGE] Implement new naming convention for all remaining fields (#1410)
+- [BREAKINGCHANGE] Variables spec snake_case -> camelCase (#1277)
+- [BREAKINGCHANGE] Datasource selection by group (#1360)
+- [BREAKINGCHANGE] Convert all panel spec values to kebab-case (#1262)
+
 ## 0.39.0 / 2023-07-26
 
 - [FEATURE] Injection of external variables (#1256)
