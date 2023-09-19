@@ -60,7 +60,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
         <FormControl fullWidth>
           <JSONEditor
             minHeight="300px"
-            maxHeight="700px"
+            maxHeight="70vh"
             value={draftDashboard}
             onChange={(value) => setDraftDashboard(value)}
           />
