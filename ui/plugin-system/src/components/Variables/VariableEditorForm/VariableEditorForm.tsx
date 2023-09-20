@@ -115,7 +115,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                 Edit
               </Button>
-              <Button color="error" variant="outlined" onClick={onDelete}>
+              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>
               <Divider

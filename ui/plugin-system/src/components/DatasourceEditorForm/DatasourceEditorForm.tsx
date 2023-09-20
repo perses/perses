@@ -105,7 +105,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
               <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
                 Edit
               </Button>
-              <Button color="error" variant="outlined" onClick={onDelete}>
+              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>
               <Divider

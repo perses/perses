@@ -337,7 +337,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
 
   return (
     <>
-      <Typography variant="h4" mb={1}>
+      <Typography variant="h4" mb={2}>
         General Settings
       </Typography>
       <TextField
