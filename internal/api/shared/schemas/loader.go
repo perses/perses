@@ -59,7 +59,10 @@ func (c *cueDefs) Load() error {
 	newSchemas := make(map[string]cue.Value)
 
 	// process each schema plugin to convert it into a CUE Value
-	for _, file := range files {
+	isError := false
+	i := 0
+	for i < len(files) && !isError {
+		file := files[i]
 		if !file.IsDir() {
 			logrus.Warningf("Plugin %s will not be loaded: it is not a folder", file.Name())
 			continue
@@ -72,6 +75,7 @@ func (c *cueDefs) Load() error {
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {
+			isError = true
 			logrus.Errorf("Plugin %s will not be loaded: The number of build instances is != 1", schemaPath)
 			continue
 		}
@@ -79,6 +83,7 @@ func (c *cueDefs) Load() error {
 
 		// check for errors on the instances (these are typically parsing errors)
 		if buildInstance.Err != nil {
+			isError = true
 			logrus.WithError(buildInstance.Err).Errorf("Plugin %s will not be loaded: file loading error", schemaPath)
 			continue
 		}
@@ -86,6 +91,7 @@ func (c *cueDefs) Load() error {
 		// build Value from the Instance
 		schema := cueContext.BuildInstance(buildInstance)
 		if schema.Err() != nil {
+			isError = true
 			logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: build error", schemaPath)
 			continue
 		}
@@ -94,6 +100,7 @@ func (c *cueDefs) Load() error {
 			// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
 			schema = c.baseDef.Unify(schema)
 			if schema.Err() != nil {
+				isError = true
 				logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: it doesn't meet the expected format for its plugin type", schemaPath)
 				continue
 			}
@@ -107,11 +114,14 @@ func (c *cueDefs) Load() error {
 
 		newSchemas[kind] = schema
 		logrus.Debugf("%s plugin loaded from file %s", kind, schemaPath)
+		i++
 	}
 
-	c.schemaMutex.Lock()
-	c.schemas = newSchemas
-	c.schemaMutex.Unlock()
+	if !isError {
+		c.schemaMutex.Lock()
+		c.schemas = newSchemas
+		c.schemaMutex.Unlock()
+	}
 	return nil
 }
 

@@ -247,8 +247,7 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 	if err != nil {
 		logrus.Debug(errors.Details(err, nil))
 		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
-		err = fmt.Errorf("invalid %s %s: %s", modelKind, modelName, err) // enrich the error message returned by cue lib
-		return err
+		return fmt.Errorf("invalid %s %s: %w", modelKind, modelName, err) // enrich the error message returned by cue lib
 	}
 	return nil
 }
