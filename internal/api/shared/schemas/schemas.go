@@ -42,7 +42,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 // retrieveSchemaForKind returns the schema corresponding to the provided kind
-func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, schemasMap *sync.Map) (cue.Value, error) {
+func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, schemasMap map[string]cue.Value) (cue.Value, error) {
 	// retrieve the value of the Kind field
 	kind, err := panelVal.LookupPath(cue.ParsePath(kindPath)).String()
 	if err != nil {
@@ -52,14 +52,14 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, sche
 	}
 
 	// retrieve the corresponding schema
-	schema, ok := schemasMap.Load(kind)
+	schema, ok := schemasMap[kind]
 	if !ok {
 		err := fmt.Errorf("invalid %s %s: Unknown %s %s", modelKind, modelName, kindPath, kind)
 		logrus.Debug(err)
 		return cue.Value{}, err
 	}
 
-	return schema.(cue.Value), nil
+	return schema, nil
 }
 
 type Schemas interface {
@@ -81,37 +81,37 @@ func New(conf config.Schemas) (Schemas, error) {
 	var loaders []Loader
 	if len(conf.PanelsPath) != 0 {
 		panels := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
+			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.PanelsPath,
+			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, panels)
 		s.panels = panels
 	}
 	if len(conf.QueriesPath) != 0 {
 		queries := &cueDefs{
-			context:     ctx,
 			baseDef:     &baseQueryDefVal,
-			schemas:     &sync.Map{},
+			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.QueriesPath,
+			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, queries)
 		s.queries = queries
 	}
 	if len(conf.DatasourcesPath) != 0 {
 		dts := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
+			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.DatasourcesPath,
+			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, dts)
 		s.dts = dts
 	}
 	if len(conf.VariablesPath) != 0 {
 		vars := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
+			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.VariablesPath,
+			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, vars)
 		s.vars = vars
@@ -235,7 +235,9 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 	value := s.context.CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
+	cueDefs.schemaMutex.RLock()
 	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.schemas)
+	cueDefs.schemaMutex.RUnlock()
 	if err != nil {
 		return err
 	}

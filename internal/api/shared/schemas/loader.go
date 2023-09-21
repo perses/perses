@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
@@ -35,10 +36,10 @@ type Loader interface {
 
 type cueDefs struct {
 	Loader
-	context     *cue.Context
 	baseDef     *cue.Value
-	schemas     *sync.Map
+	schemas     map[string]cue.Value
 	schemasPath string
+	schemaMutex *sync.RWMutex
 }
 
 func (c *cueDefs) GetSchemaPath() string {
@@ -51,6 +52,8 @@ func (c *cueDefs) Load() error {
 	if err != nil {
 		return err
 	}
+	// the Cue context is keeping track of loaded instances. Which means this context must be recreated everytime Load is called to avoid a memory leak.
+	cueContext := cuecontext.New()
 
 	// newSchemas is used for double buffering, to avoid any issue when there are panels to validate at the same time load() is triggered
 	newSchemas := make(map[string]cue.Value)
@@ -81,7 +84,7 @@ func (c *cueDefs) Load() error {
 		}
 
 		// build Value from the Instance
-		schema := c.context.BuildInstance(buildInstance)
+		schema := cueContext.BuildInstance(buildInstance)
 		if schema.Err() != nil {
 			logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: build error", schemaPath)
 			continue
@@ -106,17 +109,9 @@ func (c *cueDefs) Load() error {
 		logrus.Debugf("%s plugin loaded from file %s", kind, schemaPath)
 	}
 
-	// make c.schemas equal to newSchemas: deep copy newSchemas to c.schemas, then remove any value of c.schemas not existing in newSchemas
-	for key, value := range newSchemas {
-		c.schemas.Store(key, value)
-	}
-	c.schemas.Range(func(key interface{}, value interface{}) bool {
-		if _, ok := newSchemas[key.(string)]; !ok {
-			c.schemas.Delete(key)
-		}
-		return true
-	})
-	logrus.Debugf("Schemas at %s (re)loaded", c.schemasPath)
+	c.schemaMutex.Lock()
+	c.schemas = newSchemas
+	c.schemaMutex.Unlock()
 	return nil
 }
 

@@ -20,7 +20,6 @@ import (
 	"strings"
 	"sync"
 
-	"cuelang.org/go/cue"
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/shared/schemas"
@@ -56,7 +55,6 @@ type loader interface {
 }
 
 type migCuePart struct {
-	context          *cue.Context
 	listOfConditions string
 	schemasPath      string
 	defaultValue     string
