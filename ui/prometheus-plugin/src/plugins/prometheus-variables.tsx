@@ -62,13 +62,13 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          readOnly={props.isReadonly}
-          labelId="prom-datasource-label"
+          InputProps={{
+            readOnly: props.isReadonly,
+          }}
           label="Prometheus Datasource"
         />
       </FormControl>
@@ -116,13 +116,13 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
   return (
     <Stack spacing={2}>
       <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind="PrometheusDatasource"
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          disabled={props.isReadonly}
-          labelId="prom-datasource-label"
+          InputProps={{
+            readOnly: props.isReadonly,
+          }}
           label="Prometheus Datasource"
         />
       </FormControl>
@@ -167,9 +167,10 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          labelId="prom-datasource-label"
+          InputProps={{
+            readOnly: props.isReadonly,
+          }}
           label="Prometheus Datasource"
-          disabled={props.isReadonly}
         />
       </FormControl>
       <PromQLEditor

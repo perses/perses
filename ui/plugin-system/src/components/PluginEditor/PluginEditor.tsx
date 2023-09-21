@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { Controller } from 'react-hook-form';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -42,6 +43,45 @@ export function PluginEditor(props: PluginEditorProps) {
         error={!!error}
         helperText={error?.message}
         onChange={onKindChange}
+      />
+      <PluginSpecEditor
+        pluginType={pluginType}
+        pluginKind={value.kind}
+        value={value.spec}
+        onChange={onSpecChange}
+        isReadonly={isReadonly}
+      />
+    </Box>
+  );
+}
+
+export function ControlledPluginEditor(props: PluginEditorProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { value, pluginType, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
+  return (
+    <Box {...others}>
+      <Controller
+        name="pluginKind"
+        render={({ field, fieldState }) => (
+          <PluginKindSelect
+            {...field}
+            fullWidth={false}
+            sx={{ mb: 1, minWidth: 120 }}
+            margin="dense"
+            label={pluginKindLabel}
+            pluginType={pluginType}
+            disabled={isLoading}
+            value={pendingKind !== '' ? pendingKind : value.kind}
+            InputProps={{ readOnly: isReadonly }}
+            error={!!error || !!fieldState.error}
+            helperText={error?.message ?? fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              onKindChange(event);
+            }}
+          />
+        )}
       />
       <PluginSpecEditor
         pluginType={pluginType}

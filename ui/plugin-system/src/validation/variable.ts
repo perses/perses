@@ -13,13 +13,73 @@
 
 import { z } from 'zod';
 
-export const variableEditValidationSchema = z.object({
-  name: z
-    .string()
-    .nonempty('Required')
-    .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
-    .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
-  title: z.string().optional(), // display name
-  description: z.string().optional(),
-  kind: z.string().nonempty('Required'),
-});
+export const variableEditValidationSchema = z
+  .object({
+    name: z
+      .string()
+      .nonempty('Required')
+      .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
+      .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
+    title: z.string().optional(), // display name
+    description: z.string().optional(),
+    kind: z.enum(['TextVariable', 'ListVariable']),
+    listVariableFields: z
+      .object({
+        allowMultiple: z.boolean(),
+        allowAll: z.boolean(),
+        capturingRegexp: z.string().optional(),
+        customAllValue: z.string().optional(),
+        plugin: z.object({
+          kind: z.string(), // TODO: .nonempty('Required')
+          spec: z.record(z.unknown()),
+        }),
+      })
+      .optional(),
+    textVariableFields: z
+      .object({
+        value: z.string(), // TODO: .nonempty('Required')
+        constant: z.boolean(),
+      })
+      .optional(),
+  })
+  .partial({
+    listVariableFields: true,
+    textVariableFields: true,
+  });
+
+// export const variableEditValidationSchema = z.discriminatedUnion('kind', [
+//   z.object({
+//     name: z
+//       .string()
+//       .nonempty('Required')
+//       .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
+//       .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
+//     title: z.string().optional(), // display name
+//     description: z.string().optional(),
+//     kind: z.literal('TextVariable'),
+//     textVariableFields: z.object({
+//       value: z.string().nonempty('Required'),
+//       constant: z.boolean(),
+//     }),
+//   }),
+//   z.object({
+//     name: z
+//       .string()
+//       .nonempty('Required')
+//       .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
+//       .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
+//     title: z.string().optional(), // display name
+//     description: z.string().optional(),
+//     kind: z.literal('ListVariable'),
+//     listVariableFields: z.object({
+//       allowMultiple: z.boolean(),
+//       allowAll: z.boolean(),
+//       capturingRegexp: z.string().optional(),
+//       customAllValue: z.string().optional(),
+//       plugin: z.object({
+//         kind: z.string().nonempty('Required'),
+//         spec: z.record(z.unknown()),
+//       }),
+//     }),
+//   }),
+// ]);

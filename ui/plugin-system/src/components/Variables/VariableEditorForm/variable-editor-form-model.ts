@@ -11,9 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
+import { Definition, TextVariableDefinition, UnknownSpec, VariableDefinition } from '@perses-dev/core';
 
-export function getInitialState(initialVariableDefinition: VariableDefinition) {
+export type VariableEditorState = {
+  name: string;
+  title: string;
+  kind: 'TextVariable' | 'ListVariable' | 'BuiltinVariable';
+  description: string;
+  listVariableFields: {
+    allowMultiple: boolean;
+    allowAll: boolean;
+    capturingRegexp: string | undefined;
+    plugin: Definition<UnknownSpec>;
+    customAllValue: string | undefined;
+  };
+  textVariableFields: {
+    value: string;
+    constant: boolean;
+  };
+};
+
+export function getInitialState(initialVariableDefinition: VariableDefinition): VariableEditorState {
   const textVariableFields = {
     value: (initialVariableDefinition as TextVariableDefinition).spec.value ?? '',
     constant: (initialVariableDefinition as TextVariableDefinition).spec.constant ?? false,
@@ -46,8 +64,6 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
     textVariableFields,
   };
 }
-
-export type VariableEditorState = ReturnType<typeof getInitialState>;
 
 export function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
   const { name, title, kind, description } = state;

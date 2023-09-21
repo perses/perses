@@ -32,7 +32,7 @@ import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Action, getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
-import { PluginEditor } from '../../PluginEditor';
+import { ControlledPluginEditor } from '../../PluginEditor';
 import { useValidation } from '../../../validation';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { VariableEditorState, getVariableDefinitionFromState, getInitialState } from './variable-editor-form-model';
@@ -76,11 +76,37 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const validation = useValidation();
+  const { variableEditorFormSchema } = useValidation();
   const form = useForm({
-    resolver: zodResolver(validation.variableEditorFormSchema),
+    resolver: zodResolver(
+      variableEditorFormSchema.refine(
+        ({ kind, listVariableFields, textVariableFields }) =>
+          (kind === 'TextVariable' && textVariableFields) || (kind === 'ListVariable' && listVariableFields),
+        'Variable spec not filled correctly'
+      )
+    ),
     mode: 'onBlur',
-    defaultValues: state,
+    // TODO: zod schema not typed correctly, defaultValues: state,
+    defaultValues: {
+      name: state.name,
+      title: state.title,
+      kind: state.kind,
+      description: state.description,
+      listVariableFields: {
+        allowMultiple: state.listVariableFields.allowMultiple,
+        allowAll: state.listVariableFields.allowAll,
+        capturingRegexp: state.listVariableFields.capturingRegexp,
+        plugin: {
+          kind: state.listVariableFields.plugin.kind,
+          spec: state.listVariableFields.plugin.spec as Record<string, object>,
+        },
+        customAllValue: state.listVariableFields.customAllValue,
+      },
+      textVariableFields: {
+        value: state.textVariableFields.value,
+        constant: state.textVariableFields.constant,
+      },
+    },
   });
 
   function processForm() {
@@ -246,6 +272,11 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                     field.onChange(event);
                     setState((draft) => {
                       draft.kind = event.target.value as VariableEditorState['kind'];
+                      if ((event.target.value as VariableEditorState['kind']) === 'TextVariable') {
+                        draft.listVariableFields = {} as VariableEditorState['listVariableFields'];
+                      } else {
+                        draft.textVariableFields = {} as VariableEditorState['textVariableFields'];
+                      }
                     });
                   }}
                 >
@@ -271,33 +302,51 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               <Box>
                 <VariablePreview values={[state.textVariableFields.value]} />
               </Box>
-              <TextField
-                label="Value"
-                value={state.textVariableFields.value}
-                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                InputProps={{
-                  readOnly: action === 'read',
-                }}
-                onChange={(v) => {
-                  setState((draft) => {
-                    draft.textVariableFields.value = v.target.value;
-                  });
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={state.textVariableFields.constant ?? false}
-                    readOnly={action === 'read'}
-                    onChange={(e) => {
-                      if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+              <Controller
+                name="textVariableFields.value"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    label="Value"
+                    value={state.textVariableFields.value}
+                    InputLabelProps={{
+                      shrink: action === 'read' ? true : undefined,
+                    }}
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event);
                       setState((draft) => {
-                        draft.textVariableFields.constant = e.target.checked;
+                        draft.textVariableFields.value = event.target.value;
                       });
                     }}
                   />
-                }
-                label="Constant"
+                )}
+              />
+              <Controller
+                name="textVariableFields.value"
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        {...field}
+                        checked={state.textVariableFields.constant ?? false}
+                        readOnly={action === 'read'}
+                        onChange={(event) => {
+                          if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
+                          field.onChange(event);
+                          setState((draft) => {
+                            draft.textVariableFields.constant = event.target.checked;
+                          });
+                        }}
+                      />
+                    }
+                    label="Constant"
+                  />
+                )}
               />
             </Stack>
           </>
@@ -325,7 +374,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   <Box />
                 </ClickAwayListener>
                 {/** */}
-                <PluginEditor
+                <ControlledPluginEditor
                   width="100%"
                   pluginType="Variable"
                   pluginKindLabel="Source"

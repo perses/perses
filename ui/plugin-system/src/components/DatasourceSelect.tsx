@@ -12,16 +12,26 @@
 // limitations under the License.
 
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
-import { Select, SelectProps, MenuItem, Stack, Divider, ListItemText, Chip, IconButton, Box } from '@mui/material';
+import {
+  MenuItem,
+  Stack,
+  Divider,
+  ListItemText,
+  Chip,
+  IconButton,
+  Box,
+  TextField,
+  TextFieldProps,
+} from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
-import { useMemo } from 'react';
+import { ChangeEvent, forwardRef, useMemo } from 'react';
 import { useListDatasourceSelectItems } from '../runtime';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
-export interface DatasourceSelectProps extends Omit<SelectProps<string>, OmittedMuiProps> {
+export interface DatasourceSelectProps extends Omit<TextFieldProps, OmittedMuiProps> {
   value: DatasourceSelector;
   onChange: (next: DatasourceSelector) => void;
   datasourcePluginKind: string;
@@ -31,7 +41,7 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
  * Displays a MUI input for selecting a Datasource of a particular kind. Note: The 'value' and `onChange` handler for
  * the input deal with a `DatasourceSelector`.
  */
-export function DatasourceSelect(props: DatasourceSelectProps) {
+export const DatasourceSelect = forwardRef((props: DatasourceSelectProps, ref) => {
   const { datasourcePluginKind, value, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind);
 
@@ -64,10 +74,10 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
   const optionValue = isLoading ? '' : selectorToOptionValue(defaultValue);
 
   // When the user makes a selection, convert the string option value back to a DatasourceSelector
-  const handleChange: SelectProps<string>['onChange'] = (e) => {
-    const next = optionValueToSelector(e.target.value);
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const next = optionValueToSelector(event.target.value);
     onChange(next);
-  };
+  }
 
   // We use a fake action event when we click on the action of the chip (hijack the "delete" feature).
   // This is because the href link action is on the `deleteIcon` property already, but the `onDelete` property
@@ -81,7 +91,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
   //  - The group's edit link is disabled if datasource is overridden.
   //    Ref: https://github.com/mui/material-ui/issues/36572
   return (
-    <Select {...others} value={optionValue} onChange={handleChange}>
+    <TextField select inputRef={ref} {...others} value={optionValue} onChange={handleChange}>
       {menuItems.map((menuItemGroup) => [
         <Divider key={`${menuItemGroup.group}-divider`} />,
         ...menuItemGroup.items.map((menuItem) => (
@@ -115,9 +125,10 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
           </MenuItem>
         )),
       ])}
-    </Select>
+    </TextField>
   );
-}
+});
+DatasourceSelect.displayName = 'DatasourceSelect';
 
 export function DatasourceName(props: { name: string; overridden?: boolean; overriding?: boolean }) {
   const { name, overridden, overriding } = props;

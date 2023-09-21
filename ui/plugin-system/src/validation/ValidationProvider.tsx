@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { z } from 'zod';
 import { datasourceEditValidationSchema } from './datasource';
 import { variableEditValidationSchema } from './variable';
 import { panelEditorValidationSchema } from './panel';
 
 export interface ValidationSchemas {
-  datasourceEditorFormSchema: z.Schema;
-  panelEditorFormSchema: z.Schema;
-  variableEditorFormSchema: z.Schema;
-  setDatasourceEditorFormSchema: (schema: z.Schema) => void;
-  setPanelEditorFormSchema: (schema: z.Schema) => void;
-  setVariableEditorFormSchema: (schema: z.Schema) => void;
+  datasourceEditorFormSchema: z.ZodObject<any>;
+  panelEditorFormSchema: z.ZodObject<any>;
+  variableEditorFormSchema: z.ZodObject<any>;
+  setDatasourcePluginEditorFormSchema: (schema: z.ZodObject<any>) => void;
+  setPanelPluginEditorFormSchema: (schema: z.ZodObject<any>) => void;
+  setVariablePluginEditorFormSchema: (schema: z.ZodObject<any>) => void;
 }
 
 export const ValidationContext = createContext<ValidationSchemas | undefined>(undefined);
@@ -41,9 +41,9 @@ export function useValidation(): ValidationSchemas {
 }
 
 export interface ValidationProviderProps {
-  initialDatasourceFormEditorSchema?: z.Schema;
-  initialPanelEditorFormSchema?: z.Schema;
-  initialVariableEditorFormSchema?: z.Schema;
+  initialDatasourceFormEditorSchema?: z.ZodObject<any>;
+  initialPanelEditorFormSchema?: z.ZodObject<any>;
+  initialVariableEditorFormSchema?: z.ZodObject<any>;
   children: ReactNode;
 }
 
@@ -53,14 +53,36 @@ export function ValidationProvider({
   initialVariableEditorFormSchema,
   children,
 }: ValidationProviderProps) {
-  const [datasourceEditorFormSchema, setDatasourceEditorFormSchema] = useState<z.Schema>(
+  const [datasourceEditorFormSchema, setDatasourceEditorFormSchema] = useState<z.ZodObject<any>>(
     initialDatasourceFormEditorSchema ?? datasourceEditValidationSchema
   );
-  const [panelEditorFormSchema, setPanelEditorFormSchema] = useState<z.Schema>(
+  const [panelEditorFormSchema, setPanelEditorFormSchema] = useState<z.ZodObject<any>>(
     initialPanelEditorFormSchema ?? panelEditorValidationSchema
   );
-  const [variableEditorFormSchema, setVariableEditorFormSchema] = useState<z.Schema>(
+  const [variableEditorFormSchema, setVariableEditorFormSchema] = useState<z.ZodObject<any>>(
     initialVariableEditorFormSchema ?? variableEditValidationSchema
+  );
+
+  const setDatasourcePluginEditorFormSchema = useCallback(
+    (pluginSchema: z.ZodObject<any>) =>
+      setDatasourceEditorFormSchema(
+        (initialDatasourceFormEditorSchema ?? datasourceEditValidationSchema).merge(pluginSchema)
+      ),
+    [initialDatasourceFormEditorSchema]
+  );
+
+  const setPanelPluginEditorFormSchema = useCallback(
+    (pluginSchema: z.ZodObject<any>) =>
+      setPanelEditorFormSchema((initialPanelEditorFormSchema ?? panelEditorValidationSchema).merge(pluginSchema)),
+    [initialPanelEditorFormSchema]
+  );
+
+  const setVariablePluginEditorFormSchema = useCallback(
+    (pluginSchema: z.ZodObject<any>) =>
+      setVariableEditorFormSchema(
+        (initialVariableEditorFormSchema ?? variableEditValidationSchema).merge(pluginSchema)
+      ),
+    [initialVariableEditorFormSchema]
   );
 
   const ctx = useMemo(() => {
@@ -68,11 +90,18 @@ export function ValidationProvider({
       datasourceEditorFormSchema,
       panelEditorFormSchema,
       variableEditorFormSchema,
-      setDatasourceEditorFormSchema,
-      setPanelEditorFormSchema,
-      setVariableEditorFormSchema,
+      setDatasourcePluginEditorFormSchema,
+      setPanelPluginEditorFormSchema,
+      setVariablePluginEditorFormSchema,
     };
-  }, [datasourceEditorFormSchema, panelEditorFormSchema, variableEditorFormSchema]);
+  }, [
+    datasourceEditorFormSchema,
+    panelEditorFormSchema,
+    setDatasourcePluginEditorFormSchema,
+    setPanelPluginEditorFormSchema,
+    setVariablePluginEditorFormSchema,
+    variableEditorFormSchema,
+  ]);
 
   return <ValidationContext.Provider value={ctx}>{children}</ValidationContext.Provider>;
 }
