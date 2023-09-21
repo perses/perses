@@ -260,7 +260,7 @@ export function VariableEditor(props: {
                           </TableCell>
                           <TableCell>{getVariableLabelByKind(v.kind) ?? v.kind}</TableCell>
                           <TableCell>{v.spec.display?.description ?? ''}</TableCell>
-                          <TableCell align="right" sx={{ display: 'flex', flexDirection: 'row', flexGrow: 1 }}>
+                          <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                             <IconButton onClick={() => changeVariableOrder(idx, 'up')} disabled={idx === 0}>
                               <ArrowUp />
                             </IconButton>
