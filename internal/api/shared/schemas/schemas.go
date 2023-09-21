@@ -226,15 +226,11 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		return err
 	}
 	// compile the JSON plugin into a CUE Value
-	cueDefs.contextMutex.RLock()
-	cueContext := cueDefs.context
-	cueDefs.contextMutex.RUnlock()
+	cueContext := cueDefs.getContext()
 	value := cueContext.CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
-	cueDefs.schemaMutex.RLock()
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.schemas)
-	cueDefs.schemaMutex.RUnlock()
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.getSchemas())
 	if err != nil {
 		return err
 	}

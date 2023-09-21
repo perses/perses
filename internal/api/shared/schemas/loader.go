@@ -131,6 +131,18 @@ func (c *cueDefs) Load() error {
 	return nil
 }
 
+func (c *cueDefs) getContext() *cue.Context {
+	c.contextMutex.RLock()
+	defer c.contextMutex.RUnlock()
+	return c.context
+}
+
+func (c *cueDefs) getSchemas() map[string]cue.Value {
+	c.schemaMutex.RLock()
+	defer c.schemaMutex.RUnlock()
+	return c.schemas
+}
+
 func NewHotReloaders(loaders []Loader) (async.SimpleTask, async.SimpleTask, error) {
 	fsWatcher, err := fsnotify.NewWatcher()
 	if err != nil {
