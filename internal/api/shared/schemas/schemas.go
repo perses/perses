@@ -16,7 +16,6 @@ package schemas
 import (
 	_ "embed"
 	"fmt"
-	"sync"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -77,13 +76,12 @@ func New(conf config.Schemas) (Schemas, error) {
 
 	// compile the base definitions
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
-	s := &sch{context: ctx}
+	s := &sch{}
 	var loaders []Loader
 	if len(conf.PanelsPath) != 0 {
 		panels := &cueDefs{
 			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.PanelsPath,
-			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, panels)
 		s.panels = panels
@@ -93,7 +91,6 @@ func New(conf config.Schemas) (Schemas, error) {
 			baseDef:     &baseQueryDefVal,
 			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.QueriesPath,
-			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, queries)
 		s.queries = queries
@@ -102,7 +99,6 @@ func New(conf config.Schemas) (Schemas, error) {
 		dts := &cueDefs{
 			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.DatasourcesPath,
-			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, dts)
 		s.dts = dts
@@ -111,7 +107,6 @@ func New(conf config.Schemas) (Schemas, error) {
 		vars := &cueDefs{
 			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.VariablesPath,
-			schemaMutex: &sync.RWMutex{},
 		}
 		loaders = append(loaders, vars)
 		s.vars = vars
@@ -125,7 +120,6 @@ func New(conf config.Schemas) (Schemas, error) {
 
 type sch struct {
 	Schemas
-	context *cue.Context
 	panels  *cueDefs
 	dts     *cueDefs
 	vars    *cueDefs
@@ -232,7 +226,10 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		return err
 	}
 	// compile the JSON plugin into a CUE Value
-	value := s.context.CompileBytes(pluginData)
+	cueDefs.contextMutex.RLock()
+	cueContext := cueDefs.context
+	cueDefs.contextMutex.RUnlock()
+	value := cueContext.CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
 	cueDefs.schemaMutex.RLock()

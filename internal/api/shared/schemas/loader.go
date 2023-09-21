@@ -36,10 +36,12 @@ type Loader interface {
 
 type cueDefs struct {
 	Loader
-	baseDef     *cue.Value
-	schemas     map[string]cue.Value
-	schemasPath string
-	schemaMutex *sync.RWMutex
+	context      *cue.Context
+	baseDef      *cue.Value
+	schemas      map[string]cue.Value
+	schemasPath  string
+	schemaMutex  sync.RWMutex
+	contextMutex sync.RWMutex
 }
 
 func (c *cueDefs) GetSchemaPath() string {
@@ -118,9 +120,13 @@ func (c *cueDefs) Load() error {
 	}
 
 	if !isError {
+		// in case there is no error we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
 		c.schemaMutex.Lock()
 		c.schemas = newSchemas
 		c.schemaMutex.Unlock()
+		c.contextMutex.Lock()
+		c.context = cueContext
+		c.contextMutex.Unlock()
 	}
 	return nil
 }
