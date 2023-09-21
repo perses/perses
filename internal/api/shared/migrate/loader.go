@@ -18,7 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"sync/atomic"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
@@ -55,11 +55,10 @@ type loader interface {
 }
 
 type migCuePart struct {
-	listOfConditions string
+	listOfConditions atomic.Pointer[string]
 	schemasPath      string
 	defaultValue     string
 	placeholderText  string
-	mutex            sync.RWMutex
 }
 
 func (c *migCuePart) GetSchemaPath() string {
@@ -67,20 +66,16 @@ func (c *migCuePart) GetSchemaPath() string {
 }
 
 func (c *migCuePart) Load() error {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
 	conditions, err := c.buildListOfConditions()
 	if err != nil {
 		return err
 	}
-	c.listOfConditions = conditions
+	c.listOfConditions.Store(&conditions)
 	return nil
 }
 
 func (c *migCuePart) getConditions() string {
-	c.mutex.RLock()
-	defer c.mutex.RUnlock()
-	return c.listOfConditions
+	return *c.listOfConditions.Load()
 }
 
 func (c *migCuePart) getPlaceholder() string {

@@ -19,7 +19,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"sync/atomic"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -36,12 +36,10 @@ type Loader interface {
 
 type cueDefs struct {
 	Loader
-	context      *cue.Context
-	baseDef      *cue.Value
-	schemas      map[string]cue.Value
-	schemasPath  string
-	schemaMutex  sync.RWMutex
-	contextMutex sync.RWMutex
+	baseDef     *cue.Value
+	context     atomic.Pointer[cue.Context]
+	schemas     atomic.Pointer[map[string]cue.Value]
+	schemasPath string
 }
 
 func (c *cueDefs) GetSchemaPath() string {
@@ -121,26 +119,10 @@ func (c *cueDefs) Load() error {
 
 	if !isError {
 		// in case there is no error we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
-		c.schemaMutex.Lock()
-		c.schemas = newSchemas
-		c.schemaMutex.Unlock()
-		c.contextMutex.Lock()
-		c.context = cueContext
-		c.contextMutex.Unlock()
+		c.schemas.Store(&newSchemas)
+		c.context.Store(cueContext)
 	}
 	return nil
-}
-
-func (c *cueDefs) getContext() *cue.Context {
-	c.contextMutex.RLock()
-	defer c.contextMutex.RUnlock()
-	return c.context
-}
-
-func (c *cueDefs) getSchemas() map[string]cue.Value {
-	c.schemaMutex.RLock()
-	defer c.schemaMutex.RUnlock()
-	return c.schemas
 }
 
 func NewHotReloaders(loaders []Loader) (async.SimpleTask, async.SimpleTask, error) {

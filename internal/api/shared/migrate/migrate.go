@@ -19,7 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
+	"sync/atomic"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -107,9 +107,8 @@ func New(schemasConf config.Schemas) (Migration, error) {
 }
 
 type mig struct {
-	migrationSchemaString string
+	migrationSchemaString atomic.Pointer[string]
 	loaders               []loader
-	mutex                 sync.RWMutex
 }
 
 func (m *mig) GetLoaders() []schemas.Loader {
@@ -130,9 +129,7 @@ func (m *mig) BuildMigrationSchemaString() {
 		migrationSchemaString = strings.Replace(migrationSchemaString, l.getPlaceholder(), conditionals, -1)
 	}
 	logrus.Tracef("migrationSchemaString: %s", migrationSchemaString)
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.migrationSchemaString = migrationSchemaString
+	m.migrationSchemaString.Store(&migrationSchemaString)
 }
 
 func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
@@ -155,9 +152,7 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 	}
 
 	// Compile the migration schema using the grafana def to resolve the paths
-	m.mutex.RLock()
-	mappingVal := cueContext.CompileString(m.migrationSchemaString, cue.Scope(grafanaDashboardVal))
-	m.mutex.RUnlock()
+	mappingVal := cueContext.CompileString(*m.migrationSchemaString.Load(), cue.Scope(grafanaDashboardVal))
 	err := mappingVal.Err()
 	if err != nil {
 		logrus.WithError(err).Trace("Unable to compile the migration schema using the received dashboard to resolve the paths")

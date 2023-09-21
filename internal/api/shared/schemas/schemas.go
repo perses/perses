@@ -80,7 +80,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	var loaders []Loader
 	if len(conf.PanelsPath) != 0 {
 		panels := &cueDefs{
-			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.PanelsPath,
 		}
 		loaders = append(loaders, panels)
@@ -89,7 +88,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	if len(conf.QueriesPath) != 0 {
 		queries := &cueDefs{
 			baseDef:     &baseQueryDefVal,
-			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.QueriesPath,
 		}
 		loaders = append(loaders, queries)
@@ -97,7 +95,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	}
 	if len(conf.DatasourcesPath) != 0 {
 		dts := &cueDefs{
-			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.DatasourcesPath,
 		}
 		loaders = append(loaders, dts)
@@ -105,7 +102,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	}
 	if len(conf.VariablesPath) != 0 {
 		vars := &cueDefs{
-			schemas:     make(map[string]cue.Value),
 			schemasPath: conf.VariablesPath,
 		}
 		loaders = append(loaders, vars)
@@ -226,11 +222,10 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		return err
 	}
 	// compile the JSON plugin into a CUE Value
-	cueContext := cueDefs.getContext()
-	value := cueContext.CompileBytes(pluginData)
+	value := cueDefs.context.Load().CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.getSchemas())
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *cueDefs.schemas.Load())
 	if err != nil {
 		return err
 	}
