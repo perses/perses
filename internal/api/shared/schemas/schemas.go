@@ -171,10 +171,18 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 }
 
 func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
+	if s.panels == nil {
+		logrus.Warning("panel schemas are not loaded")
+		return nil
+	}
 	return s.validatePlugin(plugin, "panel", panelName, s.panels)
 }
 
 func (s *sch) ValidateQuery(plugin common.Plugin) error {
+	if s.queries == nil {
+		logrus.Warning("query schemas are not loaded")
+		return nil
+	}
 	return s.validatePlugin(plugin, "query", "", s.queries)
 }
 
@@ -222,6 +230,10 @@ func (s *sch) ValidateDashboardVariables(variables []dashboard.Variable) error {
 }
 
 func (s *sch) ValidateVariable(plugin common.Plugin, variableName string) error {
+	if s.vars == nil {
+		logrus.Warning("variable schemas are not loaded")
+		return nil
+	}
 	return s.validatePlugin(plugin, "variable", variableName, s.vars)
 }
 
