@@ -15,11 +15,11 @@ package databasesql
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/huandu/go-sqlbuilder"
+	jsoniter "github.com/json-iterator/go"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -190,6 +190,7 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		if scanErr := query.Scan(&rowJSONDoc); scanErr != nil {
 			return scanErr
 		}
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		return json.Unmarshal([]byte(rowJSONDoc), entity)
 	}
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
@@ -239,6 +240,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		}
 		// then get back the actual struct behind the value.
 		obj := value.Interface()
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		if unmarshalErr := json.Unmarshal([]byte(rowJSONDoc), obj); unmarshalErr != nil {
 			return unmarshalErr
 		}

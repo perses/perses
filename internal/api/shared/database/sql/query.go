@@ -14,10 +14,10 @@
 package databasesql
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/huandu/go-sqlbuilder"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
@@ -53,6 +53,7 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
@@ -73,6 +74,7 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
+	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
