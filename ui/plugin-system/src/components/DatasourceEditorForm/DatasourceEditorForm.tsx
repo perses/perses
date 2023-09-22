@@ -66,10 +66,20 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
     resolver: zodResolver(validation.datasourceEditorFormSchema),
     mode: 'onBlur',
     defaultValues: {
-      name: state.metadata.name,
-      title: state.spec.display?.name,
-      description: state.spec.display?.description,
-      default: state.spec.default,
+      metadata: {
+        name: state.metadata.name,
+      },
+      spec: {
+        display: {
+          name: state.spec.display?.name,
+          description: state.spec.display?.description,
+        },
+        default: state.spec.default,
+        plugin: {
+          kind: state.spec.plugin.kind,
+          spec: state.spec.plugin.spec as Record<string, object>,
+        },
+      },
     },
   });
 
@@ -140,7 +150,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
         <Grid container spacing={2} mb={2}>
           <Grid item xs={4}>
             <Controller
-              name="name"
+              name="metadata.name"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -167,7 +177,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           </Grid>
           <Grid item xs={8}>
             <Controller
-              name="title"
+              name="spec.display.name"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -194,7 +204,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           </Grid>
           <Grid item xs={12}>
             <Controller
-              name="description"
+              name="spec.display.description"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -222,7 +232,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
           <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
             <Stack>
               <Controller
-                name="default"
+                name="spec.default"
                 render={({ field }) => (
                   <FormControlLabel
                     {...field}

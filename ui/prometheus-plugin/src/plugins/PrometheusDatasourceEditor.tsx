@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { DurationString, RequestHeaders } from '@perses-dev/core';
-import { OptionsEditorRadios } from '@perses-dev/plugin-system';
+import { OptionsEditorRadios, useValidation } from '@perses-dev/plugin-system';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { produce } from 'immer';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { z } from 'zod';
+import { Controller } from 'react-hook-form';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
 
 export interface PrometheusDatasourceEditorProps {
@@ -52,24 +54,31 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     {
       label: strDirect,
       content: (
-        <>
-          <TextField
-            fullWidth
-            label="URL"
-            value={value.directUrl || ''}
-            InputProps={{
-              readOnly: isReadonly,
-            }}
-            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-            onChange={(e) => {
-              onChange(
-                produce(value, (draft) => {
-                  draft.directUrl = e.target.value;
-                })
-              );
-            }}
-          />
-        </>
+        <Controller
+          name="spec.plugin.spec.directUrl"
+          render={({ field, fieldState }) => (
+            <TextField
+              {...field}
+              fullWidth
+              label="URL"
+              value={value.directUrl || ''}
+              InputProps={{
+                readOnly: isReadonly,
+              }}
+              InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+              error={!!fieldState.error}
+              helperText={fieldState.error?.message}
+              onChange={(event) => {
+                field.onChange(event);
+                onChange(
+                  produce(value, (draft) => {
+                    draft.directUrl = event.target.value;
+                  })
+                );
+              }}
+            />
+          )}
+        />
       ),
     },
     {
@@ -89,7 +98,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                 produce(value, (draft) => {
                   if (draft.proxy !== undefined) {
                     draft.proxy.spec.url = e.target.value;
-                  }
+                  } // TODO: if undefined
                 })
               );
             }}
@@ -389,6 +398,50 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
     },
   };
 
+  const [currentTabIndex, setCurrentTabIndex] = useState<number>(defaultTab);
+  const { setDatasourcePluginEditorFormSchema } = useValidation();
+  useEffect(() => {
+    if (tabs[currentTabIndex]?.label === strDirect) {
+      setDatasourcePluginEditorFormSchema(
+        z.object({
+          spec: z.object({
+            plugin: z.object({
+              spec: z.object({
+                directUrl: z.string().url().nonempty('Required'),
+              }),
+            }),
+          }),
+        })
+      );
+    } else if (tabs[currentTabIndex]?.label === strProxy) {
+      setDatasourcePluginEditorFormSchema(
+        z.object({
+          spec: z.object({
+            plugin: z.object({
+              spec: z.object({
+                proxy: z.object({
+                  spec: z.object({
+                    url: z.string().url().nonempty('Required'),
+                    allowedEndpoints: z
+                      .array(
+                        z.object({
+                          endpointPattern: z.string().nonempty('Required'),
+                          method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
+                        })
+                      )
+                      .optional(),
+                    headers: z.object({}).optional(),
+                    secret: z.string().optional(),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        })
+      );
+    }
+  }, [currentTabIndex, setDatasourcePluginEditorFormSchema, tabs]);
+
   // For better user experience, save previous states in mind for both mode.
   // This avoids losing everything when the user changes their mind back.
   const [previousSpecDirect, setPreviousSpecDirect] = useState(initialSpecDirect);
@@ -396,6 +449,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
 
   // When changing mode, remove previous mode's config + append default values for the new mode.
   const handleModeChange = (v: number) => {
+    setCurrentTabIndex(v);
     if (tabs[v]?.label == strDirect) {
       setPreviousSpecProxy(value);
       onChange(previousSpecDirect);

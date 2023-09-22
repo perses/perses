@@ -15,8 +15,20 @@ import { z } from 'zod';
 import { resourceIdValidationSchema } from './resource';
 
 export const datasourceEditValidationSchema = z.object({
-  name: resourceIdValidationSchema,
-  title: z.string().optional(), // display name
-  description: z.string().optional(),
-  default: z.boolean(),
+  metadata: z.object({
+    name: resourceIdValidationSchema,
+  }),
+  spec: z.object({
+    display: z
+      .object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+      })
+      .optional(),
+    default: z.boolean(),
+    plugin: z.object({
+      kind: z.string(),
+      spec: z.record(z.unknown()),
+    }),
+  }),
 });
