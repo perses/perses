@@ -16,7 +16,6 @@ package schemas
 import (
 	_ "embed"
 	"fmt"
-	"sync"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -42,7 +41,7 @@ var cueValidationOptions = []cue.Option{
 }
 
 // retrieveSchemaForKind returns the schema corresponding to the provided kind
-func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, schemasMap *sync.Map) (cue.Value, error) {
+func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, schemasMap map[string]cue.Value) (cue.Value, error) {
 	// retrieve the value of the Kind field
 	kind, err := panelVal.LookupPath(cue.ParsePath(kindPath)).String()
 	if err != nil {
@@ -52,14 +51,14 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, sche
 	}
 
 	// retrieve the corresponding schema
-	schema, ok := schemasMap.Load(kind)
+	schema, ok := schemasMap[kind]
 	if !ok {
 		err := fmt.Errorf("invalid %s %s: Unknown %s %s", modelKind, modelName, kindPath, kind)
 		logrus.Debug(err)
 		return cue.Value{}, err
 	}
 
-	return schema.(cue.Value), nil
+	return schema, nil
 }
 
 type Schemas interface {
@@ -77,12 +76,10 @@ func New(conf config.Schemas) (Schemas, error) {
 
 	// compile the base definitions
 	baseQueryDefVal := ctx.CompileBytes(baseQueryDef)
-	s := &sch{context: ctx}
+	s := &sch{}
 	var loaders []Loader
 	if len(conf.PanelsPath) != 0 {
 		panels := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
 			schemasPath: conf.PanelsPath,
 		}
 		loaders = append(loaders, panels)
@@ -90,9 +87,7 @@ func New(conf config.Schemas) (Schemas, error) {
 	}
 	if len(conf.QueriesPath) != 0 {
 		queries := &cueDefs{
-			context:     ctx,
 			baseDef:     &baseQueryDefVal,
-			schemas:     &sync.Map{},
 			schemasPath: conf.QueriesPath,
 		}
 		loaders = append(loaders, queries)
@@ -100,8 +95,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	}
 	if len(conf.DatasourcesPath) != 0 {
 		dts := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
 			schemasPath: conf.DatasourcesPath,
 		}
 		loaders = append(loaders, dts)
@@ -109,8 +102,6 @@ func New(conf config.Schemas) (Schemas, error) {
 	}
 	if len(conf.VariablesPath) != 0 {
 		vars := &cueDefs{
-			context:     ctx,
-			schemas:     &sync.Map{},
 			schemasPath: conf.VariablesPath,
 		}
 		loaders = append(loaders, vars)
@@ -125,7 +116,6 @@ func New(conf config.Schemas) (Schemas, error) {
 
 type sch struct {
 	Schemas
-	context *cue.Context
 	panels  *cueDefs
 	dts     *cueDefs
 	vars    *cueDefs
@@ -244,10 +234,10 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		return err
 	}
 	// compile the JSON plugin into a CUE Value
-	value := s.context.CompileBytes(pluginData)
+	value := cueDefs.context.Load().CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, cueDefs.schemas)
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *cueDefs.schemas.Load())
 	if err != nil {
 		return err
 	}
@@ -257,8 +247,7 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 	if err != nil {
 		logrus.Debug(errors.Details(err, nil))
 		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
-		err = fmt.Errorf("invalid %s %s: %s", modelKind, modelName, err) // enrich the error message returned by cue lib
-		return err
+		return fmt.Errorf("invalid %s %s: %w", modelKind, modelName, err) // enrich the error message returned by cue lib
 	}
 	return nil
 }

@@ -19,9 +19,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
+	"sync/atomic"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
@@ -35,9 +36,9 @@ type Loader interface {
 
 type cueDefs struct {
 	Loader
-	context     *cue.Context
 	baseDef     *cue.Value
-	schemas     *sync.Map
+	context     atomic.Pointer[cue.Context]
+	schemas     atomic.Pointer[map[string]cue.Value]
 	schemasPath string
 }
 
@@ -51,12 +52,17 @@ func (c *cueDefs) Load() error {
 	if err != nil {
 		return err
 	}
+	// the Cue context is keeping track of loaded instances. Which means this context must be recreated everytime Load is called to avoid a memory leak.
+	cueContext := cuecontext.New()
 
 	// newSchemas is used for double buffering, to avoid any issue when there are panels to validate at the same time load() is triggered
 	newSchemas := make(map[string]cue.Value)
 
 	// process each schema plugin to convert it into a CUE Value
-	for _, file := range files {
+	isError := false
+	i := 0
+	for i < len(files) && !isError {
+		file := files[i]
 		if !file.IsDir() {
 			logrus.Warningf("Plugin %s will not be loaded: it is not a folder", file.Name())
 			continue
@@ -69,6 +75,7 @@ func (c *cueDefs) Load() error {
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {
+			isError = true
 			logrus.Errorf("Plugin %s will not be loaded: The number of build instances is != 1", schemaPath)
 			continue
 		}
@@ -76,13 +83,15 @@ func (c *cueDefs) Load() error {
 
 		// check for errors on the instances (these are typically parsing errors)
 		if buildInstance.Err != nil {
+			isError = true
 			logrus.WithError(buildInstance.Err).Errorf("Plugin %s will not be loaded: file loading error", schemaPath)
 			continue
 		}
 
 		// build Value from the Instance
-		schema := c.context.BuildInstance(buildInstance)
+		schema := cueContext.BuildInstance(buildInstance)
 		if schema.Err() != nil {
+			isError = true
 			logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: build error", schemaPath)
 			continue
 		}
@@ -91,6 +100,7 @@ func (c *cueDefs) Load() error {
 			// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
 			schema = c.baseDef.Unify(schema)
 			if schema.Err() != nil {
+				isError = true
 				logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: it doesn't meet the expected format for its plugin type", schemaPath)
 				continue
 			}
@@ -104,19 +114,14 @@ func (c *cueDefs) Load() error {
 
 		newSchemas[kind] = schema
 		logrus.Debugf("%s plugin loaded from file %s", kind, schemaPath)
+		i++
 	}
 
-	// make c.schemas equal to newSchemas: deep copy newSchemas to c.schemas, then remove any value of c.schemas not existing in newSchemas
-	for key, value := range newSchemas {
-		c.schemas.Store(key, value)
+	if !isError {
+		// in case there is no error we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
+		c.schemas.Store(&newSchemas)
+		c.context.Store(cueContext)
 	}
-	c.schemas.Range(func(key interface{}, value interface{}) bool {
-		if _, ok := newSchemas[key.(string)]; !ok {
-			c.schemas.Delete(key)
-		}
-		return true
-	})
-	logrus.Debugf("Schemas at %s (re)loaded", c.schemasPath)
 	return nil
 }
 
