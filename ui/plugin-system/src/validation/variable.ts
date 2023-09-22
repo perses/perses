@@ -30,14 +30,14 @@ export const variableEditValidationSchema = z
         capturingRegexp: z.string().optional(),
         customAllValue: z.string().optional(),
         plugin: z.object({
-          kind: z.string(), // TODO: .nonempty('Required')
+          kind: z.string(), // TODO: .nonempty('Required') or .omit()
           spec: z.record(z.unknown()),
         }),
       })
       .optional(),
     textVariableFields: z
       .object({
-        value: z.string(), // TODO: .nonempty('Required')
+        value: z.string(),
         constant: z.boolean(),
       })
       .optional(),

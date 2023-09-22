@@ -19,9 +19,13 @@ import {
   VariablePlugin,
   parseTemplateVariables,
   replaceTemplateVariables,
+  useValidation,
 } from '@perses-dev/plugin-system';
-import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
+import { z } from 'zod';
+import { Controller } from 'react-hook-form';
+import { useEffect } from 'react';
 import {
   DEFAULT_PROM,
   getPrometheusTimeRange,
@@ -59,31 +63,69 @@ function PrometheusLabelValuesVariableEditor(props: OptionsEditorProps<Prometheu
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const { setVariablePluginEditorFormSchema } = useValidation();
+  useEffect(() => {
+    setVariablePluginEditorFormSchema(
+      z.object({
+        listVariableFields: z.object({
+          plugin: z.object({
+            spec: z.object({
+              datasource: z.object({
+                kind: z.string(),
+                group: z.string().optional(),
+                name: z.string().optional(),
+              }),
+              labelName: z.string().nonempty(),
+            }),
+          }),
+        }),
+      })
+    );
+  }, [setVariablePluginEditorFormSchema]);
+
   return (
     <Stack spacing={2}>
-      <FormControl margin="dense">
-        <DatasourceSelect
-          datasourcePluginKind="PrometheusDatasource"
-          value={selectedDatasource}
-          onChange={handleDatasourceChange}
-          InputProps={{
-            readOnly: props.isReadonly,
-          }}
-          label="Prometheus Datasource"
-        />
-      </FormControl>
-      <TextField
-        label="Label Name"
-        required
-        value={props.value.labelName}
-        onChange={(e) => {
-          props.onChange({ ...props.value, labelName: e.target.value });
-        }}
-        InputProps={{
-          readOnly: props.isReadonly,
-        }}
+      <Controller
+        name="listVariableFields.plugin.spec.datasource"
+        render={({ field, fieldState }) => (
+          <DatasourceSelect
+            {...field}
+            datasourcePluginKind={PROM_DATASOURCE_KIND}
+            value={selectedDatasource}
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
+            label="Prometheus Datasource"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              handleDatasourceChange(event);
+            }}
+          />
+        )}
       />
-      <MatcherEditor
+      <Controller
+        name="listVariableFields.plugin.spec.labelName"
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label="Label Name"
+            required
+            value={props.value.labelName}
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              props.onChange({ ...props.value, labelName: event.target.value });
+            }}
+          />
+        )}
+      />
+      <MatcherEditor // TODO: validation
         matchers={props.value.matchers ?? []}
         onChange={(e) => {
           props.onChange({ ...props.value, matchers: e });
@@ -113,20 +155,48 @@ function PrometheusLabelNamesVariableEditor(props: OptionsEditorProps<Prometheus
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const { setVariablePluginEditorFormSchema } = useValidation();
+  useEffect(() => {
+    setVariablePluginEditorFormSchema(
+      z.object({
+        listVariableFields: z.object({
+          plugin: z.object({
+            spec: z.object({
+              datasource: z.object({
+                kind: z.string(),
+                group: z.string().optional(),
+                name: z.string().optional(),
+              }),
+            }),
+          }),
+        }),
+      })
+    );
+  }, [setVariablePluginEditorFormSchema]);
+
   return (
     <Stack spacing={2}>
-      <FormControl margin="dense">
-        <DatasourceSelect
-          datasourcePluginKind="PrometheusDatasource"
-          value={selectedDatasource}
-          onChange={handleDatasourceChange}
-          InputProps={{
-            readOnly: props.isReadonly,
-          }}
-          label="Prometheus Datasource"
-        />
-      </FormControl>
-      <MatcherEditor
+      <Controller
+        name="listVariableFields.plugin.spec.datasource"
+        render={({ field, fieldState }) => (
+          <DatasourceSelect
+            {...field}
+            datasourcePluginKind={PROM_DATASOURCE_KIND}
+            value={selectedDatasource}
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
+            label="Prometheus Datasource"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              handleDatasourceChange(event);
+            }}
+          />
+        )}
+      />
+      <MatcherEditor // TODO: validation
         matchers={props.value.matchers ?? []}
         isReadonly={props.isReadonly}
         onChange={(e) => {
@@ -159,38 +229,83 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
     throw new Error('Got unexpected non-Prometheus datasource selector');
   };
 
+  const { setVariablePluginEditorFormSchema } = useValidation();
+  useEffect(() => {
+    setVariablePluginEditorFormSchema(
+      z.object({
+        listVariableFields: z.object({
+          plugin: z.object({
+            spec: z.object({
+              datasource: z.object({
+                kind: z.string(),
+                group: z.string().optional(),
+                name: z.string().optional(),
+              }),
+              expr: z.string(),
+              labelName: z.string().nonempty('Required'),
+            }),
+          }),
+        }),
+      })
+    );
+  }, [setVariablePluginEditorFormSchema]);
+
   return (
     <Stack spacing={2}>
-      <FormControl margin="dense">
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
-        <DatasourceSelect
-          datasourcePluginKind={PROM_DATASOURCE_KIND}
-          value={selectedDatasource}
-          onChange={handleDatasourceChange}
-          InputProps={{
-            readOnly: props.isReadonly,
-          }}
-          label="Prometheus Datasource"
-        />
-      </FormControl>
-      <PromQLEditor
-        completeConfig={{ remote: { url: promURL } }}
-        value={value.expr}
-        onChange={(query) => {
-          props.onChange({ ...props.value, expr: query });
-        }}
-        readOnly={props.isReadonly}
-        width="100%"
+      <Controller
+        name="listVariableFields.plugin.spec.datasource"
+        render={({ field, fieldState }) => (
+          <DatasourceSelect
+            {...field}
+            datasourcePluginKind={PROM_DATASOURCE_KIND}
+            value={selectedDatasource}
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
+            label="Prometheus Datasource"
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              handleDatasourceChange(event);
+            }}
+          />
+        )}
       />
-      <TextField
-        label="Label Name"
-        value={props.value.labelName}
-        InputProps={{
-          readOnly: props.isReadonly,
-        }}
-        onChange={(e) => {
-          props.onChange({ ...props.value, labelName: e.target.value });
-        }}
+      <Controller
+        name="listVariableFields.plugin.spec.expr"
+        render={({ field }) => (
+          <PromQLEditor
+            {...field}
+            completeConfig={{ remote: { url: promURL } }}
+            value={value.expr}
+            readOnly={props.isReadonly}
+            width="100%"
+            onChange={(event) => {
+              field.onChange(event);
+              props.onChange({ ...props.value, expr: event });
+            }}
+          />
+        )}
+      />
+      <Controller
+        name="listVariableFields.plugin.spec.labelName"
+        render={({ field, fieldState }) => (
+          <TextField
+            {...field}
+            label="Label Name"
+            value={props.value.labelName}
+            InputProps={{
+              readOnly: props.isReadonly,
+            }}
+            error={!!fieldState.error}
+            helperText={fieldState.error?.message}
+            onChange={(event) => {
+              field.onChange(event);
+              props.onChange({ ...props.value, labelName: event.target.value });
+            }}
+          />
+        )}
       />
     </Stack>
   );
