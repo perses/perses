@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 func readAndDetect(file string) (data []byte, isJSON bool, err error) {
@@ -32,8 +34,9 @@ func readAndDetect(file string) (data []byte, isJSON bool, err error) {
 		return
 	}
 
+	jsonLib := jsoniter.ConfigCompatibleWithStandardLibrary
 	// detecting file format
-	isJSON = json.Unmarshal(data, &json.RawMessage{}) == nil
+	isJSON = jsonLib.Unmarshal(data, &json.RawMessage{}) == nil
 	return
 }
 

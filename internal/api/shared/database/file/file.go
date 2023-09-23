@@ -14,7 +14,6 @@
 package databasefile
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -23,6 +22,7 @@ import (
 	"reflect"
 	"strings"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/config"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -233,6 +233,7 @@ func (d *DAO) buildPath(key string) string {
 
 func (d *DAO) unmarshal(data []byte, entity interface{}) error {
 	if d.Extension == config.JSONExtension {
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		return json.Unmarshal(data, entity)
 	}
 	return yaml.Unmarshal(data, entity)
@@ -240,6 +241,7 @@ func (d *DAO) unmarshal(data []byte, entity interface{}) error {
 
 func (d *DAO) marshal(entity interface{}) ([]byte, error) {
 	if d.Extension == config.JSONExtension {
+		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		return json.Marshal(entity)
 	}
 	return yaml.Marshal(entity)
