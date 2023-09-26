@@ -19,6 +19,7 @@ export const TOOLTIP_TEXT = {
   editJson: 'Edit JSON',
   editVariables: 'Edit variables',
   refreshDashboard: 'Refresh dashboard',
+  refreshDashboardInterval: 'Auto refresh interval',
   // Group buttons
   addPanelToGroup: 'Add panel to group',
   deleteGroup: 'Delete group',

@@ -107,12 +107,14 @@ export function TimeRangeControls({
         </InfoTooltip>
       )}
       {showRefreshInterval && (
-        <RefreshIntervalPicker
-          timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
-          value={refreshInterval}
-          onChange={handleRefreshIntervalChange}
-          height={height}
-        />
+        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboardInterval}>
+          <RefreshIntervalPicker
+            timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
+            value={refreshInterval}
+            onChange={handleRefreshIntervalChange}
+            height={height}
+          />
+        </InfoTooltip>
       )}
     </Stack>
   );
