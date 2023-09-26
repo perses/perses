@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.40.1 / 2023-09-26
+
+- [ENHANCEMENT] Variables actions shouldn't wrap to next line (#1442)
+- [BUGFIX] Fix json/yaml files loading by using jsoniter at the database layer level (#1444)
+- [BUGFIX] Fix memory leak caused by a cue context kept during the load of the schemas (#1441)
+- [BUGFIX] Fix nilpointer when plugin is not loaded (#1443)
+- [BUGFIX] Fix delete buttons still clickable in readonly mode (#1439)
+
 ## 0.40.0 / 2023-09-19
 
 - [FEATURE] Add metadata validation for project, dashboard, datasource and variable on the UI (#1416)
