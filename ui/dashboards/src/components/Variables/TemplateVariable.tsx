@@ -152,6 +152,7 @@ function ListVariable({ name, source }: TemplateVariableProps) {
         <InputLabel id={name}>{title}</InputLabel>
         <Select
           id={name}
+          title={selectedValue as string}
           label={title}
           value={selectedValue}
           onChange={(e) => {
@@ -202,6 +203,7 @@ function TextVariable({ name, source }: TemplateVariableProps) {
 
   return (
     <TextField
+      title={tempValue as string}
       value={tempValue}
       onChange={(e) => setTempValue(e.target.value)}
       onBlur={() => setVariableValue(name, tempValue, source)}
