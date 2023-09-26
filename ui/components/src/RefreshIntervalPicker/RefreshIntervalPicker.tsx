@@ -13,6 +13,7 @@
 
 import { Box, FormControl, MenuItem, Select } from '@mui/material';
 import { DurationString } from '@perses-dev/core';
+import { useMemo } from 'react';
 import { TimeOption } from '../model';
 
 interface RefreshIntervalPickerProps {
@@ -25,6 +26,14 @@ interface RefreshIntervalPickerProps {
 export function RefreshIntervalPicker(props: RefreshIntervalPickerProps) {
   const { value, onChange, timeOptions, height } = props;
   const formattedValue = value;
+
+  // If the dashboard refresh interval is not provided in timeOptions, it will create a specific option for the select
+  const customInterval = useMemo(() => {
+    if (value && !timeOptions.some((option) => option.value.pastDuration === value)) {
+      return <MenuItem value={value}>{value}</MenuItem>;
+    }
+  }, [timeOptions, value]);
+
   return (
     <FormControl>
       <Box>
@@ -47,6 +56,7 @@ export function RefreshIntervalPicker(props: RefreshIntervalPickerProps) {
               {item.display}
             </MenuItem>
           ))}
+          {customInterval}
         </Select>
       </Box>
     </FormControl>
