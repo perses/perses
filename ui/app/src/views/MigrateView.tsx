@@ -14,15 +14,13 @@
 import {
   Alert,
   Autocomplete,
-  Box,
   Button,
   CircularProgress,
   Container,
+  Divider,
   Stack,
   TextField,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from '@mui/material';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
@@ -48,7 +46,6 @@ function MigrateView() {
   const [lightGrafanaDashboard, setLightGrafanaDashboard] = useState<GrafanaLightDashboard>();
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [projectName, setProjectName] = useState<string>('');
-  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const migrateMutation = useMigrate();
@@ -103,15 +100,14 @@ function MigrateView() {
             respective parent row (if applicable) before pasting the JSON here.
           </Typography>
         </Alert>
-        <Button
-          startIcon={<Upload />}
-          variant="contained"
-          component="label"
-          sx={{ width: isLaptopSize ? '25%' : '50%' }}
-        >
+        <Typography variant="h2" sx={{ paddingTop: 2 }}>
+          1. Provide a Grafana dashboard
+        </Typography>
+        <Button fullWidth startIcon={<Upload />} variant="outlined" component="label">
           Upload JSON file
-          <input type="file" onChange={fileUploadOnChange} hidden />
+          <input type="file" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
         </Button>
+        <Divider>OR</Divider>
         <TextField
           value={grafanaDashboard}
           onChange={(e) => completeGrafanaDashboard(e.target.value)}
@@ -119,8 +115,8 @@ function MigrateView() {
           fullWidth
           minRows={10}
           maxRows={20}
-          label="Grafana dashboard"
-          placeholder="Paste your Grafana dashboard"
+          label="Grafana Dashboard JSON"
+          placeholder="Paste your Grafana Dashboard JSON here..."
         />
         {
           // When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
@@ -138,6 +134,7 @@ function MigrateView() {
           })
         }
         <Button
+          variant="contained"
           disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
           startIcon={<AutoFix />}
           onClick={() => {
@@ -153,11 +150,15 @@ function MigrateView() {
           </Alert>
         )}
         {!isLoading && data !== undefined && data !== null && migrateMutation.isSuccess && (
-          <Stack direction="row">
-            <Box width={'80%'}>
-              <JSONEditor value={migrateMutation.data} maxHeight="50rem" width="100%" />
-            </Box>
-            <Stack width={'100%'}>
+          <Stack direction="column">
+            <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
+              2. Migration output
+            </Typography>
+            <JSONEditor value={migrateMutation.data} maxHeight="50rem" width="100%" />
+            <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
+              3. Import
+            </Typography>
+            <Stack width={'100%'} gap={1}>
               <Autocomplete
                 disablePortal
                 renderInput={(params) => (
