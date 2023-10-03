@@ -30,7 +30,7 @@ import {
   DEFAULT_PROM,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
-import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../PrometheusDatasourceEditor';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (

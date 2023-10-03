@@ -23,8 +23,7 @@ import {
   PrometheusClient,
 } from '../../model';
 import { PromQLEditor } from '../../components';
-import { PrometheusDatasourceSpec } from '../prometheus-datasource';
-import { DEFAULT_SCRAPE_INTERVAL } from '../PrometheusDatasourceEditor';
+import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import {
   PrometheusTimeSeriesQueryEditorProps,
   useQueryState,
