@@ -11,7 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { PrometheusDatasourceSelector } from '../model';
+
+export const DEFAULT_SCRAPE_INTERVAL: DurationString = '1m';
+
+export interface PrometheusDatasourceSpec {
+  directUrl?: string;
+  proxy?: HTTPProxy;
+  scrapeInterval?: DurationString; // default to 1m
+}
+
+export interface HTTPProxy {
+  kind: 'HTTPProxy';
+  spec: HTTPProxySpec;
+}
+export interface HTTPProxySpec {
+  // url is the url of the datasource. It is not the url of the proxy.
+  // The Perses server is the proxy, so it needs to know where to redirect the request.
+  url: string;
+  // allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
+  // Leave it empty if you don't want to restrict the access to the datasource.
+  allowedEndpoints?: HTTPAllowedEndpoint[];
+  // headers can be used to provide additional headers that need to be forwarded when requesting the datasource
+  headers?: RequestHeaders;
+  // secret is the name of the secret that should be used for the proxy or discovery configuration
+  // It will contain any sensitive information such as password, token, certificate.
+  secret?: string;
+}
+
+export interface HTTPAllowedEndpoint {
+  endpointPattern: string;
+  method: string;
+}
 
 export interface PrometheusVariableOptionsBase {
   datasource?: PrometheusDatasourceSelector;

@@ -11,25 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition, DurationString, RequestHeaders } from '@perses-dev/core';
+import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
 import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
-import {
-  PrometheusDatasourceEditor,
-  PrometheusDatasourceSpec as PrometheusDatasourceSpecFull,
-} from './PrometheusDatasourceEditor';
-
-export interface PrometheusDatasourceSpec {
-  directUrl?: string;
-  headers?: RequestHeaders;
-  scrapeInterval?: DurationString;
-}
+import { PrometheusDatasourceSpec } from './types';
+import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
 
 /**
  * Creates a PrometheusClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
-  const { directUrl, headers: specHeaders } = spec;
+  const { directUrl, proxy } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -37,6 +29,8 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
   if (datasourceUrl === undefined) {
     throw new Error('No URL specified for Prometheus client. You can use directUrl in the spec to configure it.');
   }
+
+  const specHeaders = proxy?.spec.headers;
 
   // Could think about this becoming a class, although it definitely doesn't have to be
   return {
@@ -97,7 +91,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
   ] as BuiltinVariableDefinition[];
 };
 
-export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpecFull, PrometheusClient> = {
+export const PrometheusDatasource: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient> = {
   createClient,
   getBuiltinVariableDefinitions,
   OptionsEditorComponent: PrometheusDatasourceEditor,
