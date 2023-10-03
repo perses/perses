@@ -29,6 +29,7 @@
     "components",
     "core",
     "dashboards",
+    "explore",
     "e2e",
     "internal-utils",
     "panels-plugin",

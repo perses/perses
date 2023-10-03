@@ -18,8 +18,17 @@ import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import HomeView from './views/home/HomeView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
-import { AdminRoute, ConfigRoute, ProjectRoute, MigrateRoute, SignInRoute, SignUpRoute } from './model/route';
+import {
+  AdminRoute,
+  ConfigRoute,
+  ProjectRoute,
+  MigrateRoute,
+  SignInRoute,
+  SignUpRoute,
+  ExploreRoute,
+} from './model/route';
 import GuardedAuthRoute from './guard/GuardedAuthRoute';
+import ExploreView from './views/explore/ExploreView';
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
@@ -43,6 +52,7 @@ function Router() {
             <Route path={ConfigRoute} element={<ConfigView />} />
             <Route path={MigrateRoute} element={<MigrateView />} />
             <Route path={ProjectRoute} element={<HomeView />} />
+            <Route path={ExploreRoute} element={<ExploreView />} />
             <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
               <Route path="" element={<ProjectView />} />
               <Route path=":tab" element={<ProjectView />} />

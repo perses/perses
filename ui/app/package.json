@@ -22,6 +22,7 @@
     "@perses-dev/components": "0.41.1",
     "@perses-dev/core": "0.41.1",
     "@perses-dev/dashboards": "0.41.1",
+    "@perses-dev/explore": "0.41.1",
     "@perses-dev/panels-plugin": "0.41.1",
     "@perses-dev/plugin-system": "0.41.1",
     "@perses-dev/prometheus-plugin": "0.41.1",
