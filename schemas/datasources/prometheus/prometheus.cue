@@ -19,8 +19,16 @@ import (
 
 kind: "PrometheusDatasource"
 spec: {
-	directUrl?: string
-	proxy?:     commonProxy.#HTTPProxy & {
+	#directUrl | #proxy
+	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+}
+
+#directUrl: {
+	directUrl: string
+}
+
+#proxy: {
+	proxy: commonProxy.#HTTPProxy & {
 		spec: {
 			allowedEndpoints: [
 				{
@@ -50,5 +58,4 @@ spec: {
 			]
 		}
 	}
-	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
 }
