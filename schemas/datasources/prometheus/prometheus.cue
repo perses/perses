@@ -14,6 +14,7 @@
 package prometheus
 
 import (
+	"github.com/perses/perses/schemas/common"
 	commonProxy "github.com/perses/perses/schemas/common/proxy"
 )
 
@@ -24,7 +25,7 @@ spec: {
 }
 
 #directUrl: {
-	directUrl: string
+	directUrl: common.#url
 }
 
 #proxy: {
