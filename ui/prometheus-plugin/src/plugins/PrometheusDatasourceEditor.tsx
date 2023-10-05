@@ -13,7 +13,7 @@
 
 import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
-import { Grid, IconButton, TextField, Typography } from '@mui/material';
+import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import React, { Fragment, useState } from 'react';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -94,18 +94,18 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                 }),
               })
             }
+            sx={{ mb: 2 }}
           />
-          <Typography variant="h4" mt={2} mb={1}>
+          <Typography variant="h4" mb={2}>
             Allowed endpoints
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.allowedEndpoints ? (
+            {value.proxy?.spec.allowedEndpoints && value.proxy?.spec.allowedEndpoints.length != 0 ? (
               value.proxy.spec.allowedEndpoints.map(({ endpointPattern, method }, i) => {
                 return (
                   <Fragment key={i}>
                     <Grid item xs={8}>
                       <TextField
-                        disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
                         fullWidth
                         label="Endpoint pattern"
                         value={endpointPattern}
@@ -113,30 +113,132 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                           readOnly: isReadonly,
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                        onChange={(e) =>
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  allowedEndpoints: value.proxy?.spec.allowedEndpoints?.map((item, itemIndex) => {
+                                    if (i === itemIndex) {
+                                      return {
+                                        endpointPattern: e.target.value,
+                                        method: item.method,
+                                      };
+                                    } else {
+                                      return item;
+                                    }
+                                  }),
+                                },
+                              },
+                            }),
+                          })
+                        }
                       />
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                       <TextField
-                        disabled // at the moment the allowed endpoints cannot be modified (enforced by backend)
+                        select
                         fullWidth
-                        label="URL"
+                        label="Method"
                         value={method}
                         InputProps={{
                           readOnly: isReadonly,
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                      />
+                        onChange={(e) =>
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  allowedEndpoints: value.proxy?.spec.allowedEndpoints?.map((item, itemIndex) => {
+                                    if (i === itemIndex) {
+                                      return {
+                                        endpointPattern: item.endpointPattern,
+                                        method: e.target.value,
+                                      };
+                                    } else {
+                                      return item;
+                                    }
+                                  }),
+                                },
+                              },
+                            }),
+                          })
+                        }
+                      >
+                        <MenuItem value="GET">GET</MenuItem>
+                        <MenuItem value="POST">POST</MenuItem>
+                        <MenuItem value="PUT">PUT</MenuItem>
+                        <MenuItem value="PATCH">PATCH</MenuItem>
+                        <MenuItem value="DELETE">DELETE</MenuItem>
+                      </TextField>
+                    </Grid>
+                    <Grid item xs={1}>
+                      <IconButton
+                        disabled={isReadonly}
+                        onClick={() => {
+                          const newEndpoints = [
+                            ...(value.proxy?.spec.allowedEndpoints?.filter((item, itemIndex) => {
+                              return itemIndex !== i;
+                            }) || []),
+                          ];
+                          onChange({
+                            ...value,
+                            ...(value.proxy && {
+                              proxy: {
+                                ...value.proxy,
+                                spec: {
+                                  ...value.proxy.spec,
+                                  allowedEndpoints: newEndpoints,
+                                },
+                              },
+                            }),
+                          });
+                        }}
+                      >
+                        <MinusIcon />
+                      </IconButton>
                     </Grid>
                   </Fragment>
                 );
               })
             ) : (
               <Grid item xs={4}>
-                <Typography>None</Typography> {/* TODO: in edit mode, allow user to add endpoints */}
+                <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
               </Grid>
             )}
+            <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
+              <IconButton
+                disabled={isReadonly}
+                onClick={() =>
+                  onChange({
+                    ...value,
+                    ...(value.proxy && {
+                      proxy: {
+                        ...value.proxy,
+                        spec: {
+                          ...value.proxy.spec,
+                          allowedEndpoints: [
+                            ...(value.proxy.spec.allowedEndpoints ?? []),
+                            { endpointPattern: '', method: '' },
+                          ],
+                        },
+                      },
+                    }),
+                  })
+                }
+              >
+                <PlusIcon />
+              </IconButton>
+            </Grid>
           </Grid>
-          <Typography variant="h4" mb={1}>
+          <Typography variant="h4" mb={2}>
             Request Headers
           </Typography>
           <Grid container spacing={2} mb={2}>
@@ -220,7 +322,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                   </Fragment>
                 );
               })}
-            <Grid item xs={12} sx={{ paddingTop: '5px !important' }}>
+            <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
               <IconButton
                 disabled={isReadonly}
                 onClick={() =>
@@ -288,7 +390,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       kind: 'HTTPProxy',
       spec: {
         allowedEndpoints: [
-          // hardcoded list of allowed endpoints for now since those are enforced by the backend
+          // list of standard endpoints suggested by default
           {
             endpointPattern: '/api/v1/labels',
             method: 'POST',
