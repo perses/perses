@@ -15,6 +15,7 @@ import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import React, { Fragment, useState } from 'react';
+import { produce } from 'immer';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from './types';
@@ -30,11 +31,8 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
-  // TODO refactor with useImmer to avoid doing so much destructuring? feasibility & performances to be checked
-
   // utilitary function used for headers when renaming a property
-  // -> TODO it would be cleaner to manipulate headers as a list instead, to avoid doing this.
-  //    This could be a pure frontend trick, but change in the backend datamodel should also be considered
+  // -> TODO it would be cleaner to manipulate headers as an intermediary list instead, to avoid doing this.
   const buildNewHeaders = (oldHeaders: RequestHeaders | undefined, oldName: string, newName: string) => {
     if (oldHeaders === undefined) return oldHeaders;
     const keys = Object.keys(oldHeaders);
@@ -63,7 +61,13 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               readOnly: isReadonly,
             }}
             InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-            onChange={(e) => onChange({ ...value, directUrl: e.target.value })}
+            onChange={(e) => {
+              onChange(
+                produce(value, (draft) => {
+                  draft.directUrl = e.target.value;
+                })
+              );
+            }}
           />
         </>
       ),
@@ -80,20 +84,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               readOnly: isReadonly,
             }}
             InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                ...(value.proxy && {
-                  proxy: {
-                    ...value.proxy,
-                    spec: {
-                      ...value.proxy.spec,
-                      url: e.target.value,
-                    },
-                  },
-                }),
-              })
-            }
+            onChange={(e) => {
+              onChange(
+                produce(value, (draft) => {
+                  if (draft.proxy !== undefined) {
+                    draft.proxy.spec.url = e.target.value;
+                  }
+                })
+              );
+            }}
             sx={{ mb: 2 }}
           />
           <Typography variant="h4" mb={2}>
@@ -113,15 +112,12 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                           readOnly: isReadonly,
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                        onChange={(e) =>
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  allowedEndpoints: value.proxy?.spec.allowedEndpoints?.map((item, itemIndex) => {
+                        onChange={(e) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.allowedEndpoints = draft.proxy.spec.allowedEndpoints?.map(
+                                  (item, itemIndex) => {
                                     if (i === itemIndex) {
                                       return {
                                         endpointPattern: e.target.value,
@@ -130,12 +126,12 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                                     } else {
                                       return item;
                                     }
-                                  }),
-                                },
-                              },
-                            }),
-                          })
-                        }
+                                  }
+                                );
+                              }
+                            })
+                          );
+                        }}
                       />
                     </Grid>
                     <Grid item xs={3}>
@@ -148,15 +144,12 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                           readOnly: isReadonly,
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-                        onChange={(e) =>
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  allowedEndpoints: value.proxy?.spec.allowedEndpoints?.map((item, itemIndex) => {
+                        onChange={(e) => {
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.allowedEndpoints = draft.proxy.spec.allowedEndpoints?.map(
+                                  (item, itemIndex) => {
                                     if (i === itemIndex) {
                                       return {
                                         endpointPattern: item.endpointPattern,
@@ -165,12 +158,12 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                                     } else {
                                       return item;
                                     }
-                                  }),
-                                },
-                              },
-                            }),
-                          })
-                        }
+                                  }
+                                );
+                              }
+                            })
+                          );
+                        }}
                       >
                         <MenuItem value="GET">GET</MenuItem>
                         <MenuItem value="POST">POST</MenuItem>
@@ -182,24 +175,19 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                     <Grid item xs={1}>
                       <IconButton
                         disabled={isReadonly}
+                        // Remove the given allowed endpoint from the list
                         onClick={() => {
-                          const newEndpoints = [
-                            ...(value.proxy?.spec.allowedEndpoints?.filter((item, itemIndex) => {
-                              return itemIndex !== i;
-                            }) || []),
-                          ];
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  allowedEndpoints: newEndpoints,
-                                },
-                              },
-                            }),
-                          });
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.allowedEndpoints = [
+                                  ...(draft.proxy.spec.allowedEndpoints?.filter((item, itemIndex) => {
+                                    return itemIndex !== i;
+                                  }) || []),
+                                ];
+                              }
+                            })
+                          );
                         }}
                       >
                         <MinusIcon />
@@ -216,22 +204,18 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
               <IconButton
                 disabled={isReadonly}
+                // Add a new (empty) allowed endpoint to the list
                 onClick={() =>
-                  onChange({
-                    ...value,
-                    ...(value.proxy && {
-                      proxy: {
-                        ...value.proxy,
-                        spec: {
-                          ...value.proxy.spec,
-                          allowedEndpoints: [
-                            ...(value.proxy.spec.allowedEndpoints ?? []),
-                            { endpointPattern: '', method: '' },
-                          ],
-                        },
-                      },
-                    }),
-                  })
+                  onChange(
+                    produce(value, (draft) => {
+                      if (draft.proxy !== undefined) {
+                        draft.proxy.spec.allowedEndpoints = [
+                          ...(draft.proxy.spec.allowedEndpoints ?? []),
+                          { endpointPattern: '', method: '' },
+                        ];
+                      }
+                    })
+                  )
                 }
               >
                 <PlusIcon />
@@ -256,18 +240,17 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                         onChange={(e) =>
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  headers: buildNewHeaders(value.proxy.spec.headers, headerName, e.target.value),
-                                },
-                              },
-                            }),
-                          })
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.headers = buildNewHeaders(
+                                  draft.proxy.spec.headers,
+                                  headerName,
+                                  e.target.value
+                                );
+                              }
+                            })
+                          )
                         }
                       />
                     </Grid>
@@ -281,39 +264,33 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                         }}
                         InputLabelProps={{ shrink: isReadonly ? true : undefined }}
                         onChange={(e) =>
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  headers: { ...value.proxy.spec.headers, [headerName]: e.target.value },
-                                },
-                              },
-                            }),
-                          })
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.headers = {
+                                  ...draft.proxy.spec.headers,
+                                  [headerName]: e.target.value,
+                                };
+                              }
+                            })
+                          )
                         }
                       />
                     </Grid>
                     <Grid item xs={1}>
                       <IconButton
                         disabled={isReadonly}
+                        // Remove the given header from the list
                         onClick={() => {
                           const newHeaders = { ...value.proxy?.spec.headers };
                           delete newHeaders[headerName];
-                          onChange({
-                            ...value,
-                            ...(value.proxy && {
-                              proxy: {
-                                ...value.proxy,
-                                spec: {
-                                  ...value.proxy.spec,
-                                  headers: newHeaders,
-                                },
-                              },
-                            }),
-                          });
+                          onChange(
+                            produce(value, (draft) => {
+                              if (draft.proxy !== undefined) {
+                                draft.proxy.spec.headers = newHeaders;
+                              }
+                            })
+                          );
                         }}
                       >
                         <MinusIcon />
@@ -325,19 +302,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
               <IconButton
                 disabled={isReadonly}
+                // Add a new (empty) header to the list
                 onClick={() =>
-                  onChange({
-                    ...value,
-                    ...(value.proxy && {
-                      proxy: {
-                        ...value.proxy,
-                        spec: {
-                          ...value.proxy.spec,
-                          headers: { ...value.proxy.spec.headers, '': '' },
-                        },
-                      },
-                    }),
-                  })
+                  onChange(
+                    produce(value, (draft) => {
+                      if (draft.proxy !== undefined) {
+                        draft.proxy.spec.headers = { ...draft.proxy.spec.headers, '': '' };
+                      }
+                    })
+                  )
                 }
               >
                 <PlusIcon />
@@ -352,20 +325,15 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
               readOnly: isReadonly,
             }}
             InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                ...(value.proxy && {
-                  proxy: {
-                    ...value.proxy,
-                    spec: {
-                      ...value.proxy.spec,
-                      secret: e.target.value,
-                    },
-                  },
-                }),
-              })
-            }
+            onChange={(e) => {
+              onChange(
+                produce(value, (draft) => {
+                  if (draft.proxy !== undefined) {
+                    draft.proxy.spec.secret = e.target.value;
+                  }
+                })
+              );
+            }}
           />
         </>
       ),
