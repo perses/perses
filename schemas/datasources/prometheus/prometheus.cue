@@ -14,13 +14,22 @@
 package prometheus
 
 import (
+	"github.com/perses/perses/schemas/common"
 	commonProxy "github.com/perses/perses/schemas/common/proxy"
 )
 
 kind: "PrometheusDatasource"
 spec: {
-	directUrl?: string
-	proxy?:     commonProxy.#HTTPProxy & {
+	#directUrl | #proxy
+	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+}
+
+#directUrl: {
+	directUrl: common.#url
+}
+
+#proxy: {
+	proxy: commonProxy.#HTTPProxy & {
 		spec: {
 			allowedEndpoints: [
 				{
@@ -50,5 +59,4 @@ spec: {
 			]
 		}
 	}
-	scrapeInterval?: =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
 }

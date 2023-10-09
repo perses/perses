@@ -24,6 +24,10 @@ export class DatasourceEditor {
 
   readonly isDefaultSwitch: Locator;
 
+  // TODO the below locators are specific to the Prom datasource and should be moved to a plugin package instead
+  readonly scrapeIntervalInput: Locator;
+  readonly urlInput: Locator;
+
   constructor(container: Locator) {
     this.container = container;
 
@@ -34,6 +38,9 @@ export class DatasourceEditor {
     this.descriptionInput = container.getByLabel('Description');
 
     this.isDefaultSwitch = container.getByLabel('Set as default');
+
+    this.scrapeIntervalInput = container.getByLabel('Scrape Interval');
+    this.urlInput = container.getByLabel('URL');
   }
 
   async setName(name: string) {
@@ -57,5 +64,15 @@ export class DatasourceEditor {
     } else {
       await this.isDefaultSwitch.uncheck();
     }
+  }
+
+  async setScrapeInterval(scrapeInterval: string) {
+    await this.scrapeIntervalInput.clear();
+    await this.scrapeIntervalInput.type(scrapeInterval);
+  }
+
+  async setURL(url: string) {
+    await this.urlInput.clear();
+    await this.urlInput.type(url);
   }
 }

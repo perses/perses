@@ -94,6 +94,8 @@ test.describe('ProjectView', () => {
     await datasourceEditor.setDisplayLabel('My personal datasource');
     await datasourceEditor.setDescription('This is a datasource for personal use');
     await datasourceEditor.setDefault(false);
+    await datasourceEditor.setScrapeInterval('1m');
+    await datasourceEditor.setURL('http://localhost:9090');
     await datasourceEditor.saveButton.click();
 
     await expect(projectPage.datasourceList).toContainText('my_ds');

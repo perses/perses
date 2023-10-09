@@ -13,6 +13,10 @@
 
 package proxy
 
+import (
+	"github.com/perses/perses/schemas/common"
+)
+
 #HTTPAllowedEndpoint: {
 	endpointPattern: string
 	method:          "POST" | "PUT" | "PATCH" | "GET" | "DELETE"
@@ -23,7 +27,7 @@ package proxy
 	spec: {
 		// url is the url of the datasource. It is not the url of the proxy.
 		// The Perses server is the proxy, so it needs to know where to redirect the request.
-		url: string
+		url: common.#url
 		// allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
 		// Leave it empty if you don't want to restrict the access to the datasource.
 		allowedEndpoints?: [ ...#HTTPAllowedEndpoint]
