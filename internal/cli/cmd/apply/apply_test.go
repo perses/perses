@@ -26,7 +26,7 @@ func TestApplyCMD(t *testing.T) {
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: `required flag(s) "file" not set`,
+			ExpectedMessage: "you are not connected to any API",
 		},
 		{
 			Title:           "not connected to any API",
@@ -58,6 +58,13 @@ func TestApplyCMD(t *testing.T) {
 object "Folder" "aoe4" has been applied in the project "game"
 object "Project" "perses" has been applied
 `,
+		},
+		{
+			Title:           "apply resources from a folder",
+			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
+			APIClient:       fakeapi.New(),
+			IsErrorExpected: true,
+			ExpectedMessage: `resource "game" not supported by the command`,
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

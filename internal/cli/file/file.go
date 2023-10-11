@@ -15,6 +15,8 @@ package file
 
 import (
 	"fmt"
+	"io/fs"
+	"path/filepath"
 
 	jsoniter "github.com/json-iterator/go"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -41,9 +43,46 @@ func Unmarshal(file string, obj interface{}) error {
 	return nil
 }
 
-func UnmarshalEntity(file string) ([]modelAPI.Entity, error) {
+func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, error) {
+	files, err := visit(dir)
+	if err != nil {
+		return nil, err
+	}
+	var entities []modelAPI.Entity
+	for _, f := range files {
+		es, unmarshalErr := UnmarshalEntitiesFromFile(f)
+		if unmarshalErr != nil {
+			return nil, unmarshalErr
+		}
+		entities = append(entities, es...)
+	}
+	return entities, nil
+}
+
+func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
 	u := &unmarshaller{}
 	return u.unmarshal(file)
+}
+
+func visit(dir string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		fileName := info.Name()
+		if filepath.Ext(fileName) != ".json" && filepath.Ext(fileName) != ".yaml" {
+			// skip every file that doesn't have the correct extension
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+
+	return files, err
 }
 
 type unmarshaller struct {

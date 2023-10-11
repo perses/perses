@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
@@ -34,6 +35,7 @@ type option struct {
 	persesCMD.Option
 	opt.ProjectOption
 	opt.FileOption
+	opt.DirectoryOption
 	writer    io.Writer
 	apiClient api.ClientInterface
 }
@@ -65,10 +67,20 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	entities, err := file.UnmarshalEntity(o.File)
+	var entities []modelAPI.Entity
+	var err error
+	if len(o.File) > 0 {
+		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+	} else if len(o.Directory) > 0 {
+		entities, err = file.UnmarshalEntitiesFromDirectory(o.Directory)
+	}
 	if err != nil {
 		return err
 	}
+	return o.applyEntity(entities)
+}
+
+func (o *option) applyEntity(entities []modelAPI.Entity) error {
 	for _, entity := range entities {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
@@ -110,11 +122,14 @@ func (o *option) SetWriter(writer io.Writer) {
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
-		Use:   "apply -f [FILENAME]",
+		Use:   "apply (-f [FILENAME] | -d [DIRECTORY_NAME])",
 		Short: "Create or update resources through a file. JSON or YAML format supported",
 		Example: `
 # Create/update the resources from the file resources.json to the remote Perses server.
 percli apply -f ./resources.json
+
+# Create/update any resources from a folder
+percli apply -d ./
 
 # Apply the JSON passed into stdin to the remote Perses server.
 cat ./resources.json | percli apply -f -
@@ -125,6 +140,6 @@ cat ./resources.json | percli apply -f -
 	}
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	opt.AddFileFlags(cmd, &o.FileOption)
-	opt.MarkFileFlagAsMandatory(cmd)
+	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	return cmd
 }
