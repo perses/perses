@@ -44,6 +44,9 @@ func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'apply'")
 	}
+	if len(o.Directory) == 0 && len(o.File) == 0 {
+		return fmt.Errorf("you need to set the flag --directory or --file for this command")
+	}
 
 	// Then, if no particular project has been specified through a flag, let's grab the one defined in the CLI config.
 	// In this particular case, we don't use the Complete method of the ProjectOption because
@@ -141,5 +144,6 @@ cat ./resources.json | percli apply -f -
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
+	cmd.MarkFlagsMutuallyExclusive("file", "directory")
 	return cmd
 }

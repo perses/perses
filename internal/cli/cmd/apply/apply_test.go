@@ -26,7 +26,7 @@ func TestApplyCMD(t *testing.T) {
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: "you are not connected to any API",
+			ExpectedMessage: "you need to set the flag --directory or --file for this command",
 		},
 		{
 			Title:           "not connected to any API",
