@@ -34,6 +34,7 @@ import (
 type option struct {
 	persesCMD.Option
 	opt.FileOption
+	opt.DirectoryOption
 	writer             io.Writer
 	chartsSchemas      string
 	queriesSchemas     string
@@ -76,11 +77,17 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	objects, err := file.UnmarshalEntity(o.File)
+	var entities []modelAPI.Entity
+	var err error
+	if len(o.File) > 0 {
+		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+	} else if len(o.Directory) > 0 {
+		entities, err = file.UnmarshalEntitiesFromDirectory(o.Directory)
+	}
 	if err != nil {
 		return err
 	}
-	if validateErr := o.validate(objects); validateErr != nil {
+	if validateErr := o.validate(entities); validateErr != nil {
 		return validateErr
 	}
 	return output.HandleString(o.writer, "your resources look good")
@@ -168,6 +175,7 @@ percli lint -f ./resources.json --online
 		},
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileFlagAsMandatory(cmd)
 	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
 	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")

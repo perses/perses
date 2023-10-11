@@ -22,6 +22,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+type DirectoryOption struct {
+	Directory string
+}
+
+func AddDirectoryFlags(cmd *cobra.Command, o *DirectoryOption) {
+	cmd.Flags().StringVarP(&o.Directory, "directory", "d", "", "Path to the directory containing the resources consumed by the command.")
+}
+
 type FileOption struct {
 	File string
 }

@@ -42,6 +42,7 @@ type keyCombination struct {
 type option struct {
 	persesCMD.Option
 	opt.FileOption
+	opt.DirectoryOption
 	opt.ProjectOption
 	writer    io.Writer
 	kind      modelV1.Kind
@@ -111,6 +112,10 @@ func (o *option) completeNames(args []string) error {
 		if err := o.setNamesFromFile(); err != nil {
 			return err
 		}
+	} else if len(o.Directory) > 0 {
+		if err := o.setNamesFromDirectory(); err != nil {
+			return err
+		}
 	} else if o.all {
 		if err := o.setNamesFromAll(); err != nil {
 			return err
@@ -145,7 +150,16 @@ func (o *option) setNamesFromAll() error {
 }
 
 func (o *option) setNamesFromFile() error {
-	entities, err := file.UnmarshalEntity(o.File)
+	entities, err := file.UnmarshalEntitiesFromFile(o.File)
+	if err != nil {
+		return err
+	}
+	o.setNames(entities)
+	return nil
+}
+
+func (o *option) setNamesFromDirectory() error {
+	entities, err := file.UnmarshalEntitiesFromDirectory(o.Directory)
 	if err != nil {
 		return err
 	}
@@ -201,6 +215,7 @@ percli delete dashboards --all
 		},
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
+	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	cmd.Flags().BoolVarP(&o.all, "all", "a", o.all, "Delete all resources in the project of the specified resource types.")
 	return cmd
