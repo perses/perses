@@ -63,29 +63,30 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
-  # It will also change the UI to reflect th
+  # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
 
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
-  # Note that if it is not provided it will be generated. When perses is used in a multi instance mode, you should provide the key.
-  # Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
-  # Also note the key must be at least 32 bytes long.
+  # Note that if it is not provided it will be generated. 
+  # When perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
+  # and therefore won't be able to decrypt what the other is encrypting.
+  # Also note that the key must be at least 32 bytes long.
   [ encryption_key: <secret> ]
-    
+
   # The path to the file containing the secret key.
   [ encryption_key_file: <filename> ]
 
   # Database configuration 
   database: <database_config>
-  
-  # The configuration to get access to the CUE schemas
+
+  # The configuration to access the CUE schemas
   [ schemas: <schemas_config> ]
-  
-  # A list of dashboard you would like to display in the UI home page
-  important_dashboards: 
-  - [ <dashboard_selector_config> ]
-  
-  # The markdown content to be display on the UI home page
+
+  # A list of dashboards you would like to display in the UI home page
+  important_dashboards:
+    - [ <dashboard_selector_config> ]
+
+  # The markdown content to be displayed on the UI home page
   [ information: <string> ]
 ```
 
@@ -93,7 +94,7 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # Config in case you want to use a file DB.
-  # Prefer the SQL config in case you are running multiple Perses instance.
+  # Prefer the SQL config in case you are running multiple Perses instances.
   [ file: <database_file_config> ]
   
   # The SQL config
@@ -202,7 +203,7 @@ Generic placeholders are defined as follows:
   # Path to the Cue schemas of the variables
   [ variables_path: <path> | default = "schemas/variables" ]
 
-  # The refresh interval of the cue schema regardless their localisation
+  # The refresh interval of the cue schemas regardless their paths
   [ interval: <duration> | default = 1h ]
 ```
 
