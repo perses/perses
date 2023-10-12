@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.41.0 / 2023-10-12
+
+- [FEATURE] PrometheusDatasource: allow providing custom allowed endpoints (#1461)
+- [ENHANCEMENT] support directory for any commands that is consuming a file (#1465)
+- [ENHANCEMENT] Quickly improve migration page design (#1452)
+- [ENHANCEMENT] Display properly custom auto refresh interval (#1451)
+- [ENHANCEMENT] Add title to variable inputs (#1449)
+- [ENHANCEMENT] Add tooltip to auto refresh dashboard select (#1450)
+- [BUGFIX] Fix wrong error check in proxy (#1466)
+- [BUGFIX] PrometheusDatasource: change to XOR between `directUrl` and `proxy` (#1459)
+
 ## 0.40.1 / 2023-09-26
 
 - [ENHANCEMENT] Variables actions shouldn't wrap to next line (#1442)
