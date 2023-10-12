@@ -14,7 +14,7 @@
 import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios, useValidation } from '@perses-dev/plugin-system';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { produce } from 'immer';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -85,30 +85,39 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
       label: strProxy,
       content: (
         <>
-          <TextField
-            fullWidth
-            label="URL"
-            value={value.proxy?.spec.url || ''}
-            InputProps={{
-              readOnly: isReadonly,
-            }}
-            InputLabelProps={{ shrink: isReadonly ? true : undefined }}
-            onChange={(e) => {
-              onChange(
-                produce(value, (draft) => {
-                  if (draft.proxy !== undefined) {
-                    draft.proxy.spec.url = e.target.value;
-                  } // TODO: if undefined
-                })
-              );
-            }}
-            sx={{ mb: 2 }}
+          <Controller
+            name="spec.plugin.spec.proxy.spec.url"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="URL"
+                value={value.proxy?.spec.url || ''}
+                InputProps={{
+                  readOnly: isReadonly,
+                }}
+                InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+                onChange={(event) => {
+                  field.onChange(event);
+                  onChange(
+                    produce(value, (draft) => {
+                      if (draft.proxy !== undefined) {
+                        draft.proxy.spec.url = event.target.value;
+                      }
+                    })
+                  );
+                }}
+                sx={{ mb: 2 }}
+              />
+            )}
           />
           <Typography variant="h4" mb={2}>
             Allowed endpoints
           </Typography>
-          <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.allowedEndpoints && value.proxy?.spec.allowedEndpoints.length != 0 ? (
+          <Grid container spacing={2}>
+            {value.proxy?.spec.allowedEndpoints ? (
               value.proxy.spec.allowedEndpoints.map(({ endpointPattern, method }, i) => {
                 return (
                   <Fragment key={i}>
@@ -210,31 +219,30 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                 <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
               </Grid>
             )}
-            <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
-              <IconButton
-                disabled={isReadonly}
-                // Add a new (empty) allowed endpoint to the list
-                onClick={() =>
-                  onChange(
-                    produce(value, (draft) => {
-                      if (draft.proxy !== undefined) {
-                        draft.proxy.spec.allowedEndpoints = [
-                          ...(draft.proxy.spec.allowedEndpoints ?? []),
-                          { endpointPattern: '', method: '' },
-                        ];
-                      }
-                    })
-                  )
-                }
-              >
-                <PlusIcon />
-              </IconButton>
-            </Grid>
           </Grid>
+          <IconButton
+            sx={{ mb: 2 }}
+            disabled={isReadonly}
+            // Add a new (empty) allowed endpoint to the list
+            onClick={() =>
+              onChange(
+                produce(value, (draft) => {
+                  if (draft.proxy !== undefined) {
+                    draft.proxy.spec.allowedEndpoints = [
+                      ...(draft.proxy.spec.allowedEndpoints ?? []),
+                      { endpointPattern: '', method: '' },
+                    ];
+                  }
+                })
+              )
+            }
+          >
+            <PlusIcon />
+          </IconButton>
           <Typography variant="h4" mb={2}>
             Request Headers
           </Typography>
-          <Grid container spacing={2} mb={2}>
+          <Grid container spacing={2}>
             {value.proxy?.spec.headers &&
               Object.keys(value.proxy.spec.headers).map((headerName, i) => {
                 return (
@@ -308,24 +316,23 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
                   </Fragment>
                 );
               })}
-            <Grid item xs={12} sx={{ paddingTop: '0px !important', paddingLeft: '5px !important' }}>
-              <IconButton
-                disabled={isReadonly}
-                // Add a new (empty) header to the list
-                onClick={() =>
-                  onChange(
-                    produce(value, (draft) => {
-                      if (draft.proxy !== undefined) {
-                        draft.proxy.spec.headers = { ...draft.proxy.spec.headers, '': '' };
-                      }
-                    })
-                  )
-                }
-              >
-                <PlusIcon />
-              </IconButton>
-            </Grid>
           </Grid>
+          <IconButton
+            sx={{ mb: 2 }}
+            disabled={isReadonly}
+            // Add a new (empty) header to the list
+            onClick={() =>
+              onChange(
+                produce(value, (draft) => {
+                  if (draft.proxy !== undefined) {
+                    draft.proxy.spec.headers = { ...draft.proxy.spec.headers, '': '' };
+                  }
+                })
+              )
+            }
+          >
+            <PlusIcon />
+          </IconButton>
           <TextField
             fullWidth
             label="Secret"
