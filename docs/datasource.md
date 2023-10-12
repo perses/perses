@@ -127,25 +127,25 @@ The following query should return an empty list or a list containing a single Pr
 GET /api/v1/globaldatasources?kind=Prometheus&default=true
 ```
 
-##### Get a single datasource
+##### Get a single global datasource
 
 ```bash
 GET /api/v1/globaldatasources/<name>
 ```
 
-##### Create a single datasource
+##### Create a single global datasource
 
 ```bash
 POST /api/v1/globaldatasources
 ```
 
-##### Update a single datasource
+##### Update a single global datasource
 
 ```bash
 PUT /api/v1/globaldatasources/<name>
 ```
 
-##### Delete a single datasource
+##### Delete a single global datasource
 
 ```bash
 DELETE /api/v1/globaldatasources/<name>
