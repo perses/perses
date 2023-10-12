@@ -260,7 +260,7 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 	var scrt *v1.SecretSpec
 	if len(cfg.Secret) > 0 {
 		scrt, err = retrieveSecret(cfg.Secret)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
