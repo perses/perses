@@ -25,7 +25,7 @@ import (
 type PublicAuthorization struct {
 	Type            string `json:"type" yaml:"type"`
 	Credentials     Hidden `json:"credentials,omitempty" yaml:"credentials,omitempty"`
-	CredentialsFile string `json:"credentials_file,omitempty" yaml:"credentials_file,omitempty"`
+	CredentialsFile string `json:"credentialsFile,omitempty" yaml:"credentialsFile,omitempty"`
 }
 
 func NewPublicAuthorization(a *Authorization) *PublicAuthorization {
@@ -43,7 +43,7 @@ func NewPublicAuthorization(a *Authorization) *PublicAuthorization {
 type Authorization struct {
 	Type            string `json:"type,omitempty" yaml:"type,omitempty"`
 	Credentials     string `json:"credentials,omitempty" yaml:"credentials,omitempty"`
-	CredentialsFile string `json:"credentials_file,omitempty" yaml:"credentials_file,omitempty"`
+	CredentialsFile string `json:"credentialsFile,omitempty" yaml:"credentialsFile,omitempty"`
 }
 
 func (a *Authorization) UnmarshalJSON(data []byte) error {
