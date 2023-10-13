@@ -372,7 +372,7 @@ func NewUser(name string) *v1.User {
 		Kind:     v1.KindUser,
 		Metadata: newMetadata(name),
 		Spec: v1.UserSpec{
-			Password: []byte("password"),
+			Password: "password",
 		},
 	}
 	entity.Metadata.CreateNow()

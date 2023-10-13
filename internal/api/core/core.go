@@ -41,7 +41,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to initialize the service manager: %w", err)
 	}
-	persesAPI := NewPersesAPI(serviceManager, conf)
+	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	proxyMiddleware := &middleware.Proxy{
 		Dashboard:    persistenceManager.GetDashboard(),
