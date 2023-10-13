@@ -1,0 +1,23 @@
+{
+  "kind": "Datasource",
+  "metadata": {
+    "name": "PrometheusDemoPersonal",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Prometheus PERSONAL Demo instance",
+      "description": "This is my personal Prometheus demo instance."
+    },
+    "default": false,
+    "plugin": {
+      "kind": "PrometheusDatasource",
+      "spec": {
+        "directUrl": "www.datasource.com"
+      }
+    }
+  }
+}
