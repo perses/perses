@@ -18,16 +18,12 @@ import (
 
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
-
-func hashAndSalt(pwd []byte) ([]byte, error) {
-	return bcrypt.GenerateFromPassword(pwd, bcrypt.DefaultCost)
-}
 
 type service struct {
 	user.Service
@@ -54,13 +50,13 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	if len(entity.Spec.Password) == 0 {
 		return nil, fmt.Errorf("%w: password cannot be empty", shared.BadRequestError)
 	}
-	hash, err := hashAndSalt(entity.Spec.Password)
+	hash, err := crypto.HashAndSalt([]byte(entity.Spec.Password))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %s", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	// save the hash in the password field
-	entity.Spec.Password = hash
+	entity.Spec.Password = string(hash)
 	if createErr := s.dao.Create(entity); createErr != nil {
 		return nil, createErr
 	}
@@ -87,12 +83,12 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Pub
 	entity.Metadata.Update(oldEntity.Metadata)
 	// in case the user updated his password, then we should hash it again, otherwise the old password should be kept
 	if len(entity.Spec.Password) > 0 {
-		hash, hashErr := hashAndSalt(entity.Spec.Password)
+		hash, hashErr := crypto.HashAndSalt([]byte(entity.Spec.Password))
 		if hashErr != nil {
 			logrus.WithError(hashErr).Errorf("unable to generate the hash for the password of the user %q", entity.Metadata.Name)
 			return nil, hashErr
 		}
-		entity.Spec.Password = hash
+		entity.Spec.Password = string(hash)
 	} else {
 		entity.Spec.Password = oldEntity.Spec.Password
 	}

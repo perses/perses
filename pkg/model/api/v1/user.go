@@ -23,43 +23,7 @@ import (
 type UserSpec struct {
 	FirstName string `json:"firstName,omitempty" yaml:"firstName,omitempty"`
 	LastName  string `json:"lastName,omitempty" yaml:"lastName,omitempty"`
-	Password  []byte `json:"password,omitempty" yaml:"password,omitempty"`
-}
-
-func (u *UserSpec) UnmarshalJSON(data []byte) error {
-	type plain = struct {
-		FirstName string `json:"firstName,omitempty"`
-		LastName  string `json:"lastName,omitempty"`
-		Password  string `json:"password,omitempty"`
-	}
-	var tmp plain
-	if err := json.Unmarshal(data, &tmp); err != nil {
-		return err
-	}
-	if len(tmp.Password) > 0 {
-		u.Password = []byte(tmp.Password)
-	}
-	u.LastName = tmp.LastName
-	u.FirstName = tmp.FirstName
-	return nil
-}
-
-func (u *UserSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type plain = struct {
-		FirstName string `yaml:"firstName,omitempty"`
-		LastName  string `yaml:"lastName,omitempty"`
-		Password  string `yaml:"password,omitempty"`
-	}
-	var tmp plain
-	if err := unmarshal(&tmp); err != nil {
-		return err
-	}
-	if len(tmp.Password) > 0 {
-		u.Password = []byte(tmp.Password)
-	}
-	u.LastName = tmp.LastName
-	u.FirstName = tmp.FirstName
-	return nil
+	Password  string `json:"password,omitempty" yaml:"password,omitempty"`
 }
 
 type User struct {

@@ -17,6 +17,7 @@ import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
 	"github.com/perses/perses/internal/api/config"
+	authendpoint "github.com/perses/perses/internal/api/impl/auth"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
 	migrateendpoint "github.com/perses/perses/internal/api/impl/migrate"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
@@ -45,7 +46,7 @@ type api struct {
 	apiEndpoints   []endpoint
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Readonly
 	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
@@ -64,6 +65,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
+		authendpoint.New(persistenceManager.GetUser()),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,

@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 )
 
-// Endpoint is the struct that define all endpoint delivered by the path /migrate
+// Endpoint is the struct that defines all endpoint delivered by the path /migrate
 type Endpoint struct {
 	migrationService migrate.Migration
 }
