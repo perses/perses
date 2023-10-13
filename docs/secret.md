@@ -4,12 +4,10 @@ When defining a datasource, you will probably need to provide a basic authentica
 used when the Perses backend will contact your Datasource.
 
 We have two different objects to store sensitive data: `GlobalSecret` and `Secret`.
-To know what which one you need, it will depend on what object representing a datasource you are using.
+You should use one or the other depending on which object your datasource corresponds to.
 
-If you want to store sensitive data for a `GlobalDatasource`, then you need to create a `GlobalSecret`.
-For a `Datasource`, you need to create a `Secret`, `GlobalSecret` cannot be used in a `Datasource`.
-Finally, for the datasource defined directly in a dashboard, you can use a `Secret` as it is defined in the same project
-as the dashboard.
+- To store sensitive data for a `GlobalDatasource`, you need to create a `GlobalSecret`.
+- For a `Datasource` object or a datasource defined directly in a dashboard, you need to create a `Secret`. `GlobalSecret` cannot be used here.
 
 A `Secret` is defined like that:
 
