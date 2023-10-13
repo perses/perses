@@ -24,7 +24,7 @@ describe('Add Panel Group', () => {
 
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
-        <TimeRangeProvider initialTimeRange={{ pastDuration: '1h' }}>
+        <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
           <TemplateVariableProvider>
             <DashboardProviderSpy />
             <PanelGroupDialog />

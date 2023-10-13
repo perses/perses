@@ -11,20 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AbsoluteTimeRange,
   DurationString,
-  isRelativeTimeRange,
   TimeRangeValue,
+  isRelativeTimeRange,
   toAbsoluteTimeRange,
 } from '@perses-dev/core';
-import { useSetRefreshIntervalParams, useSetTimeRangeParams } from './query-params';
+import { getRefreshIntervalInMs } from './refresh-interval';
 
 export interface TimeRangeProviderProps {
-  initialTimeRange: TimeRangeValue;
-  initialRefreshInterval?: DurationString;
-  enabledURLParams?: boolean;
+  timeRange: TimeRangeValue;
+  refreshInterval?: DurationString;
+  setTimeRange?: (value: TimeRangeValue) => void;
+  setRefreshInterval?: (value: DurationString) => void;
   children?: React.ReactNode;
 }
 
@@ -60,33 +61,40 @@ export function useTimeRange(): TimeRange {
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeProvider(props: TimeRangeProviderProps) {
-  const { initialTimeRange, initialRefreshInterval, enabledURLParams, children } = props;
+  const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
-  const { timeRange, setTimeRange } = useSetTimeRangeParams(initialTimeRange, enabledURLParams);
-  const { refreshInterval, setRefreshInterval, refreshIntervalInMs } = useSetRefreshIntervalParams(
-    initialRefreshInterval,
-    enabledURLParams
-  );
+  const [localTimeRange, setLocalTimeRange] = useState<TimeRangeValue>(timeRange);
+  const [localRefreshInterval, setLocalefreshInterval] = useState<DurationString | undefined>(refreshInterval);
 
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshCounter, setRefreshCounter] = useState(0);
+
+  useEffect(() => {
+    setLocalTimeRange(timeRange);
+  }, [timeRange]);
+
+  useEffect(() => {
+    setLocalefreshInterval(refreshInterval);
+  }, [refreshInterval]);
 
   const refresh = useCallback(() => {
-    setRefreshKey(refreshKey + 1);
-  }, [refreshKey]);
+    setRefreshCounter((counter) => counter + 1);
+  }, [setRefreshCounter]);
 
   const ctx = useMemo(() => {
-    const absoluteTimeRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+    const absoluteTimeRange = isRelativeTimeRange(localTimeRange)
+      ? toAbsoluteTimeRange(localTimeRange)
+      : localTimeRange;
     return {
-      timeRange,
-      setTimeRange,
+      timeRange: localTimeRange,
+      setTimeRange: setTimeRange ?? setLocalTimeRange,
       absoluteTimeRange,
       refresh,
-      refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${refreshInterval}:${refreshKey}`,
-      refreshInterval,
-      refreshIntervalInMs,
-      setRefreshInterval,
+      refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${localRefreshInterval}:${refreshCounter}`,
+      refreshInterval: localRefreshInterval,
+      refreshIntervalInMs: getRefreshIntervalInMs(localRefreshInterval),
+      setRefreshInterval: setRefreshInterval ?? setLocalefreshInterval,
     };
-  }, [timeRange, setTimeRange, refresh, refreshKey, refreshInterval, refreshIntervalInMs, setRefreshInterval]);
+  }, [localTimeRange, setTimeRange, refresh, refreshCounter, localRefreshInterval, setRefreshInterval]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }

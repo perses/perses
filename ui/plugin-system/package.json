@@ -30,6 +30,7 @@
   "dependencies": {
     "@perses-dev/components": "0.41.1",
     "@perses-dev/core": "0.41.1",
+    "date-fns": "^2.30.0",
     "immer": "^9.0.15",
     "react-hook-form": "^7.46.1",
     "use-immer": "^0.7.0",

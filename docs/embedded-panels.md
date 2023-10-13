@@ -16,7 +16,7 @@ npx create-react-app perses-embedded-panel --template typescript
 npm i --save @perses-dev/components \
   @perses-dev/plugin-system @perses-dev/panels-plugin \
   @tanstack/react-query @perses-dev/dashboards \
-  @mui/material use-query-params @perses-dev/prometheus-plugin react-router-dom \
+  @mui/material @perses-dev/prometheus-plugin \
   @emotion/styled @hookform/resolvers
 ```
 
@@ -36,14 +36,11 @@ import {
   TimeRangeProvider
 } from "@perses-dev/plugin-system";
 import { TimeSeriesChart } from '@perses-dev/panels-plugin';
-import { ReactRouter6Adapter } from "use-query-params/adapters/react-router-6";
 import { ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { QueryParamProvider } from "use-query-params";
 import { DatasourceStoreProvider, TemplateVariableProvider } from "@perses-dev/dashboards";
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
-import { BrowserRouter } from "react-router-dom";
 import { DashboardResource, GlobalDatasource, ProjectDatasource } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 
@@ -119,43 +116,35 @@ function App() {
               TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
             }}
           >
-            <BrowserRouter>
-              <QueryParamProvider adapter={ReactRouter6Adapter} options={{ params: {} }}>
-                <QueryClientProvider client={queryClient}>
-                  <TimeRangeProvider
-                    initialRefreshInterval="0s"
-                    initialTimeRange={{ pastDuration: '30m' }}
-                    enabledURLParams={false}
-                  >
-                    <TemplateVariableProvider>
-                      <DatasourceStoreProvider dashboardResource={fakeDashboard} datasourceApi={fakeDatasourceApi}>
-                        <DataQueriesProvider
-                          definitions={[
-                            {
-                              kind: 'PrometheusTimeSeriesQuery',
-                              spec: { query: `up{job="prometheus"}` },
-                            },
-                          ]}
-                        >
-                          <TimeSeriesChart.PanelComponent
-                            contentDimensions={{
-                              width: 1200,
-                              height: 400,
-                            }}
-                            spec={{
-                              legend: {
-                                position: 'bottom',
-                                size: 'medium',
-                              },
-                            }}
-                          />
-                        </DataQueriesProvider>
-                      </DatasourceStoreProvider>
-                    </TemplateVariableProvider>
-                  </TimeRangeProvider>
-                </QueryClientProvider>
-              </QueryParamProvider>
-            </BrowserRouter>
+            <QueryClientProvider client={queryClient}>
+              <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
+                <TemplateVariableProvider>
+                  <DatasourceStoreProvider dashboardResource={fakeDashboard} datasourceApi={fakeDatasourceApi}>
+                    <DataQueriesProvider
+                      definitions={[
+                        {
+                          kind: 'PrometheusTimeSeriesQuery',
+                          spec: { query: `up{job="prometheus"}` },
+                        },
+                      ]}
+                    >
+                      <TimeSeriesChart.PanelComponent
+                        contentDimensions={{
+                          width: 1200,
+                          height: 400,
+                        }}
+                        spec={{
+                          legend: {
+                            position: 'bottom',
+                            size: 'medium',
+                          },
+                        }}
+                      />
+                    </DataQueriesProvider>
+                  </DatasourceStoreProvider>
+                </TemplateVariableProvider>
+              </TimeRangeProvider>
+            </QueryClientProvider>
           </PluginRegistry>
         </SnackbarProvider>
       </ChartsProvider>

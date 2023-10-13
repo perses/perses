@@ -43,7 +43,7 @@ describe('Panel', () => {
     definition ??= createTestPanel();
 
     renderWithContext(
-      <TimeRangeProvider initialTimeRange={{ pastDuration: '1h' }}>
+      <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
         <TemplateVariableProvider
           initialVariableDefinitions={[
             {
