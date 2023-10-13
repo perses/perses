@@ -21,12 +21,12 @@ import (
 )
 
 type UserSpec struct {
-	FirstName string `json:"firstName,omitempty" yaml:"firstName"`
-	LastName  string `json:"lastName,omitempty" yaml:"lastName"`
-	Password  []byte `json:"password,omitempty" yaml:"password"`
+	FirstName string `json:"firstName,omitempty" yaml:"firstName,omitempty"`
+	LastName  string `json:"lastName,omitempty" yaml:"lastName,omitempty"`
+	Password  []byte `json:"password,omitempty" yaml:"password,omitempty"`
 }
 
-func (p *UserSpec) UnmarshalJSON(data []byte) error {
+func (u *UserSpec) UnmarshalJSON(data []byte) error {
 	type plain = struct {
 		FirstName string `json:"firstName,omitempty"`
 		LastName  string `json:"lastName,omitempty"`
@@ -37,10 +37,28 @@ func (p *UserSpec) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	if len(tmp.Password) > 0 {
-		p.Password = []byte(tmp.Password)
+		u.Password = []byte(tmp.Password)
 	}
-	p.LastName = tmp.LastName
-	p.FirstName = tmp.FirstName
+	u.LastName = tmp.LastName
+	u.FirstName = tmp.FirstName
+	return nil
+}
+
+func (u *UserSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type plain = struct {
+		FirstName string `yaml:"firstName,omitempty"`
+		LastName  string `yaml:"lastName,omitempty"`
+		Password  string `yaml:"password,omitempty"`
+	}
+	var tmp plain
+	if err := unmarshal(&tmp); err != nil {
+		return err
+	}
+	if len(tmp.Password) > 0 {
+		u.Password = []byte(tmp.Password)
+	}
+	u.LastName = tmp.LastName
+	u.FirstName = tmp.FirstName
 	return nil
 }
 

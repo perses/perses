@@ -115,9 +115,21 @@ func (s *service) Delete(parameters shared.Parameters) error {
 }
 
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
-	return s.dao.Get(parameters.Name)
+	usr, err := s.dao.Get(parameters.Project)
+	if err != nil {
+		return nil, err
+	}
+	return v1.NewPublicUser(usr), nil
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
-	return s.dao.List(q)
+	l, err := s.dao.List(q)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*v1.PublicUser, 0, len(l))
+	for _, usr := range l {
+		result = append(result, v1.NewPublicUser(usr))
+	}
+	return result, nil
 }

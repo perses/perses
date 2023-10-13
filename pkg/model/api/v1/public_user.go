@@ -19,9 +19,9 @@ import (
 )
 
 type PublicUserSpec struct {
-	FirstName string        `json:"firstName,omitempty" yaml:"firstName"`
-	LastName  string        `json:"lastName,omitempty" yaml:"lastName"`
-	Password  secret.Hidden `json:"password,omitempty" yaml:"password"`
+	FirstName string        `json:"firstName,omitempty" yaml:"firstName,omitempty"`
+	LastName  string        `json:"lastName,omitempty" yaml:"lastName,omitempty"`
+	Password  secret.Hidden `json:"password,omitempty" yaml:"password,omitempty"`
 }
 
 func NewPublicUserSpec(u UserSpec) PublicUserSpec {
