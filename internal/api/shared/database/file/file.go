@@ -90,8 +90,9 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		return unMarshalErr
 	}
 	// This last check is here to verify that we get the accurate document.
-	// On macOS the filesystem is not case-sensitive regarding the search. So if you have a document named "foo",
-	// it will be returned if are looking for "Foo", "FoO" etc.
+	// On macOS, the filesystem is not case-sensitive regarding the search.
+	// So if you have a document named "foo",
+	// it will be returned if you are looking for "Foo", "FoO" etc.
 	if entity.GetMetadata().GetName() != metadata.GetName() {
 		return &databaseModel.Error{Key: key, Code: databaseModel.ErrorCodeNotFound}
 	}
@@ -106,7 +107,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		return fmt.Errorf("slice in parameter is not a pointer to a slice but a %q", typeParameter.Kind())
 	}
 
-	// it's a pointer, so move to the actual element behind the pointer.
+	// It's a pointer, so move to the actual element behind the pointer.
 	// Having a pointer avoid getting the error:
 	//           reflect.Value.Set using unaddressable value
 	// It's because the slice is usually not initialized and doesn't have any memory allocated.
@@ -122,9 +123,9 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		return fmt.Errorf("unable to build the query: %s", err)
 	}
 	if !isExist {
-		// there is nothing to return. So let's initialize the slice just to avoid returning a nil slice
+		// There is nothing to return. So let's initialize the slice just to avoid returning a nil slice
 		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
-		//and finally reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
+		// And finally, reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 		result.Elem().Set(sliceElem)
 		return nil
 	}
@@ -138,7 +139,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		sliceElem = reflect.MakeSlice(typeParameter, 0, 0)
 	}
 	for _, file := range files {
-		// now read all file and append them to the final result
+		// now read all files and append them to the final result
 		data, readErr := os.ReadFile(file)
 		if readErr != nil {
 			return readErr
@@ -164,7 +165,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 			sliceElem.Set(reflect.Append(sliceElem, value))
 		}
 	}
-	// at the end reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
+	// At the end reset the element of the slice to ensure we didn't disconnect the link between the pointer to the slice and the actual slice
 	result.Elem().Set(sliceElem)
 	return nil
 }

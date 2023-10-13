@@ -35,6 +35,7 @@ const (
 	PathGlobalVariable   = "globalvariables"
 	PathProject          = "projects"
 	PathSecret           = "secrets"
+	PathUser             = "users"
 	PathVariable         = "variables"
 )
 

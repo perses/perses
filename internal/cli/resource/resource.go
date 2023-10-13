@@ -93,6 +93,14 @@ var resources = []resource{
 		},
 	},
 	{
+		kind:      modelV1.KindUser,
+		shortTerm: "usr",
+		aliases: []string{
+			"users",
+			"usrs",
+		},
+	},
+	{
 		kind:      modelV1.KindVariable,
 		shortTerm: "var",
 		aliases: []string{

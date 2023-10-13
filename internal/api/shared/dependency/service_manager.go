@@ -26,6 +26,7 @@ import (
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
+	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -36,6 +37,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/migrate"
@@ -55,6 +57,7 @@ type ServiceManager interface {
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
 	GetSecret() secret.Service
+	GetUser() user.Service
 	GetVariable() variable.Service
 }
 
@@ -72,6 +75,7 @@ type service struct {
 	project          project.Service
 	schemas          schemas.Schemas
 	secret           secret.Service
+	user             user.Service
 	variable         variable.Service
 }
 
@@ -98,6 +102,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable())
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
+	userService := userImpl.NewService(dao.GetUser())
 	return &service{
 		crypto:           cryptoService,
 		dashboard:        dashboardService,
@@ -111,6 +116,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		project:          projectService,
 		schemas:          schemasService,
 		secret:           secretService,
+		user:             userService,
 		variable:         variableService,
 	}, nil
 }
@@ -161,6 +167,10 @@ func (s *service) GetSchemas() schemas.Schemas {
 
 func (s *service) GetSecret() secret.Service {
 	return s.secret
+}
+
+func (s *service) GetUser() user.Service {
+	return s.user
 }
 
 func (s *service) GetVariable() variable.Service {

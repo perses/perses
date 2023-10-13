@@ -31,6 +31,7 @@ const (
 	KindGlobalSecret     Kind = "GlobalSecret"
 	KindProject          Kind = "Project"
 	KindSecret           Kind = "Secret"
+	KindUser             Kind = "User"
 	KindVariable         Kind = "Variable"
 )
 
@@ -43,6 +44,7 @@ var KindMap = map[Kind]bool{
 	KindGlobalVariable:   true,
 	KindProject:          true,
 	KindSecret:           true,
+	KindUser:             true,
 	KindVariable:         true,
 }
 
@@ -55,6 +57,7 @@ var PluralKindMap = map[Kind]string{
 	KindGlobalVariable:   "globalvariables",
 	KindProject:          "projects",
 	KindSecret:           "secrets",
+	KindUser:             "users",
 	KindVariable:         "variables",
 }
 
@@ -113,6 +116,8 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Project{}, nil
 	case KindSecret:
 		return &Secret{}, nil
+	case KindUser:
+		return &User{}, nil
 	case KindVariable:
 		return &Variable{}, nil
 	default:

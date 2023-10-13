@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
 	"github.com/perses/perses/internal/api/impl/v1/secret"
+	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/shared"
@@ -56,6 +57,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, cfg config.Config) e
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject(), readonly),
 		secret.NewEndpoint(serviceManager.GetSecret(), readonly),
+		user.NewEndpoint(serviceManager.GetUser(), readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), readonly),
 	}
 	apiEndpoints := []endpoint{

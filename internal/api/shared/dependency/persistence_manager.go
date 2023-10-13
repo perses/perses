@@ -24,6 +24,7 @@ import (
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
+	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -34,6 +35,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/database"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -50,6 +52,7 @@ type PersistenceManager interface {
 	GetPersesDAO() databaseModel.DAO
 	GetProject() project.DAO
 	GetSecret() secret.DAO
+	GetUser() user.DAO
 	GetVariable() variable.DAO
 }
 
@@ -65,6 +68,7 @@ type persistence struct {
 	perses           databaseModel.DAO
 	project          project.DAO
 	secret           secret.DAO
+	user             user.DAO
 	variable         variable.DAO
 }
 
@@ -82,6 +86,7 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
 	secretDAO := secretImpl.NewDAO(persesDAO)
+	userDAO := userImpl.NewDAO(persesDAO)
 	variableDAO := variableImpl.NewDAO(persesDAO)
 	return &persistence{
 		dashboard:        dashboardDAO,
@@ -94,6 +99,7 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 		perses:           persesDAO,
 		project:          projectDAO,
 		secret:           secretDAO,
+		user:             userDAO,
 		variable:         variableDAO,
 	}, nil
 }
@@ -136,6 +142,10 @@ func (p *persistence) GetProject() project.DAO {
 
 func (p *persistence) GetSecret() secret.DAO {
 	return p.secret
+}
+
+func (p *persistence) GetUser() user.DAO {
+	return p.user
 }
 
 func (p *persistence) GetVariable() variable.DAO {
