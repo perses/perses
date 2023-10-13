@@ -79,9 +79,9 @@ func TestValidatePanels(t *testing.T) {
 	}
 
 	testSuite := []struct {
-		title     string
-		dashboard *v1.Dashboard
-		result    string
+		title            string
+		dashboard        *v1.Dashboard
+		expectedErrorStr string
 	}{
 		{
 			title: "dashboard containing valid panels",
@@ -114,7 +114,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "",
+			expectedErrorStr: "",
 		},
 		{
 			title: "dashboard containing an invalid panel (unknown panel kind)",
@@ -135,7 +135,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid panel MyInvalidPanel: Unknown kind UnknownChart",
+			expectedErrorStr: "invalid panel MyInvalidPanel: Unknown kind UnknownChart",
 		},
 		{
 			title: "dashboard containing a panel with an invalid query (unknown query type)",
@@ -156,7 +156,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid query : Unknown kind UnknownGraphQuery",
+			expectedErrorStr: "invalid query n°1: Unknown kind UnknownGraphQuery",
 		},
 		{
 			title: "dashboard containing a panel with an invalid query (field not allowed)",
@@ -177,7 +177,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid query : spec.aaaaaa: field not allowed",
+			expectedErrorStr: "invalid query n°1: spec.aaaaaa: field not allowed",
 		},
 		{
 			title: "dashboard containing a panel with an invalid query (datasource type not matching query type)",
@@ -198,7 +198,7 @@ func TestValidatePanels(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid query : spec.datasource.kind: conflicting values \"CustomDatasource\" and \"SQLDatasource\"",
+			expectedErrorStr: "invalid query n°1: spec.datasource.kind: conflicting values \"CustomDatasource\" and \"SQLDatasource\"",
 		},
 	}
 	for _, test := range testSuite {
@@ -212,11 +212,12 @@ func TestValidatePanels(t *testing.T) {
 			}
 
 			err = schema.ValidatePanels(test.dashboard.Spec.Panels)
-			errString := ""
-			if err != nil {
-				errString = err.Error()
+
+			if test.expectedErrorStr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.expectedErrorStr)
 			}
-			assert.Equal(t, test.result, errString)
 		})
 	}
 }
@@ -234,9 +235,9 @@ func TestValidateDashboardVariables(t *testing.T) {
 	}
 
 	testSuite := []struct {
-		title     string
-		dashboard *v1.Dashboard
-		result    string
+		title            string
+		dashboard        *v1.Dashboard
+		expectedErrorStr string
 	}{
 		{
 			title: "dashboard containing valid variables",
@@ -283,7 +284,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "",
+			expectedErrorStr: "",
 		},
 		{
 			title: "dashboard containing a variable of an unknown schema type",
@@ -314,7 +315,7 @@ func TestValidateDashboardVariables(t *testing.T) {
 					Layouts: []dashboard.Layout{},
 				},
 			},
-			result: "invalid variable myUnknownVar: Unknown kind UnknownVariable",
+			expectedErrorStr: "invalid variable myUnknownVar: Unknown kind UnknownVariable",
 		},
 	}
 	for _, test := range testSuite {
@@ -326,11 +327,12 @@ func TestValidateDashboardVariables(t *testing.T) {
 				t.Fatal(err)
 			}
 			err = schema.ValidateDashboardVariables(test.dashboard.Spec.Variables)
-			errString := ""
-			if err != nil {
-				errString = err.Error()
+
+			if test.expectedErrorStr == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.ErrorContains(t, err, test.expectedErrorStr)
 			}
-			assert.Equal(t, test.result, errString)
 		})
 	}
 }

@@ -35,7 +35,7 @@ func TestDashboard(t *testing.T) {
 	}{
 		{
 			title:            "dashboard with variables queries mixing parent variable & regex",
-			dashboardFile:    "variable_with_regex_dashboard.json",
+			dashboardFile:    "dashboard_with_regex_in_variable.json",
 			expectedErrorStr: "",
 		},
 	}
@@ -47,9 +47,10 @@ func TestDashboard(t *testing.T) {
 			projectPath := testUtils.GetRepositoryPath()
 			schemasService, schErr := schemas.New(config.Schemas{
 				// use the real schemas for these tests
-				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
-				QueriesPath:   filepath.Join(projectPath, config.DefaultQueriesPath),
-				VariablesPath: filepath.Join(projectPath, config.DefaultVariablesPath),
+				PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
+				QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
+				DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
+				VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
 			})
 			if schErr != nil {
 				t.Fatal(schErr)
@@ -77,9 +78,14 @@ func TestDatasource(t *testing.T) {
 		expectedErrorStr string
 	}{
 		{
-			title:            "nominal case with few datasources",
-			datasourceFiles:  []string{"datasource_custom.json", "datasource_default.json"},
+			title:            "nominal cases",
+			datasourceFiles:  []string{"datasource_direct.json", "datasource_proxy.json", "datasource_proxy_2.json"},
 			expectedErrorStr: "",
+		},
+		{
+			title:            "error case with wrongly-formatted URL",
+			datasourceFiles:  []string{"datasource_direct_2_invalid.json"},
+			expectedErrorStr: "invalid value \"www.datasource.com\" (out of bound",
 		},
 	}
 
@@ -93,9 +99,10 @@ func TestDatasource(t *testing.T) {
 			projectPath := testUtils.GetRepositoryPath()
 			schemasService, schErr := schemas.New(config.Schemas{
 				// use the real schemas for these tests
-				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
-				QueriesPath:   filepath.Join(projectPath, config.DefaultQueriesPath),
-				VariablesPath: filepath.Join(projectPath, config.DefaultVariablesPath),
+				PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
+				QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
+				DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
+				VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
 			})
 			if schErr != nil {
 				t.Fatal(schErr)
@@ -111,12 +118,11 @@ func TestDatasource(t *testing.T) {
 
 			for _, datasource := range datasources {
 				err := Datasource(datasource, datasources, schemasService)
-
-				actualErrorStr := ""
-				if err != nil {
-					actualErrorStr = err.Error()
+				if test.expectedErrorStr == "" {
+					assert.NoError(t, err)
+				} else {
+					assert.ErrorContains(t, err, test.expectedErrorStr)
 				}
-				assert.Equal(t, test.expectedErrorStr, actualErrorStr)
 			}
 		})
 	}

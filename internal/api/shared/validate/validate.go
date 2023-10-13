@@ -49,7 +49,7 @@ func DashboardWithVars(entity *modelV1.Dashboard, sch schemas.Schemas, projectVa
 }
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
-	if err := validateDTSPlugin(entity.GetDTSSpec().Plugin, sch); err != nil {
+	if err := validateDatasourcePlugin(entity.GetDatasourceSpec().Plugin, entity.GetMetadata().GetName(), sch); err != nil {
 		return err
 	}
 	if list != nil {
@@ -67,7 +67,7 @@ func Variable(entity modelV1.VariableInterface, sch schemas.Schemas) error {
 
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
 	name := entity.GetMetadata().GetName()
-	spec := entity.GetDTSSpec()
+	spec := entity.GetDatasourceSpec()
 	// Since the entity is not supposed to be a default datasource, no need to verify if there is another one already defined as default
 	if !spec.Default {
 		return nil
@@ -78,7 +78,7 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 			// nothing to check if comparing with same datasource
 			continue
 		}
-		dtsSpec := dts.GetDTSSpec()
+		dtsSpec := dts.GetDatasourceSpec()
 		if dtsSpec.Default && dtsSpec.Plugin.Kind == entityPluginKind {
 			return fmt.Errorf("datasource %q cannot be a default %q because there is already one defined named %q", entity.GetMetadata().GetName(), entityPluginKind, dts.GetMetadata().GetName())
 		}
@@ -109,11 +109,11 @@ func validateVariableNames(variables []dashboard.Variable) error {
 	return nil
 }
 
-func validateDTSPlugin(plugin common.Plugin, sch schemas.Schemas) error {
+func validateDatasourcePlugin(plugin common.Plugin, name string, sch schemas.Schemas) error {
 	if _, err := http.ValidateAndExtract(plugin.Spec); err != nil {
 		return err
 	}
-	return sch.ValidateDatasource(plugin)
+	return sch.ValidateDatasource(plugin, name)
 }
 
 func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
@@ -130,16 +130,16 @@ func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
 		}
 	}
 	if len(entity.Spec.Datasources) > 0 {
-		defaultDTS := make(map[string]bool)
-		for _, spec := range entity.Spec.Datasources {
-			if err := validateDTSPlugin(spec.Plugin, sch); err != nil {
+		defaultDts := make(map[string]bool)
+		for dtsName, spec := range entity.Spec.Datasources {
+			if err := validateDatasourcePlugin(spec.Plugin, dtsName, sch); err != nil {
 				return err
 			}
 			if spec.Default {
-				if defaultDTS[spec.Plugin.Kind] {
-					return fmt.Errorf("there is already a default datasource defined for the kind %q", spec.Plugin.Kind)
+				if defaultDts[spec.Plugin.Kind] {
+					return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, spec.Plugin.Kind)
 				}
-				defaultDTS[spec.Plugin.Kind] = true
+				defaultDts[spec.Plugin.Kind] = true
 			}
 		}
 	}

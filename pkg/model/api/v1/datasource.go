@@ -25,8 +25,8 @@ import (
 func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list []T) []T {
 	result := make([]T, 0, len(list))
 	for _, d := range list {
-		if (len(kind) > 0 && kind != d.GetDTSSpec().Plugin.Kind) ||
-			(defaultDTS != nil && *defaultDTS != d.GetDTSSpec().Default) {
+		if (len(kind) > 0 && kind != d.GetDatasourceSpec().Plugin.Kind) ||
+			(defaultDTS != nil && *defaultDTS != d.GetDatasourceSpec().Default) {
 			continue
 		}
 		result = append(result, d)
@@ -36,7 +36,7 @@ func FilterDatasource[T DatasourceInterface](kind string, defaultDTS *bool, list
 
 type DatasourceInterface interface {
 	GetMetadata() modelAPI.Metadata
-	GetDTSSpec() DatasourceSpec
+	GetDatasourceSpec() DatasourceSpec
 }
 
 type DatasourceSpec struct {
@@ -99,7 +99,7 @@ func (d *GlobalDatasource) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *GlobalDatasource) GetDTSSpec() DatasourceSpec {
+func (d *GlobalDatasource) GetDatasourceSpec() DatasourceSpec {
 	return d.Spec
 }
 
@@ -160,7 +160,7 @@ func (d *Datasource) GetKind() string {
 	return string(d.Kind)
 }
 
-func (d *Datasource) GetDTSSpec() DatasourceSpec {
+func (d *Datasource) GetDatasourceSpec() DatasourceSpec {
 	return d.Spec
 }
 

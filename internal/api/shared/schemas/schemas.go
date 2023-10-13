@@ -16,6 +16,8 @@ package schemas
 import (
 	_ "embed"
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
@@ -62,7 +64,7 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, sche
 }
 
 type Schemas interface {
-	ValidateDatasource(plugin common.Plugin) error
+	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
 	ValidateGlobalVariable(v modelV1.VariableSpec) error
@@ -127,12 +129,12 @@ func (s *sch) GetLoaders() []Loader {
 	return s.loaders
 }
 
-func (s *sch) ValidateDatasource(plugin common.Plugin) error {
+func (s *sch) ValidateDatasource(plugin common.Plugin, dtsName string) error {
 	if s.dts == nil {
 		logrus.Warning("datasource schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "datasource", "", s.dts)
+	return s.validatePlugin(plugin, "datasource", dtsName, s.dts)
 }
 
 // ValidatePanels verify a list of panels.
@@ -150,8 +152,8 @@ func (s *sch) ValidatePanels(panels map[string]*modelV1.Panel) error {
 		if err := s.ValidatePanel(panel.Spec.Plugin, panelName); err != nil {
 			return err
 		}
-		for _, query := range panel.Spec.Queries {
-			if err := s.ValidateQuery(query.Spec.Plugin); err != nil {
+		for i, query := range panel.Spec.Queries {
+			if err := s.ValidateQuery(query.Spec.Plugin, fmt.Sprintf("n°%d", i+1)); err != nil {
 				return err
 			}
 		}
@@ -168,12 +170,12 @@ func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
 	return s.validatePlugin(plugin, "panel", panelName, s.panels)
 }
 
-func (s *sch) ValidateQuery(plugin common.Plugin) error {
+func (s *sch) ValidateQuery(plugin common.Plugin, queryName string) error {
 	if s.queries == nil {
 		logrus.Warning("query schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "query", "", s.queries)
+	return s.validatePlugin(plugin, "query", queryName, s.queries)
 }
 
 func (s *sch) ValidateGlobalVariable(v modelV1.VariableSpec) error {
@@ -245,9 +247,15 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 	unified := value.Unify(pluginSchema)
 	err = unified.Validate(cueValidationOptions...)
 	if err != nil {
-		logrus.Debug(errors.Details(err, nil))
-		//TODO: return errors.Details(err, nil) to get a more meaningful error, but should be cleaned of line numbers & server file paths!
-		return fmt.Errorf("invalid %s %s: %w", modelKind, modelName, err) // enrich the error message returned by cue lib
+		// retrieve the full error detail to provide better insights to the end user:
+		ex, errOs := os.Executable()
+		if errOs != nil {
+			logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
+		}
+		fullErrStr := errors.Details(err, &errors.Config{Cwd: filepath.Dir(ex)})
+		logrus.Debug(fullErrStr)
+
+		return fmt.Errorf("invalid %s %s: %s", modelKind, modelName, fullErrStr)
 	}
 	return nil
 }
