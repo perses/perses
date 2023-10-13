@@ -58,8 +58,8 @@ func validateAllSchemas(sch schemas.Schemas) {
 	validateSchemas(config.DefaultPanelsPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidatePanel(plugin, name)
 	})
-	validateSchemas(config.DefaultDatasourcesPath, func(plugin common.Plugin, _ string) error {
-		return sch.ValidateDatasource(plugin)
+	validateSchemas(config.DefaultDatasourcesPath, func(plugin common.Plugin, name string) error {
+		return sch.ValidateDatasource(plugin, name)
 	})
 	validateSchemas(config.DefaultVariablesPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidateVariable(plugin, name)
