@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.41.1 / 2023-10-13
+
+- [ENHANCEMENT] Improve validation error feedback to end user (#1470)
+- [BUGFIX] Fix too-restrictive regex used for URL validation (#1470)
+
 ## 0.41.0 / 2023-10-12
 
 - [FEATURE] PrometheusDatasource: allow providing custom allowed endpoints (#1461)
