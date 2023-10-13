@@ -97,6 +97,13 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		upsertFunc = func() error {
 			return persistenceManager.GetGlobalSecret().Update(entity)
 		}
+	case *v1.User:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetUser().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetUser().Update(entity)
+		}
 	default:
 		t.Fatalf("%T is not managed", object)
 	}
@@ -355,6 +362,30 @@ func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
 		Kind:     v1.KindGlobalSecret,
 		Metadata: newMetadata(name),
 		Spec:     newPublicSecretSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewUser(name string) *v1.User {
+	entity := &v1.User{
+		Kind:     v1.KindUser,
+		Metadata: newMetadata(name),
+		Spec: v1.UserSpec{
+			Password: []byte("password"),
+		},
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewPublicUser(name string) *v1.PublicUser {
+	entity := &v1.PublicUser{
+		Kind:     v1.KindUser,
+		Metadata: newMetadata(name),
+		Spec: v1.PublicUserSpec{
+			Password: "<secret>",
+		},
 	}
 	entity.Metadata.CreateNow()
 	return entity

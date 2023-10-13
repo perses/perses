@@ -35,6 +35,7 @@ const (
 	tableFolder           = "folder"
 	tableDatasource       = "datasource"
 	tableSecret           = "secret"
+	tableUser             = "user"
 	tableVariable         = "variable"
 
 	colID      = "id"
@@ -61,6 +62,8 @@ func getTableName(kind modelV1.Kind) (string, error) {
 		return tableProject, nil
 	case modelV1.KindSecret:
 		return tableSecret, nil
+	case modelV1.KindUser:
+		return tableUser, nil
 	case modelV1.KindVariable:
 		return tableVariable, nil
 	default:
@@ -90,6 +93,7 @@ func (d *DAO) Init() error {
 		d.createResourceTable(tableGlobalSecret),
 		d.createResourceTable(tableGlobalVariable),
 		d.createResourceTable(tableProject),
+		d.createResourceTable(tableUser),
 
 		d.createProjectResourceTable(tableDashboard),
 		d.createProjectResourceTable(tableFolder),
@@ -205,7 +209,7 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		return fmt.Errorf("slice in parameter is not a pointer to a slice but a %q", typeParameter.Kind())
 	}
 
-	// it's a pointer, so move to the actual element behind the pointer.
+	// It's a pointer, so move to the actual element behind the pointer.
 	// Having a pointer avoid getting the error:
 	//           reflect.Value.Set using unaddressable value
 	// It's because the slice is usually not initialized and doesn't have any memory allocated.

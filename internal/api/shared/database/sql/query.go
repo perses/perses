@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -119,6 +120,8 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	case *secret.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
+	case *user.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
 	case *variable.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
@@ -159,6 +162,8 @@ func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	case *secret.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
+	case *user.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
 	case *variable.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:

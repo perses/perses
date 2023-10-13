@@ -30,6 +30,7 @@ type ClientInterface interface {
 	Health() HealthInterface
 	Project() ProjectInterface
 	Secret(project string) SecretInterface
+	User() UserInterface
 	Variable(project string) VariableInterface
 }
 
@@ -82,6 +83,10 @@ func (c *client) Project() ProjectInterface {
 
 func (c *client) Secret(project string) SecretInterface {
 	return newSecret(c.restClient, project)
+}
+
+func (c *client) User() UserInterface {
+	return newUser(c.restClient)
 }
 
 func (c *client) Variable(project string) VariableInterface {

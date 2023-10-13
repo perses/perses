@@ -23,3 +23,4 @@ package api
 //go:generate go run generate.go -package=variable -plural=variables -kind=Variable -isProjectResource=true
 //go:generate go run generate.go -package=globalsecret -plural=globalsecrets -kind=GlobalSecret
 //go:generate go run generate.go -package=secret -plural=secrets -kind=Secret -isProjectResource=true
+//go:generate go run generate.go -package=user -plural=users -kind=User

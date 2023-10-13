@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -46,7 +47,7 @@ func isFolderExist(folder string) (bool, error) {
 
 func (d *DAO) generateProjectResourceQuery(kind v1.Kind, project string) string {
 	if len(project) == 0 {
-		// it's used when we query a list of object. It can happen that the project is empty.
+		// It's used when we query a list of object. It can happen that the project is empty.
 		return path.Join(d.Folder, v1.PluralKindMap[kind])
 	}
 	return path.Join(d.Folder, v1.PluralKindMap[kind], project)
@@ -81,6 +82,9 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 		prefix = qt.NamePrefix
 	case *secret.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindSecret, qt.Project)
+		prefix = qt.NamePrefix
+	case *user.Query:
+		pathFolder = d.generateResourceQuery(v1.KindUser)
 		prefix = qt.NamePrefix
 	case *variable.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindVariable, qt.Project)

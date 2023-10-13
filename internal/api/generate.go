@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -32,7 +32,7 @@ var (
 		template.New("endpoint").Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -126,7 +126,7 @@ func (e *Endpoint) List(ctx echo.Context) error {
 		template.New("interface").Funcs(tplFunc).Parse(`{{- $endpoint := . -}}
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -159,10 +159,6 @@ type Query struct {
 {{ end }}
 }
 
-func (q *Query) Build() (string, error) {
-	return v1.Generate{{ $kind }}ID({{- if $endpoint.IsProjectResource -}}q.Project,{{- end -}}q.NamePrefix), nil
-}
-
 type DAO interface {
 	Create(entity *v1.{{ $kind }}) error
 	Update(entity *v1.{{ $kind }}) error
@@ -185,7 +181,7 @@ type Service interface {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -262,7 +258,7 @@ func (d *dao) List(q databaseModel.Query) ([]*v1.{{ $kind }}, error) {
 {{- $package := $endpoint.PackageName -}}
 {{- $kind := $endpoint.Kind -}}
 {{- $plural := $endpoint.Plural -}}
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
