@@ -7,7 +7,7 @@ toolchain go1.21.0
 require (
 	cuelang.org/go v0.6.0
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.15.0
+	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/goreleaser/goreleaser v1.21.2
 	github.com/huandu/go-sqlbuilder v1.22.0
@@ -27,6 +27,7 @@ require (
 )
 
 require (
+	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
@@ -36,7 +37,7 @@ require (
 	github.com/cockroachdb/apd/v3 v3.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/proto v1.10.0 // indirect
-	github.com/fatih/color v1.14.1 // indirect
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
