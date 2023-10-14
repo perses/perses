@@ -65,7 +65,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
-		authendpoint.New(persistenceManager.GetUser()),
+		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetCrypto()),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,

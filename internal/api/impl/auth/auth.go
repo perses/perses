@@ -22,15 +22,18 @@ import (
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/sirupsen/logrus"
 )
 
 type Endpoint struct {
-	dao user.DAO
+	dao    user.DAO
+	crypto crypto.Crypto
 }
 
-func New(dao user.DAO) *Endpoint {
+func New(dao user.DAO, crypto crypto.Crypto) *Endpoint {
 	return &Endpoint{
-		dao: dao,
+		dao:    dao,
+		crypto: crypto,
 	}
 }
 
@@ -53,5 +56,12 @@ func (e *Endpoint) auth(ctx echo.Context) error {
 	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {
 		return shared.HandleBadRequestError("wrong login or password ")
 	}
-	return ctx.JSON(http.StatusOK, api.AuthResponse{})
+	token, err := e.crypto.SignedToken(body.Login)
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to generate the JWT token")
+		return shared.InternalError
+	}
+	return ctx.JSON(http.StatusOK, api.AuthResponse{
+		Token: token,
+	})
 }
