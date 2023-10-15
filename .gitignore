@@ -19,10 +19,6 @@ Thumbs.db
 /bin
 /dist
 
-# ignore generated file
-internal/api/impl/v1/**/*/endpoint.go
-internal/api/front/endpoint.go
-
 coverage.txt
 
 /internal/api/e2e/test/

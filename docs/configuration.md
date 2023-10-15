@@ -66,9 +66,13 @@ Generic placeholders are defined as follows:
   # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
 
+  # It is activating or deactivating the permission verification on each endpoint.
+  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ activate_permission: <boolean> | default = true ]
+
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
-  # Note that if it is not provided it will be generated. 
-  # When perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
+  # Note that if it is not provided, it will be generated. 
+  # When Perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
   # and therefore won't be able to decrypt what the other is encrypting.
   # Also note that the key must be at least 32 bytes long.
   [ encryption_key: <secret> ]

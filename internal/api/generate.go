@@ -70,28 +70,28 @@ func NewEndpoint(service {{ $package }}.Service, readonly bool) *Endpoint {
 	}
 }
 
-func (e *Endpoint) RegisterRoutes(g *echo.Group) {
+func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	group := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
 {{ if $endpoint.IsProjectResource -}}
 	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", shared.PathProject, shared.ParamProject, shared.Path{{ $kind }}))
 {{- end }}
 	if !e.readonly {
-		group.POST("", e.Create)
+		group.POST("", e.Create, false)
 {{ if $endpoint.IsProjectResource -}}
-		subGroup.POST("", e.Create)
-		subGroup.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
-		subGroup.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
+		subGroup.POST("", e.Create, false)
+		subGroup.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
+		subGroup.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
 {{- else -}}
-		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update)
-		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete)
+		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
+		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
 {{- end }}
 	}
-	group.GET("", e.List)
+	group.GET("", e.List, false)
 {{ if $endpoint.IsProjectResource -}}
-	subGroup.GET("", e.List)
-	subGroup.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get)
+	subGroup.GET("", e.List, false)
+	subGroup.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
 {{- else -}}
-	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get)
+	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
 {{- end }}
 }
 
@@ -402,7 +402,7 @@ type endpoint struct {
 func generateEndpoint(ept endpoint) {
 	folder := fmt.Sprintf("./impl/v1/%s", ept.PackageName)
 	fileName := "endpoint.go"
-	generateFile(folder, fileName, endpointTemplate, ept, true)
+	generateFile(folder, fileName, endpointTemplate, ept, false)
 }
 
 func generateInterface(ept endpoint) {
@@ -420,8 +420,8 @@ func generatePersistence(ept endpoint) {
 func generateClient(ept endpoint) {
 	folder := "../../pkg/client/api/v1/"
 	fileName := fmt.Sprintf("%s.go", ept.PackageName)
-	// as the endpoint are generated and not add in git, the client that reflects exactly what is exposed by the endpoint,
-	// then should be also ignored by git and so we can override it.
+	// as the endpoint is generated and not adds in git, the client that reflects exactly what is exposed by the endpoint,
+	// then should be also ignored by git, and so we can override it.
 	generateFile(folder, fileName, clientTemplate, ept, true)
 }
 

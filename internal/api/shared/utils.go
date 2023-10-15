@@ -39,7 +39,7 @@ const (
 	PathVariable         = "variables"
 )
 
-// ProjectResourcePathList is containing the list of the resource path that are part of a project.
+// ProjectResourcePathList is containing the list of the resource path that is part of a project.
 var ProjectResourcePathList = []string{
 	PathDashboard, PathDatasource, PathFolder, PathSecret, PathVariable,
 }

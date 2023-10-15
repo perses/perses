@@ -37,13 +37,14 @@ import (
 )
 
 type endpoint interface {
-	RegisterRoutes(g *echo.Group)
+	CollectRoutes(g *shared.Group)
 }
 
 type api struct {
 	echoUtils.Register
 	apiV1Endpoints []endpoint
 	apiEndpoints   []endpoint
+	jwtMiddleware  echo.MiddlewareFunc
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
@@ -65,25 +66,68 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
-		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetCrypto()),
+		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetJWT()),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
+		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
+			return !*cfg.ActivatePermission
+		}),
 	}
 }
 
 func (a *api) RegisterRoute(e *echo.Echo) {
-	a.registerAPIV1Route(e)
+	// First, let's collect every route.
+	// The expecting result is a tree we will need to loop over.
+	groups := a.collectRoutes()
+	// Now let's create a simple struct that will help us to loop over the route tree.
+	type queue struct {
+		parent *echo.Group
+		group  *shared.Group
+	}
+	var queueList []queue
+	for _, g := range groups {
+		queueList = append(queueList, queue{group: g})
+	}
+	// It is our current element on each iteration.
+	var q queue
+	for len(queueList) > 0 {
+		// Let's grab the first element of the queue and remove it so the size of the queue is decreasing.
+		q, queueList = queueList[0], queueList[1:]
+		// Now we need to initialize the echo group that will be used to finally register in the router the different route.
+		var group *echo.Group
+		if q.parent != nil {
+			// The group can be created in a chain.
+			// That's why if there is a group parent, we need to use it to create the new current group
+			group = q.parent.Group(q.group.Path)
+		} else {
+			group = e.Group(q.group.Path)
+		}
+		// Then let's collect every child group, so we can loop over them during a future iteration.
+		for _, g := range q.group.Groups {
+			queueList = append(queueList, queue{group: g, parent: group})
+		}
+		// Finally, register the route with the echo.Group previously created.
+		// We will consider also if the route needs to remain anonymous or not and then inject the JWT middleware accordingly.
+		for _, route := range q.group.Routes {
+			if route.IsAnonymous {
+				route.Register(group)
+			} else {
+				route.Register(group, a.jwtMiddleware)
+			}
+		}
+	}
 }
 
-func (a *api) registerAPIV1Route(e *echo.Echo) {
-	apiGroup := e.Group("/api")
+func (a *api) collectRoutes() []*shared.Group {
+	apiGroup := &shared.Group{Path: "/api"}
 	for _, ept := range a.apiEndpoints {
-		ept.RegisterRoutes(apiGroup)
+		ept.CollectRoutes(apiGroup)
 	}
-	apiV1Group := e.Group(shared.APIV1Prefix)
+	apiV1Group := &shared.Group{Path: shared.APIV1Prefix}
 	for _, ept := range a.apiV1Endpoints {
-		ept.RegisterRoutes(apiV1Group)
+		ept.CollectRoutes(apiV1Group)
 	}
+	return []*shared.Group{apiGroup, apiV1Group}
 }
