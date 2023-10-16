@@ -19,5 +19,3 @@ export const panelEditorValidationSchema = z.object({
   description: z.string().optional(),
   type: z.string().nonempty('Required'),
 });
-
-export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

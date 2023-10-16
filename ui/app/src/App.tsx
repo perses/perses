@@ -13,6 +13,7 @@
 
 import { Box } from '@mui/material';
 
+import { ValidationProvider } from '@perses-dev/plugin-system';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Router from './Router';
@@ -34,7 +35,9 @@ function App() {
           display: 'flex',
         }}
       >
-        <Router />
+        <ValidationProvider>
+          <Router />
+        </ValidationProvider>
       </Box>
       <Footer />
     </Box>

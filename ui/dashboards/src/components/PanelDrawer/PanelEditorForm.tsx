@@ -22,12 +22,12 @@ import {
   Action,
   getTitleAction,
   getSubmitText,
+  useValidation,
 } from '@perses-dev/plugin-system';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
-import { panelEditorValidationSchema, PanelEditorValidationType } from '../../validation';
 import { PanelPreview } from './PanelPreview';
 import { usePanelEditor } from './usePanelEditor';
 
@@ -67,8 +67,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const titleAction = getTitleAction(initialAction, true);
   const submitText = getSubmitText(initialAction, true);
 
-  const form = useForm<PanelEditorValidationType>({
-    resolver: zodResolver(panelEditorValidationSchema),
+  const validation = useValidation();
+  const form = useForm({
+    resolver: zodResolver(validation.panelEditorFormSchema),
     mode: 'onBlur',
     defaultValues: {
       name: initialPanelDef.spec.display.name,
@@ -78,10 +79,10 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     },
   });
 
-  const processForm: SubmitHandler<PanelEditorValidationType> = () => {
+  function processForm() {
     const values: PanelEditorValues = { groupId, panelDefinition };
     onSave(values);
-  };
+  }
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval

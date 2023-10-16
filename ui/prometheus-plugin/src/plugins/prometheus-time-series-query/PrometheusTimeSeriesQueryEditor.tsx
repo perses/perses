@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Stack, TextField, FormControl, InputLabel } from '@mui/material';
+import { Stack, TextField, FormControl } from '@mui/material';
 import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
 import {
   DEFAULT_PROM,
@@ -69,14 +69,13 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   return (
     <Stack spacing={2}>
       <FormControl margin="dense" fullWidth={false}>
-        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
-            maintain 17 compatibility somehow with a polyfill/shim? */}
-        <InputLabel id="prom-datasource-label">Prometheus Datasource</InputLabel>
         <DatasourceSelect
           datasourcePluginKind={PROM_DATASOURCE_KIND}
           value={selectedDatasource}
           onChange={handleDatasourceChange}
-          labelId="prom-datasource-label"
+          InputProps={{
+            readOnly: props.isReadonly,
+          }}
           label="Prometheus Datasource"
         />
       </FormControl>

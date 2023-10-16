@@ -12,5 +12,7 @@
 // limitations under the License.
 
 export * from './datasource';
+export * from './panel';
 export * from './resource';
 export * from './variable';
+export * from './ValidationProvider';

@@ -31,7 +31,6 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = propValue !== '' && isLoading ? '' : propValue;
 
-  // TODO: Does this need a loading indicator of some kind?
   return (
     <TextField select inputRef={ref} {...others} value={value} data-testid="plugin-kind-select">
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
