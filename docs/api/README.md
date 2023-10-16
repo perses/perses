@@ -1,10 +1,10 @@
 # API
 
 This section will give you an insight on every resource supported by the Perses API. While it can give you some
-explanation about the purpose of each resource, this documentation is mainly for users that would like to interact
-directly with the API and manipulate directly the resource without using the UI.
+explanations about the purpose of each resource, this documentation is mainly for users that would like to interact
+directly with the API and manipulate the resources without using the UI.
 
-On the different documentation, you will find the definition of each resource in the yaml format.
+On the different documentations, you will find the definition of each resource in the yaml format.
 Brackets indicate that a parameter is optional.
 
 Generic placeholders are defined as follows:
