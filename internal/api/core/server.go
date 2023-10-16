@@ -82,40 +82,40 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 	// The expecting result is a tree we will need to loop over.
 	groups := a.collectRoutes()
 	// Now let's create a simple struct that will help us to loop over the route tree.
-	type queue struct {
+	type queueElement struct {
 		parent *echo.Group
 		group  *shared.Group
 	}
-	var queueList []queue
+	var queue []queueElement
 	for _, g := range groups {
-		queueList = append(queueList, queue{group: g})
+		queue = append(queue, queueElement{group: g})
 	}
 	// It is our current element on each iteration.
-	var q queue
-	for len(queueList) > 0 {
+	var el queueElement
+	for len(queue) > 0 {
 		// Let's grab the first element of the queue and remove it so the size of the queue is decreasing.
-		q, queueList = queueList[0], queueList[1:]
+		el, queue = queue[0], queue[1:]
 		// Now we need to initialize the echo group that will be used to finally register in the router the different route.
 		var group *echo.Group
-		if q.parent != nil {
+		if el.parent != nil {
 			// The group can be created in a chain.
 			// That's why if there is a group parent, we need to use it to create the new current group
-			group = q.parent.Group(q.group.Path)
+			group = el.parent.Group(el.group.Path)
 		} else {
-			group = e.Group(q.group.Path)
+			group = e.Group(el.group.Path)
 		}
 		// Then let's collect every child group, so we can loop over them during a future iteration.
-		for _, g := range q.group.Groups {
-			queueList = append(queueList, queue{group: g, parent: group})
+		for _, g := range el.group.Groups {
+			queue = append(queue, queueElement{group: g, parent: group})
 		}
 		// Finally, register the route with the echo.Group previously created.
 		// We will consider also if the route needs to remain anonymous or not and then inject the JWT middleware accordingly.
-		for _, route := range q.group.Routes {
-			if route.IsAnonymous {
-				route.Register(group)
-			} else {
-				route.Register(group, a.jwtMiddleware)
+		for _, route := range el.group.Routes {
+			var mdws []echo.MiddlewareFunc
+			if !route.IsAnonymous {
+				mdws = append(mdws, a.jwtMiddleware)
 			}
+			route.Register(group, mdws...)
 		}
 	}
 }
