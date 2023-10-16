@@ -26,7 +26,7 @@ import (
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
+	terminal "golang.org/x/term"
 )
 
 func readPassword() (string, error) {
