@@ -25,25 +25,25 @@ URL query parameters:
 
 - name = `<string>` : filters the list of projects based on their names (prefix).
 
-#### Get a single `Project`
+### Get a single `Project`
 
 ```bash
 GET /api/v1/projects/<name>
 ```
 
-#### Create a single `Project`
+### Create a single `Project`
 
 ```bash
 POST /api/v1/projects
 ```
 
-#### Update a single `Project`
+### Update a single `Project`
 
 ```bash
 PUT /api/v1/projects/<name>
 ```
 
-#### Delete a single `Project`
+### Delete a single `Project`
 
 ```bash
 DELETE /api/v1/projects/<name>

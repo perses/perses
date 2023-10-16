@@ -132,7 +132,7 @@ are reflected in how the packages are organized. There is some variability from 
 - Other variables are `camelCase`.
 - Non-component directories are `kebab-case`.
 
-See the [dashboarding docs](../docs/dashboard.md) for information about the naming conventions for the dashboarding specification, which impacts both UI and backend code.
+See the [dashboarding docs](../docs/api/dashboard.md) for information about the naming conventions for the dashboarding specification, which impacts both UI and backend code.
 
 ## React components
 
