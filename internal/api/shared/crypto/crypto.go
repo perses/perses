@@ -21,9 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -32,44 +30,30 @@ import (
 type Crypto interface {
 	Encrypt(spec *modelV1.SecretSpec) error
 	Decrypt(spec *modelV1.SecretSpec) error
-	SignedToken(login string) (string, error)
 }
 
-func New(encodedKey string) (Crypto, error) {
+func New(encodedKey string) (Crypto, JWT, error) {
 	key, err := hex.DecodeString(encodedKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	aesBlock, err := aes.NewCipher(key)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	return &crypto{
-		encodedKey: encodedKey,
-		block:      aesBlock,
-	}, nil
+			key:   key,
+			block: aesBlock,
+		},
+		&jwtImpl{
+			key: key,
+		}, nil
 }
 
 type crypto struct {
-	encodedKey string
-	block      cipher.Block
-}
-
-func (c *crypto) SignedToken(login string) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   login,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 72)),
-		},
-	})
-	key, err := hex.DecodeString(c.encodedKey)
-	if err != nil {
-		return "", err
-	}
-	// The type of the key depends on the signature method.
-	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
-	return token.SignedString(key)
+	key   []byte
+	block cipher.Block
 }
 
 func (c *crypto) Encrypt(spec *modelV1.SecretSpec) error {

@@ -53,6 +53,7 @@ type ServiceManager interface {
 	GetGlobalSecret() globalsecret.Service
 	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
+	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
@@ -71,6 +72,7 @@ type service struct {
 	globalSecret     globalsecret.Service
 	globalVariable   globalvariable.Service
 	health           health.Service
+	jwt              crypto.JWT
 	migrate          migrate.Migration
 	project          project.Service
 	schemas          schemas.Schemas
@@ -80,7 +82,7 @@ type service struct {
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
-	cryptoService, err := crypto.New(string(conf.EncryptionKey))
+	cryptoService, jwtService, err := crypto.New(string(conf.EncryptionKey))
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +114,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		globalSecret:     globalSecret,
 		globalVariable:   globalVariableService,
 		health:           healthService,
+		jwt:              jwtService,
 		migrate:          migrateService,
 		project:          projectService,
 		schemas:          schemasService,
@@ -151,6 +154,10 @@ func (s *service) GetGlobalVariable() globalvariable.Service {
 
 func (s *service) GetHealth() health.Service {
 	return s.health
+}
+
+func (s *service) GetJWT() crypto.JWT {
+	return s.jwt
 }
 
 func (s *service) GetMigration() migrate.Migration {

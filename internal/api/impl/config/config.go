@@ -18,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/config"
+	"github.com/perses/perses/internal/api/shared"
 )
 
 type Endpoint struct {
@@ -30,8 +31,8 @@ func New(cfg config.Config) *Endpoint {
 	}
 }
 
-func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	g.GET("/config", e.getConfig)
+func (e *Endpoint) CollectRoutes(g *shared.Group) {
+	g.GET("/config", e.getConfig, true)
 }
 
 func (e *Endpoint) getConfig(ctx echo.Context) error {

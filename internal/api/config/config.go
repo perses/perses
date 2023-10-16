@@ -31,7 +31,7 @@ func randomString(stringSize uint) string {
 	// gosec is yelling because we are using a weak random generator.
 	// We are generating a string for the encryption key as best effort so the docker image can run without pre-configuration.
 	// So it makes Perses easier to be tested.
-	// People should provide the secret key by them self in the regular flow.
+	// People should provide the secret key by their self in the regular flow.
 	// nolint:gosec
 	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
 	b := make([]byte, stringSize)
@@ -42,17 +42,19 @@ func randomString(stringSize uint) string {
 }
 
 type dashboardSelector struct {
-	// Project correspond to the name of the project (dashboard.metadata.project)
+	// Project is the name of the project (dashboard.metadata.project)
 	Project string `json:"project" yaml:"project"`
-	// Dashboard correspond to the name of the dashboard (dashboard.metadata.name)
+	// Dashboard is the name of the dashboard (dashboard.metadata.name)
 	Dashboard string `json:"dashboard" yaml:"dashboard"`
 }
 
 type Config struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
+	// ActivatePermission is activating or deactivating the permission verification on each endpoint.
+	ActivatePermission *bool `json:"activate_permission,omitempty" yaml:"activate_permission,omitempty"`
 	// EncryptionKey is the secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource
-	// Note that if it is not provided it will be generated. When perses is used in a multi instance mode, you should provide the key.
+	// Note that if it is not provided, it will be generated. When Perses is used in a multi instance mode, you should provide the key.
 	// Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
 	// Also note the key must be at least 32 bytes long.
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
@@ -60,7 +62,7 @@ type Config struct {
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
 	// Database contains the different configuration depending on the database you want to use
 	Database Database `json:"database" yaml:"database"`
-	// Schemas contains the configuration to get access to the CUE schemas
+	// Schemas contain the configuration to get access to the CUE schemas
 	Schemas Schemas `json:"schemas" yaml:"schemas"`
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
@@ -88,6 +90,10 @@ func (c *Config) Verify() error {
 		return fmt.Errorf("encryption_key must be longer than 32 bytes")
 	}
 	c.EncryptionKey = promConfig.Secret(hex.EncodeToString([]byte(c.EncryptionKey)))
+	if c.ActivatePermission == nil {
+		var activatePermission = true
+		c.ActivatePermission = &activatePermission
+	}
 	return nil
 }
 

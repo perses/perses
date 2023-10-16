@@ -35,10 +35,10 @@ func New(migrationService migrate.Migration) *Endpoint {
 	}
 }
 
-// RegisterRoutes is the method to use to register the routes prefixed by /api
+// CollectRoutes is the method to use to register the routes prefixed by /api
 // If the version is not v1, then look at the same method but in the package with the version as the name.
-func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	g.POST("/migrate", e.Migrate)
+func (e *Endpoint) CollectRoutes(g *shared.Group) {
+	g.POST("/migrate", e.Migrate, true)
 }
 
 // Migrate is the endpoint that provides the Perses dashboard corresponding to the provided grafana dashboard.

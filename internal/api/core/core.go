@@ -53,7 +53,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
-	// enable hot reload of CUE schemas for dashboards validation:
+	// enable hot reload of CUE schemas for dashboard validation:
 	// - watch for changes on the schemas folders
 	// - register a cron task to reload all the schemas every <interval>
 	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())

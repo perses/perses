@@ -13,6 +13,7 @@ require (
 	github.com/goreleaser/goreleaser v1.21.2
 	github.com/huandu/go-sqlbuilder v1.22.0
 	github.com/json-iterator/go v1.1.12
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.21.0

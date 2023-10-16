@@ -54,8 +54,10 @@ func defaultFileConfig() *config.File {
 
 func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	projectPath := test.GetRepositoryPath()
+	var activatePermission = false
 	conf := config.Config{
-		EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+		ActivatePermission: &activatePermission,
+		EncryptionKey:      promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
 			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),

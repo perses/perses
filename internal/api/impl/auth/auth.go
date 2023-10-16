@@ -26,19 +26,19 @@ import (
 )
 
 type Endpoint struct {
-	dao    user.DAO
-	crypto crypto.Crypto
+	dao user.DAO
+	jwt crypto.JWT
 }
 
-func New(dao user.DAO, crypto crypto.Crypto) *Endpoint {
+func New(dao user.DAO, jwt crypto.JWT) *Endpoint {
 	return &Endpoint{
-		dao:    dao,
-		crypto: crypto,
+		dao: dao,
+		jwt: jwt,
 	}
 }
 
-func (e *Endpoint) RegisterRoutes(g *echo.Group) {
-	g.POST("/auth", e.auth)
+func (e *Endpoint) CollectRoutes(g *shared.Group) {
+	g.POST("/auth", e.auth, true)
 }
 
 func (e *Endpoint) auth(ctx echo.Context) error {
@@ -56,7 +56,7 @@ func (e *Endpoint) auth(ctx echo.Context) error {
 	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {
 		return shared.HandleBadRequestError("wrong login or password ")
 	}
-	token, err := e.crypto.SignedToken(body.Login)
+	token, err := e.jwt.SignedToken(body.Login)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the JWT token")
 		return shared.InternalError
