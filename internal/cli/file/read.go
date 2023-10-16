@@ -14,18 +14,17 @@
 package file
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 
 	jsoniter "github.com/json-iterator/go"
+	"github.com/perses/perses/internal/cli/read"
 )
 
 func readAndDetect(file string) (data []byte, isJSON bool, err error) {
 	if file == "-" {
-		data, err = readFromStdout()
+		data, err = read.FromStdout()
 	} else {
 		data, err = os.ReadFile(file) //nolint
 	}
@@ -38,33 +37,6 @@ func readAndDetect(file string) (data []byte, isJSON bool, err error) {
 	// detecting file format
 	isJSON = jsonLib.Unmarshal(data, &json.RawMessage{}) == nil
 	return
-}
-
-func readFromStdout() ([]byte, error) {
-	// from https://flaviocopes.com/go-shell-pipes/
-	info, err := os.Stdin.Stat()
-	if err != nil {
-		return nil, err
-	}
-
-	if info.Mode()&os.ModeCharDevice != 0 {
-		return nil, fmt.Errorf("the command is intended to work with pipes")
-	}
-
-	reader := bufio.NewReader(os.Stdin)
-	var output []byte
-
-	for {
-		input, readErr := reader.ReadByte()
-		if readErr != nil {
-			if readErr == io.EOF {
-				break
-			}
-			return nil, readErr
-		}
-		output = append(output, input)
-	}
-	return output, nil
 }
 
 func newReadFileErr(err error) error {

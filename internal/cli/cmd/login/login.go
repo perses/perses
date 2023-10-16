@@ -17,25 +17,51 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 
+	"github.com/go-kit/log/term"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/read"
+	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
+
+func readPassword() (string, error) {
+	in := os.Stdin
+	if term.IsTerminal(in) {
+		// read using terminal
+		result, err := terminal.ReadPassword(int(in.Fd()))
+		return string(result), err
+	}
+	// read using reader
+	var result string
+	_, err := fmt.Fscan(in, &result)
+	return result, err
+}
 
 type option struct {
 	persesCMD.Option
 	writer      io.Writer
 	url         string
+	username    string
+	password    string
+	token       string
 	insecureTLS bool
 }
 
 func (o *option) Complete(args []string) error {
-	if len(args) == 0 || len(args) > 1 {
+	if len(args) > 1 {
 		return fmt.Errorf("only the server URL should be specified as an argument")
 	}
-	o.url = args[0]
+
+	if len(args) == 0 {
+		o.url = config.Global.RestClientConfig.URL
+	} else {
+		o.url = args[0]
+	}
 	return nil
 }
 
@@ -43,20 +69,66 @@ func (o *option) Validate() error {
 	if _, err := url.Parse(o.url); err != nil {
 		return err
 	}
+	if len(o.username) > 0 && len(o.token) > 0 {
+		return fmt.Errorf("--token and --username are mutually exclusive")
+	}
 	return nil
 }
 
 func (o *option) Execute() error {
+	httpConfig := perseshttp.RestConfigClient{
+		URL:         o.url,
+		InsecureTLS: o.insecureTLS,
+	}
+	if len(o.token) == 0 {
+		if err := o.readAndSetCredentialInput(); err != nil {
+			return err
+		}
+		if err := o.setToken(httpConfig); err != nil {
+			return err
+		}
+	}
+	httpConfig.Token = o.token
 	return config.Write(&config.Config{
-		RestClientConfig: perseshttp.RestConfigClient{
-			URL:         o.url,
-			InsecureTLS: o.insecureTLS,
-		},
+		RestClientConfig: httpConfig,
 	})
 }
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) setToken(httpConfig perseshttp.RestConfigClient) error {
+	restClient, err := perseshttp.NewFromConfig(httpConfig)
+	if err != nil {
+		return err
+	}
+	token, err := api.NewWithClient(restClient).Auth().Login(o.username, o.password)
+	if err != nil {
+		return err
+	}
+	o.token = token
+	return nil
+}
+
+func (o *option) readAndSetCredentialInput() error {
+	if len(o.username) == 0 {
+		_, _ = fmt.Fprint(o.writer, "Username: ")
+		user, err := read.FromStdin()
+		if err != nil {
+			return err
+		}
+		o.username = user
+	}
+	if len(o.password) == 0 {
+		_, _ = fmt.Fprint(o.writer, "Password: ")
+		password, err := readPassword()
+		if err != nil {
+			return err
+		}
+		o.password = password
+	}
+	return nil
 }
 
 func NewCMD() *cobra.Command {
@@ -73,5 +145,8 @@ percli login https://perses.dev
 		},
 	}
 	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")
+	cmd.Flags().StringVarP(&o.username, "username", "u", "", "Username used for the authentication.")
+	cmd.Flags().StringVarP(&o.password, "password", "p", "", "Password used for the authentication.")
+	cmd.Flags().StringVar(&o.token, "token", "", "Bearer token for authentication to the API server")
 	return cmd
 }

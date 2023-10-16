@@ -25,6 +25,7 @@ type ClientInterface interface {
 	V1() v1.ClientInterface
 	Migrate(body *api.Migrate) (*modelV1.Dashboard, error)
 	Validate() ValidateInterface
+	Auth() AuthInterface
 }
 
 type client struct {
@@ -59,4 +60,8 @@ func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
 
 func (c *client) Validate() ValidateInterface {
 	return newValidate(c.restClient)
+}
+
+func (c *client) Auth() AuthInterface {
+	return newAuth(c.restClient)
 }
