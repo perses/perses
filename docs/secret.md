@@ -111,7 +111,7 @@ GET /api/v1/projects/<project_name>/secrets
 
 URL query parameters:
 
-- name = `<string>` : should be used to filter the list of secrets based on the prefix name.
+- name = `<string>` : filters the list of secrets based on their names (prefix).
 
 #### Get a single `Secret`
 
@@ -147,7 +147,7 @@ GET /api/v1/globalsecrets
 
 URL query parameters:
 
-- name = `<string>` : should be used to filter the list of secret based on the prefix name.
+- name = `<string>` : filters the list of global secrets based on their names (prefix).
 
 #### Get a single global `Secret`
 
