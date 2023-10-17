@@ -25,13 +25,13 @@ func TestLoginCMD(t *testing.T) {
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: "no URL has been provided or has been found in the previous configuration",
+			ExpectedMessage: "no URL has been provided neither found in the previous configuration",
 		},
 		{
 			Title:           "token flag used",
 			Args:            []string{"--token", "foo.bar.jwt", "https://demo.perses.dev"},
 			IsErrorExpected: false,
-			ExpectedMessage: `successfully log in https://demo.perses.dev
+			ExpectedMessage: `successfully logged in https://demo.perses.dev
 `,
 		},
 	}

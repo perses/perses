@@ -58,7 +58,7 @@ Depending on the server configuration, you will certainly have to provide a toke
 
 - `--token` can be used to set a Bearer JWT token
 - `--username` and `--password` can be used to set a username & password. The command will contact the Perses server
-  with the credential. It will return a Bearer JWT token which expires in 1h
+  with the credential(s). It will return a Bearer JWT token which expires after 1h.
 
 The URL and the token will be stored in JSON file that is by default `<UserHome>/.perses/config.json`.
 
@@ -84,7 +84,7 @@ $ percli get project
 
 #### Select the project
 
-To select a project to be used as the default one when running commands, you can use the following command:
+The project to be used by default when running commands can be set with:
 
 ```bash
 $ percli project perses
@@ -274,7 +274,7 @@ has two modes:
 Each of the above folders should contain files, named `mig.cuepart` that holds the logic of the migration for each
 plugin. For more information about these files, please read the documentation about [cue](./cue.md)
 
-In both modes, ff the command runs successfully, it will return the dashboard in the Perses format.
+In both modes, if the command runs successfully, it will return the dashboard in the Perses format.
 
 For example:
 

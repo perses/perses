@@ -29,7 +29,7 @@ func newAuth(client *perseshttp.RESTClient) AuthInterface {
 	return &auth{client: client}
 }
 
-// paas implements PaasInterface
+// auth implements AuthInterface
 type auth struct {
 	AuthInterface
 	client *perseshttp.RESTClient

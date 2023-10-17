@@ -64,7 +64,7 @@ func (o *option) Complete(args []string) error {
 		o.url = args[0]
 	}
 	if len(o.url) == 0 {
-		return fmt.Errorf("no URL has been provided or has not been found in the previous configuration")
+		return fmt.Errorf("no URL has been provided neither found in the previous configuration")
 	}
 	return nil
 }
@@ -98,7 +98,7 @@ func (o *option) Execute() error {
 	}); err != nil {
 		return err
 	}
-	return output.HandleString(o.writer, fmt.Sprintf("successfully log in %s", o.url))
+	return output.HandleString(o.writer, fmt.Sprintf("successfully logged in %s", o.url))
 }
 
 func (o *option) SetWriter(writer io.Writer) {
