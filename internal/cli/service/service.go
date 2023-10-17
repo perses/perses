@@ -76,6 +76,10 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 		return &secret{
 			apiClient: apiClient.V1().Secret(projectName),
 		}, nil
+	case modelV1.KindUser:
+		return &user{
+			apiClient: apiClient.V1().User(),
+		}, nil
 	case modelV1.KindVariable:
 		return &variable{
 			apiClient: apiClient.V1().Variable(projectName),
