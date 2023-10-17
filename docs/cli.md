@@ -1,14 +1,14 @@
 # Perses CLI (percli)
 
 On top of the application, we also provide a CLI named `percli`. This tool can be used to interact with the backend REST
-API to manage the resources such as dashboards, datasources, projects etc.
+API to manage the resources such as dashboards, datasources, projects, etc.
 
 The CLI is available in the docker image or in the archive we created during each release.
 
 ## Tips
 
 This CLI provides its own documentation using the --help option. This is the main source of truth for documentation,
-while this page is here to provide some examples of how to use the main commands, tips & tricks etc.
+while this page is here to provide some examples of how to use the main commands, tips & tricks, etc.
 
 Example:
 
@@ -51,10 +51,16 @@ command.
 The only parameter required to use this command is the URL to the API.
 
 ```bash
-$ percli login https://perses.dev
+$ percli login https://demo.perses.dev
 ```
 
-The URL will be stored in JSON file that is by default `<UserHome>/.perses/config.json`.
+Depending on the server configuration, you will certainly have to provide a token or a user/password.
+
+- `--token` can be used to set a Bearer JWT token
+- `--username` and `--password` can be used to set a username & password. The command will contact the Perses server
+  with the credential. It will return a Bearer JWT token which expires in 1h
+
+The URL and the token will be stored in JSON file that is by default `<UserHome>/.perses/config.json`.
 
 Note: you can change the location of this file using the global flag `--percliconfig`.
 
@@ -78,7 +84,7 @@ $ percli get project
 
 #### Select the project
 
-In order to select a project to be used as the default one when running commands, you can use the following command:
+To select a project to be used as the default one when running commands, you can use the following command:
 
 ```bash
 $ percli project perses
@@ -93,7 +99,7 @@ project perses selected
 To create or update any data in the Perses API, you can use the `apply` command. This command can receive the data to
 create/update from a file or from stdin.
 
-for example if you want to create a project, you can proceed like that:
+for example, if you want to create a project, you can proceed like that:
 
 ```bash
 project='{
@@ -109,7 +115,7 @@ object "Project" "MyProject" has been applied
 
 ### Get data
 
-To retrieve the data you can use the `get` command :
+To retrieve the data, you can use the `get` command :
 
 ```bash
 $ percli get project
@@ -130,8 +136,8 @@ $ percli get dashboard
   Demo      | perses  | 9d
 ```
 
-**Note**: This command can be used with the --output flag in order to get the list either in Json or Yaml format. This
-option can be used to export the resources into a file in order to mass update them.
+**Note**: This command can be used with the --output flag to get the list either in Json or Yaml format. This
+option can be used to export the resources into a file to mass update them.
 
 ### Describe data
 
@@ -250,25 +256,25 @@ $ percli lint -f ./resource.json
 ```
 
 By default, the command doesn't require any remote server. We are providing a flag `--online` that will tell the CLI to
-use a remote Perses server for additional validation. For example, when it will have to validate a dashboard, it will
+use a remote Perses server for additional validation. For example, when it has to validate a dashboard, it will
 use the endpoint `/api/validate/dashboards`. That can be useful if you want to be sure that your dashboard is compatible
 with the server (because it will match the plugins known by the server instead of the local ones)
 
 ### Migrate from Grafana dashboard to Perses format
 
 The command `migrate` is for the moment only used to translate a Grafana dashboard to the Perses format. This command
-has two mode:
+has two modes:
 
 1. An online mode that requires an active connection to a remote Perses server that holds the translation logic.
 2. An offline mode that requires three different folders:
-   - charts folders
-   - queries folders
-   - variables folders
+    - charts folders
+    - queries folders
+    - variables folders
 
 Each of the above folders should contain files, named `mig.cuepart` that holds the logic of the migration for each
-plugin. For more information about these files please read the documentation about [cue](./cue.md)
+plugin. For more information about these files, please read the documentation about [cue](./cue.md)
 
-In both mode, ff the command runs successfully, it will return the dashboard in the Perses format.
+In both modes, ff the command runs successfully, it will return the dashboard in the Perses format.
 
 For example:
 
