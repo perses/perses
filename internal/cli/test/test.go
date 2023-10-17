@@ -15,6 +15,7 @@ package test
 
 import (
 	"bytes"
+	"os"
 	"testing"
 
 	"github.com/perses/perses/internal/cli/config"
@@ -33,6 +34,7 @@ type Suite struct {
 }
 
 func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite) {
+	configFilePath := "./config.json"
 	for _, test := range suites {
 		t.Run(test.Title, func(t *testing.T) {
 			buffer := bytes.NewBufferString("")
@@ -44,6 +46,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 				Project: test.Project,
 			}
 			config.Global.SetAPIClient(test.APIClient)
+			config.Global.SetFilePath(configFilePath)
 
 			err := cmd.Execute()
 			if test.IsErrorExpected {
@@ -53,6 +56,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			} else if assert.Nil(t, err) {
 				assert.Equal(t, test.ExpectedMessage, buffer.String())
 			}
+			_ = os.Remove(configFilePath)
 		})
 	}
 }

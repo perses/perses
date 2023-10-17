@@ -74,6 +74,10 @@ func (c *Config) SetAPIClient(apiClient api.ClientInterface) {
 	c.apiClient = apiClient
 }
 
+func (c *Config) SetFilePath(filePath string) {
+	c.filePath = filePath
+}
+
 func GetDefaultPath() string {
 	return filepath.Join(getRootFolder(), pathConfig, configFileName)
 }
@@ -116,7 +120,7 @@ func SetProject(project string) error {
 // Write writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
 func Write(config *Config) error {
-	// this value has been set by the root command and that will be the path where the config must be saved
+	// this value has been set by the root command, and that will be the path where the config must be saved
 	filePath := Global.filePath
 	directory := filepath.Dir(filePath)
 
