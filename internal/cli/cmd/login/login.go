@@ -22,6 +22,7 @@ import (
 	"github.com/go-kit/log/term"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/internal/cli/read"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
@@ -62,6 +63,9 @@ func (o *option) Complete(args []string) error {
 	} else {
 		o.url = args[0]
 	}
+	if len(o.url) == 0 {
+		return fmt.Errorf("no URL has been provided or has not been found in the previous configuration")
+	}
 	return nil
 }
 
@@ -89,9 +93,12 @@ func (o *option) Execute() error {
 		}
 	}
 	httpConfig.Token = o.token
-	return config.Write(&config.Config{
+	if err := config.Write(&config.Config{
 		RestClientConfig: httpConfig,
-	})
+	}); err != nil {
+		return err
+	}
+	return output.HandleString(o.writer, fmt.Sprintf("successfully log in %s", o.url))
 }
 
 func (o *option) SetWriter(writer io.Writer) {
