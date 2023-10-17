@@ -1,4 +1,4 @@
-if #panel.type == "gauge" {
+if #panel.type != _|_ if #panel.type == "gauge" {
     kind: "GaugeChart"
     spec: {
         #calcName: "\(#panel.options.reduceOptions.calcs[0])" // only consider [0] here as Perses's GaugeChart doesn't support multi queries

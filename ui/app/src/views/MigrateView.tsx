@@ -94,12 +94,6 @@ function MigrateView() {
             dashboard structure.
           </Typography>
         </Alert>
-        <Alert variant={'outlined'} severity={'warning'}>
-          <Typography>
-            If your dashboard contains Library panels, in order to migrate these nicely you should collapse their
-            respective parent row (if applicable) before pasting the JSON here.
-          </Typography>
-        </Alert>
         <Typography variant="h2" sx={{ paddingTop: 2 }}>
           1. Provide a Grafana dashboard
         </Typography>

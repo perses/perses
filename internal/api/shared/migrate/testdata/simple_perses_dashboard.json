@@ -235,7 +235,7 @@
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
-              "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
+              "expr": "group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
               "labelName": "type"
             }
           },
@@ -255,7 +255,7 @@
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
-              "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[placeholder]))",
+              "expr": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
               "labelName": "migration_from_grafana_not_supported"
             }
           },

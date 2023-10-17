@@ -1,4 +1,4 @@
-if #panel.type == "timeseries" || #panel.type == "graph" {
+if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
     kind: "TimeSeriesChart"
     spec: {
         legend: {
