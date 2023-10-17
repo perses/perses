@@ -71,14 +71,18 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	var entities []modelAPI.Entity
-	var err error
 	if len(o.File) > 0 {
+		var err error
 		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+		if err != nil {
+			return err
+		}
 	} else if len(o.Directory) > 0 {
-		entities, err = file.UnmarshalEntitiesFromDirectory(o.Directory)
-	}
-	if err != nil {
-		return err
+		var errorList []error
+		entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
+		if len(errorList) > 0 {
+			return errorList[0]
+		}
 	}
 	return o.applyEntity(entities)
 }

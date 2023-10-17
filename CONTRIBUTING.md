@@ -91,14 +91,7 @@ granular control over building and starting the API server.
 
 With the required dependencies installed, you can proceed as follows:
 
-- Change to the `dev` folder and generate the local database by running the `populate.sh` script. You will then be able
-  to modify it on the fly.
-
-```bash
-bash populate.sh
-```
-
-- Return to the root of the project and build the API server:
+- At the root of the project, build the API server:
 
 ```bash
 cd ../

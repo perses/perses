@@ -43,25 +43,27 @@ func Unmarshal(file string, obj interface{}) error {
 	return nil
 }
 
-func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, error) {
+func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
 	files, err := visit(dir)
 	if err != nil {
-		return nil, err
+		return nil, []error{err}
 	}
 	var entities []modelAPI.Entity
+	var errors []error
 	for _, f := range files {
 		es, unmarshalErr := UnmarshalEntitiesFromFile(f)
 		if unmarshalErr != nil {
-			return nil, unmarshalErr
+			errors = append(errors, unmarshalErr)
+			continue
 		}
 		entities = append(entities, es...)
 	}
-	return entities, nil
+	return entities, errors
 }
 
 func UnmarshalEntitiesFromFile(file string) ([]modelAPI.Entity, error) {
-	u := &unmarshaller{}
-	return u.unmarshal(file)
+	u := &unmarshaller{file: file}
+	return u.unmarshal()
 }
 
 func visit(dir string) ([]string, error) {
@@ -87,20 +89,21 @@ func visit(dir string) ([]string, error) {
 
 type unmarshaller struct {
 	isJSON  bool
+	file    string
 	objects []map[string]interface{}
 }
 
-func (u *unmarshaller) unmarshal(file string) ([]modelAPI.Entity, error) {
-	if err := u.read(file); err != nil {
+func (u *unmarshaller) unmarshal() ([]modelAPI.Entity, error) {
+	if err := u.read(); err != nil {
 		return nil, err
 	}
 
 	return u.unmarshalEntities()
 }
 
-func (u *unmarshaller) read(file string) error {
+func (u *unmarshaller) read() error {
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
-	data, isJSON, err := readAndDetect(file)
+	data, isJSON, err := readAndDetect(u.file)
 	if err != nil {
 		return err
 	}
@@ -130,22 +133,23 @@ func (u *unmarshaller) read(file string) error {
 
 func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 	if len(u.objects) == 0 {
-		return nil, fmt.Errorf("unable to unmarshall data, data is empty")
+		return nil, fmt.Errorf("unable to unmarshall data from the file %q, data is empty", u.file)
 	}
 	var result []modelAPI.Entity
 	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	for i, object := range u.objects {
 		if _, ok := object["kind"]; !ok {
-			return nil, fmt.Errorf("objects[%d] unable to find 'kind' field", i)
+			return nil, fmt.Errorf("objects[%d] from file %q unable to find 'kind' field", i, u.file)
 		}
 		kind := modelV1.Kind(fmt.Sprintf("%v", object["kind"]))
-		// we create the service associated to the current resource. It will be used to unmarshal the resource with the accurate struct.
+		// We create the service associated to the current resource.
+		// It will be used to unmarshal the resource with the accurate struct.
 		entity, err := modelV1.GetStruct(kind)
 		if err != nil {
 			logrus.WithError(err).Debugf("unable to get the struct")
-			return nil, fmt.Errorf("resource %q not supported by the command", kind)
+			return nil, fmt.Errorf("resource %q from file %q not supported by the command", kind, u.file)
 		}
-		// Let's marshal the resource, so we can finally unmarshal it with the accurate struct.
+		// Let's marshal the resource, so we can finally unmarshal it with an accurate struct.
 		var data []byte
 		var marshalErr error
 		if u.isJSON {

@@ -6,6 +6,10 @@ database:
     folder: "dev/local_db"
     extension: "json"
 
+provisioning:
+  folders:
+  - "dev/data"
+
 schemas:
   panels_path: "schemas/panels"
   queries_path: "schemas/queries"

@@ -67,6 +67,9 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 	runner.WithTasks(watcher, migrateWatcher)
 	runner.WithCronTasks(conf.Schemas.Interval, reloader, migrateReloader)
+	if len(conf.Provisioning.Folders) > 0 {
+		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
+	}
 
 	// register the API
 	runner.HTTPServerBuilder().
