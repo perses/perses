@@ -40,7 +40,18 @@ export interface DatasourceSelectItem {
   name: string;
   overridden?: boolean;
   overriding?: boolean;
-  selector: DatasourceSelector;
+  selector: DatasourceSelectItemSelector;
+}
+
+/**
+ * Datasource Selector used by the frontend only to differentiate datasources coming from different group.
+ */
+export interface DatasourceSelectItemSelector extends DatasourceSelector {
+  /**
+   * Group of the datasource.
+   * Omit it if you don't store datasource by group.
+   */
+  group?: string;
 }
 
 export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
