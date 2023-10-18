@@ -1,4 +1,4 @@
-if #panel.type == "stat" {
+if #panel.type != _|_ if #panel.type == "stat" {
     kind: "StatChart"
     spec: {
         #calcPath: "\(#panel.options.reduceOptions.calcs[0])" // only consider [0] here as Perses's StatChart doesn't support multi queries
