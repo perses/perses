@@ -3,6 +3,7 @@
 set -e
 
 exclude_directories=("*/node_modules/*" ".git/*" ".idea/*" ".github/*" ".circleci/*" "scripts/*" "*/dist/*" "*/storybook-static/*")
+exclude_files=("migrate.cue")
 year=$(date +'%Y')
 
 license_copyright="The Perses Authors"
@@ -27,6 +28,14 @@ function buildExcludeDirectories() {
   echo "${result}"
 }
 
+function buildExcludeFiles() {
+  local result="-not -name \"${exclude_files[0]}\""
+  for file in "${exclude_files[@]:1}"; do
+    result+=" -and -not -name \"${file}\""
+  done
+  echo "${result}"
+}
+
 function buildPatternList() {
   local patterns=("$@")
   local result="-name \"${patterns[0]}\""
@@ -40,7 +49,8 @@ function findFilesWithMissingLicense(){
   local patterns=("$@")
   buildPattern=$(buildPatternList "${patterns[@]}")
   buildExcludeDir=$(buildExcludeDirectories)
-  cmd="find . -type f \( ${buildPattern} \) -and \( ${buildExcludeDir} \) -exec grep -H -E -o -c \"${license_copyright}\" {} \; | grep ':0$'"
+  buildExcludeFiles=$(buildExcludeFiles)
+  cmd="find . -type f \( ${buildPattern} \) -and \( ${buildExcludeDir} \) -and \( ${buildExcludeFiles} \) -exec grep -H -E -o -c \"${license_copyright}\" {} \; | grep ':0$'"
   eval $cmd
 }
 
