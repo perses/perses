@@ -271,7 +271,7 @@ has two modes:
     - queries folders
     - variables folders
 
-Each of the above folders should contain files, named `mig.cuepart` that holds the logic of the migration for each
+Each of the above folders should contain a file named `migrate.cue`, that holds the logic of the migration for each
 plugin. For more information about these files, please read the documentation about [cue](./cue.md)
 
 In both modes, if the command runs successfully, it will return the dashboard in the Perses format.
