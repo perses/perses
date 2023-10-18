@@ -21,6 +21,8 @@ Prometheus as a datasource is basically an HTTP server. So we need to define am 
 
   # It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
   [ proxy: <http_proxy_spec> ]
+  
+  [ scrapeInterval: <duration> ]
 ```
 
 #### `<http_proxy_spec>`
