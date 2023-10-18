@@ -15,7 +15,7 @@ import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import { Select, SelectProps, MenuItem, Stack, Divider, ListItemText, Chip, IconButton, Box } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { useMemo } from 'react';
-import { useListDatasourceSelectItems } from '../runtime';
+import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
 // this component
@@ -137,20 +137,29 @@ export function DatasourceName(props: { name: string; overridden?: boolean; over
 // Delimiter used to stringify/parse option values
 const OPTION_VALUE_DELIMITER = '_____';
 
-// Given a DatasourceSelector, returns a string value like `{kind}_____{name}` that can be used as a Select input value
-function selectorToOptionValue(selector: DatasourceSelector): string {
+/**
+ * Given a DatasourceSelectItemSelector,
+ * returns a string value like `{kind}_____{group}_____{name}` that can be used as a Select input value.
+ * @param selector
+ */
+function selectorToOptionValue(selector: DatasourceSelectItemSelector): string {
   return [selector.kind, selector.group ?? '', selector.name ?? ''].join(OPTION_VALUE_DELIMITER);
 }
 
-// Given an option value name like `{kind}_____{name}`, returns a DatasourceSelector
+/**
+ * Given an option value name like `{kind}_____{group}_____{name}`,
+ * returns a DatasourceSelector to be used by the query data model.
+ * @param optionValue
+ */
 function optionValueToSelector(optionValue: string): DatasourceSelector {
-  const [kind, group, name] = optionValue.split(OPTION_VALUE_DELIMITER);
-  if (kind === undefined || group === undefined || name === undefined) {
+  const words = optionValue.split(OPTION_VALUE_DELIMITER);
+  const kind = words[0];
+  const name = words[2];
+  if (kind === undefined || name === undefined) {
     throw new Error('Invalid optionValue string');
   }
   return {
     kind,
-    group: group === '' ? undefined : group,
     name: name === '' ? undefined : name,
   };
 }
