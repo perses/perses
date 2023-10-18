@@ -6,7 +6,6 @@ Perses will use a Role-based access control (RBAC) for regulating access to reso
 The RBAC API is based on four kinds of resource: GlobalRole, Role, GlobalRoleBinding and RoleBinding.
 Perses RBAC implementation is highly inspired by K8S RBAC implementation.
 
-
 ## Role and GlobalRole
 
 An RBAC `Role` or `GlobalRole` contains a set of permissions (rules). Permissions are purely additive (there are no "deny" permissions).
@@ -14,10 +13,10 @@ An RBAC `Role` or `GlobalRole` contains a set of permissions (rules). Permission
 A `Role` defines a set of permissions within a particular project. When you create a `Role` you need to specify the project it belongs in.
 `GlobalRole`, by contrast, is not limited to a project scope.
 
-
 ### Role example
 
 Here is an example of Role in "MySuperProject" project that can be used to grant edit access to dashboards:
+
 ```yaml
 kind: Role
 metadata:
@@ -29,7 +28,6 @@ spec:
       scopes: ["Dashboard"]
 ```
 
-
 ### Global Role example
 
 A `GlobalRole` can be used to grant the same permissions as a Role. However, because `GlobalRole` are global, you can also use them to grant access to:
@@ -37,6 +35,7 @@ A `GlobalRole` can be used to grant the same permissions as a Role. However, bec
 - project resources (like Dashboards) across all projects
 
 Here is an example of a `GlobalRole` that can be used to grant edit access to variables in all projects:
+
 ```yaml
 kind: GlobalRole
 metadata:
@@ -47,18 +46,17 @@ spec:
       scopes: ["Variable"]
 ```
 
-
 ## RoleBinding and GlobalRoleBinding
 
-A role binding grants the permissions defined in a role to a user or set of users. 
+A role binding grants the permissions defined in a role to a user or set of users.
 It holds a list of subjects (users or teams) and a reference to the role being granted. A `RoleBinding` grants permissions within a specific project whereas a `GlobalRoleBinding` grants that access global-wide.
 
 A `RoleBinding` may reference any `Role` in the same project. Similarly, a `GlobalRoleBinding` can reference any `GlobalRole`.
 
-
 ### RoleBinding example
 
 Here is an example of a `RoleBinding` that grants the "dashboard-editor" `Role` to the user "jane" within the "MySuperProject" project. This allows "jane" to edit dashboards in the "MySuperProject" project.
+
 ```yaml
 kind: RoleBinding
 metadata:
@@ -71,10 +69,10 @@ spec:
       name: jane
 ```
 
-
 ### GlobalRoleBinding example
 
 Here is an example of a `GlobalRoleBinding` that grants the "variable-editor" `GlobalRole` to the user "jane" within all projects. This allows "jane" to edit variables in all projects.
+
 ```yaml
 kind: GlobalRoleBinding
 metadata:
@@ -86,20 +84,19 @@ spec:
       name: jane
 ```
 
-
 ### RoleBinding and GlobalRoleBinding update restriction
 
 After you create a binding, you cannot change the `Role` or `GlobalRole` that it refers to. If you try to change a binding's role, you get a validation error. If you do want to change the role for a binding, you need to remove the binding object and create a replacement.
 
 There are two reasons for this restriction:
-- Making role immutable allows granting someone update permission on an existing binding object, so that they can manage the list of subjects, without being able to change the role that is granted to those subjects. 
+- Making role immutable allows granting someone update permission on an existing binding object, so that they can manage the list of subjects, without being able to change the role that is granted to those subjects.
 - A binding to a different role is a fundamentally different binding. Requiring a binding to be deleted/recreated in order to change the roleRef ensures the full list of subjects in the binding is intended to be granted the new role (as opposed to enabling or accidentally modifying only the roleRef without verifying all of the existing subjects should be given the new role's permissions).
-
 
 ## Referring to resources
 
 In Perses API, resources are identified and accessed using a string, corresponding to the name in the metadata. You can also refer to all resources using the wildcard `*` character.
 Here is an example for granting edit permissions to all resources in all projects:
+
 ```yaml
 kind: GlobalRole
 metadata:
@@ -110,7 +107,6 @@ spec:
       scopes: ["*"]
 ```
 
-
 ## RBAC Synchro
 
 Roles and RoleBindings of an user are stored in the user's JWT.
@@ -120,7 +116,6 @@ To do that there are multiple mechanisms:
 - cache is refreshed if roles and role bindings retrieve from the user's JWT are different from the cache
 - cache is refreshed when a new role is created, edited or deleted
 - cache is refreshed when a new rolebinding is created, edited or deleted
-
 
 ## Golang Struct Implementation
 
