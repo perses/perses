@@ -147,6 +147,11 @@ export default function Header(): JSX.Element {
       <Toolbar
         sx={{
           backgroundColor: (theme) => theme.palette.designSystem.blue[700],
+          '&': {
+            minHeight: '40px',
+            paddingLeft: 0,
+            paddingRight: 0.75,
+          },
         }}
       >
         <Box
@@ -160,6 +165,9 @@ export default function Header(): JSX.Element {
           <Button
             onClick={() => {
               navigate('/');
+            }}
+            sx={{
+              padding: 0,
             }}
           >
             <PersesLogo />

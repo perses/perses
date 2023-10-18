@@ -40,14 +40,14 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
         sx={{ backgroundColor: 'inherit', ...props.sx }}
       >
         <Box display="flex" justifyContent="space-between">
-          <Box display="flex" flexWrap="wrap" alignItems="start" my={isSticky ? 2 : 0} ml={isSticky ? 2 : 0}>
+          <Box display="flex" flexWrap="wrap" alignItems="start" mt={isSticky ? 1.5 : 0} ml={isSticky ? 2 : 0}>
             <TemplateVariableList></TemplateVariableList>
             {props.initialVariableIsSticky && (
               <IconButton onClick={() => setIsPin(!isPin)}>{isPin ? <PinOutline /> : <PinOffOutline />}</IconButton>
             )}
           </Box>
           {isSticky && (
-            <Box my={2} mr={2}>
+            <Box mt={1.5} mr={2}>
               <TimeRangeControls></TimeRangeControls>
             </Box>
           )}

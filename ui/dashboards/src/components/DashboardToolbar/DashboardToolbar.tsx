@@ -62,7 +62,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     <>
       {isEditMode ? (
         <Stack spacing={1} data-testid={testId}>
-          <Box p={2} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
+          <Box px={2} py={1} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">
               {isReadonly && (
@@ -81,7 +81,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               display: 'flex',
               width: '100%',
               alignItems: 'start',
-              padding: (theme) => theme.spacing(1, 2),
+              padding: (theme) => theme.spacing(1, 2, 0, 2),
             }}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -93,12 +93,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               />
             </ErrorBoundary>
             <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
-              <Stack direction="row" spacing={1} ml={1} mb={1} whiteSpace="nowrap">
+              <Stack direction="row" spacing={1} ml={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>
-              <Stack direction="row" spacing={1} ml={1} mb={1}>
+              <Stack direction="row" spacing={1} ml={1}>
                 <TimeRangeControls />
                 <DownloadButton />
                 <EditJsonButton />
@@ -107,7 +107,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
         </Stack>
       ) : (
-        <Stack spacing={1} padding={2} data-testid={testId}>
+        <Stack spacing={1} px={2} pt={1} data-testid={testId}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">
@@ -116,7 +116,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               {isBiggerThanSm && <EditButton onClick={onEditButtonClick} />}
             </Stack>
           </Box>
-          <Box paddingY={2}>
+          <Box>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
