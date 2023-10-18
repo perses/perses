@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package first
+package model
 
 kind: "FirstVariable"
 spec: close({

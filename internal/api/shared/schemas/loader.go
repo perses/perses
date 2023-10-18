@@ -71,7 +71,8 @@ func (c *cueDefs) Load() error {
 		schemaPath := filepath.Join(c.schemasPath, file.Name())
 
 		// load the cue files into build.Instances slice
-		buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath})
+		// package `model` is imposed so that we dont mix model-related files with migration-related files
+		buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: "model"})
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {

@@ -1,3 +1,6 @@
+// NB: the .cuepart extension is a homemade one: It designates a partial CUE file, meaning that
+// it contains some placeholders for later string replacements, that are not valid to CUE syntax.
+
 import (
     "regexp"
     "strings" 

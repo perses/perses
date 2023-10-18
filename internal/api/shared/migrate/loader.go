@@ -93,11 +93,10 @@ func (c *migCuePart) buildListOfConditions() (string, error) {
 	// process each schema plugin to convert it into a CUE Value
 	for _, file := range files {
 		if !file.IsDir() {
-			// TODO probably we want to walk into all nested directory. To be sure we are grabbing every .cuepart files
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
 			continue
 		}
-		migFilePath := filepath.Join(c.schemasPath, file.Name(), "mig.cuepart")
+		migFilePath := filepath.Join(c.schemasPath, file.Name(), "migrate.cue")
 		contentStr, readErr := os.ReadFile(migFilePath)
 		if readErr != nil {
 			logrus.WithError(readErr).Debugf("No migration file found at %s, plugin %s will be skipped", migFilePath, file.Name())

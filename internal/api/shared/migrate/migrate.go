@@ -120,10 +120,10 @@ func (m *mig) GetLoaders() []schemas.Loader {
 }
 
 func (m *mig) BuildMigrationSchemaString() {
-	// start building the migration schema from the base .cuepart file
+	// start building the migration schema from the base mapping.cuepart file
 	migrationSchemaString := string(migrationFileBytes)
 
-	// generate the blocks of conditionals from the mig.cuepart files of each plugin & replace the placeholders with them
+	// generate the blocks of conditionals from the migrate.cue files of each plugin & replace the placeholders with them
 	for _, l := range m.loaders {
 		conditionals := l.getConditions()
 		migrationSchemaString = strings.Replace(migrationSchemaString, l.getPlaceholder(), conditionals, -1)
