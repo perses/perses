@@ -39,10 +39,10 @@ create a Datasource.
 ### Global level
 
 When we talk about scope and user permission in a REST API, the easiest way is to associate one permission per endpoint.
-If we want to provide a datasource shared by all projects, then it makes sense to create a different object that is
+If we want to provide a datasource shared by all projects, then it makes sense to have a different object that is
 living outside a project.
 
-That’s why we will have a new resource called `GlobalDatasource`
+That’s why we have another resource called `GlobalDatasource`
 
 ```yaml
   kind: "GlobalDatasource"
@@ -101,8 +101,9 @@ smallest scope.
 As described before, you can provide a proxy configuration that will be used by the Perses server to redirect any
 queries to the datasource.
 
-It means in case of the Prometheus datasource, if the field `directUrl` is not set, then the FE needs to use the Perses
-server to contact the datasource.
+It means in the case of the Prometheus datasource, 
+if the field `directUrl` is not set then the FE needs to use the Perses server to contact the datasource.
+
 For that, the FE will have to determinate which URL should be used to contact the Perses server based on what kind of
 datasource is used.
 

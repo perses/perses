@@ -43,7 +43,7 @@ spec:
     [ <string>: <string> ]
   # This is the name of the secret that should be used for the proxy or discovery configuration
   # It will contain any sensitive information such as password, token, certificate.
-  # Please the documentation about the secret to understand how to create it
+  # Please read the documentation about secrets to understand how to create one
   [ secret: <string> ]
 ```
 
