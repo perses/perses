@@ -21,7 +21,7 @@ Generic placeholders are defined as follows:
 
 1. [Project](./project.md)
 2. [Datasource](./datasource.md)
-   1. [Different Datasource scope](./datasource.md#different-datasource-scope)
+   1. [Choose a scope](./datasource.md#choose-a-scope)
    2. [Specification](./datasource.md#datasource-specification)
    3. [API definition](./datasource.md#api-definition)
 3. [Secret](./secret.md)

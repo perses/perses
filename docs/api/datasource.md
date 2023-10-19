@@ -1,9 +1,11 @@
 # Datasource
 
-## Different Datasource scope
+## Choose a scope
 
-We have three different ways to define a datasource, depending on the scope we want to give
-to the datasource.
+There are three different scopes in which you can define a datasource, depending on which point you want it to be shared.
+
+- for common use cases, use higher scopes to reuse the same datasource on multiple dashboards
+- for more specific needs, use lower scopes to restrict the datasource availability to a specific set of (or even a single) dashboard(s).
 
 ### Dashboard level
 
@@ -90,7 +92,7 @@ interface DatasourceSelector {
 }
 ```
 
-Priority is `"Local datasource in the dashboard" > "Project datasource" > "Global datasource"`.
+The priority order is `"Local datasource in the dashboard" > "Project datasource" > "Global datasource"`.
 
 So if by any chance you have a local datasource that is named exactly like a Project datasource, or a Global datasource,
 we will consider that the user intentionally wanted to override the upper datasource. We will use the one with the
