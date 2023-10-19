@@ -390,18 +390,6 @@
                   "mean",
                   "sum"
                 ]
-              },
-              "thresholds": {
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
               }
             }
           },
@@ -438,14 +426,6 @@
                 "mode": "table",
                 "position": "bottom",
                 "values": []
-              },
-              "thresholds": {
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
               }
             }
           },

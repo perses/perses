@@ -65,18 +65,6 @@
                 "mode": "list",
                 "position": "bottom",
                 "values": []
-              },
-              "thresholds": {
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
               }
             }
           }
