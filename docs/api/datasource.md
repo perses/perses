@@ -9,7 +9,7 @@ There are three different scopes in which you can define a datasource, depending
 
 ### Dashboard level
 
-Like in the first draft, we can extend the dashboard spec to include a list of datasources:
+We have extended the dashboard spec to include a list of datasources:
 
 ```typescript
 interface DashboardSpec {
@@ -21,14 +21,10 @@ interface DashboardSpec {
 Of course, the scope of such definition is the dashboard where it is defined.
 It cannot be used outside the dashboard.
 
-**Note**: We don’t really have a use case in mind, but as it is not really complicated to have it in the dashboard
-specification, we decided to support it.
-Once we will have user feedbacks, if they don’t like it, it won’t be that hard to remove as well.
-
 ### Project level
 
 In case you would like to share a datasource across different dashboards in the **same** project, you will need to
-create a Datasource.
+create a `Datasource`.
 
 ```yaml
   kind: "Datasource"
