@@ -7,6 +7,7 @@ application.
 > working on some default values or opt-in/opt-out mechanisms.
 
 ### Getting started (npm example)
+
 ```bash
 # For example you can use the create-react-app command line or reuse the code of your app
 npx create-react-app perses-embedded-panel --template typescript
@@ -166,31 +167,31 @@ function App() {
 export default App;
 
 ```
+
 You should see a perses panel going to your browser
 ![embedded-panel-screenshot.png](images/embedded-panel-screenshot.png)
 
-
 ### Definitions by provider
+
 > Check each Provider's source code/jsdoc for more details.
 
-- ``DataQueriesProvider``: Provide the queries' definition, with the query type, the value. This is to be inside the 
+- `DataQueriesProvider`: Provide the queries' definition, with the query type, the value. This is to be inside the
   chart below. For each query, one line will be displayed in the chart.
-- ``DatasourceStoreProvider``: Provide the datasources. In other terms, the place from which the data will be collected.
-- ``TemplateVariableProvider``: Provide the variables that can be used inside the chart. 
+- `DatasourceStoreProvider`: Provide the datasources. In other terms, the place from which the data will be collected.
+- `TemplateVariableProvider`: Provide the variables that can be used inside the chart.
   It will allow you to reference any variable into the queries thanks to the `${myVar}` syntax.
   Available variables will be either the builtin variables or the local/external variables that you can pass to the provider.
-- ``TimeRangeProvider``: Provide `time range` of the query, but also the `refresh interval` (time between each query
+- `TimeRangeProvider`: Provide `time range` of the query, but also the `refresh interval` (time between each query
   automatic replay)
-- ``QueryClientProvider``: Provide a ``@tanstack/react-query`` ``QueryClient``, which is a mandatory dependency.
-  (We advise to configure it with ``refetchOnWindowFocus: false`` except if you want to replay the queries every time
+- `QueryClientProvider`: Provide a `@tanstack/react-query` `QueryClient`, which is a mandatory dependency.
+  (We advise to configure it with `refetchOnWindowFocus: false` except if you want to replay the queries every time
   you change window)
-- ``QueryParamProvider``: Provide the ability to take time range, refresh interval, and different variables from the
+- `QueryParamProvider`: Provide the ability to take time range, refresh interval, and different variables from the
   url query params.
-- ``BrowserRouter``: Provide necessary elements for the `QueryParamProvider`
-- ``PluginRegistry``: Provide the different Perses plugins that will be used in the providers/charts below.
-- ``SnackbarProvider``: Provide the toaster that will occurs in case of error/success.
-- ``ChartsProvider``: Provider for the option of [apache/echarts](https://echarts.apache.org/en/option.html) library.
+- `BrowserRouter`: Provide necessary elements for the `QueryParamProvider`
+- `PluginRegistry`: Provide the different Perses plugins that will be used in the providers/charts below.
+- `SnackbarProvider`: Provide the toaster that will occurs in case of error/success.
+- `ChartsProvider`: Provider for the option of [apache/echarts](https://echarts.apache.org/en/option.html) library.
   Which is used for all the charts display.
-- ``ThemeProvider``: Provider of the [Material UI theme](https://mui.com/material-ui/customization/theming/) which is
-currently the theme used in Perses.
-
+- `ThemeProvider`: Provider of the [Material UI theme](https://mui.com/material-ui/customization/theming/) which is
+  currently the theme used in Perses.
