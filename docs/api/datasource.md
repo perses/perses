@@ -2,7 +2,7 @@
 
 ## Choose a scope
 
-There are three different scopes in which you can define a datasource, depending on which point you want it to be shared.
+There are three different scopes in which you can define a datasource, depending on how much you want it to be shared.
 
 - for common use cases, use higher scopes to reuse the same datasource on multiple dashboards
 - for more specific needs, use lower scopes to restrict the datasource availability to a specific set of (or even a single) dashboard(s).

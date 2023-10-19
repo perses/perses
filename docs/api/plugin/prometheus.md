@@ -11,7 +11,7 @@ spec: <prometheus_plugin_spec>
 
 ### Plugin Specification
 
-Prometheus as a datasource is basically an HTTP server. So we need to define am HTTP config.
+Prometheus as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
 ```yaml
   # It is the url of the datasource.
