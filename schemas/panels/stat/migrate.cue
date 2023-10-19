@@ -16,7 +16,7 @@ if #panel.type != _|_ if #panel.type == "stat" {
 
 		if #panel.fieldConfig.defaults.thresholds != _|_ {
 			thresholds: {
-				//defaultColor: TODO how to fill this one?
+				// defaultColor: TODO how to fill this one?
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part? 
 					value: [ // switch
 						if step.value == null { 0 },

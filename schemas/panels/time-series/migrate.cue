@@ -41,9 +41,10 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 			}
 		}
 
-		if #panel.fieldConfig.defaults.thresholds != _|_ {
+		// migrate thresholds only if they are visible
+		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle.mode != "off" {
 			thresholds: {
-				//defaultColor: TODO how to fill this one?
+				// defaultColor: TODO how to fill this one?
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part?
 					value: [ // switch
 						if step.value == null { 0 },
