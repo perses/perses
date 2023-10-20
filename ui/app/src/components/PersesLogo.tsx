@@ -20,7 +20,7 @@ interface PersesLogoProps extends SVGProps<SVGSVGElement> {
 export const PersesLogo = (props: PersesLogoProps) => {
   const { title = 'Perses Logo' } = props;
   return (
-    <svg width="130" height="43" viewBox="0 0 367 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="130" height="32" viewBox="0 0 367 120" fill="none" xmlns="http://www.w3.org/2000/svg">
       <title id="perses-banner-title">{title}</title>
       <rect width="367" height="120" />
       <path

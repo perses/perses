@@ -16,7 +16,7 @@ import { Box, Stack, Typography, Grid } from '@mui/material';
 import FolderPound from 'mdi-material-ui/FolderPound';
 import { useCallback, useState } from 'react';
 import { DeleteProjectDialog } from '../../components/dialogs';
-import AppBreadcrumbs from '../../components/AppBreadcrumbs';
+import ProjectBreadcrumbs from '../../components/ProjectBreadcrumbs';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectTabs } from './ProjectTabs';
 
@@ -36,7 +36,7 @@ function ProjectView() {
 
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs projectName={projectName} />
+      <ProjectBreadcrumbs projectName={projectName} />
       <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>

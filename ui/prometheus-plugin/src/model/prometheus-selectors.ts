@@ -31,7 +31,7 @@ export const DEFAULT_PROM: PrometheusDatasourceSelector = { kind: PROM_DATASOURC
  * Returns true if the provided PrometheusDatasourceSelector is the default one.
  */
 export function isDefaultPromSelector(selector: PrometheusDatasourceSelector) {
-  return selector.name === undefined && selector.group === undefined;
+  return selector.name === undefined;
 }
 
 /**

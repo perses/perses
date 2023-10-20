@@ -15,9 +15,9 @@ package base
 
 kind: string
 spec: {
-	datasource?: {
+	datasource?: close({
 		kind:  string
 		name?: string
-	}
+	})
 	// additional fields allowed
 }

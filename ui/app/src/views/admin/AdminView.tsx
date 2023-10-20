@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack, Typography } from '@mui/material';
-import Cog from 'mdi-material-ui/Cog';
+import ShieldAccount from 'mdi-material-ui/ShieldAccount';
 import { useParams } from 'react-router-dom';
 import AppBreadcrumbs from '../../components/AppBreadcrumbs';
 import { AdminTabs } from './AdminTabs';
@@ -21,11 +21,11 @@ function AdminView() {
   const { tab } = useParams();
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs admin={true} />
+      <AppBreadcrumbs rootPageName="Administration" />
       <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
-            <Cog fontSize={'large'} />
+            <ShieldAccount fontSize={'large'} />
             <Typography variant="h1">Administration</Typography>
           </Stack>
         </Stack>

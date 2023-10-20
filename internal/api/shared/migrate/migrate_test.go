@@ -46,6 +46,18 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "old_grafana_panels_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard embeddind a library panel",
+			inputGrafanaDashboardFile:   "library_panel_grafana_dashboard.json",
+			expectedPersesDashboardFile: "library_panel_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with old query format used (i.e query string instead of struct with query + refId)",
+			inputGrafanaDashboardFile:   "old_grafana_query_grafana_dashboard.json",
+			expectedPersesDashboardFile: "old_grafana_query_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 
 	for _, test := range testSuite {

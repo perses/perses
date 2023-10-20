@@ -49,15 +49,7 @@ export interface DatasourceSelector {
    * Kind of the datasource.
    */
   kind: string;
-  /**
-   * Group of the datasource.
-   * Omit it if you don't store datasource by group.
-   * TODO: This group field is fairly ignored by the backend data model.
-   *   We need to decouple properly the backend and frontend data models.
-   *   A Zustand store would certainly help here to decouple definition from the backend and state from the UI.
-   *   => See Variable Store
-   */
-  group?: string;
+
   /**
    * Name of the datasource.
    * If omitted, it's assumed that you target the default datasource for the specified kind (and group, if set)

@@ -31,6 +31,7 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Cog from 'mdi-material-ui/Cog';
 import Folder from 'mdi-material-ui/Folder';
+import ShieldAccount from 'mdi-material-ui/ShieldAccount';
 import { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
@@ -147,6 +148,11 @@ export default function Header(): JSX.Element {
       <Toolbar
         sx={{
           backgroundColor: (theme) => theme.palette.designSystem.blue[700],
+          '&': {
+            minHeight: '40px',
+            paddingLeft: 0,
+            paddingRight: 0.75,
+          },
         }}
       >
         <Box
@@ -160,6 +166,9 @@ export default function Header(): JSX.Element {
           <Button
             onClick={() => {
               navigate('/');
+            }}
+            sx={{
+              padding: 0,
             }}
           >
             <PersesLogo />
@@ -178,7 +187,18 @@ export default function Header(): JSX.Element {
               navigate('/admin');
             }}
           >
-            <Cog sx={{ marginRight: 0.5 }} /> Admin
+            <ShieldAccount sx={{ marginRight: 0.5 }} /> Admin
+          </Button>
+          <Button
+            aria-label="Config"
+            aria-controls="menu-config-appbar"
+            aria-haspopup="true"
+            color="inherit"
+            onClick={() => {
+              navigate('/config');
+            }}
+          >
+            <Cog sx={{ marginRight: 0.5 }} /> Config
           </Button>
           <ProjectMenu />
         </Box>

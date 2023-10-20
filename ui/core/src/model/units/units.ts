@@ -26,6 +26,12 @@ import {
 } from './percent';
 import { formatTime, TimeFormatOptions as TimeFormatOptions, TIME_GROUP_CONFIG, TIME_UNIT_CONFIG } from './time';
 import { UnitGroup, UnitGroupConfig, UnitConfig } from './types';
+import {
+  formatThroughput,
+  THROUGHPUT_GROUP_CONFIG,
+  THROUGHPUT_UNIT_CONFIG,
+  ThroughputFormatOptions,
+} from './throughput';
 
 /**
  * Most of the number formatting is based on Intl.NumberFormat, which is built into JavaScript.
@@ -40,15 +46,22 @@ export const UNIT_GROUP_CONFIG: Readonly<Record<UnitGroup, UnitGroupConfig>> = {
   Percent: PERCENT_GROUP_CONFIG,
   Decimal: DECIMAL_GROUP_CONFIG,
   Bytes: BYTES_GROUP_CONFIG,
+  Throughput: THROUGHPUT_GROUP_CONFIG,
 };
 export const UNIT_CONFIG = {
   ...TIME_UNIT_CONFIG,
   ...PERCENT_UNIT_CONFIG,
   ...DECIMAL_UNIT_CONFIG,
   ...BYTES_UNIT_CONFIG,
+  ...THROUGHPUT_UNIT_CONFIG,
 } as const;
 
-export type FormatOptions = TimeFormatOptions | PercentFormatOptions | DecimalFormatOptions | BytesFormatOptions;
+export type FormatOptions =
+  | TimeFormatOptions
+  | PercentFormatOptions
+  | DecimalFormatOptions
+  | BytesFormatOptions
+  | ThroughputFormatOptions;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
@@ -72,6 +85,10 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
 
   if (isTimeUnit(formatOptions)) {
     return formatTime(value, formatOptions);
+  }
+
+  if (isThroughputUnit(formatOptions)) {
+    return formatThroughput(value, formatOptions);
   }
 
   const exhaustive: never = formatOptions;
@@ -120,4 +137,8 @@ export function isUnitWithShortValues(formatOptions: FormatOptions): formatOptio
   const groupConfig = getUnitGroupConfig(formatOptions);
 
   return !!groupConfig.shortValues;
+}
+
+export function isThroughputUnit(formatOptions: FormatOptions): formatOptions is ThroughputFormatOptions {
+  return getUnitGroup(formatOptions) == 'Throughput';
 }

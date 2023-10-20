@@ -17,7 +17,7 @@
 import { AbsoluteTimeRange, DurationString } from '../time';
 import { FormatOptions } from './units';
 
-export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes'] as const;
+export const UNIT_GROUPS = ['Time', 'Percent', 'Decimal', 'Bytes', 'Throughput'] as const;
 export type UnitGroup = (typeof UNIT_GROUPS)[number];
 
 /**
