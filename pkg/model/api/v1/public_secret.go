@@ -21,9 +21,9 @@ import (
 type PublicSecretSpec struct {
 	BasicAuth *secret.PublicBasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
 	// The HTTP authorization credentials for the targets.
-	Authorization *secret.PublicAuthorization `yaml:"authorization,omitempty" json:"authorization,omitempty"`
+	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
-	TLSConfig secret.PublicTLSConfig `yaml:"tlsConfig,omitempty" json:"tlsConfig,omitempty"`
+	TLSConfig secret.PublicTLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
 }
 
 func NewPublicSecretSpec(s SecretSpec) PublicSecretSpec {
