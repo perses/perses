@@ -35,7 +35,7 @@ function ConfigView() {
           <CircularProgress />
         </Stack>
       )}
-      {data !== undefined && <JSONEditor value={data} />}
+      {data !== undefined && <JSONEditor value={data} readOnly />}
     </Stack>
   );
 }
