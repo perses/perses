@@ -314,7 +314,7 @@ func newSecretSpec() v1.SecretSpec {
 			Password: "Detective",
 		},
 		Authorization: nil,
-		TLSConfig:     secret.TLSConfig{},
+		TLSConfig:     nil,
 	}
 }
 

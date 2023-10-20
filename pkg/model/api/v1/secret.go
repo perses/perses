@@ -26,7 +26,7 @@ type SecretSpec struct {
 	// The HTTP authorization credentials for the targets.
 	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
-	TLSConfig secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
 }
 
 func (s *SecretSpec) UnmarshalJSON(data []byte) error {
