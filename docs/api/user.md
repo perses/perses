@@ -7,7 +7,7 @@ For the moment, user is a way to create an account and then get a write access t
 ```yaml
 kind: "User"
 metadata:
-  # This is the user login
+  # User name for login
   name: <string>
 spec:
   [ firstName: <string> ]
@@ -29,7 +29,7 @@ GET /api/v1/users
 
 URL query parameters:
 
-- name = `<string>` : filters the list of users based on their login (prefix).
+- name = `<string>` : filters the list of users based on their login name (prefix).
 
 ### Get a single `User`
 
