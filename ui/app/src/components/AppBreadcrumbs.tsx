@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Breadcrumbs, Link, Typography } from '@mui/material';
+import { Breadcrumbs, Link, Typography, styled } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface AppBreadcrumbsProps {
@@ -28,6 +28,12 @@ function HomeLinkBreadcrumb() {
   );
 }
 
+const StyledBreadcrumbs = styled(Breadcrumbs)({
+  fontSize: 'large',
+  paddingLeft: 0.5,
+  lineHeight: '30px',
+});
+
 /*
  * AppBreadcrumbs provide a navigation helper
  * For dashboard breadcrumb, projectName & dashboardName are mandatory
@@ -41,38 +47,38 @@ function AppBreadcrumbs(props: AppBreadcrumbsProps) {
 
   if (dashboardName && projectName) {
     return (
-      <Breadcrumbs sx={{ fontSize: 'large' }}>
+      <StyledBreadcrumbs>
         <HomeLinkBreadcrumb />
         <Link underline={'hover'} variant={'h3'} component={RouterLink} to={`/projects/${projectName}`}>
           {projectName}
         </Link>
         <Typography variant={'h3'}>{dashboardName}</Typography>
-      </Breadcrumbs>
+      </StyledBreadcrumbs>
     );
   }
 
   if (projectName) {
     return (
-      <Breadcrumbs sx={{ fontSize: 'large' }}>
+      <StyledBreadcrumbs>
         <HomeLinkBreadcrumb />
         <Typography variant={'h3'}>{projectName}</Typography>
-      </Breadcrumbs>
+      </StyledBreadcrumbs>
     );
   }
 
   if (admin) {
     return (
-      <Breadcrumbs sx={{ fontSize: 'large' }}>
+      <StyledBreadcrumbs>
         <HomeLinkBreadcrumb />
         <Typography variant={'h3'}>Admin</Typography>
-      </Breadcrumbs>
+      </StyledBreadcrumbs>
     );
   }
 
   return (
-    <Breadcrumbs sx={{ fontSize: 'large' }}>
+    <StyledBreadcrumbs>
       <Typography variant={'h3'}>Home</Typography>
-    </Breadcrumbs>
+    </StyledBreadcrumbs>
   );
 }
 
