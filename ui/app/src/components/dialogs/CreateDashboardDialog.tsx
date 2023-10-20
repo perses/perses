@@ -34,7 +34,6 @@ interface CreateDashboardProps {
  * If it contains only one element, it will be used as project value and will hide the project selection.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
- * @constructor
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projectOptions, hideProjectSelect, onClose, onSuccess } = props;

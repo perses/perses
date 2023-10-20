@@ -75,12 +75,14 @@ func (c *crypto) Encrypt(spec *modelV1.SecretSpec) error {
 		authorization.Credentials = encryptedCredentials
 	}
 
-	tlsConfig := &spec.TLSConfig
-	encryptedKey, err := c.encrypt(tlsConfig.Key)
-	if err != nil {
-		return err
+	tlsConfig := spec.TLSConfig
+	if tlsConfig != nil {
+		encryptedKey, err := c.encrypt(tlsConfig.Key)
+		if err != nil {
+			return err
+		}
+		tlsConfig.Key = encryptedKey
 	}
-	tlsConfig.Key = encryptedKey
 	return nil
 }
 
@@ -103,12 +105,14 @@ func (c *crypto) Decrypt(spec *modelV1.SecretSpec) error {
 		authorization.Credentials = decryptedCredentials
 	}
 
-	tlsConfig := &spec.TLSConfig
-	decryptedKey, err := c.decrypt(tlsConfig.Key)
-	if err != nil {
-		return err
+	tlsConfig := spec.TLSConfig
+	if tlsConfig != nil {
+		decryptedKey, err := c.decrypt(tlsConfig.Key)
+		if err != nil {
+			return err
+		}
+		tlsConfig.Key = decryptedKey
 	}
-	tlsConfig.Key = decryptedKey
 	return nil
 }
 

@@ -24,6 +24,7 @@ export * from './panels';
 export * from './project';
 export * from './query';
 export * from './resource';
+export * from './secrets';
 export * from './thresholds';
 export * from './time';
 export * from './time-series-data';

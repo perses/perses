@@ -26,8 +26,11 @@ type PublicTLSConfig struct {
 	InsecureSkipVerify bool   `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
 }
 
-func NewPublicTLSConfig(t TLSConfig) PublicTLSConfig {
-	return PublicTLSConfig{
+func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
+	if t == nil {
+		return nil
+	}
+	return &PublicTLSConfig{
 		CA:                 Hidden(t.CA),
 		Cert:               Hidden(t.Cert),
 		Key:                Hidden(t.Key),

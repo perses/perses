@@ -397,7 +397,7 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 }
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
-	if h.secret == nil {
+	if h.secret == nil || h.secret.TLSConfig == nil {
 		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
 	}
 	cfg := &promConfig.TLSConfig{

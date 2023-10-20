@@ -15,6 +15,7 @@ import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import KeyIcon from 'mdi-material-ui/Key';
 import {
   getDatasourceDisplayName,
   GlobalDatasource,
@@ -31,9 +32,11 @@ import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useIsReadonly } from '../../model/config-client';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
+import { GlobalSecrets } from './tabs/GlobalSecret';
 
 const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
+const secretsTabIndex = 'secrets';
 
 interface TabButtonProps {
   index: string;
@@ -196,9 +199,9 @@ export function AdminTabs(props: AdminTabsProps) {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="admin tabs">
+        <Tabs value={value} onChange={handleChange} aria-label="Admin tabs">
           <Tab
             label="Global variables"
             icon={<CodeJsonIcon />}
@@ -213,6 +216,13 @@ export function AdminTabs(props: AdminTabsProps) {
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
           />
+          <Tab
+            label="Global secrets"
+            icon={<KeyIcon />}
+            iconPosition="start"
+            {...a11yProps(secretsTabIndex)}
+            value={secretsTabIndex}
+          />
         </Tabs>
         <TabButton index={value} />
       </Stack>
@@ -221,6 +231,9 @@ export function AdminTabs(props: AdminTabsProps) {
       </TabPanel>
       <TabPanel value={value} index={datasourcesTabIndex}>
         <GlobalDatasources id="global-datasource-list" />
+      </TabPanel>
+      <TabPanel value={value} index={secretsTabIndex}>
+        <GlobalSecrets id="global-secret-list" />
       </TabPanel>
     </Box>
   );

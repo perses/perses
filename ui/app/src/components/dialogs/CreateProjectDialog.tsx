@@ -31,7 +31,6 @@ interface CreateProjectDialogProps {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
- * @constructor
  */
 export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;

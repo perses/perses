@@ -31,7 +31,6 @@ export interface DeleteDashboardDialogProps {
  * @param props.closeDialog Provides the function to close itself.
  * @param props.onConfirm Action to perform when user confirmed.
  * @param props.dashboard The dashboard resource to delete.
- * @constructor
  */
 export const DeleteDashboardDialog = (props: DeleteDashboardDialogProps) => {
   const { dashboard, open, onClose, onSuccess } = props;

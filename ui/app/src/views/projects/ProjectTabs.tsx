@@ -16,6 +16,7 @@ import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import KeyIcon from 'mdi-material-ui/Key';
 import {
   getDatasourceDisplayName,
   getVariableExtendedDisplayName,
@@ -35,10 +36,12 @@ import { useIsReadonly } from '../../model/config-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
+import { ProjectSecrets } from './tabs/ProjectSecrets';
 
 const dashboardsTabIndex = 'dashboards';
 const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
+const secretsTabIndex = 'secrets';
 
 interface TabButtonProps {
   index: string;
@@ -218,9 +221,9 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="project tabs">
+        <Tabs value={value} onChange={handleChange} aria-label="Project tabs">
           <Tab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
@@ -242,6 +245,13 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
           />
+          <Tab
+            label="Secrets"
+            icon={<KeyIcon />}
+            iconPosition="start"
+            {...a11yProps(secretsTabIndex)}
+            value={secretsTabIndex}
+          />
         </Tabs>
         <TabButton index={value} projectName={projectName} />
       </Stack>
@@ -253,6 +263,9 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       </TabPanel>
       <TabPanel value={value} index={datasourcesTabIndex}>
         <ProjectDatasources projectName={projectName} id="project-datasource-list" />
+      </TabPanel>
+      <TabPanel value={value} index={secretsTabIndex}>
+        <ProjectSecrets projectName={projectName} id="secret-datasource-list" />
       </TabPanel>
     </Box>
   );

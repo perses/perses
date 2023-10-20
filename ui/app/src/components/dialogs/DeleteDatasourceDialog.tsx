@@ -32,7 +32,6 @@ export interface DeleteDatasourceDialogProps<T extends Datasource> {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
- * @constructor
  */
 export function DeleteDatasourceDialog<T extends Datasource>(props: DeleteDatasourceDialogProps<T>) {
   const { datasource, open, onSubmit, onClose } = props;

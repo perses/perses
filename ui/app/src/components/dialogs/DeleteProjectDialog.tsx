@@ -30,7 +30,6 @@ interface DeleteProjectDialogProps {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onClose Callback executed when dialog is closed.
  * @param props.onSuccess Callback executed when deletion has been performed with success.
- * @constructor
  */
 export const DeleteProjectDialog = (props: DeleteProjectDialogProps) => {
   const { name, open, onClose, onSuccess } = props;

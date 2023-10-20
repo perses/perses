@@ -24,9 +24,9 @@ import (
 type SecretSpec struct {
 	BasicAuth *secret.BasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
 	// The HTTP authorization credentials for the targets.
-	Authorization *secret.Authorization `yaml:"authorization,omitempty" json:"authorization,omitempty"`
+	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// TLSConfig to use to connect to the targets.
-	TLSConfig secret.TLSConfig `yaml:"tlsConfig,omitempty" json:"tlsConfig,omitempty"`
+	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
 }
 
 func (s *SecretSpec) UnmarshalJSON(data []byte) error {

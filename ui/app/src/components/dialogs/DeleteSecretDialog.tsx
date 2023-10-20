@@ -11,37 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getVariableExtendedDisplayName, Variable } from '@perses-dev/core';
+import { Secret } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
 
-interface DeleteVariableDialogProps<T extends Variable> {
-  variable: T;
+interface DeleteSecretDialogProps<T extends Secret> {
+  secret: T;
   open: boolean;
   onSubmit: Dispatch<T>;
   onClose: DispatchWithoutAction;
 }
 
 /**
- * Dialog used to delete a variable.
- * @param props.variable The variable resource to delete.
+ * Dialog used to delete a secret.
+ * @param props.secret The secret resource to delete.
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
  */
-export function DeleteVariableDialog<T extends Variable>(props: DeleteVariableDialogProps<T>) {
-  const { variable, open, onClose, onSubmit } = props;
+export function DeleteSecretDialog<T extends Secret>(props: DeleteSecretDialogProps<T>) {
+  const { secret, open, onClose, onSubmit } = props;
 
   return (
     <Dialog open={open} onClose={onClose}>
-      <Dialog.Header>Delete Variable</Dialog.Header>
+      <Dialog.Header>Delete Secret</Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the variable {getVariableExtendedDisplayName(variable)}? This action cannot be
-        undone.
+        Are you sure you want to delete the secret {secret.metadata.name}? This action cannot be undone.
       </Dialog.Content>
       <Dialog.Actions>
-        <Button variant="contained" type="submit" onClick={() => onSubmit(variable)}>
+        <Button variant="contained" type="submit" onClick={() => onSubmit(secret)}>
           Delete
         </Button>
         <Button variant="outlined" color="secondary" onClick={onClose}>
