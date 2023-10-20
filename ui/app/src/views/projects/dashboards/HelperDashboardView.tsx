@@ -18,11 +18,11 @@ import { PluginRegistry } from '@perses-dev/plugin-system';
 import { DashboardResource, getDashboardDisplayName } from '@perses-dev/core';
 import { useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
-import AppBreadcrumbs from '../../../components/AppBreadcrumbs';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useVariableList } from '../../../model/variable-client';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
+import ProjectBreadcrumbs from '../../../components/ProjectBreadcrumbs';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;
@@ -81,7 +81,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
               datasourceApi={datasourceApi}
               externalVariableDefinitions={externalVariableDefinitions}
               dashboardTitleComponent={
-                <AppBreadcrumbs
+                <ProjectBreadcrumbs
                   dashboardName={getDashboardDisplayName(dashboardResource)}
                   projectName={dashboardResource.metadata.project}
                 />

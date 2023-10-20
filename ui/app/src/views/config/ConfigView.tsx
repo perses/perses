@@ -12,27 +12,27 @@
 // limitations under the License.
 
 import { Box, Stack, Typography } from '@mui/material';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
-import { useParams } from 'react-router-dom';
+import Cog from 'mdi-material-ui/Cog';
+import { JSONEditor } from '@perses-dev/components';
 import AppBreadcrumbs from '../../components/AppBreadcrumbs';
-import { AdminTabs } from './AdminTabs';
+import { useConfig } from '../../model/config-client';
 
-function AdminView() {
-  const { tab } = useParams();
+function ConfigView() {
+  const cfg = useConfig();
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs rootPageName="Admin" />
+      <AppBreadcrumbs rootPageName="Config" />
       <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
-            <ShieldAccount fontSize={'large'} />
-            <Typography variant="h1">Administration</Typography>
+            <Cog fontSize={'large'} />
+            <Typography variant="h1">Configuration</Typography>
           </Stack>
         </Stack>
       </Box>
-      <AdminTabs initialTab={tab} />
+      <JSONEditor value={cfg.data} />
     </Stack>
   );
 }
 
-export default AdminView;
+export default ConfigView;
