@@ -13,7 +13,7 @@
 
 package common
 
-#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat
+#format: #timeFormat | #percentFormat | #decimalFormat | #bytesFormat | #throughputFormat
 
 #timeFormat: {
 	unit:           "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years"
@@ -33,6 +33,12 @@ package common
 
 #bytesFormat: {
 	unit:           "bytes"
+	decimalPlaces?: number
+	shortValues?:   bool
+}
+
+#throughputFormat: {
+	unit:           "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec"
 	decimalPlaces?: number
 	shortValues?:   bool
 }
