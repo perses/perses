@@ -86,7 +86,7 @@ export interface SecretDataGridProperties {
 }
 
 export function SecretDataGrid(props: SecretDataGridProperties) {
-  const { columns, rows, onRowClick, initialState, hideToolbar, isLoading } = props;
+  const { columns, rows, initialState, hideToolbar, isLoading } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -99,7 +99,6 @@ export function SecretDataGrid(props: SecretDataGridProperties) {
   return (
     <DataGrid
       autoHeight={true}
-      onRowClick={(params) => onRowClick && onRowClick(params.row.name, params.row.project)}
       rows={rows}
       columns={columns}
       getRowId={(row) => row.name}

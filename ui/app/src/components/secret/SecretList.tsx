@@ -73,18 +73,7 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
   }, [data]);
 
   const [targetedSecret, setTargetedSecret] = useState<T>();
-  // const [action, setAction] = useState<Action>('read');
-  // const [isSecretDrawerOpened, setSecretDrawerOpened] = useState<boolean>(false);
   const [isDeleteSecretDialogOpened, setDeleteSecretDialogOpened] = useState<boolean>(false);
-
-  // const handleRowClick = useCallback(
-  //   (name: string, project?: string) => {
-  //     setTargetedSecret(findSecret(name, project));
-  //     setAction('read');
-  //     setSecretDrawerOpened(true);
-  //   },
-  //   [findSecret]
-  // );
 
   const handleCopyVarNameButtonClick = useCallback(
     async (secretName: string) => {
@@ -93,16 +82,6 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
     },
     [infoSnackbar]
   );
-
-  // const handleEditButtonClick = useCallback(
-  //   (name: string, project?: string) => () => {
-  //     const secret = findSecret(name, project);
-  //     setTargetedSecret(secret);
-  //     setAction('update');
-  //     setSecretDrawerOpened(true);
-  //   },
-  //   [findSecret]
-  // );
 
   const handleDeleteButtonClick = useCallback(
     (name: string, project?: string) => () => {
@@ -205,13 +184,6 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
         flex: 0.5,
         minWidth: 100,
         getActions: (params: GridRowParams<Row>) => [
-          // <GridActionsCellItem
-          //   key={params.id + '-edit'}
-          //   icon={<PencilIcon />}
-          //   label="Rename"
-          //   disabled={isReadonly}
-          //   onClick={handleEditButtonClick(params.row.name, params.row.project)}
-          // />,
           <GridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
@@ -231,7 +203,6 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
         <SecretDataGrid
           columns={columns}
           rows={rows}
-          // onRowClick={handleRowClick}
           initialState={initialState}
           hideToolbar={hideToolbar}
           isLoading={isLoading}
@@ -239,15 +210,6 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
       </Stack>
       {targetedSecret && (
         <>
-          {/*<SecretDrawer*/}
-          {/*  secret={targetedSecret}*/}
-          {/*  isOpen={isSecretDrawerOpened}*/}
-          {/*  action={action}*/}
-          {/*  isReadonly={isReadonly}*/}
-          {/*  onSave={(v: T) => onUpdate(v).then(() => setSecretDrawerOpened(false))}*/}
-          {/*  onDelete={onDelete}*/}
-          {/*  onClose={() => setSecretDrawerOpened(false)}*/}
-          {/*/>*/}
           <DeleteSecretDialog
             open={isDeleteSecretDialogOpened}
             onClose={() => setDeleteSecretDialogOpened(false)}

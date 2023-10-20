@@ -199,9 +199,9 @@ export function AdminTabs(props: AdminTabsProps) {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="admin tabs">
+        <Tabs value={value} onChange={handleChange} aria-label="Admin tabs">
           <Tab
             label="Global variables"
             icon={<CodeJsonIcon />}

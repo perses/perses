@@ -221,9 +221,9 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        sx={{ marginLeft: 2.5, marginRight: 2.5, borderBottom: 1, borderColor: 'divider' }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="project tabs">
+        <Tabs value={value} onChange={handleChange} aria-label="Project tabs">
           <Tab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
