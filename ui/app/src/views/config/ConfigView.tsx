@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Stack, Typography } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
 import AppBreadcrumbs from '../../components/AppBreadcrumbs';
 import { useConfig } from '../../model/config-client';
 
 function ConfigView() {
-  const cfg = useConfig();
+  const { data, isLoading } = useConfig();
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs rootPageName="Config" />
+      <AppBreadcrumbs rootPageName="Configuration" />
       <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
@@ -30,7 +30,12 @@ function ConfigView() {
           </Stack>
         </Stack>
       </Box>
-      <JSONEditor value={cfg.data} />
+      {isLoading && (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      )}
+      {data !== undefined && <JSONEditor value={data} />}
     </Stack>
   );
 }

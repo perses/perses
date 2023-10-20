@@ -21,7 +21,7 @@ function AdminView() {
   const { tab } = useParams();
   return (
     <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs rootPageName="Admin" />
+      <AppBreadcrumbs rootPageName="Administration" />
       <Box>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" alignItems="center" gap={1}>
