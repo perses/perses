@@ -29,7 +29,6 @@ interface DeleteVariableDialogProps<T extends Variable> {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
- * @constructor
  */
 export function DeleteVariableDialog<T extends Variable>(props: DeleteVariableDialogProps<T>) {
   const { variable, open, onClose, onSubmit } = props;

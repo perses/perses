@@ -29,7 +29,6 @@ interface DeleteSecretDialogProps<T extends Secret> {
  * @param props.open Define if the dialog should be opened or not.
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
- * @constructor
  */
 export function DeleteSecretDialog<T extends Secret>(props: DeleteSecretDialogProps<T>) {
   const { secret, open, onClose, onSubmit } = props;
