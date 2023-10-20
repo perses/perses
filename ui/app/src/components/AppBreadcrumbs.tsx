@@ -15,12 +15,10 @@ import { Breadcrumbs, Link, Typography, styled } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface AppBreadcrumbsProps {
-  projectName?: string;
-  dashboardName?: string;
-  admin?: boolean;
+  rootPageName: string;
 }
 
-function HomeLinkBreadcrumb() {
+export function HomeLinkBreadcrumb() {
   return (
     <Link underline={'hover'} variant={'h3'} component={RouterLink} to={'/'}>
       Home
@@ -28,56 +26,18 @@ function HomeLinkBreadcrumb() {
   );
 }
 
-const StyledBreadcrumbs = styled(Breadcrumbs)({
+export const StyledBreadcrumbs = styled(Breadcrumbs)({
   fontSize: 'large',
   paddingLeft: 0.5,
   lineHeight: '30px',
 });
 
-/*
- * AppBreadcrumbs provide a navigation helper
- * For dashboard breadcrumb, projectName & dashboardName are mandatory
- * For project breadcrumb, projectName is mandatory
- * For admin breadcrumb, admin flag needs to be true
- * For home breadcrumb, all props need to be empty or undefined
- */
-// TODO: this component should probably be split, maybe this wrapper is not useful in some cases (e.g Home and Admin?)
 function AppBreadcrumbs(props: AppBreadcrumbsProps) {
-  const { projectName, dashboardName, admin } = props;
-
-  if (dashboardName && projectName) {
-    return (
-      <StyledBreadcrumbs>
-        <HomeLinkBreadcrumb />
-        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={`/projects/${projectName}`}>
-          {projectName}
-        </Link>
-        <Typography variant={'h3'}>{dashboardName}</Typography>
-      </StyledBreadcrumbs>
-    );
-  }
-
-  if (projectName) {
-    return (
-      <StyledBreadcrumbs>
-        <HomeLinkBreadcrumb />
-        <Typography variant={'h3'}>{projectName}</Typography>
-      </StyledBreadcrumbs>
-    );
-  }
-
-  if (admin) {
-    return (
-      <StyledBreadcrumbs>
-        <HomeLinkBreadcrumb />
-        <Typography variant={'h3'}>Admin</Typography>
-      </StyledBreadcrumbs>
-    );
-  }
-
+  const { rootPageName } = props;
   return (
-    <StyledBreadcrumbs>
-      <Typography variant={'h3'}>Home</Typography>
+    <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
+      <HomeLinkBreadcrumb />
+      <Typography variant={'h3'}>{rootPageName}</Typography>
     </StyledBreadcrumbs>
   );
 }

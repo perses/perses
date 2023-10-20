@@ -19,6 +19,7 @@ import HomeView from './views/home/HomeView';
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
+const ConfigView = lazy(() => import('./views/config/ConfigView'));
 const GuardedProjectRoute = lazy(() => import('./GuardedProjectRoute'));
 const ProjectView = lazy(() => import('./views/projects/ProjectView'));
 const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
@@ -32,6 +33,7 @@ function Router() {
         <Routes>
           <Route path="/admin" element={<AdminView />} />
           <Route path="/admin/:tab" element={<AdminView />} />
+          <Route path="/config" element={<ConfigView />} />
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
           <Route path="/projects/:projectName" element={<GuardedProjectRoute />}>

@@ -32,6 +32,7 @@ var (
 		"/admin",
 		"/projects",
 		"/migrate",
+		"/config",
 	}
 )
 
