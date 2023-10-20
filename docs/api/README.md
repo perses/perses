@@ -27,3 +27,6 @@ Generic placeholders are defined as follows:
 3. [Secret](./secret.md)
    1. [Specification](./secret.md#secret-specification)
    2. [API definition](./secret.md#api-definition)
+4. [User](./user.md)
+   1. [Specification](./user.md#user-specification)
+   2. [API definition](./user.md#api-definition)
