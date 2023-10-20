@@ -80,6 +80,11 @@ export interface Database {
   sql?: DatabaseSQL;
 }
 
+export interface ProvisioningConfig {
+  interval: string;
+  folders: string[];
+}
+
 export interface ConfigModel {
   readonly: boolean;
   activate_permission: boolean;
@@ -89,6 +94,7 @@ export interface ConfigModel {
   schemas: ConfigSchemasModel;
   important_dashboards: DashboardSelector[];
   information: string;
+  provisioning?: ProvisioningConfig;
 }
 
 type ConfigOptions = Omit<UseQueryOptions<ConfigModel, Error>, 'queryKey' | 'queryFn'>;
