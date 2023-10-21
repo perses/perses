@@ -21,6 +21,7 @@ kind: "PrometheusTimeSeriesQuery"
 spec: close({
 	datasource?: {
 		kind: prometheus.kind
+		name?: string
 	}
 	query:             string
 	seriesNameFormat?: string

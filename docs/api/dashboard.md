@@ -55,6 +55,14 @@ characters you can use there.
   [ description: <string> ]
 ```
 
+### `<datasource_spec>`
+
+See the [doc](./datasource.md) about the datasource.
+
+### `<variable_spec>`
+
+See the [doc](./variable.md) about the variable.
+
 ### `<panel_spec>`
 
 ```yaml
@@ -63,11 +71,46 @@ spec:
   display: <display_spec>
   # This where you will define your chart
   # The chart definition will depend on the chart plugin available in Perses
-  plugin: <plugin_spec>
+  plugin: <panel_plugin_spec>
   # A list of query executed by the panel. The type of the query is conditioned by the type of chart used.
   queries:
     - [ <query_spec> ]
 ```
+
+#### `<panel_plugin_spec>`
+
+```yaml
+  # The plugin type of the panel. For example, `TimeSeriesChart`
+  kind: <string>
+
+  # The actual definition of the panel plugin. It will depend on the type defined in the previous field `kind`
+  spec: <plugin_spec>
+```
+
+See the [doc](./plugin/panel.md) about the panel plugin we are supporting.
+
+#### `<query_spec>`
+
+```yaml
+# The type of the query. For the moment we only support `TimeSeriesQuery`
+kind: <string>
+spec:
+  plugin: <query_plugin_spec>
+```
+
+##### `<query_plugin_spec>`
+
+```yaml
+  # The plugin type that is matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`
+  kind: <string>
+
+  # The actual definition of the query. It will depend on the type defined in the previous field `kind`
+  spec: <plugin_spec>
+```
+
+We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
+Please look at the [documentation](./plugin/prometheus.md#datasource) to know the spec for
+the `PrometheusTimeSeriesQuery`.
 
 ### `<layout_spec>`
 
@@ -76,7 +119,7 @@ kind: "Grid"
 spec:
   [ display: <grid_display_spec> ]
   items:
-    [- <grid_item_spec> ]
+    [ - <grid_item_spec> ]
 ```
 
 ### `<grid_item_spec>`

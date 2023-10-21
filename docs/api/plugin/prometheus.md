@@ -102,3 +102,39 @@ spec:
               method: "GET"
           secret: "prometheus_secret_config"
 ```
+
+## Query
+
+We are only supporting one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
+
+```yaml
+kind: "PrometheusTimeSeriesQuery"
+spec: <timeseries_query_spec>
+```
+
+### `<timeseries_query_spec>`
+
+```yaml
+  # The promql query
+  query: <string>
+
+  # If empty, then the default PrometheusDatasource is chosen
+  # See the documentation about the datasources to understand how it is selected.
+  [ datasource: <datasource_selector> ]
+  [ seriesNameFormat: <string> ]
+  [ minStep: <duration> ]
+  [ resolution: number ]
+```
+
+#### Example
+
+A simple one: 
+
+```yaml
+kind: "TimeSeriesQuery"
+spec:
+  plugin:
+    kind: "PrometheusTimeSeriesQuery"
+    spec:
+      query: "rate(caddy_http_response_duration_seconds_sum[$interval])"
+```
