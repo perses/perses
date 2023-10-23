@@ -49,7 +49,7 @@ That’s why we have another resource called `GlobalVariable`
 
 ## Variable specification
 
-We are supporting two different types of variable. `TextVariable` and `ListVariable`
+We are supporting two different types of variables: `TextVariable` and `ListVariable`.
 
 ### TextVariable
 
@@ -74,7 +74,7 @@ spec: <text_spec>
 #### Example
 
 ```yaml
-kind: "Variable"
+kind: "Variable"  # Alternatively, "GlobalVariable"
 metadata:
   name: "text"
   project: "perses"
@@ -111,9 +111,14 @@ spec: <list_spec>
 
   [ display: <display_spec> ]
 
+  # It's a value from the list to be selected by default
   # It can be a single value or a list.
   [ defaultValue: <string> | <array of string> ]
+
+  # Whether to append the "All" value that allows selecting all available values at once.
   [ allowAllValue: <boolean> | default = false ]
+
+  # Whether to allow multi-selection of values.
   [ allMultiple: <boolean> | default = false ]
 
   # It is a custom value that will be used if allowAllValue is true and if then `all` is selected
@@ -122,6 +127,9 @@ spec: <list_spec>
   # CapturingRegexp is the regexp used to catch and filter the result of the query.
   # If empty, then nothing is filtered. This is the equivalent of setting capturingRegexp with (.*)
   [ capturingRegexp: <string> ]
+  
+  # The method to apply when rendering the list of values
+  [ sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" ]
 
   # The definition of the plugin variable
   plugin: <plugin_spec>
@@ -167,7 +175,7 @@ GET /api/v1/projects/<project_name>/variables
 
 URL query parameters:
 
-- name = `<string>` : should be used to filter the list of variables based on the prefix name.
+- name = `<string>` : filters the list of variables based on their name (prefix match).
 
 #### Get a single `Variable`
 
@@ -203,7 +211,7 @@ GET /api/v1/globalvariables
 
 URL query parameters:
 
-- name = `<string>` : should be used to filter the list of datasource based on the prefix name.
+- name = `<string>` : filters the list of variables based on their name (prefix match).
 
 #### Get a single `GlobalVariable`
 

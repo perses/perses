@@ -124,7 +124,7 @@ spec: <prometheus_label_names_spec>
 
 #### Example
 
-A simple Prometheus LabelValues variable would be
+A simple Prometheus LabelNames variable would be
 
 ```yaml
 kind: "Variable"
@@ -227,6 +227,7 @@ spec:
 kind: "PrometheusPromQLVariable"
 spec: <prometheus_promql_spec>
 ```
+
 #### `<prometheus_promql_spec>`
 
 ```yaml

@@ -32,8 +32,8 @@ Generic placeholders are defined as follows:
    2. [Specification](./variable.md#variable-specification)
    3. [API definition](./variable.md#api-definition)
 5. [User](./user.md)
-    1. [Specification](./user.md#user-specification)
-    2. [API definition](./user.md#api-definition)
+   1. [Specification](./user.md#user-specification)
+   2. [API definition](./user.md#api-definition)
 6. Plugin
    1. [Prometheus](./plugin/prometheus.md)
       1. [Datasource](./plugin/prometheus.md#datasource)
