@@ -45,6 +45,7 @@ export interface ListVariableSpec<PluginSpec> extends VariableSpec {
   allowAllValue?: boolean;
   customAllValue?: string;
   capturingRegexp?: string;
+  sort?: string;
   plugin: Definition<PluginSpec>;
 }
 

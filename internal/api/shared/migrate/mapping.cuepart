@@ -47,6 +47,8 @@ import (
         total: "sum"
         sum: "sum"
     }
+    // mapping array for the sort attribute (index = grafana sort id, value = perses equivalent)
+    sort: ["none", "alphabetical-asc", "alphabetical-desc", "numerical-asc", "numerical-desc", "alphabetical-ci-asc", "alphabetical-ci-desc"]
 }
 #defaultCalc: "Last"
 
@@ -57,7 +59,7 @@ metadata: {
 spec: {
     duration: "1h" // fixed value, we don't really care translating this one
     display: {
-    	name: #grafanaDashboard.title
+        name: #grafanaDashboard.title
     }
     variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
         if grafanaVar.type == "constant" {
@@ -124,6 +126,11 @@ spec: {
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
+
+                if grafanaVar.sort != _|_ if #mapping.sort[grafanaVar.sort] != _|_ {
+                    sort: #mapping.sort[grafanaVar.sort]
+                }
+
                 // defaultValue: nothing to map to this field
                 #var: grafanaVar
                 plugin: [ // switch

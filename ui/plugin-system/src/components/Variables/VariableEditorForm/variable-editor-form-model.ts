@@ -22,19 +22,21 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
   const listVariableFields = {
     allowMultiple: false,
     allowAll: false,
+    customAllValue: undefined as string | undefined,
     capturingRegexp: undefined as string | undefined,
+    sort: undefined as string | undefined,
     plugin: {
       kind: '',
       spec: {},
     },
-    customAllValue: undefined as string | undefined,
   };
   if (initialVariableDefinition.kind === 'ListVariable') {
     listVariableFields.allowMultiple = initialVariableDefinition.spec.allowAllValue ?? false;
     listVariableFields.allowAll = initialVariableDefinition.spec.allowAllValue ?? false;
-    listVariableFields.capturingRegexp = initialVariableDefinition.spec.capturingRegexp;
-    listVariableFields.plugin = initialVariableDefinition.spec.plugin;
     listVariableFields.customAllValue = initialVariableDefinition.spec.customAllValue;
+    listVariableFields.capturingRegexp = initialVariableDefinition.spec.capturingRegexp;
+    listVariableFields.sort = initialVariableDefinition.spec.sort;
+    listVariableFields.plugin = initialVariableDefinition.spec.plugin;
   }
 
   return {
@@ -73,9 +75,10 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
         display,
         allowMultiple: state.listVariableFields.allowMultiple,
         allowAllValue: state.listVariableFields.allowAll,
-        capturingRegexp: state.listVariableFields.capturingRegexp,
-        plugin: state.listVariableFields.plugin,
         customAllValue: state.listVariableFields.customAllValue,
+        capturingRegexp: state.listVariableFields.capturingRegexp,
+        sort: state.listVariableFields.sort,
+        plugin: state.listVariableFields.plugin,
       },
     };
   }
