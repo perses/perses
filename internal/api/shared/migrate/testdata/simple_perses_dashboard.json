@@ -65,7 +65,8 @@
               "matchers": []
             }
           },
-          "name": "lv1"
+          "name": "lv1",
+          "sort": "none"
         }
       },
       {
@@ -87,7 +88,8 @@
               ]
             }
           },
-          "name": "lv2"
+          "name": "lv2",
+          "sort": "none"
         }
       },
       {
@@ -109,7 +111,8 @@
               ]
             }
           },
-          "name": "lv3"
+          "name": "lv3",
+          "sort": "alphabetical-asc"
         }
       },
       {
@@ -131,7 +134,8 @@
               ]
             }
           },
-          "name": "lv4"
+          "name": "lv4",
+          "sort": "alphabetical-desc"
         }
       },
       {
@@ -199,7 +203,8 @@
               "matchers": []
             }
           },
-          "name": "LabelNamesTest"
+          "name": "LabelNamesTest",
+          "sort": "none"
         }
       },
       {
@@ -219,7 +224,8 @@
               "labelName": "type"
             }
           },
-          "name": "queryResVar"
+          "name": "queryResVar",
+          "sort": "alphabetical-ci-asc"
         }
       },
       {
@@ -239,7 +245,8 @@
               "labelName": "type"
             }
           },
-          "name": "queryResVarVolatile"
+          "name": "queryResVarVolatile",
+          "sort": "alphabetical-ci-desc"
         }
       },
       {
@@ -259,7 +266,8 @@
               "labelName": "migration_from_grafana_not_supported"
             }
           },
-          "name": "queryResVarOther"
+          "name": "queryResVarOther",
+          "sort": "none"
         }
       },
       {

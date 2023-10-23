@@ -129,6 +129,7 @@ There are some utilities that you can use in your plugin migration logic:
 
 - `#mapping.unit`: mapping table for the `unit` attribute (key = grafana unit, value = perses equivalent).
 - `#mapping.calc`: mapping table for the `calculation` attribute (key = grafana unit, value = perses equivalent).
+- `#mapping.sort`: mapping array for the sort attribute (index = grafana sort id, value = perses equivalent).
 - `#defaultCalc`: standard default value for the `calculation` attribute.
 
 ## Query

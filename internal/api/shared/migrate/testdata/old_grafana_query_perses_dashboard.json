@@ -47,7 +47,8 @@
               "labelName": "stack"
             }
           },
-          "name": "stack"
+          "name": "stack",
+          "sort": "alphabetical-asc"
         }
       }
     ],

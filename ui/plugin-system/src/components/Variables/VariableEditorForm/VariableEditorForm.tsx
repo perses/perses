@@ -359,6 +359,31 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   helperText="Optional, if you want to filter on captured result."
                 />
               </Stack>
+
+              <Stack>
+                <TextField
+                  select
+                  label="Sort"
+                  value={state.listVariableFields.sort || ''}
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: isReadonly,
+                  }}
+                  onChange={(e) => {
+                    setState((draft) => {
+                      draft.listVariableFields.sort = e.target.value;
+                    });
+                  }}
+                >
+                  <MenuItem value="none">None</MenuItem>
+                  <MenuItem value="alphabetical-asc">Alphabetical, asc</MenuItem>
+                  <MenuItem value="alphabetical-desc">Alphabetical, desc</MenuItem>
+                  <MenuItem value="numerical-asc">Numerical, asc</MenuItem>
+                  <MenuItem value="numerical-desc">Numerical, desc</MenuItem>
+                  <MenuItem value="alphabetical-ci-asc">Alphabetical, case-insensitive, asc</MenuItem>
+                  <MenuItem value="alphabetical-ci-desc">Alphabetical, case-insensitive, desc</MenuItem>
+                </TextField>
+              </Stack>
             </Stack>
 
             <Divider />

@@ -75,6 +75,7 @@ type ListSpec struct {
 	// CapturingRegexp is the regexp used to catch and filter the result of the query.
 	// If empty, then nothing is filtered. That's the equivalent of setting CapturingRegexp with (.*)
 	CapturingRegexp string        `json:"capturingRegexp,omitempty" yaml:"capturingRegexp,omitempty"`
+	Sort            string        `json:"sort,omitempty" yaml:"sort,omitempty"`
 	Plugin          common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
