@@ -341,7 +341,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               <Stack>
                 <TextField
                   label="Capturing Regexp Filter"
-                  value={state.listVariableFields.capturingRegexp || ''}
+                  value={state.listVariableFields.capturingRegexp ?? ''}
                   InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
                     readOnly: action === 'read',
@@ -364,7 +364,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 <TextField
                   select
                   label="Sort"
-                  value={state.listVariableFields.sort || ''}
+                  value={state.listVariableFields.sort ?? ''}
                   InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
                     readOnly: isReadonly,
