@@ -187,6 +187,9 @@ jobs:
           install-only: true
       - name: Build Go binaries and docker images
         run: make cross-build
+      - name: Publish main docker image
+        if: ${{ github.ref_name == 'main' }}
+        run: make push-main-docker-image
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:

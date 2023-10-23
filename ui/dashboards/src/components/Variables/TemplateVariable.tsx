@@ -60,6 +60,7 @@ export function useListVariableState(
 } {
   const allowMultiple = spec?.allowMultiple === true;
   const allowAllValue = spec?.allowAllValue === true;
+  const sort = spec?.sort;
   const loading = useMemo(() => variablesOptionsQuery.isFetching || false, [variablesOptionsQuery]);
   const options = variablesOptionsQuery.data;
 
@@ -70,15 +71,39 @@ export function useListVariableState(
     value = typeof value === 'string' ? [value] : [];
   }
 
+  // Sort the provided list of options according to the method defined
+  const sortedOptions = useMemo((): VariableOption[] => {
+    const opts = options ? [...options] : [];
+
+    if (!sort || sort === 'none') return opts;
+
+    switch (sort) {
+      case 'alphabetical-asc':
+        return opts.sort((a, b) => (a.label > b.label ? 1 : -1));
+      case 'alphabetical-desc':
+        return opts.sort((a, b) => (a.label > b.label ? -1 : 1));
+      case 'numerical-asc':
+        return opts.sort((a, b) => (parseInt(a.label) > parseInt(b.label) ? 1 : -1));
+      case 'numerical-desc':
+        return opts.sort((a, b) => (parseInt(a.label) < parseInt(b.label) ? 1 : -1));
+      case 'alphabetical-ci-asc':
+        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
+      case 'alphabetical-ci-desc':
+        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+      default:
+        return opts;
+    }
+  }, [options, sort]);
+
   const viewOptions = useMemo(() => {
-    let computedOptions = options ? [...options] : [];
+    let computedOptions = sortedOptions;
 
     // Add the all value if it's allowed
     if (allowAllValue) {
       computedOptions = [{ value: DEFAULT_ALL_VALUE, label: 'All' }, ...computedOptions];
     }
     return computedOptions;
-  }, [options, allowAllValue]);
+  }, [allowAllValue, sortedOptions]);
 
   const valueIsInOptions = useMemo(
     () =>

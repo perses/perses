@@ -1,4 +1,4 @@
-# Configuration]
+# Configuration
 
 Perses is configured via command-line flags and a configuration file
 

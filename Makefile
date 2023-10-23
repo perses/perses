@@ -164,6 +164,10 @@ generate-changelog:
 generate-goreleaser:
 	$(GO) run ./scripts/generate-goreleaser/generate-goreleaser.go
 
+.PHONY: push-main-docker-image
+push-main-docker-image:
+	$(GO) run ./scripts/push-main-docker-image/push-main-docker-image.go
+
 .PHONY: clean
 clean:
 	rm -rf ./bin

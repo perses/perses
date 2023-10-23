@@ -590,7 +590,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 1,
         "type": "query"
       },
       {
@@ -618,7 +618,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 2,
         "type": "query"
       },
       {
@@ -754,7 +754,7 @@
         "refresh": 1,
         "regex": ".*type=\\\"(.*)\\\".*",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 5,
         "type": "query"
       },
       {
@@ -781,7 +781,7 @@
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
-        "sort": 0,
+        "sort": 6,
         "type": "query"
       },
       {

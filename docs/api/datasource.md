@@ -99,7 +99,7 @@ smallest scope.
 As described before, you can provide a proxy configuration that will be used by the Perses server to redirect any
 queries to the datasource.
 
-It means in the case of the Prometheus datasource, 
+It means in the case of the Prometheus datasource,
 if the field `directUrl` is not set then the FE needs to use the Perses server to contact the datasource.
 
 For that, the FE will have to determinate which URL should be used to contact the Perses server based on what kind of

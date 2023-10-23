@@ -23,5 +23,5 @@ spec: close({
 		kind:  prometheus.kind
 		name?: string
 	}
-	matchers: [...string]
+	matchers?: [...string]
 })

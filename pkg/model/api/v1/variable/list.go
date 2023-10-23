@@ -65,17 +65,80 @@ func (v *DefaultValue) MarshalYAML() (interface{}, error) {
 	return v.SliceValues, nil
 }
 
+type Sort string
+
+const (
+	SortNone                            Sort = "none"
+	SortAlphabeticalAsc                 Sort = "alphabetical-asc"
+	SortAlphabeticalDesc                Sort = "alphabetical-desc"
+	SortNumericalAsc                    Sort = "numerical-asc"
+	SortNumericalDesc                   Sort = "numerical-desc"
+	SortAlphabeticalCaseInsensitiveAsc  Sort = "alphabetical-ci-asc"
+	SortAlphabeticalCaseInsensitiveDesc Sort = "alphabetical-ci-desc"
+)
+
+var SortMap = map[Sort]bool{
+	SortNone:                            true,
+	SortAlphabeticalAsc:                 true,
+	SortAlphabeticalDesc:                true,
+	SortNumericalAsc:                    true,
+	SortNumericalDesc:                   true,
+	SortAlphabeticalCaseInsensitiveAsc:  true,
+	SortAlphabeticalCaseInsensitiveDesc: true,
+}
+
+func (s *Sort) UnmarshalJSON(data []byte) error {
+	var tmp Sort
+	type plain Sort
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *Sort) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Sort
+	type plain Sort
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *Sort) validate() error {
+	if len(*s) == 0 {
+		return nil
+	}
+	if _, ok := SortMap[*s]; !ok {
+		return fmt.Errorf("unknown sort method %q used", *s)
+	}
+	return nil
+}
+
 type ListSpec struct {
-	Display       *Display      `json:"display,omitempty" yaml:"display,omitempty"`
-	DefaultValue  *DefaultValue `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
-	AllowAllValue bool          `json:"allowAllValue" yaml:"allowAllValue"`
-	AllowMultiple bool          `json:"allowMultiple" yaml:"allowMultiple"`
+	Display *Display `json:"display,omitempty" yaml:"display,omitempty"`
+	// Value from the list to be selected by default.
+	DefaultValue *DefaultValue `json:"defaultValue,omitempty" yaml:"defaultValue,omitempty"`
+	// Whether or not to append the "All" value that allows selecting all available values at once.
+	AllowAllValue bool `json:"allowAllValue" yaml:"allowAllValue"`
+	// Whether or not to allow multi-selection of values.
+	AllowMultiple bool `json:"allowMultiple" yaml:"allowMultiple"`
 	// CustomAllValue is a custom value that will be used if AllowAllValue is true and if then `all` is selected
 	CustomAllValue string `json:"customAllValue,omitempty" yaml:"customAllValue,omitempty"`
 	// CapturingRegexp is the regexp used to catch and filter the result of the query.
 	// If empty, then nothing is filtered. That's the equivalent of setting CapturingRegexp with (.*)
-	CapturingRegexp string        `json:"capturingRegexp,omitempty" yaml:"capturingRegexp,omitempty"`
-	Plugin          common.Plugin `json:"plugin" yaml:"plugin"`
+	CapturingRegexp string `json:"capturingRegexp,omitempty" yaml:"capturingRegexp,omitempty"`
+	// Sort method to apply when rendering the list of values
+	Sort   *Sort         `json:"sort,omitempty" yaml:"sort,omitempty"`
+	Plugin common.Plugin `json:"plugin" yaml:"plugin"`
 }
 
 func (v *ListSpec) Validate() error {
