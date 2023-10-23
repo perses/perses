@@ -43,19 +43,19 @@ func main() {
 	}
 	for _, dockerConfig := range goreleaserConfig.Dockers {
 		for _, image := range dockerConfig.ImageTemplates {
-			if _, err := exec.Command("docker", "push", image).Output(); err != nil {
-				logrus.WithError(err).Fatalf("unable to push the docker image %q", image)
+			if output, err := exec.Command("docker", "push", image).Output(); err != nil {
+				logrus.WithError(err).Fatalf("unable to push the docker image %q. Output: %q", image, output)
 			}
 		}
 	}
 	for _, manifestConfig := range goreleaserConfig.DockerManifests {
 		args := []string{"manifest", "create", manifestConfig.NameTemplate}
 		args = append(args, manifestConfig.ImageTemplates...)
-		if _, err := exec.Command("docker", args...).Output(); err != nil {
-			logrus.WithError(err).Fatalf("unable to create the docker manifest %q", manifestConfig.NameTemplate)
+		if output, err := exec.Command("docker", args...).Output(); err != nil {
+			logrus.WithError(err).Fatalf("unable to create the docker manifest %q. Output: %q", manifestConfig.NameTemplate, output)
 		}
-		if _, err := exec.Command("docker", "manifest", "push", manifestConfig.NameTemplate).Output(); err != nil { //nolint:gosec
-			logrus.WithError(err).Fatalf("unable to push the docker manifest %q", manifestConfig.NameTemplate)
+		if output, err := exec.Command("docker", "manifest", "push", manifestConfig.NameTemplate).Output(); err != nil { //nolint:gosec
+			logrus.WithError(err).Fatalf("unable to push the docker manifest %q. Output: %q", manifestConfig.NameTemplate, output)
 		}
 	}
 }
