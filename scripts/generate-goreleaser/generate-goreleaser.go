@@ -17,7 +17,9 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/goreleaser/goreleaser/pkg/config"
 	"github.com/sirupsen/logrus"
@@ -26,15 +28,26 @@ import (
 
 const dockerBaseImageTemplateName = "docker.io/persesdev/perses"
 
+var date = time.Now().Format("2006-01-02")
+
 //go:embed .goreleaser.base.yaml
 var baseConfig []byte
-var (
-	dockerSupportedArches            = []string{"amd64", "arm64"}
-	mapDockerfileNameAndTemplateName = map[string][]string{
-		"Dockerfile":                  {"", "distroless"},
-		"distroless-debug.Dockerfile": {"debug", "distroless-debug"},
+
+func getCurrentBranch() string {
+	branch, err := exec.Command("git", "branch", "--show-current").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current branch")
 	}
-)
+	return strings.TrimSpace(string(branch))
+}
+
+func getCurrentCommit() string {
+	commit, err := exec.Command("git", "log", "-n1", "--format=\"%h\"").Output()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to get the current commit")
+	}
+	return strings.TrimSuffix(strings.TrimPrefix(strings.TrimSpace(string(commit)), "\""), "\"")
+}
 
 func join(elems []string, sep string) string {
 	var sb strings.Builder
@@ -63,21 +76,41 @@ func readGoreleaserBaseFile() *config.Project {
 	return c
 }
 
-func generateDockerConfig(c *config.Project) {
+type dockerTemplateName struct {
+	shortName string
+	longName  string
+}
+
+type goreleaserGenerator struct {
+	goreleaserConfig                 *config.Project
+	dockerSupportedArches            []string
+	mapDockerfileNameAndTemplateName map[string]dockerTemplateName
+	currentBranch                    string
+	currentCommit                    string
+}
+
+func (g *goreleaserGenerator) generateDockerImageName(arch string, templateLongName string) string {
+	if g.currentBranch == "main" {
+		return fmt.Sprintf("%s:main-%s-%s-%s-%s", dockerBaseImageTemplateName, date, g.currentCommit, templateLongName, arch)
+	}
+	return fmt.Sprintf("%s:{{ .Tag }}-%s-%s", dockerBaseImageTemplateName, templateLongName, arch)
+}
+
+func (g *goreleaserGenerator) generateDockerConfig() {
 	var binaryIDs []string
-	for _, build := range c.Builds {
+	for _, build := range g.goreleaserConfig.Builds {
 		binaryIDs = append(binaryIDs, build.ID)
 	}
-	for dockerfileName, templateNames := range mapDockerfileNameAndTemplateName {
-		for _, arch := range dockerSupportedArches {
-			c.Dockers = append(c.Dockers, config.Docker{
+	for dockerfileName, templateNames := range g.mapDockerfileNameAndTemplateName {
+		for _, arch := range g.dockerSupportedArches {
+			g.goreleaserConfig.Dockers = append(g.goreleaserConfig.Dockers, config.Docker{
 				Goos:       "linux",
 				Goarch:     arch,
 				IDs:        binaryIDs,
 				Dockerfile: dockerfileName,
 				Use:        "buildx",
 				ImageTemplates: []string{
-					fmt.Sprintf("%s:{{ .Tag }}-%s-%s", dockerBaseImageTemplateName, templateNames[1], arch),
+					g.generateDockerImageName(arch, templateNames.longName),
 				},
 				BuildFlagTemplates: []string{
 					"--pull",
@@ -103,19 +136,42 @@ func generateDockerConfig(c *config.Project) {
 	}
 }
 
-func generateDockerManifest(c *config.Project) {
-	for _, templateNames := range mapDockerfileNameAndTemplateName {
+func (g *goreleaserGenerator) generateDockerManifest() {
+	if g.currentBranch == "main" {
+		g.generateDockerManifestForMainBranch()
+	} else {
+		g.generateDockerManifestForReleaseOrSnapshot()
+	}
+}
+
+func (g *goreleaserGenerator) generateDockerManifestForMainBranch() {
+	for _, templateNames := range g.mapDockerfileNameAndTemplateName {
 		var imageTemplate []string
-		for _, arch := range dockerSupportedArches {
-			imageTemplate = append(imageTemplate, fmt.Sprintf("%s:{{ .Tag }}-%s-%s", dockerBaseImageTemplateName, templateNames[1], arch))
+		for _, arch := range g.dockerSupportedArches {
+			imageTemplate = append(imageTemplate, g.generateDockerImageName(arch, templateNames.longName))
 		}
-		c.DockerManifests = append(c.DockerManifests,
+		g.goreleaserConfig.DockerManifests = append(g.goreleaserConfig.DockerManifests,
 			config.DockerManifest{
-				NameTemplate:   fmt.Sprintf("%s:%s", dockerBaseImageTemplateName, join([]string{"latest", templateNames[0]}, "-")),
+				NameTemplate:   fmt.Sprintf("%s:main-%s-%s-%s", dockerBaseImageTemplateName, date, g.currentCommit, templateNames.longName),
 				ImageTemplates: imageTemplate,
 			})
-		for _, templateName := range templateNames {
-			c.DockerManifests = append(c.DockerManifests,
+	}
+}
+
+func (g *goreleaserGenerator) generateDockerManifestForReleaseOrSnapshot() {
+	for _, templateNames := range g.mapDockerfileNameAndTemplateName {
+		var imageTemplate []string
+		for _, arch := range g.dockerSupportedArches {
+			imageTemplate = append(imageTemplate, g.generateDockerImageName(arch, templateNames.longName))
+		}
+		g.goreleaserConfig.DockerManifests = append(g.goreleaserConfig.DockerManifests,
+			config.DockerManifest{
+				NameTemplate:   fmt.Sprintf("%s:%s", dockerBaseImageTemplateName, join([]string{"latest", templateNames.shortName}, "-")),
+				ImageTemplates: imageTemplate,
+			})
+		templateNameList := []string{templateNames.shortName, templateNames.longName}
+		for _, templateName := range templateNameList {
+			g.goreleaserConfig.DockerManifests = append(g.goreleaserConfig.DockerManifests,
 				config.DockerManifest{
 					NameTemplate:   fmt.Sprintf("%s:%s", dockerBaseImageTemplateName, join([]string{"{{ .Tag }}", templateName}, "-")),
 					ImageTemplates: imageTemplate,
@@ -131,8 +187,18 @@ func generateDockerManifest(c *config.Project) {
 
 func main() {
 	c := readGoreleaserBaseFile()
-	generateDockerConfig(c)
-	generateDockerManifest(c)
+	generator := &goreleaserGenerator{
+		goreleaserConfig:      c,
+		dockerSupportedArches: []string{"amd64", "arm64"},
+		mapDockerfileNameAndTemplateName: map[string]dockerTemplateName{
+			"Dockerfile":                  {shortName: "", longName: "distroless"},
+			"distroless-debug.Dockerfile": {shortName: "debug", longName: "distroless-debug"},
+		},
+		currentBranch: getCurrentBranch(),
+		currentCommit: getCurrentCommit(),
+	}
+	generator.generateDockerConfig()
+	generator.generateDockerManifest()
 	data, err := yaml.Marshal(c)
 	if err != nil {
 		logrus.Fatal(err)
