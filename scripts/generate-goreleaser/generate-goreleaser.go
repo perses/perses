@@ -28,6 +28,8 @@ import (
 
 const dockerBaseImageTemplateName = "docker.io/persesdev/perses"
 
+var date = time.Now().Format("2006-01-02")
+
 //go:embed .goreleaser.base.yaml
 var baseConfig []byte
 
@@ -88,7 +90,6 @@ type goreleaserGenerator struct {
 }
 
 func (g *goreleaserGenerator) generateDockerImageName(arch string, templateLongName string) string {
-	date := time.Now().Format("2006-02-01")
 	if g.currentBranch == "main" {
 		return fmt.Sprintf("%s:main-%s-%s-%s-%s", dockerBaseImageTemplateName, date, g.currentCommit, templateLongName, arch)
 	}
@@ -144,7 +145,6 @@ func (g *goreleaserGenerator) generateDockerManifest() {
 }
 
 func (g *goreleaserGenerator) generateDockerManifestForMainBranch() {
-	date := time.Now().Format("2006-02-01")
 	for _, templateNames := range g.mapDockerfileNameAndTemplateName {
 		var imageTemplate []string
 		for _, arch := range g.dockerSupportedArches {

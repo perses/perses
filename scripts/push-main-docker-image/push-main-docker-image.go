@@ -54,7 +54,7 @@ func main() {
 		if _, err := exec.Command("docker", args...).Output(); err != nil {
 			logrus.WithError(err).Fatalf("unable to create the docker manifest %q", manifestConfig.NameTemplate)
 		}
-		if _, err := exec.Command("docker", "push", manifestConfig.NameTemplate).Output(); err != nil {
+		if _, err := exec.Command("docker", "manifest", "push", manifestConfig.NameTemplate).Output(); err != nil { //nolint:gosec
 			logrus.WithError(err).Fatalf("unable to push the docker manifest %q", manifestConfig.NameTemplate)
 		}
 	}
