@@ -57,18 +57,18 @@ spec:
 kind: "TimeSeriesChart"
 spec:
   [ legend: <legend_spec> ]
-  [ tooltip: <tooltip_spec> ]
-  [ yAxis: <yAxis_spec> ]
-  [ thresholds: <thresholds_spec> ]
-  [ visual: <visual_spec> ]
+    [ tooltip: <tooltip_spec> ]
+    [ yAxis: <yAxis_spec> ]
+    [ thresholds: <thresholds_spec> ]
+    [ visual: <visual_spec> ]
 ```
 
 ### `<legend_spec>`
 
 ```yaml
 position: <enum = "bottom" | "right">
-[ mode: <enum = "list" | "table" ]
-[ size: <enum = "small" | "medium" ]
+            [ mode: <enum = "list" | "table" ]
+  [ size: <enum = "small" | "medium" ]
 values:
   - [ <calculation> ]
 ```
@@ -115,6 +115,72 @@ values:
 
 ### `<calculation_spec>`
 
+It's an enum. Possible values are:
+
+- `first`
+- `last`
+- `first-number`
+- `last-number`
+- `mean`
+- `sum`
+- `min`
+- `max`
+
 ### `<format_spec>`
 
+The format spec is one of the following:
+
+#### Time format
+
+```yaml
+  unit: <enum = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years">
+  [ decimalPlaces: <int> ]
+```
+
+#### Percent format
+
+```yaml
+  unit: <enum =  "percent" | "percent-decimal">
+  [ decimalPlaces: <int> ]
+```
+
+#### Decimal format
+
+```yaml
+  unit: "decimal"
+  [ decimalPlaces: <int> ]
+  [ shortValues: <boolean> | default = false ]
+```
+
+#### Bytes format
+
+```yaml
+  unit: "bytes"
+  [ decimalPlaces: <int> ]
+  [ shortValues: <boolean> | default = false ]
+```
+
+#### Throughput format
+
+```yaml
+  unit: < enum = "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec">
+  [ decimalPlaces: <int> ]
+  [ shortValues: <boolean> | default = false ]
+```
+
 ### `<thresholds_spec>`
+
+```yaml
+  [ mode: <enum = "percent" | "absolute"> ]
+  [ defaultColor: string ]
+  steps:
+    - [ <step_spec> ]
+```
+
+#### `<step_spec>`
+
+```yaml
+  value: <int>
+  [ color: <string> ]
+  [ name: <string> ]
+```
