@@ -102,3 +102,149 @@ spec:
               method: "GET"
           secret: "prometheus_secret_config"
 ```
+
+## Variable
+
+### PrometheusLabelNamesVariable
+
+```yaml
+kind: "PrometheusLabelNamesVariable"
+spec: <prometheus_label_names_spec>
+```
+
+#### `<prometheus_label_names_spec>`
+
+```yaml
+  # If empty, then the default PrometheusDatasource is chosen
+  # See the documentation about the datasources to understand how it is selected.
+  [ datasource: <datasource_selector> ]
+  matchers:
+   [ - <string> ]
+```
+
+#### Example
+
+A simple Prometheus LabelNames variable would be
+
+```yaml
+kind: "Variable"
+metadata:
+  name: "labelNames"
+  project: "perses"
+spec:
+  kind: "ListVariable"
+  spec:
+    plugin:
+      kind: "PrometheusLabelNamesVariable"
+```
+
+A more complex one
+
+```yaml
+kind: "Variable"
+metadata:
+  name: "labelNames"
+  project: "perses"
+spec:
+  kind: "ListVariable"
+  spec:
+    allowMultiple: false
+    allowAllValue: false
+    plugin:
+      kind: "PrometheusLabelNamesVariable"
+      spec:
+        datasource:
+          kind: "PrometheusDatasource"
+          name: "PrometheusDemo"
+        matchers:
+          - "up"
+```
+
+### PrometheusLabelValuesVariable
+
+```yaml
+kind: "PrometheusLabelValuesVariable"
+spec: <prometheus_label_values_spec>
+```
+
+#### `<prometheus_label_values_spec>`
+
+```yaml
+  # If empty, then the default PrometheusDatasource is chosen
+  # See the documentation about the datasources to understand how it is selected.
+  [ datasource: <datasource_selector> ]
+  labelName: <string>
+  matchers:
+   [ - <string> ]
+```
+
+#### Example
+
+A simple Prometheus LabelValues variable would be
+
+```yaml
+kind: "Variable"
+metadata:
+  name: "job"
+  project: "perses"
+spec:
+  kind: "ListVariable"
+  spec:
+    allowMultiple: false
+    allowAllValue: false
+    plugin:
+      kind: "PrometheusLabelValuesVariable"
+      spec:
+        labelName: "job"
+```
+
+A more complex one
+
+```yaml
+kind: "Variable"
+metadata:
+  name: "instance"
+  project: "perses"
+spec:
+  kind: "ListVariable"
+  spec:
+    allowMultiple: false
+    allowAllValue: false
+    plugin:
+      kind: "PrometheusLabelValuesVariable"
+      spec:
+        datasource:
+          kind: "PrometheusDatasource"
+          name: "PrometheusDemo"
+        labelName: "instance"
+        matchers:
+        - "up{job=~\"$job\"}"
+```
+
+### PrometheusPromQLVariable
+
+```yaml
+kind: "PrometheusPromQLVariable"
+spec: <prometheus_promql_spec>
+```
+
+#### `<prometheus_promql_spec>`
+
+```yaml
+  # If empty, then the default PrometheusDatasource is chosen
+  # See the documentation about the datasources to understand how it is selected.
+  [ datasource: <datasource_selector> ]
+
+  # The promql expression
+  expr: <string>
+  [ labelName: <string> ]
+```
+
+### `<datasource_selector>`
+
+```yaml
+  kind: "PrometheusDatasource"
+
+  # The name of the datasource regardless its level
+  [ name: <string> ]
+```
