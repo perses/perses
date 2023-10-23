@@ -75,23 +75,24 @@ export function useListVariableState(
   const sortedOptions = useMemo((): VariableOption[] => {
     const opts = options ? [...options] : [];
 
-    if (sort && sort != 'none') {
-      switch (sort) {
-        case 'alphabetical-asc':
-          return opts.sort((a, b) => (a.label > b.label ? 1 : -1));
-        case 'alphabetical-desc':
-          return opts.sort((a, b) => (a.label > b.label ? -1 : 1));
-        case 'numerical-asc':
-          return opts.sort((a, b) => (parseInt(a.label) > parseInt(b.label) ? 1 : -1));
-        case 'numerical-desc':
-          return opts.sort((a, b) => (parseInt(a.label) < parseInt(b.label) ? 1 : -1));
-        case 'alphabetical-ci-asc':
-          return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
-        case 'alphabetical-ci-desc':
-          return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
-      }
+    if (!sort || sort === 'none') return opts;
+
+    switch (sort) {
+      case 'alphabetical-asc':
+        return opts.sort((a, b) => (a.label > b.label ? 1 : -1));
+      case 'alphabetical-desc':
+        return opts.sort((a, b) => (a.label > b.label ? -1 : 1));
+      case 'numerical-asc':
+        return opts.sort((a, b) => (parseInt(a.label) > parseInt(b.label) ? 1 : -1));
+      case 'numerical-desc':
+        return opts.sort((a, b) => (parseInt(a.label) < parseInt(b.label) ? 1 : -1));
+      case 'alphabetical-ci-asc':
+        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? 1 : -1));
+      case 'alphabetical-ci-desc':
+        return opts.sort((a, b) => (a.label.toLowerCase() > b.label.toLowerCase() ? -1 : 1));
+      default:
+        return opts;
     }
-    return opts;
   }, [options, sort]);
 
   const viewOptions = useMemo(() => {
