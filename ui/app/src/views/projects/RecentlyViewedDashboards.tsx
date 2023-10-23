@@ -27,14 +27,23 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
 
   return (
     <Box id={props.id}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack
+        sx={{
+          borderBottom: 1,
+          borderColor: 'divider',
+          width: '100%',
+          height: '72px',
+          justifyContent: 'space-between',
+          flexDirection: 'row',
+        }}
+      >
         <Stack direction="row" alignItems="center" gap={1} my={2}>
           <HistoryIcon />
           <Typography variant="h3">Recently Viewed Dashboards</Typography>
         </Stack>
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <Card>
+        <Card sx={{ marginTop: 2 }}>
           <RecentDashboardList dashboardList={data} isLoading={isLoading} />
         </Card>
       </ErrorBoundary>
