@@ -180,6 +180,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Override version
+        if: ${{ github.ref_name == 'main' }}
+        run: ./scripts/override_version.sh
       - name: install goreleaser
         uses: goreleaser/goreleaser-action@v5
         with:
@@ -193,7 +196,7 @@ jobs:
       - name: Publish Release and binaries
         ## This step will only run when a new tag is pushed.
         ## It will build the Go binaries and the docker images and then publish:
-        ## - the Github release with the archive built
+        ## - the GitHub release with the archive built
         ## - docker images on the different docker registry selected
         if: ${{ github.event_name == 'push' && startsWith(github.ref_name, 'v') }}
         run: make cross-release
