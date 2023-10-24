@@ -159,9 +159,9 @@ func (o *option) setNamesFromFile() error {
 }
 
 func (o *option) setNamesFromDirectory() error {
-	entities, err := file.UnmarshalEntitiesFromDirectory(o.Directory)
-	if err != nil {
-		return err
+	entities, errors := file.UnmarshalEntitiesFromDirectory(o.Directory)
+	if len(errors) > 0 {
+		return errors[0]
 	}
 	o.setNames(entities)
 	return nil

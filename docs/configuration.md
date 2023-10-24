@@ -92,6 +92,10 @@ Generic placeholders are defined as follows:
 
   # The markdown content to be displayed on the UI home page
   [ information: <string> ]
+
+  # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
+  # The data coming from the provisioning folder will totally override what exists in the database.
+  [ provisioning: <provisioning_spec> ]
 ```
 
 ### `<database_config>`
@@ -255,4 +259,15 @@ A `tls_config` allows configuring TLS connections.
 
   # The dashboard name (dashboard.metadata.name)
   dashboard: <string>
+```
+
+### `<provisioning_spec>`
+
+```yaml
+  [ interval: <duration> | default = 1h ]
+
+  # List of folder that Perses will read periodically. 
+  # Every known data found in the different folders will be injected in the database regardless what exist.
+  folders:
+    - <string>
 ```

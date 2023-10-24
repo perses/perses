@@ -64,7 +64,7 @@ object "Project" "perses" has been deleted
 			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: `resource "game" not supported by the command`,
+			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 		{
 			Title:           "delete a single resource from a file",

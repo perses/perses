@@ -37,7 +37,7 @@ func TestLintCMD(t *testing.T) {
 			Title:           "lint unknown document",
 			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			IsErrorExpected: true,
-			ExpectedMessage: `resource "game" not supported by the command`,
+			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 		{
 			Title:           "lint a single resource",

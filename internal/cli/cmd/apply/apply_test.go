@@ -39,7 +39,7 @@ func TestApplyCMD(t *testing.T) {
 			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: `resource "game" not supported by the command`,
+			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 		{
 			Title:           "apply a single resource",
@@ -64,7 +64,7 @@ object "Project" "perses" has been applied
 			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: `resource "game" not supported by the command`,
+			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

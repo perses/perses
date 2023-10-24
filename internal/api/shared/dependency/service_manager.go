@@ -16,6 +16,7 @@
 package dependency
 
 import (
+	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/config"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
@@ -56,6 +57,7 @@ type ServiceManager interface {
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetProject() project.Service
+	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
 	GetSecret() secret.Service
 	GetUser() user.Service
@@ -75,6 +77,7 @@ type service struct {
 	jwt              crypto.JWT
 	migrate          migrate.Migration
 	project          project.Service
+	provisioning     async.SimpleTask
 	schemas          schemas.Schemas
 	secret           secret.Service
 	user             user.Service
@@ -105,7 +108,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable())
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser())
-	return &service{
+	svc := &service{
 		crypto:           cryptoService,
 		dashboard:        dashboardService,
 		datasource:       datasourceService,
@@ -121,7 +124,13 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		secret:           secretService,
 		user:             userService,
 		variable:         variableService,
-	}, nil
+	}
+	provisioningService := &provisioning{
+		serviceManager: svc,
+		folders:        conf.Provisioning.Folders,
+	}
+	svc.provisioning = provisioningService
+	return svc, nil
 }
 
 func (s *service) GetCrypto() crypto.Crypto {
@@ -166,6 +175,10 @@ func (s *service) GetMigration() migrate.Migration {
 
 func (s *service) GetProject() project.Service {
 	return s.project
+}
+
+func (s *service) GetProvisioning() async.SimpleTask {
+	return s.provisioning
 }
 
 func (s *service) GetSchemas() schemas.Schemas {
