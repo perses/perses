@@ -25,10 +25,14 @@ type ClientInterface interface {
 	Datasource(project string) DatasourceInterface
 	Folder(project string) FolderInterface
 	GlobalDatasource() GlobalDatasourceInterface
+	GlobalRole() GlobalRoleInterface
+	GlobalRoleBinding() GlobalRoleBindingInterface
 	GlobalSecret() GlobalSecretInterface
 	GlobalVariable() GlobalVariableInterface
 	Health() HealthInterface
 	Project() ProjectInterface
+	Role(project string) RoleInterface
+	RoleBinding(project string) RoleBindingInterface
 	Secret(project string) SecretInterface
 	User() UserInterface
 	Variable(project string) VariableInterface
@@ -65,6 +69,14 @@ func (c *client) GlobalDatasource() GlobalDatasourceInterface {
 	return newGlobalDatasource(c.restClient)
 }
 
+func (c *client) GlobalRole() GlobalRoleInterface {
+	return newGlobalRole(c.restClient)
+}
+
+func (c *client) GlobalRoleBinding() GlobalRoleBindingInterface {
+	return newGlobalRoleBinding(c.restClient)
+}
+
 func (c *client) GlobalSecret() GlobalSecretInterface {
 	return newGlobalSecret(c.restClient)
 }
@@ -79,6 +91,14 @@ func (c *client) Health() HealthInterface {
 
 func (c *client) Project() ProjectInterface {
 	return newProject(c.restClient)
+}
+
+func (c *client) Role(project string) RoleInterface {
+	return newRole(c.restClient, project)
+}
+
+func (c *client) RoleBinding(project string) RoleBindingInterface {
+	return newRoleBinding(c.restClient, project)
 }
 
 func (c *client) Secret(project string) SecretInterface {

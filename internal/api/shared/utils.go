@@ -24,19 +24,23 @@ import (
 )
 
 const (
-	ParamName            = "name"
-	ParamProject         = "project"
-	APIV1Prefix          = "/api/v1"
-	PathDashboard        = "dashboards"
-	PathDatasource       = "datasources"
-	PathFolder           = "folders"
-	PathGlobalDatasource = "globaldatasources"
-	PathGlobalSecret     = "globalsecrets"
-	PathGlobalVariable   = "globalvariables"
-	PathProject          = "projects"
-	PathSecret           = "secrets"
-	PathUser             = "users"
-	PathVariable         = "variables"
+	ParamName             = "name"
+	ParamProject          = "project"
+	APIV1Prefix           = "/api/v1"
+	PathDashboard         = "dashboards"
+	PathDatasource        = "datasources"
+	PathFolder            = "folders"
+	PathGlobalDatasource  = "globaldatasources"
+	PathGlobalRole        = "globalroles"
+	PathGlobalRoleBinding = "globalrolebindings"
+	PathGlobalSecret      = "globalsecrets"
+	PathGlobalVariable    = "globalvariables"
+	PathProject           = "projects"
+	PathRole              = "roles"
+	PathRoleBinding       = "rolebindings"
+	PathSecret            = "secrets"
+	PathUser              = "users"
+	PathVariable          = "variables"
 )
 
 // ProjectResourcePathList is containing the list of the resource path that is part of a project.

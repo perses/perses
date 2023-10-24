@@ -22,10 +22,14 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	globalRoleImpl "github.com/perses/perses/internal/api/impl/v1/globalrole"
+	globalRoleBindingImpl "github.com/perses/perses/internal/api/impl/v1/globalrolebinding"
 	globalSecretImpl "github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	globalVariableImpl "github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	roleImpl "github.com/perses/perses/internal/api/impl/v1/role"
+	roleBindingImpl "github.com/perses/perses/internal/api/impl/v1/rolebinding"
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
@@ -33,10 +37,14 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -51,6 +59,8 @@ type ServiceManager interface {
 	GetDatasource() datasource.Service
 	GetFolder() folder.Service
 	GetGlobalDatasource() globaldatasource.Service
+	GetGlobalRole() globalrole.Service
+	GetGlobalRoleBinding() globalrolebinding.Service
 	GetGlobalSecret() globalsecret.Service
 	GetGlobalVariable() globalvariable.Service
 	GetHealth() health.Service
@@ -59,6 +69,8 @@ type ServiceManager interface {
 	GetProject() project.Service
 	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
+	GetRole() role.Service
+	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
 	GetUser() user.Service
 	GetVariable() variable.Service
@@ -66,22 +78,26 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
-	crypto           crypto.Crypto
-	dashboard        dashboard.Service
-	datasource       datasource.Service
-	folder           folder.Service
-	globalDatasource globaldatasource.Service
-	globalSecret     globalsecret.Service
-	globalVariable   globalvariable.Service
-	health           health.Service
-	jwt              crypto.JWT
-	migrate          migrate.Migration
-	project          project.Service
-	provisioning     async.SimpleTask
-	schemas          schemas.Schemas
-	secret           secret.Service
-	user             user.Service
-	variable         variable.Service
+	crypto            crypto.Crypto
+	dashboard         dashboard.Service
+	datasource        datasource.Service
+	folder            folder.Service
+	globalDatasource  globaldatasource.Service
+	globalRole        globalrole.Service
+	globalRoleBinding globalrolebinding.Service
+	globalSecret      globalsecret.Service
+	globalVariable    globalvariable.Service
+	health            health.Service
+	jwt               crypto.JWT
+	migrate           migrate.Migration
+	project           project.Service
+	provisioning      async.SimpleTask
+	schemas           schemas.Schemas
+	role              role.Service
+	roleBinding       rolebinding.Service
+	secret            secret.Service
+	user              user.Service
+	variable          variable.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
@@ -102,28 +118,36 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
+	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), schemasService)
+	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), schemasService)
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable())
+	roleService := roleImpl.NewService(dao.GetRole(), schemasService)
+	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), schemasService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser())
 	svc := &service{
-		crypto:           cryptoService,
-		dashboard:        dashboardService,
-		datasource:       datasourceService,
-		folder:           folderService,
-		globalDatasource: globalDatasourceService,
-		globalSecret:     globalSecret,
-		globalVariable:   globalVariableService,
-		health:           healthService,
-		jwt:              jwtService,
-		migrate:          migrateService,
-		project:          projectService,
-		schemas:          schemasService,
-		secret:           secretService,
-		user:             userService,
-		variable:         variableService,
+		crypto:            cryptoService,
+		dashboard:         dashboardService,
+		datasource:        datasourceService,
+		folder:            folderService,
+		globalDatasource:  globalDatasourceService,
+		globalRole:        globalRole,
+		globalRoleBinding: globalRoleBinding,
+		globalSecret:      globalSecret,
+		globalVariable:    globalVariableService,
+		health:            healthService,
+		jwt:               jwtService,
+		migrate:           migrateService,
+		project:           projectService,
+		role:              roleService,
+		roleBinding:       roleBindingService,
+		schemas:           schemasService,
+		secret:            secretService,
+		user:              userService,
+		variable:          variableService,
 	}
 	provisioningService := &provisioning{
 		serviceManager: svc,
@@ -151,6 +175,14 @@ func (s *service) GetFolder() folder.Service {
 
 func (s *service) GetGlobalDatasource() globaldatasource.Service {
 	return s.globalDatasource
+}
+
+func (s *service) GetGlobalRole() globalrole.Service {
+	return s.globalRole
+}
+
+func (s *service) GetGlobalRoleBinding() globalrolebinding.Service {
+	return s.globalRoleBinding
 }
 
 func (s *service) GetGlobalSecret() globalsecret.Service {
@@ -183,6 +215,14 @@ func (s *service) GetProvisioning() async.SimpleTask {
 
 func (s *service) GetSchemas() schemas.Schemas {
 	return s.schemas
+}
+
+func (s *service) GetRole() role.Service {
+	return s.role
+}
+
+func (s *service) GetRoleBinding() rolebinding.Service {
+	return s.roleBinding
 }
 
 func (s *service) GetSecret() secret.Service {

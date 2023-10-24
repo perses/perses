@@ -15,6 +15,10 @@ package databasefile
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"os"
 	"path"
 
@@ -71,6 +75,12 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 	case *globaldatasource.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalDatasource)
 		prefix = qt.NamePrefix
+	case *globalrole.Query:
+		pathFolder = d.generateResourceQuery(v1.KindGlobalRole)
+		prefix = qt.NamePrefix
+	case *globalrolebinding.Query:
+		pathFolder = d.generateResourceQuery(v1.KindGlobalRoleBinding)
+		prefix = qt.NamePrefix
 	case *globalsecret.Query:
 		pathFolder = d.generateResourceQuery(v1.KindGlobalSecret)
 		prefix = qt.NamePrefix
@@ -79,6 +89,12 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 		prefix = qt.NamePrefix
 	case *project.Query:
 		pathFolder = d.generateResourceQuery(v1.KindProject)
+		prefix = qt.NamePrefix
+	case *role.Query:
+		pathFolder = d.generateProjectResourceQuery(v1.KindRole, qt.Project)
+		prefix = qt.NamePrefix
+	case *rolebinding.Query:
+		pathFolder = d.generateProjectResourceQuery(v1.KindRoleBinding, qt.Project)
 		prefix = qt.NamePrefix
 	case *secret.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindSecret, qt.Project)
