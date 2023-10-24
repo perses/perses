@@ -30,6 +30,7 @@ var (
 	asts        = http.FS(assets.New(embedFS))
 	reactRoutes = []string{
 		"/admin",
+		"/auth",
 		"/projects",
 		"/migrate",
 		"/config",

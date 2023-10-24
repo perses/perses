@@ -13,11 +13,13 @@
 
 import { Box } from '@mui/material';
 
+import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Router from './Router';
 
 function App() {
+  const location = useLocation();
   return (
     <Box
       sx={{
@@ -27,7 +29,8 @@ function App() {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      <Header />
+      {location.pathname !== '/auth' && <Header />}
+
       <Box
         sx={{
           flex: 1,

@@ -16,6 +16,7 @@ import { Routes, Route } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import HomeView from './views/home/HomeView';
+import AuthView from './views/auth/AuthView';
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
@@ -33,6 +34,7 @@ function Router() {
         <Routes>
           <Route path="/admin" element={<AdminView />} />
           <Route path="/admin/:tab" element={<AdminView />} />
+          <Route path="/auth" element={<AuthView />} />
           <Route path="/config" element={<ConfigView />} />
           <Route path="/migrate" element={<MigrateView />} />
           <Route path="/projects" element={<HomeView />} />
