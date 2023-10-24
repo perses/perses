@@ -1,6 +1,6 @@
 # Dashboard
 
-Without no big doubt, this is the principal resource of Perses.
+Without any doubt, this is the principal resource of Perses.
 
 A `Dashboard` belongs to a `Project`. See the [project documentation](./project.md) to see how to create a project.
 
@@ -14,36 +14,43 @@ metadata:
 spec: <dashboard_specification>
 ```
 
-See the next section to get details about the `<dashboard_specification>`
+See the next section to get details about the `<dashboard_specification>`.
 
 ## Dashboard specification
 
 ```yaml
   # Metadata.name has some restrictions. For example, you can't use space there.
-  # Display is the way to provide a reach name and a description for your dashboard.
+  # `display` allows to provide a rich name and a description for your dashboard.
   [ display: <display_spec> ]
+
   datasources:
     [ <string>: <datasource_spec> ]
-  # The list of the variable that should be used in the different panels or even in the different variables.
+
+  # `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
   [ variables: <variable_spec> ]
-  # It is a map where the key is the reference of the panel. The value is the actual panel definition that will describe
-  # what kind of chart you will display. One panel can only hold one chart.
+
+  # `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
+  # the kind of chart this panel is using. A panel can only hold one chart.
   panels:
     [ <string>: <panel_spec> ]
-  # It is the list of layout. A layout is the object you need to use to describe how to display the list of the panel.
+
+  # `layouts` is the list of layouts. A layout describes how to display the list of panels. 
+  # Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
   layouts:
     - <layout_spec>
-  # The default time you would like to use when getting data to fill the dashboard
+
+  # `duration` is the default time range to use on the initial load of the dashboard.
   [ duration: <duration> ]
-  # The default refresh interval to use when landing on the dashboard.
-  [ refresh_interval: <duration> ]
+
+  # `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
+  [ refreshInterval: <duration> ]
 ```
 
-A dashboard in its minimal definition only required a panel and a layout.
+A dashboard in its minimal definition only requires a panel and a layout.
 
 ### `<display_spec>`
 
-This is the way to provide a reach name and a description for your dashboard. There is no restriction about the type of
+This is the way to provide a rich name and a description for your dashboard. There is no restriction about the type of
 characters you can use there.
 
 ```yaml
@@ -51,17 +58,18 @@ characters you can use there.
   # Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the dashboard.
   # This is just for display purpose.
   [ name: <string> ]
-  # The description of the dashboard
+
+  # The description of the dashboard.
   [ description: <string> ]
 ```
 
 ### `<datasource_spec>`
 
-See the [doc](./datasource.md) about the datasource.
+See the [datasource](./datasource.md) documentation.
 
 ### `<variable_spec>`
 
-See the [doc](./variable.md) about the variable.
+See the [variable](./variable.md) documentation.
 
 ### `<panel_spec>`
 
@@ -69,10 +77,12 @@ See the [doc](./variable.md) about the variable.
 kind: "Panel"
 spec:
   display: <display_spec>
-  # This where you will define your chart
-  # The chart definition will depend on the chart plugin available in Perses
+
+  # `plugin` is where you define the chart type to use.
+  # The chart type chosen should match one of the chart plugins known to the Perses instance.
   plugin: <panel_plugin_spec>
-  # A list of query executed by the panel. The type of the query is conditioned by the type of chart used.
+
+  # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of chart & the type of datasource used.
   queries:
     - [ <query_spec> ]
 ```
@@ -80,19 +90,19 @@ spec:
 #### `<panel_plugin_spec>`
 
 ```yaml
-  # The plugin type of the panel. For example, `TimeSeriesChart`
+  # `kind` is the plugin type of the panel. For example, `TimeSeriesChart`.
   kind: <string>
 
-  # The actual definition of the panel plugin. It will depend on the type defined in the previous field `kind`
+  # `spec` is the actual definition of the panel plugin. Each `kind` comes with its own `spec`.
   spec: <plugin_spec>
 ```
 
-See the [doc](./plugin/panel.md) about the panel plugin we are supporting.
+See the [panel](./plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
 
 #### `<query_spec>`
 
 ```yaml
-# The type of the query. For the moment we only support `TimeSeriesQuery`
+# kind` is the type of the query. For the moment we only support `TimeSeriesQuery`.
 kind: <string>
 spec:
   plugin: <query_plugin_spec>
@@ -101,16 +111,15 @@ spec:
 ##### `<query_plugin_spec>`
 
 ```yaml
-  # The plugin type that is matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`
+  # `kind` is the plugin type matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`.
   kind: <string>
 
-  # The actual definition of the query. It will depend on the type defined in the previous field `kind`
+  # `spec` is the actual definition of the query. Each `kind` comes with its own `spec`.
   spec: <plugin_spec>
 ```
 
 We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
-Please look at the [documentation](./plugin/prometheus.md#datasource) to know the spec for
-the `PrometheusTimeSeriesQuery`.
+Please look at the [Prometheus plugin documentation](./plugin/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
 
 ### `<layout_spec>`
 
@@ -167,7 +176,7 @@ GET /api/v1/projects/<project_name>/dasbhoards
 
 URL query parameters:
 
-- name = `<string>` : filters the list of dashboards based on their names (prefix).
+- name = `<string>` : filters the list of dashboards based on their name (prefix match).
 
 ### Get a single `Dashboard`
 
@@ -178,7 +187,7 @@ GET /api/v1/projects/<project_name>/dasbhoards/<dasbhoard_name>
 ### Create a single `Dashboard`
 
 ```bash
-POST /api/v1/projects/<project_name>/secrets
+POST /api/v1/projects/<project_name>/dashboards
 ```
 
 ### Update a single `Dashboard`

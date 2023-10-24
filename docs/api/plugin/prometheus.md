@@ -115,13 +115,15 @@ spec: <timeseries_query_spec>
 ### `<timeseries_query_spec>`
 
 ```yaml
-  # The promql query
+  #`query` is the promQL expression.
   query: <string>
 
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
   [ seriesNameFormat: <string> ]
+
+  # `minStep` is the minimum time interval you want between each data points.
   [ minStep: <duration> ]
   [ resolution: number ]
 ```
@@ -151,7 +153,7 @@ spec: <prometheus_label_names_spec>
 #### `<prometheus_label_names_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
   matchers:
@@ -206,7 +208,7 @@ spec: <prometheus_label_values_spec>
 #### `<prometheus_label_values_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
   labelName: <string>
@@ -267,7 +269,7 @@ spec: <prometheus_promql_spec>
 #### `<prometheus_promql_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
 

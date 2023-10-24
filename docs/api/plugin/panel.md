@@ -67,8 +67,8 @@ spec:
 
 ```yaml
 position: <enum = "bottom" | "right">
-            [ mode: <enum = "list" | "table" ]
-  [ size: <enum = "small" | "medium" ]
+[ mode: <enum = "list" | "table"> ]
+[ size: <enum = "small" | "medium"> ]
 values:
   - [ <calculation> ]
 ```
@@ -111,7 +111,7 @@ values:
   mode: <enum = "auto" | "categorical">
 ```
 
-## Common definition
+## Common definitions
 
 ### `<calculation_spec>`
 
