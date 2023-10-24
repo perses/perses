@@ -48,7 +48,11 @@ export default function Footer(): JSX.Element {
               underline={'hover'}
               target="_blank"
               rel="noreferrer"
-              href={`https://github.com/perses/perses/releases/tag/v${data.version}`}
+              href={
+                data.version.startsWith('main')
+                  ? `https://github.com/perses/perses/tree/${data.commit}`
+                  : `https://github.com/perses/perses/releases/tag/v${data.version}`
+              }
             >
               {data.version}
             </Link>
