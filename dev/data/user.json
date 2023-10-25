@@ -1,0 +1,11 @@
+[
+  {
+    "kind": "User",
+    "metadata": {
+      "name": "admin"
+    },
+    "spec": {
+      "password": "password"
+    }
+  }
+]

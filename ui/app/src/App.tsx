@@ -17,6 +17,7 @@ import { useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Router from './Router';
+import { SignInRoute, SignUpRoute } from './model/route';
 
 function App() {
   const location = useLocation();
@@ -29,7 +30,7 @@ function App() {
         backgroundColor: ({ palette }) => palette.background.default,
       }}
     >
-      {location.pathname !== '/auth' && <Header />}
+      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
 
       <Box
         sx={{

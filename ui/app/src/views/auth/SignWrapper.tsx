@@ -11,37 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Container, Divider, LinearProgress, TextField, useMediaQuery, useTheme } from '@mui/material';
-import { useState } from 'react';
-import { useSnackbar } from '@perses-dev/components';
+import React from 'react';
+import { Container, Divider, useMediaQuery, useTheme } from '@mui/material';
 import { useDarkMode } from '../../context/DarkMode';
-import { useAuthMutation } from '../../model/auth-client';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 
-function AuthView() {
+export function SignWrapper(props: { children: React.ReactNode }) {
   const { isDarkModeEnabled } = useDarkMode();
   const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
-  const authMutation = useAuthMutation();
-  const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const [login, setLogin] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-
-  const handleLogin = () => {
-    authMutation.mutate(
-      { login: login, password: password },
-      {
-        onSuccess: () => {
-          successSnackbar(`Successfully login`);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-        },
-      }
-    );
-  };
-
   return (
     <Container
       maxWidth="sm"
@@ -59,31 +38,7 @@ function AuthView() {
         flexItem
         sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
       />
-      <Container sx={{ display: 'flex', flexDirection: 'column' }}>
-        <TextField
-          label="Login"
-          required
-          sx={{ marginTop: '10px', marginBottom: '10px' }}
-          onChange={(e) => setLogin(e.target.value)}
-        />
-        <TextField
-          type="password"
-          label="Password"
-          required
-          sx={{ marginBottom: '10px' }}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button
-          variant="contained"
-          disabled={authMutation.isLoading || login === '' || password === ''}
-          onClick={() => handleLogin()}
-        >
-          Login
-        </Button>
-        {authMutation.isLoading && <LinearProgress />}
-      </Container>
+      <Container sx={{ display: 'flex', flexDirection: 'column' }}>{props.children}</Container>
     </Container>
   );
 }
-
-export default AuthView;
