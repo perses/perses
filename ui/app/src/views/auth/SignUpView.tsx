@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Container, LinearProgress, Link, TextField, Typography } from '@mui/material';
+import { Button, Container, LinearProgress, Link, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
 import { useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -19,7 +19,7 @@ import { SignInRoute } from '../../model/route';
 import { useCreateUserMutation } from '../../model/user-client';
 import { SignWrapper } from './SignWrapper';
 
-function CreateAccoundView() {
+function SignUpView() {
   const createUserMutation = useCreateUserMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -50,6 +50,7 @@ function CreateAccoundView() {
   return (
     <SignWrapper>
       <Container
+        disableGutters={useMediaQuery(useTheme().breakpoints.up('sm'))}
         sx={{
           display: 'flex',
           flexDirection: 'row',
@@ -93,4 +94,4 @@ function CreateAccoundView() {
   );
 }
 
-export default CreateAccoundView;
+export default SignUpView;
