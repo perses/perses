@@ -62,67 +62,53 @@ spec: {
         name: #grafanaDashboard.title
     }
     variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
-        if grafanaVar.type == "constant" {
-            kind: "TextVariable"
-            spec: {
-                name: grafanaVar.name
-                display: {
-                    name: [ // switch
-                        if grafanaVar.label != _|_ if grafanaVar.label != "" {
-                            grafanaVar.label
-                        },
-                        grafanaVar.name
-                    ][0]
-                    if grafanaVar.description != _|_ {
-                        description: grafanaVar.description
-                    }
-                    hidden: true
-                }
-                constant: true
-                value: grafanaVar.query
+        _displayConversion: {
+            // for some reason it's required to change the inputs names for each nested "function call",
+            // hence #var2 here to not conflict with #var from _singleVarConversion
+            #var2: _
+
+            name: [ // switch
+                if #var2.label != _|_ if #var2.label != "" {
+                    #var2.label
+                },
+                #var2.name
+            ][0]
+            if #var2.description != _|_ {
+                description: #var2.description
+            }
+            if #var2.hide != _|_ {
+                hidden: [ // switch
+                    if #var2.hide > 0 {
+                        true
+                    },
+                    false
+                ][0]
             }
         }
-        if grafanaVar.type == "textbox" {
+        _singleVarConversion: {
+            #var: _
+            #constant: _
+
             kind: "TextVariable"
             spec: {
-                name: grafanaVar.name
-                display: {
-                    name: [ // switch
-                        if grafanaVar.label != _|_ if grafanaVar.label != "" {
-                            grafanaVar.label
-                        },
-                        grafanaVar.name
-                    ][0]
-                    if grafanaVar.description != _|_ {
-                        description: grafanaVar.description
-                    }
-                    if grafanaVar.hide > 0 {
-                        hidden: true
-                    }
-                }
-                constant: false
-                value: grafanaVar.query
+                name: #var.name
+                display: _displayConversion & {#var2: #var}
+                constant: #constant
+                value: #var.query
             }
+        }
+        if grafanaVar.type == "constant" {
+            _singleVarConversion & {#var: grafanaVar, #constant: true}
+        }
+        if grafanaVar.type == "textbox" {
+            _singleVarConversion & {#var: grafanaVar, #constant: false}
         }
         if grafanaVar.type != "constant" && grafanaVar.type != "textbox" {
             kind: "ListVariable"
             spec: {
                 name: grafanaVar.name
                 if grafanaVar.label != _|_ || grafanaVar.description != _|_ || grafanaVar.hide > 0 {
-                    display: {
-                        name: [ // switch
-                            if grafanaVar.label != _|_ if grafanaVar.label != "" {
-                                grafanaVar.label
-                            },
-                            grafanaVar.name
-                        ][0]
-                        if grafanaVar.description != _|_ {
-                            description: grafanaVar.description
-                        }
-                        if grafanaVar.hide > 0 {
-                            hidden: true
-                        }
-                    }
+                    display: _displayConversion & {#var2: grafanaVar}
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
@@ -141,59 +127,59 @@ spec: {
     }]
     // go through the top-level panels 1st time, to fill the panels section of Perses
     panels: { for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels {
+        // function-like pattern to factorize the panel conversion logic
+        #panelConversion: {
+            #panel: _
+
+            kind: "Panel"
+            spec: {
+                display: {
+                    name: *#panel.title | "empty"
+                    description: *#panel.description | ""
+                }
+                plugin: [ // switch
+                    %(conditional_panels)
+                ][0]
+                // in case of no targets, the resulting empty array will be removed via unmarshaling in Go (omitempty)
+                queries: [ if #panel.targets != _|_ for _, target in #panel.targets {
+                    kind: "TimeSeriesQuery"
+                    spec: {
+                        #target: target
+                        plugin: [ // switch
+                            %(conditional_timeseries_queries)
+                        ][0]
+                    }
+                }]
+            }
+        }
         // if the current panel is a row, go through its children panels
         if grafanaPanel.panels != _|_ {
             for innerPanelId, innerPanel in grafanaPanel.panels { 
                 "\(grafanaPanelId)_\(innerPanelId)": {
-                    kind: "Panel"
-                    spec: {
-                        display: {
-                            name: *innerPanel.title | "empty"
-                            description: *innerPanel.description | ""
-                        }
-                        #panel: innerPanel
-                        plugin: [ // switch
-                            %(conditional_panels)
-                        ][0]
-                        // in case of no targets, the resulting empty array will be removed via unmarshaling in Go (omitempty)
-                        queries: [ if innerPanel.targets != _|_ for _, target in innerPanel.targets {
-                            kind: "TimeSeriesQuery"
-                            spec: {
-                                #target: target
-                                plugin: [ // switch
-                                    %(conditional_timeseries_queries)
-                                ][0]
-                            }
-                        }]
-                    }
+                    #panelConversion & {#panel: innerPanel}
                 }
             }
         }
-        if grafanaPanel.panels == _|_ { // else
+        // else
+        if grafanaPanel.panels == _|_ { 
             "\(grafanaPanelId)": {
-                kind: "Panel"
-                spec: {
-                    display: {
-                        name: *grafanaPanel.title | "empty"
-                        description: *grafanaPanel.description | ""
-                    }
-                    #panel: grafanaPanel
-                    plugin: [ // switch
-                        %(conditional_panels)
-                    ][0]
-                    queries: [ if grafanaPanel.targets != _|_ for _, target in grafanaPanel.targets {
-                        kind: "TimeSeriesQuery"
-                        spec: {
-                            #target: target
-                            plugin: [ // switch
-                                %(conditional_timeseries_queries)
-                            ][0]
-                        }
-                    }]
-                }
+                #panelConversion & {#panel: grafanaPanel}
             }
         }
-    }},
+    }}
+    // function-like pattern to factorize the position conversion logic
+    #positionConversion: {
+        #gridPos: _
+        #id: _
+        // it may happen that a grafana panel coordinate has a decimal, which we have to get rid of
+        x: math.Round(#gridPos.x)
+        y: math.Round(#gridPos.y)
+        width: math.Round(#gridPos.w)
+        height: math.Round(#gridPos.h)
+        content: {
+            "$ref": "#/spec/panels/\(#id)"
+        }
+    }
     // we have to go through the panels again here, since in Grafana a panel embeds its position info while in Perses panels & layouts are split
     layouts: [
         // create a first grid to gather standalone panels
@@ -202,38 +188,23 @@ spec: {
             spec: {
                 // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
                 items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
-                    // it may happen that a grafana panel coordinate has a decimal
-                    x: math.Round(grafanaPanel.gridPos.x)
-                    y: math.Round(grafanaPanel.gridPos.y)
-                    width: math.Round(grafanaPanel.gridPos.w)
-                    height: math.Round(grafanaPanel.gridPos.h)
-                    content: {
-                        "$ref": "#/spec/panels/\(grafanaPanelId)"
-                    }
+                    #positionConversion & {#gridPos: grafanaPanel.gridPos, #id: grafanaPanelId}
                 }]
             }
         },
         // go through the top-level panels a 3rd time & match only the rows, to create the corresponding grids
         for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels != _|_ { // if the panel is a row
-            #row: grafanaPanel
             kind: "Grid"
             spec: {
                 display: {
-                    title: #row.title,
+                    title: grafanaPanel.title,
                     collapse: {
-                        open: !#row.collapsed
+                        open: !grafanaPanel.collapsed
                     }
                 }
                 // go through the children panels of the current row
-                items: [ for innerPanelId, innnerPanel in #row.panels {
-                    // it may happen that a grafana panel coordinate has a decimal
-                    x: math.Round(innnerPanel.gridPos.x)
-                    y: math.Round(innnerPanel.gridPos.y)
-                    width: math.Round(innnerPanel.gridPos.w)
-                    height: math.Round(innnerPanel.gridPos.h)
-                    content: {
-                        "$ref": "#/spec/panels/\(grafanaPanelId)_\(innerPanelId)"
-                    }
+                items: [ for innerPanelId, innnerPanel in grafanaPanel.panels {
+                    #positionConversion & {#gridPos: innnerPanel.gridPos, #id: "\(grafanaPanelId)_\(innerPanelId)"}
                 }]
             }
         }
