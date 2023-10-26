@@ -10705,12 +10705,6 @@
         {
           "kind": "Grid",
           "spec": {
-            "items": []
-          }
-        },
-        {
-          "kind": "Grid",
-          "spec": {
             "display": {
               "title": "Quick CPU / Mem / Disk",
               "collapse": {

@@ -316,10 +316,6 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
-                    "datasource": {
-                      "kind": "PrometheusDatasource",
-                      "name": "argos-world"
-                    },
                     "query": "vector(4)"
                   }
                 }

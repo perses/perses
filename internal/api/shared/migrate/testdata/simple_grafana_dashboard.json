@@ -82,10 +82,6 @@
       "pluginVersion": "9.5.8",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "argos-world"
-          },
           "editorMode": "code",
           "expr": "vector(4)",
           "legendFormat": "__auto",
@@ -352,7 +348,6 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
                 "uid": "argos-world"
               },
               "editorMode": "code",
@@ -456,6 +451,15 @@
           "type": "text"
         }
       ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "My row title",
       "type": "row"
     }
@@ -544,7 +548,6 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "prometheus",
           "uid": "argos-world"
         },
         "definition": "label_values(thanos_build_info, stack)",
