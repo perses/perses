@@ -451,6 +451,15 @@
           "type": "text"
         }
       ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "My row title",
       "type": "row"
     }
