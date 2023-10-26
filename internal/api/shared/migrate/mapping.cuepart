@@ -134,7 +134,12 @@ spec: {
             kind: "Panel"
             spec: {
                 display: {
-                    name: *#panel.title | "empty"
+                    name: [ // switch
+                        if #panel.title != _|_ if #panel.title != "" {
+                            #panel.title
+                        },
+                        "empty"
+                    ][0]
                     description: *#panel.description | ""
                 }
                 plugin: [ // switch
