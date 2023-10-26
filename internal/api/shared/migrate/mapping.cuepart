@@ -63,36 +63,34 @@ spec: {
     }
     variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
         _displayConversion: {
-            // for some reason it's required to change the inputs names for each nested "function call",
-            // hence #var2 here to not conflict with #var from _singleVarConversion
-            #var2: _
+            #var: _
 
             name: [ // switch
-                if #var2.label != _|_ if #var2.label != "" {
-                    #var2.label
+                if #var.label != _|_ if #var.label != "" {
+                    #var.label
                 },
-                #var2.name
+                #var.name
             ][0]
-            if #var2.description != _|_ {
-                description: #var2.description
+            if #var.description != _|_ {
+                description: #var.description
             }
-            if #var2.hide != _|_ {
+            if #var.hide != _|_ {
                 hidden: [ // switch
-                    if #var2.hide > 0 {
+                    if #var.hide > 0 {
                         true
                     },
                     false
                 ][0]
             }
         }
-        _singleVarConversion: {
+        _singleVarConversion: this={
             #var: _
             #constant: _
 
             kind: "TextVariable"
             spec: {
                 name: #var.name
-                display: _displayConversion & {#var2: #var}
+                display: _displayConversion & {#var: this.#var}
                 constant: #constant
                 value: #var.query
             }
@@ -108,7 +106,7 @@ spec: {
             spec: {
                 name: grafanaVar.name
                 if grafanaVar.label != _|_ || grafanaVar.description != _|_ || grafanaVar.hide > 0 {
-                    display: _displayConversion & {#var2: grafanaVar}
+                    display: _displayConversion & {#var: grafanaVar}
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
