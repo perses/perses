@@ -128,7 +128,7 @@ spec: {
     // go through the top-level panels 1st time, to fill the panels section of Perses
     panels: { for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels {
         // function-like pattern to factorize the panel conversion logic
-        #panelConversion: {
+        _panelConversion: {
             #panel: _
 
             kind: "Panel"
@@ -161,19 +161,19 @@ spec: {
         if grafanaPanel.panels != _|_ {
             for innerPanelId, innerPanel in grafanaPanel.panels { 
                 "\(grafanaPanelId)_\(innerPanelId)": {
-                    #panelConversion & {#panel: innerPanel}
+                    _panelConversion & {#panel: innerPanel}
                 }
             }
         }
         // else
         if grafanaPanel.panels == _|_ { 
             "\(grafanaPanelId)": {
-                #panelConversion & {#panel: grafanaPanel}
+                _panelConversion & {#panel: grafanaPanel}
             }
         }
     }}
     // function-like pattern to factorize the position conversion logic
-    #positionConversion: {
+    _positionConversion: {
         #gridPos: _
         #id: _
         // it may happen that a grafana panel coordinate has a decimal, which we have to get rid of
@@ -194,7 +194,7 @@ spec: {
                 spec: {
                     // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
                     items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
-                        #positionConversion & {#gridPos: grafanaPanel.gridPos, #id: grafanaPanelId}
+                        _positionConversion & {#gridPos: grafanaPanel.gridPos, #id: grafanaPanelId}
                     }]
                 }
             }
@@ -211,7 +211,7 @@ spec: {
                 }
                 // go through the children panels of the current row
                 items: [ for innerPanelId, innnerPanel in grafanaPanel.panels {
-                    #positionConversion & {#gridPos: innnerPanel.gridPos, #id: "\(grafanaPanelId)_\(innerPanelId)"}
+                    _positionConversion & {#gridPos: innnerPanel.gridPos, #id: "\(grafanaPanelId)_\(innerPanelId)"}
                 }]
             }
         }
