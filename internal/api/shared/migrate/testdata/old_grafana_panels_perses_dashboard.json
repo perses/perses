@@ -110,12 +110,6 @@
       {
         "kind": "Grid",
         "spec": {
-          "items": []
-        }
-      },
-      {
-        "kind": "Grid",
-        "spec": {
           "display": {
             "title": "Dashboard Info",
             "collapse": {
