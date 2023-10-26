@@ -95,9 +95,9 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "MigrationFromGrafanaNotSupported"
+                      "name": "$datasource"
                     },
-                    "query": "migration_from_grafana_not_supported"
+                    "query": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))"
                   }
                 }
               }

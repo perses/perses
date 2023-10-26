@@ -352,7 +352,6 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
                 "uid": "argos-world"
               },
               "editorMode": "code",
@@ -544,7 +543,6 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "prometheus",
           "uid": "argos-world"
         },
         "definition": "label_values(thanos_build_info, stack)",
