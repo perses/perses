@@ -94,7 +94,7 @@ export function PanelEditorForm(props: PanelEditorProps) {
           <Grid item xs={12}>
             <Box
               sx={{
-                padding: (theme) => theme.spacing(1),
+                paddingX: 1,
               }}
             >
               <Typography variant="h4" marginBottom={1}>
