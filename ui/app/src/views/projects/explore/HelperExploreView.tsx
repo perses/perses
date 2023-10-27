@@ -17,11 +17,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { DashboardResource } from '@perses-dev/core';
 import { ViewExplore } from '@perses-dev/explore';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
-import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../utils/variables';
-import { useGlobalVariableList } from '../../model/global-variable-client';
-import { useVariableList } from '../../model/variable-client';
-import { bundledPluginLoader } from '../../model/bundled-plugins';
+import { CircularProgress, Stack } from '@mui/material';
+import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
+import { useGlobalVariableList } from '../../../model/global-variable-client';
+import { useVariableList } from '../../../model/variable-client';
+import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
+import { bundledPluginLoader } from '../../../model/bundled-plugins';
 
 export interface HelperDashboardView {
   dashboardResource: DashboardResource;
@@ -55,7 +56,13 @@ function HelperExploreView(props: HelperDashboardView) {
     [projectName, projectVars, globalVars]
   );
 
-  if (isLoadingProjectVars || isLoadingGlobalVars) return null;
+  if (isLoadingProjectVars || isLoadingGlobalVars) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>

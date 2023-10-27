@@ -37,6 +37,7 @@ const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
 const ProjectView = lazy(() => import('./views/projects/ProjectView'));
 const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
 const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
+const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
 
 function Router() {
   return (

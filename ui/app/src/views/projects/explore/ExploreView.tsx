@@ -13,8 +13,8 @@
 
 import { useParams } from 'react-router-dom';
 import { DashboardResource, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
-import { generateMetadataName } from '../../utils/metadata';
-import ProjectBreadcrumbs from '../../components/ProjectBreadcrumbs';
+import { generateMetadataName } from '../../../utils/metadata';
+import ProjectBreadcrumbs from '../../../components/ProjectBreadcrumbs';
 import HelperExploreView from './HelperExploreView';
 
 const DEFAULT_DASHBOARD_NAME = 'Explore Page';
