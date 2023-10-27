@@ -147,19 +147,7 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 
 func IsGlobal(kind Kind) bool {
 	switch kind {
-	case KindGlobalDatasource:
-		return true
-	case KindGlobalRole:
-		return true
-	case KindGlobalRoleBinding:
-		return true
-	case KindGlobalSecret:
-		return true
-	case KindGlobalVariable:
-		return true
-	case KindProject:
-		return true
-	case KindUser:
+	case KindGlobalDatasource, KindGlobalRole, KindGlobalRoleBinding, KindGlobalSecret, KindGlobalVariable, KindProject, KindUser:
 		return true
 	default:
 		return false

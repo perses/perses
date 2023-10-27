@@ -1,5 +1,10 @@
 # RoleBinding
 
+A role binding grants the permissions defined in a role to a user or set of users.
+It holds a list of subjects (users or teams) and a reference to the role being granted. A `RoleBinding` grants permissions within a specific project whereas a `GlobalRoleBinding` grants that access global-wide.
+
+A `RoleBinding` may reference any `Role` in the same project. Similarly, a `GlobalRoleBinding` can reference any `GlobalRole`.
+
 ## Choose a scope
 
 There are two different scopes in which you can define a RoleBinding, depending on the role scope.
@@ -36,10 +41,11 @@ In case you would like to set a role binding for a GlobalRole , you will need to
   # Name of the Role or GlobalRole concerned by the role binding (metadata.name)
   role: <string>
   # Subjects that will inherit permissions from the role
-  subjects: [<subject>]
+  subjects: 
+    - <subject_spec>
 ```
 
-### Subject definition
+### `<subject_spec>`
 
 ```yaml
   # The type of the subject. For example: `User`

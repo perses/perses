@@ -1,11 +1,14 @@
 # Role
 
+A `Role` defines a set of permissions within a particular project. When you create a `Role` you need to specify the project it belongs in.
+`GlobalRole`, by contrast, is not limited to a project scope.
+
 ## Choose a scope
 
 There are two different scopes in which you can define a Role, depending on how much you want it to be shared.
 
-- for global scope, use GlobalRole
-- for project scope, use Role
+- for global scope, use `GlobalRole`
+- for project scope, use `Role`
 
 ### Project level
 
@@ -34,18 +37,20 @@ In case you would like to set permissions at Global level , you will need to cre
 
 ```yaml
   # List of permissions owned by the role
-  permissions: [<permission>]
+  permissions:
+    - <permission_spec>
 ```
 
-### Permission definition
+### `<permission_spec>`
 
 ```yaml
-  # The type of the action. For example: `create`, `read`, `update` or `delete`
-  action: <string>
+  # The type of the action
+  action: <enum= "create" | "read" | "update" | "delete">
 
   # The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
   # With Role, you can't target global kinds
-  scopes: [<string>]
+  scopes:
+    - <string>
 ```
 
 ### More info about authorization

@@ -90,7 +90,7 @@ After you create a binding, you cannot change the `Role` or `GlobalRole` that it
 
 There are two reasons for this restriction:
 - Making role immutable allows granting someone update permission on an existing binding object, so that they can manage the list of subjects, without being able to change the role that is granted to those subjects.
-- A binding to a different role is a fundamentally different binding. Requiring a binding to be deleted/recreated in order to change the roleRef ensures the full list of subjects in the binding is intended to be granted the new role (as opposed to enabling or accidentally modifying only the roleRef without verifying all of the existing subjects should be given the new role's permissions).
+- A binding to a different role is a fundamentally different binding. Requiring a binding to be deleted/recreated in order to change the role reference ensures the full list of subjects in the binding is intended to be granted the new role (as opposed to enabling or accidentally modifying only the role reference without verifying all of the existing subjects should be given the new role's permissions).
 
 ## Referring to resources
 

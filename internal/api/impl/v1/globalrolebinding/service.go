@@ -47,10 +47,6 @@ func (s *service) Create(entity api.Entity) (interface{}, error) {
 
 func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
 	// TODO: validate user + role exists
-	if len(entity.Spec.Subjects) == 0 {
-		return nil, shared.HandleBadRequestError("spec.subjects can't be empty")
-	}
-
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -73,10 +69,6 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters shared.Paramet
 	}
 
 	// TODO: validate user + role exists
-	if len(entity.Spec.Subjects) == 0 {
-		return nil, shared.HandleBadRequestError("spec.subjects can't be empty")
-	}
-
 	// find the previous version of the Datasource
 	oldEntity, err := s.dao.Get(parameters.Name)
 	if err != nil {

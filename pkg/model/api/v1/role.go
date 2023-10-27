@@ -23,7 +23,6 @@ import (
 
 type RoleInterface interface {
 	GetMetadata() modelAPI.Metadata
-	GetRoleSpec() RoleSpec
 }
 
 type ActionKind string
@@ -42,6 +41,42 @@ type Permission struct {
 	// The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
 	// With Role, you can't target global kinds
 	Scopes []Kind `json:"scopes" yaml:"scopes"`
+}
+
+func (p *Permission) UnmarshalJSON(data []byte) error {
+	var tmp Permission
+	type plain Permission
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *Permission) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Permission
+	type plain Permission
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *Permission) validate() error {
+	if len(p.Action) == 0 {
+		return fmt.Errorf("permission action cannot be empty")
+	}
+	if len(p.Scopes) == 0 {
+		return fmt.Errorf("permission scopes cannot be empty")
+	}
+	return nil
 }
 
 type RoleSpec struct {
@@ -167,10 +202,6 @@ func (r *Role) GetMetadata() modelAPI.Metadata {
 
 func (r *Role) GetKind() string {
 	return string(r.Kind)
-}
-
-func (r *Role) GetRoleSpec() RoleSpec {
-	return r.Spec
 }
 
 func (r *Role) GetSpec() interface{} {

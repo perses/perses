@@ -23,7 +23,6 @@ import (
 
 type RoleBindingInterface interface {
 	GetMetadata() modelAPI.Metadata
-	GetRoleBindingSpec() RoleBindingSpec
 }
 
 type Subject struct {
@@ -102,7 +101,10 @@ func (r *RoleBindingSpec) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 func (r *RoleBindingSpec) validate() error {
 	if len(r.Role) == 0 {
-		return fmt.Errorf("spec cannot be empty")
+		return fmt.Errorf("rolebinding role cannot be empty")
+	}
+	if len(r.Subjects) == 0 {
+		return fmt.Errorf("rolebinding subjects cannot be empty")
 	}
 	return nil
 }
@@ -216,10 +218,6 @@ func (r *RoleBinding) GetMetadata() modelAPI.Metadata {
 
 func (r *RoleBinding) GetKind() string {
 	return string(r.Kind)
-}
-
-func (r *RoleBinding) GetRoleBindingSpec() RoleBindingSpec {
-	return r.Spec
 }
 
 func (r *RoleBinding) GetSpec() interface{} {
