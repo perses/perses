@@ -12,7 +12,11 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { TimeRangeProvider, useInitialRefreshInterval, useInitialTimeRange } from '@perses-dev/plugin-system';
+import {
+  TimeRangeProviderWithQueryParams,
+  useInitialRefreshInterval,
+  useInitialTimeRange,
+} from '@perses-dev/plugin-system';
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL, DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import {
@@ -23,6 +27,7 @@ import {
   TemplateVariableProvider,
 } from '@perses-dev/dashboards';
 import { ViewExploreApp } from './ViewExploreApp';
+
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   dashboardResource: DashboardResource;
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
@@ -39,10 +44,9 @@ export function ViewExplore(props: ViewExploreProps) {
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: true }}>
-        <TimeRangeProvider
+        <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
-          enabledURLParams={true}
         >
           <TemplateVariableProvider externalVariableDefinitions={externalVariableDefinitions}>
             <Box
@@ -63,7 +67,7 @@ export function ViewExplore(props: ViewExploreProps) {
               </ErrorBoundary>
             </Box>
           </TemplateVariableProvider>
-        </TimeRangeProvider>
+        </TimeRangeProviderWithQueryParams>
       </DashboardProvider>
     </DatasourceStoreProvider>
   );

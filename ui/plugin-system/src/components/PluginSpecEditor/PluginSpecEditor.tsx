@@ -19,6 +19,7 @@ import { usePlugin } from '../../runtime';
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginType: PluginType;
   pluginKind: string;
+  isEditor?: boolean;
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {

@@ -63,10 +63,6 @@ function TabButton(props: TabButtonProps) {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
-  const handleGoToExplore = () => {
-    navigate(`/projects/${props.projectName}/explore`);
-  };
-
   const handleVariableCreation = useCallback(
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
@@ -103,16 +99,7 @@ function TabButton(props: TabButtonProps) {
     case dashboardsTabIndex:
       return (
         <>
-          <Box>
-            <Stack direction="row" spacing={1}>
-              <CRUDButton
-                text="Add Dashboard"
-                variant="contained"
-                onClick={() => setCreateDashboardDialogOpened(true)}
-              />
-              <CRUDButton color="inherit" text="Explore" variant="contained" onClick={handleGoToExplore} />
-            </Stack>
-          </Box>
+          <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setCreateDashboardDialogOpened(true)} />
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
             projectOptions={[props.projectName]}

@@ -28,7 +28,7 @@ import {
   ExploreRoute,
 } from './model/route';
 import GuardedAuthRoute from './guard/GuardedAuthRoute';
-import ExploreView from './views/explore/ExploreView';
+
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));

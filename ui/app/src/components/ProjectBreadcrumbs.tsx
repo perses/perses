@@ -18,11 +18,10 @@ import { HomeLinkBreadcrumb, StyledBreadcrumbs } from './AppBreadcrumbs';
 interface ProjectBreadcrumbsProps {
   projectName: string;
   dashboardName?: string;
-  isExplore?: boolean;
 }
 
 function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
-  const { projectName, dashboardName, isExplore } = props;
+  const { projectName, dashboardName } = props;
 
   if (dashboardName) {
     return (
@@ -35,19 +34,6 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
       </StyledBreadcrumbs>
     );
   }
-
-  if (isExplore) {
-    return (
-      <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
-        <HomeLinkBreadcrumb />
-        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={`/projects/${projectName}`}>
-          {projectName}
-        </Link>
-        <Typography variant={'h3'}>Explore</Typography>
-      </StyledBreadcrumbs>
-    );
-  }
-
   return (
     <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
       <HomeLinkBreadcrumb />

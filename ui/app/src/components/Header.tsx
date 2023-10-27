@@ -34,12 +34,13 @@ import Cog from 'mdi-material-ui/Cog';
 import Folder from 'mdi-material-ui/Folder';
 import ShieldAccount from 'mdi-material-ui/ShieldAccount';
 import Menu from 'mdi-material-ui/Menu';
+import Compass from 'mdi-material-ui/Compass';
 import React, { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
-import { AdminRoute, ConfigRoute, MigrateRoute } from '../model/route';
+import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute } from '../model/route';
 import WhitePersesLogo from './logo/WhitePersesLogo';
 import PersesLogoCropped from './logo/PersesLogoCropped';
 
@@ -87,6 +88,12 @@ function ToolMenu() {
             <Cog />{' '}
           </ListItemIcon>
           <Typography>Config </Typography>
+        </MenuItem>
+        <MenuItem component={RouterLink} to={ExploreRoute}>
+          <ListItemIcon>
+            <Compass />
+          </ListItemIcon>
+          <Typography>Explore</Typography>
         </MenuItem>
         <MenuItem component={RouterLink} to={MigrateRoute}>
           <ListItemIcon>
@@ -259,6 +266,16 @@ export default function Header(): JSX.Element {
                 to={ConfigRoute}
               >
                 <Cog sx={{ marginRight: 0.5 }} /> Config
+              </Button>
+              <Button
+                aria-label="Explore"
+                aria-controls="menu-config-appbar"
+                aria-haspopup="true"
+                color="inherit"
+                component={RouterLink}
+                to="/explore"
+              >
+                <Compass sx={{ marginRight: 0.5 }} /> Explore
               </Button>
             </>
           ) : (

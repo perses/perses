@@ -11,29 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useParams } from 'react-router-dom';
 import { DashboardResource, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { generateMetadataName } from '../../../utils/metadata';
-import ProjectBreadcrumbs from '../../../components/ProjectBreadcrumbs';
-import HelperExploreView from './HelperExploreView';
+import AppBreadcrumbs from '../../../components/AppBreadcrumbs';
+import ProjectExploreView from './ProjectExploreView';
 
 const DEFAULT_DASHBOARD_NAME = 'Explore Page';
 
-/**
- * TBD
- */
 function ExploreView() {
-  const { projectName } = useParams();
-
-  if (!projectName) {
-    throw new Error('Unable to get project name');
-  }
-
   const dashboardResource: DashboardResource = {
     kind: 'Dashboard',
     metadata: {
       name: generateMetadataName(DEFAULT_DASHBOARD_NAME),
-      project: projectName,
+      project: '',
       version: 0,
     },
     spec: {
@@ -49,9 +39,9 @@ function ExploreView() {
   };
 
   return (
-    <HelperExploreView
+    <ProjectExploreView
       dashboardResource={dashboardResource}
-      exploreTitleComponent={<ProjectBreadcrumbs isExplore={true} projectName={dashboardResource.metadata.project} />}
+      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" />}
     />
   );
 }

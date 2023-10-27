@@ -81,6 +81,7 @@ function QueryEditor(props: QueryEditorProps) {
     <Box {...others}>
       {/* If TimeSeriesQuery plugins ever have common props on the definition, the inputs could go here */}
       <PluginEditor
+        isExplore={true}
         pluginType="TimeSeriesQuery"
         pluginKindLabel="Query Type"
         value={plugin}

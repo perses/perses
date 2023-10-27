@@ -38,7 +38,7 @@ export const ExploreToolbar = (props: ExploreToolbarProps) => {
           display: 'flex',
           width: '100%',
           alignItems: 'start',
-          padding: (theme) => theme.spacing(1, 2, 0, 2),
+          paddingX: 2,
         }}
       >
         <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">

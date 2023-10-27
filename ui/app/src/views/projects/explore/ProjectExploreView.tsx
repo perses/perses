@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
 import { useEffect, useMemo, useState } from 'react';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { DashboardResource } from '@perses-dev/core';
@@ -24,19 +24,30 @@ import { useVariableList } from '../../../model/variable-client';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 
-export interface HelperDashboardView {
+export interface ProjectExploreViewProps {
   dashboardResource: DashboardResource;
   exploreTitleComponent?: JSX.Element;
 }
 
-/**
- * TODO: TBD
- */
-function HelperExploreView(props: HelperDashboardView) {
+function ProjectExploreView(props: ProjectExploreViewProps) {
+  return (
+    <ProjectStoreProvider enabledURLParams={true}>
+      <HelperExploreView {...props} />
+    </ProjectStoreProvider>
+  );
+}
+
+function HelperExploreView(props: ProjectExploreViewProps) {
   const { dashboardResource, exploreTitleComponent } = props;
-  const projectName = dashboardResource.metadata.project;
+  const { project } = useProjectStore();
+  const projectName = project?.metadata.name == 'none' ? '' : project?.metadata.name;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+
+  const dashResource = useMemo(() => {
+    return { ...dashboardResource, metadata: { ...dashboardResource.metadata, project: projectName } };
+  }, [projectName, dashboardResource]);
+
   useEffect(() => {
     // warm up the caching of the datasources
     if (projectName) {
@@ -76,7 +87,7 @@ function HelperExploreView(props: HelperDashboardView) {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}
-            dashboardResource={dashboardResource}
+            dashboardResource={dashResource}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
           />
@@ -86,4 +97,4 @@ function HelperExploreView(props: HelperDashboardView) {
   );
 }
 
-export default HelperExploreView;
+export default ProjectExploreView;
