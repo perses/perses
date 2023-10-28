@@ -103,6 +103,44 @@ spec:
           secret: "prometheus_secret_config"
 ```
 
+## Query
+
+We are only supporting one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
+
+```yaml
+kind: "PrometheusTimeSeriesQuery"
+spec: <timeseries_query_spec>
+```
+
+### `<timeseries_query_spec>`
+
+```yaml
+  #`query` is the promQL expression.
+  query: <string>
+
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+  # See the documentation about the datasources to understand how it is selected.
+  [ datasource: <datasource_selector> ]
+  [ seriesNameFormat: <string> ]
+
+  # `minStep` is the minimum time interval you want between each data points.
+  [ minStep: <duration> ]
+  [ resolution: number ]
+```
+
+#### Example
+
+A simple one:
+
+```yaml
+kind: "TimeSeriesQuery"
+spec:
+  plugin:
+    kind: "PrometheusTimeSeriesQuery"
+    spec:
+      query: "rate(caddy_http_response_duration_seconds_sum[$interval])"
+```
+
 ## Variable
 
 ### PrometheusLabelNamesVariable
@@ -115,7 +153,7 @@ spec: <prometheus_label_names_spec>
 #### `<prometheus_label_names_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
   matchers:
@@ -170,7 +208,7 @@ spec: <prometheus_label_values_spec>
 #### `<prometheus_label_values_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
   labelName: <string>
@@ -231,7 +269,7 @@ spec: <prometheus_promql_spec>
 #### `<prometheus_promql_spec>`
 
 ```yaml
-  # If empty, then the default PrometheusDatasource is chosen
+  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
   [ datasource: <datasource_selector> ]
 
