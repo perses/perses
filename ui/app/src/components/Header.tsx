@@ -36,7 +36,7 @@ import { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
-import { PersesLogo } from './PersesLogo';
+import WhitePersesLogo from './logo/WhitePersesLogo';
 
 const ITEM_HEIGHT = 48;
 
@@ -171,7 +171,7 @@ export default function Header(): JSX.Element {
               padding: 0,
             }}
           >
-            <PersesLogo />
+            <WhitePersesLogo />
           </Button>
           <Divider
             orientation="vertical"
