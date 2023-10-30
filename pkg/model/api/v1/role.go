@@ -36,8 +36,8 @@ const (
 )
 
 type Permission struct {
-	// Action of the permission (read, create, update, delete, ...)
-	Action ActionKind `json:"action" yaml:"action"`
+	// Actions of the permission (read, create, update, delete, ...)
+	Actions []ActionKind `json:"actions" yaml:"actions"`
 	// The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
 	// With Role, you can't target global kinds
 	Scopes []Kind `json:"scopes" yaml:"scopes"`
@@ -70,8 +70,8 @@ func (p *Permission) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (p *Permission) validate() error {
-	if len(p.Action) == 0 {
-		return fmt.Errorf("permission action cannot be empty")
+	if len(p.Actions) == 0 {
+		return fmt.Errorf("permission actions cannot be empty")
 	}
 	if len(p.Scopes) == 0 {
 		return fmt.Errorf("permission scopes cannot be empty")

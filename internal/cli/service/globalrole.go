@@ -18,6 +18,7 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"strings"
 )
 
 type globalRole struct {
@@ -62,15 +63,20 @@ func (g *globalRole) BuildMatrix(hits []modelAPI.Entity) [][]string {
 
 		firstLine := true
 		for _, permission := range entity.Spec.Permissions {
+			var actions []string
+			for _, action := range permission.Actions {
+				actions = append(actions, string(action))
+			}
+
 			if len(permission.Scopes) == 0 {
-				line = append(line, string(permission.Action), "EMPTY")
+				line = append(line, strings.Join(actions, ","), "EMPTY")
 				data = append(data, line)
 				continue
 			}
 
 			for _, scope := range permission.Scopes {
 				if firstLine {
-					line = append(line, string(permission.Action), string(scope))
+					line = append(line, strings.Join(actions, ","), string(scope))
 					data = append(data, line)
 					firstLine = false
 					continue
@@ -88,7 +94,7 @@ func (g *globalRole) GetColumHeader() []string {
 	return []string{
 		"NAME",
 		"AGE",
-		"ACTION",
+		"ACTIONS",
 		"SCOPE",
 	}
 }

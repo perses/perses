@@ -44,8 +44,9 @@ In case you would like to set permissions at Global level , you will need to cre
 ### `<permission_spec>`
 
 ```yaml
-  # The type of the action
-  action: <enum= "create" | "read" | "update" | "delete">
+  # Types of actions the permission grant access
+  actions:
+    - <enum= "create" | "read" | "update" | "delete">
 
   # The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
   # With Role, you can't target global kinds
