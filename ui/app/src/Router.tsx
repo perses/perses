@@ -19,11 +19,12 @@ import HomeView from './views/home/HomeView';
 import SignInView from './views/auth/SignInView';
 import SignUpView from './views/auth/SignUpView';
 import { AdminRoute, ConfigRoute, ProjectRoute, MigrateRoute, SignInRoute, SignUpRoute } from './model/route';
+import GuardedAuthRoute from './guard/GuardedAuthRoute';
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
 const ConfigView = lazy(() => import('./views/config/ConfigView'));
-const GuardedProjectRoute = lazy(() => import('./GuardedProjectRoute'));
+const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
 const ProjectView = lazy(() => import('./views/projects/ProjectView'));
 const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
 const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
@@ -34,20 +35,22 @@ function Router() {
       {/* TODO: What sort of loading fallback do we want? */}
       <Suspense>
         <Routes>
-          <Route path={AdminRoute} element={<AdminView />} />
-          <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
           <Route path={SignInRoute} element={<SignInView />} />
           <Route path={SignUpRoute} element={<SignUpView />} />
-          <Route path={ConfigRoute} element={<ConfigView />} />
-          <Route path={MigrateRoute} element={<MigrateView />} />
-          <Route path={ProjectRoute} element={<HomeView />} />
-          <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
-            <Route path="" element={<ProjectView />} />
-            <Route path=":tab" element={<ProjectView />} />
-            <Route path="dashboard/new" element={<CreateDashboardView />} />
-            <Route path="dashboards/:dashboardName" element={<DashboardView />} />
+          <Route path="/" element={<GuardedAuthRoute />}>
+            <Route path={AdminRoute} element={<AdminView />} />
+            <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
+            <Route path={ConfigRoute} element={<ConfigView />} />
+            <Route path={MigrateRoute} element={<MigrateView />} />
+            <Route path={ProjectRoute} element={<HomeView />} />
+            <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
+              <Route path="" element={<ProjectView />} />
+              <Route path=":tab" element={<ProjectView />} />
+              <Route path="dashboard/new" element={<CreateDashboardView />} />
+              <Route path="dashboards/:dashboardName" element={<DashboardView />} />
+            </Route>
+            <Route path="" element={<HomeView />} />
           </Route>
-          <Route path="/" element={<HomeView />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

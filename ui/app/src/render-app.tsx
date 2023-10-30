@@ -18,6 +18,7 @@ import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SnackbarProvider } from '@perses-dev/components';
+import { CookiesProvider } from 'react-cookie';
 import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
@@ -47,17 +48,19 @@ export function renderApp(container: Element | null) {
   root.render(
     <React.StrictMode>
       <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <QueryParamProvider adapter={ReactRouter6Adapter}>
-            <DarkModeContextProvider>
-              <NavHistoryProvider>
-                <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                  <App />
-                </SnackbarProvider>
-              </NavHistoryProvider>
-            </DarkModeContextProvider>
-          </QueryParamProvider>
-        </QueryClientProvider>
+        <CookiesProvider>
+          <QueryClientProvider client={queryClient}>
+            <QueryParamProvider adapter={ReactRouter6Adapter}>
+              <DarkModeContextProvider>
+                <NavHistoryProvider>
+                  <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                    <App />
+                  </SnackbarProvider>
+                </NavHistoryProvider>
+              </DarkModeContextProvider>
+            </QueryParamProvider>
+          </QueryClientProvider>
+        </CookiesProvider>
       </BrowserRouter>
     </React.StrictMode>
   );

@@ -16,7 +16,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import { ProjectResource } from '@perses-dev/core';
-import { fetchProject } from './model/project-client';
+import { fetchProject } from '../model/project-client';
 
 function GuardedProjectRoute() {
   const { projectName } = useParams();

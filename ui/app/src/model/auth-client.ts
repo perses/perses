@@ -13,6 +13,8 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchJson } from '@perses-dev/core';
+import { useCookies } from 'react-cookie';
+import { useJwt } from 'react-jwt';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -25,6 +27,13 @@ export interface AuthResponse {
 export interface AuthBody {
   login: string;
   password: string;
+}
+
+export function useAuthToken() {
+  const [cookies] = useCookies();
+  const partialToken = cookies['jwtPayload'];
+  const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+  return useJwt(`${partialToken}.${fakeSignature}`);
 }
 
 export function useAuthMutation() {

@@ -103,11 +103,15 @@ export function useConfig(options?: ConfigOptions) {
   return useQuery<ConfigModel, Error>(
     [resource],
     () => {
-      const url = buildURL({ resource: resource, apiPrefix: '/api' });
-      return fetchJson<ConfigModel>(url);
+      return fetchConfig();
     },
     options
   );
+}
+
+export function fetchConfig() {
+  const url = buildURL({ resource: resource, apiPrefix: '/api' });
+  return fetchJson<ConfigModel>(url);
 }
 
 export function useIsReadonly() {
