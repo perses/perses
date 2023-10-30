@@ -58,6 +58,8 @@
           },
           "allowAllValue": true,
           "allowMultiple": false,
+          "customAllValue": ".*",
+          "sort": "none",
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -65,8 +67,7 @@
               "matchers": []
             }
           },
-          "name": "lv1",
-          "sort": "none"
+          "name": "lv1"
         }
       },
       {
@@ -79,6 +80,7 @@
           },
           "allowAllValue": true,
           "allowMultiple": false,
+          "sort": "none",
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -88,8 +90,7 @@
               ]
             }
           },
-          "name": "lv2",
-          "sort": "none"
+          "name": "lv2"
         }
       },
       {
@@ -102,6 +103,7 @@
           },
           "allowAllValue": true,
           "allowMultiple": false,
+          "sort": "alphabetical-asc",
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -111,8 +113,7 @@
               ]
             }
           },
-          "name": "lv3",
-          "sort": "alphabetical-asc"
+          "name": "lv3"
         }
       },
       {
@@ -125,6 +126,7 @@
           },
           "allowAllValue": true,
           "allowMultiple": false,
+          "sort": "alphabetical-desc",
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -134,8 +136,7 @@
               ]
             }
           },
-          "name": "lv4",
-          "sort": "alphabetical-desc"
+          "name": "lv4"
         }
       },
       {
@@ -197,14 +198,14 @@
         "spec": {
           "allowAllValue": false,
           "allowMultiple": false,
+          "sort": "none",
           "plugin": {
             "kind": "PrometheusLabelNamesVariable",
             "spec": {
               "matchers": []
             }
           },
-          "name": "LabelNamesTest",
-          "sort": "none"
+          "name": "LabelNamesTest"
         }
       },
       {
@@ -217,6 +218,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "sort": "alphabetical-ci-asc",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -224,8 +226,7 @@
               "labelName": "type"
             }
           },
-          "name": "queryResVar",
-          "sort": "alphabetical-ci-asc"
+          "name": "queryResVar"
         }
       },
       {
@@ -238,6 +239,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "sort": "alphabetical-ci-desc",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -245,8 +247,7 @@
               "labelName": "type"
             }
           },
-          "name": "queryResVarVolatile",
-          "sort": "alphabetical-ci-desc"
+          "name": "queryResVarVolatile"
         }
       },
       {
@@ -259,6 +260,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "sort": "none",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -266,8 +268,7 @@
               "labelName": "migration_from_grafana_not_supported"
             }
           },
-          "name": "queryResVarOther",
-          "sort": "none"
+          "name": "queryResVarOther"
         }
       },
       {
@@ -394,6 +395,12 @@
                   "mean",
                   "sum"
                 ]
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": true,
+                "display": "line",
+                "lineWidth": 1
               }
             }
           },
@@ -426,10 +433,11 @@
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "legend": {
-                "mode": "table",
-                "position": "bottom",
-                "values": []
+              "visual": {
+                "areaOpacity": 0.85,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 1
               }
             }
           },

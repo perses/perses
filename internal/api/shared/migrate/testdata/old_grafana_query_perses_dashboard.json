@@ -40,6 +40,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": true,
+          "sort": "alphabetical-asc",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -47,8 +48,7 @@
               "labelName": "stack"
             }
           },
-          "name": "stack",
-          "sort": "alphabetical-asc"
+          "name": "stack"
         }
       }
     ],
@@ -66,6 +66,13 @@
                 "mode": "list",
                 "position": "bottom",
                 "values": []
+              },
+              "visual": {
+                "areaOpacity": 0,
+                "connectNulls": false,
+                "display": "line",
+                "lineWidth": 3,
+                "stack": "all"
               }
             }
           }
