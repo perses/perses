@@ -11,6 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TimeRangeProvider';
-export * from './TimeRangeProviderWithQueryParams';
-export * from './query-params';
+import { DurationString, parseDurationString } from '@perses-dev/core';
+import { milliseconds } from 'date-fns';
+
+/**
+ * Utils function to transform a refresh interval in {@link DurationString} format into a number of ms.
+ * @param refreshInterval
+ */
+export function getRefreshIntervalInMs(refreshInterval?: DurationString) {
+  if (refreshInterval !== undefined && refreshInterval !== null) {
+    return milliseconds(parseDurationString(refreshInterval));
+  }
+  return 0;
+}

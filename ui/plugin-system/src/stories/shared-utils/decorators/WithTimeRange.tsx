@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { TimeRangeProvider, TimeRangeProviderProps } from '@perses-dev/plugin-system';
+import { TimeRangeProvider, TimeRangeFromQueryProps } from '@perses-dev/plugin-system';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -21,7 +21,7 @@ declare module '@storybook/react' {
 }
 
 export type WithTimeRangeParameter = {
-  props: Partial<TimeRangeProviderProps>;
+  props: Partial<TimeRangeFromQueryProps>;
 };
 
 // Type guard because storybook types parameters as `any`
@@ -35,7 +35,7 @@ export const WithTimeRange = (Story: StoryFn, context: StoryContext<unknown>) =>
   const props = parameter?.props;
 
   return (
-    <TimeRangeProvider initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '1h' }} {...props}>
+    <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '1h' }} {...props}>
       <Story />
     </TimeRangeProvider>
   );

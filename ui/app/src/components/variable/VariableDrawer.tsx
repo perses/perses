@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithPromise, VariableDefinition, Variable, getVariableProject } from '@perses-dev/core';
+import { DispatchWithPromise, Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
 import React, { Dispatch, DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
-import { DatasourceStoreProvider, TemplateVariableProvider } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, TemplateVariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   Action,
   PluginRegistry,
-  TimeRangeProvider,
-  useInitialTimeRange,
+  TimeRangeProviderWithQueryParams,
   VariableEditorForm,
+  useInitialTimeRange,
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
@@ -81,8 +81,8 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
           }}
         >
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
-            <TimeRangeProvider initialTimeRange={initialTimeRange} enabledURLParams={true}>
-              <TemplateVariableProvider initialVariableDefinitions={[]}>
+            <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
+              <TemplateVariableProviderWithQueryParams initialVariableDefinitions={[]}>
                 <VariableEditorForm
                   initialVariableDefinition={variableDef}
                   initialAction={action}
@@ -92,8 +92,8 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                   onClose={onClose}
                   onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
                 />
-              </TemplateVariableProvider>
-            </TimeRangeProvider>
+              </TemplateVariableProviderWithQueryParams>
+            </TimeRangeProviderWithQueryParams>
           </DatasourceStoreProvider>
         </PluginRegistry>
         {onDelete && (
