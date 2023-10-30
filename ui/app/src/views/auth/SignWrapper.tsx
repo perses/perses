@@ -11,25 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
-import { Container, Divider, useMediaQuery, useTheme } from '@mui/material';
+import { Divider, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { ReactNode } from 'react';
 import { useDarkMode } from '../../context/DarkMode';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 
-export function SignWrapper(props: { children: React.ReactNode }) {
+export function SignWrapper(props: { children: ReactNode }) {
   const { isDarkModeEnabled } = useDarkMode();
-  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('md'));
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        display: 'flex',
-        flexDirection: isLaptopSize ? 'row' : 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+    <Stack
+      width="100%"
+      flexDirection={isLaptopSize ? 'row' : 'column'}
+      alignItems="center"
+      justifyContent="center"
+      gap={2}
     >
       {!isLaptopSize ? <PersesLogoCropped /> : isDarkModeEnabled ? <DarkThemePersesLogo /> : <LightThemePersesLogo />}
       <Divider
@@ -38,7 +36,7 @@ export function SignWrapper(props: { children: React.ReactNode }) {
         flexItem
         sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
       />
-      <Container sx={{ display: 'flex', flexDirection: 'column' }}>{props.children}</Container>
-    </Container>
+      <Stack gap={1}>{props.children}</Stack>
+    </Stack>
   );
 }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Container, LinearProgress, Link, TextField, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Button, LinearProgress, Link, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
@@ -49,33 +49,12 @@ function SignUpView() {
 
   return (
     <SignWrapper>
-      <Container
-        disableGutters={useMediaQuery(useTheme().breakpoints.up('sm'))}
-        sx={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginTop: '10px',
-          paddingLeft: 0,
-          paddingRight: 0,
-        }}
-      >
+      <Stack direction="row" gap={1}>
         <TextField label="First name" onChange={(e) => setFirstname(e.target.value)} />
         <TextField label="Last name" onChange={(e) => setLastname(e.target.value)} />
-      </Container>
-      <TextField
-        label="Username"
-        required
-        sx={{ marginTop: '10px', marginBottom: '10px' }}
-        onChange={(e) => setLogin(e.target.value)}
-      />
-      <TextField
-        type="password"
-        label="Password"
-        required
-        sx={{ marginBottom: '10px' }}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      </Stack>
+      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} />
+      <TextField type="password" label="Password" required onChange={(e) => setPassword(e.target.value)} />
       <Button
         variant="contained"
         disabled={createUserMutation.isLoading || login === '' || password === ''}
@@ -84,7 +63,7 @@ function SignUpView() {
         Register
       </Button>
       {createUserMutation.isLoading && <LinearProgress />}
-      <Typography>
+      <Typography sx={{ textAlign: 'center' }}>
         Already have an account?&nbsp;
         <Link underline="hover" component={RouterLink} to={SignInRoute}>
           Sign in

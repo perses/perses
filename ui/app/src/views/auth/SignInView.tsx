@@ -43,19 +43,8 @@ function SignInView() {
 
   return (
     <SignWrapper>
-      <TextField
-        label="Username"
-        required
-        sx={{ marginTop: '10px', marginBottom: '10px' }}
-        onChange={(e) => setLogin(e.target.value)}
-      />
-      <TextField
-        type="password"
-        label="Password"
-        required
-        sx={{ marginBottom: '10px' }}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} />
+      <TextField type="password" label="Password" required onChange={(e) => setPassword(e.target.value)} />
       <Button
         variant="contained"
         disabled={authMutation.isLoading || login === '' || password === ''}
@@ -64,7 +53,7 @@ function SignInView() {
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
-      <Typography>
+      <Typography sx={{ textAlign: 'center' }}>
         Don&lsquo;t have an account yet?&nbsp;
         <Link underline="hover" component={RouterLink} to={SignUpRoute}>
           Register now
