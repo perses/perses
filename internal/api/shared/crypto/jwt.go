@@ -14,12 +14,22 @@
 package crypto
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sirupsen/logrus"
+)
+
+const (
+	cookieKeyJWTPayload   = "jwtPayload"
+	cookieKeyJWTSignature = "jwtSignature"
 )
 
 type JWTCustomClaims struct {
@@ -28,6 +38,11 @@ type JWTCustomClaims struct {
 
 type JWT interface {
 	SignedToken(login string) (string, error)
+	// CreateJWTCookies will create two different cookies that contain a piece of the token.
+	// As a reminder, a JWT token has the following structure: header.payload.signature
+	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
+	// The second cookie will contain the signature, and it won't be accessible by Javascript.
+	CreateJWTCookies(token string) (*http.Cookie, *http.Cookie)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
@@ -48,9 +63,48 @@ func (j *jwtImpl) SignedToken(login string) (string, error) {
 	return token.SignedString(j.key)
 }
 
+func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
+	now := time.Now().Add(time.Hour * 1)
+	tokenSplit := strings.Split(token, ".")
+	headerPayloadCookie := &http.Cookie{
+		Name:     cookieKeyJWTPayload,
+		Path:     "/api",
+		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
+		Expires:  now,
+		Secure:   true,
+		HttpOnly: false,
+		SameSite: http.SameSiteNoneMode,
+	}
+	signatureCookie := &http.Cookie{
+		Name:     cookieKeyJWTSignature,
+		Path:     "/api",
+		Value:    tokenSplit[2],
+		Expires:  now,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	}
+	return headerPayloadCookie, signatureCookie
+}
+
 func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 	jwtMiddlewareConfig := echojwt.Config{
 		Skipper: skipper,
+		BeforeFunc: func(c echo.Context) {
+			// Merge the JWT cookies if they exist to create the token,
+			// and then set the header Authorization with the complete token.
+			payloadCookie, err := c.Cookie(cookieKeyJWTPayload)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", cookieKeyJWTPayload)
+				return
+			}
+			signatureCookie, err := c.Cookie(cookieKeyJWTSignature)
+			if errors.Is(err, http.ErrNoCookie) {
+				logrus.Tracef("cookie %q not found", cookieKeyJWTSignature)
+				return
+			}
+			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
+		},
 		NewClaimsFunc: func(c echo.Context) jwt.Claims {
 			return new(JWTCustomClaims)
 		},
