@@ -189,7 +189,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -287,7 +287,7 @@
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 85,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -338,7 +338,7 @@
               "calcs": [],
               "displayMode": "table",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "single",
@@ -514,6 +514,7 @@
         "type": "constant"
       },
       {
+        "allValue": ".*",
         "current": {
           "selected": false,
           "text": "All",

@@ -110,11 +110,12 @@ spec: {
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
-
+                if grafanaVar.allValue != _|_ {
+                    customAllValue: grafanaVar.allValue
+                }
                 if grafanaVar.sort != _|_ if #mapping.sort[grafanaVar.sort] != _|_ {
                     sort: #mapping.sort[grafanaVar.sort]
                 }
-
                 // defaultValue: nothing to map to this field
                 #var: grafanaVar
                 plugin: [ // switch

@@ -8,6 +8,12 @@ if #target.datasource != _|_ if #target.datasource.type != _|_ if #target.dataso
 			name: #target.datasource.uid
 		}
 		query: #target.expr
+		if #target.legendFormat != _|_ if #target.legendFormat != "__auto" {
+			seriesNameFormat: #target.legendFormat
+		}
+		if #target.interval != _|_ {
+			minStep: #target.interval
+		}
 	}
 },
 // The datasource.type may not be present while we are dealing with a prometheus query.
@@ -23,5 +29,11 @@ if #target.expr != _|_ {
 			}
 		}
 		query: #target.expr
+		if #target.legendFormat != _|_ if #target.legendFormat != "__auto" {
+			seriesNameFormat: #target.legendFormat
+		}
+		if #target.interval != _|_ {
+			minStep: #target.interval
+		}
 	}
 },

@@ -75,15 +75,7 @@
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "legend": {
-                "mode": "table",
-                "position": "bottom",
-                "values": [
-                  "min",
-                  "max",
-                  "mean"
-                ]
-              }
+              "visual": {}
             }
           },
           "queries": [
@@ -97,7 +89,9 @@
                       "kind": "PrometheusDatasource",
                       "name": "$datasource"
                     },
-                    "query": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))"
+                    "minStep": "2m",
+                    "query": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))",
+                    "seriesNameFormat": "Queueing rate"
                   }
                 }
               }
