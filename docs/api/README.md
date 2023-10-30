@@ -34,7 +34,15 @@ Generic placeholders are defined as follows:
 5. [User](./user.md)
    1. [Specification](./user.md#user-specification)
    2. [API definition](./user.md#api-definition)
-6. Plugin
+6. [Role](./role.md)
+   1. [Choose a scope](./datasource.md#choose-a-scope)
+   2. [Specification](./role.md#role-specification)
+   3. [API definition](./role.md#api-definition)
+7. [RoleBinding](./rolebinding.md)
+   1. [Choose a scope](./rolebinding.md#choose-a-scope)
+   2. [Specification](./rolebinding.md#rolebinding-specification)
+   3. [API definition](./rolebinding.md#api-definition)
+8. Plugin
    1. [Prometheus](./plugin/prometheus.md)
       1. [Datasource](./plugin/prometheus.md#datasource)
       2. [Variable](./plugin/prometheus.md#variable)

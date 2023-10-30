@@ -41,12 +41,13 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 	var getFunc GetFunc
 	var upsertFunc UpsertFunc
 	switch entity := object.(type) {
-	case *v1.Project:
+
+	case *v1.Dashboard:
 		getFunc = func() (api.Entity, error) {
-			return persistenceManager.GetProject().Get(entity.Metadata.Name)
+			return persistenceManager.GetDashboard().Get(entity.Metadata.Project, entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
-			return persistenceManager.GetProject().Update(entity)
+			return persistenceManager.GetDashboard().Update(entity)
 		}
 	case *v1.Datasource:
 		getFunc = func() (api.Entity, error) {
@@ -62,33 +63,19 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		upsertFunc = func() error {
 			return persistenceManager.GetGlobalDatasource().Update(entity)
 		}
-	case *v1.Dashboard:
+	case *v1.GlobalRole:
 		getFunc = func() (api.Entity, error) {
-			return persistenceManager.GetDashboard().Get(entity.Metadata.Project, entity.Metadata.Name)
+			return persistenceManager.GetGlobalRole().Get(entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
-			return persistenceManager.GetDashboard().Update(entity)
+			return persistenceManager.GetGlobalRole().Update(entity)
 		}
-	case *v1.Variable:
+	case *v1.GlobalRoleBinding:
 		getFunc = func() (api.Entity, error) {
-			return persistenceManager.GetVariable().Get(entity.Metadata.Project, entity.Metadata.Name)
+			return persistenceManager.GetGlobalRoleBinding().Get(entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
-			return persistenceManager.GetVariable().Update(entity)
-		}
-	case *v1.GlobalVariable:
-		getFunc = func() (api.Entity, error) {
-			return persistenceManager.GetGlobalVariable().Get(entity.Metadata.Name)
-		}
-		upsertFunc = func() error {
-			return persistenceManager.GetGlobalVariable().Update(entity)
-		}
-	case *v1.Secret:
-		getFunc = func() (api.Entity, error) {
-			return persistenceManager.GetSecret().Get(entity.Metadata.Project, entity.Metadata.Name)
-		}
-		upsertFunc = func() error {
-			return persistenceManager.GetSecret().Update(entity)
+			return persistenceManager.GetGlobalRoleBinding().Update(entity)
 		}
 	case *v1.GlobalSecret:
 		getFunc = func() (api.Entity, error) {
@@ -97,12 +84,54 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		upsertFunc = func() error {
 			return persistenceManager.GetGlobalSecret().Update(entity)
 		}
+	case *v1.GlobalVariable:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetGlobalVariable().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetGlobalVariable().Update(entity)
+		}
+	case *v1.Project:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetProject().Get(entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetProject().Update(entity)
+		}
+	case *v1.Role:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetRole().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetRole().Update(entity)
+		}
+	case *v1.RoleBinding:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetRoleBinding().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetRoleBinding().Update(entity)
+		}
+	case *v1.Secret:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetSecret().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetSecret().Update(entity)
+		}
 	case *v1.User:
 		getFunc = func() (api.Entity, error) {
 			return persistenceManager.GetUser().Get(entity.Metadata.Name)
 		}
 		upsertFunc = func() error {
 			return persistenceManager.GetUser().Update(entity)
+		}
+	case *v1.Variable:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetVariable().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetVariable().Update(entity)
 		}
 	default:
 		t.Fatalf("%T is not managed", object)
@@ -305,6 +334,69 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	dashboard.Metadata.Name = name
 	dashboard.Metadata.Project = projectName
 	return dashboard
+}
+
+func newRoleSpec() v1.RoleSpec {
+	return v1.RoleSpec{
+		Permissions: []v1.Permission{
+			{
+				Actions: []v1.ActionKind{v1.KindCreate},
+				Scopes:  []v1.Kind{v1.KindVariable, v1.KindDatasource},
+			},
+		},
+	}
+}
+
+func NewGlobalRole(name string) *v1.GlobalRole {
+	entity := &v1.GlobalRole{
+		Kind:     v1.KindGlobalRole,
+		Metadata: newMetadata(name),
+		Spec:     newRoleSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewRole(projectName string, name string) *v1.Role {
+	entity := &v1.Role{
+		Kind:     v1.KindRole,
+		Metadata: newProjectMetadata(projectName, name),
+		Spec:     newRoleSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func newRoleBindingSpec() v1.RoleBindingSpec {
+	return v1.RoleBindingSpec{
+		Role: "admin",
+		Subjects: []v1.Subject{
+			{
+				Kind: v1.KindUser,
+				Name: "alice",
+			},
+		},
+	}
+}
+
+func NewGlobalRoleBinding(name string) *v1.GlobalRoleBinding {
+	entity := &v1.GlobalRoleBinding{
+		Kind:     v1.KindGlobalRoleBinding,
+		Metadata: newMetadata(name),
+		Spec:     newRoleBindingSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
+}
+
+func NewRoleBinding(projectName string, name string) *v1.RoleBinding {
+	entity := &v1.RoleBinding{
+		Kind:     v1.KindRoleBinding,
+		Metadata: newProjectMetadata(projectName, name),
+		Spec:     newRoleBindingSpec(),
+	}
+	entity.Metadata.CreateNow()
+	return entity
 }
 
 func newSecretSpec() v1.SecretSpec {

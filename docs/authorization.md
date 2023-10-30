@@ -24,7 +24,7 @@ metadata:
   project: MySuperProject
 spec:
   permissions:
-    - action: edit
+    - actions: ["edit"]
       scopes: ["Dashboard"]
 ```
 
@@ -42,7 +42,7 @@ metadata:
   name: variable-editor
 spec:
   permissions:
-    - action: edit
+    - actions: ["edit"]
       scopes: ["Variable"]
 ```
 
@@ -90,7 +90,7 @@ After you create a binding, you cannot change the `Role` or `GlobalRole` that it
 
 There are two reasons for this restriction:
 - Making role immutable allows granting someone update permission on an existing binding object, so that they can manage the list of subjects, without being able to change the role that is granted to those subjects.
-- A binding to a different role is a fundamentally different binding. Requiring a binding to be deleted/recreated in order to change the roleRef ensures the full list of subjects in the binding is intended to be granted the new role (as opposed to enabling or accidentally modifying only the roleRef without verifying all of the existing subjects should be given the new role's permissions).
+- A binding to a different role is a fundamentally different binding. Requiring a binding to be deleted/recreated in order to change the role reference ensures the full list of subjects in the binding is intended to be granted the new role (as opposed to enabling or accidentally modifying only the role reference without verifying all of the existing subjects should be given the new role's permissions).
 
 ## Referring to resources
 
@@ -103,7 +103,7 @@ metadata:
   name: admin-editor
 spec:
   permissions:
-    - action: edit
+    - actions: ["edit"]
       scopes: ["*"]
 ```
 
@@ -116,51 +116,3 @@ To do that there are multiple mechanisms:
 - cache is refreshed if roles and role bindings retrieve from the user's JWT are different from the cache
 - cache is refreshed when a new role is created, edited or deleted
 - cache is refreshed when a new rolebinding is created, edited or deleted
-
-## Golang Struct Implementation
-
-```golang
-type GlobalRole struct {
-    Kind     Kind
-    Metadata Metadata
-    Spec     RoleSpec
-}
-
-type Role struct {
-    Kind     Kind
-    Metadata ProjectMetadata
-    Spec     RoleSpec
-}
-
-type RoleSpec struct {
-    permissions []Permission
-}
-
-type Permission struct {
-    action string // i.e.: read, create, edit, delete
-    scopes []Kind // i.e.: GlobalDatasource, Dashboard, ...
-}
-
-
-type GlobalRoleBinding struct {
-    Kind     Kind
-    Metadata Metadata
-    Spec     RoleBindingSpec
-}
- 
-type RoleBinding struct {
-    Kind     Kind
-    Metadata ProjectMetadata
-    Spec     RoleBindingSpec 
-}
- 
-type RoleBindingSpec struct {
-    role     string
-    subjects []Subject
-}
- 
-type Subject struct {
-    kind Kind
-    name string
-}
-```

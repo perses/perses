@@ -62,6 +62,20 @@ var resources = []resource{
 		},
 	},
 	{
+		kind:      modelV1.KindGlobalRole,
+		shortTerm: "grl",
+		aliases: []string{
+			"globalRoles",
+		},
+	},
+	{
+		kind:      modelV1.KindGlobalRoleBinding,
+		shortTerm: "grlb",
+		aliases: []string{
+			"globalRoleBindings",
+		},
+	},
+	{
 		kind:      modelV1.KindGlobalSecret,
 		shortTerm: "gs",
 		aliases: []string{
@@ -83,6 +97,20 @@ var resources = []resource{
 		kind: modelV1.KindProject,
 		aliases: []string{
 			"projects",
+		},
+	},
+	{
+		kind:      modelV1.KindRole,
+		shortTerm: "rl",
+		aliases: []string{
+			"roles",
+		},
+	},
+	{
+		kind:      modelV1.KindRoleBinding,
+		shortTerm: "rlb",
+		aliases: []string{
+			"rolebindings",
 		},
 	},
 	{
@@ -112,23 +140,12 @@ var resources = []resource{
 
 func HandleSuccessMessage(writer io.Writer, kind modelV1.Kind, project string, globalResourceMessage string) error {
 	var outputErr error
-	if IsGlobal(kind) {
+	if modelV1.IsGlobal(kind) {
 		outputErr = output.HandleString(writer, globalResourceMessage)
 	} else {
 		outputErr = output.HandleString(writer, fmt.Sprintf("%s in the project %q", globalResourceMessage, project))
 	}
 	return outputErr
-}
-
-// IsGlobal returns true if the give resource type doesn't belong to a project.
-// Returns false otherwise.
-func IsGlobal(kind modelV1.Kind) bool {
-	switch kind {
-	case modelV1.KindProject, modelV1.KindGlobalDatasource, modelV1.KindGlobalSecret, modelV1.KindGlobalVariable:
-		return true
-	default:
-		return false
-	}
 }
 
 // GetProject determinate the project we should use to perform an action on the current resource with the following logic:
