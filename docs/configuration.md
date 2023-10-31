@@ -62,23 +62,8 @@ Generic placeholders are defined as follows:
 * `<string>`: a regular string
 
 ```yaml
-  # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
-  # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
-  [ readonly: <boolean> | default = false ]
-
-  # It is activating or deactivating the permission verification on each endpoint.
-  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ activate_permission: <boolean> | default = true ]
-
-  # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
-  # Note that if it is not provided, it will be generated. 
-  # When Perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
-  # and therefore won't be able to decrypt what the other is encrypting.
-  # Also note that the key must be at least 32 bytes long.
-  [ encryption_key: <secret> ]
-
-  # The path to the file containing the secret key.
-  [ encryption_key_file: <filename> ]
+  # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
+  [ security: <security_config> ]
 
   # Database configuration 
   database: <database_config>
@@ -96,6 +81,28 @@ Generic placeholders are defined as follows:
   # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
   # The data coming from the provisioning folder will totally override what exists in the database.
   [ provisioning: <provisioning_spec> ]
+```
+
+### `<security_config>`
+
+```yaml
+  # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
+  # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
+  [ readonly: <boolean> | default = false ]
+
+  # It is activating or deactivating the permission verification on each endpoint.
+  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ activate_permission: <boolean> | default = true ]
+
+  # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
+  # Note that if it is not provided, it will be generated. 
+  # When Perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
+  # and therefore won't be able to decrypt what the other is encrypting.
+  # Also note that the key must be at least 32 bytes long.
+  [ encryption_key: <secret> ]
+
+  # The path to the file containing the secret key.
+  [ encryption_key_file: <filename> ]
 ```
 
 ### `<database_config>`

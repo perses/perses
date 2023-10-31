@@ -1,6 +1,8 @@
-readonly: false
-activate_permission: true
-encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+security:
+  readonly: false
+  activate_permission: true
+  encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+
 database:
   sql:
     user: "user"

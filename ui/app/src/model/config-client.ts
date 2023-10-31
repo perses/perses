@@ -85,11 +85,15 @@ export interface ProvisioningConfig {
   folders: string[];
 }
 
-export interface ConfigModel {
+export interface SecurityConfig {
   readonly: boolean;
   activate_permission: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+}
+
+export interface ConfigModel {
+  security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
   important_dashboards: DashboardSelector[];
@@ -129,7 +133,7 @@ export function useIsReadonly() {
   if (isLoading || data === undefined) {
     return undefined;
   }
-  return data.readonly;
+  return data.security.readonly;
 }
 
 export function useImportantDashboardSelectors() {
