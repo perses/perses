@@ -66,25 +66,29 @@ func (j *jwtImpl) SignedToken(login string) (string, error) {
 func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(time.Hour * 1)
 	tokenSplit := strings.Split(token, ".")
+	maxAge := 3600
+	path := "/"
+	sameSite := http.SameSiteNoneMode
+	secure := true
 	headerPayloadCookie := &http.Cookie{
 		Name:     cookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
-		Path:     "/",
-		MaxAge:   3600,
+		Path:     path,
+		MaxAge:   maxAge,
 		Expires:  expireDate,
-		Secure:   true,
+		Secure:   secure,
 		HttpOnly: false,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: sameSite,
 	}
 	signatureCookie := &http.Cookie{
 		Name:     cookieKeyJWTSignature,
 		Value:    tokenSplit[2],
-		Path:     "/",
-		MaxAge:   3600,
+		Path:     path,
+		MaxAge:   maxAge,
 		Expires:  expireDate,
-		Secure:   true,
+		Secure:   secure,
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: sameSite,
 	}
 	return headerPayloadCookie, signatureCookie
 }
