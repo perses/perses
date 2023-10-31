@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { DashboardSelector, fetchJson } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { marked } from 'marked';
@@ -107,6 +107,15 @@ export function useConfig(options?: ConfigOptions) {
     },
     options
   );
+}
+
+export function useGetConfigMutation() {
+  return useMutation<ConfigModel, Error>({
+    mutationKey: [resource],
+    mutationFn: () => {
+      return fetchConfig();
+    },
+  });
 }
 
 export function fetchConfig() {

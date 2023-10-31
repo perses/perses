@@ -15,19 +15,23 @@ import { Await, Outlet, useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
-import { fetchConfig } from '../model/config-client';
+import { useGetConfigMutation } from '../model/config-client';
 import { useAuthToken } from '../model/auth-client';
 import { SignInRoute } from '../model/route';
 
 function GuardedAuthRoute() {
+  const { mutateAsync } = useGetConfigMutation();
   const { exceptionSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { isExpired } = useAuthToken();
   const [authPromise, setAuthPromise] = useState<Promise<boolean>>();
 
   useEffect(() => {
+    if (authPromise !== undefined) {
+      return;
+    }
     setAuthPromise(
-      fetchConfig()
+      mutateAsync()
         .catch((err) => {
           exceptionSnackbar(err);
           throw err;
@@ -45,7 +49,7 @@ function GuardedAuthRoute() {
           return true;
         })
     );
-  }, [exceptionSnackbar, isExpired, navigate]);
+  }, [authPromise, exceptionSnackbar, isExpired, mutateAsync, navigate]);
   return (
     <Suspense fallback={<LinearProgress />}>
       <Await resolve={authPromise}>
