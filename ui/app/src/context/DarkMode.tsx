@@ -48,7 +48,7 @@ export function DarkModeContextProvider(props: { children: React.ReactNode }) {
 
   const theme = useMemo(() => getTheme(isDarkModeEnabled ? 'dark' : 'light'), [isDarkModeEnabled]);
   const chartsTheme: PersesChartsTheme = useMemo(() => {
-    return generateChartsTheme(theme, ECHARTS_THEME_OVERRIDES);
+    return generateChartsTheme(theme, { echartsTheme: ECHARTS_THEME_OVERRIDES });
   }, [theme]);
 
   return (

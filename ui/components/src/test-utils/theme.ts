@@ -34,7 +34,9 @@ const TEST_ECHARTS_THEME_OVERRIDES: EChartsTheme = {
   },
 };
 
-export const testChartsTheme: PersesChartsTheme = generateChartsTheme(createMuiTheme({}), TEST_ECHARTS_THEME_OVERRIDES);
+export const testChartsTheme: PersesChartsTheme = generateChartsTheme(createMuiTheme({}), {
+  echartsTheme: TEST_ECHARTS_THEME_OVERRIDES,
+});
 
 export const mockChartsContext: SharedChartsState = {
   chartsTheme: testChartsTheme,
