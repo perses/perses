@@ -38,6 +38,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		return nil, nil, fmt.Errorf("unable to initialize the database: %w", dbInitError)
 	}
 	serviceManager, err := dependency.NewServiceManager(persistenceManager, conf)
+	//authorizationManager, err := dependency.NewAuthorizationManager(persistenceManager, conf)
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to initialize the service manager: %w", err)
 	}

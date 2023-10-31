@@ -91,7 +91,7 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	return sql, args, nil
 }
 
-func generatSelectQuery(tableName string, project string, name string) (string, []interface{}) {
+func generateSelectQuery(tableName string, project string, name string) (string, []interface{}) {
 	queryBuilder := sqlbuilder.NewSelectBuilder().
 		Select(colDoc).
 		From(tableName)
@@ -109,33 +109,33 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 	var args []interface{}
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
 	case *folder.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
 	case *globalrole.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
 	case *globalrolebinding.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
 	case *globalsecret.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
 	case *globalvariable.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	case *role.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
 	case *rolebinding.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
 	case *secret.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
 	case *user.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
 	case *variable.Query:
-		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}

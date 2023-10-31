@@ -73,6 +73,15 @@ type RoleBindingSpec struct {
 	Subjects []Subject `json:"subjects" yaml:"subjects"`
 }
 
+func (r *RoleBindingSpec) Has(kind Kind, name string) bool {
+	for _, sub := range r.Subjects {
+		if sub.Kind == kind && sub.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 func (r *RoleBindingSpec) UnmarshalJSON(data []byte) error {
 	var tmp RoleBindingSpec
 	type plain RoleBindingSpec

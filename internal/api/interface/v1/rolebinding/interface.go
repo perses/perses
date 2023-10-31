@@ -27,6 +27,9 @@ type Query struct {
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
 	Project string `param:"project" query:"project"`
+	// User is the exact name of a
+	SubjectKind string `param:"subjectKind" query:"subjectKind"`
+	SubjectName string `param:"subjectKind" query:"subjectKind"`
 }
 
 type DAO interface {
