@@ -61,6 +61,9 @@ func (e *Endpoint) auth(ctx echo.Context) error {
 		logrus.WithError(err).Errorf("unable to generate the JWT token")
 		return shared.InternalError
 	}
+	jwtHeaderPayloadCookie, signatureCookie := e.jwt.CreateJWTCookies(token)
+	ctx.SetCookie(jwtHeaderPayloadCookie)
+	ctx.SetCookie(signatureCookie)
 	return ctx.JSON(http.StatusOK, api.AuthResponse{
 		Token: token,
 	})
