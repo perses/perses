@@ -52,7 +52,7 @@ type api struct {
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
-	readonly := cfg.Readonly
+	readonly := cfg.Security.Readonly
 	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
@@ -80,7 +80,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
-			return !*cfg.ActivatePermission
+			return !*cfg.Security.ActivatePermission
 		}),
 	}
 }

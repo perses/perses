@@ -37,7 +37,7 @@ function GuardedAuthRoute() {
           throw err;
         })
         .then((conf) => {
-          if (!conf.activate_permission) {
+          if (!conf.security.activate_permission) {
             return true;
           }
           if (isExpired) {
