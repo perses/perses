@@ -20,7 +20,8 @@ import { ReactCodeMirrorProps } from '@uiw/react-codemirror/src';
 
 type JSONEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'extensions' | 'onChange' | 'value'> & {
   value: T;
-  onChange?: (next: T) => void;
+  placeholder?: string;
+  onChange?: (next: string) => void;
 };
 
 export function JSONEditor<T>(props: JSONEditorProps<T>) {
@@ -28,6 +29,7 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
   const isDarkMode = theme.palette.mode === 'dark';
 
   const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
+  const [lastProcessedValue, setLastProcessedValue] = useState<string>(value);
 
   useEffect(() => {
     setValue(JSON.stringify(props.value, null, 2));
@@ -44,15 +46,14 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
         setValue(newValue);
       }}
       onBlur={() => {
-        try {
-          const json = JSON.parse(value ?? '{}');
-          if (props.onChange !== undefined) {
-            props.onChange(json);
-          }
-        } catch (e) {
-          // ignore this error
+        // Avoid triggering the provided onChange if the last processed value is equal to the current value.
+        // Without this, the find & replace interface (showing up when typing CTRL+F, which triggers onBlur) closes immediately.
+        if (lastProcessedValue !== value && props.onChange !== undefined) {
+          props.onChange(value);
+          setLastProcessedValue(value);
         }
       }}
+      placeholder={props.placeholder}
     />
   );
 }

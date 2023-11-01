@@ -22,7 +22,7 @@ export interface PanelSpecEditorProps {
   panelDefinition: PanelDefinition;
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
-  onJSONChange: (panelDefinition: PanelDefinition) => void;
+  onJSONChange: (panelDefinitionStr: string) => void;
 }
 
 export function PanelSpecEditor(props: PanelSpecEditorProps) {

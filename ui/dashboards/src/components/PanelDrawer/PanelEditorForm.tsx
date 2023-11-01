@@ -98,7 +98,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     }
   }
 
-  const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
+  const handlePanelDefinitionChange = (nextPanelDefStr: string) => {
+    const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);
     const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
     // if panel plugin kind and spec are modified, then need to save current spec
     if (
