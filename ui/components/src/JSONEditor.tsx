@@ -46,8 +46,9 @@ export function JSONEditor<T>(props: JSONEditorProps<T>) {
         setValue(newValue);
       }}
       onBlur={() => {
-        // Avoid triggering the provided onChange if the last processed value is equal to the current value.
-        // Without this, the find & replace interface (showing up when typing CTRL+F, which triggers onBlur) closes immediately.
+        // Don't trigger the provided onChange if the last processed value is equal to the current value.
+        // This prevents e.g CTRL+F to trigger value refresh downstream, which would cause the embedded
+        // find & replace interface to close immediately.
         if (lastProcessedValue !== value && props.onChange !== undefined) {
           props.onChange(value);
           setLastProcessedValue(value);
