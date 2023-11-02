@@ -64,7 +64,10 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   }
 
   // always show json editor by default
-  tabs.push({ label: 'JSON', content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
+  tabs.push({
+    label: 'JSON',
+    content: <JSONEditor maxHeight="80vh" value={panelDefinition} onChange={onJSONChange} />,
+  });
 
   return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
 }
