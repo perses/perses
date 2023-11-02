@@ -116,7 +116,7 @@ function MigrateView() {
         <Divider>OR</Divider>
         <JSONEditor
           value={grafanaDashboard}
-          onChange={(e: string) => completeGrafanaDashboard(e)}
+          onChange={(value: string) => completeGrafanaDashboard(value)}
           minHeight="10rem"
           maxHeight="30rem"
           width="100%"
