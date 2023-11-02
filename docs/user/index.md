@@ -6,11 +6,11 @@ dashboard.
 
 **Prerequisites:** Podman 4.x+ OR Go version 1.18+, NodeJS version 16+, npm version 8+ 
 
-**Note:** This workshop is based on Perses v0.41.
+**Note:** This documentation is based on Perses v0.41.
 
 ## Table of Contents
 
-### 1 - Introduction to Perses (Coming soon...)
+### [1 - Introduction to Perses](section-1/introduction.md)
 This section introduces you to the Perses project and provides you with an understanding of its role in the CoreDash 
 community.
 
