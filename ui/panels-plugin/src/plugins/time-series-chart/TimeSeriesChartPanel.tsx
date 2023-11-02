@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import { Box, Skeleton, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
@@ -43,7 +43,6 @@ import {
   TableColumnConfig,
   LegendItem,
   LegendProps,
-  useId,
   TimeChart,
   TimeChartSeriesMapping,
   TooltipConfig,
@@ -82,7 +81,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   } = props;
   const chartsTheme = useChartsTheme();
   const muiTheme = useTheme();
-  const chartId = useId('time-series-panel');
+  const chartId = useId();
 
   const chartRef = useRef<ChartInstance>(null);
 

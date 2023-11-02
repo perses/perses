@@ -12,9 +12,8 @@
 // limitations under the License.
 
 import { FormControl, FormLabel, FormControlLabelProps, Stack, Box, IconButton } from '@mui/material';
-import React from 'react';
+import React, { useId } from 'react';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { useId } from '../utils';
 import { InfoTooltip } from '../InfoTooltip';
 
 export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'control'> & {
@@ -24,7 +23,7 @@ export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'c
 export const OptionsEditorControl = ({ label, control, description }: OptionsEditorControlProps) => {
   // Make sure we have a unique ID we can use for associating labels and
   // controls for a11y.
-  const generatedControlId = useId('EditorSectionControl');
+  const generatedControlId = useId();
   const controlId = `${generatedControlId}-control`;
 
   const controlProps = {

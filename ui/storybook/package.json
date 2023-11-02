@@ -43,8 +43,8 @@
     "msw": "^1.2.1",
     "msw-storybook-addon": "^1.8.0",
     "qs": "^6.11.1",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "storybook": "^7.0.2",
     "storybook-dark-mode": "^3.0.0"
   },

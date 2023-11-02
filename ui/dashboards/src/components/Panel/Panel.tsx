@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo, useId } from 'react';
 import useResizeObserver from 'use-resize-observer';
-import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
+import { ErrorBoundary, ErrorAlert, combineSx, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
 import { Card, CardProps, CardContent } from '@mui/material';
 import { PanelGroupItemId } from '../../context';
@@ -53,7 +53,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, panelOptions, panelGroupItemId, ...others } = props;
 
   // Make sure we have an ID we can use for aria attributes
-  const generatedPanelId = useId('Panel');
+  const generatedPanelId = useId();
   const headerId = `${generatedPanelId}-header`;
 
   const [contentElement, setContentElement] = useState<HTMLElement | null>(null);
