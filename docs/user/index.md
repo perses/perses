@@ -4,9 +4,7 @@ Are you looking at getting started with open dashboards and visualization? This 
 the open source dashboards and visualization project Perses, what it is, a basic installation, and building your first 
 dashboard.
 
-**Prerequisites:** Podman 4.x+ OR Go version 1.18+, NodeJS version 16+, npm version 8+ 
-
-**Note:** This documentation is based on Perses v0.41.
+**Prerequisites:** Podman 4.x+ OR Go version 1.18+, NodeJS version 16+, npm version 8+
 
 ## Table of Contents
 
