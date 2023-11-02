@@ -19,6 +19,7 @@ import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
 const authResource = 'auth';
+const jwtPayload = 'jwtPayload';
 
 export interface AuthResponse {
   token: string;
@@ -29,9 +30,17 @@ export interface AuthBody {
   password: string;
 }
 
+export function useIsTokenExist() {
+  const [cookies] = useCookies();
+  return cookies[jwtPayload] !== undefined;
+}
+
 export function useAuthToken() {
   const [cookies] = useCookies();
-  const partialToken = cookies['jwtPayload'];
+  const partialToken = cookies[jwtPayload];
+  // useJWT need a complete token (including a signature) to be able to decode it.
+  // It doesn't need the accurate signature to decode the payload.
+  // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
   return useJwt(`${partialToken}.${fakeSignature}`);
 }

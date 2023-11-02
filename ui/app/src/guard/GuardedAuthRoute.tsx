@@ -16,14 +16,14 @@ import { useSnackbar } from '@perses-dev/components';
 import { Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 import { useGetConfigMutation } from '../model/config-client';
-import { useAuthToken } from '../model/auth-client';
+import { useIsTokenExist } from '../model/auth-client';
 import { SignInRoute } from '../model/route';
 
 function GuardedAuthRoute() {
   const { mutateAsync } = useGetConfigMutation();
   const { exceptionSnackbar } = useSnackbar();
   const navigate = useNavigate();
-  const { isExpired } = useAuthToken();
+  const isTokenExist = useIsTokenExist();
   const [authPromise, setAuthPromise] = useState<Promise<boolean>>();
 
   useEffect(() => {
@@ -40,7 +40,8 @@ function GuardedAuthRoute() {
           if (!conf.security.activate_permission) {
             return true;
           }
-          if (isExpired) {
+          // In case the token is null, it means we weren't able to find the cookie.
+          if (!isTokenExist) {
             navigate(SignInRoute);
             const err = new Error('session has expired');
             exceptionSnackbar(err);
@@ -49,7 +50,7 @@ function GuardedAuthRoute() {
           return true;
         })
     );
-  }, [authPromise, exceptionSnackbar, isExpired, mutateAsync, navigate]);
+  }, [authPromise, exceptionSnackbar, isTokenExist, mutateAsync, navigate]);
   return (
     <Suspense fallback={<LinearProgress />}>
       <Await resolve={authPromise}>
