@@ -49,9 +49,10 @@ type api struct {
 	apiV1Endpoints []endpoint
 	apiEndpoints   []endpoint
 	jwtMiddleware  echo.MiddlewareFunc
+	rbacMiddleware echo.MiddlewareFunc
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, authorizationManager dependency.AuthorizationManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
 	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
@@ -80,6 +81,9 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
+			return !*cfg.Security.ActivatePermission
+		}),
+		rbacMiddleware: authorizationManager.GetRBAC().Middleware(func(c echo.Context) bool {
 			return !*cfg.Security.ActivatePermission
 		}),
 	}
@@ -122,6 +126,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 			var mdws []echo.MiddlewareFunc
 			if !route.IsAnonymous {
 				mdws = append(mdws, a.jwtMiddleware)
+				mdws = append(mdws, a.rbacMiddleware)
 			}
 			route.Register(group, mdws...)
 		}
