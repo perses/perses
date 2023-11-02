@@ -43,6 +43,7 @@ type JWT interface {
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
 	// The second cookie will contain the signature, and it won't be accessible by Javascript.
 	CreateJWTCookies(token string) (*http.Cookie, *http.Cookie)
+	Parse(token string) (*JWTCustomClaims, error)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
@@ -91,6 +92,21 @@ func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 		SameSite: sameSite,
 	}
 	return headerPayloadCookie, signatureCookie
+}
+
+func (j *jwtImpl) Parse(token string) (*JWTCustomClaims, error) {
+	jwtToken, err := jwt.ParseWithClaims(token, &JWTCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return j.key, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse token '%q': %w", token, err)
+	}
+
+	claims, ok := jwtToken.Claims.(*JWTCustomClaims)
+	if !ok || !jwtToken.Valid {
+		return nil, fmt.Errorf("failed to parse token claims: %w", err)
+	}
+	return claims, nil
 }
 
 func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {

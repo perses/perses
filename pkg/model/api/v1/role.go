@@ -28,11 +28,11 @@ type RoleInterface interface {
 type ActionKind string
 
 const (
-	KindWildcard ActionKind = "*"
-	KindRead     ActionKind = "read"
-	KindCreate   ActionKind = "create"
-	KindUpdate   ActionKind = "update"
-	KindDelete   ActionKind = "delete"
+	WildcardAction ActionKind = "*"
+	ReadAction     ActionKind = "read"
+	CreateAction   ActionKind = "create"
+	UpdateAction   ActionKind = "update"
+	DeleteAction   ActionKind = "delete"
 )
 
 type Permission struct {

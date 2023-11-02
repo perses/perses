@@ -16,6 +16,7 @@ package dependency
 import (
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/crypto"
 )
 
 type AuthorizationManager interface {
@@ -27,8 +28,8 @@ type authorztion struct {
 	rbac authorization.RBAC
 }
 
-func NewAuthorizationManager(dao PersistenceManager, conf config.Config) (AuthorizationManager, error) {
-	rbac, err := authorization.NewRBAC(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf.Authorization)
+func NewAuthorizationManager(dao PersistenceManager, jwtService crypto.JWT, conf config.Config) (AuthorizationManager, error) {
+	rbac, err := authorization.NewRBAC(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), jwtService, conf.Authorization)
 	if err != nil {
 		return nil, err
 	}

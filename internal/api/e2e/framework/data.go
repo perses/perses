@@ -340,7 +340,7 @@ func newRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
 		Permissions: []v1.Permission{
 			{
-				Actions: []v1.ActionKind{v1.KindCreate},
+				Actions: []v1.ActionKind{v1.CreateAction},
 				Scopes:  []v1.Kind{v1.KindVariable, v1.KindDatasource},
 			},
 		},
