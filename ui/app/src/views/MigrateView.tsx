@@ -42,7 +42,8 @@ interface GrafanaLightDashboard {
 }
 
 function MigrateView() {
-  const [grafanaDashboard, setGrafanaDashboard] = useState<string>('');
+  const [grafanaDashboard, setGrafanaDashboard] = useState<Record<string, unknown>>();
+  const [isValidJson, setIsValidJson] = useState<boolean>(false);
   const [lightGrafanaDashboard, setLightGrafanaDashboard] = useState<GrafanaLightDashboard>();
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
   const [projectName, setProjectName] = useState<string>('');
@@ -54,6 +55,7 @@ function MigrateView() {
   });
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
+
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files === null) {
@@ -64,6 +66,7 @@ function MigrateView() {
       completeGrafanaDashboard(value);
     }
   };
+
   const importOnClick = () => {
     const dashboard = migrateMutation.data;
     if (dashboard === undefined) {
@@ -72,14 +75,23 @@ function MigrateView() {
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };
-  const completeGrafanaDashboard = (dashboard: string) => {
-    setLightGrafanaDashboard(JSON.parse(dashboard));
-    setGrafanaDashboard(dashboard);
+
+  const completeGrafanaDashboard = (dashboard: string | undefined) => {
+    try {
+      const json = JSON.parse(dashboard ?? '{}');
+      setGrafanaDashboard(json);
+      setLightGrafanaDashboard(json);
+      setIsValidJson(true);
+    } catch (e) {
+      setIsValidJson(false);
+    }
   };
+
   const setInput = (key: string, value: string) => {
     grafanaInput[key] = value;
     setGrafanaInput(grafanaInput);
   };
+
   return (
     <Container maxWidth="md" sx={{ marginY: 2 }}>
       <Stack direction="row" alignItems="center" gap={1} mb={2}>
@@ -102,14 +114,12 @@ function MigrateView() {
           <input type="file" onChange={fileUploadOnChange} hidden style={{ width: '100%' }} />
         </Button>
         <Divider>OR</Divider>
-        <TextField
+        <JSONEditor
           value={grafanaDashboard}
-          onChange={(e) => completeGrafanaDashboard(e.target.value)}
-          multiline
-          fullWidth
-          minRows={10}
-          maxRows={20}
-          label="Grafana Dashboard JSON"
+          onChange={(e: string) => completeGrafanaDashboard(e)}
+          minHeight="10rem"
+          maxHeight="30rem"
+          width="100%"
           placeholder="Paste your Grafana Dashboard JSON here..."
         />
         {
@@ -129,10 +139,10 @@ function MigrateView() {
         }
         <Button
           variant="contained"
-          disabled={migrateMutation.isLoading || grafanaDashboard.length == 0}
+          disabled={migrateMutation.isLoading || !isValidJson}
           startIcon={<AutoFix />}
           onClick={() => {
-            migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: grafanaDashboard });
+            migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: grafanaDashboard ?? {} });
           }}
         >
           Migrate
@@ -148,7 +158,7 @@ function MigrateView() {
             <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
               2. Migration output
             </Typography>
-            <JSONEditor value={migrateMutation.data} maxHeight="50rem" width="100%" />
+            <JSONEditor value={migrateMutation.data} maxHeight="50rem" width="100%" readOnly />
             <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
               3. Import
             </Typography>
