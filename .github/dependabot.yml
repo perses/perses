@@ -7,11 +7,19 @@ updates:
   open-pull-requests-limit: 10
   schedule:
     interval: "weekly"
+  # Raise all gomod pull requests with custom labels
+  labels:
+    - "dependencies"
+    - "api"
 - package-ecosystem: "npm"
   directory: "/ui"
   open-pull-requests-limit: 0
   schedule:
     interval: "monthly"
+  # Raise all npm pull requests with custom labels
+  labels:
+    - "dependencies"
+    - "ui"
 - package-ecosystem: "github-actions"
   directory: "/"
   schedule:

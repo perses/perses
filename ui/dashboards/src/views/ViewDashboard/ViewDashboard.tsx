@@ -15,18 +15,18 @@ import { Box, BoxProps } from '@mui/material';
 import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
-  TimeRangeProvider,
+  TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import {
-  TemplateVariableProvider,
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
   TemplateVariableProviderProps,
+  TemplateVariableProviderWithQueryParams,
 } from '../../context';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
@@ -101,12 +101,11 @@ export function ViewDashboard(props: ViewDashboardProps) {
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
-        <TimeRangeProvider
+        <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
-          enabledURLParams={true}
         >
-          <TemplateVariableProvider
+          <TemplateVariableProviderWithQueryParams
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
             builtinVariables={builtinVariables}
@@ -137,8 +136,8 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 />
               </ErrorBoundary>
             </Box>
-          </TemplateVariableProvider>
-        </TimeRangeProvider>
+          </TemplateVariableProviderWithQueryParams>
+        </TimeRangeProviderWithQueryParams>
       </DashboardProvider>
     </DatasourceStoreProvider>
   );

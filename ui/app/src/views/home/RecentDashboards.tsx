@@ -36,7 +36,7 @@ function RecentDashboardsMosaic() {
   }
 
   return (
-    <>
+    <Grid container spacing={2} data-testid="recent-dashboards-mosaic">
       {data.map((datedDashboard) => (
         <Grid
           key={`${datedDashboard.dashboard.metadata.project}-${datedDashboard.dashboard.metadata.name}`}
@@ -47,7 +47,7 @@ function RecentDashboardsMosaic() {
           <DashboardCard dashboard={datedDashboard.dashboard}></DashboardCard>
         </Grid>
       ))}
-    </>
+    </Grid>
   );
 }
 
@@ -58,9 +58,7 @@ export function RecentDashboards() {
         <HistoryIcon />
         <h2>Recent Dashboards</h2>
       </Stack>
-      <Grid container spacing={2}>
-        <RecentDashboardsMosaic />
-      </Grid>
+      <RecentDashboardsMosaic />
     </Stack>
   );
 }

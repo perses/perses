@@ -35,7 +35,7 @@ export class AppHomePage {
    * @param dashboardName - Name of the dashboard.
    */
   async navigateToDashboard(projectName: string, dashboardName: string) {
-    this.goto();
+    await this.goto();
 
     await this.showDashboardList(projectName);
     const navigationPromise = this.page.waitForNavigation();
@@ -48,7 +48,7 @@ export class AppHomePage {
    * @param projectName - Name of the project.
    */
   async navigateToProject(projectName: string) {
-    this.goto();
+    await this.goto();
 
     const navigationPromise = this.page.waitForNavigation();
     await this.clickProjectLink(projectName);
@@ -64,7 +64,7 @@ export class AppHomePage {
   }
 
   async clickProjectLink(projectName: string) {
-    const projectLink = this.page.getByRole('link', { name: projectName });
+    const projectLink = this.page.getByRole('button', { name: projectName }).getByRole('link', { name: projectName });
     await projectLink.click();
   }
 
@@ -83,10 +83,9 @@ export class AppHomePage {
   }
 
   async clickRecentDashboardItem(projectName: string, dashboardName: string) {
-    const dashboardButton = this.page.getByRole('button', {
-      name: `${dashboardName} ${projectName}`,
-    });
-
+    const dashboardButton = this.page
+      .getByTestId('recent-dashboards-mosaic')
+      .getByTestId(`dashboard-card-${projectName}-${dashboardName}`);
     await dashboardButton.click();
   }
 

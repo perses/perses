@@ -82,10 +82,6 @@
       "pluginVersion": "9.5.8",
       "targets": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "argos-world"
-          },
           "editorMode": "code",
           "expr": "vector(4)",
           "legendFormat": "__auto",
@@ -193,7 +189,7 @@
               "type": "linear"
             },
             "showPoints": "auto",
-            "spanNulls": false,
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -291,7 +287,7 @@
                 "axisPlacement": "auto",
                 "barAlignment": 0,
                 "drawStyle": "line",
-                "fillOpacity": 0,
+                "fillOpacity": 85,
                 "gradientMode": "none",
                 "hideFrom": {
                   "legend": false,
@@ -342,7 +338,7 @@
               "calcs": [],
               "displayMode": "table",
               "placement": "bottom",
-              "showLegend": true
+              "showLegend": false
             },
             "tooltip": {
               "mode": "single",
@@ -352,7 +348,6 @@
           "targets": [
             {
               "datasource": {
-                "type": "prometheus",
                 "uid": "argos-world"
               },
               "editorMode": "code",
@@ -456,6 +451,15 @@
           "type": "text"
         }
       ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "My row title",
       "type": "row"
     }
@@ -510,6 +514,7 @@
         "type": "constant"
       },
       {
+        "allValue": ".*",
         "current": {
           "selected": false,
           "text": "All",
@@ -544,7 +549,6 @@
           "value": "$__all"
         },
         "datasource": {
-          "type": "prometheus",
           "uid": "argos-world"
         },
         "definition": "label_values(thanos_build_info, stack)",

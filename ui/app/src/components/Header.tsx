@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -41,7 +41,6 @@ import WhitePersesLogo from './logo/WhitePersesLogo';
 const ITEM_HEIGHT = 48;
 
 function ProjectMenu(): JSX.Element {
-  const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -94,25 +93,27 @@ function ProjectMenu(): JSX.Element {
         {data.length ? (
           data.map((project, index) => {
             return (
-              <MenuItem
-                key={index}
-                onClick={() => {
-                  setAnchorEl(null);
-                  navigate(`/projects/${project.metadata.name}`);
-                }}
-              >
-                <Typography
-                  variant="inherit"
-                  noWrap
-                  sx={{
-                    '&:hover': {
-                      overflow: 'visible',
-                    },
+              <li key={index}>
+                <MenuItem
+                  component={RouterLink}
+                  to={`/projects/${project.metadata.name}`}
+                  onClick={() => {
+                    setAnchorEl(null);
                   }}
                 >
-                  {project.metadata.name}
-                </Typography>
-              </MenuItem>
+                  <Typography
+                    variant="inherit"
+                    noWrap
+                    sx={{
+                      '&:hover': {
+                        overflow: 'visible',
+                      },
+                    }}
+                  >
+                    {project.metadata.name}
+                  </Typography>
+                </MenuItem>
+              </li>
             );
           })
         ) : (
@@ -132,7 +133,6 @@ function ProjectMenu(): JSX.Element {
 }
 
 export default function Header(): JSX.Element {
-  const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,9 +164,8 @@ export default function Header(): JSX.Element {
           }}
         >
           <Button
-            onClick={() => {
-              navigate('/');
-            }}
+            component={RouterLink}
+            to="/"
             sx={{
               padding: 0,
             }}
@@ -183,9 +182,8 @@ export default function Header(): JSX.Element {
             aria-controls="menu-admin-appbar"
             aria-haspopup="true"
             color="inherit"
-            onClick={() => {
-              navigate('/admin');
-            }}
+            component={RouterLink}
+            to="/admin"
           >
             <ShieldAccount sx={{ marginRight: 0.5 }} /> Admin
           </Button>
@@ -194,9 +192,8 @@ export default function Header(): JSX.Element {
             aria-controls="menu-config-appbar"
             aria-haspopup="true"
             color="inherit"
-            onClick={() => {
-              navigate('/config');
-            }}
+            component={RouterLink}
+            to="/config"
           >
             <Cog sx={{ marginRight: 0.5 }} /> Config
           </Button>
@@ -208,9 +205,8 @@ export default function Header(): JSX.Element {
               sx={(theme) => ({
                 color: theme.palette.common.white,
               })}
-              onClick={() => {
-                navigate('/migrate');
-              }}
+              component={RouterLink}
+              to="/migrate"
             >
               <AutoFix />
             </IconButton>

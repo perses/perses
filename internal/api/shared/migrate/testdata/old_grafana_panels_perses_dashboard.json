@@ -75,15 +75,7 @@
           "plugin": {
             "kind": "TimeSeriesChart",
             "spec": {
-              "legend": {
-                "mode": "table",
-                "position": "bottom",
-                "values": [
-                  "min",
-                  "max",
-                  "mean"
-                ]
-              }
+              "visual": {}
             }
           },
           "queries": [
@@ -95,9 +87,11 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "MigrationFromGrafanaNotSupported"
+                      "name": "$datasource"
                     },
-                    "query": "migration_from_grafana_not_supported"
+                    "minStep": "2m",
+                    "query": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))",
+                    "seriesNameFormat": "Queueing rate"
                   }
                 }
               }
@@ -107,12 +101,6 @@
       }
     },
     "layouts": [
-      {
-        "kind": "Grid",
-        "spec": {
-          "items": []
-        }
-      },
       {
         "kind": "Grid",
         "spec": {

@@ -16,24 +16,22 @@ import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardResource } from '@perses-dev/core';
 import { getDashboardDisplayName } from '@perses-dev/core/dist/utils/text';
 import FolderPoundIcon from 'mdi-material-ui/FolderPound';
-import { useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface DashboardCardProps {
   dashboard: DashboardResource;
 }
 
 export function DashboardCard(props: DashboardCardProps) {
-  const navigate = useNavigate();
-
   return (
     <Button
       variant="contained"
       fullWidth
       sx={{ justifyContent: 'start', backgroundColor: (theme) => theme.palette.designSystem.blue[700] }}
-      onClick={() =>
-        navigate(`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`)
-      }
       title={getDashboardDisplayName(props.dashboard)}
+      component={RouterLink}
+      to={`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`}
+      data-testid={`dashboard-card-${props.dashboard.metadata.project}-${props.dashboard.metadata.name}`}
     >
       <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, maxWidth: '100%' }}>
         <ViewDashboardIcon />

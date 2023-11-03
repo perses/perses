@@ -424,6 +424,21 @@ export function TemplateVariableProvider({
   externalVariableDefinitions = [],
   builtinVariables = [],
 }: TemplateVariableProviderProps) {
+  const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions }));
+
+  return (
+    <TemplateVariableStoreContext.Provider value={store}>
+      <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
+    </TemplateVariableStoreContext.Provider>
+  );
+}
+
+export function TemplateVariableProviderWithQueryParams({
+  children,
+  initialVariableDefinitions = [],
+  externalVariableDefinitions = [],
+  builtinVariables = [],
+}: TemplateVariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(
