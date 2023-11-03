@@ -35,7 +35,7 @@ func ExtractParameters(ctx echo.Context) Parameters {
 }
 
 func ExtractJWTClaims(ctx echo.Context, jwtService crypto.JWT) *crypto.JWTCustomClaims {
-	claims, err := jwtService.Parse(ctx.Request().Header.Get("Authorization"))
+	claims, err := jwtService.Parse(crypto.ExtractTokenFromBearer(ctx.Request().Header.Get("Authorization")))
 	if err != nil {
 		return nil
 	}

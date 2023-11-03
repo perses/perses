@@ -36,6 +36,14 @@ type JWTCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+func ExtractTokenFromBearer(header string) string {
+	splitToken := strings.Split(header, "Bearer")
+	if len(splitToken) != 2 {
+		return ""
+	}
+	return strings.TrimSpace(splitToken[1])
+}
+
 type JWT interface {
 	SignedToken(login string) (string, error)
 	// CreateJWTCookies will create two different cookies that contain a piece of the token.

@@ -45,10 +45,10 @@ func NewService(dao globalvariable.DAO, rbac authorization.RBAC, sch schemas.Sch
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.GlobalVariable); ok {
 		if claims == nil { // TODO: check permission disabled
-			return nil, fmt.Errorf("missing token")
+			return nil, shared.HandleBadRequestError("missing token")
 		}
 		if !s.rbac.HasPermission(claims.Subject, v1.CreateAction, v1.GlobalProject, v1.KindGlobalVariable) {
-			return nil, fmt.Errorf("permission denied")
+			return nil, shared.HandleBadRequestError("permission denied")
 		}
 		return s.create(object)
 	}
