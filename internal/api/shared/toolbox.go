@@ -14,6 +14,7 @@
 package shared
 
 import (
+	"github.com/perses/perses/internal/api/shared/crypto"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -33,12 +34,20 @@ func ExtractParameters(ctx echo.Context) Parameters {
 	}
 }
 
+func ExtractJWTClaims(ctx echo.Context, jwtService crypto.JWT) *crypto.JWTCustomClaims {
+	claims, err := jwtService.Parse(ctx.Request().Header.Get("Authorization"))
+	if err != nil {
+		return nil
+	}
+	return claims
+}
+
 type ToolboxService interface {
-	Create(entity api.Entity) (interface{}, error)
-	Update(entity api.Entity, parameters Parameters) (interface{}, error)
-	Delete(parameters Parameters) error
-	Get(parameters Parameters) (interface{}, error)
-	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
+	Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error)
+	Update(entity api.Entity, parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
+	Delete(parameters Parameters, claims *crypto.JWTCustomClaims) error
+	Get(parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
+	List(q databaseModel.Query, parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -51,22 +60,25 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service ToolboxService) Toolbox {
+func NewToolBox(service ToolboxService, jwtService crypto.JWT) Toolbox {
 	return &toolbox{
-		service: service,
+		service:    service,
+		jwtService: jwtService,
 	}
 }
 
 type toolbox struct {
 	Toolbox
-	service ToolboxService
+	service    ToolboxService
+	jwtService crypto.JWT
 }
 
 func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Create(entity)
+	claims := ExtractJWTClaims(ctx, t.jwtService)
+	newEntity, err := t.service.Create(entity, claims)
 	if err != nil {
 		return err
 	}
@@ -78,7 +90,8 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := ExtractParameters(ctx)
-	newEntity, err := t.service.Update(entity, parameters)
+	claims := ExtractJWTClaims(ctx, t.jwtService)
+	newEntity, err := t.service.Update(entity, parameters, claims)
 	if err != nil {
 		return err
 	}
@@ -87,7 +100,8 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	if err := t.service.Delete(parameters); err != nil {
+	claims := ExtractJWTClaims(ctx, t.jwtService)
+	if err := t.service.Delete(parameters, claims); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -95,7 +109,8 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 
 func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	entity, err := t.service.Get(parameters)
+	claims := ExtractJWTClaims(ctx, t.jwtService)
+	entity, err := t.service.Get(parameters, claims)
 	if err != nil {
 		return err
 	}
@@ -107,7 +122,8 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 		return HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx)
-	result, err := t.service.List(q, parameters)
+	claims := ExtractJWTClaims(ctx, t.jwtService)
+	result, err := t.service.List(q, parameters, claims)
 	if err != nil {
 		return err
 	}

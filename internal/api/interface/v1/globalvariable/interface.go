@@ -25,6 +25,7 @@ type Query struct {
 	// NamePrefix can be empty in case you want to return the full list of GlobalVariable available.
 	NamePrefix string `query:"name"`
 }
+
 type DAO interface {
 	Create(entity *v1.GlobalVariable) error
 	Update(entity *v1.GlobalVariable) error

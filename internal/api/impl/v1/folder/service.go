@@ -15,6 +15,8 @@ package folder
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/shared"
@@ -26,16 +28,18 @@ import (
 
 type service struct {
 	folder.Service
-	dao folder.DAO
+	dao  folder.DAO
+	rbac authorization.RBAC
 }
 
-func NewService(dao folder.DAO) folder.Service {
+func NewService(dao folder.DAO, rbac authorization.RBAC) folder.Service {
 	return &service{
-		dao: dao,
+		dao:  dao,
+		rbac: rbac,
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.Folder); ok {
 		return s.create(object)
 	}
@@ -51,7 +55,7 @@ func (s *service) create(entity *v1.Folder) (*v1.Folder, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.Folder); ok {
 		return s.update(object, parameters)
 	}
@@ -82,14 +86,14 @@ func (s *service) update(entity *v1.Folder, parameters shared.Parameters) (*v1.F
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	return s.dao.List(q)
 }

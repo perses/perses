@@ -15,6 +15,7 @@ package user
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/authorization"
 
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
@@ -27,16 +28,17 @@ import (
 
 type service struct {
 	user.Service
-	dao user.DAO
+	dao  user.DAO
+	rbac authorization.RBAC
 }
 
-func NewService(dao user.DAO) user.Service {
+func NewService(dao user.DAO, rbac authorization.RBAC) user.Service {
 	return &service{
 		dao: dao,
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if userObject, ok := entity.(*v1.User); ok {
 		return s.create(userObject)
 	}
@@ -63,7 +65,7 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if userObject, ok := entity.(*v1.User); ok {
 		return s.update(userObject, parameters)
 	}
@@ -106,11 +108,11 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Pub
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	usr, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
@@ -118,7 +120,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return v1.NewPublicUser(usr), nil
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

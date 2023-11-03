@@ -1,9 +1,6 @@
 package authorization
 
 import (
-	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -16,7 +13,7 @@ import (
 
 type RBAC interface {
 	HasPermission(user string, action v1.ActionKind, project string, kind v1.Kind) bool
-	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
+	//Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.AuthorizationConfig) (RBAC, error) {
@@ -42,37 +39,37 @@ func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject
 	return r.cache.HasPermission(user, reqAction, reqProject, reqKind)
 }
 
-func (r rbacImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			// Retrieve Access-Token
-			accessToken := c.Request().Header.Get("Authorization")
-			if len(accessToken) == 0 {
-				// SHOULD NEVER HAPPEN, BECAUSE THE JWT MIDDLEWARE IS INJECTING THIS HEADER BEFORE THIS MIDDLEWARE
-				return fmt.Errorf("access-token not provided")
-			}
-
-			// Verify Access-Token is valid and not expired
-			claims, err := r.jwtService.Parse(accessToken)
-			if err != nil {
-				return err
-			}
-			// Retrieve user permissions
-			// TODO
-			action := v1.CreateAction
-			project := "test"
-			scope := v1.KindVariable
-
-			r.HasPermission(claims.Subject, action, project, scope)
-
-			// Check if user has the permission
-
-			// TODO: if user cached permission are different from token => refresh cache
-			// TODO: update user payload when gettign new perm
-			return nil // TODO
-		}
-	}
-}
+//func (r rbacImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
+//	return func(next echo.HandlerFunc) echo.HandlerFunc {
+//		return func(c echo.Context) error {
+//			// Retrieve Access-Token
+//			accessToken := c.Request().Header.Get("Authorization")
+//			if len(accessToken) == 0 {
+//				// SHOULD NEVER HAPPEN, BECAUSE THE JWT MIDDLEWARE IS INJECTING THIS HEADER BEFORE THIS MIDDLEWARE
+//				return fmt.Errorf("access-token not provided")
+//			}
+//
+//			// Verify Access-Token is valid and not expired
+//			claims, err := r.jwtService.Parse(accessToken)
+//			if err != nil {
+//				return err
+//			}
+//			// Retrieve user permissions
+//			// TODO
+//			action := v1.CreateAction
+//			project := "test"
+//			scope := v1.KindVariable
+//
+//			r.HasPermission(claims.Subject, action, project, scope)
+//
+//			// Check if user has the permission
+//
+//			// TODO: if user cached permission are different from token => refresh cache
+//			// TODO: update user payload when gettign new perm
+//			return nil // TODO
+//		}
+//	}
+//}
 
 func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (*Cache, error) {
 	var cache Cache

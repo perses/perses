@@ -48,6 +48,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
@@ -69,6 +70,7 @@ type ServiceManager interface {
 	GetProject() project.Service
 	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
+	GetRBAC() authorization.RBAC
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
@@ -93,6 +95,7 @@ type service struct {
 	project           project.Service
 	provisioning      async.SimpleTask
 	schemas           schemas.Schemas
+	rbac              authorization.RBAC
 	role              role.Service
 	roleBinding       rolebinding.Service
 	secret            secret.Service
@@ -113,21 +116,26 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), schemasService, dao.GetGlobalVariable(), dao.GetVariable())
-	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
-	folderService := folderImpl.NewService(dao.GetFolder())
-	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
-	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
-	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), schemasService)
-	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), schemasService)
-	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
-	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
+	rbacService, err := authorization.NewRBAC(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), jwtService, conf.Authorization)
+	if err != nil {
+		return nil, err
+	}
+	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), rbacService, schemasService)
+	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), rbacService, schemasService)
+	folderService := folderImpl.NewService(dao.GetFolder(), rbacService)
+	variableService := variableImpl.NewService(dao.GetVariable(), rbacService, schemasService)
+	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), rbacService, schemasService)
+	globalRole := globalRoleImpl.NewService(dao.GetGlobalRole(), rbacService, schemasService)
+	globalRoleBinding := globalRoleBindingImpl.NewService(dao.GetGlobalRoleBinding(), rbacService, schemasService)
+	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService, rbacService)
+	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), rbacService, schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
-	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable())
-	roleService := roleImpl.NewService(dao.GetRole(), schemasService)
-	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), schemasService)
-	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
-	userService := userImpl.NewService(dao.GetUser())
+	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetSecret(), dao.GetVariable(), rbacService)
+	roleService := roleImpl.NewService(dao.GetRole(), rbacService, schemasService)
+	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), rbacService, schemasService)
+	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService, rbacService)
+	userService := userImpl.NewService(dao.GetUser(), rbacService)
+
 	svc := &service{
 		crypto:            cryptoService,
 		dashboard:         dashboardService,
@@ -142,6 +150,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		jwt:               jwtService,
 		migrate:           migrateService,
 		project:           projectService,
+		rbac:              rbacService,
 		role:              roleService,
 		roleBinding:       roleBindingService,
 		schemas:           schemasService,
@@ -215,6 +224,10 @@ func (s *service) GetProvisioning() async.SimpleTask {
 
 func (s *service) GetSchemas() schemas.Schemas {
 	return s.schemas
+}
+
+func (s *service) GetRBAC() authorization.RBAC {
+	return s.rbac
 }
 
 func (s *service) GetRole() role.Service {

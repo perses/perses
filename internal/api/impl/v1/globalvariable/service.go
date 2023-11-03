@@ -15,6 +15,8 @@ package globalvariable
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/shared"
@@ -27,19 +29,27 @@ import (
 
 type service struct {
 	globalvariable.Service
-	dao globalvariable.DAO
-	sch schemas.Schemas
+	dao  globalvariable.DAO
+	rbac authorization.RBAC
+	sch  schemas.Schemas
 }
 
-func NewService(dao globalvariable.DAO, sch schemas.Schemas) globalvariable.Service {
+func NewService(dao globalvariable.DAO, rbac authorization.RBAC, sch schemas.Schemas) globalvariable.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:  dao,
+		rbac: rbac,
+		sch:  sch,
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.GlobalVariable); ok {
+		if claims == nil { // TODO: check permission disabled
+			return nil, fmt.Errorf("missing token")
+		}
+		if !s.rbac.HasPermission(claims.Subject, v1.CreateAction, v1.GlobalProject, v1.KindGlobalVariable) {
+			return nil, fmt.Errorf("permission denied")
+		}
 		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Globalvariable format, received '%T'", entity))
@@ -58,7 +68,7 @@ func (s *service) create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error) 
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.GlobalVariable); ok {
 		return s.update(object, parameters)
 	}
@@ -86,14 +96,14 @@ func (s *service) update(entity *v1.GlobalVariable, parameters shared.Parameters
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	return s.dao.List(q)
 }

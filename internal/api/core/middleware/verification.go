@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	"io"
 	"net/http"
 	"strings"
@@ -81,7 +82,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				}
 			}
 			if len(projectName) > 0 {
-				if _, err := svc.Get(shared.Parameters{Name: projectName}); err != nil {
+				if _, err := svc.Get(shared.Parameters{Name: projectName}, &crypto.JWTCustomClaims{}); err != nil { // TODO: fix
 					if databaseModel.IsKeyNotFound(err) {
 						return shared.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
 					}

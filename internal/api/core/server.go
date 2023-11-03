@@ -49,27 +49,27 @@ type api struct {
 	apiV1Endpoints []endpoint
 	apiEndpoints   []endpoint
 	jwtMiddleware  echo.MiddlewareFunc
-	rbacMiddleware echo.MiddlewareFunc
+	//rbacMiddleware echo.MiddlewareFunc
 }
 
-func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, authorizationManager dependency.AuthorizationManager, cfg config.Config) echoUtils.Register {
+func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
 	apiV1Endpoints := []endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
-		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
-		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
-		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
-		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), readonly),
-		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), readonly),
-		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), readonly),
-		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), readonly),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetJWT(), readonly),
+		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetJWT(), readonly),
+		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetJWT(), readonly),
+		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetJWT(), readonly),
+		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetJWT(), readonly),
+		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetJWT(), readonly),
+		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetJWT(), readonly),
+		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetJWT(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
-		project.NewEndpoint(serviceManager.GetProject(), readonly),
-		role.NewEndpoint(serviceManager.GetRole(), readonly),
-		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), readonly),
-		secret.NewEndpoint(serviceManager.GetSecret(), readonly),
-		user.NewEndpoint(serviceManager.GetUser(), readonly),
-		variable.NewEndpoint(serviceManager.GetVariable(), readonly),
+		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetJWT(), readonly),
+		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetJWT(), readonly),
+		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetJWT(), readonly),
+		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetJWT(), readonly),
+		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetJWT(), readonly),
+		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetJWT(), readonly),
 	}
 	apiEndpoints := []endpoint{
 		configendpoint.New(cfg),
@@ -83,9 +83,9 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
 			return !*cfg.Security.ActivatePermission
 		}),
-		rbacMiddleware: authorizationManager.GetRBAC().Middleware(func(c echo.Context) bool {
-			return !*cfg.Security.ActivatePermission
-		}),
+		//rbacMiddleware: serviceManager.GetRBAC().Middleware(func(c echo.Context) bool {
+		//	return !*cfg.Security.ActivatePermission
+		//}),
 	}
 }
 
@@ -126,7 +126,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 			var mdws []echo.MiddlewareFunc
 			if !route.IsAnonymous {
 				mdws = append(mdws, a.jwtMiddleware)
-				mdws = append(mdws, a.rbacMiddleware)
+				//mdws = append(mdws, a.rbacMiddleware)
 			}
 			route.Register(group, mdws...)
 		}

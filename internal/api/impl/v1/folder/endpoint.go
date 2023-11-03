@@ -17,6 +17,7 @@ package folder
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
@@ -29,9 +30,9 @@ type Endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service folder.Service, readonly bool) *Endpoint {
+func NewEndpoint(service folder.Service, jwtService crypto.JWT, readonly bool) *Endpoint {
 	return &Endpoint{
-		toolbox:  shared.NewToolBox(service),
+		toolbox:  shared.NewToolBox(service, jwtService),
 		readonly: readonly,
 	}
 }

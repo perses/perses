@@ -16,6 +16,7 @@ package dependency
 import (
 	"context"
 	"fmt"
+	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/shared"
@@ -74,7 +75,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		}
 
 		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.Get(param)
+		_, apiError := svc.Get(param, &crypto.JWTCustomClaims{}) // TODO: fix
 		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
 			logrus.WithError(apiError).Errorf("unable to retrieve the %q from the database", kind)
 			continue
@@ -82,12 +83,12 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 
 		if databaseModel.IsKeyNotFound(apiError) {
 			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.Create(entity); createError != nil {
+			if _, createError := svc.Create(entity, &crypto.JWTCustomClaims{}); createError != nil { // TODO: fix
 				logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
 			}
 		} else {
 			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.Update(entity, param); updateError != nil {
+			if _, updateError := svc.Update(entity, param, &crypto.JWTCustomClaims{}); updateError != nil { // TODO: fix
 				logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 			}
 		}

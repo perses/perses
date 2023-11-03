@@ -20,3 +20,10 @@ func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.Acti
 	}
 	return false
 }
+
+type Need struct {
+	Action v1.ActionKind
+	// If project is empty it's a global permission
+	Project string
+	Scope   v1.Kind
+}
