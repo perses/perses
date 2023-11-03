@@ -19,7 +19,8 @@ import {
   CircularProgress,
   Divider,
   IconButton,
-  Menu,
+  ListItemIcon,
+  Menu as MUIMenu,
   MenuItem,
   Stack,
   Switch,
@@ -32,13 +33,71 @@ import AutoFix from 'mdi-material-ui/AutoFix';
 import Cog from 'mdi-material-ui/Cog';
 import Folder from 'mdi-material-ui/Folder';
 import ShieldAccount from 'mdi-material-ui/ShieldAccount';
-import { MouseEvent, useState } from 'react';
+import Menu from 'mdi-material-ui/Menu';
+import React, { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
+import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
+import { AdminRoute, ConfigRoute, MigrateRoute } from '../model/route';
 import WhitePersesLogo from './logo/WhitePersesLogo';
+import PersesLogoCropped from './logo/PersesLogoCropped';
 
 const ITEM_HEIGHT = 48;
+
+function ToolMenu() {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+  return (
+    <Box>
+      <IconButton
+        aria-label="Tooling menu"
+        aria-controls="menu-tool-list-appbar"
+        aria-haspopup="true"
+        color="inherit"
+        onClick={handleMenu}
+      >
+        <Menu />
+      </IconButton>
+      <MUIMenu
+        id="menu-tool-list-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        keepMounted
+        open={anchorEl !== null}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem component={RouterLink} to={AdminRoute}>
+          <ListItemIcon>
+            <ShieldAccount />
+          </ListItemIcon>
+          <Typography>Admin</Typography>
+        </MenuItem>
+        <MenuItem component={RouterLink} to={ConfigRoute}>
+          <ListItemIcon>
+            <Cog />{' '}
+          </ListItemIcon>
+          <Typography>Config </Typography>
+        </MenuItem>
+        <MenuItem component={RouterLink} to={MigrateRoute}>
+          <ListItemIcon>
+            <AutoFix />
+          </ListItemIcon>
+          <Typography>Migration</Typography>
+        </MenuItem>
+      </MUIMenu>
+    </Box>
+  );
+}
 
 function ProjectMenu(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
@@ -73,7 +132,7 @@ function ProjectMenu(): JSX.Element {
         Projects
         <ChevronDown />
       </Button>
-      <Menu
+      <MUIMenu
         id="menu-project-list-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
@@ -127,12 +186,14 @@ function ProjectMenu(): JSX.Element {
             </Typography>
           </MenuItem>
         )}
-      </Menu>
+      </MUIMenu>
     </Box>
   );
 }
 
 export default function Header(): JSX.Element {
+  const isLaptopSize = useIsLaptopSize();
+  const isMobileSize = useIsMobileSize();
   const { exceptionSnackbar } = useSnackbar();
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -170,47 +231,55 @@ export default function Header(): JSX.Element {
               padding: 0,
             }}
           >
-            <WhitePersesLogo />
+            {isLaptopSize ? <WhitePersesLogo /> : <PersesLogoCropped color="white" width={32} height={32} />}
           </Button>
           <Divider
             orientation="vertical"
             flexItem
             sx={{ borderRightColor: 'rgba(255,255,255,0.2)', marginRight: 0.5 }}
           />
-          <Button
-            aria-label="Administration"
-            aria-controls="menu-admin-appbar"
-            aria-haspopup="true"
-            color="inherit"
-            component={RouterLink}
-            to="/admin"
-          >
-            <ShieldAccount sx={{ marginRight: 0.5 }} /> Admin
-          </Button>
-          <Button
-            aria-label="Config"
-            aria-controls="menu-config-appbar"
-            aria-haspopup="true"
-            color="inherit"
-            component={RouterLink}
-            to="/config"
-          >
-            <Cog sx={{ marginRight: 0.5 }} /> Config
-          </Button>
+          {!isMobileSize ? (
+            <>
+              <Button
+                aria-label="Administration"
+                aria-controls="menu-admin-appbar"
+                aria-haspopup="true"
+                color="inherit"
+                component={RouterLink}
+                to={AdminRoute}
+              >
+                <ShieldAccount sx={{ marginRight: 0.5 }} /> Admin
+              </Button>
+              <Button
+                aria-label="Config"
+                aria-controls="menu-config-appbar"
+                aria-haspopup="true"
+                color="inherit"
+                component={RouterLink}
+                to={ConfigRoute}
+              >
+                <Cog sx={{ marginRight: 0.5 }} /> Config
+              </Button>
+            </>
+          ) : (
+            <ToolMenu />
+          )}
           <ProjectMenu />
         </Box>
         <Stack direction={'row'} alignItems={'center'}>
-          <Tooltip title="Migration tool">
-            <IconButton
-              sx={(theme) => ({
-                color: theme.palette.common.white,
-              })}
-              component={RouterLink}
-              to="/migrate"
-            >
-              <AutoFix />
-            </IconButton>
-          </Tooltip>
+          {!isMobileSize && (
+            <Tooltip title="Migration tool">
+              <IconButton
+                sx={(theme) => ({
+                  color: theme.palette.common.white,
+                })}
+                component={RouterLink}
+                to={MigrateRoute}
+              >
+                <AutoFix />
+              </IconButton>
+            </Tooltip>
+          )}
           <Tooltip title="Theme">
             <Switch
               checked={isDarkModeEnabled}

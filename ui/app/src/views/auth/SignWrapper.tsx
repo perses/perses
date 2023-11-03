@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Divider, Stack } from '@mui/material';
 import { ReactNode } from 'react';
 import { useDarkMode } from '../../context/DarkMode';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
+import { useIsLaptopSize } from '../../utils/browser-size';
 
 export function SignWrapper(props: { children: ReactNode }) {
   const { isDarkModeEnabled } = useDarkMode();
-  const isLaptopSize = useMediaQuery(useTheme().breakpoints.up('md'));
+  const isLaptopSize = useIsLaptopSize();
   return (
     <Stack
       width="100%"
