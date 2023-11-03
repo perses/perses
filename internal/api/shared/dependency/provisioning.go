@@ -104,12 +104,20 @@ func (p *provisioning) getService(kind modelV1.Kind) (shared.ToolboxService, err
 		return p.serviceManager.GetFolder(), nil
 	case modelV1.KindGlobalDatasource:
 		return p.serviceManager.GetGlobalDatasource(), nil
+	case modelV1.KindGlobalRole:
+		return p.serviceManager.GetGlobalRole(), nil
+	case modelV1.KindGlobalRoleBinding:
+		return p.serviceManager.GetGlobalRoleBinding(), nil
 	case modelV1.KindGlobalSecret:
 		return p.serviceManager.GetGlobalSecret(), nil
 	case modelV1.KindGlobalVariable:
 		return p.serviceManager.GetGlobalVariable(), nil
 	case modelV1.KindProject:
 		return p.serviceManager.GetProject(), nil
+	case modelV1.KindRole:
+		return p.serviceManager.GetRole(), nil
+	case modelV1.KindRoleBinding:
+		return p.serviceManager.GetRoleBinding(), nil
 	case modelV1.KindSecret:
 		return p.serviceManager.GetSecret(), nil
 	case modelV1.KindUser:

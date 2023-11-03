@@ -111,7 +111,7 @@ func (s *service) Delete(parameters shared.Parameters) error {
 }
 
 func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
-	usr, err := s.dao.Get(parameters.Project)
+	usr, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
 	}

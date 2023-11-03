@@ -43,7 +43,7 @@ const config: PlaywrightTestConfig = {
     },
     // Start backend server
     {
-      command: './scripts/api_backend_dev.sh',
+      command: './scripts/api_backend_dev.sh --e2e',
       port: 8080,
       cwd: path.resolve(__dirname, '../../../..'),
       reuseExistingServer: true,

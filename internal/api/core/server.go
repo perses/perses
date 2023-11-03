@@ -24,10 +24,14 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/impl/v1/globalrole"
+	"github.com/perses/perses/internal/api/impl/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	"github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	"github.com/perses/perses/internal/api/impl/v1/health"
 	"github.com/perses/perses/internal/api/impl/v1/project"
+	"github.com/perses/perses/internal/api/impl/v1/role"
+	"github.com/perses/perses/internal/api/impl/v1/rolebinding"
 	"github.com/perses/perses/internal/api/impl/v1/secret"
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
@@ -48,16 +52,20 @@ type api struct {
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
-	readonly := cfg.Readonly
+	readonly := cfg.Security.Readonly
 	apiV1Endpoints := []endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
 		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
 		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
+		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), readonly),
+		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), readonly),
 		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), readonly),
 		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
 		project.NewEndpoint(serviceManager.GetProject(), readonly),
+		role.NewEndpoint(serviceManager.GetRole(), readonly),
+		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), readonly),
 		secret.NewEndpoint(serviceManager.GetSecret(), readonly),
 		user.NewEndpoint(serviceManager.GetUser(), readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), readonly),
@@ -72,7 +80,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
-			return !*cfg.ActivatePermission
+			return !*cfg.Security.ActivatePermission
 		}),
 	}
 }

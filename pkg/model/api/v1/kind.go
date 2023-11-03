@@ -23,42 +23,54 @@ import (
 type Kind string
 
 const (
-	KindDashboard        Kind = "Dashboard"
-	KindDatasource       Kind = "Datasource"
-	KindFolder           Kind = "Folder"
-	KindGlobalDatasource Kind = "GlobalDatasource"
-	KindGlobalVariable   Kind = "GlobalVariable"
-	KindGlobalSecret     Kind = "GlobalSecret"
-	KindProject          Kind = "Project"
-	KindSecret           Kind = "Secret"
-	KindUser             Kind = "User"
-	KindVariable         Kind = "Variable"
+	KindDashboard         Kind = "Dashboard"
+	KindDatasource        Kind = "Datasource"
+	KindFolder            Kind = "Folder"
+	KindGlobalDatasource  Kind = "GlobalDatasource"
+	KindGlobalRole        Kind = "GlobalRole"
+	KindGlobalRoleBinding Kind = "GlobalRoleBinding"
+	KindGlobalVariable    Kind = "GlobalVariable"
+	KindGlobalSecret      Kind = "GlobalSecret"
+	KindProject           Kind = "Project"
+	KindRole              Kind = "Role"
+	KindRoleBinding       Kind = "RoleBinding"
+	KindSecret            Kind = "Secret"
+	KindUser              Kind = "User"
+	KindVariable          Kind = "Variable"
 )
 
 var KindMap = map[Kind]bool{
-	KindDashboard:        true,
-	KindDatasource:       true,
-	KindFolder:           true,
-	KindGlobalDatasource: true,
-	KindGlobalSecret:     true,
-	KindGlobalVariable:   true,
-	KindProject:          true,
-	KindSecret:           true,
-	KindUser:             true,
-	KindVariable:         true,
+	KindDashboard:         true,
+	KindDatasource:        true,
+	KindFolder:            true,
+	KindGlobalDatasource:  true,
+	KindGlobalRole:        true,
+	KindGlobalRoleBinding: true,
+	KindGlobalSecret:      true,
+	KindGlobalVariable:    true,
+	KindProject:           true,
+	KindRole:              true,
+	KindRoleBinding:       true,
+	KindSecret:            true,
+	KindUser:              true,
+	KindVariable:          true,
 }
 
 var PluralKindMap = map[Kind]string{
-	KindDashboard:        "dashboards",
-	KindDatasource:       "datasources",
-	KindFolder:           "folders",
-	KindGlobalDatasource: "globaldatasources",
-	KindGlobalSecret:     "globalsecrets",
-	KindGlobalVariable:   "globalvariables",
-	KindProject:          "projects",
-	KindSecret:           "secrets",
-	KindUser:             "users",
-	KindVariable:         "variables",
+	KindDashboard:         "dashboards",
+	KindDatasource:        "datasources",
+	KindFolder:            "folders",
+	KindGlobalDatasource:  "globaldatasources",
+	KindGlobalRole:        "globalroles",
+	KindGlobalRoleBinding: "globalrolebindings",
+	KindGlobalSecret:      "globalsecrets",
+	KindGlobalVariable:    "globalvariables",
+	KindProject:           "projects",
+	KindRole:              "roles",
+	KindRoleBinding:       "rolebindings",
+	KindSecret:            "secrets",
+	KindUser:              "users",
+	KindVariable:          "variables",
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
@@ -108,12 +120,20 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Folder{}, nil
 	case KindGlobalDatasource:
 		return &GlobalDatasource{}, nil
+	case KindGlobalRole:
+		return &GlobalRole{}, nil
+	case KindGlobalRoleBinding:
+		return &GlobalRoleBinding{}, nil
 	case KindGlobalSecret:
 		return &GlobalSecret{}, nil
 	case KindGlobalVariable:
 		return &GlobalVariable{}, nil
 	case KindProject:
 		return &Project{}, nil
+	case KindRole:
+		return &Role{}, nil
+	case KindRoleBinding:
+		return &RoleBinding{}, nil
 	case KindSecret:
 		return &Secret{}, nil
 	case KindUser:
@@ -122,5 +142,14 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Variable{}, nil
 	default:
 		return nil, fmt.Errorf("%q has no associated struct", kind)
+	}
+}
+
+func IsGlobal(kind Kind) bool {
+	switch kind {
+	case KindGlobalDatasource, KindGlobalRole, KindGlobalRoleBinding, KindGlobalSecret, KindGlobalVariable, KindProject, KindUser:
+		return true
+	default:
+		return false
 	}
 }

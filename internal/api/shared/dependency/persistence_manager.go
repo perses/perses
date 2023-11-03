@@ -19,10 +19,14 @@ import (
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
+	globalRoleImpl "github.com/perses/perses/internal/api/impl/v1/globalrole"
+	globalRoleBindingImpl "github.com/perses/perses/internal/api/impl/v1/globalrolebinding"
 	globalSecretImpl "github.com/perses/perses/internal/api/impl/v1/globalsecret"
 	globalVariableImpl "github.com/perses/perses/internal/api/impl/v1/globalvariable"
 	healthImpl "github.com/perses/perses/internal/api/impl/v1/health"
 	projectImpl "github.com/perses/perses/internal/api/impl/v1/project"
+	roleImpl "github.com/perses/perses/internal/api/impl/v1/role"
+	roleBindingImpl "github.com/perses/perses/internal/api/impl/v1/rolebinding"
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
@@ -30,10 +34,14 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/health"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -46,11 +54,15 @@ type PersistenceManager interface {
 	GetDatasource() datasource.DAO
 	GetFolder() folder.DAO
 	GetGlobalDatasource() globaldatasource.DAO
+	GetGlobalRole() globalrole.DAO
+	GetGlobalRoleBinding() globalrolebinding.DAO
 	GetGlobalSecret() globalsecret.DAO
 	GetGlobalVariable() globalvariable.DAO
 	GetHealth() health.DAO
 	GetPersesDAO() databaseModel.DAO
 	GetProject() project.DAO
+	GetRole() role.DAO
+	GetRoleBinding() rolebinding.DAO
 	GetSecret() secret.DAO
 	GetUser() user.DAO
 	GetVariable() variable.DAO
@@ -58,18 +70,22 @@ type PersistenceManager interface {
 
 type persistence struct {
 	PersistenceManager
-	dashboard        dashboard.DAO
-	datasource       datasource.DAO
-	folder           folder.DAO
-	globalDatasource globaldatasource.DAO
-	globalSecret     globalsecret.DAO
-	globalVariable   globalvariable.DAO
-	health           health.DAO
-	perses           databaseModel.DAO
-	project          project.DAO
-	secret           secret.DAO
-	user             user.DAO
-	variable         variable.DAO
+	dashboard         dashboard.DAO
+	datasource        datasource.DAO
+	folder            folder.DAO
+	globalDatasource  globaldatasource.DAO
+	globalRole        globalrole.DAO
+	globalRoleBinding globalrolebinding.DAO
+	globalSecret      globalsecret.DAO
+	globalVariable    globalvariable.DAO
+	health            health.DAO
+	perses            databaseModel.DAO
+	project           project.DAO
+	role              role.DAO
+	roleBinding       rolebinding.DAO
+	secret            secret.DAO
+	user              user.DAO
+	variable          variable.DAO
 }
 
 func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
@@ -81,26 +97,34 @@ func NewPersistenceManager(conf config.Database) (PersistenceManager, error) {
 	datasourceDAO := datasourceImpl.NewDAO(persesDAO)
 	folderDAO := folderImpl.NewDAO(persesDAO)
 	globalDatatasourceDAO := globalDatasourceImpl.NewDAO(persesDAO)
+	globalRoleDAO := globalRoleImpl.NewDAO(persesDAO)
+	globalRoleBindingDAO := globalRoleBindingImpl.NewDAO(persesDAO)
 	globalSecretDAO := globalSecretImpl.NewDAO(persesDAO)
 	globalVariableDAO := globalVariableImpl.NewDAO(persesDAO)
 	healthDAO := healthImpl.NewDAO(persesDAO)
 	projectDAO := projectImpl.NewDAO(persesDAO)
+	roleDAO := roleImpl.NewDAO(persesDAO)
+	roleBindingDAO := roleBindingImpl.NewDAO(persesDAO)
 	secretDAO := secretImpl.NewDAO(persesDAO)
 	userDAO := userImpl.NewDAO(persesDAO)
 	variableDAO := variableImpl.NewDAO(persesDAO)
 	return &persistence{
-		dashboard:        dashboardDAO,
-		datasource:       datasourceDAO,
-		folder:           folderDAO,
-		globalDatasource: globalDatatasourceDAO,
-		globalSecret:     globalSecretDAO,
-		globalVariable:   globalVariableDAO,
-		health:           healthDAO,
-		perses:           persesDAO,
-		project:          projectDAO,
-		secret:           secretDAO,
-		user:             userDAO,
-		variable:         variableDAO,
+		dashboard:         dashboardDAO,
+		datasource:        datasourceDAO,
+		folder:            folderDAO,
+		globalDatasource:  globalDatatasourceDAO,
+		globalRole:        globalRoleDAO,
+		globalRoleBinding: globalRoleBindingDAO,
+		globalSecret:      globalSecretDAO,
+		globalVariable:    globalVariableDAO,
+		health:            healthDAO,
+		perses:            persesDAO,
+		project:           projectDAO,
+		role:              roleDAO,
+		roleBinding:       roleBindingDAO,
+		secret:            secretDAO,
+		user:              userDAO,
+		variable:          variableDAO,
 	}, nil
 }
 
@@ -118,6 +142,14 @@ func (p *persistence) GetFolder() folder.DAO {
 
 func (p *persistence) GetGlobalDatasource() globaldatasource.DAO {
 	return p.globalDatasource
+}
+
+func (p *persistence) GetGlobalRole() globalrole.DAO {
+	return p.globalRole
+}
+
+func (p *persistence) GetGlobalRoleBinding() globalrolebinding.DAO {
+	return p.globalRoleBinding
 }
 
 func (p *persistence) GetGlobalSecret() globalsecret.DAO {
@@ -138,6 +170,14 @@ func (p *persistence) GetPersesDAO() databaseModel.DAO {
 
 func (p *persistence) GetProject() project.DAO {
 	return p.project
+}
+
+func (p *persistence) GetRole() role.DAO {
+	return p.role
+}
+
+func (p *persistence) GetRoleBinding() rolebinding.DAO {
+	return p.roleBinding
 }
 
 func (p *persistence) GetSecret() secret.DAO {

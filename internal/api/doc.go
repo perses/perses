@@ -14,13 +14,17 @@
 package api
 
 // this file is just there to run the command generate
-//go:generate go run generate.go -package=globaldatasource -plural=globaldatasources -kind=GlobalDatasource
-//go:generate go run generate.go -package=datasource -plural=datasources -kind=Datasource -isProjectResource=true
-//go:generate go run generate.go -package=project -plural=projects -kind=Project
 //go:generate go run generate.go -package=dashboard -plural=dashboards -kind=Dashboard -isProjectResource=true
+//go:generate go run generate.go -package=datasource -plural=datasources -kind=Datasource -isProjectResource=true
 //go:generate go run generate.go -package=folder -plural=folders -kind=Folder -isProjectResource=true
-//go:generate go run generate.go -package=globalvariable -plural=globalvariables -kind=GlobalVariable
-//go:generate go run generate.go -package=variable -plural=variables -kind=Variable -isProjectResource=true
+//go:generate go run generate.go -package=globaldatasource -plural=globaldatasources -kind=GlobalDatasource
+//go:generate go run generate.go -package=globalrole -plural=globalroles -kind=GlobalRole
+//go:generate go run generate.go -package=globalrolebinding -plural=globalrolebindings -kind=GlobalRoleBinding
 //go:generate go run generate.go -package=globalsecret -plural=globalsecrets -kind=GlobalSecret
+//go:generate go run generate.go -package=globalvariable -plural=globalvariables -kind=GlobalVariable
+//go:generate go run generate.go -package=project -plural=projects -kind=Project
+//go:generate go run generate.go -package=role -plural=roles -kind=Role -isProjectResource=true
+//go:generate go run generate.go -package=rolebinding -plural=rolebindings -kind=RoleBinding -isProjectResource=true
 //go:generate go run generate.go -package=secret -plural=secrets -kind=Secret -isProjectResource=true
 //go:generate go run generate.go -package=user -plural=users -kind=User
+//go:generate go run generate.go -package=variable -plural=variables -kind=Variable -isProjectResource=true
