@@ -74,31 +74,31 @@ func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject
 func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (*Cache, error) {
 	var cache Cache
 	// Retrieve users, roles, globalroles, rolebindings and globalrolebindings
-	users, err := userDAO.List(user.Query{})
+	users, err := userDAO.List(&user.Query{})
 	if err != nil {
 		return nil, err
 	}
 	cache.users = users
 
-	roles, err := roleDAO.List(role.Query{})
+	roles, err := roleDAO.List(&role.Query{})
 	if err != nil {
 		return nil, err
 	}
 	cache.roles = roles
 
-	globalRoles, err := globalRoleDAO.List(globalrole.Query{})
+	globalRoles, err := globalRoleDAO.List(&globalrole.Query{})
 	if err != nil {
 		return nil, err
 	}
 	cache.globalRoles = globalRoles
 
-	roleBindings, err := roleBindingDAO.List(rolebinding.Query{})
+	roleBindings, err := roleBindingDAO.List(&rolebinding.Query{})
 	if err != nil {
 		return nil, err
 	}
 	cache.roleBindings = roleBindings
 
-	globalRoleBindings, err := globalRoleBindingDAO.List(globalrolebinding.Query{})
+	globalRoleBindings, err := globalRoleBindingDAO.List(&globalrolebinding.Query{})
 	if err != nil {
 		return nil, err
 	}
