@@ -55,7 +55,8 @@ The project has guiding goals for its development:
 
 ## Chat with Perses project team?
 
-You can find the project team on Matrix in the #perses-dev channel.
+You can find the project team on Matrix in the #perses-dev channel, see the [contributing guide](../../../CONTRIBUTING.md) 
+for details.
 
 <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/437001/280049367-00378850-a7a1-4176-9f71-1394f3ada470.png" alt="Matrix dev channel" style="width: 60%;"/>
 
