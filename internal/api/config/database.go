@@ -19,7 +19,10 @@ import (
 	"time"
 
 	"github.com/prometheus/common/config"
+	"github.com/sirupsen/logrus"
 )
+
+const defaultFileDBFolder = "./local_db"
 
 type FileExtension string
 
@@ -126,7 +129,10 @@ type Database struct {
 
 func (d *Database) Verify() error {
 	if d.File == nil && d.SQL == nil {
-		return fmt.Errorf("you must specify if Perses has to use SQL or filesystem as a database")
+		logrus.Debug("no database has been specified, therefore a file system database is used")
+		d.File = &File{
+			Folder: defaultFileDBFolder,
+		}
 	}
 	if d.File != nil && d.SQL != nil {
 		return fmt.Errorf("you cannot tel to Perses to use SQL and the filesystem at the same time")
