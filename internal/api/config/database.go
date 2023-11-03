@@ -22,6 +22,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const defaultFileDBFolder = "./local_db"
+
 type FileExtension string
 
 const (
@@ -129,7 +131,7 @@ func (d *Database) Verify() error {
 	if d.File == nil && d.SQL == nil {
 		logrus.Debug("no database has been specified, therefore a file system database is used")
 		d.File = &File{
-			Folder: "./local_db",
+			Folder: defaultFileDBFolder,
 		}
 	}
 	if d.File != nil && d.SQL != nil {
