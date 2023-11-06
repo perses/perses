@@ -55,7 +55,7 @@ export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec;
       maxWidth={VARIABLE_INPUT_MAX_WIDTH}
       marginBottom={1}
       marginRight={1}
-      data-testid="template-variable"
+      data-testid={'template-variable-' + spec.name}
     >
       <TemplateVariable key={spec.name + source ?? ''} name={spec.name} source={source} />
     </Box>

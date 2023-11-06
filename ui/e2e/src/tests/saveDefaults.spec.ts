@@ -34,13 +34,8 @@ test.describe('Dashboard: Defaults', () => {
     await expect(page.url()).toContain('start=6h');
 
     // Changed selected interval variable
-    await expect(dashboardPage.variableListItems).toContainText(['1m']);
-    await dashboardPage.page
-      .getByRole('button', {
-        name: 'interval',
-        exact: true,
-      })
-      .click();
+    await expect(dashboardPage.getTemplateVariable('interval')).toHaveValue('1m');
+    await dashboardPage.getTemplateVariable('interval').click();
     await page.getByRole('option', { name: '5m' }).click();
 
     // Change text variable
@@ -68,7 +63,7 @@ test.describe('Dashboard: Defaults', () => {
     await page.getByRole('button', { name: 'Refresh dashboard' }).click();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
-    await expect(dashboardPage.variableListItems).toContainText(['5m']);
+    await expect(dashboardPage.getTemplateVariable('interval')).toHaveValue('5m');
 
     // Confirm text variable value is persisted
     const newTextVariableInput = await page.getByRole('textbox', { name: 'Text variable' });
