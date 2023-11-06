@@ -64,9 +64,9 @@ export function useListVariableState(
   value: VariableValue | undefined;
   loading: boolean;
   options: VariableOption[] | undefined;
-  // selectedValue is the value(s) that will be used in the view only
-  selectedValue: VariableValue;
-  // viewOptions are the options used in the view only (options + All if allowed)
+  // selectedOptions is/are the option(s) selected in the view
+  selectedOptions: VariableOption | VariableOption[];
+  // viewOptions are the options used in the view only (= options + All if allowed)
   viewOptions: VariableOption[];
 } {
   const allowMultiple = spec?.allowMultiple === true;
@@ -117,10 +117,23 @@ export function useListVariableState(
     return value;
   }, [viewOptions, value, valueIsInOptions, allowMultiple, allowAllValue]);
 
-  // Once we computed value, we set it as the selected one, if it is available in the options
-  const selectedValue = value && valueIsInOptions ? value : allowMultiple ? [] : '';
+  const selectedOptions = useMemo(() => {
+    // In the case Autocomplete.multiple equals false, Autocomplete.value expects a single object, not
+    // an array, hence this conditional
+    if (Array.isArray(value)) {
+      return viewOptions.filter((o) => {
+        return value?.includes(o.value);
+      });
+    } else {
+      return (
+        viewOptions.find((o) => {
+          return value === o.value;
+        }) ?? { value: '', label: '' }
+      );
+    }
+  }, [value, viewOptions]);
 
-  return { value, loading, options, selectedValue, viewOptions };
+  return { value, loading, options, selectedOptions, viewOptions };
 }
 
 function ListVariable({ name, source }: TemplateVariableProps) {
@@ -128,11 +141,12 @@ function ListVariable({ name, source }: TemplateVariableProps) {
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
-  const { selectedValue, value, loading, options, viewOptions } = useListVariableState(
+  const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
     variablesOptionsQuery
   );
+  const [inputValue, setInputValue] = useState<string>('');
 
   const title = definition?.spec.display?.name ?? name;
   const allowMultiple = definition?.spec.allowMultiple === true;
@@ -164,17 +178,21 @@ function ListVariable({ name, source }: TemplateVariableProps) {
         disableCloseOnSelect={allowMultiple}
         multiple={allowMultiple}
         fullWidth
-        onChange={(e, value) => {
+        value={selectedOptions}
+        onChange={(_, value) => {
           // Must be selected
           if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
             setVariableValue(name, DEFAULT_ALL_VALUE, source);
-            return;
+          } else {
+            setVariableValue(name, variableOptionToVariableValue(value), source);
           }
-          setVariableValue(name, variableOptionToVariableValue(value), source);
+        }}
+        inputValue={inputValue}
+        onInputChange={(_, newInputValue) => {
+          setInputValue(newInputValue);
         }}
         options={viewOptions}
-        getOptionLabel={(option) => option.label}
-        renderInput={(params) => <TextField {...params} value={selectedValue} label={title} />}
+        renderInput={(params) => <TextField {...params} label={title} />}
       />
       {loading && <LinearProgress />}
     </Box>
