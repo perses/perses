@@ -43,6 +43,9 @@ func NewService(dao secret.DAO, crypto crypto.Crypto, rbac authorization.RBAC) s
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if object, ok := entity.(*v1.Secret); ok {
+		if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, object.Metadata.Project, v1.KindSecret); err != nil {
+			return nil, err
+		}
 		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Secret format, received '%T'", entity))
@@ -62,6 +65,9 @@ func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, parameters.Project, v1.KindSecret); err != nil {
+		return nil, err
+	}
 	if object, ok := entity.(*v1.Secret); ok {
 		return s.update(object, parameters)
 	}
@@ -98,10 +104,16 @@ func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.P
 }
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, parameters.Project, v1.KindSecret); err != nil {
+		return err
+	}
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, parameters.Project, v1.KindSecret); err != nil {
+		return nil, err
+	}
 	scrt, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
 		return nil, err
@@ -109,7 +121,10 @@ func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClai
 	return v1.NewPublicSecret(scrt), nil
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, parameters.Project, v1.KindSecret); err != nil {
+		return nil, err
+	}
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

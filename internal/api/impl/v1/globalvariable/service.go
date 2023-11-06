@@ -43,13 +43,10 @@ func NewService(dao globalvariable.DAO, rbac authorization.RBAC, sch schemas.Sch
 }
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, v1.GlobalProject, v1.KindGlobalVariable); err != nil {
+		return nil, err
+	}
 	if object, ok := entity.(*v1.GlobalVariable); ok {
-		if claims == nil { // TODO: check permission disabled
-			return nil, shared.HandleBadRequestError("missing token")
-		}
-		if !s.rbac.HasPermission(claims.Subject, v1.CreateAction, v1.GlobalProject, v1.KindGlobalVariable) {
-			return nil, shared.HandleBadRequestError("permission denied")
-		}
 		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Globalvariable format, received '%T'", entity))
@@ -69,6 +66,9 @@ func (s *service) create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error) 
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, v1.GlobalProject, v1.KindGlobalVariable); err != nil {
+		return nil, err
+	}
 	if object, ok := entity.(*v1.GlobalVariable); ok {
 		return s.update(object, parameters)
 	}
@@ -97,13 +97,22 @@ func (s *service) update(entity *v1.GlobalVariable, parameters shared.Parameters
 }
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, v1.GlobalProject, v1.KindGlobalVariable); err != nil {
+		return err
+	}
 	return s.dao.Delete(parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalVariable); err != nil {
+		return nil, err
+	}
 	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalVariable); err != nil {
+		return nil, err
+	}
 	return s.dao.List(q)
 }
