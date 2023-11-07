@@ -56,7 +56,7 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, v1.GlobalProject, v1.KindProject); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.Project); ok {
 		return s.create(object)
@@ -75,7 +75,7 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, v1.GlobalProject, v1.KindProject); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.Project); ok {
 		return s.update(object, parameters)
@@ -103,7 +103,7 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, v1.GlobalProject, v1.KindProject); err != nil {
-		return err
+		return shared.HandleUnauthorizedError(err.Error())
 	}
 	projectName := parameters.Name
 	if err := s.folderDAO.DeleteAll(projectName); err != nil {
@@ -131,14 +131,14 @@ func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomC
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindProject); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindProject); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.List(q)
 }

@@ -1,13 +1,13 @@
 package authorization
 
 import (
+	"fmt"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -17,10 +17,10 @@ func CheckUserPermission(rbac RBAC, claims *crypto.JWTCustomClaims, action v1.Ac
 		return nil
 	}
 	if claims == nil {
-		return shared.HandleBadRequestError("missing token")
+		return fmt.Errorf("missing token")
 	}
 	if !rbac.HasPermission(claims.Subject, action, project, scope) {
-		return shared.HandleBadRequestError("permission denied")
+		return fmt.Errorf("permission denied")
 	}
 	return nil
 }

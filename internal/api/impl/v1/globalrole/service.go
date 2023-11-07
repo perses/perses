@@ -44,7 +44,7 @@ func NewService(dao globalrole.DAO, rbac authorization.RBAC, sch schemas.Schemas
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, v1.GlobalProject, v1.KindGlobalRole); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.GlobalRole); ok {
 		return s.create(object)
@@ -63,7 +63,7 @@ func (s *service) create(entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, v1.GlobalProject, v1.KindGlobalRole); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.GlobalRole); ok {
 		return s.update(object, parameters)
@@ -92,21 +92,21 @@ func (s *service) update(entity *v1.GlobalRole, parameters shared.Parameters) (*
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, v1.GlobalProject, v1.KindGlobalRole); err != nil {
-		return err
+		return shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Delete(parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalRole); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
 	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalRole); err != nil {
-		return nil, err
+		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.List(q)
 }

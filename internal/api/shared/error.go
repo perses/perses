@@ -32,10 +32,11 @@ func (e *PersesError) Error() string {
 }
 
 var (
-	InternalError   = &PersesError{message: "internal server error"}
-	NotFoundError   = &PersesError{message: "document not found"}
-	ConflictError   = &PersesError{message: "document already exists"}
-	BadRequestError = &PersesError{message: "bad request"}
+	InternalError     = &PersesError{message: "internal server error"}
+	NotFoundError     = &PersesError{message: "document not found"}
+	ConflictError     = &PersesError{message: "document already exists"}
+	BadRequestError   = &PersesError{message: "bad request"}
+	UnauthorizedError = &PersesError{message: "unauthorized"}
 )
 
 // HandleError is translating the given error to the echoHTTPError
@@ -56,6 +57,9 @@ func HandleError(err error) error {
 	if errors.Is(err, BadRequestError) {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
+	if errors.Is(err, UnauthorizedError) {
+		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
+	}
 
 	if _, ok := err.(*echo.HTTPError); ok {
 		// the error is coming from the echo framework likely because the route doesn't exist.
@@ -68,4 +72,8 @@ func HandleError(err error) error {
 
 func HandleBadRequestError(msg string) error {
 	return fmt.Errorf("%w: %s", BadRequestError, msg)
+}
+
+func HandleUnauthorizedError(msg string) error {
+	return fmt.Errorf("%w: %s", UnauthorizedError, msg)
 }
