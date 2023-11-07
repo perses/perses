@@ -147,7 +147,7 @@ describe('BarChartOptionsEditorSettings', () => {
       },
       onChange
     );
-    const resetButton = screen.getByRole('button', { name: 'Reset To Defaults', exact: true });
+    const resetButton = screen.getByRole('button', { name: 'Reset To Defaults' });
     userEvent.click(resetButton);
     expect(onChange).toHaveBeenCalledWith(
       expect.objectContaining({

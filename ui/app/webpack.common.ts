@@ -29,7 +29,7 @@ export const commonConfig: Configuration = {
     publicPath: '/',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', 'jsx', '.json'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
   plugins: [
     // Generates HTML index page with bundle injected

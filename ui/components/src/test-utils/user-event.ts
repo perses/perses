@@ -11,5 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './theme';
-export * from './user-event';
+import { JSX } from 'react/jsx-runtime';
+import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
+
+export function setupUserEventAndRender(tsx: JSX.Element) {
+  return {
+    user: userEvent.setup(),
+    ...render(tsx),
+  };
+}

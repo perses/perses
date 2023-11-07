@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen, getAllByRole, within } from '@testing-library/react';
+import { screen, getAllByRole, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
+import { setupUserEventAndRender } from '@perses-dev/components';
 import { Table } from './Table';
 import { TableColumnConfig, TableProps } from './model/table-model';
 
@@ -95,7 +96,7 @@ const renderTable = ({
   onRowMouseOver = jest.fn(),
   onRowMouseOut = jest.fn(),
 }: RenderTableOpts = {}) => {
-  return render(
+  return setupUserEventAndRender(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
       <Table
         data={data}
@@ -573,7 +574,7 @@ describe('table', () => {
 
       test('selects all after clicking header checkbox', () => {
         const mockOnRowSelectionChange = jest.fn();
-        renderTable({
+        const { user } = renderTable({
           data: data,
           checkboxSelection: true,
           onRowSelectionChange: mockOnRowSelectionChange,
@@ -587,7 +588,7 @@ describe('table', () => {
           throw new Error('Missing first checkbox');
         }
 
-        userEvent.click(firstCheckbox);
+        user.click(firstCheckbox);
         const expectedSelectAll = {
           '0': true,
           '1': true,
@@ -600,7 +601,7 @@ describe('table', () => {
       describe.each(['standard', 'legend'] as const)('with "%s" row selection', (rowSelectionVariant) => {
         test('selects a single row on clicking that row', () => {
           const mockOnRowSelectionChange = jest.fn();
-          renderTable({
+          const { user } = renderTable({
             data: data,
             checkboxSelection: true,
             onRowSelectionChange: mockOnRowSelectionChange,
@@ -618,7 +619,7 @@ describe('table', () => {
             throw new Error('Unable to find row');
           }
 
-          userEvent.click(rowToClick);
+          user.click(rowToClick);
           expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
             '1': true,
           });
@@ -626,7 +627,7 @@ describe('table', () => {
 
         test('selects a single row on clicking the checkbox in the row', () => {
           const mockOnRowSelectionChange = jest.fn();
-          renderTable({
+          const { user } = renderTable({
             data: data,
             checkboxSelection: true,
             onRowSelectionChange: mockOnRowSelectionChange,
@@ -643,7 +644,7 @@ describe('table', () => {
             throw new Error('Unable to find checkbox');
           }
 
-          userEvent.click(checkboxToClick);
+          user.click(checkboxToClick);
           expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
             '2': true,
           });
@@ -667,7 +668,7 @@ describe('table', () => {
       ] as const)('with "%s" row selection (modifed: %p)', (rowSelectionVariant, isModifed) => {
         test('selects none after clicking header checkbox', () => {
           const mockOnRowSelectionChange = jest.fn();
-          renderTable({
+          const { user } = renderTable({
             data: data,
             checkboxSelection: true,
             onRowSelectionChange: mockOnRowSelectionChange,
@@ -682,16 +683,17 @@ describe('table', () => {
             throw new Error('Missing first checkbox');
           }
 
-          userEvent.click(firstCheckbox, {
-            shiftKey: isModifed,
-          });
+          if (isModifed) {
+            user.keyboard('[ShiftLeft>]');
+          }
+          user.click(firstCheckbox);
           const expectedSelectNone = {};
           expect(mockOnRowSelectionChange).toHaveBeenCalledWith(expectedSelectNone);
         });
 
         test('unselects a row on clicking that row', () => {
           const mockOnRowSelectionChange = jest.fn();
-          renderTable({
+          const { user } = renderTable({
             data: data,
             checkboxSelection: true,
             onRowSelectionChange: mockOnRowSelectionChange,
@@ -709,9 +711,10 @@ describe('table', () => {
             throw new Error('Unable to find row');
           }
 
-          userEvent.click(rowToClick, {
-            shiftKey: isModifed,
-          });
+          if (isModifed) {
+            user.keyboard('[ShiftLeft>]');
+          }
+          user.click(rowToClick);
           expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
             ...allCheckboxRowSelection,
             '1': undefined,
@@ -720,7 +723,7 @@ describe('table', () => {
 
         test('unselects a row on clicking the checkbox in the row', () => {
           const mockOnRowSelectionChange = jest.fn();
-          renderTable({
+          const { user } = renderTable({
             data: data,
             checkboxSelection: true,
             onRowSelectionChange: mockOnRowSelectionChange,
@@ -738,9 +741,10 @@ describe('table', () => {
             throw new Error('Unable to find checkbox');
           }
 
-          userEvent.click(checkboxToClick, {
-            metaKey: isModifed,
-          });
+          if (isModifed) {
+            user.keyboard('[Meta>]');
+          }
+          user.click(checkboxToClick);
           expect(mockOnRowSelectionChange).toHaveBeenCalledWith({
             ...allCheckboxRowSelection,
             '2': undefined,

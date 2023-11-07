@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import userEvent from '@testing-library/user-event';
-import { render, screen, within } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
+import { setupUserEventAndRender } from '@perses-dev/components';
 import { TableLegend, TableLegendProps } from './TableLegend';
 
 const MOCK_VIEWPORT_HEIGHT = 1000;
@@ -50,7 +51,7 @@ const renderTableLegend = ({
   onItemMouseOver = jest.fn(),
   onItemMouseOut = jest.fn(),
 }: RenderTableLegendOpts = {}) => {
-  return render(
+  return setupUserEventAndRender(
     <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
       <TableLegend
         items={items}
@@ -110,7 +111,7 @@ describe('TableLegend', () => {
 
     test('selects none on click header checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -122,14 +123,14 @@ describe('TableLegend', () => {
         throw new Error(`Missing header checkbox.`);
       }
 
-      userEvent.click(headerCheckbox);
+      user.click(headerCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
     });
 
     test('focuses item on click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -141,7 +142,7 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox);
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         two: true,
@@ -150,7 +151,7 @@ describe('TableLegend', () => {
 
     test('unselects item on modified click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -162,9 +163,8 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox, {
-        shiftKey: true,
-      });
+      user.keyboard('[ShiftLeft>]');
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -194,7 +194,7 @@ describe('TableLegend', () => {
 
     test('selects all on click header checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -206,7 +206,7 @@ describe('TableLegend', () => {
         throw new Error(`Missing header checkbox.`);
       }
 
-      userEvent.click(headerCheckbox);
+      user.click(headerCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -217,7 +217,7 @@ describe('TableLegend', () => {
 
     test('selects item on click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -229,7 +229,7 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox);
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         two: true,
@@ -238,7 +238,7 @@ describe('TableLegend', () => {
 
     test('selects item on modified click associated checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -250,7 +250,8 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox, { metaKey: true });
+      user.keyboard('[Meta>]');
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         two: true,
@@ -287,7 +288,7 @@ describe('TableLegend', () => {
 
     test('selects all on click header checkbox', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -299,7 +300,7 @@ describe('TableLegend', () => {
         throw new Error(`Missing header checkbox.`);
       }
 
-      userEvent.click(headerCheckbox);
+      user.click(headerCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -331,7 +332,7 @@ describe('TableLegend', () => {
 
     test('selects item on modified click associated checkbox for unselected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -343,9 +344,8 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox, {
-        shiftKey: true,
-      });
+      user.keyboard('[ShiftLeft>]');
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -355,7 +355,7 @@ describe('TableLegend', () => {
 
     test('unselects item on modified click associated checkbox for selected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -367,16 +367,15 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox, {
-        metaKey: true,
-      });
+      user.keyboard('[Meta>]');
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({});
     });
 
     test('selects all on click associated checkbox for selected item', () => {
       const mockOnSelectedItemsChange = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
       });
@@ -388,7 +387,7 @@ describe('TableLegend', () => {
         throw new Error(`Missing checkbox for row.`);
       }
 
-      userEvent.click(rowCheckbox);
+      user.click(rowCheckbox);
 
       expect(mockOnSelectedItemsChange).toHaveBeenCalledWith({
         one: true,
@@ -401,7 +400,7 @@ describe('TableLegend', () => {
   describe('on mouse over item', () => {
     test('calls `onItemMouseOver` with event and item information', () => {
       const mockOnItemMouseOver = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         onItemMouseOver: mockOnItemMouseOver,
       });
 
@@ -411,7 +410,7 @@ describe('TableLegend', () => {
         throw new Error('Cannot find legend item');
       }
 
-      userEvent.hover(itemToMouseOver);
+      user.hover(itemToMouseOver);
 
       expect(mockOnItemMouseOver).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -428,7 +427,7 @@ describe('TableLegend', () => {
   describe('on mouse out item', () => {
     test('calls `onItemMouseOut` with event and item information', () => {
       const mockOnItemMouseOut = jest.fn();
-      renderTableLegend({
+      const { user } = renderTableLegend({
         onItemMouseOut: mockOnItemMouseOut,
       });
       const tableRows = screen.getAllByRole('row');
@@ -437,7 +436,7 @@ describe('TableLegend', () => {
         throw new Error('Cannot find legend item');
       }
 
-      userEvent.unhover(itemToMouseOut);
+      user.unhover(itemToMouseOut);
 
       expect(mockOnItemMouseOut).toHaveBeenCalledWith(
         expect.objectContaining({
