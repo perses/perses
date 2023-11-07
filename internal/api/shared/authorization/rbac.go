@@ -28,15 +28,19 @@ func CheckUserPermission(rbac RBAC, claims *crypto.JWTCustomClaims, action v1.Ac
 type RBAC interface {
 	IsEnabled() bool
 	HasPermission(user string, action v1.ActionKind, project string, kind v1.Kind) bool
-	//Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.Config) (RBAC, error) {
-	cache, err := NewCache(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
-	if err != nil {
-		return nil, err
+	var cache *Cache
+	if *conf.Security.ActivatePermission {
+		newCache, err := NewCache(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO, *conf.Security.Authorization)
+		if err != nil {
+			return nil, err
+		}
+		cache = newCache
 	}
-	// TODO: refresh interval
+
+	// TODO: refresh interval if permissions activated
 
 	return &rbacImpl{
 		cache:      cache,
@@ -60,7 +64,7 @@ func (r rbacImpl) IsEnabled() bool {
 	return r.isEnabled
 }
 
-func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (*Cache, error) {
+func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.AuthorizationConfig) (*Cache, error) {
 	var cache Cache
 	// Retrieve users, roles, globalroles, rolebindings and globalrolebindings
 	users, err := userDAO.List(&user.Query{})
@@ -114,6 +118,10 @@ func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO
 			}
 		}
 	}
+
+	// Adding guest (default) permissions for connected users
+	cache.guestPermissions = conf.GuestPermissions
+
 	return &cache, nil
 }
 
@@ -124,7 +132,8 @@ type Cache struct {
 	roleBindings       []*v1.RoleBinding
 	globalRoleBindings []*v1.GlobalRoleBinding
 	// user -> project / * (global) -> perms
-	userPermissions map[string]map[string][]*v1.Permission
+	userPermissions  map[string]map[string][]*v1.Permission
+	guestPermissions []*v1.Permission
 }
 
 func (r Cache) AddEntry(user string, project string, permission *v1.Permission) {
@@ -158,7 +167,9 @@ func (r Cache) FindGlobalRole(name string) *v1.GlobalRole {
 
 func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
 	// Checking default permission
-	// TODO
+	if ok := PermissionListHasPermission(r.guestPermissions, reqAction, reqScope); ok {
+		return true
+	}
 
 	// Checking global perm first
 	userPermissions, ok := r.userPermissions[user]

@@ -15,19 +15,20 @@ package config
 
 import (
 	"encoding/json"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"time"
 )
 
 // jsonSchemas is only used to marshal the config in a proper json format
 // (mainly because of the duration that is not yet supported by json).
-type jsonAuhtorizationConfig struct {
+type jsonAuthorizationConfig struct {
 	Interval string `json:"interval,omitempty"`
 }
 
 type AuthorizationConfig struct {
 	// Interval is the refresh frequency
-	Interval time.Duration `json:"interval" yaml:"interval"`
-	// TODO: default perm for guest user
+	Interval         time.Duration    `json:"interval" yaml:"interval"`
+	GuestPermissions []*v1.Permission `json:"guest_permissions" yaml:"guest_permissions"`
 }
 
 func (p *AuthorizationConfig) Verify() error {
@@ -38,7 +39,7 @@ func (p *AuthorizationConfig) Verify() error {
 }
 
 func (p AuthorizationConfig) MarshalJSON() ([]byte, error) {
-	j := &jsonProvisioningConfig{
+	j := &jsonAuthorizationConfig{
 		Interval: p.Interval.String(),
 	}
 	return json.Marshal(j)

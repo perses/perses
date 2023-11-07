@@ -34,7 +34,8 @@ type service struct {
 
 func NewService(dao user.DAO, rbac authorization.RBAC) user.Service {
 	return &service{
-		dao: dao,
+		dao:  dao,
+		rbac: rbac,
 	}
 }
 

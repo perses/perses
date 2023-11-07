@@ -51,7 +51,8 @@ type Security struct {
 	// Also note the key must be at least 32 bytes long.
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
-	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	EncryptionKeyFile string               `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	Authorization     *AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 }
 
 func (s *Security) Verify() error {
@@ -77,6 +78,12 @@ func (s *Security) Verify() error {
 	if s.ActivatePermission == nil {
 		var activatePermission = true
 		s.ActivatePermission = &activatePermission
+	}
+
+	if *s.ActivatePermission {
+		if s.Authorization == nil {
+			return fmt.Errorf("permissions are enabled but authorization section is missing")
+		}
 	}
 	return nil
 }

@@ -33,9 +33,8 @@ type Config struct {
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// Information contains markdown content to be display on the home page
-	Information   string              `json:"information,omitempty" yaml:"information,omitempty"`
-	Provisioning  ProvisioningConfig  `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
-	Authorization AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
+	Information  string             `json:"information,omitempty" yaml:"information,omitempty"`
+	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 }
 
 func (c *Config) Verify() error {

@@ -2,6 +2,30 @@ security:
   readonly: false
   activate_permission: true
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+  authorization:
+    interval: 5m
+    guest_permissions:
+      - actions:
+          - read
+        scopes:
+          - Dashboard
+          - Datasource
+          - Folder
+          - GlobalDatasource
+          - GlobalRole
+          - GlobalRoleBinding
+          - GlobalSecret
+          - GlobalVariable
+          - Project
+          - Role
+          - RoleBinding
+          - Secret
+          - User
+          - Variable
+      - actions:
+          - create
+        scopes:
+          - Project
 
 database:
   file:
