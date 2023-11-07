@@ -55,7 +55,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
           createdAt: datedDashboard.dashboard.metadata.createdAt,
           updatedAt: datedDashboard.dashboard.metadata.updatedAt,
           viewedAt: datedDashboard.date,
-        } as Row)
+        }) as Row
     );
   }, [dashboardList]);
 

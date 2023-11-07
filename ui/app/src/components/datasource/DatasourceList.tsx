@@ -68,7 +68,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
           version: datasource.metadata.version,
           createdAt: datasource.metadata.createdAt,
           updatedAt: datasource.metadata.updatedAt,
-        } as Row)
+        }) as Row
     );
   }, [data]);
 
