@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useMemo, useState } from 'react';
-import { Box, LinearProgress, TextField, Autocomplete } from '@mui/material';
+import { LinearProgress, TextField, Autocomplete, Popper, PopperProps } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -197,16 +197,54 @@ function ListVariable({ name, source }: TemplateVariableProps) {
     }
   }, [setVariableOptions, name, options, source]);
 
+  const LETTER_HSIZE = 8; // approximation
+  const ARROW_OFFSET = 40;
+  const MIN_INPUT_WIDTH = 120;
+  const MAX_INPUT_WIDTH = 500;
+  const [inputWidth, setInputWidth] = useState(MIN_INPUT_WIDTH);
+
+  const handleInputResize = (newInputValue: string) => {
+    const newInputValueSize = (newInputValue.length + 1) * LETTER_HSIZE + ARROW_OFFSET;
+    if (newInputValueSize < MIN_INPUT_WIDTH) {
+      setInputWidth(MIN_INPUT_WIDTH);
+    } else if (newInputValueSize > MAX_INPUT_WIDTH) {
+      setInputWidth(MAX_INPUT_WIDTH);
+    } else {
+      setInputWidth(newInputValueSize);
+    }
+  };
+
   return (
-    <Box display={'flex'}>
+    <>
       <Autocomplete
         disablePortal
         disableCloseOnSelect={allowMultiple}
         multiple={allowMultiple}
         fullWidth
+        limitTags={3}
+        size="small"
+        disableClearable
+        PopperComponent={(props: PopperProps) => (
+          <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
+        )}
+        renderInput={(params) => {
+          return allowMultiple ? (
+            <TextField {...params} label={title} />
+          ) : (
+            <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
+          );
+        }}
+        sx={{
+          '& .MuiInputBase-root': {
+            minHeight: '38px',
+          },
+          '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
+            paddingY: '5px',
+            paddingLeft: '5px',
+          },
+        }}
         value={selectedOptions}
         onChange={(_, value) => {
-          // Must be selected
           if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
             setVariableValue(name, DEFAULT_ALL_VALUE, source);
           } else {
@@ -216,12 +254,14 @@ function ListVariable({ name, source }: TemplateVariableProps) {
         inputValue={inputValue}
         onInputChange={(_, newInputValue) => {
           setInputValue(newInputValue);
+          if (!allowMultiple) {
+            handleInputResize(newInputValue);
+          }
         }}
         options={viewOptions}
-        renderInput={(params) => <TextField {...params} label={title} />}
       />
       {loading && <LinearProgress />}
-    </Box>
+    </>
   );
 }
 
@@ -246,6 +286,11 @@ function TextVariable({ name, source }: TemplateVariableProps) {
       label={definition?.spec.display?.name ?? name}
       InputProps={{
         readOnly: definition?.spec.constant ?? false,
+      }}
+      sx={{
+        '& .MuiInputBase-root': {
+          minHeight: '38px',
+        },
       }}
     />
   );
