@@ -54,7 +54,28 @@ func addEntry(userPermissions userPermissions, user string, project string, perm
 	userPermissions[user][project] = append(userPermissions[user][project], permission)
 }
 
-func buildUserPermissions(users []*v1.User, roles []*v1.Role, globalRoles []*v1.GlobalRole, roleBindings []*v1.RoleBinding, globalRoleBindings []*v1.GlobalRoleBinding) userPermissions {
+func buildUserPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (userPermissions, error) {
+	users, err := userDAO.List(&user.Query{})
+	if err != nil {
+		return nil, err
+	}
+	roles, err := roleDAO.List(&role.Query{})
+	if err != nil {
+		return nil, err
+	}
+	globalRoles, err := globalRoleDAO.List(&globalrole.Query{})
+	if err != nil {
+		return nil, err
+	}
+	roleBindings, err := roleBindingDAO.List(&rolebinding.Query{})
+	if err != nil {
+		return nil, err
+	}
+	globalRoleBindings, err := globalRoleBindingDAO.List(&globalrolebinding.Query{})
+	if err != nil {
+		return nil, err
+	}
+
 	// Build cache
 	userPermissions := make(userPermissions)
 	for _, usr := range users {
@@ -76,19 +97,13 @@ func buildUserPermissions(users []*v1.User, roles []*v1.Role, globalRoles []*v1.
 			}
 		}
 	}
-	return userPermissions
+	return userPermissions, nil
 }
 
 type RBAC interface {
 	IsEnabled() bool
 	HasPermission(user string, action v1.ActionKind, project string, kind v1.Kind) bool
-	AddRole(role v1.Role)
-	AddRoleBinding(roleBinding v1.RoleBinding)
-	// TODO
-	//UpdateRole(role v1.Role)
-	//UpdateRoleBinding(role v1.Role)
-	//DeleteRole(role v1.Role)
-	//DeleteRoleBinding(role v1.Role)
+	Refresh() error
 }
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.Config) (RBAC, error) {
@@ -104,16 +119,26 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 	// TODO: refresh interval if permissions activated
 
 	return &rbacImpl{
-		cache:      cache,
-		jwtService: jwtService,
-		isEnabled:  *conf.Security.ActivatePermission,
+		cache:                cache,
+		userDAO:              userDAO,
+		roleDAO:              roleDAO,
+		roleBindingDAO:       roleBindingDAO,
+		globalRoleDAO:        globalRoleDAO,
+		globalRoleBindingDAO: globalRoleBindingDAO,
+		jwtService:           jwtService,
+		isEnabled:            *conf.Security.ActivatePermission,
 	}, nil
 }
 
 type rbacImpl struct {
-	cache      *Cache
-	jwtService crypto.JWT
-	isEnabled  bool
+	cache                *Cache
+	userDAO              user.DAO
+	roleDAO              role.DAO
+	roleBindingDAO       rolebinding.DAO
+	globalRoleDAO        globalrole.DAO
+	globalRoleBindingDAO globalrolebinding.DAO
+	jwtService           crypto.JWT
+	isEnabled            bool
 	// TODO: refresh async.SimpleTask
 }
 
@@ -121,13 +146,13 @@ func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject
 	return r.cache.HasPermission(user, reqAction, reqProject, reqKind)
 }
 
-func (r rbacImpl) AddRole(role v1.Role) {
-	r.cache.roles = append(r.cache.roles, &role)
-}
-
-func (r rbacImpl) AddRoleBinding(roleBinding v1.RoleBinding) {
-	r.cache.roleBindings = append(r.cache.roleBindings, &roleBinding)
-	r.cache.userPermissions = buildUserPermissions(r.cache.users, r.cache.roles, r.cache.globalRoles, r.cache.roleBindings, r.cache.globalRoleBindings)
+func (r rbacImpl) Refresh() error {
+	userPermissions, err := buildUserPermissions(r.userDAO, r.roleDAO, r.roleBindingDAO, r.globalRoleDAO, r.globalRoleBindingDAO)
+	if err != nil {
+		return err
+	}
+	r.cache.userPermissions = userPermissions
+	return nil
 }
 
 func (r rbacImpl) IsEnabled() bool {
@@ -136,52 +161,22 @@ func (r rbacImpl) IsEnabled() bool {
 
 func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.AuthorizationConfig) (*Cache, error) {
 	var cache Cache
-	// Retrieve users, roles, globalroles, rolebindings and globalrolebindings
-	users, err := userDAO.List(&user.Query{})
-	if err != nil {
-		return nil, err
-	}
-	cache.users = users
 
-	roles, err := roleDAO.List(&role.Query{})
-	if err != nil {
-		return nil, err
-	}
-	cache.roles = roles
-
-	globalRoles, err := globalRoleDAO.List(&globalrole.Query{})
-	if err != nil {
-		return nil, err
-	}
-	cache.globalRoles = globalRoles
-
-	roleBindings, err := roleBindingDAO.List(&rolebinding.Query{})
-	if err != nil {
-		return nil, err
-	}
-	cache.roleBindings = roleBindings
-
-	globalRoleBindings, err := globalRoleBindingDAO.List(&globalrolebinding.Query{})
-	if err != nil {
-		return nil, err
-	}
-	cache.globalRoleBindings = globalRoleBindings
-
-	// Adding guest (default) permissions for connected users
 	cache.guestPermissions = conf.GuestPermissions
+	userPermissions, err := buildUserPermissions(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
+	if err != nil {
+		return nil, err
+	}
 
-	cache.userPermissions = buildUserPermissions(users, roles, globalRoles, roleBindings, globalRoleBindings)
-	return &cache, nil
+	return &Cache{
+		guestPermissions: conf.GuestPermissions,
+		userPermissions:  userPermissions,
+	}, nil
 }
 
 type userPermissions = map[string]map[string][]*v1.Permission
 
 type Cache struct {
-	users              []*v1.User
-	roles              []*v1.Role
-	globalRoles        []*v1.GlobalRole
-	roleBindings       []*v1.RoleBinding
-	globalRoleBindings []*v1.GlobalRoleBinding
 	// username -> projectname or * (global) -> perms
 	userPermissions  userPermissions
 	guestPermissions []*v1.Permission

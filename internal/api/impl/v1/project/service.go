@@ -164,10 +164,9 @@ func (s *service) createProjectRoleAndRoleBinding(projectName string, userName s
 	if err := s.roleBindingDAO.Create(&ownerRoleBinding); err != nil {
 		return err
 	}
-	s.rbac.AddRole(ownerRole)
-	s.rbac.AddRole(editorRole)
-	s.rbac.AddRole(viewerRole)
-	s.rbac.AddRoleBinding(ownerRoleBinding)
+	if err := s.rbac.Refresh(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -178,8 +177,7 @@ func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v
 		return nil, err
 	}
 	if s.rbac.IsEnabled() {
-		err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject) // TODO: retrieve user from claims
-		if err != nil {
+		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject); err != nil { // TODO: retrieve user from claims
 			return nil, err
 		}
 	}
@@ -246,6 +244,11 @@ func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomC
 	if err := s.roleDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all roles")
 		return err
+	}
+	if s.rbac.IsEnabled() {
+		if err := s.rbac.Refresh(); err != nil {
+			return err
+		}
 	}
 	return s.dao.Delete(parameters.Name)
 }

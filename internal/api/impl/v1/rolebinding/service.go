@@ -36,8 +36,9 @@ type service struct {
 
 func NewService(dao rolebinding.DAO, rbac authorization.RBAC, sch schemas.Schemas) rolebinding.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:  dao,
+		rbac: rbac,
+		sch:  sch,
 	}
 }
 
