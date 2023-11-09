@@ -23,10 +23,9 @@ describe('PluginKindSelect', () => {
 
   // Opens the select and waits for loading to finish (i.e. options to appear)
   const openSelect = async () => {
-    const select = screen.getByRole('button');
-    userEvent.click(select);
-    const options = await screen.findAllByTestId('option');
-    return options;
+    const select = screen.getByRole('combobox');
+    await userEvent.click(select);
+    return await screen.findAllByTestId('option');
   };
 
   it('displays the list of plugins for a plugin type', async () => {
@@ -52,7 +51,7 @@ describe('PluginKindSelect', () => {
     });
 
     // Use findByRole to wait for loading to finish and selected value to appear
-    const select = await screen.findByRole('button', { name: 'Ernie Variable 1' });
+    const select = await screen.findByRole('combobox', { name: 'Ernie Variable 1' });
     expect(select).toBeInTheDocument();
   });
 
@@ -69,7 +68,7 @@ describe('PluginKindSelect', () => {
 
     await openSelect();
     const newOption = screen.getByRole('option', { name: 'Bert Variable' });
-    userEvent.click(newOption);
+    await userEvent.click(newOption);
 
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChangeValue).toBe('BertVariable');
