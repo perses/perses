@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useMemo, useState } from 'react';
-import { Select, FormControl, InputLabel, MenuItem, Box, LinearProgress, TextField } from '@mui/material';
+import { LinearProgress, TextField, Autocomplete, Popper, PopperProps } from '@mui/material';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -30,6 +30,18 @@ type TemplateVariableProps = {
   name: VariableName;
   source?: string;
 };
+
+function variableOptionToVariableValue(options: VariableOption | VariableOption[] | null): VariableValue {
+  if (options === null) {
+    return null;
+  }
+  if (Array.isArray(options)) {
+    return options.map((v) => {
+      return v.value;
+    });
+  }
+  return options.value;
+}
 
 export function TemplateVariable({ name, source }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name, source);
@@ -53,9 +65,9 @@ export function useListVariableState(
   value: VariableValue | undefined;
   loading: boolean;
   options: VariableOption[] | undefined;
-  // selectedValue is the value(s) that will be used in the view only
-  selectedValue: VariableValue;
-  // viewOptions are the options used in the view only (options + All if allowed)
+  // selectedOptions is/are the option(s) selected in the view
+  selectedOptions: VariableOption | VariableOption[];
+  // viewOptions are the options used in the view only (= options + All if allowed)
   viewOptions: VariableOption[];
 } {
   const allowMultiple = spec?.allowMultiple === true;
@@ -131,10 +143,23 @@ export function useListVariableState(
     return value;
   }, [viewOptions, value, valueIsInOptions, allowMultiple, allowAllValue]);
 
-  // Once we computed value, we set it as the selected one, if it is available in the options
-  const selectedValue = value && valueIsInOptions ? value : allowMultiple ? [] : '';
+  const selectedOptions = useMemo(() => {
+    // In the case Autocomplete.multiple equals false, Autocomplete.value expects a single object, not
+    // an array, hence this conditional
+    if (Array.isArray(value)) {
+      return viewOptions.filter((o) => {
+        return value?.includes(o.value);
+      });
+    } else {
+      return (
+        viewOptions.find((o) => {
+          return value === o.value;
+        }) ?? { value: '', label: '' }
+      );
+    }
+  }, [value, viewOptions]);
 
-  return { value, loading, options, selectedValue, viewOptions };
+  return { value, loading, options, selectedOptions, viewOptions };
 }
 
 function ListVariable({ name, source }: TemplateVariableProps) {
@@ -142,11 +167,12 @@ function ListVariable({ name, source }: TemplateVariableProps) {
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
   const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
-  const { selectedValue, value, loading, options, viewOptions } = useListVariableState(
+  const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
     variablesOptionsQuery
   );
+  const [inputValue, setInputValue] = useState<string>('');
 
   const title = definition?.spec.display?.name ?? name;
   const allowMultiple = definition?.spec.allowMultiple === true;
@@ -171,47 +197,71 @@ function ListVariable({ name, source }: TemplateVariableProps) {
     }
   }, [setVariableOptions, name, options, source]);
 
-  return (
-    <Box display={'flex'}>
-      <FormControl fullWidth>
-        <InputLabel id={name}>{title}</InputLabel>
-        <Select
-          id={name}
-          title={selectedValue as string}
-          label={title}
-          value={selectedValue}
-          onChange={(e) => {
-            // Must be selected
-            if (e.target.value === null || e.target.value.length === 0) {
-              if (allowAllValue) {
-                setVariableValue(name, DEFAULT_ALL_VALUE, source);
-              }
-              return;
-            }
-            setVariableValue(name, e.target.value as VariableValue, source);
-          }}
-          multiple={allowMultiple}
-        >
-          {loading && (
-            <MenuItem value="loading" disabled>
-              Loading
-            </MenuItem>
-          )}
+  const LETTER_HSIZE = 8; // approximation
+  const ARROW_OFFSET = 40;
+  const MIN_INPUT_WIDTH = 120;
+  const MAX_INPUT_WIDTH = 500;
+  const [inputWidth, setInputWidth] = useState(MIN_INPUT_WIDTH);
 
-          {viewOptions.length === 0 && (
-            <MenuItem value="empty" disabled>
-              No options
-            </MenuItem>
-          )}
-          {viewOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </Select>
-        {loading && <LinearProgress />}
-      </FormControl>
-    </Box>
+  const handleInputResize = (newInputValue: string) => {
+    const newInputValueSize = (newInputValue.length + 1) * LETTER_HSIZE + ARROW_OFFSET;
+    if (newInputValueSize < MIN_INPUT_WIDTH) {
+      setInputWidth(MIN_INPUT_WIDTH);
+    } else if (newInputValueSize > MAX_INPUT_WIDTH) {
+      setInputWidth(MAX_INPUT_WIDTH);
+    } else {
+      setInputWidth(newInputValueSize);
+    }
+  };
+
+  return (
+    <>
+      <Autocomplete
+        disablePortal
+        disableCloseOnSelect={allowMultiple}
+        multiple={allowMultiple}
+        fullWidth
+        limitTags={3}
+        size="small"
+        disableClearable
+        PopperComponent={(props: PopperProps) => (
+          <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
+        )}
+        renderInput={(params) => {
+          return allowMultiple ? (
+            <TextField {...params} label={title} />
+          ) : (
+            <TextField {...params} label={title} style={{ width: `${inputWidth}px` }} />
+          );
+        }}
+        sx={{
+          '& .MuiInputBase-root': {
+            minHeight: '38px',
+          },
+          '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
+            paddingY: '5px',
+            paddingLeft: '5px',
+          },
+        }}
+        value={selectedOptions}
+        onChange={(_, value) => {
+          if ((value === null || (Array.isArray(value) && value.length === 0)) && allowAllValue) {
+            setVariableValue(name, DEFAULT_ALL_VALUE, source);
+          } else {
+            setVariableValue(name, variableOptionToVariableValue(value), source);
+          }
+        }}
+        inputValue={inputValue}
+        onInputChange={(_, newInputValue) => {
+          setInputValue(newInputValue);
+          if (!allowMultiple) {
+            handleInputResize(newInputValue);
+          }
+        }}
+        options={viewOptions}
+      />
+      {loading && <LinearProgress />}
+    </>
   );
 }
 
@@ -236,6 +286,11 @@ function TextVariable({ name, source }: TemplateVariableProps) {
       label={definition?.spec.display?.name ?? name}
       InputProps={{
         readOnly: definition?.spec.constant ?? false,
+      }}
+      sx={{
+        '& .MuiInputBase-root': {
+          minHeight: '38px',
+        },
       }}
     />
   );
