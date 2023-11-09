@@ -44,7 +44,7 @@ func (p *AuthorizationConfig) Verify() error {
 	return nil
 }
 
-func (p AuthorizationConfig) MarshalJSON() ([]byte, error) {
+func (p *AuthorizationConfig) MarshalJSON() ([]byte, error) {
 	j := &jsonAuthorizationConfig{
 		Interval: p.Interval.String(),
 	}

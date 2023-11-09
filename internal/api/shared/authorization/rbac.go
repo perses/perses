@@ -1,3 +1,16 @@
+// Copyright 2021 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package authorization
 
 import (
@@ -81,8 +94,9 @@ func buildUserPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rol
 	for _, usr := range users {
 		for _, globalRoleBinding := range globalRoleBindings {
 			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				for _, permission := range findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-					addEntry(userPermissions, usr.Metadata.Name, "", &permission)
+				globalRolePermissions := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
+				for i := range globalRolePermissions {
+					addEntry(userPermissions, usr.Metadata.Name, "", &globalRolePermissions[i])
 				}
 			}
 		}
@@ -91,8 +105,9 @@ func buildUserPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rol
 	for _, usr := range users {
 		for _, roleBinding := range roleBindings {
 			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				for _, permission := range findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-					addEntry(userPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &permission)
+				rolePermissions := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
+				for i := range rolePermissions {
+					addEntry(userPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
 				}
 			}
 		}
@@ -201,16 +216,18 @@ func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject
 	userPermissions := make(userPermissions)
 	for _, globalRoleBinding := range globalRoleBindings {
 		if globalRoleBinding.Spec.Has(v1.KindUser, user) {
-			for _, permission := range findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-				addEntry(userPermissions, user, "", &permission)
+			globalRolePermissions := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
+			for i := range globalRolePermissions {
+				addEntry(userPermissions, user, "", &globalRolePermissions[i])
 			}
 		}
 	}
 
 	for _, roleBinding := range roleBindings {
 		if roleBinding.Spec.Has(v1.KindUser, user) {
-			for _, permission := range findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-				addEntry(userPermissions, user, roleBinding.Metadata.Project, &permission)
+			rolePermissions := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
+			for i := range rolePermissions {
+				addEntry(userPermissions, user, roleBinding.Metadata.Project, &rolePermissions[i])
 			}
 		}
 	}
@@ -229,7 +246,7 @@ func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject
 	}
 
 	// Retrieving user permissions
-	projectPermissions, ok := userPermissions["user"][reqProject]
+	projectPermissions, ok := userPermissions[user][reqProject]
 	if !ok {
 		return false
 	}
