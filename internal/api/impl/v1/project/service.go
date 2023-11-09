@@ -15,6 +15,8 @@ package project
 
 import (
 	"fmt"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 
@@ -33,24 +35,28 @@ import (
 
 type service struct {
 	project.Service
-	dao           project.DAO
-	folderDAO     folder.DAO
-	datasourceDAO datasource.DAO
-	dashboardDAO  dashboard.DAO
-	secretDAO     secret.DAO
-	variableDAO   variable.DAO
-	rbac          authorization.RBAC
+	dao            project.DAO
+	folderDAO      folder.DAO
+	datasourceDAO  datasource.DAO
+	dashboardDAO   dashboard.DAO
+	roleDAO        role.DAO
+	roleBindingDAO rolebinding.DAO
+	secretDAO      secret.DAO
+	variableDAO    variable.DAO
+	rbac           authorization.RBAC
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac authorization.RBAC) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac authorization.RBAC) project.Service {
 	return &service{
-		dao:           dao,
-		folderDAO:     folderDAO,
-		datasourceDAO: datasourceDAO,
-		dashboardDAO:  dashboardDAO,
-		secretDAO:     secretDAO,
-		variableDAO:   variableDAO,
-		rbac:          rbac,
+		dao:            dao,
+		folderDAO:      folderDAO,
+		datasourceDAO:  datasourceDAO,
+		dashboardDAO:   dashboardDAO,
+		roleDAO:        roleDAO,
+		roleBindingDAO: roleBindingDAO,
+		secretDAO:      secretDAO,
+		variableDAO:    variableDAO,
+		rbac:           rbac,
 	}
 }
 
@@ -59,16 +65,123 @@ func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (int
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.Project); ok {
-		return s.create(object)
+		return s.create(object, claims)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
-func (s *service) create(entity *v1.Project) (*v1.Project, error) {
+func (s *service) createProjectRoleAndRoleBinding(projectName string, userName string) error {
+	if len(userName) == 0 {
+		return fmt.Errorf("user empty")
+	}
+
+	ownerRole := v1.Role{
+		Kind: v1.KindRole,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "owner",
+			},
+			Project: projectName,
+		},
+		Spec: v1.RoleSpec{
+			Permissions: []v1.Permission{
+				{
+					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
+					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
+				},
+			},
+		},
+	}
+
+	editorRole := v1.Role{
+		Kind: v1.KindRole,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "editor",
+			},
+			Project: projectName,
+		},
+		Spec: v1.RoleSpec{
+			Permissions: []v1.Permission{
+				{
+					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
+					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindSecret, v1.KindVariable},
+				},
+				{
+					Actions: []v1.ActionKind{v1.ReadAction},
+					Scopes:  []v1.Kind{v1.KindRole, v1.KindRoleBinding},
+				},
+			},
+		},
+	}
+
+	viewerRole := v1.Role{
+		Kind: v1.KindRole,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "viewer",
+			},
+			Project: projectName,
+		},
+		Spec: v1.RoleSpec{
+			Permissions: []v1.Permission{
+				{
+					Actions: []v1.ActionKind{v1.ReadAction},
+					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
+				},
+			},
+		},
+	}
+
+	ownerRoleBinding := v1.RoleBinding{
+		Kind: v1.KindRoleBinding,
+		Metadata: v1.ProjectMetadata{
+			Metadata: v1.Metadata{
+				Name: "owner",
+			},
+			Project: projectName,
+		},
+		Spec: v1.RoleBindingSpec{
+			Role: "owner",
+			Subjects: []v1.Subject{
+				{
+					Kind: v1.KindUser,
+					Name: userName,
+				},
+			},
+		},
+	}
+
+	if err := s.roleDAO.Create(&ownerRole); err != nil {
+		return err
+	}
+	if err := s.roleDAO.Create(&editorRole); err != nil {
+		return err
+	}
+	if err := s.roleDAO.Create(&viewerRole); err != nil {
+		return err
+	}
+	if err := s.roleBindingDAO.Create(&ownerRoleBinding); err != nil {
+		return err
+	}
+	s.rbac.AddRole(ownerRole)
+	s.rbac.AddRole(editorRole)
+	s.rbac.AddRole(viewerRole)
+	s.rbac.AddRoleBinding(ownerRoleBinding)
+	return nil
+}
+
+func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
+	}
+	if s.rbac.IsEnabled() {
+		err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject) // TODO: retrieve user from claims
+		if err != nil {
+			return nil, err
+		}
 	}
 	return entity, nil
 }
@@ -124,6 +237,14 @@ func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomC
 	}
 	if err := s.variableDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all variables")
+		return err
+	}
+	if err := s.roleBindingDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all roleBindings")
+		return err
+	}
+	if err := s.roleDAO.DeleteAll(projectName); err != nil {
+		logrus.WithError(err).Error("unable to delete all roles")
 		return err
 	}
 	return s.dao.Delete(parameters.Name)

@@ -25,9 +25,70 @@ func CheckUserPermission(rbac RBAC, claims *crypto.JWTCustomClaims, action v1.Ac
 	return nil
 }
 
+func findRole(roles []*v1.Role, project string, name string) *v1.Role {
+	for _, rle := range roles {
+		if rle.Metadata.Name == name && rle.Metadata.Project == project {
+			return rle
+		}
+	}
+	return nil
+}
+
+func findGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole { // TODO: generic
+	for _, grle := range globalRoles {
+		if grle.Metadata.Name == name {
+			return grle
+		}
+	}
+	return nil
+}
+
+func addEntry(userPermissions userPermissions, user string, project string, permission *v1.Permission) {
+	if _, ok := userPermissions[user]; !ok {
+		userPermissions[user] = make(map[string][]*v1.Permission)
+	}
+
+	if _, ok := userPermissions[user][project]; !ok { // TODO: check val ?
+		userPermissions[user][project] = make([]*v1.Permission, 0)
+	}
+	userPermissions[user][project] = append(userPermissions[user][project], permission)
+}
+
+func buildUserPermissions(users []*v1.User, roles []*v1.Role, globalRoles []*v1.GlobalRole, roleBindings []*v1.RoleBinding, globalRoleBindings []*v1.GlobalRoleBinding) userPermissions {
+	// Build cache
+	userPermissions := make(userPermissions)
+	for _, usr := range users {
+		for _, globalRoleBinding := range globalRoleBindings {
+			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
+				for _, permission := range findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
+					addEntry(userPermissions, usr.Metadata.Name, "", &permission)
+				}
+			}
+		}
+	}
+
+	for _, usr := range users {
+		for _, roleBinding := range roleBindings {
+			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
+				for _, permission := range findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
+					addEntry(userPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &permission)
+				}
+			}
+		}
+	}
+	return userPermissions
+}
+
 type RBAC interface {
 	IsEnabled() bool
 	HasPermission(user string, action v1.ActionKind, project string, kind v1.Kind) bool
+	AddRole(role v1.Role)
+	AddRoleBinding(roleBinding v1.RoleBinding)
+	// TODO
+	//UpdateRole(role v1.Role)
+	//UpdateRoleBinding(role v1.Role)
+	//DeleteRole(role v1.Role)
+	//DeleteRoleBinding(role v1.Role)
 }
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.Config) (RBAC, error) {
@@ -58,6 +119,15 @@ type rbacImpl struct {
 
 func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqKind v1.Kind) bool {
 	return r.cache.HasPermission(user, reqAction, reqProject, reqKind)
+}
+
+func (r rbacImpl) AddRole(role v1.Role) {
+	r.cache.roles = append(r.cache.roles, &role)
+}
+
+func (r rbacImpl) AddRoleBinding(roleBinding v1.RoleBinding) {
+	r.cache.roleBindings = append(r.cache.roleBindings, &roleBinding)
+	r.cache.userPermissions = buildUserPermissions(r.cache.users, r.cache.roles, r.cache.globalRoles, r.cache.roleBindings, r.cache.globalRoleBindings)
 }
 
 func (r rbacImpl) IsEnabled() bool {
@@ -97,33 +167,14 @@ func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO
 	}
 	cache.globalRoleBindings = globalRoleBindings
 
-	// Build cache
-	cache.userPermissions = make(map[string]map[string][]*v1.Permission)
-	for _, usr := range users {
-		for _, globalRoleBinding := range globalRoleBindings {
-			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				for _, permission := range cache.FindGlobalRole(globalRoleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-					cache.AddEntry(usr.Metadata.Name, "", &permission)
-				}
-			}
-		}
-	}
-
-	for _, usr := range users {
-		for _, roleBinding := range roleBindings {
-			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				for _, permission := range cache.FindRole(roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions { // TODO: Check nil
-					cache.AddEntry(usr.Metadata.Name, roleBinding.Metadata.Project, &permission)
-				}
-			}
-		}
-	}
-
 	// Adding guest (default) permissions for connected users
 	cache.guestPermissions = conf.GuestPermissions
 
+	cache.userPermissions = buildUserPermissions(users, roles, globalRoles, roleBindings, globalRoleBindings)
 	return &cache, nil
 }
+
+type userPermissions = map[string]map[string][]*v1.Permission
 
 type Cache struct {
 	users              []*v1.User
@@ -131,38 +182,9 @@ type Cache struct {
 	globalRoles        []*v1.GlobalRole
 	roleBindings       []*v1.RoleBinding
 	globalRoleBindings []*v1.GlobalRoleBinding
-	// user -> project / * (global) -> perms
-	userPermissions  map[string]map[string][]*v1.Permission
+	// username -> projectname or * (global) -> perms
+	userPermissions  userPermissions
 	guestPermissions []*v1.Permission
-}
-
-func (r Cache) AddEntry(user string, project string, permission *v1.Permission) {
-	if _, ok := r.userPermissions[user]; !ok {
-		r.userPermissions[user] = make(map[string][]*v1.Permission)
-	}
-
-	if _, ok := r.userPermissions[user][project]; !ok { // TODO: check val ?
-		r.userPermissions[user][project] = make([]*v1.Permission, 0)
-	}
-	r.userPermissions[user][project] = append(r.userPermissions[user][project], permission)
-}
-
-func (r Cache) FindRole(project string, name string) *v1.Role {
-	for _, rle := range r.roles {
-		if rle.Metadata.Name == name && rle.Metadata.Project == project {
-			return rle
-		}
-	}
-	return nil
-}
-
-func (r Cache) FindGlobalRole(name string) *v1.GlobalRole {
-	for _, grle := range r.globalRoles {
-		if grle.Metadata.Name == name {
-			return grle
-		}
-	}
-	return nil
 }
 
 func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
