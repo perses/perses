@@ -26,7 +26,9 @@ type jsonAuthorizationConfig struct {
 }
 
 type AuthorizationConfig struct {
-	// Interval is the refresh frequency
+	// Enable caching for permissions, highly recommended
+	ActivateCache *bool `json:"activate_cache,omitempty" yaml:"activate_cache,omitempty"`
+	// Interval is the refresh frequency of the cache
 	Interval         time.Duration    `json:"interval" yaml:"interval"`
 	GuestPermissions []*v1.Permission `json:"guest_permissions" yaml:"guest_permissions"`
 }
@@ -34,6 +36,10 @@ type AuthorizationConfig struct {
 func (p *AuthorizationConfig) Verify() error {
 	if p.Interval <= 0 {
 		p.Interval = defaultInterval
+	}
+	if p.ActivateCache != nil {
+		var activateCache = true
+		p.ActivateCache = &activateCache
 	}
 	return nil
 }
