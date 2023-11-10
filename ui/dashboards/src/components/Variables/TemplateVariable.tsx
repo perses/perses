@@ -162,6 +162,10 @@ export function useListVariableState(
   return { value, loading, options, selectedOptions, viewOptions };
 }
 
+const StyledPopper = (props: PopperProps) => (
+  <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
+);
+
 function ListVariable({ name, source }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name, source);
   const definition = ctx.definition as ListVariableDefinition;
@@ -224,9 +228,7 @@ function ListVariable({ name, source }: TemplateVariableProps) {
         limitTags={3}
         size="small"
         disableClearable
-        PopperComponent={(props: PopperProps) => (
-          <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
-        )}
+        PopperComponent={StyledPopper}
         renderInput={(params) => {
           return allowMultiple ? (
             <TextField {...params} label={title} />
