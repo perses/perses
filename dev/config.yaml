@@ -3,8 +3,8 @@ security:
   activate_permission: true
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
   authorization:
-    interval: 5m
-    activate_cache: false
+    activate_cache: true
+    interval: 10m
     guest_permissions:
       - actions:
           - read

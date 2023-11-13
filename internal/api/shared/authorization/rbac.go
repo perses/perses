@@ -142,7 +142,6 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 			globalRoleDAO:        globalRoleDAO,
 			globalRoleBindingDAO: globalRoleBindingDAO,
 			jwtService:           jwtService,
-			isEnabled:            *conf.Security.ActivatePermission,
 			guestPermissions:     conf.Security.Authorization.GuestPermissions,
 		}, nil
 	}
@@ -154,7 +153,6 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		jwtService:           jwtService,
-		isEnabled:            *conf.Security.ActivatePermission,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
 	}, nil
 }
@@ -180,13 +178,12 @@ type rbacImpl struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	jwtService           crypto.JWT
-	isEnabled            bool
 	guestPermissions     []*v1.Permission
 	// TODO: refresh async.SimpleTask
 }
 
 func (r rbacImpl) IsEnabled() bool {
-	return r.isEnabled
+	return true
 }
 
 func (r rbacImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
@@ -265,13 +262,12 @@ type rbacCacheImpl struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	jwtService           crypto.JWT
-	isEnabled            bool
 	guestPermissions     []*v1.Permission
 	// TODO: refresh async.SimpleTask
 }
 
 func (r rbacCacheImpl) IsEnabled() bool {
-	return r.isEnabled
+	return true
 }
 
 func (r rbacCacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
