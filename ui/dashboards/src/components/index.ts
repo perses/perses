@@ -16,6 +16,7 @@ export * from './AddPanelButton';
 export * from './Dashboard';
 export * from './DashboardToolbar';
 export * from './DashboardStickyToolbar';
+export * from './Datasources';
 export * from './DeletePanelDialog';
 export * from './DeletePanelGroupDialog';
 export * from './DiscardChangesConfirmationDialog';

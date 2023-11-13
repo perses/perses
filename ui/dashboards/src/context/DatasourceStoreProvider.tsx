@@ -20,6 +20,7 @@ import {
   DatasourceSpec,
   GlobalDatasource,
   useEvent,
+  Datasource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -310,4 +311,31 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
   };
 
   return { results, addItem };
+}
+
+export type ExternalDatasources = {
+  source: string;
+  tooltip?: {
+    title?: string;
+    description?: string;
+  };
+  editLink?: string;
+  datasources: Datasource[];
+};
+
+export function useLocalDatasources() {
+  return {};
+}
+
+export function useExternalDatasources() {
+  // TODO
+  return [];
+}
+
+export function useDatasourceActions() {
+  return {
+    setDatasources: (datasources: Record<string, DatasourceSpec>) => {
+      return datasources;
+    },
+  };
 }
