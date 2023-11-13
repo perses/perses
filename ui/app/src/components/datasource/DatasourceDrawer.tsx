@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DispatchWithPromise } from '@perses-dev/core';
+import { Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Action, DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
@@ -38,6 +38,14 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     /* do nothing */
   };
 
+  const handleSave = (name: string, spec: DatasourceSpec) => {
+    datasource.spec = spec;
+    datasource.metadata.name = name;
+    if (onSave) {
+      onSave(datasource);
+    }
+  };
+
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -51,11 +59,12 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
         >
           {isOpen && (
             <DatasourceEditorForm
-              initialDatasource={datasource}
+              initialName={datasource.metadata.name}
+              initialSpec={datasource.spec}
               initialAction={action}
               isDraft={false}
               isReadonly={isReadonly}
-              onSave={onSave}
+              onSave={handleSave}
               onClose={onClose}
               onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
             />

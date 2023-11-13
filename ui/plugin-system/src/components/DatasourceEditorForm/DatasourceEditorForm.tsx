@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { useImmer } from 'use-immer';
-import { Display, Datasource } from '@perses-dev/core';
+import { Display, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import React, { Dispatch, DispatchWithoutAction, useCallback, useState } from 'react';
+import { DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,36 +26,37 @@ import { datasourceEditValidationSchema, DatasourceEditValidationType } from '..
  * This preprocessing ensures that we always have a defined object for the `display` property
  * @param datasource
  */
-function getInitialState<T extends Datasource>(datasource: T): T {
+function getInitialState(name: string, spec: DatasourceSpec) {
   const patchedDisplay: Display = {
-    name: datasource.spec.display?.name ?? '',
-    description: datasource.spec.display?.description ?? '',
+    name: spec.display?.name ?? '',
+    description: spec.display?.description ?? '',
   };
 
   return {
-    ...datasource,
+    name: name,
     spec: {
-      ...datasource.spec,
+      ...spec,
       display: patchedDisplay,
     },
   };
 }
 
-interface DatasourceEditorFormProps<T extends Datasource> {
-  initialDatasource: T;
+interface DatasourceEditorFormProps {
+  initialName: string;
+  initialSpec: DatasourceSpec;
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
-  onSave: Dispatch<T>;
+  onSave: (name: string, spec: DatasourceSpec) => void;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
-export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEditorFormProps<T>) {
-  const { initialDatasource, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
+export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
+  const { initialName, initialSpec, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
-  const patchedInitialDatasource = getInitialState(initialDatasource);
-  const [state, setState] = useImmer(patchedInitialDatasource);
+  const initialState = getInitialState(initialName, initialSpec);
+  const [state, setState] = useImmer(initialState);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
@@ -65,7 +66,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
     resolver: zodResolver(datasourceEditValidationSchema),
     mode: 'onBlur',
     defaultValues: {
-      name: state.metadata.name,
+      name: state.name,
       title: state.spec.display?.name,
       description: state.spec.display?.description,
       default: state.spec.default,
@@ -73,7 +74,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   });
 
   const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
-    onSave(state);
+    onSave(state.name, state.spec);
   };
 
   // When user click on cancel, several possibilities:
@@ -81,12 +82,12 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   const handleCancel = useCallback(() => {
-    if (JSON.stringify(patchedInitialDatasource) !== JSON.stringify(state)) {
+    if (JSON.stringify(initialState) !== JSON.stringify(state)) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
     }
-  }, [state, patchedInitialDatasource, setDiscardDialogOpened, onClose]);
+  }, [state, initialState, setDiscardDialogOpened, onClose]);
 
   return (
     <FormProvider {...form}>
@@ -157,7 +158,7 @@ export function DatasourceEditorForm<T extends Datasource>(props: DatasourceEdit
                   onChange={(event) => {
                     field.onChange(event);
                     setState((draft) => {
-                      draft.metadata.name = event.target.value;
+                      draft.name = event.target.value;
                     });
                   }}
                 />
