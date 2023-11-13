@@ -16,6 +16,7 @@ package globaldatasource
 import (
 	"fmt"
 	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
@@ -44,7 +45,7 @@ func NewService(dao globaldatasource.DAO, rbac authorization.RBAC, sch schemas.S
 }
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, v1.GlobalProject, v1.KindGlobalDatasource); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, rbac.GlobalProject, v1.KindGlobalDatasource); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.GlobalDatasource); ok {
@@ -66,7 +67,7 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, v1.GlobalProject, v1.KindGlobalDatasource); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, rbac.GlobalProject, v1.KindGlobalDatasource); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.GlobalDatasource); ok {
@@ -97,21 +98,21 @@ func (s *service) update(entity *v1.GlobalDatasource, parameters shared.Paramete
 }
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, v1.GlobalProject, v1.KindGlobalDatasource); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, rbac.GlobalProject, v1.KindGlobalDatasource); err != nil {
 		return shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Delete(parameters.Name)
 }
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalDatasource); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindGlobalDatasource); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindGlobalDatasource); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindGlobalDatasource); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	dtsList, err := s.dao.List(q)

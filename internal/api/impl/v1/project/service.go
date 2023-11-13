@@ -18,6 +18,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -61,7 +62,7 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 }
 
 func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, v1.GlobalProject, v1.KindProject); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, rbac.GlobalProject, v1.KindProject); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.Project); ok {
@@ -70,99 +71,28 @@ func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (int
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
-func (s *service) createProjectRoleAndRoleBinding(projectName string, userName string) error {
-	if len(userName) == 0 {
+// Create default roles and role bindings for the project
+func (s *service) createProjectRoleAndRoleBinding(projectName string, username string) error {
+	if len(username) == 0 {
 		return fmt.Errorf("user empty")
 	}
 
-	ownerRole := v1.Role{
-		Kind: v1.KindRole,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: "owner",
-			},
-			Project: projectName,
-		},
-		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
-				{
-					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
-				},
-			},
-		},
-	}
+	owner := authorization.DefaultOwnerRole(projectName)
+	editor := authorization.DefaultEditorRole(projectName)
+	viewer := authorization.DefaultViewerRole(projectName)
+	ownerRb := authorization.DefaultOwnerRoleBinding(projectName, username)
 
-	editorRole := v1.Role{
-		Kind: v1.KindRole,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: "editor",
-			},
-			Project: projectName,
-		},
-		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
-				{
-					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindSecret, v1.KindVariable},
-				},
-				{
-					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.Kind{v1.KindRole, v1.KindRoleBinding},
-				},
-			},
-		},
+	if err := s.roleDAO.Create(&owner); err != nil {
+		return fmt.Errorf("failed to create owner role: %e", err)
 	}
-
-	viewerRole := v1.Role{
-		Kind: v1.KindRole,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: "viewer",
-			},
-			Project: projectName,
-		},
-		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
-				{
-					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
-				},
-			},
-		},
+	if err := s.roleDAO.Create(&editor); err != nil {
+		return fmt.Errorf("failed to create editor role: %e", err)
 	}
-
-	ownerRoleBinding := v1.RoleBinding{
-		Kind: v1.KindRoleBinding,
-		Metadata: v1.ProjectMetadata{
-			Metadata: v1.Metadata{
-				Name: "owner",
-			},
-			Project: projectName,
-		},
-		Spec: v1.RoleBindingSpec{
-			Role: "owner",
-			Subjects: []v1.Subject{
-				{
-					Kind: v1.KindUser,
-					Name: userName,
-				},
-			},
-		},
+	if err := s.roleDAO.Create(&viewer); err != nil {
+		return fmt.Errorf("failed to create viewer role: %e", err)
 	}
-
-	if err := s.roleDAO.Create(&ownerRole); err != nil {
-		return err
-	}
-	if err := s.roleDAO.Create(&editorRole); err != nil {
-		return err
-	}
-	if err := s.roleDAO.Create(&viewerRole); err != nil {
-		return err
-	}
-	if err := s.roleBindingDAO.Create(&ownerRoleBinding); err != nil {
-		return err
+	if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
+		return fmt.Errorf("failed to create owner role binding: %e", err)
 	}
 	if err := s.rbac.Refresh(); err != nil {
 		return err
@@ -176,6 +106,8 @@ func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
+
+	// If authorization is enabled, permissions to the creator need to be given
 	if s.rbac.IsEnabled() {
 		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject); err != nil { // TODO: retrieve user from claims
 			return nil, err
@@ -185,7 +117,7 @@ func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v
 }
 
 func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, v1.GlobalProject, v1.KindProject); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, rbac.GlobalProject, v1.KindProject); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	if object, ok := entity.(*v1.Project); ok {
@@ -213,7 +145,7 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 }
 
 func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, v1.GlobalProject, v1.KindProject); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, rbac.GlobalProject, v1.KindProject); err != nil {
 		return shared.HandleUnauthorizedError(err.Error())
 	}
 	projectName := parameters.Name
@@ -254,14 +186,14 @@ func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomC
 }
 
 func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindProject); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindProject); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.Get(parameters.Name)
 }
 
 func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, v1.GlobalProject, v1.KindProject); err != nil {
+	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindProject); err != nil {
 		return nil, shared.HandleUnauthorizedError(err.Error())
 	}
 	return s.dao.List(q)

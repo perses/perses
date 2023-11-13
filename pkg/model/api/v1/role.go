@@ -28,7 +28,6 @@ type RoleInterface interface {
 type ActionKind string
 
 const (
-	GlobalProject             = ""
 	WildcardAction ActionKind = "*"
 	ReadAction     ActionKind = "read"
 	CreateAction   ActionKind = "create"

@@ -15,10 +15,9 @@ package secret
 
 import (
 	"fmt"
-	"github.com/perses/perses/internal/api/shared/authorization"
-
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
