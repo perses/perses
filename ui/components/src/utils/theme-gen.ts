@@ -22,12 +22,7 @@ type MuiTheme = Omit<Theme, 'components'>;
 
 export function generateChartsTheme(
   muiTheme: MuiTheme,
-  echartsTheme: EChartsTheme,
-  /**
-   * The id of the container that will have the chart tooltip appended to it.
-   * By default, chart tooltip uses the body of the top-level document object.
-   */
-  tooltipPortalContainerId?: string
+  persesChartsThemeOverride: Partial<PersesChartsTheme>
 ): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
@@ -231,40 +226,42 @@ export function generateChartsTheme(
     },
   };
 
-  return {
-    tooltipPortalContainerId,
-    echartsTheme: merge(muiConvertedTheme, echartsTheme),
-    noDataOption: {
-      title: {
-        show: true,
-        textStyle: {
-          color: primaryTextColor,
-          fontSize: 16,
-          fontWeight: 400,
+  return merge(
+    {
+      echartsTheme: muiConvertedTheme,
+      noDataOption: {
+        title: {
+          show: true,
+          textStyle: {
+            color: primaryTextColor,
+            fontSize: 16,
+            fontWeight: 400,
+          },
+          text: 'No data',
+          left: 'center',
+          top: 'center',
         },
-        text: 'No data',
-        left: 'center',
-        top: 'center',
+        xAxis: {
+          show: false,
+        },
+        yAxis: {
+          show: false,
+        },
       },
-      xAxis: {
-        show: false,
+      sparkline: {
+        width: 2,
+        color: '#1976d2',
       },
-      yAxis: {
-        show: false,
+      container: {
+        padding: {
+          default: parseInt(muiTheme.spacing(1.5), 10),
+        },
+      },
+      thresholds: {
+        defaultColor: muiTheme.palette.success.main,
+        palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
       },
     },
-    sparkline: {
-      width: 2,
-      color: '#1976d2',
-    },
-    container: {
-      padding: {
-        default: parseInt(muiTheme.spacing(1.5), 10),
-      },
-    },
-    thresholds: {
-      defaultColor: muiTheme.palette.success.main,
-      palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
-    },
-  };
+    persesChartsThemeOverride
+  );
 }
