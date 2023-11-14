@@ -14,6 +14,7 @@
 package shared
 
 import (
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"net/http"
 
@@ -34,9 +35,14 @@ func ExtractParameters(ctx echo.Context) Parameters {
 	}
 }
 
-func ExtractJWTClaims(ctx echo.Context, jwtService crypto.JWT) *crypto.JWTCustomClaims {
-	claims, err := jwtService.Parse(crypto.ExtractTokenFromBearer(ctx.Request().Header.Get("Authorization")))
-	if err != nil {
+func ExtractJWTClaims(ctx echo.Context) *crypto.JWTCustomClaims {
+	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
+	if !ok {
+		return nil
+	}
+
+	claims, ok := jwtToken.Claims.(*crypto.JWTCustomClaims)
+	if !ok {
 		return nil
 	}
 	return claims
@@ -77,7 +83,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	claims := ExtractJWTClaims(ctx, t.jwtService)
+	claims := ExtractJWTClaims(ctx)
 	newEntity, err := t.service.Create(entity, claims)
 	if err != nil {
 		return err
@@ -90,7 +96,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx, t.jwtService)
+	claims := ExtractJWTClaims(ctx)
 	newEntity, err := t.service.Update(entity, parameters, claims)
 	if err != nil {
 		return err
@@ -100,7 +106,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx, t.jwtService)
+	claims := ExtractJWTClaims(ctx)
 	if err := t.service.Delete(parameters, claims); err != nil {
 		return err
 	}
@@ -109,7 +115,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 
 func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx, t.jwtService)
+	claims := ExtractJWTClaims(ctx)
 	entity, err := t.service.Get(parameters, claims)
 	if err != nil {
 		return err
@@ -122,7 +128,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 		return HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx, t.jwtService)
+	claims := ExtractJWTClaims(ctx)
 	result, err := t.service.List(q, parameters, claims)
 	if err != nil {
 		return err

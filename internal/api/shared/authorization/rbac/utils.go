@@ -23,8 +23,7 @@ import (
 )
 
 const (
-	GlobalProject = ""
-	wildcard      = "*"
+	GlobalProject = "*"
 )
 
 // UsersPermissions contains the mapping of all users and their permissions
@@ -36,7 +35,7 @@ func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.Acti
 		for _, action := range permission.Actions {
 			if action == reqAction || action == v1.WildcardAction {
 				for _, scope := range permission.Scopes {
-					if scope == reqScope || scope == wildcard { // TODO: wildcard var
+					if scope == reqScope || scope == v1.KindWildcard { // TODO: wildcard var
 						return true
 					}
 				}

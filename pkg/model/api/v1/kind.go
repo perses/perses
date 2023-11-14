@@ -37,6 +37,7 @@ const (
 	KindSecret            Kind = "Secret"
 	KindUser              Kind = "User"
 	KindVariable          Kind = "Variable"
+	KindWildcard          Kind = "*"
 )
 
 var KindMap = map[Kind]bool{

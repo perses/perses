@@ -50,11 +50,11 @@ type RBAC interface {
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.Config) (RBAC, error) {
 
-	if !*conf.Security.ActivatePermission {
+	if !*conf.Security.Authorization.EnableAuthorization {
 		return &rbac.DisabledImpl{}, nil
 	}
 
-	if *conf.Security.Authorization.ActivateCache {
+	if *conf.Security.Authorization.EnableCache {
 		newCache, err := rbac.NewCache(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
 		if err != nil {
 			return nil, err

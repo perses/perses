@@ -1,9 +1,9 @@
 security:
   readonly: false
-  activate_permission: true
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
   authorization:
-    activate_cache: true
+    enable_authorization: true
+    enable_cache: true
     interval: 10m
     guest_permissions:
       - actions:

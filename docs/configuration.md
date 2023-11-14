@@ -60,7 +60,6 @@ Generic placeholders are defined as follows:
 * `<int>`: an integer value
 * `<secret>`: a regular string that is a secret, such as a password
 * `<string>`: a regular string
-* `<action>`: a string that can take the values `create`, `read`, `update` or `delete`
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable`
 
 ```yaml
@@ -92,10 +91,6 @@ Generic placeholders are defined as follows:
   # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
 
-  # It is activating or deactivating the permission verification on each endpoint.
-  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ activate_permission: <boolean> | default = true ]
-
   # It contains any configuration that changes authorization behavior like default permissions
   [ authorization: <authorization_config> ]
 
@@ -113,12 +108,18 @@ Generic placeholders are defined as follows:
 #### `<authorization_config>`
 
 ```yaml
+  # It is activating or deactivating the permission verification on each endpoint.
+  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ enable_authorization: <boolean> | default = true ]
+
   # It will cache user permissions, highly reduce call to database / filesystem
   # TODO: The cache is refresh if user JWT permissions are different from the user cached permissions
   # DO NOT ACTIVATE IN MULTIPLE REPLICAS DEPLOYMENT OF PERSES: WIP
-  [ activate_cache: <boolean> | default = true ]
+  [ enable_cache: <boolean> | default = true ]
+
   # The refresh interval of the cache if enabled
   [ interval: <duration> | default = 10m ]
+
   # Default permissions for guest users (logged-in users)
   guest_permissions:
     - [ <permissions> ]
@@ -129,7 +130,7 @@ Generic placeholders are defined as follows:
 ```yaml
   # Actions authorized by the permission
   actions:
-    - <action>
+    - <enum= "read" | "create" | "update" | "delete">
   # Resource kinds that are concerned by the permission
   scopes:
     - <kind>

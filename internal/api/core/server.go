@@ -49,7 +49,6 @@ type api struct {
 	apiV1Endpoints []endpoint
 	apiEndpoints   []endpoint
 	jwtMiddleware  echo.MiddlewareFunc
-	//rbacMiddleware echo.MiddlewareFunc
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
@@ -81,11 +80,8 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
-			return !*cfg.Security.ActivatePermission
+			return !*cfg.Security.Authorization.EnableAuthorization
 		}),
-		//rbacMiddleware: serviceManager.GetRBAC().Middleware(func(c echo.Context) bool {
-		//	return !*cfg.Security.ActivatePermission
-		//}),
 	}
 }
 

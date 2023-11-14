@@ -87,9 +87,16 @@ export interface ProvisioningConfig {
 
 export interface SecurityConfig {
   readonly: boolean;
-  activate_permission: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+  authorization: AuthorizationConfig;
+}
+
+export interface AuthorizationConfig {
+  enable_authorization: boolean;
+  enable_cache: boolean;
+  interval: Duration;
+  guest_permissions: []; // TODO typing
 }
 
 export interface ConfigModel {
