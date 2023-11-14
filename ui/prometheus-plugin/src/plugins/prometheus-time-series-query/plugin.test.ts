@@ -68,6 +68,8 @@ const createStubContext = () => {
       getDatasource: getDatasource,
       getDatasourceClient: getDatasourceClient,
       listDatasourceSelectItems: jest.fn(),
+      getLocalDatasources: jest.fn(),
+      setLocalDatasources: jest.fn(),
     },
     refreshKey: 'test',
     refreshIntervalInMs: 0,
