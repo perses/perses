@@ -334,13 +334,3 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
 
   return { results, addItem };
 }
-
-export type ExternalDatasources = {
-  source: string;
-  tooltip?: {
-    title?: string;
-    description?: string;
-  };
-  editLink?: string;
-  datasources: Datasource[];
-};
