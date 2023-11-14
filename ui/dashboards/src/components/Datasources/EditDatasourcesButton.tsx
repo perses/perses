@@ -18,14 +18,13 @@ import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { DatasourceSpec } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT } from '../../constants';
-import { ExternalDatasources, useDatasourceActions, useExternalDatasources } from '../../context';
+import { useDatasourceActions } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton() {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
   const { getLocalDatasources } = useDatasourceStore();
   const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
-  const externalDatasources: ExternalDatasources[] = useExternalDatasources();
   const { setDatasources } = useDatasourceActions();
 
   const openDatasourceEditor = () => {
@@ -58,7 +57,6 @@ export function EditDatasourcesButton() {
       >
         <DatasourceEditor
           localDatasources={localDatasources}
-          externalDatasources={externalDatasources}
           onCancel={closeDatasourceEditor}
           onChange={(datasources: Record<string, DatasourceSpec>) => {
             setDatasources(datasources);

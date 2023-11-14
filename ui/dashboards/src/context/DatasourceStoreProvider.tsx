@@ -328,11 +328,6 @@ export type ExternalDatasources = {
   datasources: Datasource[];
 };
 
-export function useExternalDatasources() {
-  // TODO
-  return [];
-}
-
 export function useDatasourceActions() {
   return {
     setDatasources: (datasources: Record<string, DatasourceSpec>) => {

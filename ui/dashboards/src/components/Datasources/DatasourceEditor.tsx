@@ -31,15 +31,14 @@ import { DatasourceSpec } from '@perses-dev/core';
 import { Action, DatasourceEditorForm } from '@perses-dev/plugin-system';
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
-import { ExternalDatasources, useDiscardChangesConfirmationDialog } from '../../context';
+import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export function DatasourceEditor(props: {
   localDatasources: Record<string, DatasourceSpec>;
-  externalDatasources: ExternalDatasources[];
   onChange: (datasources: Record<string, DatasourceSpec>) => void;
   onCancel: () => void;
 }) {
-  const { externalDatasources, onChange, onCancel } = props;
+  const { onChange, onCancel } = props;
   const [localDatasources, setLocalDatasources] = useImmer(props.localDatasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
   const [datasourceEditName, setDatasourceEditName] = useState<string | null>(null);
