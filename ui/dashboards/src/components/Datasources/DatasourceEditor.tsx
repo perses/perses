@@ -140,7 +140,6 @@ export function DatasourceEditor(props: {
                   <Table sx={{ minWidth: 650 }} aria-label="table of datasources">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Visibility</TableCell>
                         <TableCell>Name</TableCell>
                         <TableCell>Type</TableCell>
                         <TableCell>Description</TableCell>
@@ -152,9 +151,9 @@ export function DatasourceEditor(props: {
                         return (
                           <TableRow key={name}>
                             <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                              {/* TODO */}
+                              {name}
                             </TableCell>
-                            <TableCell>{/* {getVariableLabelByKind(v.kind) ?? v.kind} */}</TableCell>
+                            <TableCell>{spec.plugin.kind}</TableCell>
                             <TableCell>{spec.display?.description ?? ''}</TableCell>
                             <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                               <IconButton onClick={() => editDatasource(name)}>

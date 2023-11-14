@@ -184,13 +184,18 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     }
   );
 
+  const getLocalDatasources = useCallback((): Record<string, DatasourceSpec> => {
+    return dashboardResource?.spec.datasources ?? {};
+  }, [dashboardResource]);
+
   const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,
       getDatasourceClient,
+      getLocalDatasources,
       listDatasourceSelectItems,
     }),
-    [getDatasource, getDatasourceClient, listDatasourceSelectItems]
+    [getDatasource, getDatasourceClient, getLocalDatasources, listDatasourceSelectItems]
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
@@ -322,11 +327,6 @@ export type ExternalDatasources = {
   editLink?: string;
   datasources: Datasource[];
 };
-
-export function useLocalDatasources() {
-  // TODO
-  return {};
-}
 
 export function useExternalDatasources() {
   // TODO

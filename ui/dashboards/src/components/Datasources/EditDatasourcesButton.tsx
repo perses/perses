@@ -16,13 +16,15 @@ import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { DatasourceSpec } from '@perses-dev/core';
+import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT } from '../../constants';
-import { ExternalDatasources, useDatasourceActions, useExternalDatasources, useLocalDatasources } from '../../context';
+import { ExternalDatasources, useDatasourceActions, useExternalDatasources } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton() {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
-  const localDatasources: Record<string, DatasourceSpec> = useLocalDatasources();
+  const { getLocalDatasources } = useDatasourceStore();
+  const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
   const externalDatasources: ExternalDatasources[] = useExternalDatasources();
   const { setDatasources } = useDatasourceActions();
 
