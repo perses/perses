@@ -34,21 +34,20 @@ import { useImmer } from 'use-immer';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export function DatasourceEditor(props: {
-  localDatasources: Record<string, DatasourceSpec>;
+  datasources: Record<string, DatasourceSpec>;
   onChange: (datasources: Record<string, DatasourceSpec>) => void;
   onCancel: () => void;
 }) {
-  const { onChange, onCancel } = props;
-  const [localDatasources, setLocalDatasources] = useImmer(props.localDatasources);
+  const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
   const [datasourceEditName, setDatasourceEditName] = useState<string | null>(null);
-  const currentEditingSpec = typeof datasourceEditName === 'string' && localDatasources[datasourceEditName];
+  const currentEditingSpec = typeof datasourceEditName === 'string' && datasources[datasourceEditName];
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
   const handleCancel = () => {
-    if (JSON.stringify(props.localDatasources) !== JSON.stringify(localDatasources)) {
+    if (JSON.stringify(props.datasources) !== JSON.stringify(datasources)) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
           closeDiscardChangesConfirmationDialog();
@@ -66,22 +65,30 @@ export function DatasourceEditor(props: {
   };
 
   const removeDatasource = (name: string) => {
-    // TODO
-    console.log('removeDatasource ' + name);
-    return;
+    setDatasources((draft) => {
+      delete draft[name];
+    });
   };
 
+  // TODO get rid of the temp datasource that remains
   const addDatasource = () => {
-    // TODO
     setDatasourceFormAction('create');
-    return;
+    setDatasources((draft) => {
+      draft['temp'] = {
+        default: false,
+        plugin: {
+          // TODO: find a way to avoid assuming that the PrometheusDatasource plugin is installed
+          kind: 'PrometheusDatasource',
+          spec: {},
+        },
+      };
+    });
+    setDatasourceEditName('temp');
   };
 
   const editDatasource = (name: string) => {
-    // TODO
-    console.log('editDatasource ' + name);
     setDatasourceFormAction('update');
-    return;
+    setDatasourceEditName(name);
   };
 
   return (
@@ -93,7 +100,7 @@ export function DatasourceEditor(props: {
           initialAction={datasourceFormAction}
           isDraft={true}
           onSave={(name: string, spec: DatasourceSpec) => {
-            setLocalDatasources((draft) => {
+            setDatasources((draft) => {
               draft[name] = spec;
               setDatasourceEditName(null);
             });
@@ -119,10 +126,10 @@ export function DatasourceEditor(props: {
             <Typography variant="h2">Edit Dashboard Datasources</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
-                disabled={props.localDatasources === localDatasources}
+                disabled={props.datasources === datasources}
                 variant="contained"
                 onClick={() => {
-                  props.onChange(localDatasources);
+                  props.onChange(datasources);
                 }}
               >
                 Apply
@@ -146,7 +153,7 @@ export function DatasourceEditor(props: {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {Object.entries(localDatasources).map(([name, spec]) => {
+                      {Object.entries(datasources).map(([name, spec]) => {
                         return (
                           <TableRow key={name}>
                             <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>

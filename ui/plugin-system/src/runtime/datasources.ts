@@ -33,6 +33,11 @@ export interface DatasourceStore {
    * Gets the list of datasources defined in the dashboard
    */
   getLocalDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Sets the list of datasources defined in the dashboard
+   */
+  setLocalDatasources(datasources: Record<string, DatasourceSpec>): void;
 }
 
 export interface DatasourceSelectItemGroup {

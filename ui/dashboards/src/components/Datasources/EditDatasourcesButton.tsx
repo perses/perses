@@ -18,14 +18,14 @@ import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { DatasourceSpec } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT } from '../../constants';
-import { useDatasourceActions } from '../../context';
+import { useDashboard } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton() {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
-  const { getLocalDatasources } = useDatasourceStore();
+  const { getLocalDatasources, setLocalDatasources } = useDatasourceStore();
   const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
-  const { setDatasources } = useDatasourceActions();
+  const { dashboard, setDashboard } = useDashboard();
 
   const openDatasourceEditor = () => {
     setIsDatasourceEditorOpen(true);
@@ -56,10 +56,17 @@ export function EditDatasourcesButton() {
         data-testid="datasource-editor"
       >
         <DatasourceEditor
-          localDatasources={localDatasources}
+          datasources={localDatasources}
           onCancel={closeDatasourceEditor}
           onChange={(datasources: Record<string, DatasourceSpec>) => {
-            setDatasources(datasources);
+            setDashboard({
+              ...dashboard,
+              spec: {
+                ...dashboard.spec,
+                datasources: datasources,
+              },
+            });
+            setLocalDatasources(datasources);
             setIsDatasourceEditorOpen(false);
           }}
         />

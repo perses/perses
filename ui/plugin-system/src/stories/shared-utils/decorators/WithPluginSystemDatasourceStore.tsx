@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
   DatasourceStore,
@@ -86,6 +86,12 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
         ]);
       }
       throw new Error(`WithDatasourceStore is not configured to support kind: ${datasourcePluginKind}`);
+    },
+    getLocalDatasources: (): Record<string, DatasourceSpec> => {
+      return {};
+    },
+    setLocalDatasources: (datasources: Record<string, DatasourceSpec>) => {
+      return datasources;
     },
   };
 
