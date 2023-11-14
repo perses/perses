@@ -7,7 +7,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
       - name: Remove npm snapshot tag
