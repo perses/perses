@@ -27,7 +27,7 @@ import { datasourceEditValidationSchema, DatasourceEditValidationType } from '..
  * @param datasource
  */
 function getInitialState(name: string, spec: DatasourceSpec) {
-  const patchedDisplay: Display = {
+  const patchedDisplay = {
     name: spec.display?.name ?? '',
     description: spec.display?.description ?? '',
   };
@@ -74,7 +74,21 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   });
 
   const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
-    onSave(state.name, state.spec);
+    // reset display fields to undefined when empty (= undo the getInitialState patch)
+    const name = state.spec.display?.name;
+    const desc = state.spec.display?.description;
+    const finalDisplay: Display | undefined =
+      name != '' || desc != ''
+        ? {
+            name: name != '' ? name : undefined,
+            description: desc != '' ? desc : undefined,
+          }
+        : undefined;
+
+    onSave(state.name, {
+      ...state.spec,
+      display: finalDisplay,
+    });
   };
 
   // When user click on cancel, several possibilities:
