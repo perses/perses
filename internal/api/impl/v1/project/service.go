@@ -15,19 +15,16 @@ package project
 
 import (
 	"fmt"
-	"github.com/perses/perses/internal/api/interface/v1/role"
-	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
-	"github.com/perses/perses/internal/api/shared/authorization"
-	"github.com/perses/perses/internal/api/shared/authorization/rbac"
-	"github.com/perses/perses/internal/api/shared/crypto"
-
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/authorization"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -61,46 +58,46 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 	}
 }
 
-func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, rbac.GlobalProject, v1.KindProject); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+// func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
+func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.Project); ok {
-		return s.create(object, claims)
+		return s.create(object)
+		//return s.create(object, claims)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 // Create default roles and role bindings for the project
-func (s *service) createProjectRoleAndRoleBinding(projectName string, username string) error {
-	if len(username) == 0 {
-		return fmt.Errorf("user empty")
-	}
+//func (s *service) createProjectRoleAndRoleBinding(projectName string, username string) error {
+//	if len(username) == 0 {
+//		return fmt.Errorf("user empty")
+//	}
+//
+//	owner := authorization.DefaultOwnerRole(projectName)
+//	editor := authorization.DefaultEditorRole(projectName)
+//	viewer := authorization.DefaultViewerRole(projectName)
+//	ownerRb := authorization.DefaultOwnerRoleBinding(projectName, username)
+//
+//	if err := s.roleDAO.Create(&owner); err != nil {
+//		return fmt.Errorf("failed to create owner role: %e", err)
+//	}
+//	if err := s.roleDAO.Create(&editor); err != nil {
+//		return fmt.Errorf("failed to create editor role: %e", err)
+//	}
+//	if err := s.roleDAO.Create(&viewer); err != nil {
+//		return fmt.Errorf("failed to create viewer role: %e", err)
+//	}
+//	if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
+//		return fmt.Errorf("failed to create owner role binding: %e", err)
+//	}
+//	if err := s.rbac.Refresh(); err != nil {
+//		return err
+//	}
+//	return nil
+//}
 
-	owner := authorization.DefaultOwnerRole(projectName)
-	editor := authorization.DefaultEditorRole(projectName)
-	viewer := authorization.DefaultViewerRole(projectName)
-	ownerRb := authorization.DefaultOwnerRoleBinding(projectName, username)
-
-	if err := s.roleDAO.Create(&owner); err != nil {
-		return fmt.Errorf("failed to create owner role: %e", err)
-	}
-	if err := s.roleDAO.Create(&editor); err != nil {
-		return fmt.Errorf("failed to create editor role: %e", err)
-	}
-	if err := s.roleDAO.Create(&viewer); err != nil {
-		return fmt.Errorf("failed to create viewer role: %e", err)
-	}
-	if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
-		return fmt.Errorf("failed to create owner role binding: %e", err)
-	}
-	if err := s.rbac.Refresh(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v1.Project, error) {
+// func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v1.Project, error) {
+func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -108,18 +105,15 @@ func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v
 	}
 
 	// If authorization is enabled, permissions to the creator need to be given
-	if s.rbac.IsEnabled() {
-		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject); err != nil { // TODO: retrieve user from claims
-			return nil, err
-		}
-	}
+	//if s.rbac.IsEnabled() {
+	//	if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject); err != nil { // TODO: retrieve user from claims
+	//		return nil, err
+	//	}
+	//}
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, rbac.GlobalProject, v1.KindProject); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Project); ok {
 		return s.update(object, parameters)
 	}
@@ -144,10 +138,7 @@ func (s *service) update(entity *v1.Project, parameters shared.Parameters) (*v1.
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, rbac.GlobalProject, v1.KindProject); err != nil {
-		return shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Delete(parameters shared.Parameters) error {
 	projectName := parameters.Name
 	if err := s.folderDAO.DeleteAll(projectName); err != nil {
 		logrus.WithError(err).Error("unable to delete all folders")
@@ -185,16 +176,10 @@ func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomC
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindProject); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, rbac.GlobalProject, v1.KindProject); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }

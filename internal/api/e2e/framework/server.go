@@ -57,9 +57,9 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 	var activatePermission = false
 	conf := config.Config{
 		Security: config.Security{
-			Readonly:           false,
-			ActivatePermission: &activatePermission,
-			EncryptionKey:      promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+			Readonly:      false,
+			Authorization: config.AuthorizationConfig{EnableAuthorization: &activatePermission},
+			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: config.Schemas{
 			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),

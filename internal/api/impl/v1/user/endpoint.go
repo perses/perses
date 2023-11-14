@@ -17,11 +17,10 @@ package user
 
 import (
 	"fmt"
-	"github.com/perses/perses/internal/api/shared/crypto"
-
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/authorization"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -30,9 +29,9 @@ type Endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service user.Service, jwtService crypto.JWT, readonly bool) *Endpoint {
+func NewEndpoint(service user.Service, rbacService authorization.RBAC, readonly bool) *Endpoint {
 	return &Endpoint{
-		toolbox:  shared.NewToolBox(service, jwtService),
+		toolbox:  shared.NewToolBox(service, rbacService, v1.KindUser),
 		readonly: readonly,
 	}
 }

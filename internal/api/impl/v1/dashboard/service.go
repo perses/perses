@@ -15,9 +15,6 @@ package dashboard
 
 import (
 	"fmt"
-	"github.com/perses/perses/internal/api/shared/authorization"
-	"github.com/perses/perses/internal/api/shared/crypto"
-
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -35,25 +32,20 @@ type service struct {
 	dao           dashboard.DAO
 	globalVarDAO  globalvariable.DAO
 	projectVarDAO variable.DAO
-	rbac          authorization.RBAC
 	sch           schemas.Schemas
 }
 
-func NewService(dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, rbac authorization.RBAC, sch schemas.Schemas) dashboard.Service {
+func NewService(dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDAO variable.DAO, sch schemas.Schemas) dashboard.Service {
 	return &service{
 		dao:           dao,
 		globalVarDAO:  globalVarDAO,
 		projectVarDAO: projectVarDAO,
-		rbac:          rbac,
 		sch:           sch,
 	}
 }
 
-func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
+func (s *service) Create(entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.Dashboard); ok {
-		if err := authorization.CheckUserPermission(s.rbac, claims, v1.CreateAction, object.Metadata.Project, v1.KindDashboard); err != nil {
-			return nil, shared.HandleUnauthorizedError(err.Error())
-		}
 		return s.create(object)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
@@ -73,10 +65,7 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.UpdateAction, parameters.Project, v1.KindDashboard); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Dashboard); ok {
 		return s.update(object, parameters)
 	}
@@ -113,24 +102,15 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters, claims *crypto.JWTCustomClaims) error {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.DeleteAction, parameters.Project, v1.KindDashboard); err != nil {
-		return shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Delete(parameters shared.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, parameters.Project, v1.KindDashboard); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, parameters shared.Parameters, claims *crypto.JWTCustomClaims) (interface{}, error) {
-	if err := authorization.CheckUserPermission(s.rbac, claims, v1.ReadAction, parameters.Project, v1.KindDashboard); err != nil {
-		return nil, shared.HandleUnauthorizedError(err.Error())
-	}
+func (s *service) List(q databaseModel.Query, parameters shared.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }
 

@@ -14,7 +14,6 @@
 package authorization
 
 import (
-	"fmt"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -25,22 +24,6 @@ import (
 	"github.com/perses/perses/internal/api/shared/crypto"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
-
-// CheckUserPermission check if the user has the permission to perform an action.
-// Returns an error if the user doesn't have the necessary permission
-// If authorization is disabled, it will skip the verification
-func CheckUserPermission(rbac RBAC, claims *crypto.JWTCustomClaims, action v1.ActionKind, project string, scope v1.Kind) error {
-	if !rbac.IsEnabled() {
-		return nil
-	}
-	if claims == nil {
-		return fmt.Errorf("missing token")
-	}
-	if !rbac.HasPermission(claims.Subject, action, project, scope) {
-		return fmt.Errorf("permission denied")
-	}
-	return nil
-}
 
 type RBAC interface {
 	IsEnabled() bool

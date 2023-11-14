@@ -88,3 +88,11 @@ func validateMetadata(ctx echo.Context, metadata api.Metadata) error {
 	}
 	return nil
 }
+
+// Retrieve project from entity metadata
+func GetMetadataProject(metadata api.Metadata) string {
+	if projectMetadata, ok := metadata.(*v1.ProjectMetadata); ok {
+		return projectMetadata.Project
+	}
+	return ""
+}

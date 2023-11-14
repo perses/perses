@@ -15,7 +15,10 @@ package shared
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -49,11 +52,11 @@ func ExtractJWTClaims(ctx echo.Context) *crypto.JWTCustomClaims {
 }
 
 type ToolboxService interface {
-	Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error)
-	Update(entity api.Entity, parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
-	Delete(parameters Parameters, claims *crypto.JWTCustomClaims) error
-	Get(parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
-	List(q databaseModel.Query, parameters Parameters, claims *crypto.JWTCustomClaims) (interface{}, error)
+	Create(entity api.Entity) (interface{}, error)
+	Update(entity api.Entity, parameters Parameters) (interface{}, error)
+	Delete(parameters Parameters) error
+	Get(parameters Parameters) (interface{}, error)
+	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -66,25 +69,41 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service ToolboxService, jwtService crypto.JWT) Toolbox {
+func NewToolBox(service ToolboxService, rbac authorization.RBAC, kind v1.Kind) Toolbox {
 	return &toolbox{
-		service:    service,
-		jwtService: jwtService,
+		service: service,
+		rbac:    rbac,
+		kind:    kind,
 	}
 }
 
 type toolbox struct {
 	Toolbox
-	service    ToolboxService
-	jwtService crypto.JWT
+	service ToolboxService
+	rbac    authorization.RBAC
+	kind    v1.Kind
+}
+
+func (t *toolbox) HasPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) bool {
+	claims := ExtractJWTClaims(ctx)
+	if v1.IsGlobal(t.kind) {
+		return t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, t.kind)
+	}
+	if len(projectName) == 0 {
+		// Retrieving project name from payload if project name not provided in the url
+		projectName = GetMetadataProject(entity.GetMetadata())
+	}
+	return t.rbac.HasPermission(claims.Subject, action, projectName, t.kind)
 }
 
 func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	claims := ExtractJWTClaims(ctx)
-	newEntity, err := t.service.Create(entity, claims)
+	parameters := ExtractParameters(ctx)
+	t.HasPermission(ctx, entity, parameters.Project, v1.CreateAction)
+
+	newEntity, err := t.service.Create(entity)
 	if err != nil {
 		return err
 	}
@@ -96,8 +115,8 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx)
-	newEntity, err := t.service.Update(entity, parameters, claims)
+	t.HasPermission(ctx, entity, parameters.Project, v1.UpdateAction)
+	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
 		return err
 	}
@@ -106,8 +125,9 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx)
-	if err := t.service.Delete(parameters, claims); err != nil {
+
+	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	if err := t.service.Delete(parameters); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -115,8 +135,8 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 
 func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx)
-	entity, err := t.service.Get(parameters, claims)
+	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	entity, err := t.service.Get(parameters)
 	if err != nil {
 		return err
 	}
@@ -128,8 +148,8 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 		return HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx)
-	claims := ExtractJWTClaims(ctx)
-	result, err := t.service.List(q, parameters, claims)
+	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	result, err := t.service.List(q, parameters)
 	if err != nil {
 		return err
 	}
