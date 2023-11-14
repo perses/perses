@@ -20,7 +20,6 @@ import {
   DatasourceSpec,
   GlobalDatasource,
   useEvent,
-  Datasource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
