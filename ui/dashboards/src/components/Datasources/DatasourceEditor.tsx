@@ -40,8 +40,15 @@ export function DatasourceEditor(props: {
 }) {
   const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
-  const [datasourceEditName, setDatasourceEditName] = useState<string | null>(null);
-  const currentEditingSpec = typeof datasourceEditName === 'string' && datasources[datasourceEditName];
+  const [datasourceEdit, setDatasourceEdit] = useState<{ name: string; spec: DatasourceSpec } | null>(null);
+  const defaultSpec: DatasourceSpec = {
+    default: false,
+    plugin: {
+      // TODO: find a way to avoid assuming that the PrometheusDatasource plugin is installed
+      kind: 'PrometheusDatasource',
+      spec: {},
+    },
+  };
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -70,50 +77,42 @@ export function DatasourceEditor(props: {
     });
   };
 
-  // TODO get rid of the temp datasource that remains
   const addDatasource = () => {
     setDatasourceFormAction('create');
-    setDatasources((draft) => {
-      draft['temp'] = {
-        default: false,
-        plugin: {
-          // TODO: find a way to avoid assuming that the PrometheusDatasource plugin is installed
-          kind: 'PrometheusDatasource',
-          spec: {},
-        },
-      };
+    setDatasourceEdit({
+      name: 'NewDatasource',
+      spec: defaultSpec,
     });
-    setDatasourceEditName('temp');
   };
 
   const editDatasource = (name: string) => {
     setDatasourceFormAction('update');
-    setDatasourceEditName(name);
+    setDatasourceEdit({
+      name: name,
+      spec: datasources[name] ?? defaultSpec,
+    });
   };
 
   return (
     <>
-      {currentEditingSpec && (
+      {datasourceEdit && (
         <DatasourceEditorForm
-          initialName={datasourceEditName}
-          initialSpec={currentEditingSpec}
+          initialName={datasourceEdit.name}
+          initialSpec={datasourceEdit.spec}
           initialAction={datasourceFormAction}
           isDraft={true}
           onSave={(name: string, spec: DatasourceSpec) => {
             setDatasources((draft) => {
               draft[name] = spec;
-              setDatasourceEditName(null);
+              setDatasourceEdit(null);
             });
           }}
           onClose={() => {
-            if (datasourceFormAction === 'create') {
-              removeDatasource(datasourceEditName);
-            }
-            setDatasourceEditName(null);
+            setDatasourceEdit(null);
           }}
         />
       )}
-      {!currentEditingSpec && (
+      {!datasourceEdit && (
         <>
           <Box
             sx={{
