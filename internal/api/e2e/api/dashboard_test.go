@@ -22,8 +22,8 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -31,7 +31,7 @@ import (
 )
 
 func TestMainScenarioDashboard(t *testing.T) {
-	e2eframework.MainTestScenarioWithProject(t, shared.PathDashboard, func(projectName string, name string) (api.Entity, api.Entity) {
+	e2eframework.MainTestScenarioWithProject(t, utils.PathDashboard, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewDashboard(t, projectName, name)
 	})
 }
@@ -42,7 +42,7 @@ func TestCreateDashboardWithWrongName(t *testing.T) {
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
 
-		expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, "perses", shared.PathDashboard)).
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, "perses", utils.PathDashboard)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusBadRequest)
@@ -56,14 +56,14 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
 
-		dashboard := extractDashboardFromHTTPBody(expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, entity.Metadata.Project, shared.PathDashboard)).
+		dashboard := extractDashboardFromHTTPBody(expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, entity.Metadata.Project, utils.PathDashboard)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK).
 			JSON().
 			Raw(), t)
 
-		updatedDashboard := extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, dashboard.Metadata.Project, shared.PathDashboard, dashboard.Metadata.Name)).
+		updatedDashboard := extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, dashboard.Metadata.Project, utils.PathDashboard, dashboard.Metadata.Name)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK).
@@ -71,7 +71,7 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 			Raw(), t)
 		assert.True(t, dashboard.Metadata.Version+1 == updatedDashboard.Metadata.Version)
 
-		updatedDashboard = extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, dashboard.Metadata.Project, shared.PathDashboard, dashboard.Metadata.Name)).
+		updatedDashboard = extractDashboardFromHTTPBody(expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, dashboard.Metadata.Project, utils.PathDashboard, dashboard.Metadata.Name)).
 			WithJSON(entity).
 			Expect().
 			Status(http.StatusOK).
@@ -90,7 +90,7 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 		demoProject := e2eframework.NewProject("Demo")
 		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoProject, demoDashboard)
 
-		expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, demoProject.GetMetadata().GetName(), shared.PathDashboard)).
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, demoProject.GetMetadata().GetName(), utils.PathDashboard)).
 			Expect().
 			Status(http.StatusOK).
 			JSON().

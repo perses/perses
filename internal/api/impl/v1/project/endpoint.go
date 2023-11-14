@@ -17,10 +17,12 @@ package project
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -37,15 +39,15 @@ func NewEndpoint(service project.Service, rbacService authorization.RBAC, readon
 }
 
 func (e *Endpoint) CollectRoutes(g *shared.Group) {
-	group := g.Group(fmt.Sprintf("/%s", shared.PathProject))
+	group := g.Group(fmt.Sprintf("/%s", utils.PathProject))
 
 	if !e.readonly {
 		group.POST("", e.Create, false)
-		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
-		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
+		group.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
+		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
 	}
 	group.GET("", e.List, false)
-	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
+	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
 }
 
 func (e *Endpoint) Create(ctx echo.Context) error {

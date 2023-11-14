@@ -16,10 +16,9 @@ package dependency
 import (
 	"context"
 	"fmt"
-	"github.com/perses/perses/internal/api/shared/crypto"
 
 	"github.com/perses/common/async"
-	"github.com/perses/perses/internal/api/shared"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/resource"
@@ -69,13 +68,13 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 			continue
 		}
 
-		param := shared.Parameters{
+		param := apiInterface.Parameters{
 			Name:    name,
 			Project: project,
 		}
 
 		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.Get(param, &crypto.JWTCustomClaims{}) // TODO: fix
+		_, apiError := svc.Get(param)
 		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
 			logrus.WithError(apiError).Errorf("unable to retrieve the %q from the database", kind)
 			continue
@@ -83,19 +82,19 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 
 		if databaseModel.IsKeyNotFound(apiError) {
 			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.Create(entity, &crypto.JWTCustomClaims{}); createError != nil { // TODO: fix
+			if _, createError := svc.Create(entity); createError != nil {
 				logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
 			}
 		} else {
 			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.Update(entity, param, &crypto.JWTCustomClaims{}); updateError != nil { // TODO: fix
+			if _, updateError := svc.Update(entity, param); updateError != nil {
 				logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 			}
 		}
 	}
 }
 
-func (p *provisioning) getService(kind modelV1.Kind) (shared.ToolboxService, error) {
+func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, error) {
 	switch kind {
 	case modelV1.KindDashboard:
 		return p.serviceManager.GetDashboard(), nil

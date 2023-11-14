@@ -11,20 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integration
-
-package api
+package apiInterface
 
 import (
-	"testing"
-
-	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared/utils"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
-func TestMainScenarioGlobalRoleBinding(t *testing.T) {
-	e2eframework.MainTestScenario(t, utils.PathGlobalRoleBinding, func(name string) api.Entity {
-		return e2eframework.NewGlobalRoleBinding(name)
-	})
+type Parameters struct {
+	Project string
+	Name    string
+}
+
+type Service interface {
+	Create(entity api.Entity) (interface{}, error)
+	Update(entity api.Entity, parameters Parameters) (interface{}, error)
+	Delete(parameters Parameters) error
+	Get(parameters Parameters) (interface{}, error)
+	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
 }

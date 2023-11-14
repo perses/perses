@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/utils"
 )
 
 type partialMetadata struct {
@@ -47,13 +48,13 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			if (method != http.MethodPost && method != http.MethodGet) || c.Request().Body == nil {
 				return next(c)
 			}
-			projectName := shared.GetProjectParameter(c)
+			projectName := utils.GetProjectParameter(c)
 			if len(projectName) == 0 && method == http.MethodPost {
 				// It's possible the HTTP Path doesn't contain the project because the user is calling the root endpoint to create a new resource.
 				// So we need to ensure the project name exists in the resource, which is why we will partially decode the body to get the project name.
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
-				for _, path := range shared.ProjectResourcePathList {
-					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)) {
+				for _, path := range utils.ProjectResourcePathList {
+					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)) {
 						// Parsing the body in an Echo middleware may cause the error code=400, message=EOF.
 						//
 						// Context.Bind only can be called only once in the life of the request as it read the body which can only be read once.

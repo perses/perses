@@ -14,31 +14,29 @@
 package shared
 
 import (
+	"net/http"
+
 	"github.com/golang-jwt/jwt/v5"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
+	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
-type Parameters struct {
-	Project string
-	Name    string
-}
-
-func ExtractParameters(ctx echo.Context) Parameters {
-	return Parameters{
-		Project: GetProjectParameter(ctx),
-		Name:    GetNameParameter(ctx),
+func extractParameters(ctx echo.Context) apiInterface.Parameters {
+	return apiInterface.Parameters{
+		Project: utils.GetProjectParameter(ctx),
+		Name:    utils.GetNameParameter(ctx),
 	}
 }
 
-func ExtractJWTClaims(ctx echo.Context) *crypto.JWTCustomClaims {
+func extractJWTClaims(ctx echo.Context) *crypto.JWTCustomClaims {
 	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
 	if !ok {
 		return nil
@@ -51,14 +49,6 @@ func ExtractJWTClaims(ctx echo.Context) *crypto.JWTCustomClaims {
 	return claims
 }
 
-type ToolboxService interface {
-	Create(entity api.Entity) (interface{}, error)
-	Update(entity api.Entity, parameters Parameters) (interface{}, error)
-	Delete(parameters Parameters) error
-	Get(parameters Parameters) (interface{}, error)
-	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
-}
-
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox interface {
@@ -69,7 +59,7 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service ToolboxService, rbac authorization.RBAC, kind v1.Kind) Toolbox {
+func NewToolBox(service apiInterface.Service, rbac authorization.RBAC, kind v1.Kind) Toolbox {
 	return &toolbox{
 		service: service,
 		rbac:    rbac,
@@ -79,19 +69,19 @@ func NewToolBox(service ToolboxService, rbac authorization.RBAC, kind v1.Kind) T
 
 type toolbox struct {
 	Toolbox
-	service ToolboxService
+	service apiInterface.Service
 	rbac    authorization.RBAC
 	kind    v1.Kind
 }
 
 func (t *toolbox) HasPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) bool {
-	claims := ExtractJWTClaims(ctx)
+	claims := extractJWTClaims(ctx)
 	if v1.IsGlobal(t.kind) {
 		return t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, t.kind)
 	}
 	if len(projectName) == 0 {
 		// Retrieving project name from payload if project name not provided in the url
-		projectName = GetMetadataProject(entity.GetMetadata())
+		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
 	return t.rbac.HasPermission(claims.Subject, action, projectName, t.kind)
 }
@@ -100,7 +90,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := extractParameters(ctx)
 	t.HasPermission(ctx, entity, parameters.Project, v1.CreateAction)
 
 	newEntity, err := t.service.Create(entity)
@@ -114,7 +104,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := extractParameters(ctx)
 	t.HasPermission(ctx, entity, parameters.Project, v1.UpdateAction)
 	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
@@ -124,7 +114,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
+	parameters := extractParameters(ctx)
 
 	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
 	if err := t.service.Delete(parameters); err != nil {
@@ -134,7 +124,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
+	parameters := extractParameters(ctx)
 	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
 	entity, err := t.service.Get(parameters)
 	if err != nil {
@@ -147,7 +137,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := extractParameters(ctx)
 	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
 	result, err := t.service.List(q, parameters)
 	if err != nil {
@@ -160,7 +150,7 @@ func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
+	if err := utils.ValidateMetadata(ctx, entity.GetMetadata()); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
 	return nil

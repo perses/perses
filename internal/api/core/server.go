@@ -38,6 +38,7 @@ import (
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 )
 
 type endpoint interface {
@@ -134,7 +135,7 @@ func (a *api) collectRoutes() []*shared.Group {
 	for _, ept := range a.apiEndpoints {
 		ept.CollectRoutes(apiGroup)
 	}
-	apiV1Group := &shared.Group{Path: shared.APIV1Prefix}
+	apiV1Group := &shared.Group{Path: utils.APIV1Prefix}
 	for _, ept := range a.apiV1Endpoints {
 		ept.CollectRoutes(apiV1Group)
 	}

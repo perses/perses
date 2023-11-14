@@ -173,7 +173,7 @@ type DAO interface {
 }
 
 type Service interface {
-	shared.ToolboxService
+	apiInterface.Service
 }
 `))
 	persistenceTemplate = template.Must(

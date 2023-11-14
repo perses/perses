@@ -19,12 +19,12 @@ import (
 	"testing"
 
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioGlobalRole(t *testing.T) {
-	e2eframework.MainTestScenario(t, shared.PathGlobalRole, func(name string) api.Entity {
+	e2eframework.MainTestScenario(t, utils.PathGlobalRole, func(name string) api.Entity {
 		return e2eframework.NewGlobalRole(name)
 	})
 }

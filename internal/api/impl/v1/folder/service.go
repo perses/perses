@@ -15,9 +15,9 @@ package folder
 
 import (
 	"fmt"
+
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -29,7 +29,7 @@ type service struct {
 	dao folder.DAO
 }
 
-func NewService(dao folder.DAO, rbac authorization.RBAC) folder.Service {
+func NewService(dao folder.DAO) folder.Service {
 	return &service{
 		dao: dao,
 	}
