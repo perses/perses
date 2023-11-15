@@ -15,9 +15,26 @@ package apiinterface
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
+
+var (
+	EmptyCtx = context{
+		echoContext: nil,
+		username:    "",
+	}
+)
+
+func NewPersesContext(ctx echo.Context) PersesContext {
+	claims := crypto.ExtractJWTClaims(ctx)
+	username, _ := claims.GetSubject()
+	return &context{
+		echoContext: ctx,
+		username:    username,
+	}
+}
 
 type PersesContext interface {
 	UpdateJWTEntry(key string, value string)
@@ -25,8 +42,8 @@ type PersesContext interface {
 }
 
 type context struct {
-	context  echo.Context
-	username string
+	echoContext echo.Context
+	username    string
 }
 
 func (c context) UpdateJWTEntry(key string, value string) {

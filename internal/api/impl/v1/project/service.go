@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api/v1/utils"
 
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -47,7 +48,7 @@ type service struct {
 	rbac           authorization.RBAC
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac authorization.RBAC) project.Service {
 	return &service{
 		dao:            dao,
 		folderDAO:      folderDAO,
@@ -57,49 +58,45 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 		roleBindingDAO: roleBindingDAO,
 		secretDAO:      secretDAO,
 		variableDAO:    variableDAO,
+		rbac:           rbac,
 	}
 }
 
-// func (s *service) Create(entity api.Entity, claims *crypto.JWTCustomClaims) (interface{}, error) {
-func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
+func (s *service) Create(ctx apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.Project); ok {
-		return s.create(object)
-		//return s.create(object, claims)
+		return s.create(object, ctx)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 // Create default roles and role bindings for the project
-//func (s *service) createProjectRoleAndRoleBinding(projectName string, username string) error {
-//	if len(username) == 0 {
-//		return fmt.Errorf("user empty")
-//	}
-//
-//	owner := authorization.DefaultOwnerRole(projectName)
-//	editor := authorization.DefaultEditorRole(projectName)
-//	viewer := authorization.DefaultViewerRole(projectName)
-//	ownerRb := authorization.DefaultOwnerRoleBinding(projectName, username)
-//
-//	if err := s.roleDAO.Create(&owner); err != nil {
-//		return fmt.Errorf("failed to create owner role: %e", err)
-//	}
-//	if err := s.roleDAO.Create(&editor); err != nil {
-//		return fmt.Errorf("failed to create editor role: %e", err)
-//	}
-//	if err := s.roleDAO.Create(&viewer); err != nil {
-//		return fmt.Errorf("failed to create viewer role: %e", err)
-//	}
-//	if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
-//		return fmt.Errorf("failed to create owner role binding: %e", err)
-//	}
-//	if err := s.rbac.Refresh(); err != nil {
-//		return err
-//	}
-//	return nil
-//}
+func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInterface.PersesContext) error {
+	owner := utils.DefaultOwnerRole(projectName)
+	editor := utils.DefaultEditorRole(projectName)
+	viewer := utils.DefaultViewerRole(projectName)
 
-// func (s *service) create(entity *v1.Project, claims *crypto.JWTCustomClaims) (*v1.Project, error) {
-func (s *service) create(entity *v1.Project) (*v1.Project, error) {
+	if err := s.roleDAO.Create(&owner); err != nil {
+		return fmt.Errorf("failed to create owner role: %e", err)
+	}
+	if err := s.roleDAO.Create(&editor); err != nil {
+		return fmt.Errorf("failed to create editor role: %e", err)
+	}
+	if err := s.roleDAO.Create(&viewer); err != nil {
+		return fmt.Errorf("failed to create viewer role: %e", err)
+	}
+	if len(ctx.GetUsername()) > 0 {
+		ownerRb := utils.DefaultOwnerRoleBinding(projectName, ctx.GetUsername())
+		if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
+			return fmt.Errorf("failed to create owner role binding: %e", err)
+		}
+	}
+	if err := s.rbac.Refresh(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *service) create(entity *v1.Project, ctx apiInterface.PersesContext) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -107,11 +104,11 @@ func (s *service) create(entity *v1.Project) (*v1.Project, error) {
 	}
 
 	// If authorization is enabled, permissions to the creator need to be given
-	//if s.rbac.IsEnabled() {
-	//	if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, claims.Subject); err != nil { // TODO: retrieve user from claims
-	//		return nil, err
-	//	}
-	//}
+	if s.rbac.IsEnabled() {
+		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil { // TODO: retrieve user from claims
+			return nil, err
+		}
+	}
 	return entity, nil
 }
 

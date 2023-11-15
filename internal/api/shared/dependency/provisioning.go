@@ -74,7 +74,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		}
 
 		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.Get(nil, param)
+		_, apiError := svc.Get(apiInterface.EmptyCtx, param)
 		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
 			logrus.WithError(apiError).Errorf("unable to retrieve the %q from the database", kind)
 			continue
@@ -82,12 +82,12 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 
 		if databaseModel.IsKeyNotFound(apiError) {
 			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.Create(nil, entity); createError != nil {
+			if _, createError := svc.Create(apiInterface.EmptyCtx, entity); createError != nil {
 				logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
 			}
 		} else {
 			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.Update(nil, entity, param); updateError != nil {
+			if _, updateError := svc.Update(apiInterface.EmptyCtx, entity, param); updateError != nil {
 				logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 			}
 		}

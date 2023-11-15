@@ -55,6 +55,7 @@ var KindMap = map[Kind]bool{
 	KindSecret:            true,
 	KindUser:              true,
 	KindVariable:          true,
+	KindWildcard:          true,
 }
 
 var PluralKindMap = map[Kind]string{
@@ -72,6 +73,7 @@ var PluralKindMap = map[Kind]string{
 	KindSecret:            "secrets",
 	KindUser:              "users",
 	KindVariable:          "variables",
+	KindWildcard:          "*",
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {

@@ -36,6 +36,19 @@ type JWTCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
+	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
+	if !ok {
+		return nil
+	}
+
+	claims, ok := jwtToken.Claims.(*JWTCustomClaims)
+	if !ok {
+		return nil
+	}
+	return claims
+}
+
 type JWT interface {
 	SignedToken(login string) (string, error)
 	// CreateJWTCookies will create two different cookies that contain a piece of the token.

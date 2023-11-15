@@ -9,20 +9,7 @@ security:
       - actions:
           - read
         scopes:
-          - Dashboard
-          - Datasource
-          - Folder
-          - GlobalDatasource
-          - GlobalRole
-          - GlobalRoleBinding
-          - GlobalSecret
-          - GlobalVariable
-          - Project
-          - Role
-          - RoleBinding
-          - Secret
-          - User
-          - Variable
+          - "*"
       - actions:
           - create
         scopes:

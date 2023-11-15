@@ -130,7 +130,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
-	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable())
+	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), rbacService)
 	roleService := roleImpl.NewService(dao.GetRole(), schemasService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), schemasService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
