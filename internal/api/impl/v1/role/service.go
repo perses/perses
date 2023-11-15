@@ -15,9 +15,10 @@ package role
 
 import (
 	"fmt"
+	apiInterface "github.com/perses/perses/internal/api/interface"
+
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
@@ -31,7 +32,7 @@ type service struct {
 	sch schemas.Schemas
 }
 
-func NewService(dao role.DAO, rbac authorization.RBAC, sch schemas.Schemas) role.Service {
+func NewService(dao role.DAO, sch schemas.Schemas) role.Service {
 	return &service{
 		dao: dao,
 		sch: sch,
@@ -54,14 +55,14 @@ func (s *service) create(entity *v1.Role) (*v1.Role, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Role); ok {
 		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting role format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.Role, parameters shared.Parameters) (*v1.Role, error) {
+func (s *service) update(entity *v1.Role, parameters apiInterface.Parameters) (*v1.Role, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in role %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -86,14 +87,14 @@ func (s *service) update(entity *v1.Role, parameters shared.Parameters) (*v1.Rol
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, parameters shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }

@@ -15,6 +15,8 @@ package dashboard
 
 import (
 	"fmt"
+ 
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -65,14 +67,14 @@ func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Dashboard); ok {
 		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v1.Dashboard, error) {
+func (s *service) update(entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -102,15 +104,15 @@ func (s *service) update(entity *v1.Dashboard, parameters shared.Parameters) (*v
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, parameters shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }
 

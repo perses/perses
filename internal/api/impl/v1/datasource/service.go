@@ -15,6 +15,9 @@ package datasource
 
 import (
 	"fmt"
+
+	apiInterface "github.com/perses/perses/internal/api/interface"
+
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -57,14 +60,14 @@ func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Datasource); ok {
 		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Datasource format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*v1.Datasource, error) {
+func (s *service) update(entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, shared.HandleBadRequestError(err.Error())
 	}
@@ -91,15 +94,15 @@ func (s *service) update(entity *v1.Datasource, parameters shared.Parameters) (*
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, parameters shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

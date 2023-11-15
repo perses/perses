@@ -15,9 +15,10 @@ package user
 
 import (
 	"fmt"
+	apiInterface "github.com/perses/perses/internal/api/interface"
+
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
@@ -27,14 +28,12 @@ import (
 
 type service struct {
 	user.Service
-	dao  user.DAO
-	rbac authorization.RBAC
+	dao user.DAO
 }
 
-func NewService(dao user.DAO, rbac authorization.RBAC) user.Service {
+func NewService(dao user.DAO) user.Service {
 	return &service{
-		dao:  dao,
-		rbac: rbac,
+		dao: dao,
 	}
 }
 
@@ -65,14 +64,14 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if userObject, ok := entity.(*v1.User); ok {
 		return s.update(userObject, parameters)
 	}
 	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", shared.BadRequestError, entity)
 }
 
-func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.PublicUser, error) {
+func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in user '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
@@ -108,11 +107,11 @@ func (s *service) update(entity *v1.User, parameters shared.Parameters) (*v1.Pub
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	usr, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
@@ -120,7 +119,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return v1.NewPublicUser(usr), nil
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

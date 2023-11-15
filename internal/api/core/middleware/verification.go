@@ -21,10 +21,11 @@ import (
 	"net/http"
 	"strings"
 
+	apiInterface "github.com/perses/perses/internal/api/interface"
+
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/project"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/utils"
 )
@@ -83,7 +84,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				}
 			}
 			if len(projectName) > 0 {
-				if _, err := svc.Get(shared.Parameters{Name: projectName}, &crypto.JWTCustomClaims{}); err != nil { // TODO: fix
+				if _, err := svc.Get(apiInterface.Parameters{Name: projectName}); err != nil { // TODO: fix
 					if databaseModel.IsKeyNotFound(err) {
 						return shared.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
 					}

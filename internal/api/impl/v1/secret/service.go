@@ -15,9 +15,10 @@ package secret
 
 import (
 	"fmt"
+	apiInterface "github.com/perses/perses/internal/api/interface"
+
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
@@ -31,7 +32,7 @@ type service struct {
 	crypto crypto.Crypto
 }
 
-func NewService(dao secret.DAO, crypto crypto.Crypto, rbac authorization.RBAC) secret.Service {
+func NewService(dao secret.DAO, crypto crypto.Crypto) secret.Service {
 	return &service{
 		dao:    dao,
 		crypto: crypto,
@@ -58,14 +59,14 @@ func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 	return v1.NewPublicSecret(entity), nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Secret); ok {
 		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting Secret format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.PublicSecret, error) {
+func (s *service) update(entity *v1.Secret, parameters apiInterface.Parameters) (*v1.PublicSecret, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Secret %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -94,11 +95,11 @@ func (s *service) update(entity *v1.Secret, parameters shared.Parameters) (*v1.P
 	return v1.NewPublicSecret(entity), nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	scrt, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
 		return nil, err
@@ -106,7 +107,7 @@ func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
 	return v1.NewPublicSecret(scrt), nil
 }
 
-func (s *service) List(q databaseModel.Query, parameters shared.Parameters) (interface{}, error) {
+func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

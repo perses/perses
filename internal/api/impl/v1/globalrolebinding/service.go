@@ -19,7 +19,6 @@ import (
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
@@ -29,9 +28,8 @@ import (
 
 type service struct {
 	globalrolebinding.Service
-	dao  globalrolebinding.DAO
-	rbac authorization.RBAC
-	sch  schemas.Schemas
+	dao globalrolebinding.DAO
+	sch schemas.Schemas
 }
 
 func NewService(dao globalrolebinding.DAO, sch schemas.Schemas) globalrolebinding.Service {

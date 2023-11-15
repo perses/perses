@@ -14,6 +14,7 @@
 package shared
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -74,16 +75,23 @@ type toolbox struct {
 	kind    v1.Kind
 }
 
-func (t *toolbox) HasPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) bool {
+func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) error {
 	claims := extractJWTClaims(ctx)
 	if v1.IsGlobal(t.kind) {
-		return t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, t.kind)
+		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, t.kind); !ok {
+			return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, t.kind))
+		}
+		return nil
 	}
-	if len(projectName) == 0 {
+	if len(projectName) == 0 && entity != nil {
 		// Retrieving project name from payload if project name not provided in the url
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
-	return t.rbac.HasPermission(claims.Subject, action, projectName, t.kind)
+	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, t.kind); !ok {
+		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, t.kind))
+
+	}
+	return nil
 }
 
 func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
@@ -91,7 +99,9 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := extractParameters(ctx)
-	t.HasPermission(ctx, entity, parameters.Project, v1.CreateAction)
+	if err := t.CheckPermission(ctx, entity, parameters.Project, v1.CreateAction); err != nil {
+		return err
+	}
 
 	newEntity, err := t.service.Create(entity)
 	if err != nil {
@@ -105,7 +115,9 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := extractParameters(ctx)
-	t.HasPermission(ctx, entity, parameters.Project, v1.UpdateAction)
+	if err := t.CheckPermission(ctx, entity, parameters.Project, v1.UpdateAction); err != nil {
+		return err
+	}
 	newEntity, err := t.service.Update(entity, parameters)
 	if err != nil {
 		return err
@@ -116,7 +128,9 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
 
-	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.DeleteAction); err != nil {
+		return err
+	}
 	if err := t.service.Delete(parameters); err != nil {
 		return err
 	}
@@ -125,7 +139,9 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 
 func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
-	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
+		return err
+	}
 	entity, err := t.service.Get(parameters)
 	if err != nil {
 		return err
@@ -138,7 +154,9 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 		return HandleBadRequestError(err.Error())
 	}
 	parameters := extractParameters(ctx)
-	t.HasPermission(ctx, nil, parameters.Project, v1.CreateAction)
+	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
+		return err
+	}
 	result, err := t.service.List(q, parameters)
 	if err != nil {
 		return err
