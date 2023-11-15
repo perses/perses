@@ -14,21 +14,21 @@
 package databasesql
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/perses/perses/internal/api/interface/v1/globalrole"
-	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
-	"github.com/perses/perses/internal/api/interface/v1/role"
-	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 
 	"github.com/huandu/go-sqlbuilder"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -58,7 +58,6 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
@@ -79,7 +78,6 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
