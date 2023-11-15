@@ -16,13 +16,13 @@
 package e2eframework
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
@@ -233,7 +233,6 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 		},
 	}
 
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(pluginSpec)
 	if err != nil {
 		t.Fatal(err)
@@ -323,7 +322,6 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
 	var list []*v1.Dashboard
 	data := test.ReadFile(dashboardJSONFilePath)
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
 	}
