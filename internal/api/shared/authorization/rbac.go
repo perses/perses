@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -43,9 +43,9 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 			return nil, err
 		}
 
-		// TODO: refresh interval if permissions activated
 		return &rbac.CacheImpl{
-			Cache:                newCache,
+			Cache: newCache,
+			// TODO: refresh async.SimpleTask
 			UserDAO:              userDAO,
 			RoleDAO:              roleDAO,
 			RoleBindingDAO:       roleBindingDAO,

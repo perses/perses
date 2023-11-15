@@ -35,7 +35,7 @@ func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.Acti
 		for _, action := range permission.Actions {
 			if action == reqAction || action == v1.WildcardAction {
 				for _, scope := range permission.Scopes {
-					if scope == reqScope || scope == v1.KindWildcard { // TODO: wildcard var
+					if scope == reqScope || scope == v1.KindWildcard {
 						return true
 					}
 				}
@@ -56,7 +56,7 @@ func FindRole(roles []*v1.Role, project string, name string) *v1.Role {
 }
 
 // FindGlobalRole is a helper to find a role in a slice
-func FindGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole { // TODO: generic
+func FindGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
 	for _, grle := range globalRoles {
 		if grle.Metadata.Name == name {
 			return grle
@@ -72,7 +72,7 @@ func AddEntry(usersPermissions UsersPermissions, user string, project string, pe
 		usersPermissions[user] = make(map[string][]*v1.Permission)
 	}
 
-	if _, ok := usersPermissions[user][project]; !ok { // TODO: check val ?
+	if _, ok := usersPermissions[user][project]; !ok {
 		usersPermissions[user][project] = make([]*v1.Permission, 0)
 	}
 	usersPermissions[user][project] = append(usersPermissions[user][project], permission)
