@@ -28,7 +28,6 @@ var (
 // (mainly because of the duration that is not yet supported by json).
 type jsonAuthorizationConfig struct {
 	EnableAuthorization *bool            `json:"enable_authorization"`
-	EnableCache         *bool            `json:"enable_cache,omitempty"`
 	Interval            string           `json:"interval,omitempty"`
 	GuestPermissions    []*v1.Permission `json:"guest_permissions"`
 }
@@ -36,8 +35,6 @@ type jsonAuthorizationConfig struct {
 type AuthorizationConfig struct {
 	// ActivatePermission is activating or deactivating the permission verification on each endpoint.
 	EnableAuthorization *bool `json:"enable_authorization" yaml:"enable_authorization"`
-	// EnableAuthorization caching for permissions, highly recommended for better performance
-	EnableCache *bool `json:"enable_cache,omitempty" yaml:"enable_cache,omitempty"`
 	// Interval is the refresh frequency of the cache
 	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
@@ -48,10 +45,6 @@ func (a *AuthorizationConfig) Verify() error {
 	if a.EnableAuthorization == nil {
 		var enabled = true
 		a.EnableAuthorization = &enabled
-	}
-	if a.EnableCache != nil {
-		var cacheEnabled = true
-		a.EnableCache = &cacheEnabled
 	}
 	if a.Interval <= 0 {
 		a.Interval = defaultCacheInterval

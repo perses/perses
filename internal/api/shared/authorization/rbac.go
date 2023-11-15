@@ -39,25 +39,13 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		return &rbac.DisabledImpl{}, nil
 	}
 
-	if *conf.Security.Authorization.EnableCache {
-		newCache, err := rbac.NewCache(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
-		if err != nil {
-			return nil, err
-		}
-
-		return &rbac.CacheImpl{
-			Cache:                newCache,
-			UserDAO:              userDAO,
-			RoleDAO:              roleDAO,
-			RoleBindingDAO:       roleBindingDAO,
-			GlobalRoleDAO:        globalRoleDAO,
-			GlobalRoleBindingDAO: globalRoleBindingDAO,
-			JwtService:           jwtService,
-			GuestPermissions:     conf.Security.Authorization.GuestPermissions,
-		}, nil
+	newCache, err := rbac.NewCache(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
+	if err != nil {
+		return nil, err
 	}
 
-	return &rbac.BasicImpl{
+	return &rbac.CacheImpl{
+		Cache:                newCache,
 		UserDAO:              userDAO,
 		RoleDAO:              roleDAO,
 		RoleBindingDAO:       roleBindingDAO,
