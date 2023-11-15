@@ -14,6 +14,8 @@
 package rbac
 
 import (
+	"context"
+
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -35,11 +37,11 @@ type CacheImpl struct {
 	// TODO: refresh async.SimpleTask
 }
 
-func (r CacheImpl) IsEnabled() bool {
+func (r *CacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
+func (r *CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
 	// Checking default permissions
 	if ok := PermissionListHasPermission(r.GuestPermissions, reqAction, reqScope); ok {
 		return true
@@ -48,13 +50,21 @@ func (r CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProjec
 	return r.Cache.HasPermission(user, reqAction, reqProject, reqScope)
 }
 
-func (r CacheImpl) Refresh() error {
+func (r *CacheImpl) Refresh() error {
 	usersPermissions, err := BuildUsersPermissions(r.UserDAO, r.RoleDAO, r.RoleBindingDAO, r.GlobalRoleDAO, r.GlobalRoleBindingDAO)
 	if err != nil {
 		return err
 	}
 	r.Cache.usersPermissions = usersPermissions
 	return nil
+}
+
+func (r *CacheImpl) Execute(_ context.Context, _ context.CancelFunc) error {
+	return r.Refresh()
+}
+
+func (r *CacheImpl) String() string {
+	return "cache RBAC"
 }
 
 func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (*Cache, error) {

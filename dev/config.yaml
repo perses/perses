@@ -4,7 +4,7 @@ security:
   authorization:
     enable_authorization: true
     enable_cache: true
-    interval: 10m
+    interval: 10s
     guest_permissions:
       - actions:
           - read

@@ -70,6 +70,9 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if len(conf.Provisioning.Folders) > 0 {
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
+	if *conf.Security.Authorization.EnableAuthorization {
+		runner.WithCronTasks(conf.Security.Authorization.Interval, serviceManager.GetRBAC())
+	}
 
 	// register the API
 	runner.HTTPServerBuilder().

@@ -14,6 +14,7 @@
 package authorization
 
 import (
+	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -26,6 +27,7 @@ import (
 )
 
 type RBAC interface {
+	async.SimpleTask
 	IsEnabled() bool
 	HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool
 	Refresh() error
@@ -44,8 +46,7 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		}
 
 		return &rbac.CacheImpl{
-			Cache: newCache,
-			// TODO: refresh async.SimpleTask
+			Cache:                newCache,
 			UserDAO:              userDAO,
 			RoleDAO:              roleDAO,
 			RoleBindingDAO:       roleBindingDAO,

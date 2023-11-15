@@ -13,18 +13,30 @@
 
 package rbac
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	"context"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+)
 
 type DisabledImpl struct{}
 
-func (r DisabledImpl) IsEnabled() bool {
+func (r *DisabledImpl) IsEnabled() bool {
 	return false
 }
 
-func (r DisabledImpl) HasPermission(_ string, _ v1.ActionKind, _ string, _ v1.Kind) bool {
+func (r *DisabledImpl) HasPermission(_ string, _ v1.ActionKind, _ string, _ v1.Kind) bool {
 	return true
 }
 
-func (r DisabledImpl) Refresh() error {
+func (r *DisabledImpl) Refresh() error {
 	return nil
+}
+
+func (r *DisabledImpl) Execute(_ context.Context, _ context.CancelFunc) error {
+	return nil
+}
+
+func (r *DisabledImpl) String() string {
+	return "disabled RBAC"
 }

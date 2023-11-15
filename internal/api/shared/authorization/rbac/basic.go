@@ -14,6 +14,8 @@
 package rbac
 
 import (
+	"context"
+
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -33,11 +35,11 @@ type BasicImpl struct {
 	GuestPermissions     []*v1.Permission
 }
 
-func (r BasicImpl) IsEnabled() bool {
+func (r *BasicImpl) IsEnabled() bool {
 	return true
 }
 
-func (r BasicImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
+func (r *BasicImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
 	// Checking default permissions
 	if ok := PermissionListHasPermission(r.GuestPermissions, reqAction, reqScope); ok {
 		return true
@@ -101,6 +103,14 @@ func (r BasicImpl) HasPermission(user string, reqAction v1.ActionKind, reqProjec
 	return PermissionListHasPermission(projectPermissions, reqAction, reqScope)
 }
 
-func (r BasicImpl) Refresh() error {
+func (r *BasicImpl) Refresh() error {
 	return nil
+}
+
+func (r *BasicImpl) Execute(_ context.Context, _ context.CancelFunc) error {
+	return nil
+}
+
+func (r *BasicImpl) String() string {
+	return "basic RBAC"
 }
