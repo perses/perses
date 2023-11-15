@@ -41,7 +41,7 @@ func NewService(dao variable.DAO, sch schemas.Schemas) variable.Service {
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.Variable); ok {
 		return s.create(object)
 	}
@@ -60,7 +60,7 @@ func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Variable); ok {
 		return s.update(object, parameters)
 	}
@@ -96,14 +96,14 @@ func (s *service) update(entity *v1.Variable, parameters apiInterface.Parameters
 	return entity, nil
 }
 
-func (s *service) Delete(parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }

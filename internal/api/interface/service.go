@@ -14,9 +14,28 @@
 package apiinterface
 
 import (
+	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
+
+type PersesContext interface {
+	UpdateJWTEntry(key string, value string)
+	GetUsername() string
+}
+
+type context struct {
+	context  echo.Context
+	username string
+}
+
+func (c context) UpdateJWTEntry(key string, value string) {
+	// TODO
+}
+
+func (c context) GetUsername() string {
+	return c.username
+}
 
 type Parameters struct {
 	Project string
@@ -24,9 +43,9 @@ type Parameters struct {
 }
 
 type Service interface {
-	Create(entity api.Entity) (interface{}, error)
-	Update(entity api.Entity, parameters Parameters) (interface{}, error)
-	Delete(parameters Parameters) error
-	Get(parameters Parameters) (interface{}, error)
-	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
+	Create(ctx PersesContext, entity api.Entity) (interface{}, error)
+	Update(ctx PersesContext, entity api.Entity, parameters Parameters) (interface{}, error)
+	Delete(ctx PersesContext, parameters Parameters) error
+	Get(ctx PersesContext, parameters Parameters) (interface{}, error)
+	List(ctx PersesContext, q databaseModel.Query, parameters Parameters) (interface{}, error)
 }

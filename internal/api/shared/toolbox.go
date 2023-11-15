@@ -103,7 +103,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 
-	newEntity, err := t.service.Create(entity)
+	newEntity, err := t.service.Create(nil, entity)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.CheckPermission(ctx, entity, parameters.Project, v1.UpdateAction); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Update(entity, parameters)
+	newEntity, err := t.service.Update(nil, entity, parameters)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.DeleteAction); err != nil {
 		return err
 	}
-	if err := t.service.Delete(parameters); err != nil {
+	if err := t.service.Delete(nil, parameters); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
@@ -142,7 +142,7 @@ func (t *toolbox) Get(ctx echo.Context) error {
 	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
 		return err
 	}
-	entity, err := t.service.Get(parameters)
+	entity, err := t.service.Get(nil, parameters)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
 		return err
 	}
-	result, err := t.service.List(q, parameters)
+	result, err := t.service.List(nil, q, parameters)
 	if err != nil {
 		return err
 	}

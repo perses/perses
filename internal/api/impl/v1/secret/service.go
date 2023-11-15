@@ -15,6 +15,7 @@ package secret
 
 import (
 	"fmt"
+
 	apiInterface "github.com/perses/perses/internal/api/interface"
 
 	"github.com/perses/perses/internal/api/interface/v1/secret"
@@ -39,7 +40,7 @@ func NewService(dao secret.DAO, crypto crypto.Crypto) secret.Service {
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.Secret); ok {
 		return s.create(object)
 	}
@@ -59,7 +60,7 @@ func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 	return v1.NewPublicSecret(entity), nil
 }
 
-func (s *service) Update(entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.Secret); ok {
 		return s.update(object, parameters)
 	}
@@ -95,11 +96,11 @@ func (s *service) update(entity *v1.Secret, parameters apiInterface.Parameters) 
 	return v1.NewPublicSecret(entity), nil
 }
 
-func (s *service) Delete(parameters apiInterface.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Project, parameters.Name)
 }
 
-func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
 	scrt, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func (s *service) Get(parameters apiInterface.Parameters) (interface{}, error) {
 	return v1.NewPublicSecret(scrt), nil
 }
 
-func (s *service) List(q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
