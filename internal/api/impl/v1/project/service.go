@@ -90,10 +90,7 @@ func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInt
 			return fmt.Errorf("failed to create owner role binding: %e", err)
 		}
 	}
-	if err := s.rbac.Refresh(); err != nil {
-		return err
-	}
-	return nil
+	return s.rbac.Refresh()
 }
 
 func (s *service) create(entity *v1.Project, ctx apiInterface.PersesContext) (*v1.Project, error) {
@@ -105,7 +102,7 @@ func (s *service) create(entity *v1.Project, ctx apiInterface.PersesContext) (*v
 
 	// If authorization is enabled, permissions to the creator need to be given
 	if s.rbac.IsEnabled() {
-		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil { // TODO: retrieve user from claims
+		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil {
 			return nil, err
 		}
 	}

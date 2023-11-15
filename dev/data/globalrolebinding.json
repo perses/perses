@@ -1,0 +1,17 @@
+[
+  {
+    "kind": "GlobalRoleBinding",
+    "metadata": {
+      "name": "admin",
+    },
+    "spec": {
+      "name": "admin",
+      "subjects": [
+        {
+          "kind": "User",
+          "name": "admin"
+        }
+      ]
+    }
+  }
+]
