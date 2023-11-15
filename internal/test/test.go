@@ -21,7 +21,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // simple wrapper to json.Marshal for testing, to ensure the test gets aborted in case of error

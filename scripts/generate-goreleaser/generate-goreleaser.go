@@ -23,7 +23,7 @@ import (
 
 	"github.com/goreleaser/goreleaser/pkg/config"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const dockerBaseImageTemplateName = "docker.io/persesdev/perses"

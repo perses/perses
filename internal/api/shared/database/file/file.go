@@ -27,7 +27,7 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
