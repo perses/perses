@@ -22,8 +22,7 @@ import (
 
 var (
 	EmptyCtx = context{
-		echoContext: nil,
-		username:    "",
+		username: "",
 	}
 )
 
@@ -31,23 +30,16 @@ func NewPersesContext(ctx echo.Context) PersesContext {
 	claims := crypto.ExtractJWTClaims(ctx)
 	username, _ := claims.GetSubject()
 	return &context{
-		echoContext: ctx,
-		username:    username,
+		username: username,
 	}
 }
 
 type PersesContext interface {
-	UpdateJWTEntry(key string, value string)
 	GetUsername() string
 }
 
 type context struct {
-	echoContext echo.Context
-	username    string
-}
-
-func (c context) UpdateJWTEntry(key string, value string) {
-	// TODO
+	username string
 }
 
 func (c context) GetUsername() string {

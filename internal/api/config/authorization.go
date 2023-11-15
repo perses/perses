@@ -15,8 +15,9 @@ package config
 
 import (
 	"encoding/json"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"time"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 var (
