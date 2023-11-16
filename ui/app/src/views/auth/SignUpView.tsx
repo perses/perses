@@ -47,19 +47,36 @@ function SignUpView() {
     );
   };
 
+  const isSignUpDisabled = () => {
+    return createUserMutation.isLoading || login === '' || password === '';
+  };
+
+  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isSignUpDisabled()) {
+      return;
+    }
+
+    // Sign up on pressing Enter button
+    if (e.charCode === 13) {
+      handleRegister();
+    }
+  };
+
   return (
     <SignWrapper>
       <Stack direction="row" gap={1}>
-        <TextField label="First name" onChange={(e) => setFirstname(e.target.value)} />
-        <TextField label="Last name" onChange={(e) => setLastname(e.target.value)} />
+        <TextField label="First name" onChange={(e) => setFirstname(e.target.value)} onKeyPress={handleKeypress} />
+        <TextField label="Last name" onChange={(e) => setLastname(e.target.value)} onKeyPress={handleKeypress} />
       </Stack>
-      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} />
-      <TextField type="password" label="Password" required onChange={(e) => setPassword(e.target.value)} />
-      <Button
-        variant="contained"
-        disabled={createUserMutation.isLoading || login === '' || password === ''}
-        onClick={() => handleRegister()}
-      >
+      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} onKeyPress={handleKeypress} />
+      <TextField
+        type="password"
+        label="Password"
+        required
+        onChange={(e) => setPassword(e.target.value)}
+        onKeyPress={handleKeypress}
+      />
+      <Button variant="contained" disabled={isSignUpDisabled()} onClick={() => handleRegister()}>
         Register
       </Button>
       {createUserMutation.isLoading && <LinearProgress />}
