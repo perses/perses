@@ -68,9 +68,9 @@ export function useDatasourceStore() {
  * Lists all available Datasource selection items for a given datasource plugin kind.
  * Returns a list, with all information that can be used in a datasource selection context (group, name, selector, kind, ...)
  */
-export function useListDatasourceSelectItems(datasourcePluginKind: string) {
+export function useListDatasourceSelectItems(datasourcePluginKind: string, project?: string) {
   const { listDatasourceSelectItems } = useDatasourceStore();
-  return useQuery(['listDatasourceSelectItems', datasourcePluginKind], () =>
+  return useQuery(['listDatasourceSelectItems', datasourcePluginKind, project], () =>
     listDatasourceSelectItems(datasourcePluginKind)
   );
 }

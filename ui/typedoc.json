@@ -4,6 +4,7 @@
     "components",
     "core",
     "dashboards",
+    "explore",
     "panels-plugin",
     "plugin-system",
     "prometheus-plugin"

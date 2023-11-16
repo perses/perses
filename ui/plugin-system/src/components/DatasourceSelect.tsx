@@ -25,6 +25,7 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
   value: DatasourceSelector;
   onChange: (next: DatasourceSelector) => void;
   datasourcePluginKind: string;
+  project?: string;
 }
 
 /**
@@ -32,9 +33,8 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
  * the input deal with a `DatasourceSelector`.
  */
 export function DatasourceSelect(props: DatasourceSelectProps) {
-  const { datasourcePluginKind, value, onChange, ...others } = props;
-  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind);
-
+  const { datasourcePluginKind, value, project, onChange, ...others } = props;
+  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   // Rebuild the group of the value if not provided
   const defaultValue = useMemo(() => {
     const group = (data ?? [])
