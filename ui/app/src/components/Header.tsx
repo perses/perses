@@ -31,7 +31,7 @@ import {
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Cog from 'mdi-material-ui/Cog';
-import Folder from 'mdi-material-ui/Folder';
+import Archive from 'mdi-material-ui/Archive';
 import ShieldAccount from 'mdi-material-ui/ShieldAccount';
 import Menu from 'mdi-material-ui/Menu';
 import React, { MouseEvent, useState } from 'react';
@@ -128,7 +128,7 @@ function ProjectMenu(): JSX.Element {
         color="inherit"
         onClick={handleMenu}
       >
-        <Folder sx={{ marginRight: 0.5 }} />
+        <Archive sx={{ marginRight: 0.5 }} />
         Projects
         <ChevronDown />
       </Button>

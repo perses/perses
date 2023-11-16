@@ -27,7 +27,7 @@ import { ChangeEvent, MouseEvent, useCallback, useMemo, useState } from 'react';
 import { DashboardResource } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
-import FolderPoundIcon from 'mdi-material-ui/FolderPound';
+import Archive from 'mdi-material-ui/Archive';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
@@ -71,7 +71,7 @@ function RenderDashboardList(props: RenderDashboardListProps) {
           <AccordionSummary expandIcon={<ChevronDown />}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
               <Stack direction="row" alignItems="center" gap={1}>
-                <FolderPoundIcon />
+                <Archive />
                 <Link component={RouterLink} to={projectLink} variant="h3" underline="hover">
                   {row.project}
                 </Link>

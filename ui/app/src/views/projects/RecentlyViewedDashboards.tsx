@@ -16,6 +16,7 @@ import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import HistoryIcon from 'mdi-material-ui/History';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
+import { MENU_TABS_HEIGHT } from '../../components/tabs';
 
 interface RecentlyViewedDashboardsProps {
   projectName: string;
@@ -28,18 +29,24 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
   return (
     <Box id={props.id}>
       <Stack
+        alignItems="center"
         sx={{
           borderBottom: 1,
           borderColor: 'divider',
-          width: '100%',
-          height: '72px',
-          justifyContent: 'space-between',
-          flexDirection: 'row',
         }}
       >
-        <Stack direction="row" alignItems="center" gap={1} my={2}>
+        <Stack
+          alignItems="center"
+          sx={{
+            width: '100%',
+            height: MENU_TABS_HEIGHT,
+            flexDirection: 'row',
+          }}
+        >
           <HistoryIcon />
-          <Typography variant="h3">Recently Viewed Dashboards</Typography>
+          <Typography ml={1} variant="h3">
+            Recently Viewed Dashboards
+          </Typography>
         </Stack>
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
