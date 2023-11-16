@@ -54,7 +54,7 @@ func (r *CacheImpl) Refresh() error {
 	if err != nil {
 		return err
 	}
-	r.Cache.usersPermissions = usersPermissions
+	r.Cache.UsersPermissions = usersPermissions
 	return nil
 }
 
@@ -73,30 +73,27 @@ func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO
 	}
 
 	return &Cache{
-		usersPermissions: usersPermissions,
+		UsersPermissions: usersPermissions,
 	}, nil
 }
 
 type Cache struct {
-	usersPermissions UsersPermissions
+	UsersPermissions UsersPermissions
 }
 
 func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool {
-	usersPermissions, ok := r.usersPermissions[user]
+	usersPermissions, ok := r.UsersPermissions[user]
 	if !ok {
 		return false
 	}
 
 	// Checking global perm first
-	if len(reqProject) > 0 {
+	if reqProject != GlobalProject {
 		globalPermissions, ok := usersPermissions[GlobalProject]
-		if !ok {
-			return false
-		}
-
-		// Check user perm
-		if ok := PermissionListHasPermission(globalPermissions, reqAction, reqScope); ok {
-			return true
+		if ok {
+			if ok := PermissionListHasPermission(globalPermissions, reqAction, reqScope); ok {
+				return true
+			}
 		}
 	}
 
