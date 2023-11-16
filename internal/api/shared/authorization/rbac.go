@@ -29,7 +29,7 @@ import (
 type RBAC interface {
 	async.SimpleTask
 	IsEnabled() bool
-	HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool
+	HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool
 	Refresh() error
 }
 

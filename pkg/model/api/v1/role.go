@@ -100,7 +100,7 @@ type Permission struct {
 	Actions []ActionKind `json:"actions" yaml:"actions"`
 	// The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
 	// With Role, you can't target global kinds
-	Scopes []Kind `json:"scopes" yaml:"scopes"`
+	Scopes []ScopeKind `json:"scopes" yaml:"scopes"`
 }
 
 func (p *Permission) UnmarshalJSON(data []byte) error {
@@ -248,7 +248,7 @@ func (r *Role) validate() error {
 	// Role can't have permissions targeting global resources
 	for _, permission := range r.Spec.Permissions {
 		for _, scope := range permission.Scopes {
-			if IsGlobal(scope) {
+			if IsGlobalScope(scope) {
 				return fmt.Errorf("invalid scope: %q for a Role scope", scope)
 			}
 		}

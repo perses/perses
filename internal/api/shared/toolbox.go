@@ -63,9 +63,13 @@ type toolbox struct {
 
 func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) error {
 	claims := crypto.ExtractJWTClaims(ctx)
-	if v1.IsGlobal(t.kind) {
-		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, t.kind); !ok {
-			return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, t.kind))
+	scope, err := v1.GetScopeKind(string(t.kind))
+	if err != nil {
+		return err
+	}
+	if v1.IsGlobalScope(*scope) {
+		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+			return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
 	}
@@ -73,8 +77,8 @@ func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, projectNa
 		// Retrieving project name from payload if project name not provided in the url
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
-	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, t.kind); !ok {
-		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, t.kind))
+	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
+		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 
 	}
 	return nil

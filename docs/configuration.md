@@ -125,10 +125,10 @@ Generic placeholders are defined as follows:
 ```yaml
   # Actions authorized by the permission
   actions:
-    - <enum= "read" | "create" | "update" | "delete">
+    - <enum= "read" | "create" | "update" | "delete" | "*">
   # Resource kinds that are concerned by the permission
   scopes:
-    - <kind>
+    - <enum= kind | "*">
 ```
 
 ### `<database_config>`

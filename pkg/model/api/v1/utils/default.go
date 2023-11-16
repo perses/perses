@@ -34,7 +34,7 @@ func DefaultOwnerRole(projectName string) v1.Role {
 			Permissions: []v1.Permission{
 				{
 					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
+					Scopes:  []v1.ScopeKind{v1.DashboardScope, v1.DashboardScope, v1.FolderScope, v1.RoleScope, v1.RoleBindingScope, v1.SecretScope, v1.VariableScope},
 				},
 			},
 		},
@@ -54,11 +54,11 @@ func DefaultEditorRole(projectName string) v1.Role {
 			Permissions: []v1.Permission{
 				{
 					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindSecret, v1.KindVariable},
+					Scopes:  []v1.ScopeKind{v1.DashboardScope, v1.DatasourceScope, v1.FolderScope, v1.SecretScope, v1.VariableScope},
 				},
 				{
 					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.Kind{v1.KindRole, v1.KindRoleBinding},
+					Scopes:  []v1.ScopeKind{v1.RoleScope, v1.RoleBindingScope},
 				},
 			},
 		},
@@ -78,7 +78,7 @@ func DefaultViewerRole(projectName string) v1.Role {
 			Permissions: []v1.Permission{
 				{
 					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.Kind{v1.KindDashboard, v1.KindDatasource, v1.KindFolder, v1.KindRole, v1.KindRoleBinding, v1.KindSecret, v1.KindVariable},
+					Scopes:  []v1.ScopeKind{v1.DatasourceScope, v1.DatasourceScope, v1.FolderScope, v1.RoleScope, v1.RoleBindingScope, v1.SecretScope, v1.VariableScope},
 				},
 			},
 		},

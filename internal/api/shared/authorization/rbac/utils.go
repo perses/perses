@@ -30,12 +30,12 @@ const (
 // username -> project name or global ("") -> permission list
 type UsersPermissions = map[string]map[string][]*v1.Permission
 
-func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.ActionKind, reqScope v1.Kind) bool {
+func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.ActionKind, reqScope v1.ScopeKind) bool {
 	for _, permission := range permissions {
 		for _, action := range permission.Actions {
 			if action == reqAction || action == v1.WildcardAction {
 				for _, scope := range permission.Scopes {
-					if scope == reqScope || scope == v1.KindWildcard {
+					if scope == reqScope || scope == v1.WildcardScope {
 						return true
 					}
 				}

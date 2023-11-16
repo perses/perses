@@ -38,7 +38,6 @@ const (
 	KindSecret            Kind = "Secret"
 	KindUser              Kind = "User"
 	KindVariable          Kind = "Variable"
-	KindWildcard          Kind = "*" // TODO: remove
 )
 
 var PluralKindMap = map[Kind]string{
@@ -185,9 +184,6 @@ func GetKind(kind string) (*Kind, error) {
 		return &result, nil
 	case strings.ToLower(string(KindVariable)):
 		result := KindVariable
-		return &result, nil
-	case strings.ToLower(string(KindWildcard)):
-		result := KindWildcard
 		return &result, nil
 	default:
 		return nil, fmt.Errorf("unknown kind %q used", kind)

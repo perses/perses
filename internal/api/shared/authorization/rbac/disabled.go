@@ -25,7 +25,7 @@ func (r *DisabledImpl) IsEnabled() bool {
 	return false
 }
 
-func (r *DisabledImpl) HasPermission(_ string, _ v1.ActionKind, _ string, _ v1.Kind) bool {
+func (r *DisabledImpl) HasPermission(_ string, _ v1.ActionKind, _ string, _ v1.ScopeKind) bool {
 	return true
 }
 

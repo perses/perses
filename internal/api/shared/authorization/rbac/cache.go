@@ -34,14 +34,13 @@ type CacheImpl struct {
 	GlobalRoleBindingDAO globalrolebinding.DAO
 	JwtService           crypto.JWT
 	GuestPermissions     []*v1.Permission
-	// TODO: refresh async.SimpleTask
 }
 
 func (r *CacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
+func (r *CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool {
 	// Checking default permissions
 	if ok := PermissionListHasPermission(r.GuestPermissions, reqAction, reqScope); ok {
 		return true
@@ -82,7 +81,7 @@ type Cache struct {
 	usersPermissions UsersPermissions
 }
 
-func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.Kind) bool {
+func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool {
 	usersPermissions, ok := r.usersPermissions[user]
 	if !ok {
 		return false
