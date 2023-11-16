@@ -41,15 +41,32 @@ function SignInView() {
     );
   };
 
+  const isSignInDisabled = () => {
+    return authMutation.isLoading || login === '' || password === '';
+  };
+
+  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isSignInDisabled()) {
+      return;
+    }
+
+    // Sign in on pressing Enter button
+    if (e.charCode === 13) {
+      handleLogin();
+    }
+  };
+
   return (
     <SignWrapper>
-      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} />
-      <TextField type="password" label="Password" required onChange={(e) => setPassword(e.target.value)} />
-      <Button
-        variant="contained"
-        disabled={authMutation.isLoading || login === '' || password === ''}
-        onClick={() => handleLogin()}
-      >
+      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} onKeyPress={handleKeypress} />
+      <TextField
+        type="password"
+        label="Password"
+        required
+        onChange={(e) => setPassword(e.target.value)}
+        onKeyPress={handleKeypress}
+      />
+      <Button variant="contained" disabled={isSignInDisabled()} onClick={() => handleLogin()}>
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
