@@ -41,16 +41,12 @@ function SignInView() {
     );
   };
 
-  const canSignInUser = () => {
-    if (authMutation.isLoading || login === '' || password === '') {
-      return false;
-    }
-
-    return true;
+  const isSignInDisabled = () => {
+    return authMutation.isLoading || login === '' || password === '';
   };
 
   const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!canSignInUser()) {
+    if (isSignInDisabled()) {
       return;
     }
 
@@ -70,7 +66,7 @@ function SignInView() {
         onChange={(e) => setPassword(e.target.value)}
         onKeyPress={handleKeypress}
       />
-      <Button variant="contained" disabled={!canSignInUser()} onClick={() => handleLogin()}>
+      <Button variant="contained" disabled={isSignInDisabled()} onClick={() => handleLogin()}>
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
