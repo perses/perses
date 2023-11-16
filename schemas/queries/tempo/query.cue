@@ -11,12 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './variables';
+package model
+
+import (
+	tempo "github.com/perses/perses/schemas/datasources/tempo:model"
+)
+
+kind: "TempoTraceQuery"
+spec: close({
+	datasource?: {
+		kind: tempo.kind
+	}
+	query: string
+})

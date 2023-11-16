@@ -12,6 +12,8 @@
 // limitations under the License.
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
+import tempoResource from '@perses-dev/tempo-plugin/plugin.json';
+
 import { PluginLoader, PluginModuleResource, dynamicImportPluginLoader } from '@perses-dev/plugin-system';
 
 /**
@@ -25,5 +27,9 @@ export const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
     resource: panelsResource as PluginModuleResource,
     importPlugin: () => import('@perses-dev/panels-plugin'),
+  },
+  {
+    resource: tempoResource as PluginModuleResource,
+    importPlugin: () => import('@perses-dev/tempo-plugin'),
   },
 ]);

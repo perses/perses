@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './variables';
+import { TempoDatasourceSelector } from './tempo-selectors';
+/**
+ * The spec/options for the TempoTraceQuery plugin.
+ */
+export interface TempoTraceQuerySpec {
+  query: string;
+  datasource?: TempoDatasourceSelector;
+}
