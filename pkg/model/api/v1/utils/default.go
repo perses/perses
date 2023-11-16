@@ -33,8 +33,8 @@ func DefaultOwnerRole(projectName string) v1.Role {
 		Spec: v1.RoleSpec{
 			Permissions: []v1.Permission{
 				{
-					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
-					Scopes:  []v1.ScopeKind{v1.DashboardScope, v1.DashboardScope, v1.FolderScope, v1.RoleScope, v1.RoleBindingScope, v1.SecretScope, v1.VariableScope},
+					Actions: []v1.ActionKind{v1.WildcardAction},
+					Scopes:  []v1.ScopeKind{v1.WildcardScope},
 				},
 			},
 		},
@@ -53,12 +53,12 @@ func DefaultEditorRole(projectName string) v1.Role {
 		Spec: v1.RoleSpec{
 			Permissions: []v1.Permission{
 				{
-					Actions: []v1.ActionKind{v1.CreateAction, v1.ReadAction, v1.UpdateAction, v1.DeleteAction},
+					Actions: []v1.ActionKind{v1.WildcardAction},
 					Scopes:  []v1.ScopeKind{v1.DashboardScope, v1.DatasourceScope, v1.FolderScope, v1.SecretScope, v1.VariableScope},
 				},
 				{
 					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.ScopeKind{v1.RoleScope, v1.RoleBindingScope},
+					Scopes:  []v1.ScopeKind{v1.ProjectScope, v1.RoleScope, v1.RoleBindingScope},
 				},
 			},
 		},
@@ -78,7 +78,7 @@ func DefaultViewerRole(projectName string) v1.Role {
 			Permissions: []v1.Permission{
 				{
 					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.ScopeKind{v1.DatasourceScope, v1.DatasourceScope, v1.FolderScope, v1.RoleScope, v1.RoleBindingScope, v1.SecretScope, v1.VariableScope},
+					Scopes:  []v1.ScopeKind{v1.WildcardScope},
 				},
 			},
 		},

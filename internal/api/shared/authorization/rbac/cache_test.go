@@ -1,6 +1,7 @@
 package rbac_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/perses/perses/internal/api/shared/authorization/rbac"
@@ -8,7 +9,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateBasicMockCache() rbac.Cache {
+func generateMockCache(userCount int, projectCountByUser int) rbac.Cache {
+	usersPermissions := make(rbac.UsersPermissions)
+	for u := 1; u <= userCount; u++ {
+		for p := 1; p <= projectCountByUser; p++ {
+			rbac.AddEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &v1.Permission{
+				Actions: []v1.ActionKind{v1.WildcardAction},
+				Scopes:  []v1.ScopeKind{v1.WildcardScope},
+			})
+		}
+	}
+	return rbac.Cache{UsersPermissions: usersPermissions}
+}
+
+func smallMockCache() rbac.Cache {
 	usersPermissions := make(rbac.UsersPermissions)
 	rbac.AddEntry(usersPermissions, "user0", "project0", &v1.Permission{
 		Actions: []v1.ActionKind{v1.CreateAction},
@@ -35,7 +49,7 @@ func generateBasicMockCache() rbac.Cache {
 }
 
 func TestCacheHasPermission(t *testing.T) {
-	smallCache := generateBasicMockCache()
+	smallCache := smallMockCache()
 
 	testSuites := []struct {
 		title          string
@@ -57,7 +71,7 @@ func TestCacheHasPermission(t *testing.T) {
 		},
 		{
 			title:          "user0 'create' has perm on 'project0' for 'dashboard' scope",
-			cache:          generateBasicMockCache(),
+			cache:          smallMockCache(),
 			user:           "user0",
 			reqAction:      v1.CreateAction,
 			reqProject:     "project0",
@@ -156,11 +170,87 @@ func TestCacheHasPermission(t *testing.T) {
 			reqScope:       v1.DashboardScope,
 			expectedResult: true,
 		},
+		// Testing global role wildcard on a project
+		{
+			title:          "admin has 'create' perm on 'project1' for 'dashboard' scope",
+			cache:          smallCache,
+			user:           "admin",
+			reqAction:      v1.CreateAction,
+			reqProject:     "project1",
+			reqScope:       v1.DashboardScope,
+			expectedResult: true,
+		},
+		{
+			title:          "admin has 'update' perm for 'globalrole' scope",
+			cache:          smallCache,
+			user:           "admin",
+			reqAction:      v1.UpdateAction,
+			reqProject:     rbac.GlobalProject,
+			reqScope:       v1.GlobalRoleScope,
+			expectedResult: true,
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
 			assert.Equal(t, test.expectedResult, test.cache.HasPermission(test.user, test.reqAction, test.reqProject, test.reqScope))
+		})
+	}
+}
+
+func BenchmarkCacheHasPermission(b *testing.B) {
+	benchSuites := []struct {
+		userCount          int
+		projectCountByUser int
+	}{
+		{
+			userCount:          10,
+			projectCountByUser: 1,
+		},
+		{
+			userCount:          100,
+			projectCountByUser: 1,
+		},
+		{
+			userCount:          100,
+			projectCountByUser: 2,
+		},
+		{
+			userCount:          100,
+			projectCountByUser: 3,
+		},
+		{
+			userCount:          1000,
+			projectCountByUser: 5,
+		},
+		{
+			userCount:          10000,
+			projectCountByUser: 20,
+		},
+		{
+			userCount:          10,
+			projectCountByUser: 100,
+		},
+		{
+			userCount:          10,
+			projectCountByUser: 1000,
+		},
+		{
+			userCount:          10,
+			projectCountByUser: 10000,
+		},
+	}
+	for _, bench := range benchSuites {
+		cache := generateMockCache(bench.userCount, bench.projectCountByUser)
+		b.Run(fmt.Sprintf("HasPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				cache.HasPermission("user0", v1.CreateAction, "project0", v1.DashboardScope)
+			}
+		})
+		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
+			for i := 0; i < b.N; i++ {
+				cache.HasPermission(fmt.Sprintf("user%d", bench.userCount), v1.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), v1.DashboardScope)
+			}
 		})
 	}
 }

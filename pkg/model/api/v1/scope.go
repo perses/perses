@@ -110,7 +110,9 @@ func GetScopeKind(kind string) (*ScopeKind, error) {
 
 func IsGlobalScope(kind ScopeKind) bool {
 	switch kind {
-	case GlobalDatasourceScope, GlobalRoleScope, GlobalRoleBindingScope, GlobalSecretScope, GlobalVariableScope, ProjectScope, UserScope, WildcardScope:
+	// ProjectScope is not global even if it should be. Owners of projects should be able to delete their own projects
+	// As ProjectScope is not Global, it can be added in Role scopes and allow this flow.
+	case GlobalDatasourceScope, GlobalRoleScope, GlobalRoleBindingScope, GlobalSecretScope, GlobalVariableScope, UserScope:
 		return true
 	default:
 		return false

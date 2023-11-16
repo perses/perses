@@ -61,7 +61,8 @@ type toolbox struct {
 	kind    v1.Kind
 }
 
-func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, projectName string, action v1.ActionKind) error {
+func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action v1.ActionKind) error {
+	projectName := parameters.Project
 	claims := crypto.ExtractJWTClaims(ctx)
 	scope, err := v1.GetScopeKind(string(t.kind))
 	if err != nil {
@@ -73,9 +74,27 @@ func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, projectNa
 		}
 		return nil
 	}
+
+	// Project is not a global scope, in order to be attached to a Role (or GlobalRole) and have user able to delete their own projects
+	if *scope == v1.ProjectScope {
+		// Create is still a "Global" only permission
+		if action == v1.CreateAction {
+			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+				return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+			}
+			return nil
+		}
+		projectName = parameters.Name
+	}
+
 	if len(projectName) == 0 && entity != nil {
-		// Retrieving project name from payload if project name not provided in the url
-		projectName = utils.GetMetadataProject(entity.GetMetadata())
+		// Project is not a global scope, in order to be attached to a Role (or GlobalRole) and have user able to delete their own projects
+		if *scope == v1.ProjectScope {
+			projectName = entity.GetMetadata().GetName()
+		} else {
+			// Retrieving project name from payload if project name not provided in the url
+			projectName = utils.GetMetadataProject(entity.GetMetadata())
+		}
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
 		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
@@ -89,10 +108,9 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, entity, parameters.Project, v1.CreateAction); err != nil {
+	if err := t.CheckPermission(ctx, entity, parameters, v1.CreateAction); err != nil {
 		return err
 	}
-
 	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx), entity)
 	if err != nil {
 		return err
@@ -105,7 +123,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 		return err
 	}
 	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, entity, parameters.Project, v1.UpdateAction); err != nil {
+	if err := t.CheckPermission(ctx, entity, parameters, v1.UpdateAction); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx), entity, parameters)
@@ -117,8 +135,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 
 func (t *toolbox) Delete(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
-
-	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.DeleteAction); err != nil {
+	if err := t.CheckPermission(ctx, nil, parameters, v1.DeleteAction); err != nil {
 		return err
 	}
 	if err := t.service.Delete(apiInterface.NewPersesContext(ctx), parameters); err != nil {
@@ -129,7 +146,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 
 func (t *toolbox) Get(ctx echo.Context) error {
 	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
+	if err := t.CheckPermission(ctx, nil, parameters, v1.ReadAction); err != nil {
 		return err
 	}
 	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx), parameters)
@@ -144,7 +161,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 		return HandleBadRequestError(err.Error())
 	}
 	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, nil, parameters.Project, v1.ReadAction); err != nil {
+	if err := t.CheckPermission(ctx, nil, parameters, v1.ReadAction); err != nil {
 		return err
 	}
 	result, err := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)
