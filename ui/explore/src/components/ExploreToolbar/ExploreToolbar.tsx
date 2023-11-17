@@ -11,43 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, useTheme, useMediaQuery, Button } from '@mui/material';
+import { Stack, Box, useTheme, useMediaQuery } from '@mui/material';
 import { TimeRangeControls } from '@perses-dev/dashboards';
-import AddIcon from 'mdi-material-ui/Plus';
 
 export interface ExploreToolbarProps {
   exploreTitleComponent?: JSX.Element;
-  onQueryAdd: () => void;
 }
 
 export const ExploreToolbar = (props: ExploreToolbarProps) => {
-  const { exploreTitleComponent, onQueryAdd } = props;
+  const { exploreTitleComponent } = props;
 
   const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
 
   const testId = 'explore-toolbar';
 
   return (
-    <Stack spacing={1} data-testid={testId}>
-      <Box px={2} py={1} display="flex">
+    <Stack data-testid={testId}>
+      <Box sx={{ display: 'flex', width: '100%' }}>
         {exploreTitleComponent}
-      </Box>
-
-      <Box
-        sx={{
-          display: 'flex',
-          width: '100%',
-          alignItems: 'start',
-          paddingX: 2,
-        }}
-      >
-        <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
-          <Stack direction="row" spacing={1} ml={1}>
-            <TimeRangeControls />
-            <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={onQueryAdd}>
-              Add Query
-            </Button>
-          </Stack>
+        <Stack
+          direction="row"
+          spacing={1}
+          ml="auto"
+          flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'}
+          justifyContent="end"
+        >
+          <TimeRangeControls />
         </Stack>
       </Box>
     </Stack>

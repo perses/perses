@@ -51,11 +51,9 @@ export function ViewExploreApp(props: ViewAppProps) {
         flexDirection: 'column',
       }}
     >
-      <Box sx={{ padding: (theme) => theme.spacing(1), height: '100%' }}>
-        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
-          <PanelEditorForm initialAction="update" initialValues={data} exploreTitleComponent={exploreTitleComponent} />
-        </ChartsProvider>
-      </Box>
+      <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
+        <PanelEditorForm initialAction="update" initialValues={data} exploreTitleComponent={exploreTitleComponent} />
+      </ChartsProvider>
     </Box>
   );
 }
