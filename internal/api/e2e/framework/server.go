@@ -36,6 +36,25 @@ import (
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
 
+func DefaultConfig() config.Config {
+	projectPath := test.GetRepositoryPath()
+	var activatePermission = false
+	return config.Config{
+		Security: config.Security{
+			Readonly:      false,
+			Authorization: config.AuthorizationConfig{EnableAuthorization: &activatePermission},
+			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+		},
+		Schemas: config.Schemas{
+			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
+			VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
+			Interval:        0,
+		},
+	}
+}
+
 func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Entity) {
 	for _, entity := range entities {
 		err := dao.Delete(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
@@ -52,23 +71,7 @@ func defaultFileConfig() *config.File {
 	}
 }
 
-func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
-	projectPath := test.GetRepositoryPath()
-	var activatePermission = false
-	conf := config.Config{
-		Security: config.Security{
-			Readonly:      false,
-			Authorization: config.AuthorizationConfig{EnableAuthorization: &activatePermission},
-			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
-		},
-		Schemas: config.Schemas{
-			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
-			Interval:        0,
-		},
-	}
+func CreateServer(t *testing.T, conf config.Config) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	if useSQL == "true" {
 		conf.Database = config.Database{
 			SQL: &config.SQL{
@@ -101,7 +104,16 @@ func CreateServer(t *testing.T) (*httptest.Server, *httpexpect.Expect, dependenc
 }
 
 func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
-	server, expect, persistenceManager := CreateServer(t)
+	conf := DefaultConfig()
+	server, expect, persistenceManager := CreateServer(t, conf)
+	defer persistenceManager.GetPersesDAO().Close()
+	defer server.Close()
+	entities := testFunc(expect, persistenceManager)
+	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+}
+
+func WithServerConfig(t *testing.T, config config.Config, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+	server, expect, persistenceManager := CreateServer(t, config)
 	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()
 	entities := testFunc(expect, persistenceManager)

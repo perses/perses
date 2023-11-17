@@ -28,6 +28,10 @@ var (
 
 func NewPersesContext(ctx echo.Context) PersesContext {
 	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claim can be empty in anonymous endpoints
+		return &context{}
+	}
 	username, _ := claims.GetSubject()
 	return &context{
 		username: username,

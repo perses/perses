@@ -123,7 +123,6 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 			var mdws []echo.MiddlewareFunc
 			if !route.IsAnonymous {
 				mdws = append(mdws, a.jwtMiddleware)
-				//mdws = append(mdws, a.rbacMiddleware)
 			}
 			route.Register(group, mdws...)
 		}

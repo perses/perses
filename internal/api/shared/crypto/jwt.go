@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	cookieKeyJWTPayload   = "jwtPayload"
-	cookieKeyJWTSignature = "jwtSignature"
+	CookieKeyJWTPayload   = "jwtPayload"
+	CookieKeyJWTSignature = "jwtSignature"
 )
 
 type JWTCustomClaims struct {
@@ -84,7 +84,7 @@ func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 	sameSite := http.SameSiteNoneMode
 	secure := true
 	headerPayloadCookie := &http.Cookie{
-		Name:     cookieKeyJWTPayload,
+		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     path,
 		MaxAge:   maxAge,
@@ -94,7 +94,7 @@ func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 		SameSite: sameSite,
 	}
 	signatureCookie := &http.Cookie{
-		Name:     cookieKeyJWTSignature,
+		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     path,
 		MaxAge:   maxAge,
@@ -112,14 +112,14 @@ func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 		BeforeFunc: func(c echo.Context) {
 			// Merge the JWT cookies if they exist to create the token,
 			// and then set the header Authorization with the complete token.
-			payloadCookie, err := c.Cookie(cookieKeyJWTPayload)
+			payloadCookie, err := c.Cookie(CookieKeyJWTPayload)
 			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", cookieKeyJWTPayload)
+				logrus.Tracef("cookie %q not found", CookieKeyJWTPayload)
 				return
 			}
-			signatureCookie, err := c.Cookie(cookieKeyJWTSignature)
+			signatureCookie, err := c.Cookie(CookieKeyJWTSignature)
 			if errors.Is(err, http.ErrNoCookie) {
-				logrus.Tracef("cookie %q not found", cookieKeyJWTSignature)
+				logrus.Tracef("cookie %q not found", CookieKeyJWTSignature)
 				return
 			}
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))

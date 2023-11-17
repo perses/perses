@@ -65,6 +65,10 @@ type toolbox struct {
 func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
 	projectName := parameters.Project
 	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
+		return nil
+	}
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return err
