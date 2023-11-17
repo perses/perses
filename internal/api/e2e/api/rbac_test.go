@@ -35,7 +35,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func serverConfig() config.Config {
+func serverAuthConfig() config.Config {
 	var authorizationEnabled = true
 	projectPath := test.GetRepositoryPath()
 	return config.Config{
@@ -64,7 +64,7 @@ func serverConfig() config.Config {
 }
 
 func TestRBAC(t *testing.T) {
-	e2eframework.WithServerConfig(t, serverConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -95,10 +95,46 @@ func TestRBAC(t *testing.T) {
 			Expect().
 			Status(http.StatusNoContent)
 
+		glRole := e2eframework.NewGlobalRole("test")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).WithJSON(glRole).WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusUnauthorized)
+
+		project2Entity := e2eframework.NewProject("mysuperproject2")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathProject)).WithJSON(project2Entity).WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusUnauthorized)
+
 		_, err := manager.GetVariable().Get(projectName, variableEntity.Metadata.Name)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
 		_, err = manager.GetProject().Get(projectName)
 		assert.True(t, databaseModel.IsKeyNotFound(err))
+		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		return []modelAPI.Entity{}
+	})
+}
+
+func TestAnonymousEndpoints(t *testing.T) {
+	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+		creator := "foo"
+		usrEntity := e2eframework.NewUser(creator)
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+			WithJSON(usrEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authEntity := modelAPI.Auth{
+			Login:    usrEntity.GetMetadata().GetName(),
+			Password: usrEntity.Spec.Password,
+		}
+		authResponse := expect.POST("/api/auth").
+			WithJSON(authEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authResponse.JSON().Object().Keys().ContainsOnly("token")
+		token := authResponse.JSON().Object().Value("token").String().Raw()
+
+		expect.GET("/api/config").WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusOK)
+		expect.GET("/api/config").WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusOK)
+		expect.GET("/api/config").Expect().Status(http.StatusOK)
+
 		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
 		return []modelAPI.Entity{}
 	})
