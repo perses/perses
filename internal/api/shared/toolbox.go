@@ -93,13 +93,8 @@ func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, parameter
 	}
 
 	if len(projectName) == 0 && entity != nil {
-		// Project is not a global scope, in order to be attached to a Role (or GlobalRole) and have user able to delete their own projects
-		if *scope == role.ProjectScope {
-			projectName = entity.GetMetadata().GetName()
-		} else {
-			// Retrieving project name from payload if project name not provided in the url
-			projectName = utils.GetMetadataProject(entity.GetMetadata())
-		}
+		// Retrieving project name from payload if project name not provided in the url
+		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
 		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
