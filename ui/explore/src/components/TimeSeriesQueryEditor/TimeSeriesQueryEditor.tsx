@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
 import { QueryDefinition, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { TimeSeriesQueryInput } from './TimeSeriesQueryInput';
 
@@ -52,11 +51,7 @@ export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
       ];
 
   return (
-    <Box
-      sx={{
-        padding: (theme) => theme.spacing(1),
-      }}
-    >
+    <>
       {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
         <TimeSeriesQueryInput
           key={i}
@@ -68,6 +63,6 @@ export function TimeSeriesQueryEditor(props: TimeSeriesQueryEditorProps) {
           onCollapseExpand={handleQueryCollapseExpand}
         />
       ))}
-    </Box>
+    </>
   );
 }

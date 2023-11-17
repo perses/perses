@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { DashboardResource, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
+import Compass from 'mdi-material-ui/Compass';
 import { generateMetadataName } from '../../../utils/metadata';
-import AppBreadcrumbs from '../../../components/AppBreadcrumbs';
+import AppBreadcrumbs from '../../../components/breadcrumbs/AppBreadcrumbs';
 import ProjectExploreView from './ProjectExploreView';
 
 const DEFAULT_DASHBOARD_NAME = 'Explore Page';
@@ -41,7 +42,7 @@ function ExploreView() {
   return (
     <ProjectExploreView
       dashboardResource={dashboardResource}
-      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" />}
+      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize={'large'} />} />}
     />
   );
 }

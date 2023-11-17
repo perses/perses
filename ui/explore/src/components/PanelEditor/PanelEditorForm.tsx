@@ -14,7 +14,8 @@
 import { PanelEditorValues, PanelPreview } from '@perses-dev/dashboards';
 import { Action, usePluginEditor } from '@perses-dev/plugin-system';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Box, Grid, Typography } from '@mui/material';
+import { Button, Grid, Stack, Typography } from '@mui/material';
+import AddIcon from 'mdi-material-ui/Plus';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { SetStateAction } from 'react';
@@ -76,37 +77,36 @@ export function PanelEditorForm(props: PanelEditorProps) {
   });
 
   return (
-    <>
-      <ExploreToolbar exploreTitleComponent={exploreTitleComponent} onQueryAdd={handleQueryAdd} />
+    <Stack sx={{ width: '100%' }} px={2} pb={2} pt={1.5} gap={2}>
+      <ExploreToolbar exploreTitleComponent={exploreTitleComponent} />
       <FormProvider {...form}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            {/* Maybe in the future we should have something like PanelSpecEditor as we have on the Dashboard System */}
-            <TimeSeriesQueryEditor
-              handleQueryChange={handleQueryChange}
-              handleQueryCollapseExpand={handleQueryCollapseExpand}
-              handleQueryDelete={handleQueryDelete}
-              queriesCollapsed={queriesCollapsed}
-              queries={queries}
-              defaultTimeSeriesQueryKind={defaultTimeSeriesQueryKind}
-            />
+            <Stack gap={1}>
+              {/* Maybe in the future we should have something like PanelSpecEditor as we have on the Dashboard System */}
+              <TimeSeriesQueryEditor
+                handleQueryChange={handleQueryChange}
+                handleQueryCollapseExpand={handleQueryCollapseExpand}
+                handleQueryDelete={handleQueryDelete}
+                queriesCollapsed={queriesCollapsed}
+                queries={queries}
+                defaultTimeSeriesQueryKind={defaultTimeSeriesQueryKind}
+              />
+              <Button variant="contained" startIcon={<AddIcon />} sx={{ marginRight: 'auto' }} onClick={handleQueryAdd}>
+                Add Query
+              </Button>
+            </Stack>
           </Grid>
           <Grid item xs={12}>
-            <Box
-              sx={{
-                paddingX: 1,
-              }}
-            >
-              <Typography variant="h4" marginBottom={1}>
-                Preview
-              </Typography>
+            <Stack gap={1}>
+              <Typography variant="h4">Preview</Typography>
               <ErrorBoundary FallbackComponent={ErrorAlert}>
                 <PanelPreview panelDefinition={panelDefinition} />
               </ErrorBoundary>
-            </Box>
+            </Stack>
           </Grid>
         </Grid>
       </FormProvider>
-    </>
+    </Stack>
   );
 }
