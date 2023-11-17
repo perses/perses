@@ -11,20 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack } from '@mui/material';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
-import { useParams } from 'react-router-dom';
-import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
-import { AdminTabs } from './AdminTabs';
+import { Tab, Tabs, styled } from '@mui/material';
 
-function AdminView() {
-  const { tab } = useParams();
-  return (
-    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={1}>
-      <AppBreadcrumbs rootPageName="Administration" icon={<ShieldAccount fontSize={'large'} />} />
-      <AdminTabs initialTab={tab} />
-    </Stack>
-  );
-}
+export const MENU_TABS_HEIGHT = '54px';
 
-export default AdminView;
+export const MenuTabs = styled(Tabs)({
+  minHeight: MENU_TABS_HEIGHT,
+});
+
+export const MenuTab = styled(Tab)({
+  minHeight: MENU_TABS_HEIGHT,
+});

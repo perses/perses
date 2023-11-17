@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { useNavigate, useParams } from 'react-router-dom';
-import { Box, Stack, Typography, Grid } from '@mui/material';
-import FolderPound from 'mdi-material-ui/FolderPound';
+import { Box, Stack, Grid } from '@mui/material';
 import { useCallback, useState } from 'react';
 import { DeleteProjectDialog } from '../../components/dialogs';
-import ProjectBreadcrumbs from '../../components/ProjectBreadcrumbs';
+import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectTabs } from './ProjectTabs';
 
@@ -35,21 +35,23 @@ function ProjectView() {
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
 
   return (
-    <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <ProjectBreadcrumbs projectName={projectName} />
-      <Box>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" alignItems="center" gap={1}>
-            <FolderPound fontSize={'large'} />
-            <Typography variant="h1">{projectName}</Typography>
-          </Stack>
-          <DeleteProjectDialog
-            name={projectName}
-            open={isDeleteProjectDialogOpen}
-            onClose={() => setIsDeleteProjectDialogOpen(false)}
-            onSuccess={handleDeleteProjectDialogSuccess}
+    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={1}>
+      <Box display="flex" justifyContent="space-between">
+        <ProjectBreadcrumbs projectName={projectName} />
+        <Box mt={0.5}>
+          <CRUDButton
+            text="Delete Project"
+            variant="outlined"
+            color="error"
+            onClick={() => setIsDeleteProjectDialogOpen(true)}
           />
-        </Stack>
+        </Box>
+        <DeleteProjectDialog
+          name={projectName}
+          open={isDeleteProjectDialogOpen}
+          onClose={() => setIsDeleteProjectDialogOpen(false)}
+          onSuccess={handleDeleteProjectDialogSuccess}
+        />
       </Box>
       <Grid container columnSpacing={8}>
         <Grid item xs={12} lg={8}>

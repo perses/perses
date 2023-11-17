@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
@@ -30,6 +30,7 @@ import { useCreateGlobalVariableMutation } from '../../model/global-variable-cli
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useIsReadonly } from '../../model/config-client';
+import { MenuTab, MenuTabs } from '../../components/tabs';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecret';
@@ -201,29 +202,29 @@ export function AdminTabs(props: AdminTabsProps) {
         justifyContent="space-between"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="Admin tabs">
-          <Tab
+        <MenuTabs value={value} onChange={handleChange} aria-label="Admin tabs">
+          <MenuTab
             label="Global variables"
             icon={<CodeJsonIcon />}
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}
           />
-          <Tab
+          <MenuTab
             label="Global datasources"
             icon={<DatabaseIcon />}
             iconPosition="start"
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
           />
-          <Tab
+          <MenuTab
             label="Global secrets"
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
           />
-        </Tabs>
+        </MenuTabs>
         <TabButton index={value} />
       </Stack>
       <TabPanel value={value} index={variablesTabIndex}>

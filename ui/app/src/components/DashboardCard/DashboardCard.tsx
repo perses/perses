@@ -15,7 +15,7 @@ import { Button, Stack, Typography } from '@mui/material';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardResource } from '@perses-dev/core';
 import { getDashboardDisplayName } from '@perses-dev/core/dist/utils/text';
-import FolderPoundIcon from 'mdi-material-ui/FolderPound';
+import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface DashboardCardProps {
@@ -43,7 +43,7 @@ export function DashboardCard(props: DashboardCardProps) {
             {getDashboardDisplayName(props.dashboard)}
           </Typography>
           <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', gap: 1, textAlign: 'start' }}>
-            <FolderPoundIcon fontSize={'small'} /> {props.dashboard.metadata.project}
+            <Archive fontSize={'small'} /> {props.dashboard.metadata.project}
           </Typography>
         </Stack>
       </Stack>

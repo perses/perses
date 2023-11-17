@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Tab, Tabs } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
@@ -33,6 +33,7 @@ import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
 import { useIsReadonly } from '../../model/config-client';
+import { MenuTab, MenuTabs } from '../../components/tabs';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
@@ -223,36 +224,36 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         justifyContent="space-between"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tabs value={value} onChange={handleChange} aria-label="Project tabs">
-          <Tab
+        <MenuTabs value={value} onChange={handleChange} aria-label="Project tabs">
+          <MenuTab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
             iconPosition="start"
             {...a11yProps(dashboardsTabIndex)}
             value={dashboardsTabIndex}
           />
-          <Tab
+          <MenuTab
             label="Variables"
             icon={<CodeJsonIcon />}
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}
           />
-          <Tab
+          <MenuTab
             label="Datasources"
             icon={<DatabaseIcon />}
             iconPosition="start"
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
           />
-          <Tab
+          <MenuTab
             label="Secrets"
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
           />
-        </Tabs>
+        </MenuTabs>
         <TabButton index={value} projectName={projectName} />
       </Stack>
       <TabPanel value={value} index={dashboardsTabIndex}>

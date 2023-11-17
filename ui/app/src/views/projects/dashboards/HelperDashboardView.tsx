@@ -22,7 +22,7 @@ import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasourc
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
 import { useVariableList } from '../../../model/variable-client';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
-import ProjectBreadcrumbs from '../../../components/ProjectBreadcrumbs';
+import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource;
