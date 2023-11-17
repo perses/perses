@@ -13,7 +13,10 @@
 
 package utils
 
-import v1 "github.com/perses/perses/pkg/model/api/v1"
+import (
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
+)
 
 var (
 	owner  = "owner"
@@ -21,8 +24,8 @@ var (
 	viewer = "viewer"
 )
 
-func DefaultOwnerRole(projectName string) v1.Role {
-	return v1.Role{
+func DefaultOwnerRole(projectName string) *v1.Role {
+	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
@@ -31,18 +34,18 @@ func DefaultOwnerRole(projectName string) v1.Role {
 			Project: projectName,
 		},
 		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
+			Permissions: []role.Permission{
 				{
-					Actions: []v1.ActionKind{v1.WildcardAction},
-					Scopes:  []v1.ScopeKind{v1.WildcardScope},
+					Actions: []role.Action{role.WildcardAction},
+					Scopes:  []role.Scope{role.WildcardScope},
 				},
 			},
 		},
 	}
 }
 
-func DefaultEditorRole(projectName string) v1.Role {
-	return v1.Role{
+func DefaultEditorRole(projectName string) *v1.Role {
+	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
@@ -51,22 +54,22 @@ func DefaultEditorRole(projectName string) v1.Role {
 			Project: projectName,
 		},
 		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
+			Permissions: []role.Permission{
 				{
-					Actions: []v1.ActionKind{v1.WildcardAction},
-					Scopes:  []v1.ScopeKind{v1.DashboardScope, v1.DatasourceScope, v1.FolderScope, v1.SecretScope, v1.VariableScope},
+					Actions: []role.Action{role.WildcardAction},
+					Scopes:  []role.Scope{role.DashboardScope, role.DatasourceScope, role.FolderScope, role.SecretScope, role.VariableScope},
 				},
 				{
-					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.ScopeKind{v1.ProjectScope, v1.RoleScope, v1.RoleBindingScope},
+					Actions: []role.Action{role.ReadAction},
+					Scopes:  []role.Scope{role.ProjectScope, role.RoleScope, role.RoleBindingScope},
 				},
 			},
 		},
 	}
 }
 
-func DefaultViewerRole(projectName string) v1.Role {
-	return v1.Role{
+func DefaultViewerRole(projectName string) *v1.Role {
+	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
@@ -75,18 +78,18 @@ func DefaultViewerRole(projectName string) v1.Role {
 			Project: projectName,
 		},
 		Spec: v1.RoleSpec{
-			Permissions: []v1.Permission{
+			Permissions: []role.Permission{
 				{
-					Actions: []v1.ActionKind{v1.ReadAction},
-					Scopes:  []v1.ScopeKind{v1.WildcardScope},
+					Actions: []role.Action{role.ReadAction},
+					Scopes:  []role.Scope{role.WildcardScope},
 				},
 			},
 		},
 	}
 }
 
-func DefaultOwnerRoleBinding(projectName string, username string) v1.RoleBinding {
-	return v1.RoleBinding{
+func DefaultOwnerRoleBinding(projectName string, username string) *v1.RoleBinding {
+	return &v1.RoleBinding{
 		Kind: v1.KindRoleBinding,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{

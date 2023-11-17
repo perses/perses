@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 const (
@@ -28,14 +29,14 @@ const (
 
 // UsersPermissions contains the mapping of all users and their permissions
 // username -> project name or global ("") -> permission list
-type UsersPermissions = map[string]map[string][]*v1.Permission
+type UsersPermissions = map[string]map[string][]*v1Role.Permission
 
-func PermissionListHasPermission(permissions []*v1.Permission, reqAction v1.ActionKind, reqScope v1.ScopeKind) bool {
+func PermissionListHasPermission(permissions []*v1Role.Permission, reqAction v1Role.Action, reqScope v1Role.Scope) bool {
 	for _, permission := range permissions {
 		for _, action := range permission.Actions {
-			if action == reqAction || action == v1.WildcardAction {
+			if action == reqAction || action == v1Role.WildcardAction {
 				for _, scope := range permission.Scopes {
-					if scope == reqScope || scope == v1.WildcardScope {
+					if scope == reqScope || scope == v1Role.WildcardScope {
 						return true
 					}
 				}
@@ -67,13 +68,13 @@ func FindGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
 
 // AddEntry is appending a project or global permission to user list of permissions
 // Empty project equal to Global permission
-func AddEntry(usersPermissions UsersPermissions, user string, project string, permission *v1.Permission) {
+func AddEntry(usersPermissions UsersPermissions, user string, project string, permission *v1Role.Permission) {
 	if _, ok := usersPermissions[user]; !ok {
-		usersPermissions[user] = make(map[string][]*v1.Permission)
+		usersPermissions[user] = make(map[string][]*v1Role.Permission)
 	}
 
 	if _, ok := usersPermissions[user][project]; !ok {
-		usersPermissions[user][project] = make([]*v1.Permission, 0)
+		usersPermissions[user][project] = make([]*v1Role.Permission, 0)
 	}
 	usersPermissions[user][project] = append(usersPermissions[user][project], permission)
 }

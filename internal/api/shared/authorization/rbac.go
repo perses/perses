@@ -23,13 +23,13 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type RBAC interface {
 	async.SimpleTask
 	IsEnabled() bool
-	HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool
+	HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool
 	Refresh() error
 }
 

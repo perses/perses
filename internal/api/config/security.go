@@ -49,8 +49,9 @@ type Security struct {
 	// Also note the key must be at least 32 bytes long.
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
-	EncryptionKeyFile string              `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
-	Authorization     AuthorizationConfig `json:"authorization" yaml:"authorization"`
+	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	// Authorization contains all config around rbac (permissions and roles)
+	Authorization AuthorizationConfig `json:"authorization" yaml:"authorization"`
 }
 
 func (s *Security) Verify() error {

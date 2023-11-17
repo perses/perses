@@ -17,8 +17,6 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/pkg/model/api/v1/utils"
-
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
@@ -32,6 +30,7 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -75,18 +74,18 @@ func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInt
 	editor := utils.DefaultEditorRole(projectName)
 	viewer := utils.DefaultViewerRole(projectName)
 
-	if err := s.roleDAO.Create(&owner); err != nil {
+	if err := s.roleDAO.Create(owner); err != nil {
 		return fmt.Errorf("failed to create owner role: %e", err)
 	}
-	if err := s.roleDAO.Create(&editor); err != nil {
+	if err := s.roleDAO.Create(editor); err != nil {
 		return fmt.Errorf("failed to create editor role: %e", err)
 	}
-	if err := s.roleDAO.Create(&viewer); err != nil {
+	if err := s.roleDAO.Create(viewer); err != nil {
 		return fmt.Errorf("failed to create viewer role: %e", err)
 	}
 	if len(ctx.GetUsername()) > 0 {
 		ownerRb := utils.DefaultOwnerRoleBinding(projectName, ctx.GetUsername())
-		if err := s.roleBindingDAO.Create(&ownerRb); err != nil {
+		if err := s.roleBindingDAO.Create(ownerRb); err != nil {
 			return fmt.Errorf("failed to create owner role binding: %e", err)
 		}
 	}

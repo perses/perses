@@ -17,131 +17,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"strings"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type RoleInterface interface {
 	GetMetadata() modelAPI.Metadata
 }
 
-type ActionKind string
-
-const (
-	ReadAction     ActionKind = "read"
-	CreateAction   ActionKind = "create"
-	UpdateAction   ActionKind = "update"
-	DeleteAction   ActionKind = "delete"
-	WildcardAction ActionKind = "*"
-)
-
-func (k *ActionKind) UnmarshalJSON(data []byte) error {
-	var tmp ActionKind
-	type plain ActionKind
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *ActionKind) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp ActionKind
-	type plain ActionKind
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*k = tmp
-	return nil
-}
-
-func (k *ActionKind) validate() error {
-	if len(*k) == 0 {
-		return fmt.Errorf("kind cannot be empty")
-	}
-	if _, err := GetActionKind(string(*k)); err != nil {
-		return err
-	}
-	return nil
-}
-
-// GetActionKind parse string to ActionKind (not case-sensitive)
-func GetActionKind(action string) (*ActionKind, error) {
-	switch strings.ToLower(action) {
-	case strings.ToLower(string(ReadAction)):
-		result := ReadAction
-		return &result, nil
-	case strings.ToLower(string(CreateAction)):
-		result := CreateAction
-		return &result, nil
-	case strings.ToLower(string(UpdateAction)):
-		result := UpdateAction
-		return &result, nil
-	case strings.ToLower(string(DeleteAction)):
-		result := DeleteAction
-		return &result, nil
-	case strings.ToLower(string(WildcardAction)):
-		result := WildcardAction
-		return &result, nil
-	default:
-		return nil, fmt.Errorf("%q has no associated struct", action)
-	}
-}
-
-type Permission struct {
-	// Actions of the permission (read, create, update, delete, ...)
-	Actions []ActionKind `json:"actions" yaml:"actions"`
-	// The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
-	// With Role, you can't target global kinds
-	Scopes []ScopeKind `json:"scopes" yaml:"scopes"`
-}
-
-func (p *Permission) UnmarshalJSON(data []byte) error {
-	var tmp Permission
-	type plain Permission
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *Permission) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Permission
-	type plain Permission
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *Permission) validate() error {
-	if len(p.Actions) == 0 {
-		return fmt.Errorf("permission actions cannot be empty")
-	}
-	if len(p.Scopes) == 0 {
-		return fmt.Errorf("permission scopes cannot be empty")
-	}
-	return nil
-}
-
 type RoleSpec struct {
 	// List of permissions owned by the role
-	Permissions []Permission `json:"permissions" yaml:"permissions"`
+	Permissions []role.Permission `json:"permissions" yaml:"permissions"`
 }
 
 // GlobalRole is the struct representing the role shared to everybody.
@@ -248,7 +135,7 @@ func (r *Role) validate() error {
 	// Role can't have permissions targeting global resources
 	for _, permission := range r.Spec.Permissions {
 		for _, scope := range permission.Scopes {
-			if IsGlobalScope(scope) {
+			if role.IsGlobalScope(scope) {
 				return fmt.Errorf("invalid scope: %q for a Role scope", scope)
 			}
 		}

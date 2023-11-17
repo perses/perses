@@ -1,3 +1,16 @@
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rbac_test
 
 import (
@@ -5,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/perses/perses/internal/api/shared/authorization/rbac"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,9 +26,9 @@ func generateMockCache(userCount int, projectCountByUser int) rbac.Cache {
 	usersPermissions := make(rbac.UsersPermissions)
 	for u := 1; u <= userCount; u++ {
 		for p := 1; p <= projectCountByUser; p++ {
-			rbac.AddEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &v1.Permission{
-				Actions: []v1.ActionKind{v1.WildcardAction},
-				Scopes:  []v1.ScopeKind{v1.WildcardScope},
+			rbac.AddEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
+				Actions: []role.Action{role.WildcardAction},
+				Scopes:  []role.Scope{role.WildcardScope},
 			})
 		}
 	}
@@ -24,25 +37,25 @@ func generateMockCache(userCount int, projectCountByUser int) rbac.Cache {
 
 func smallMockCache() rbac.Cache {
 	usersPermissions := make(rbac.UsersPermissions)
-	rbac.AddEntry(usersPermissions, "user0", "project0", &v1.Permission{
-		Actions: []v1.ActionKind{v1.CreateAction},
-		Scopes:  []v1.ScopeKind{v1.DashboardScope},
+	rbac.AddEntry(usersPermissions, "user0", "project0", &role.Permission{
+		Actions: []role.Action{role.CreateAction},
+		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	rbac.AddEntry(usersPermissions, "user0", "project0", &v1.Permission{
-		Actions: []v1.ActionKind{v1.CreateAction},
-		Scopes:  []v1.ScopeKind{v1.VariableScope},
+	rbac.AddEntry(usersPermissions, "user0", "project0", &role.Permission{
+		Actions: []role.Action{role.CreateAction},
+		Scopes:  []role.Scope{role.VariableScope},
 	})
-	rbac.AddEntry(usersPermissions, "user1", "project0", &v1.Permission{
-		Actions: []v1.ActionKind{v1.CreateAction},
-		Scopes:  []v1.ScopeKind{v1.WildcardScope},
+	rbac.AddEntry(usersPermissions, "user1", "project0", &role.Permission{
+		Actions: []role.Action{role.CreateAction},
+		Scopes:  []role.Scope{role.WildcardScope},
 	})
-	rbac.AddEntry(usersPermissions, "user2", "project1", &v1.Permission{
-		Actions: []v1.ActionKind{v1.WildcardAction},
-		Scopes:  []v1.ScopeKind{v1.DashboardScope},
+	rbac.AddEntry(usersPermissions, "user2", "project1", &role.Permission{
+		Actions: []role.Action{role.WildcardAction},
+		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	rbac.AddEntry(usersPermissions, "admin", rbac.GlobalProject, &v1.Permission{
-		Actions: []v1.ActionKind{v1.WildcardAction},
-		Scopes:  []v1.ScopeKind{v1.WildcardScope},
+	rbac.AddEntry(usersPermissions, "admin", rbac.GlobalProject, &role.Permission{
+		Actions: []role.Action{role.WildcardAction},
+		Scopes:  []role.Scope{role.WildcardScope},
 	})
 
 	return rbac.Cache{UsersPermissions: usersPermissions}
@@ -55,45 +68,45 @@ func TestCacheHasPermission(t *testing.T) {
 		title          string
 		cache          rbac.Cache
 		user           string
-		reqAction      v1.ActionKind
+		reqAction      role.Action
 		reqProject     string
-		reqScope       v1.ScopeKind
+		reqScope       role.Scope
 		expectedResult bool
 	}{
 		{
 			title:          "empty cache",
 			cache:          rbac.Cache{},
 			user:           "user0",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.VariableScope,
+			reqScope:       role.VariableScope,
 			expectedResult: false,
 		},
 		{
 			title:          "user0 'create' has perm on 'project0' for 'dashboard' scope",
 			cache:          smallMockCache(),
 			user:           "user0",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user0 has 'create' perm on 'project0' for 'variable' scope",
 			cache:          smallCache,
 			user:           "user0",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.VariableScope,
+			reqScope:       role.VariableScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user0 hasn't 'create' perm on 'project0' for 'datasource' scope",
 			cache:          smallCache,
 			user:           "user0",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.DatasourceScope,
+			reqScope:       role.DatasourceScope,
 			expectedResult: false,
 		},
 		// Testing scope wildcard on a project
@@ -101,36 +114,36 @@ func TestCacheHasPermission(t *testing.T) {
 			title:          "user1 has 'create' perm on 'project0' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "user1",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.DatasourceScope,
+			reqScope:       role.DatasourceScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user1 has 'create' perm on 'project0' for 'datasource' scope",
 			cache:          smallCache,
 			user:           "user1",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.DatasourceScope,
+			reqScope:       role.DatasourceScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user1 has 'create' perm on 'project0' for 'variable' scope",
 			cache:          smallCache,
 			user:           "user1",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project0",
-			reqScope:       v1.VariableScope,
+			reqScope:       role.VariableScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user1 hasn't 'create' perm for 'globaldatasource' scope",
 			cache:          smallCache,
 			user:           "user1",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     rbac.GlobalProject,
-			reqScope:       v1.GlobalDatasourceScope,
+			reqScope:       role.GlobalDatasourceScope,
 			expectedResult: false,
 		},
 		// Testing action wildcard on a project
@@ -138,36 +151,36 @@ func TestCacheHasPermission(t *testing.T) {
 			title:          "user2 has 'create' perm on 'project1' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "user2",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project1",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user2 has 'update' perm on 'project1' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "user2",
-			reqAction:      v1.UpdateAction,
+			reqAction:      role.UpdateAction,
 			reqProject:     "project1",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user2 has 'read' perm on 'project1' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "user2",
-			reqAction:      v1.ReadAction,
+			reqAction:      role.ReadAction,
 			reqProject:     "project1",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		{
 			title:          "user2 has 'delete' perm on 'project1' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "user2",
-			reqAction:      v1.DeleteAction,
+			reqAction:      role.DeleteAction,
 			reqProject:     "project1",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		// Testing global role wildcard on a project
@@ -175,18 +188,18 @@ func TestCacheHasPermission(t *testing.T) {
 			title:          "admin has 'create' perm on 'project1' for 'dashboard' scope",
 			cache:          smallCache,
 			user:           "admin",
-			reqAction:      v1.CreateAction,
+			reqAction:      role.CreateAction,
 			reqProject:     "project1",
-			reqScope:       v1.DashboardScope,
+			reqScope:       role.DashboardScope,
 			expectedResult: true,
 		},
 		{
 			title:          "admin has 'update' perm for 'globalrole' scope",
 			cache:          smallCache,
 			user:           "admin",
-			reqAction:      v1.UpdateAction,
+			reqAction:      role.UpdateAction,
 			reqProject:     rbac.GlobalProject,
-			reqScope:       v1.GlobalRoleScope,
+			reqScope:       role.GlobalRoleScope,
 			expectedResult: true,
 		},
 	}
@@ -244,12 +257,12 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 		cache := generateMockCache(bench.userCount, bench.projectCountByUser)
 		b.Run(fmt.Sprintf("HasPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cache.HasPermission("user0", v1.CreateAction, "project0", v1.DashboardScope)
+				cache.HasPermission("user0", role.CreateAction, "project0", role.DashboardScope)
 			}
 		})
 		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cache.HasPermission(fmt.Sprintf("user%d", bench.userCount), v1.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), v1.DashboardScope)
+				cache.HasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
 			}
 		})
 	}

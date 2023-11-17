@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared/crypto"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type CacheImpl struct {
@@ -33,14 +33,14 @@ type CacheImpl struct {
 	GlobalRoleDAO        globalrole.DAO
 	GlobalRoleBindingDAO globalrolebinding.DAO
 	JwtService           crypto.JWT
-	GuestPermissions     []*v1.Permission
+	GuestPermissions     []*v1Role.Permission
 }
 
 func (r *CacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *CacheImpl) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool {
+func (r *CacheImpl) HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool {
 	// Checking default permissions
 	if ok := PermissionListHasPermission(r.GuestPermissions, reqAction, reqScope); ok {
 		return true
@@ -81,7 +81,7 @@ type Cache struct {
 	UsersPermissions UsersPermissions
 }
 
-func (r Cache) HasPermission(user string, reqAction v1.ActionKind, reqProject string, reqScope v1.ScopeKind) bool {
+func (r Cache) HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool {
 	usersPermissions, ok := r.UsersPermissions[user]
 	if !ok {
 		return false

@@ -17,7 +17,7 @@ import (
 	"encoding/json"
 	"time"
 
-	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 var (
@@ -27,9 +27,9 @@ var (
 // jsonSchemas is only used to marshal the config in a proper json format
 // (mainly because of the duration that is not yet supported by json).
 type jsonAuthorizationConfig struct {
-	EnableAuthorization *bool            `json:"enable_authorization"`
-	Interval            string           `json:"interval,omitempty"`
-	GuestPermissions    []*v1.Permission `json:"guest_permissions"`
+	EnableAuthorization *bool              `json:"enable_authorization"`
+	Interval            string             `json:"interval,omitempty"`
+	GuestPermissions    []*role.Permission `json:"guest_permissions"`
 }
 
 type AuthorizationConfig struct {
@@ -38,7 +38,7 @@ type AuthorizationConfig struct {
 	// Interval is the refresh frequency of the cache
 	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
-	GuestPermissions []*v1.Permission `json:"guest_permissions" yaml:"guest_permissions"`
+	GuestPermissions []*role.Permission `json:"guest_permissions" yaml:"guest_permissions"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -50,7 +50,7 @@ func (a *AuthorizationConfig) Verify() error {
 		a.Interval = defaultCacheInterval
 	}
 	if a.GuestPermissions == nil {
-		a.GuestPermissions = []*v1.Permission{}
+		a.GuestPermissions = []*role.Permission{}
 	}
 	return nil
 }
