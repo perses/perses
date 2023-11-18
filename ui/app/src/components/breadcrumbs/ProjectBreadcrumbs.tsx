@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { HomeLinkBreadcrumb, StyledBreadcrumbs } from './AppBreadcrumbs';
+import { Typography } from '@mui/material';
+import Archive from 'mdi-material-ui/Archive';
+import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {
   projectName: string;
@@ -25,20 +26,30 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
 
   if (dashboardName) {
     return (
-      <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
-        <HomeLinkBreadcrumb />
-        <Link underline={'hover'} variant={'h3'} component={RouterLink} to={`/projects/${projectName}`}>
-          {projectName}
-        </Link>
-        <Typography variant={'h3'}>{dashboardName}</Typography>
-      </StyledBreadcrumbs>
+      <Breadcrumbs>
+        <HomeLinkCrumb />
+        <LinkCrumb to={`/projects/${projectName}`}>
+          <StackCrumb>
+            <Archive fontSize={'small'} />
+            {projectName}
+          </StackCrumb>
+        </LinkCrumb>
+        <StackCrumb>
+          <ViewDashboardIcon fontSize={'small'} />
+          <Typography variant={'h3'}>{dashboardName}</Typography>
+        </StackCrumb>
+      </Breadcrumbs>
     );
   }
+
   return (
-    <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
-      <HomeLinkBreadcrumb />
-      <Typography variant={'h3'}>{projectName}</Typography>
-    </StyledBreadcrumbs>
+    <Breadcrumbs>
+      <HomeLinkCrumb />
+      <StackCrumb>
+        <Archive fontSize={'large'} />
+        <TitleCrumb>{projectName}</TitleCrumb>
+      </StackCrumb>
+    </Breadcrumbs>
   );
 }
 

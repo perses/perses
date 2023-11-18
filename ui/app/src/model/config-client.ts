@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { DashboardSelector, fetchJson } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { marked } from 'marked';
@@ -85,11 +85,15 @@ export interface ProvisioningConfig {
   folders: string[];
 }
 
-export interface ConfigModel {
+export interface SecurityConfig {
   readonly: boolean;
   activate_permission: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+}
+
+export interface ConfigModel {
+  security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
   important_dashboards: DashboardSelector[];
@@ -103,11 +107,24 @@ export function useConfig(options?: ConfigOptions) {
   return useQuery<ConfigModel, Error>(
     [resource],
     () => {
-      const url = buildURL({ resource: resource, apiPrefix: '/api' });
-      return fetchJson<ConfigModel>(url);
+      return fetchConfig();
     },
     options
   );
+}
+
+export function useGetConfigMutation() {
+  return useMutation<ConfigModel, Error>({
+    mutationKey: [resource],
+    mutationFn: () => {
+      return fetchConfig();
+    },
+  });
+}
+
+export function fetchConfig() {
+  const url = buildURL({ resource: resource, apiPrefix: '/api' });
+  return fetchJson<ConfigModel>(url);
 }
 
 export function useIsReadonly() {
@@ -116,7 +133,7 @@ export function useIsReadonly() {
   if (isLoading || data === undefined) {
     return undefined;
   }
-  return data.readonly;
+  return data.security.readonly;
 }
 
 export function useImportantDashboardSelectors() {

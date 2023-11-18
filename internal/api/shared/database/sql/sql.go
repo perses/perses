@@ -15,11 +15,11 @@ package databasesql
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/huandu/go-sqlbuilder"
-	jsoniter "github.com/json-iterator/go"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -27,16 +27,20 @@ import (
 )
 
 const (
-	tableGlobalDatasource = "globaldatasource"
-	tableGlobalSecret     = "globalsecret"
-	tableGlobalVariable   = "globalvariable"
-	tableProject          = "project"
-	tableDashboard        = "dashboard"
-	tableFolder           = "folder"
-	tableDatasource       = "datasource"
-	tableSecret           = "secret"
-	tableUser             = "user"
-	tableVariable         = "variable"
+	tableGlobalDatasource  = "globaldatasource"
+	tableGlobalRole        = "globalrole"
+	tableGlobalRoleBinding = "globalrolebinding"
+	tableGlobalSecret      = "globalsecret"
+	tableGlobalVariable    = "globalvariable"
+	tableProject           = "project"
+	tableDashboard         = "dashboard"
+	tableFolder            = "folder"
+	tableDatasource        = "datasource"
+	tableRole              = "role"
+	tableRoleBinding       = "rolebinding"
+	tableSecret            = "secret"
+	tableUser              = "user"
+	tableVariable          = "variable"
 
 	colID      = "id"
 	colDoc     = "doc"
@@ -54,12 +58,20 @@ func getTableName(kind modelV1.Kind) (string, error) {
 		return tableFolder, nil
 	case modelV1.KindGlobalDatasource:
 		return tableGlobalDatasource, nil
+	case modelV1.KindGlobalRole:
+		return tableGlobalRole, nil
+	case modelV1.KindGlobalRoleBinding:
+		return tableGlobalRoleBinding, nil
 	case modelV1.KindGlobalSecret:
 		return tableGlobalSecret, nil
 	case modelV1.KindGlobalVariable:
 		return tableGlobalVariable, nil
 	case modelV1.KindProject:
 		return tableProject, nil
+	case modelV1.KindRole:
+		return tableRole, nil
+	case modelV1.KindRoleBinding:
+		return tableRoleBinding, nil
 	case modelV1.KindSecret:
 		return tableSecret, nil
 	case modelV1.KindUser:
@@ -90,6 +102,8 @@ type DAO struct {
 func (d *DAO) Init() error {
 	tables := []string{
 		d.createResourceTable(tableGlobalDatasource),
+		d.createResourceTable(tableGlobalRole),
+		d.createResourceTable(tableGlobalRoleBinding),
 		d.createResourceTable(tableGlobalSecret),
 		d.createResourceTable(tableGlobalVariable),
 		d.createResourceTable(tableProject),
@@ -98,6 +112,8 @@ func (d *DAO) Init() error {
 		d.createProjectResourceTable(tableDashboard),
 		d.createProjectResourceTable(tableFolder),
 		d.createProjectResourceTable(tableDatasource),
+		d.createProjectResourceTable(tableRole),
+		d.createProjectResourceTable(tableRoleBinding),
 		d.createProjectResourceTable(tableSecret),
 		d.createProjectResourceTable(tableVariable),
 	}
@@ -194,7 +210,6 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 		if scanErr := query.Scan(&rowJSONDoc); scanErr != nil {
 			return scanErr
 		}
-		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		return json.Unmarshal([]byte(rowJSONDoc), entity)
 	}
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
@@ -244,7 +259,6 @@ func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 		}
 		// then get back the actual struct behind the value.
 		obj := value.Interface()
-		json := jsoniter.ConfigCompatibleWithStandardLibrary
 		if unmarshalErr := json.Unmarshal([]byte(rowJSONDoc), obj); unmarshalErr != nil {
 			return unmarshalErr
 		}

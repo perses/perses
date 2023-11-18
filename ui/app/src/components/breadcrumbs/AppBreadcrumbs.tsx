@@ -11,34 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Breadcrumbs, Link, Typography, styled } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface AppBreadcrumbsProps {
   rootPageName: string;
+  icon: React.ReactNode;
 }
-
-export function HomeLinkBreadcrumb() {
-  return (
-    <Link underline={'hover'} variant={'h3'} component={RouterLink} to={'/'}>
-      Home
-    </Link>
-  );
-}
-
-export const StyledBreadcrumbs = styled(Breadcrumbs)({
-  fontSize: 'large',
-  paddingLeft: 0.5,
-  lineHeight: '30px',
-});
 
 function AppBreadcrumbs(props: AppBreadcrumbsProps) {
-  const { rootPageName } = props;
+  const { rootPageName, icon } = props;
   return (
-    <StyledBreadcrumbs sx={{ fontSize: 'large' }}>
-      <HomeLinkBreadcrumb />
-      <Typography variant={'h3'}>{rootPageName}</Typography>
-    </StyledBreadcrumbs>
+    <Breadcrumbs>
+      <HomeLinkCrumb />
+      <StackCrumb>
+        {icon}
+        <TitleCrumb>{rootPageName}</TitleCrumb>
+      </StackCrumb>
+    </Breadcrumbs>
   );
 }
 

@@ -21,7 +21,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func TestUnmarshalJSONConfig(t *testing.T) {

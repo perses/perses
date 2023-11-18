@@ -21,7 +21,7 @@ Thumbs.db
 
 coverage.txt
 
-/internal/api/e2e/test/
+/internal/api/e2e/api/test/
 /internal/api/shared/database/file/test
 /pkg/client/api/v1/test/
 

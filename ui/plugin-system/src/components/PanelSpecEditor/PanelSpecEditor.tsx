@@ -22,7 +22,7 @@ export interface PanelSpecEditorProps {
   panelDefinition: PanelDefinition;
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
-  onJSONChange: (panelDefinition: PanelDefinition) => void;
+  onJSONChange: (panelDefinitionStr: string) => void;
 }
 
 export function PanelSpecEditor(props: PanelSpecEditorProps) {
@@ -64,7 +64,10 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   }
 
   // always show json editor by default
-  tabs.push({ label: 'JSON', content: <JSONEditor value={panelDefinition} onChange={onJSONChange} /> });
+  tabs.push({
+    label: 'JSON',
+    content: <JSONEditor maxHeight="80vh" value={panelDefinition} onChange={onJSONChange} />,
+  });
 
   return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
 }

@@ -14,19 +14,18 @@
 package file
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"path/filepath"
 
-	jsoniter "github.com/json-iterator/go"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func Unmarshal(file string, obj interface{}) error {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, isJSON, err := readAndDetect(file)
 	if err != nil {
 		return err
@@ -102,7 +101,6 @@ func (u *unmarshaller) unmarshal() ([]modelAPI.Entity, error) {
 }
 
 func (u *unmarshaller) read() error {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, isJSON, err := readAndDetect(u.file)
 	if err != nil {
 		return err
@@ -136,7 +134,6 @@ func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 		return nil, fmt.Errorf("unable to unmarshall data from the file %q, data is empty", u.file)
 	}
 	var result []modelAPI.Entity
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	for i, object := range u.objects {
 		if _, ok := object["kind"]; !ok {
 			return nil, fmt.Errorf("objects[%d] from file %q unable to find 'kind' field", i, u.file)
@@ -171,7 +168,6 @@ func (u *unmarshaller) unmarshalEntities() ([]modelAPI.Entity, error) {
 }
 
 func (u *unmarshaller) unmarshalEntity(data []byte, entity modelAPI.Entity) error {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	var unmarshalErr error
 	if u.isJSON {
 		unmarshalErr = json.Unmarshal(data, entity)

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { PanelDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -98,7 +98,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     }
   }
 
-  const handlePanelDefinitionChange = (nextPanelDef: PanelDefinition) => {
+  const handlePanelDefinitionChange = (nextPanelDefStr: string) => {
+    const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);
     const { kind: pluginKind, spec: pluginSpec } = nextPanelDef.spec.plugin;
     // if panel plugin kind and spec are modified, then need to save current spec
     if (

@@ -28,7 +28,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: install mdox
@@ -42,7 +43,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: install cue
@@ -57,7 +59,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: test
@@ -78,7 +81,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: test
@@ -89,7 +93,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_npm: false
@@ -107,7 +112,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: install cue

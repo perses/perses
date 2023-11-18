@@ -49,6 +49,15 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
     closeEditJsonDialog();
   };
 
+  const completeDraftDashboard = (dashboard: string | undefined) => {
+    try {
+      const json = JSON.parse(dashboard ?? '{}');
+      setDraftDashboard(json);
+    } catch (e) {
+      // do nothing
+    }
+  };
+
   return (
     <Dialog.Form onSubmit={handleApply}>
       <Dialog.Content sx={{ width: '100%' }}>
@@ -62,7 +71,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
             minHeight="300px"
             maxHeight="70vh"
             value={draftDashboard}
-            onChange={(value) => setDraftDashboard(value)}
+            onChange={(value: string) => completeDraftDashboard(value)}
           />
         </FormControl>
       </Dialog.Content>

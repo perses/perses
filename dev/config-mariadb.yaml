@@ -1,6 +1,8 @@
-readonly: false
-activate_permission: false
-encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+security:
+  readonly: false
+  activate_permission: true
+  encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+
 database:
   sql:
     user: "user"
@@ -9,6 +11,10 @@ database:
     net: "tcp"
     addr: "localhost:3306"
     allow_native_passwords: true
+
+provisioning:
+  folders:
+    - "dev/data"
 
 schemas:
   panels_path: "schemas/panels"

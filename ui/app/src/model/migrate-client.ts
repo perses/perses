@@ -20,7 +20,7 @@ const resource = 'migrate';
 
 export interface MigrateBodyRequest {
   input?: Record<string, string>;
-  grafanaDashboard: string;
+  grafanaDashboard: Record<string, unknown>;
 }
 
 export function useMigrate() {
@@ -31,9 +31,9 @@ export function useMigrate() {
       return fetchJson<DashboardResource>(url, {
         method: HTTPMethodPOST,
         headers: HTTPHeader,
-        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${
+        body: `{"input":${body.input ? JSON.stringify(body.input) : '{}'}, "grafanaDashboard": ${JSON.stringify(
           body.grafanaDashboard
-        }}`,
+        )}}`,
       });
     },
   });

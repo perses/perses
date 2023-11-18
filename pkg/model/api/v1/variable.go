@@ -16,10 +16,11 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
+
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"gopkg.in/yaml.v2"
-	"regexp"
+	"gopkg.in/yaml.v3"
 )
 
 type VariableInterface interface {

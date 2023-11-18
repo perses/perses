@@ -14,17 +14,21 @@
 package databasesql
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/huandu/go-sqlbuilder"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
@@ -54,7 +58,6 @@ func (d *DAO) generateInsertQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
@@ -75,7 +78,6 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	if idErr != nil {
 		return "", nil, idErr
 	}
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	rowJSONDoc, unmarshalErr := json.Marshal(entity)
 	if unmarshalErr != nil {
 		return "", nil, unmarshalErr
@@ -112,12 +114,20 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+	case *globalrole.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
+	case *globalrolebinding.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
 	case *globalsecret.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
 	case *globalvariable.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+	case *role.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
+	case *rolebinding.Query:
+		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
 	case *secret.Query:
 		sqlQuery, args = generatSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
 	case *user.Query:
@@ -154,12 +164,20 @@ func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+	case *globalrole.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
+	case *globalrolebinding.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
 	case *globalsecret.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
 	case *globalvariable.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+	case *role.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
+	case *rolebinding.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
 	case *secret.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
 	case *user.Query:

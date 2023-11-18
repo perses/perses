@@ -60,6 +60,14 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 		return &globalDatasource{
 			apiClient: apiClient.V1().GlobalDatasource(),
 		}, nil
+	case modelV1.KindGlobalRole:
+		return &globalRole{
+			apiClient: apiClient.V1().GlobalRole(),
+		}, nil
+	case modelV1.KindGlobalRoleBinding:
+		return &globalRoleBinding{
+			apiClient: apiClient.V1().GlobalRoleBinding(),
+		}, nil
 	case modelV1.KindGlobalSecret:
 		return &globalSecret{
 			apiClient: apiClient.V1().GlobalSecret(),
@@ -71,6 +79,14 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 	case modelV1.KindProject:
 		return &project{
 			apiClient: apiClient.V1().Project(),
+		}, nil
+	case modelV1.KindRole:
+		return &role{
+			apiClient: apiClient.V1().Role(projectName),
+		}, nil
+	case modelV1.KindRoleBinding:
+		return &roleBinding{
+			apiClient: apiClient.V1().RoleBinding(projectName),
 		}, nil
 	case modelV1.KindSecret:
 		return &secret{
