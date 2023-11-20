@@ -34,8 +34,8 @@ available, but you need to map to the container port 8080.
 
 ### Note: What do do with failures?
 
-At anytime in these instructions should you encounter failures, during installation, testing, data population, or build 
-results. Don't worry, this can be rerun anytime after you fix any problems reported. You might have to remove the perses 
+Don't worry if at anytime in these instructions you encounter failures during installation, testing, data population, or build 
+results. The container can be rerun anytime after you fix any problems reported. You might have to remove the perses 
 container depending on how far you get before something goes wrong. Just stop, remove, and restart it:
 
 ```shell
