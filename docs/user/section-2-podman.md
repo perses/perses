@@ -47,7 +47,7 @@ $ podman run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses:v{VERSION-
 ```
 ## Connect a browser (default)
 
-Open the Perses console at [http://localhost:8080](http://localhost:8080)
+Open the Perses console at http://localhost:8080.
 
 You are presented with an empty home dashboard, in light mode. For fun you can choose optionally to flip the switch in
 the top right corner to enable dark mode.
@@ -297,7 +297,7 @@ manage the container when done with your exploration:
 
 ## Connect a browser
 
-Open the Perses console at [http://localhost:8080](http://localhost:8080)
+Open the Perses console at http://localhost:8080.
 
 This time you are presented with a home dashboard with a pre-installed WorkshopProject, in light mode. For fun you can 
 choose optionally to flip the switch in the top right corner to enable dark mode.
