@@ -32,7 +32,7 @@ from the command line (-d), map the local machine port 8080 to the container por
 the image version supported in these instructions (persesdev/perses:v{VERSION-NUMBER}). Note: you can use any local port you have 
 available, but you need to map to the container port 8080.
 
-### Note: What do do with failures?
+### Note: What to do with failures?
 
 Don't worry if at anytime in these instructions you encounter failures during installation, testing, data population, or build 
 results. The container can be rerun anytime after you fix any problems reported. You might have to remove the perses 
