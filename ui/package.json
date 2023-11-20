@@ -25,7 +25,18 @@
     "typedoc": "typedoc"
   },
   "workspaces": [
-    "*"
+    "app",
+    "components",
+    "core",
+    "dashboards",
+    "explore",
+    "e2e",
+    "internal-utils",
+    "panels-plugin",
+    "plugin-system",
+    "prometheus-plugin",
+    "storybook",
+    "tempo-plugin"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.62",
