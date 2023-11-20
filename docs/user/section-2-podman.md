@@ -55,7 +55,7 @@ the top right corner to enable dark mode.
 ## But this version is empty?
 
 The first thing you might notice is that you now have a blank canvas. There are no example projects, no dashboards, and 
-noting configured to get started with. Maybe you are OK with that, but wouldn't it be nice to start this exploration 
+nothing configured to get started with. Maybe you are OK with that, but wouldn't it be nice to start this exploration 
 with an example to explore?
 
 To achieve that you can make use of the [Perses Easy Install project](https://gitlab.com/o11y-workshops/perses-install-demo). 
