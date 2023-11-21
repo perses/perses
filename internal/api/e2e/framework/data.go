@@ -30,6 +30,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
@@ -336,10 +337,10 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 
 func newRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
-		Permissions: []v1.Permission{
+		Permissions: []role.Permission{
 			{
-				Actions: []v1.ActionKind{v1.KindCreate},
-				Scopes:  []v1.Kind{v1.KindVariable, v1.KindDatasource},
+				Actions: []role.Action{role.CreateAction},
+				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope},
 			},
 		},
 	}

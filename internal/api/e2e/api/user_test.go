@@ -23,8 +23,8 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +46,7 @@ func decodePublicUser(t *testing.T, object interface{}) *modelV1.PublicUser {
 }
 
 func TestMainScenarioUser(t *testing.T) {
-	path := shared.PathUser
+	path := utils.PathUser
 	creator := func(name string) modelAPI.Entity {
 		return e2eframework.NewUser(name)
 	}
@@ -58,7 +58,7 @@ func TestMainScenarioUser(t *testing.T) {
 			e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
 
 			// call now the update endpoint, shouldn't return an error
-			o := expect.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			o := expect.PUT(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK).

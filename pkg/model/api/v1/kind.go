@@ -16,6 +16,7 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
@@ -38,23 +39,6 @@ const (
 	KindUser              Kind = "User"
 	KindVariable          Kind = "Variable"
 )
-
-var KindMap = map[Kind]bool{
-	KindDashboard:         true,
-	KindDatasource:        true,
-	KindFolder:            true,
-	KindGlobalDatasource:  true,
-	KindGlobalRole:        true,
-	KindGlobalRoleBinding: true,
-	KindGlobalSecret:      true,
-	KindGlobalVariable:    true,
-	KindProject:           true,
-	KindRole:              true,
-	KindRoleBinding:       true,
-	KindSecret:            true,
-	KindUser:              true,
-	KindVariable:          true,
-}
 
 var PluralKindMap = map[Kind]string{
 	KindDashboard:         "dashboards",
@@ -103,9 +87,11 @@ func (k *Kind) validate() error {
 	if len(*k) == 0 {
 		return fmt.Errorf("kind cannot be empty")
 	}
-	if _, ok := KindMap[*k]; !ok {
-		return fmt.Errorf("unknown kind %q used", *k)
+	kind, err := GetKind(string(*k))
+	if err != nil {
+		return err
 	}
+	*k = *kind
 	return nil
 }
 
@@ -151,5 +137,55 @@ func IsGlobal(kind Kind) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+// GetKind parse string to Kind (not case-sensitive)
+func GetKind(kind string) (*Kind, error) {
+	switch strings.ToLower(kind) {
+	case strings.ToLower(string(KindDashboard)):
+		result := KindDashboard
+		return &result, nil
+	case strings.ToLower(string(KindDatasource)):
+		result := KindDatasource
+		return &result, nil
+	case strings.ToLower(string(KindFolder)):
+		result := KindFolder
+		return &result, nil
+	case strings.ToLower(string(KindGlobalDatasource)):
+		result := KindGlobalDatasource
+		return &result, nil
+	case strings.ToLower(string(KindGlobalRole)):
+		result := KindGlobalRole
+		return &result, nil
+	case strings.ToLower(string(KindGlobalRoleBinding)):
+		result := KindGlobalRoleBinding
+		return &result, nil
+	case strings.ToLower(string(KindGlobalSecret)):
+		result := KindGlobalSecret
+		return &result, nil
+	case strings.ToLower(string(KindGlobalVariable)):
+		result := KindGlobalVariable
+		return &result, nil
+	case strings.ToLower(string(KindProject)):
+		result := KindProject
+		return &result, nil
+	case strings.ToLower(string(KindRole)):
+		result := KindRole
+		return &result, nil
+	case strings.ToLower(string(KindRoleBinding)):
+		result := KindRoleBinding
+		return &result, nil
+	case strings.ToLower(string(KindSecret)):
+		result := KindSecret
+		return &result, nil
+	case strings.ToLower(string(KindUser)):
+		result := KindUser
+		return &result, nil
+	case strings.ToLower(string(KindVariable)):
+		result := KindVariable
+		return &result, nil
+	default:
+		return nil, fmt.Errorf("unknown kind %q used", kind)
 	}
 }

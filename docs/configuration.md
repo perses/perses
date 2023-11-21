@@ -60,6 +60,7 @@ Generic placeholders are defined as follows:
 * `<int>`: an integer value
 * `<secret>`: a regular string that is a secret, such as a password
 * `<string>`: a regular string
+* `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
   # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
@@ -90,9 +91,8 @@ Generic placeholders are defined as follows:
   # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
 
-  # It is activating or deactivating the permission verification on each endpoint.
-  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ activate_permission: <boolean> | default = true ]
+  # It contains any configuration that changes authorization behavior like default permissions
+  [ authorization: <authorization_config> ]
 
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
   # Note that if it is not provided, it will be generated. 
@@ -103,6 +103,32 @@ Generic placeholders are defined as follows:
 
   # The path to the file containing the secret key.
   [ encryption_key_file: <filename> ]
+```
+
+#### `<authorization_config>`
+
+```yaml
+  # It is activating or deactivating the permission verification on each endpoint.
+  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ enable_authorization: <boolean> | default = true ]
+
+  # The refresh interval of the cache if enabled
+  [ interval: <duration> | default = 10m ]
+
+  # Default permissions for guest users (logged-in users)
+  guest_permissions:
+    - [ <permissions> ]
+```
+
+##### `<permissions>`
+
+```yaml
+  # Actions authorized by the permission
+  actions:
+    - <enum= "read" | "create" | "update" | "delete" | "*">
+  # Resource kinds that are concerned by the permission
+  scopes:
+    - <enum= kind | "*">
 ```
 
 ### `<database_config>`

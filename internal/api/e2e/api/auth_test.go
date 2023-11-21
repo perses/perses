@@ -22,15 +22,15 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
 func TestAuth(t *testing.T) {
 	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usrEntity := e2eframework.NewUser("foo")
-		expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, shared.PathUser)).
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
 			Status(http.StatusOK)

@@ -43,8 +43,6 @@ func randomString(stringSize uint) string {
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
-	// ActivatePermission is activating or deactivating the permission verification on each endpoint.
-	ActivatePermission *bool `json:"activate_permission,omitempty" yaml:"activate_permission,omitempty"`
 	// EncryptionKey is the secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource
 	// Note that if it is not provided, it will be generated. When Perses is used in a multi instance mode, you should provide the key.
 	// Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
@@ -52,6 +50,8 @@ type Security struct {
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	// Authorization contains all config around rbac (permissions and roles)
+	Authorization AuthorizationConfig `json:"authorization" yaml:"authorization"`
 }
 
 func (s *Security) Verify() error {
@@ -74,9 +74,5 @@ func (s *Security) Verify() error {
 		return fmt.Errorf("encryption_key must be longer than 32 bytes")
 	}
 	s.EncryptionKey = promConfig.Secret(hex.EncodeToString([]byte(s.EncryptionKey)))
-	if s.ActivatePermission == nil {
-		var activatePermission = true
-		s.ActivatePermission = &activatePermission
-	}
 	return nil
 }

@@ -14,31 +14,27 @@
 package shared
 
 import (
+	"fmt"
 	"net/http"
+
+	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/authorization/rbac"
+	"github.com/perses/perses/internal/api/shared/crypto"
+	"github.com/perses/perses/internal/api/shared/utils"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 
 	"github.com/labstack/echo/v4"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
-type Parameters struct {
-	Project string
-	Name    string
-}
-
-func ExtractParameters(ctx echo.Context) Parameters {
-	return Parameters{
-		Project: GetProjectParameter(ctx),
-		Name:    GetNameParameter(ctx),
+func extractParameters(ctx echo.Context) apiInterface.Parameters {
+	return apiInterface.Parameters{
+		Project: utils.GetProjectParameter(ctx),
+		Name:    utils.GetNameParameter(ctx),
 	}
-}
-
-type ToolboxService interface {
-	Create(entity api.Entity) (interface{}, error)
-	Update(entity api.Entity, parameters Parameters) (interface{}, error)
-	Delete(parameters Parameters) error
-	Get(parameters Parameters) (interface{}, error)
-	List(q databaseModel.Query, parameters Parameters) (interface{}, error)
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -51,22 +47,71 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service ToolboxService) Toolbox {
+func NewToolBox(service apiInterface.Service, rbac authorization.RBAC, kind v1.Kind) Toolbox {
 	return &toolbox{
 		service: service,
+		rbac:    rbac,
+		kind:    kind,
 	}
 }
 
 type toolbox struct {
 	Toolbox
-	service ToolboxService
+	service apiInterface.Service
+	rbac    authorization.RBAC
+	kind    v1.Kind
+}
+
+func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
+	projectName := parameters.Project
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
+		return nil
+	}
+	scope, err := role.GetScope(string(t.kind))
+	if err != nil {
+		return err
+	}
+	if role.IsGlobalScope(*scope) {
+		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+			return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+		}
+		return nil
+	}
+
+	// Project is not a global scope, in order to be attached to a Role (or GlobalRole) and have user able to delete their own projects
+	if *scope == role.ProjectScope {
+		// Create is still a "Global" only permission
+		if action == role.CreateAction {
+			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
+				return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+			}
+			return nil
+		}
+		projectName = parameters.Name
+	}
+
+	if len(projectName) == 0 && entity != nil {
+		// Retrieving project name from payload if project name not provided in the url
+		projectName = utils.GetMetadataProject(entity.GetMetadata())
+	}
+	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
+		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
+
+	}
+	return nil
 }
 
 func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	newEntity, err := t.service.Create(entity)
+	parameters := extractParameters(ctx)
+	if err := t.CheckPermission(ctx, entity, parameters, role.CreateAction); err != nil {
+		return err
+	}
+	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx), entity)
 	if err != nil {
 		return err
 	}
@@ -77,8 +122,11 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := ExtractParameters(ctx)
-	newEntity, err := t.service.Update(entity, parameters)
+	parameters := extractParameters(ctx)
+	if err := t.CheckPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
+		return err
+	}
+	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx), entity, parameters)
 	if err != nil {
 		return err
 	}
@@ -86,16 +134,22 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
-	if err := t.service.Delete(parameters); err != nil {
+	parameters := extractParameters(ctx)
+	if err := t.CheckPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
+		return err
+	}
+	if err := t.service.Delete(apiInterface.NewPersesContext(ctx), parameters); err != nil {
 		return err
 	}
 	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
-	entity, err := t.service.Get(parameters)
+	parameters := extractParameters(ctx)
+	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
+		return err
+	}
+	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx), parameters)
 	if err != nil {
 		return err
 	}
@@ -106,8 +160,11 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	parameters := ExtractParameters(ctx)
-	result, err := t.service.List(q, parameters)
+	parameters := extractParameters(ctx)
+	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
+		return err
+	}
+	result, err := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)
 	if err != nil {
 		return err
 	}
@@ -118,7 +175,7 @@ func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	if err := validateMetadata(ctx, entity.GetMetadata()); err != nil {
+	if err := utils.ValidateMetadata(ctx, entity.GetMetadata()); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
 	return nil

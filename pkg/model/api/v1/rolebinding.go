@@ -68,9 +68,18 @@ func (s *Subject) validate() error {
 
 type RoleBindingSpec struct {
 	// Name of the Role or GlobalRole concerned by the role binding (metadata.name)
-	Role string `json:"name" yaml:"name"`
+	Role string `json:"role" yaml:"role"`
 	// Subjects that will inherit permissions from the role
 	Subjects []Subject `json:"subjects" yaml:"subjects"`
+}
+
+func (r *RoleBindingSpec) Has(kind Kind, name string) bool {
+	for _, sub := range r.Subjects {
+		if sub.Kind == kind && sub.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *RoleBindingSpec) UnmarshalJSON(data []byte) error {

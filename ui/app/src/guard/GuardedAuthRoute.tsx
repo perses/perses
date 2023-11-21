@@ -37,7 +37,7 @@ function GuardedAuthRoute() {
           throw err;
         })
         .then((conf) => {
-          if (!conf.security.activate_permission) {
+          if (!conf.security.authorization.enable_authorization) {
             return true;
           }
           // In case the token is null, it means we weren't able to find the cookie.
