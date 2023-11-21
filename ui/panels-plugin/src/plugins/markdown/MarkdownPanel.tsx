@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
-import { PanelProps, useReplaceVariablesInString, useDataQueries } from '@perses-dev/plugin-system';
+import { PanelProps, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import { MarkdownPanelOptions } from './markdown-panel-model';
 
@@ -86,32 +86,10 @@ export function MarkdownPanel(props: MarkdownPanelProps) {
   const html = useMemo(() => markdownToHTML(textAfterVariableReplacement ?? ''), [textAfterVariableReplacement]);
   const sanitizedHTML = useMemo(() => sanitizeHTML(html), [html]);
 
-  // To be Removed: Only for testing TraceQueries
-  const { queryResults: traceResults } = useDataQueries('TraceQuery');
-  const traceStr = JSON.stringify(traceResults, null, 3);
-  const showTraceResults = traceResults !== undefined;
-
   return (
-    <div>
-      <Box
-        sx={(theme) => createMarkdownPanelStyles(theme, chartsTheme)}
-        dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
-      />
-      {/* TO BE REMOVED: ONLY FOR TESTING TRACE QUERIES */}
-      {showTraceResults && (
-        <Box
-          sx={{
-            mb: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            height: 700,
-            overflow: 'hidden',
-            overflowY: 'scroll',
-          }}
-        >
-          <pre>{traceStr}</pre>
-        </Box>
-      )}
-    </div>
+    <Box
+      sx={(theme) => createMarkdownPanelStyles(theme, chartsTheme)}
+      dangerouslySetInnerHTML={{ __html: sanitizedHTML }}
+    />
   );
 }
