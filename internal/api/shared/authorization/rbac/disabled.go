@@ -14,8 +14,6 @@
 package rbac
 
 import (
-	"context"
-
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
@@ -31,12 +29,4 @@ func (r *DisabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Ro
 
 func (r *DisabledImpl) Refresh() error {
 	return nil
-}
-
-func (r *DisabledImpl) Execute(_ context.Context, _ context.CancelFunc) error {
-	return nil
-}
-
-func (r *DisabledImpl) String() string {
-	return "disabled RBAC"
 }

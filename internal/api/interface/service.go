@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	EmptyCtx = context{
+	EmptyCtx = &context{
 		username: "",
 	}
 )

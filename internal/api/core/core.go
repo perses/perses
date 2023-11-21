@@ -71,7 +71,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
 	if *conf.Security.Authorization.EnableAuthorization {
-		runner.WithCronTasks(conf.Security.Authorization.Interval, serviceManager.GetRBAC())
+		runner.WithCronTasks(conf.Security.Authorization.Interval, serviceManager.GetRBACTask())
 	}
 
 	// register the API

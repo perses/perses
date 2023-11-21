@@ -27,16 +27,16 @@ const (
 	GlobalProject = "*"
 )
 
-// UsersPermissions contains the mapping of all users and their permissions
+// usersPermissions contains the mapping of all users and their permissions
 // username -> project name or global ("") -> permission list
-type UsersPermissions = map[string]map[string][]*v1Role.Permission
+type usersPermissions = map[string]map[string][]*v1Role.Permission
 
-func PermissionListHasPermission(permissions []*v1Role.Permission, reqAction v1Role.Action, reqScope v1Role.Scope) bool {
+func permissionListHasPermission(permissions []*v1Role.Permission, requestAction v1Role.Action, requestScope v1Role.Scope) bool {
 	for _, permission := range permissions {
 		for _, action := range permission.Actions {
-			if action == reqAction || action == v1Role.WildcardAction {
+			if action == requestAction || action == v1Role.WildcardAction {
 				for _, scope := range permission.Scopes {
-					if scope == reqScope || scope == v1Role.WildcardScope {
+					if scope == requestScope || scope == v1Role.WildcardScope {
 						return true
 					}
 				}
@@ -46,8 +46,8 @@ func PermissionListHasPermission(permissions []*v1Role.Permission, reqAction v1R
 	return false
 }
 
-// FindRole is a helper to find a role in a slice
-func FindRole(roles []*v1.Role, project string, name string) *v1.Role {
+// findRole is a helper to find a role in a slice
+func findRole(roles []*v1.Role, project string, name string) *v1.Role {
 	for _, rle := range roles {
 		if rle.Metadata.Name == name && rle.Metadata.Project == project {
 			return rle
@@ -56,8 +56,8 @@ func FindRole(roles []*v1.Role, project string, name string) *v1.Role {
 	return nil
 }
 
-// FindGlobalRole is a helper to find a role in a slice
-func FindGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
+// findGlobalRole is a helper to find a role in a slice
+func findGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
 	for _, grle := range globalRoles {
 		if grle.Metadata.Name == name {
 			return grle
@@ -66,9 +66,9 @@ func FindGlobalRole(globalRoles []*v1.GlobalRole, name string) *v1.GlobalRole {
 	return nil
 }
 
-// AddEntry is appending a project or global permission to user list of permissions
+// addEntry is appending a project or global permission to user list of permissions
 // Empty project equal to Global permission
-func AddEntry(usersPermissions UsersPermissions, user string, project string, permission *v1Role.Permission) {
+func addEntry(usersPermissions usersPermissions, user string, project string, permission *v1Role.Permission) {
 	if _, ok := usersPermissions[user]; !ok {
 		usersPermissions[user] = make(map[string][]*v1Role.Permission)
 	}
@@ -79,8 +79,8 @@ func AddEntry(usersPermissions UsersPermissions, user string, project string, pe
 	usersPermissions[user][project] = append(usersPermissions[user][project], permission)
 }
 
-// BuildUsersPermissions is building an array mapping of user and their global and project permissions
-func BuildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (UsersPermissions, error) {
+// buildUsersPermissions is building an array mapping of user and their global and project permissions
+func buildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (usersPermissions, error) {
 	users, err := userDAO.List(&user.Query{})
 	if err != nil {
 		return nil, err
@@ -103,13 +103,13 @@ func BuildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO ro
 	}
 
 	// Build cache
-	usersPermissions := make(UsersPermissions)
+	usersPermissions := make(usersPermissions)
 	for _, usr := range users {
 		for _, globalRoleBinding := range globalRoleBindings {
 			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				globalRolePermissions := FindGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
+				globalRolePermissions := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
 				for i := range globalRolePermissions {
-					AddEntry(usersPermissions, usr.Metadata.Name, GlobalProject, &globalRolePermissions[i])
+					addEntry(usersPermissions, usr.Metadata.Name, GlobalProject, &globalRolePermissions[i])
 				}
 			}
 		}
@@ -118,9 +118,9 @@ func BuildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO ro
 	for _, usr := range users {
 		for _, roleBinding := range roleBindings {
 			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
-				rolePermissions := FindRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
+				rolePermissions := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
 				for i := range rolePermissions {
-					AddEntry(usersPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
+					addEntry(usersPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
 				}
 			}
 		}

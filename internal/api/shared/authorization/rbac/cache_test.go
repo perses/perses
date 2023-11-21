@@ -11,54 +11,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rbac_test
+package rbac
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 )
 
-func generateMockCache(userCount int, projectCountByUser int) rbac.Cache {
-	usersPermissions := make(rbac.UsersPermissions)
+func generateMockCache(userCount int, projectCountByUser int) Cache {
+	usersPermissions := make(usersPermissions)
 	for u := 1; u <= userCount; u++ {
 		for p := 1; p <= projectCountByUser; p++ {
-			rbac.AddEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
+			addEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
 				Actions: []role.Action{role.WildcardAction},
 				Scopes:  []role.Scope{role.WildcardScope},
 			})
 		}
 	}
-	return rbac.Cache{UsersPermissions: usersPermissions}
+	return Cache{UsersPermissions: usersPermissions}
 }
 
-func smallMockCache() rbac.Cache {
-	usersPermissions := make(rbac.UsersPermissions)
-	rbac.AddEntry(usersPermissions, "user0", "project0", &role.Permission{
+func smallMockCache() Cache {
+	usersPermissions := make(usersPermissions)
+	addEntry(usersPermissions, "user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	rbac.AddEntry(usersPermissions, "user0", "project0", &role.Permission{
+	addEntry(usersPermissions, "user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.VariableScope},
 	})
-	rbac.AddEntry(usersPermissions, "user1", "project0", &role.Permission{
+	addEntry(usersPermissions, "user1", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
-	rbac.AddEntry(usersPermissions, "user2", "project1", &role.Permission{
+	addEntry(usersPermissions, "user2", "project1", &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	rbac.AddEntry(usersPermissions, "admin", rbac.GlobalProject, &role.Permission{
+	addEntry(usersPermissions, "admin", GlobalProject, &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
 
-	return rbac.Cache{UsersPermissions: usersPermissions}
+	return Cache{UsersPermissions: usersPermissions}
 }
 
 func TestCacheHasPermission(t *testing.T) {
@@ -66,7 +65,7 @@ func TestCacheHasPermission(t *testing.T) {
 
 	testSuites := []struct {
 		title          string
-		cache          rbac.Cache
+		cache          Cache
 		user           string
 		reqAction      role.Action
 		reqProject     string
@@ -75,7 +74,7 @@ func TestCacheHasPermission(t *testing.T) {
 	}{
 		{
 			title:          "empty cache",
-			cache:          rbac.Cache{},
+			cache:          Cache{},
 			user:           "user0",
 			reqAction:      role.CreateAction,
 			reqProject:     "project0",
@@ -142,7 +141,7 @@ func TestCacheHasPermission(t *testing.T) {
 			cache:          smallCache,
 			user:           "user1",
 			reqAction:      role.CreateAction,
-			reqProject:     rbac.GlobalProject,
+			reqProject:     GlobalProject,
 			reqScope:       role.GlobalDatasourceScope,
 			expectedResult: false,
 		},
@@ -198,7 +197,7 @@ func TestCacheHasPermission(t *testing.T) {
 			cache:          smallCache,
 			user:           "admin",
 			reqAction:      role.UpdateAction,
-			reqProject:     rbac.GlobalProject,
+			reqProject:     GlobalProject,
 			reqScope:       role.GlobalRoleScope,
 			expectedResult: true,
 		},
@@ -211,6 +210,45 @@ func TestCacheHasPermission(t *testing.T) {
 	}
 }
 
+// With Mac Book Pro M2
+// go test -bench=. -benchtime=1000000x -benchmem
+// BenchmarkCacheHasPermission                                                              Benchtime          Time per op    Mem usage per op    Allocs per op
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1)
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1)-10         	 1000000	       13.41 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1)-10      	 1000000	       114.7 ns/op	      16 B/op	       2 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:1)
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:1)-10        	 1000000	       8.962 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:1)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:1)-10     	 1000000	       113.2 ns/op	      16 B/op	       2 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:2)
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:2)-10        	 1000000	       9.179 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:2)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:2)-10     	 1000000	       118.9 ns/op	      16 B/op	       2 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:3)
+// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:3)-10        	 1000000	       8.887 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:3)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:3)-10     	 1000000	       120.9 ns/op	      16 B/op	       2 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:1000,projectCountByUser:5)
+// BenchmarkCacheHasPermission/HasPermission(userCount:1000,projectCountByUser:5)-10       	 1000000	       9.007 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:1000,projectCountByUser:5)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:1000,projectCountByUser:5)-10    	 1000000	       139.5 ns/op	      24 B/op	       3 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:10000,projectCountByUser:20)
+// BenchmarkCacheHasPermission/HasPermission(userCount:10000,projectCountByUser:20)-10     	 1000000	       9.391 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10000,projectCountByUser:20)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10000,projectCountByUser:20)-10  	 1000000	       151.1 ns/op	      40 B/op	       3 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:100)
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:100)-10       	 1000000	       12.05 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:100)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:100)-10    	 1000000	       121.8 ns/op	      16 B/op	       2 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1000)
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1000)-10      	 1000000	       9.439 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1000)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1000)-10   	 1000000	       138.5 ns/op	      32 B/op	       3 allocs/op
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:10000)
+// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:10000)-10     	 1000000	       12.18 ns/op	       0 B/op	       0 allocs/op
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:10000)
+// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:10000)-10  	 1000000	       137.4 ns/op	      32 B/op	       3 allocs/op
 func BenchmarkCacheHasPermission(b *testing.B) {
 	benchSuites := []struct {
 		userCount          int

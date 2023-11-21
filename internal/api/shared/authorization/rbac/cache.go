@@ -14,8 +14,6 @@
 package rbac
 
 import (
-	"context"
-
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -40,17 +38,17 @@ func (r *CacheImpl) IsEnabled() bool {
 	return true
 }
 
-func (r *CacheImpl) HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool {
+func (r *CacheImpl) HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// Checking default permissions
-	if ok := PermissionListHasPermission(r.GuestPermissions, reqAction, reqScope); ok {
+	if ok := permissionListHasPermission(r.GuestPermissions, requestAction, requestScope); ok {
 		return true
 	}
 	// Checking cached permissions
-	return r.Cache.HasPermission(user, reqAction, reqProject, reqScope)
+	return r.Cache.HasPermission(user, requestAction, requestProject, requestScope)
 }
 
 func (r *CacheImpl) Refresh() error {
-	usersPermissions, err := BuildUsersPermissions(r.UserDAO, r.RoleDAO, r.RoleBindingDAO, r.GlobalRoleDAO, r.GlobalRoleBindingDAO)
+	usersPermissions, err := buildUsersPermissions(r.UserDAO, r.RoleDAO, r.RoleBindingDAO, r.GlobalRoleDAO, r.GlobalRoleBindingDAO)
 	if err != nil {
 		return err
 	}
@@ -58,16 +56,8 @@ func (r *CacheImpl) Refresh() error {
 	return nil
 }
 
-func (r *CacheImpl) Execute(_ context.Context, _ context.CancelFunc) error {
-	return r.Refresh()
-}
-
-func (r *CacheImpl) String() string {
-	return "cache RBAC"
-}
-
 func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (*Cache, error) {
-	usersPermissions, err := BuildUsersPermissions(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
+	usersPermissions, err := buildUsersPermissions(userDAO, roleDAO, roleBindingDAO, globalRoleDAO, globalRoleBindingDAO)
 	if err != nil {
 		return nil, err
 	}
@@ -78,28 +68,28 @@ func NewCache(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO
 }
 
 type Cache struct {
-	UsersPermissions UsersPermissions
+	UsersPermissions usersPermissions
 }
 
-func (r Cache) HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool {
+func (r Cache) HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	usersPermissions, ok := r.UsersPermissions[user]
 	if !ok {
 		return false
 	}
 
 	// Checking global perm first
-	if reqProject != GlobalProject {
+	if requestProject != GlobalProject {
 		globalPermissions, ok := usersPermissions[GlobalProject]
 		if ok {
-			if ok := PermissionListHasPermission(globalPermissions, reqAction, reqScope); ok {
+			if ok := permissionListHasPermission(globalPermissions, requestAction, requestScope); ok {
 				return true
 			}
 		}
 	}
 
-	projectPermissions, ok := usersPermissions[reqProject]
+	projectPermissions, ok := usersPermissions[requestProject]
 	if !ok {
 		return false
 	}
-	return PermissionListHasPermission(projectPermissions, reqAction, reqScope)
+	return permissionListHasPermission(projectPermissions, requestAction, requestScope)
 }

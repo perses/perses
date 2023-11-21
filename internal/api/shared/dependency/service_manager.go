@@ -71,6 +71,7 @@ type ServiceManager interface {
 	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
 	GetRBAC() authorization.RBAC
+	GetRBACTask() async.SimpleTask
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
@@ -96,6 +97,7 @@ type service struct {
 	provisioning      async.SimpleTask
 	schemas           schemas.Schemas
 	rbac              authorization.RBAC
+	rbacTask          async.SimpleTask
 	role              role.Service
 	roleBinding       rolebinding.Service
 	secret            secret.Service
@@ -151,6 +153,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		migrate:           migrateService,
 		project:           projectService,
 		rbac:              rbacService,
+		rbacTask:          authorization.NewCronTask(rbacService),
 		role:              roleService,
 		roleBinding:       roleBindingService,
 		schemas:           schemasService,
@@ -228,6 +231,10 @@ func (s *service) GetSchemas() schemas.Schemas {
 
 func (s *service) GetRBAC() authorization.RBAC {
 	return s.rbac
+}
+
+func (s *service) GetRBACTask() async.SimpleTask {
+	return s.rbacTask
 }
 
 func (s *service) GetRole() role.Service {

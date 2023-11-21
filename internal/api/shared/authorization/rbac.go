@@ -14,6 +14,8 @@
 package authorization
 
 import (
+	"context"
+
 	"github.com/perses/common/async"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -27,9 +29,8 @@ import (
 )
 
 type RBAC interface {
-	async.SimpleTask
 	IsEnabled() bool
-	HasPermission(user string, reqAction v1Role.Action, reqProject string, reqScope v1Role.Scope) bool
+	HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
 	Refresh() error
 }
 
@@ -54,4 +55,21 @@ func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO,
 		JwtService:           jwtService,
 		GuestPermissions:     conf.Security.Authorization.GuestPermissions,
 	}, nil
+}
+
+func NewCronTask(rbacService RBAC) async.SimpleTask {
+	return &rbacTask{svc: rbacService}
+}
+
+type rbacTask struct {
+	async.SimpleTask
+	svc RBAC
+}
+
+func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
+	return r.svc.Refresh()
+}
+
+func (r *rbacTask) String() string {
+	return "rbac refresh cache"
 }
