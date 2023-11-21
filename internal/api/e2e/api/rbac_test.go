@@ -16,10 +16,8 @@
 package api
 
 import (
-	"encoding/hex"
 	"fmt"
 	"net/http"
-	"path/filepath"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -28,39 +26,25 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/utils"
-	"github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	promConfig "github.com/prometheus/common/config"
 	"github.com/stretchr/testify/assert"
 )
 
 func serverAuthConfig() config.Config {
 	var authorizationEnabled = true
-	projectPath := test.GetRepositoryPath()
-	return config.Config{
-		Security: config.Security{
-			Readonly: false,
-			Authorization: config.AuthorizationConfig{EnableAuthorization: &authorizationEnabled, GuestPermissions: []*role.Permission{
-				{
-					Actions: []role.Action{role.ReadAction},
-					Scopes:  []role.Scope{role.WildcardScope},
-				},
-				{
-					Actions: []role.Action{role.CreateAction},
-					Scopes:  []role.Scope{role.ProjectScope},
-				},
-			}},
-			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+	conf := e2eframework.DefaultConfig()
+	conf.Security.Authorization = config.AuthorizationConfig{EnableAuthorization: &authorizationEnabled, GuestPermissions: []*role.Permission{
+		{
+			Actions: []role.Action{role.ReadAction},
+			Scopes:  []role.Scope{role.WildcardScope},
 		},
-		Schemas: config.Schemas{
-			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
-			Interval:        0,
+		{
+			Actions: []role.Action{role.CreateAction},
+			Scopes:  []role.Scope{role.ProjectScope},
 		},
-	}
+	}}
+	return conf
 }
 
 func TestNewProjectEndpoints(t *testing.T) {
