@@ -10,7 +10,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/go-kit/log v0.2.1
 	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/goreleaser/goreleaser v1.22.1
 	github.com/huandu/go-sqlbuilder v1.24.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
