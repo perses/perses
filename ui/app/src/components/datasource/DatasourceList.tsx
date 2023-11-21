@@ -204,7 +204,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
             isOpen={isDatasourceDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => handleDatasourceUpdate(v).then(() => setDatasourceDrawerOpened(false))}
+            onSave={handleDatasourceUpdate}
             onDelete={onDelete}
             onClose={() => setDatasourceDrawerOpened(false)}
           />
