@@ -32,9 +32,8 @@ import (
 )
 
 func serverAuthConfig() config.Config {
-	var authorizationEnabled = true
 	conf := e2eframework.DefaultConfig()
-	conf.Security.Authorization = config.AuthorizationConfig{EnableAuthorization: &authorizationEnabled, GuestPermissions: []*role.Permission{
+	conf.Security.Authorization = config.AuthorizationConfig{EnableAuthorization: true, GuestPermissions: []*role.Permission{
 		{
 			Actions: []role.Action{role.ReadAction},
 			Scopes:  []role.Scope{role.WildcardScope},

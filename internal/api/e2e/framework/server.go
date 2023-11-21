@@ -38,11 +38,10 @@ var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
 
 func DefaultConfig() config.Config {
 	projectPath := test.GetRepositoryPath()
-	var activatePermission = false
 	return config.Config{
 		Security: config.Security{
 			Readonly:      false,
-			Authorization: config.AuthorizationConfig{EnableAuthorization: &activatePermission},
+			Authorization: config.AuthorizationConfig{EnableAuthorization: false},
 			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: config.Schemas{

@@ -81,7 +81,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
-			return !*cfg.Security.Authorization.EnableAuthorization
+			return !cfg.Security.Authorization.EnableAuthorization
 		}),
 	}
 }

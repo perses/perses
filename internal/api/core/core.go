@@ -71,7 +71,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if len(conf.Provisioning.Folders) > 0 {
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
-	if *conf.Security.Authorization.EnableAuthorization {
+	if conf.Security.Authorization.EnableAuthorization {
 		rbacTask := authorization.NewCronTask(serviceManager.GetRBAC())
 		runner.WithCronTasks(conf.Security.Authorization.Interval, rbacTask)
 	}
