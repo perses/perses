@@ -21,6 +21,7 @@ import (
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core/middleware"
+	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/schemas"
@@ -71,7 +72,8 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
 	if *conf.Security.Authorization.EnableAuthorization {
-		runner.WithCronTasks(conf.Security.Authorization.Interval, serviceManager.GetRBACTask())
+		rbacTask := authorization.NewCronTask(serviceManager.GetRBAC())
+		runner.WithCronTasks(conf.Security.Authorization.Interval, rbacTask)
 	}
 
 	// register the API

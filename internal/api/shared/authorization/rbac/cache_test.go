@@ -210,45 +210,6 @@ func TestCacheHasPermission(t *testing.T) {
 	}
 }
 
-// With Mac Book Pro M2
-// go test -bench=. -benchtime=1000000x -benchmem
-// BenchmarkCacheHasPermission                                                              Benchtime          Time per op    Mem usage per op    Allocs per op
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1)
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1)-10         	 1000000	       13.41 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1)-10      	 1000000	       114.7 ns/op	      16 B/op	       2 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:1)
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:1)-10        	 1000000	       8.962 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:1)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:1)-10     	 1000000	       113.2 ns/op	      16 B/op	       2 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:2)
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:2)-10        	 1000000	       9.179 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:2)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:2)-10     	 1000000	       118.9 ns/op	      16 B/op	       2 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:3)
-// BenchmarkCacheHasPermission/HasPermission(userCount:100,projectCountByUser:3)-10        	 1000000	       8.887 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:3)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:100,projectCountByUser:3)-10     	 1000000	       120.9 ns/op	      16 B/op	       2 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:1000,projectCountByUser:5)
-// BenchmarkCacheHasPermission/HasPermission(userCount:1000,projectCountByUser:5)-10       	 1000000	       9.007 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:1000,projectCountByUser:5)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:1000,projectCountByUser:5)-10    	 1000000	       139.5 ns/op	      24 B/op	       3 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:10000,projectCountByUser:20)
-// BenchmarkCacheHasPermission/HasPermission(userCount:10000,projectCountByUser:20)-10     	 1000000	       9.391 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10000,projectCountByUser:20)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10000,projectCountByUser:20)-10  	 1000000	       151.1 ns/op	      40 B/op	       3 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:100)
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:100)-10       	 1000000	       12.05 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:100)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:100)-10    	 1000000	       121.8 ns/op	      16 B/op	       2 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1000)
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:1000)-10      	 1000000	       9.439 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1000)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:1000)-10   	 1000000	       138.5 ns/op	      32 B/op	       3 allocs/op
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:10000)
-// BenchmarkCacheHasPermission/HasPermission(userCount:10,projectCountByUser:10000)-10     	 1000000	       12.18 ns/op	       0 B/op	       0 allocs/op
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:10000)
-// BenchmarkCacheHasPermission/HasNotPermission(userCount:10,projectCountByUser:10000)-10  	 1000000	       137.4 ns/op	      32 B/op	       3 allocs/op
 func BenchmarkCacheHasPermission(b *testing.B) {
 	benchSuites := []struct {
 		userCount          int
