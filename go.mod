@@ -14,7 +14,7 @@ require (
 	github.com/goreleaser/goreleaser v1.22.1
 	github.com/huandu/go-sqlbuilder v1.24.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.11.2
+	github.com/labstack/echo/v4 v4.11.3
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.21.0
 	github.com/prometheus/client_golang v1.17.0
