@@ -13,7 +13,7 @@
 
 import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
+import { healthCheck, instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
 import { PrometheusDatasourceSpec } from './types';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
 
@@ -37,6 +37,7 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
+    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders }),
     instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
     rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
     labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
