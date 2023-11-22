@@ -20,6 +20,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
@@ -51,7 +52,7 @@ type Security struct {
 	// EncryptionKeyFile is the path to file containing the secret key
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
 	// Authorization contains all config around rbac (permissions and roles)
-	Authorization AuthorizationConfig `json:"authorization" yaml:"authorization"`
+	Authorization *AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 }
 
 func (s *Security) Verify() error {
@@ -74,5 +75,12 @@ func (s *Security) Verify() error {
 		return fmt.Errorf("encryption_key must be longer than 32 bytes")
 	}
 	s.EncryptionKey = promConfig.Secret(hex.EncodeToString([]byte(s.EncryptionKey)))
+	if s.Authorization == nil {
+		s.Authorization = &AuthorizationConfig{
+			EnableAuthorization: false,
+			Interval:            0,
+			GuestPermissions:    []*role.Permission{},
+		}
+	}
 	return nil
 }
