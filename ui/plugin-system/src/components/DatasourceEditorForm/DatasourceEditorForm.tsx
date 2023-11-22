@@ -74,16 +74,12 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   });
 
   const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
-    // reset display fields to undefined when empty (= undo the getInitialState patch)
+    // reset display name to undefined when empty, because we don't want an empty string as value
     const name = state.spec.display?.name;
-    const desc = state.spec.display?.description;
-    const finalDisplay: Display | undefined =
-      name != '' || desc != ''
-        ? {
-            name: name != '' ? name : undefined,
-            description: desc != '' ? desc : undefined,
-          }
-        : undefined;
+    const finalDisplay: Display | undefined = {
+      ...state.spec.display,
+      name: name ? name : undefined,
+    };
 
     onSave(state.name, {
       ...state.spec,

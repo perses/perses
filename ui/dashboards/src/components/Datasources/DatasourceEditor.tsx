@@ -95,7 +95,7 @@ export function DatasourceEditor(props: {
 
   return (
     <>
-      {datasourceEdit && (
+      {datasourceEdit ? (
         <DatasourceEditorForm
           initialName={datasourceEdit.name}
           initialSpec={datasourceEdit.spec}
@@ -111,8 +111,7 @@ export function DatasourceEditor(props: {
             setDatasourceEdit(null);
           }}
         />
-      )}
-      {!datasourceEdit && (
+      ) : (
         <>
           <Box
             sx={{
