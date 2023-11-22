@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Datasource, DispatchWithPromise } from '@perses-dev/core';
+import { Role, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
-import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
+import { DeleteRoleDialog } from '../dialogs';
+import { RoleEditorForm } from './RoleEditorForm';
 
-interface DatasourceDrawerProps<T extends Datasource> {
-  datasource: T;
+interface RoleDrawerProps<T extends Role> {
+  role: T;
   isOpen: boolean;
   action: Action;
   isReadonly?: boolean;
@@ -28,9 +29,9 @@ interface DatasourceDrawerProps<T extends Datasource> {
   onClose: DispatchWithoutAction;
 }
 
-export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
-  const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
+  const { role, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+  const [isDeleteRoleDialogStateOpened, setDeleteRoleDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
@@ -38,16 +39,8 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     /* do nothing */
   };
 
-  const handleSave = (name: string, spec: DatasourceSpec) => {
-    datasource.spec = spec;
-    datasource.metadata.name = name;
-    if (onSave) {
-      onSave(datasource);
-    }
-  };
-
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="role-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
           pluginLoader={bundledPluginLoader}
@@ -58,29 +51,28 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           }}
         >
           {isOpen && (
-            <DatasourceEditorForm
-              initialName={datasource.metadata.name}
-              initialSpec={datasource.spec}
+            <RoleEditorForm
+              initialRole={role}
               initialAction={action}
               isDraft={false}
               isReadonly={isReadonly}
-              onSave={handleSave}
+              onSave={onSave as Dispatch<Role>}
               onClose={onClose}
-              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              onDelete={onDelete ? () => setDeleteRoleDialogStateOpened(true) : undefined}
             />
           )}
         </PluginRegistry>
         {onDelete && (
-          <DeleteDatasourceDialog
-            open={isDeleteDatasourceDialogStateOpened}
-            onClose={() => setDeleteDatasourceDialogStateOpened(false)}
-            onSubmit={(d) =>
+          <DeleteRoleDialog
+            open={isDeleteRoleDialogStateOpened}
+            onClose={() => setDeleteRoleDialogStateOpened(false)}
+            onSubmit={(d: T) =>
               onDelete(d).then(() => {
-                setDeleteDatasourceDialogStateOpened(false);
+                setDeleteRoleDialogStateOpened(false);
                 onClose();
               })
             }
-            datasource={datasource}
+            role={role}
           />
         )}
       </ErrorBoundary>

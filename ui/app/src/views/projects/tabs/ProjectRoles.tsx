@@ -13,31 +13,31 @@
 
 import { Card } from '@mui/material';
 import { useCallback } from 'react';
-import { Secret, SecretResource } from '@perses-dev/core';
+import { Role, RoleResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { SecretList } from '../../../components/secret/SecretList';
-import { useDeleteSecretMutation, useUpdateSecretMutation, useSecretList } from '../../../model/secret-client';
+import { RoleList } from '../../../components/roles/RoleList';
+import { useDeleteRoleMutation, useUpdateRoleMutation, useRoleList } from '../../../model/role-client';
 
-interface ProjectSecretsProps {
+interface ProjectRolesProps {
   projectName: string;
   id?: string;
 }
 
-export function ProjectSecrets(props: ProjectSecretsProps) {
+export function ProjectRoles(props: ProjectRolesProps) {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useSecretList(projectName);
+  const { data, isLoading } = useRoleList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const updateSecretMutation = useUpdateSecretMutation(projectName);
-  const deleteSecretMutation = useDeleteSecretMutation(projectName);
+  const updateRoleMutation = useUpdateRoleMutation(projectName);
+  const deleteRoleMutation = useDeleteRoleMutation(projectName);
 
-  const handleSecretUpdate = useCallback(
-    (secret: SecretResource): Promise<void> =>
+  const handleRoleUpdate = useCallback(
+    (role: RoleResource): Promise<void> =>
       new Promise((resolve, reject) => {
-        updateSecretMutation.mutate(secret, {
-          onSuccess: (updatedSecret: Secret) => {
-            successSnackbar(`Secret ${updatedSecret.metadata.name} has been successfully updated`);
+        updateRoleMutation.mutate(role, {
+          onSuccess: (updatedRole: Role) => {
+            successSnackbar(`Role ${updatedRole.metadata.name} has been successfully updated`);
             resolve();
           },
           onError: (err) => {
@@ -47,15 +47,15 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateSecretMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleMutation]
   );
 
-  const handleSecretDelete = useCallback(
-    (secret: SecretResource): Promise<void> =>
+  const handleRoleDelete = useCallback(
+    (role: RoleResource): Promise<void> =>
       new Promise((resolve, reject) => {
-        deleteSecretMutation.mutate(secret, {
-          onSuccess: (deletedSecret: Secret) => {
-            successSnackbar(`Secret ${deletedSecret.metadata.name} has been successfully deleted`);
+        deleteRoleMutation.mutate(role, {
+          onSuccess: (deletedRole: Role) => {
+            successSnackbar(`Role ${deletedRole.metadata.name} has been successfully deleted`);
             resolve();
           },
           onError: (err) => {
@@ -65,22 +65,21 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteSecretMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleMutation]
   );
 
   return (
     <Card id={id}>
-      <SecretList
+      <RoleList
         data={data ?? []}
         isLoading={isLoading}
-        onUpdate={handleSecretUpdate}
-        onDelete={handleSecretDelete}
+        onUpdate={handleRoleUpdate}
+        onDelete={handleRoleDelete}
         initialState={{
           columns: {
             columnVisibilityModel: {
               id: false,
               project: false,
-              name: false,
               version: false,
               createdAt: false,
               updatedAt: false,

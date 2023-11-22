@@ -26,11 +26,11 @@ import {
   Divider,
 } from '@mui/material';
 import { useImmer } from 'use-immer';
-import { VariableDefinition, ListVariableDefinition } from '@perses-dev/core';
+import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorBoundary } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Action, getSubmitText, getTitleAction } from '../../../utils';
+import { getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
 import { variableEditValidationSchema, VariableEditValidationType } from '../../../validation';

@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Datasource, DispatchWithPromise } from '@perses-dev/core';
+import { RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
-import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
+import { DeleteRoleBindingDialog } from '../dialogs';
+import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
-interface DatasourceDrawerProps<T extends Datasource> {
-  datasource: T;
+interface RoleBindingDrawerProps<T extends RoleBinding> {
+  roleBinding: T;
   isOpen: boolean;
   action: Action;
   isReadonly?: boolean;
@@ -28,9 +29,9 @@ interface DatasourceDrawerProps<T extends Datasource> {
   onClose: DispatchWithoutAction;
 }
 
-export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
-  const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawerProps<T>) {
+  const { roleBinding, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+  const [isDeleteRoleBindingDialogStateOpened, setDeleteRoleBindingDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
@@ -38,16 +39,8 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     /* do nothing */
   };
 
-  const handleSave = (name: string, spec: DatasourceSpec) => {
-    datasource.spec = spec;
-    datasource.metadata.name = name;
-    if (onSave) {
-      onSave(datasource);
-    }
-  };
-
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="roleBinding-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry
           pluginLoader={bundledPluginLoader}
@@ -58,29 +51,28 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           }}
         >
           {isOpen && (
-            <DatasourceEditorForm
-              initialName={datasource.metadata.name}
-              initialSpec={datasource.spec}
+            <RoleBindingEditorForm
+              initialRoleBinding={roleBinding}
               initialAction={action}
               isDraft={false}
               isReadonly={isReadonly}
-              onSave={handleSave}
+              onSave={onSave as Dispatch<RoleBinding>}
               onClose={onClose}
-              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              onDelete={onDelete ? () => setDeleteRoleBindingDialogStateOpened(true) : undefined}
             />
           )}
         </PluginRegistry>
         {onDelete && (
-          <DeleteDatasourceDialog
-            open={isDeleteDatasourceDialogStateOpened}
-            onClose={() => setDeleteDatasourceDialogStateOpened(false)}
-            onSubmit={(d) =>
+          <DeleteRoleBindingDialog
+            open={isDeleteRoleBindingDialogStateOpened}
+            onClose={() => setDeleteRoleBindingDialogStateOpened(false)}
+            onSubmit={(d: T) =>
               onDelete(d).then(() => {
-                setDeleteDatasourceDialogStateOpened(false);
+                setDeleteRoleBindingDialogStateOpened(false);
                 onClose();
               })
             }
-            datasource={datasource}
+            roleBinding={roleBinding}
           />
         )}
       </ErrorBoundary>

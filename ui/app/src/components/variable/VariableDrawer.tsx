@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithPromise, Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
+import { DispatchWithPromise, Variable, VariableDefinition, getVariableProject, Action } from '@perses-dev/core';
 import React, { Dispatch, DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
 import { DatasourceStoreProvider, TemplateVariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
-  Action,
   PluginRegistry,
   TimeRangeProviderWithQueryParams,
   VariableEditorForm,
@@ -24,7 +23,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
-import { DeleteVariableDialog } from '../dialogs/DeleteVariableDialog';
+import { DeleteVariableDialog } from '../dialogs';
 
 interface VariableDrawerProps<T extends Variable> {
   variable: T;

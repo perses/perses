@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  getDatasourceDisplayName,
-  getMetadataProject,
-  Datasource,
-  DispatchWithPromise,
-  Action,
-} from '@perses-dev/core';
+import { getMetadataProject, RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Stack, Tooltip } from '@mui/material';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
@@ -25,12 +19,12 @@ import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { useIsReadonly } from '../../context/Config';
-import { DeleteDatasourceDialog } from '../dialogs';
-import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
-import { DatasourceDrawer } from './DatasourceDrawer';
+import { useIsReadonly } from '../../model/config-client';
+import { DeleteRoleBindingDialog } from '../dialogs';
+import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
+import { RoleBindingDrawer } from './RoleBindingDrawer';
 
-export interface DatasourceListProperties<T extends Datasource> {
+export interface RoleBindingListProperties<T extends RoleBinding> {
   data: T[];
   hideToolbar?: boolean;
   onUpdate: DispatchWithPromise<T>;
@@ -40,22 +34,22 @@ export interface DatasourceListProperties<T extends Datasource> {
 }
 
 /**
- * Display datasources in a table style.
- * @param props.data Contains all datasources to display
+ * Display role bindings in a table style.
+ * @param props.data Contains all role bindings to display
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.onUpdate Event received when an 'update' action has been requested
  * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DatasourceList<T extends Datasource>(props: DatasourceListProperties<T>) {
+export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListProperties<T>) {
   const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
-  const findDatasource = useCallback(
+  const findRoleBinding = useCallback(
     (name: string, project?: string) => {
       return data.find(
-        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name
+        (roleBinding) => getMetadataProject(roleBinding.metadata) === project && roleBinding.metadata.name === name
       );
     },
     [data]
@@ -63,71 +57,61 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
 
   const rows = useMemo(() => {
     return data.map(
-      (datasource) =>
+      (roleBinding) =>
         ({
-          project: getMetadataProject(datasource.metadata),
-          name: datasource.metadata.name,
-          displayName: getDatasourceDisplayName(datasource),
-          description: datasource.spec.display?.description,
-          type: datasource.spec.plugin.kind,
-          version: datasource.metadata.version,
-          createdAt: datasource.metadata.createdAt,
-          updatedAt: datasource.metadata.updatedAt,
+          project: getMetadataProject(roleBinding.metadata),
+          name: roleBinding.metadata.name,
+          version: roleBinding.metadata.version,
+          createdAt: roleBinding.metadata.createdAt,
+          updatedAt: roleBinding.metadata.updatedAt,
         } as Row)
     );
   }, [data]);
 
-  const [targetedDatasource, setTargetedDatasource] = useState<T>();
+  const [targetedRoleBinding, setTargetedRoleBinding] = useState<T>();
   const [action, setAction] = useState<Action>('read');
-  const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState<boolean>(false);
-  const [isDeleteDatasourceDialogOpened, setDeleteDatasourceDialogOpened] = useState<boolean>(false);
+  const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState<boolean>(false);
+  const [isDeleteRoleBindingDialogOpened, setDeleteRoleBindingDialogOpened] = useState<boolean>(false);
 
-  const handleDatasourceUpdate = useCallback(
-    async (datasource: T) => {
-      await onUpdate(datasource);
-      setDatasourceDrawerOpened(false);
+  const handleRoleBindingUpdate = useCallback(
+    async (roleBinding: T) => {
+      await onUpdate(roleBinding);
+      setRoleBindingDrawerOpened(false);
     },
     [onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
-      setTargetedDatasource(findDatasource(name, project));
+      setTargetedRoleBinding(findRoleBinding(name, project));
       setAction('read');
-      setDatasourceDrawerOpened(true);
+      setRoleBindingDrawerOpened(true);
     },
-    [findDatasource]
+    [findRoleBinding]
   );
 
   const handleEditButtonClick = useCallback(
     (name: string, project?: string) => () => {
-      const datasource = findDatasource(name, project);
-      setTargetedDatasource(datasource);
+      const roleBinding = findRoleBinding(name, project);
+      setTargetedRoleBinding(roleBinding);
       setAction('update');
-      setDatasourceDrawerOpened(true);
+      setRoleBindingDrawerOpened(true);
     },
-    [findDatasource]
+    [findRoleBinding]
   );
 
   const handleDeleteButtonClick = useCallback(
     (name: string, project?: string) => () => {
-      setTargetedDatasource(findDatasource(name, project));
-      setDeleteDatasourceDialogOpened(true);
+      setTargetedRoleBinding(findRoleBinding(name, project));
+      setDeleteRoleBindingDialogOpened(true);
     },
-    [findDatasource]
+    [findRoleBinding]
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'name',
-        headerName: 'Name',
-        type: 'string',
-        flex: 2,
-        renderCell: (params) => <pre>{params.value}</pre>,
-      },
+      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
       {
         field: 'version',
         headerName: 'Version',
@@ -137,8 +121,6 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         flex: 1,
         minWidth: 80,
       },
-      { field: 'description', headerName: 'Description', type: 'string', flex: 3, minWidth: 300 },
-      { field: 'type', headerName: 'Type', type: 'string', flex: 2 },
       {
         field: 'createdAt',
         headerName: 'Creation Date',
@@ -194,7 +176,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
 
   return (
     <Stack width="100%">
-      <DatasourceDataGrid
+      <RoleBindingDataGrid
         rows={rows}
         columns={columns}
         initialState={initialState}
@@ -202,22 +184,22 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         isLoading={isLoading}
         onRowClick={handleRowClick}
       />
-      {targetedDatasource && (
+      {targetedRoleBinding && (
         <>
-          <DatasourceDrawer
-            datasource={targetedDatasource}
-            isOpen={isDatasourceDrawerOpened}
+          <RoleBindingDrawer
+            roleBinding={targetedRoleBinding}
+            isOpen={isRoleBindingDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={handleDatasourceUpdate}
+            onSave={(v: T) => handleRoleBindingUpdate(v).then(() => setRoleBindingDrawerOpened(false))}
             onDelete={onDelete}
-            onClose={() => setDatasourceDrawerOpened(false)}
+            onClose={() => setRoleBindingDrawerOpened(false)}
           />
-          <DeleteDatasourceDialog
-            open={isDeleteDatasourceDialogOpened}
-            onClose={() => setDeleteDatasourceDialogOpened(false)}
-            onSubmit={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
-            datasource={targetedDatasource}
+          <DeleteRoleBindingDialog
+            open={isDeleteRoleBindingDialogOpened}
+            onClose={() => setDeleteRoleBindingDialogOpened(false)}
+            onSubmit={(v: T) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
+            roleBinding={targetedRoleBinding}
           />
         </>
       )}

@@ -42,7 +42,7 @@ export function useAuthToken() {
   // It doesn't need the accurate signature to decode the payload.
   // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-  return useJwt(`${partialToken}.${fakeSignature}`);
+  return useJwt<{}>(`${partialToken}.${fakeSignature}`);
 }
 
 export function useAuthMutation() {

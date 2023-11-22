@@ -13,31 +13,35 @@
 
 import { Card } from '@mui/material';
 import { useCallback } from 'react';
-import { Secret, SecretResource } from '@perses-dev/core';
+import { RoleBinding, RoleBindingResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { SecretList } from '../../../components/secret/SecretList';
-import { useDeleteSecretMutation, useUpdateSecretMutation, useSecretList } from '../../../model/secret-client';
+import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
+import {
+  useDeleteRoleBindingMutation,
+  useUpdateRoleBindingMutation,
+  useRoleBindingList,
+} from '../../../model/rolebinding-client';
 
-interface ProjectSecretsProps {
+interface ProjectRoleBindingsProps {
   projectName: string;
   id?: string;
 }
 
-export function ProjectSecrets(props: ProjectSecretsProps) {
+export function ProjectRoleBindings(props: ProjectRoleBindingsProps) {
   const { projectName, id } = props;
 
-  const { data, isLoading } = useSecretList(projectName);
+  const { data, isLoading } = useRoleBindingList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const updateSecretMutation = useUpdateSecretMutation(projectName);
-  const deleteSecretMutation = useDeleteSecretMutation(projectName);
+  const updateRoleBindingMutation = useUpdateRoleBindingMutation(projectName);
+  const deleteRoleBindingMutation = useDeleteRoleBindingMutation(projectName);
 
-  const handleSecretUpdate = useCallback(
-    (secret: SecretResource): Promise<void> =>
+  const handleRoleBindingUpdate = useCallback(
+    (roleBinding: RoleBindingResource): Promise<void> =>
       new Promise((resolve, reject) => {
-        updateSecretMutation.mutate(secret, {
-          onSuccess: (updatedSecret: Secret) => {
-            successSnackbar(`Secret ${updatedSecret.metadata.name} has been successfully updated`);
+        updateRoleBindingMutation.mutate(roleBinding, {
+          onSuccess: (updatedRoleBinding: RoleBinding) => {
+            successSnackbar(`RoleBinding ${updatedRoleBinding.metadata.name} has been successfully updated`);
             resolve();
           },
           onError: (err) => {
@@ -47,15 +51,15 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, updateSecretMutation]
+    [exceptionSnackbar, successSnackbar, updateRoleBindingMutation]
   );
 
-  const handleSecretDelete = useCallback(
-    (secret: SecretResource): Promise<void> =>
+  const handleRoleBindingDelete = useCallback(
+    (roleBinding: RoleBindingResource): Promise<void> =>
       new Promise((resolve, reject) => {
-        deleteSecretMutation.mutate(secret, {
-          onSuccess: (deletedSecret: Secret) => {
-            successSnackbar(`Secret ${deletedSecret.metadata.name} has been successfully deleted`);
+        deleteRoleBindingMutation.mutate(roleBinding, {
+          onSuccess: (deletedRoleBinding: RoleBinding) => {
+            successSnackbar(`RoleBinding ${deletedRoleBinding.metadata.name} has been successfully deleted`);
             resolve();
           },
           onError: (err) => {
@@ -65,22 +69,21 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
           },
         });
       }),
-    [exceptionSnackbar, successSnackbar, deleteSecretMutation]
+    [exceptionSnackbar, successSnackbar, deleteRoleBindingMutation]
   );
 
   return (
     <Card id={id}>
-      <SecretList
+      <RoleBindingList
         data={data ?? []}
         isLoading={isLoading}
-        onUpdate={handleSecretUpdate}
-        onDelete={handleSecretDelete}
+        onUpdate={handleRoleBindingUpdate}
+        onDelete={handleRoleBindingDelete}
         initialState={{
           columns: {
             columnVisibilityModel: {
               id: false,
               project: false,
-              name: false,
               version: false,
               createdAt: false,
               updatedAt: false,
