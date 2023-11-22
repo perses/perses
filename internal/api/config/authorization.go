@@ -29,7 +29,7 @@ var (
 type jsonAuthorizationConfig struct {
 	EnableAuthorization bool               `json:"enable_authorization"`
 	Interval            string             `json:"interval,omitempty"`
-	GuestPermissions    []*role.Permission `json:"guest_permissions"`
+	GuestPermissions    []*role.Permission `json:"guest_permissions,omitempty"`
 }
 
 type AuthorizationConfig struct {
@@ -38,7 +38,7 @@ type AuthorizationConfig struct {
 	// Interval is the refresh frequency of the cache
 	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
-	GuestPermissions []*role.Permission `json:"guest_permissions" yaml:"guest_permissions"`
+	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
@@ -51,9 +51,11 @@ func (a *AuthorizationConfig) Verify() error {
 	return nil
 }
 
-func (a *AuthorizationConfig) MarshalJSON() ([]byte, error) {
+func (a AuthorizationConfig) MarshalJSON() ([]byte, error) {
 	j := &jsonAuthorizationConfig{
-		Interval: a.Interval.String(),
+		EnableAuthorization: a.EnableAuthorization,
+		Interval:            a.Interval.String(),
+		GuestPermissions:    a.GuestPermissions,
 	}
 	return json.Marshal(j)
 }
