@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -65,7 +65,8 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
-  const { dashboardResource, projectName, datasourceApi, onCreate, children } = props;
+  const { projectName, datasourceApi, onCreate, children } = props;
+  const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const project = projectName ?? dashboardResource?.metadata.project;
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
@@ -183,13 +184,34 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
     }
   );
 
+  const getLocalDatasources = useCallback((): Record<string, DatasourceSpec> => {
+    return dashboardResource?.spec.datasources ?? {};
+  }, [dashboardResource]);
+
+  const setLocalDatasources = useCallback(
+    (datasources: Record<string, DatasourceSpec>) => {
+      if (dashboardResource) {
+        setDashboardResource({
+          ...dashboardResource,
+          spec: {
+            ...dashboardResource.spec,
+            datasources: datasources,
+          },
+        });
+      }
+    },
+    [dashboardResource]
+  );
+
   const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,
       getDatasourceClient,
+      getLocalDatasources,
+      setLocalDatasources,
       listDatasourceSelectItems,
     }),
-    [getDatasource, getDatasourceClient, listDatasourceSelectItems]
+    [getDatasource, getDatasourceClient, getLocalDatasources, setLocalDatasources, listDatasourceSelectItems]
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;

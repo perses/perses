@@ -16,6 +16,7 @@ export const TOOLTIP_TEXT = {
   addPanel: 'Add panel',
   addGroup: 'Add panel group',
   downloadDashboard: 'Download JSON',
+  editDatasources: 'Edit datasources',
   editJson: 'Edit JSON',
   editVariables: 'Edit variables',
   refreshDashboard: 'Refresh dashboard',

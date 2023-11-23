@@ -23,6 +23,7 @@ import {
   ProjectMetadata,
   DurationString,
   DEFAULT_REFRESH_INTERVAL,
+  DatasourceSpec,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -55,6 +56,7 @@ export interface DashboardStoreState
   duration: DurationString;
   refreshInterval: DurationString;
   display?: Display;
+  datasources?: Record<string, DatasourceSpec>;
 }
 
 export interface DashboardStoreProps {
@@ -111,7 +113,7 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL },
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
     metadata,
   } = dashboardResource;
 
@@ -145,9 +147,13 @@ function initStore(props: DashboardProviderProps) {
           display,
           duration,
           refreshInterval,
+          datasources,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
-          setDashboard: ({ metadata, spec: { display, panels = {}, layouts = [], duration, refreshInterval } }) => {
+          setDashboard: ({
+            metadata,
+            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
+          }) => {
             set((state) => {
               state.metadata = metadata;
               state.display = display;
@@ -157,6 +163,7 @@ function initStore(props: DashboardProviderProps) {
               state.panelGroupOrder = panelGroupOrder;
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
+              state.datasources = datasources;
             });
           },
         };

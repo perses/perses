@@ -28,6 +28,16 @@ export interface DatasourceStore {
    * Gets a list of datasource selection items for a plugin kind.
    */
   listDatasourceSelectItems(datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]>;
+
+  /**
+   * Gets the list of datasources defined in the dashboard
+   */
+  getLocalDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Sets the list of datasources defined in the dashboard
+   */
+  setLocalDatasources(datasources: Record<string, DatasourceSpec>): void;
 }
 
 export interface DatasourceSelectItemGroup {
