@@ -1,16 +1,29 @@
+// Copyright 2023 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { Action, RoleBinding } from '@perses-dev/core';
-import {
-  getSubmitText,
-  getTitleAction,
-  variableEditValidationSchema,
-  VariableEditValidationType,
-} from '@perses-dev/plugin-system';
+import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { Box, Button, Divider, Stack, TextField, Typography } from '@mui/material';
+import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
-import { useImmer } from 'use-immer';
 import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  roleBindingsEditorValidationSchema,
+  RoleBindingsEditorValidationType,
+} from '@perses-dev/plugin-system/dist/validation/rolebinding';
+import PlusIcon from 'mdi-material-ui/Plus';
+import MinusIcon from 'mdi-material-ui/Minus';
 
 interface RoleBindingEditorFormProps {
   initialRoleBinding: RoleBinding;
@@ -25,29 +38,33 @@ interface RoleBindingEditorFormProps {
 export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   const { initialRoleBinding, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
-  const [state, setState] = useImmer(initialRoleBinding);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<VariableEditValidationType>({
-    resolver: zodResolver(variableEditValidationSchema),
+  const form = useForm<RoleBindingsEditorValidationType>({
+    resolver: zodResolver(roleBindingsEditorValidationSchema),
     mode: 'onBlur',
-    defaultValues: state,
+    defaultValues: initialRoleBinding,
   });
 
-  const processForm: SubmitHandler<VariableEditValidationType> = () => {
-    onSave(state);
+  const processForm: SubmitHandler<RoleBindingsEditorValidationType> = (data: RoleBinding) => {
+    onSave(data);
   };
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'spec.subjects',
+  });
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (JSON.stringify(initialRoleBinding) !== JSON.stringify(state)) {
+    if (JSON.stringify(initialRoleBinding) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -64,7 +81,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
           borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
         }}
       >
-        <Typography variant="h2">{titleAction} Variable</Typography>
+        <Typography variant="h2">{titleAction} Role Binding</Typography>
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' ? (
             <>
@@ -106,33 +123,107 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
           )}
         </Stack>
       </Box>
-      <Box padding={2} sx={{ overflowY: 'scroll' }}>
-        <Controller
-          name="name"
-          render={({ field, fieldState }) => (
-            <TextField
-              {...field}
-              required
-              fullWidth
-              label="Name"
-              InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-              InputProps={{
-                disabled: action === 'update',
-                readOnly: action === 'read',
-              }}
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              onChange={(event) => {
-                field.onChange(event);
-                setState((draft) => {
-                  draft.metadata.name = event.target.value;
-                });
-              }}
-            />
-          )}
-        />
+      <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
+        <Stack gap={2} direction="row">
+          <Controller
+            name="metadata.name"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                required
+                fullWidth
+                label="Name"
+                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                InputProps={{
+                  disabled: action === 'update',
+                  readOnly: action === 'read',
+                }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+                onChange={(event) => {
+                  field.onChange(event);
+                  // form.setValue(`metadata.name`, event.target.value);
+                }}
+              />
+            )}
+          />
+          <Controller
+            name="spec.role"
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                required
+                fullWidth
+                label="Role"
+                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                InputProps={{
+                  disabled: action === 'update',
+                  readOnly: action === 'read',
+                }}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message}
+                onChange={(event) => {
+                  field.onChange(event);
+                  // form.setValue(`spec.role`, event.target.value);
+                }}
+              />
+            )}
+          />
+        </Stack>
         <Divider />
-      </Box>
+        <Stack gap={1}>
+          <Typography variant="h1" mb={2}>
+            Subjects
+          </Typography>
+          {fields && fields.length > 0 ? (
+            fields.map((field, index) => (
+              <Stack key={field.id} direction={'row'} gap={1}>
+                <Controller
+                  name={`spec.subjects.${index}.name`}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
+                      label="Username"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      onChange={(event) => {
+                        field.onChange(event);
+                        // form.setValue(`spec.subjects.${index}.name`, event.target.value);
+                      }}
+                    />
+                  )}
+                />
+                <IconButton
+                  disabled={isReadonly}
+                  style={{ width: 'fit-content' }}
+                  // Add a new subject
+                  onClick={() => remove(index)}
+                >
+                  <MinusIcon />
+                </IconButton>
+              </Stack>
+            ))
+          ) : (
+            <Typography variant="subtitle1" mb={2}>
+              No subjects
+            </Typography>
+          )}
+          <IconButton
+            disabled={isReadonly}
+            style={{ width: 'fit-content' }}
+            // Add a new subject
+            onClick={() => append({ kind: 'User', name: '' })}
+          >
+            <PlusIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
       <DiscardChangesConfirmationDialog
         description="Are you sure you want to discard these changes? Changes cannot be recovered."
         isOpen={isDiscardDialogOpened}
