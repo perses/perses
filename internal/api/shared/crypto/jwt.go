@@ -30,6 +30,12 @@ import (
 const (
 	CookieKeyJWTPayload   = "jwtPayload"
 	CookieKeyJWTSignature = "jwtSignature"
+	CookieKeyRefreshToken = "jwtRefreshToken"
+)
+
+var (
+	accessTokenExpiration  = time.Minute * 15
+	refreshTokenExpiration = time.Hour * 24
 )
 
 type JWTCustomClaims struct {
@@ -50,12 +56,16 @@ func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
 }
 
 type JWT interface {
-	SignedToken(login string) (string, error)
-	// CreateJWTCookies will create two different cookies that contain a piece of the token.
+	SignedAccessToken(login string) (string, error)
+	SignedRefreshToken(login string) (string, error)
+	// CreateAccessTokenCookie will create two different cookies that contain a piece of the token.
 	// As a reminder, a JWT token has the following structure: header.payload.signature
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
 	// The second cookie will contain the signature, and it won't be accessible by Javascript.
-	CreateJWTCookies(token string) (*http.Cookie, *http.Cookie)
+	CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie)
+	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
+
+	Validate(token string) (*JWTCustomClaims, error)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
@@ -63,12 +73,22 @@ type jwtImpl struct {
 	key []byte
 }
 
-func (j *jwtImpl) SignedToken(login string) (string, error) {
+func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
+	now := time.Now()
+	return j.signedToken(login, now, now.Add(accessTokenExpiration))
+}
+
+func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
+	now := time.Now()
+	return j.signedToken(login, now, now.Add(refreshTokenExpiration))
+}
+
+func (j *jwtImpl) signedToken(login string, notBefore time.Time, expireAt time.Time) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   login,
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
-			NotBefore: jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(expireAt),
+			NotBefore: jwt.NewNumericDate(notBefore),
 		},
 	})
 	// The type of the key depends on the signature method.
@@ -76,10 +96,9 @@ func (j *jwtImpl) SignedToken(login string) (string, error) {
 	return token.SignedString(j.key)
 }
 
-func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
-	expireDate := time.Now().Add(time.Hour * 1)
-	tokenSplit := strings.Split(token, ".")
-	maxAge := 3600
+func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
+	expireDate := time.Now().Add(accessTokenExpiration)
+	tokenSplit := strings.Split(accessToken, ".")
 	path := "/"
 	sameSite := http.SameSiteNoneMode
 	secure := true
@@ -87,7 +106,7 @@ func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     path,
-		MaxAge:   maxAge,
+		MaxAge:   int(accessTokenExpiration),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: false,
@@ -97,13 +116,36 @@ func (j *jwtImpl) CreateJWTCookies(token string) (*http.Cookie, *http.Cookie) {
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     path,
-		MaxAge:   maxAge,
+		MaxAge:   int(accessTokenExpiration),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: true,
 		SameSite: sameSite,
 	}
 	return headerPayloadCookie, signatureCookie
+}
+
+func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
+	return &http.Cookie{
+		Name:     CookieKeyRefreshToken,
+		Value:    refreshToken,
+		Path:     "/",
+		MaxAge:   int(refreshTokenExpiration),
+		Expires:  time.Now().Add(refreshTokenExpiration),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteNoneMode,
+	}
+}
+
+func (j *jwtImpl) Validate(token string) (*JWTCustomClaims, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(token *jwt.Token) (interface{}, error) {
+		return j.key, nil
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
+	if err != nil {
+		return nil, err
+	}
+	return parsedToken.Claims.(*JWTCustomClaims), nil
 }
 
 func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {

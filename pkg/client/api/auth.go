@@ -22,7 +22,7 @@ const authResource = "auth"
 
 // AuthInterface has methods to work with Auth resource
 type AuthInterface interface {
-	Login(user, password string) (string, error)
+	Login(user, password string) (*api.AuthResponse, error)
 }
 
 func newAuth(client *perseshttp.RESTClient) AuthInterface {
@@ -35,7 +35,7 @@ type auth struct {
 	client *perseshttp.RESTClient
 }
 
-func (c *auth) Login(user string, password string) (string, error) {
+func (c *auth) Login(user string, password string) (*api.AuthResponse, error) {
 	body := &api.Auth{
 		Login:    user,
 		Password: password,
@@ -50,8 +50,8 @@ func (c *auth) Login(user string, password string) (string, error) {
 		Object(result)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return result.Token, nil
+	return result, nil
 }

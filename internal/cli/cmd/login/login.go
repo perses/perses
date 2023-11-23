@@ -114,7 +114,7 @@ func (o *option) setToken(httpConfig perseshttp.RestConfigClient) error {
 	if err != nil {
 		return err
 	}
-	o.token = token
+	o.token = token.AccessToken
 	return nil
 }
 
