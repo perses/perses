@@ -48,6 +48,11 @@ export function useIsReadonly() {
   return config.security.readonly;
 }
 
+export function useIsAuthorizationEnabled() {
+  const { config } = useConfigContext();
+  return config.security.authorization.enable_authorization;
+}
+
 export function useImportantDashboardSelectors() {
   const { config } = useConfigContext();
   return config.important_dashboards;

@@ -207,7 +207,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                   )}
                 />
                 <IconButton
-                  disabled={isReadonly}
+                  disabled={isReadonly || action === 'read'}
                   style={{ width: 'fit-content' }}
                   // Add a new subject
                   onClick={() => remove(index)}
@@ -222,7 +222,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
             </Typography>
           )}
           <IconButton
-            disabled={isReadonly}
+            disabled={isReadonly || action === 'read'}
             style={{ width: 'fit-content' }}
             // Add a new subject
             onClick={() => append({ kind: 'User', name: '' })}

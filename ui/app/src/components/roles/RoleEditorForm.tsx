@@ -155,7 +155,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
                 <Stack key={field.id} direction={'row'} gap={1} alignItems="end">
                   <PermissionControl form={form} index={index} action={action} />
                   <IconButton
-                    disabled={isReadonly}
+                    disabled={isReadonly || action === 'read'}
                     style={{ width: 'fit-content', height: 'fit-content' }}
                     // Add a new permission
                     onClick={() => remove(index)}
@@ -172,7 +172,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
             </Typography>
           )}
           <IconButton
-            disabled={isReadonly}
+            disabled={isReadonly || action === 'read'}
             style={{ width: 'fit-content' }}
             // Add a new subject
             onClick={() => append({ actions: ['read'], scopes: ['*'] })}

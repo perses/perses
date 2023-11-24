@@ -36,7 +36,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsReadonly } from '../../context/Config';
+import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation } from '../../model/role-client';
@@ -118,7 +118,7 @@ function TabButton(props: TabButtonProps) {
     (role: RoleResource) => {
       createRoleMutation.mutate(role, {
         onSuccess: (createdRole: RoleResource) => {
-          successSnackbar(`Role ${createdRole} has been successfully created`);
+          successSnackbar(`Role ${createdRole.metadata.name} has been successfully created`);
           setRoleDrawerOpened(false);
         },
         onError: (err) => {
@@ -134,7 +134,7 @@ function TabButton(props: TabButtonProps) {
     (roleBinding: RoleBindingResource) => {
       createRoleBindingMutation.mutate(roleBinding, {
         onSuccess: (createdRoleBinding: RoleBindingResource) => {
-          successSnackbar(`RoleBinding ${createdRoleBinding} has been successfully created`);
+          successSnackbar(`RoleBinding ${createdRoleBinding.metadata.name} has been successfully created`);
           setRoleBindingDrawerOpened(false);
         },
         onError: (err) => {
@@ -303,6 +303,7 @@ interface DashboardVariableTabsProps {
 
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
+  const isAuthorizationEnabled = useIsAuthorizationEnabled();
 
   const navigate = useNavigate();
 
@@ -379,12 +380,16 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index={secretsTabIndex}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
-      <TabPanel value={value} index={rolesTabIndex}>
-        <ProjectRoles projectName={projectName} id="project-role-list" />
-      </TabPanel>
-      <TabPanel value={value} index={roleBindingsTabIndex}>
-        <ProjectRoleBindings projectName={projectName} id="project-rolebinding-list" />
-      </TabPanel>
+      {isAuthorizationEnabled && (
+        <>
+          <TabPanel value={value} index={rolesTabIndex}>
+            <ProjectRoles projectName={projectName} id="project-role-list" />
+          </TabPanel>
+          <TabPanel value={value} index={roleBindingsTabIndex}>
+            <ProjectRoleBindings projectName={projectName} id="project-rolebinding-list" />
+          </TabPanel>
+        </>
+      )}
     </Box>
   );
 }

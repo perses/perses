@@ -90,7 +90,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps) {
             },
           },
           sorting: {
-            sortModel: [{ field: 'displayName', sort: 'asc' }],
+            sortModel: [{ field: 'name', sort: 'asc' }],
           },
         }}
       />

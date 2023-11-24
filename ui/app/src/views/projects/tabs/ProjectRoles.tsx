@@ -86,7 +86,7 @@ export function ProjectRoles(props: ProjectRolesProps) {
             },
           },
           sorting: {
-            sortModel: [{ field: 'displayName', sort: 'asc' }],
+            sortModel: [{ field: 'name', sort: 'asc' }],
           },
         }}
       />

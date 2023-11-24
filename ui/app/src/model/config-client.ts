@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { DashboardSelector, fetchJson } from '@perses-dev/core';
+import { DashboardSelector, fetchJson, Permission } from '@perses-dev/core';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -90,9 +90,8 @@ export interface SecurityConfig {
 
 export interface AuthorizationConfig {
   enable_authorization: boolean;
-  enable_cache: boolean;
   interval: Duration;
-  guest_permissions: []; // TODO typing
+  guest_permissions: Permission[];
 }
 
 export interface ConfigModel {

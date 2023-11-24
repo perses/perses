@@ -19,8 +19,8 @@ import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { useIsReadonly } from '../../model/config-client';
 import { DeleteRoleBindingDialog } from '../dialogs';
+import { useIsReadonly } from '../../context/Config';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
 
