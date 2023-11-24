@@ -90,7 +90,7 @@ func (e *Endpoint) refresh(ctx echo.Context) error {
 	if len(refreshToken) == 0 {
 		return shared.HandleBadRequestError("no refresh token has been found")
 	}
-	claims, err := e.jwt.Validate(refreshToken)
+	claims, err := e.jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}

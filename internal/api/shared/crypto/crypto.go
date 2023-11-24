@@ -47,7 +47,8 @@ func New(encodedKey string) (Crypto, JWT, error) {
 			block: aesBlock,
 		},
 		&jwtImpl{
-			key: key,
+			accessKey:  key,
+			refreshKey: append(key, []byte("-refresh")...),
 		}, nil
 }
 

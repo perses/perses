@@ -42,6 +42,19 @@ type JWTCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
+func signedToken(login string, notBefore time.Time, expireAt time.Time, key []byte) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   login,
+			ExpiresAt: jwt.NewNumericDate(expireAt),
+			NotBefore: jwt.NewNumericDate(notBefore),
+		},
+	})
+	// The type of the key depends on the signature method.
+	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
+	return token.SignedString(key)
+}
+
 func ExtractJWTClaims(ctx echo.Context) *JWTCustomClaims {
 	jwtToken, ok := ctx.Get("user").(*jwt.Token) // by default token is stored under `user` key
 	if !ok {
@@ -64,36 +77,23 @@ type JWT interface {
 	// The second cookie will contain the signature, and it won't be accessible by Javascript.
 	CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
-
-	Validate(token string) (*JWTCustomClaims, error)
+	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
 
 type jwtImpl struct {
-	key []byte
+	accessKey  []byte
+	refreshKey []byte
 }
 
 func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
 	now := time.Now()
-	return j.signedToken(login, now, now.Add(accessTokenExpiration))
+	return signedToken(login, now, now.Add(accessTokenExpiration), j.accessKey)
 }
 
 func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 	now := time.Now()
-	return j.signedToken(login, now, now.Add(refreshTokenExpiration))
-}
-
-func (j *jwtImpl) signedToken(login string, notBefore time.Time, expireAt time.Time) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS512, &JWTCustomClaims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   login,
-			ExpiresAt: jwt.NewNumericDate(expireAt),
-			NotBefore: jwt.NewNumericDate(notBefore),
-		},
-	})
-	// The type of the key depends on the signature method.
-	// See https://golang-jwt.github.io/jwt/usage/signing_methods/#signing-methods-and-key-types.
-	return token.SignedString(j.key)
+	return signedToken(login, now, now.Add(refreshTokenExpiration), j.refreshKey)
 }
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
@@ -106,7 +106,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     path,
-		MaxAge:   int(accessTokenExpiration),
+		MaxAge:   int(accessTokenExpiration.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: false,
@@ -116,7 +116,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     path,
-		MaxAge:   int(accessTokenExpiration),
+		MaxAge:   int(accessTokenExpiration.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: true,
@@ -130,7 +130,7 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
 		Path:     "/",
-		MaxAge:   int(refreshTokenExpiration),
+		MaxAge:   int(refreshTokenExpiration.Seconds()),
 		Expires:  time.Now().Add(refreshTokenExpiration),
 		Secure:   true,
 		HttpOnly: true,
@@ -138,9 +138,9 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	}
 }
 
-func (j *jwtImpl) Validate(token string) (*JWTCustomClaims, error) {
+func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
 	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(token *jwt.Token) (interface{}, error) {
-		return j.key, nil
+		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			return new(JWTCustomClaims)
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
-		SigningKey:    j.key,
+		SigningKey:    j.accessKey,
 	}
 	return echojwt.WithConfig(jwtMiddlewareConfig)
 }
