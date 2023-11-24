@@ -42,26 +42,17 @@ export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawe
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="roleBinding-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          // TODO this required field is useless here
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
-          {isOpen && (
-            <RoleBindingEditorForm
-              initialRoleBinding={roleBinding}
-              initialAction={action}
-              isDraft={false}
-              isReadonly={isReadonly}
-              onSave={onSave as Dispatch<RoleBinding>}
-              onClose={onClose}
-              onDelete={onDelete ? () => setDeleteRoleBindingDialogStateOpened(true) : undefined}
-            />
-          )}
-        </PluginRegistry>
+        {isOpen && (
+          <RoleBindingEditorForm
+            initialRoleBinding={roleBinding}
+            initialAction={action}
+            isDraft={false}
+            isReadonly={isReadonly}
+            onSave={onSave as Dispatch<RoleBinding>}
+            onClose={onClose}
+            onDelete={onDelete ? () => setDeleteRoleBindingDialogStateOpened(true) : undefined}
+          />
+        )}
         {onDelete && (
           <DeleteRoleBindingDialog
             open={isDeleteRoleBindingDialogStateOpened}

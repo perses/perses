@@ -13,20 +13,57 @@
 
 import { z } from 'zod';
 import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
-import { KINDS } from '@perses-dev/core';
 
-const permissionValidationschema = z.object({
-  actions: z.array(z.enum(['create', 'read', 'update', 'delete', '*'])),
-  scopes: z.array(z.enum(['*', ...KINDS])),
+const permissionValidationSchema = z.object({
+  // TODO: use SCOPE & ACTIONS constants
+  actions: z.array(z.enum(['*', 'create', 'read', 'update', 'delete'])).nonempty('Must contains at least 1 action'),
+  scopes: z
+    .array(
+      z.enum([
+        '*',
+        'Dashboard',
+        'Datasource',
+        'Folder',
+        'GlobalDatasource',
+        'GlobalRole',
+        'GlobalRoleBinding',
+        'GlobalSecret',
+        'GlobalVariable',
+        'Project',
+        'Role',
+        'RoleBinding',
+        'Secret',
+        'User',
+        'Variable',
+      ])
+    )
+    .nonempty('Must contains at least 1 scope'), // TODO: limit project role
 });
 
-export const roleEditorValidationSchema = z.object({
+export const roleValidationSchema = z.object({
+  kind: z.literal('Role'),
+  metadata: z.object({
+    name: resourceIdValidationSchema,
+    project: resourceIdValidationSchema,
+  }),
+  spec: z.object({
+    permissions: z.array(permissionValidationSchema),
+  }),
+});
+
+export const globalRoleValidationSchema = z.object({
+  kind: z.literal('GlobalRole'),
   metadata: z.object({
     name: resourceIdValidationSchema,
   }),
   spec: z.object({
-    permissions: z.array(permissionValidationschema),
+    permissions: z.array(permissionValidationSchema),
   }),
 });
 
-export type RoleEditorValidationType = z.infer<typeof roleEditorValidationSchema>;
+export const rolesEditorValidationSchema = z.discriminatedUnion('kind', [
+  roleValidationSchema,
+  globalRoleValidationSchema,
+]);
+
+export type RolesEditorValidationType = z.infer<typeof rolesEditorValidationSchema>;

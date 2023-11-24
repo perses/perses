@@ -15,7 +15,28 @@ import { Metadata, ProjectMetadata } from './resource';
 import { Kind } from './kind';
 
 export type Action = 'create' | 'read' | 'update' | 'delete' | '*';
+export const ACTIONS = ['*', 'create', 'read', 'update', 'delete'];
 export type Scope = Kind | '*';
+export const PROJECT_SCOPES = [
+  '*',
+  'Dashboard',
+  'Datasource',
+  'Folder',
+  'Project',
+  'Role',
+  'RoleBinding',
+  'Secret',
+  'Variable',
+];
+
+export const GLOBAL_SCOPES = [
+  'GlobalDatasource',
+  'GlobalRole',
+  'GlobalRoleBinding',
+  'GlobalSecret',
+  'GlobalVariable',
+  'User',
+];
 
 export interface Permission {
   actions: Action[];

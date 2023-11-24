@@ -42,26 +42,17 @@ export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="role-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          // TODO this required field is useless here
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
-          {isOpen && (
-            <RoleEditorForm
-              initialRole={role}
-              initialAction={action}
-              isDraft={false}
-              isReadonly={isReadonly}
-              onSave={onSave as Dispatch<Role>}
-              onClose={onClose}
-              onDelete={onDelete ? () => setDeleteRoleDialogStateOpened(true) : undefined}
-            />
-          )}
-        </PluginRegistry>
+        {isOpen && (
+          <RoleEditorForm
+            initialRole={role}
+            initialAction={action}
+            isDraft={false}
+            isReadonly={isReadonly}
+            onSave={onSave as Dispatch<Role>}
+            onClose={onClose}
+            onDelete={onDelete ? () => setDeleteRoleDialogStateOpened(true) : undefined}
+          />
+        )}
         {onDelete && (
           <DeleteRoleDialog
             open={isDeleteRoleDialogStateOpened}

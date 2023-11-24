@@ -142,7 +142,6 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                 helperText={fieldState.error?.message}
                 onChange={(event) => {
                   field.onChange(event);
-                  // form.setValue(`metadata.name`, event.target.value);
                 }}
               />
             )}
@@ -164,7 +163,6 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                 helperText={fieldState.error?.message}
                 onChange={(event) => {
                   field.onChange(event);
-                  // form.setValue(`spec.role`, event.target.value);
                 }}
               />
             )}
@@ -194,7 +192,6 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                       helperText={fieldState.error?.message}
                       onChange={(event) => {
                         field.onChange(event);
-                        // form.setValue(`spec.subjects.${index}.name`, event.target.value);
                       }}
                     />
                   )}
@@ -210,8 +207,8 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
               </Stack>
             ))
           ) : (
-            <Typography variant="subtitle1" mb={2}>
-              No subjects
+            <Typography variant="subtitle1" mb={2} fontStyle="italic">
+              No subject defined
             </Typography>
           )}
           <IconButton

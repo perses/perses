@@ -27,8 +27,8 @@ import {
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import { DatasourceSpec } from '@perses-dev/core';
-import { Action, DatasourceEditorForm } from '@perses-dev/plugin-system';
+import { Action, DatasourceSpec } from '@perses-dev/core';
+import { DatasourceEditorForm } from '@perses-dev/plugin-system';
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
 import { useDiscardChangesConfirmationDialog } from '../../context';
