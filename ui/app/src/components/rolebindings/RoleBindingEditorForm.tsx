@@ -13,9 +13,9 @@
 
 import { Action, RoleBinding } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, useState } from 'react';
+import React, { DispatchWithoutAction, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
-import { Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -24,6 +24,7 @@ import {
 } from '@perses-dev/plugin-system/dist/validation/rolebinding';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { useUserList } from '../../model/user-client';
 
 interface RoleBindingEditorFormProps {
   initialRoleBinding: RoleBinding;
@@ -58,6 +59,11 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
     control: form.control,
     name: 'spec.subjects',
   });
+
+  const { data } = useUserList();
+  const usernames = useMemo(() => {
+    return (data ?? []).map((user) => user.metadata.name);
+  }, [data]);
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -179,20 +185,24 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                 <Controller
                   name={`spec.subjects.${index}.name`}
                   render={({ field, fieldState }) => (
-                    <TextField
+                    <Autocomplete
                       {...field}
-                      required
+                      disablePortal
+                      freeSolo
+                      options={usernames}
                       fullWidth
-                      label="Username"
-                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                      InputProps={{
-                        readOnly: action === 'read',
+                      onChange={(_, data) => {
+                        field.onChange(data);
                       }}
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                      onChange={(event) => {
-                        field.onChange(event);
-                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Username"
+                          required
+                          error={!!fieldState.error}
+                          helperText={fieldState.error?.message}
+                        />
+                      )}
                     />
                   )}
                 />

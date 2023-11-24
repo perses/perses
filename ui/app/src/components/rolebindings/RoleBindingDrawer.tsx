@@ -14,8 +14,6 @@
 import { RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
-import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteRoleBindingDialog } from '../dialogs';
 import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 

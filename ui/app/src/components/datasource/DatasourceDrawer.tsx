@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Datasource, DispatchWithPromise } from '@perses-dev/core';
+import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';

@@ -14,8 +14,6 @@
 import { Role, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
-import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteRoleDialog } from '../dialogs';
 import { RoleEditorForm } from './RoleEditorForm';
 
