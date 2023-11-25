@@ -38,6 +38,16 @@ export interface DatasourceStore {
    * Sets the list of datasources defined in the dashboard
    */
   setLocalDatasources(datasources: Record<string, DatasourceSpec>): void;
+
+  /**
+   * Gets the list of datasources that are available in the dashboard (i.e. dashboards that have been created on the server side that we can use).
+   */
+  getSavedDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Sets the list of datasources that are saved in the dashboard
+   */
+  setSavedDatasources(datasources: Record<string, DatasourceSpec>): void;
 }
 
 export interface DatasourceSelectItemGroup {
@@ -50,6 +60,7 @@ export interface DatasourceSelectItem {
   name: string;
   overridden?: boolean;
   overriding?: boolean;
+  saved?: boolean;
   selector: DatasourceSelectItemSelector;
 }
 

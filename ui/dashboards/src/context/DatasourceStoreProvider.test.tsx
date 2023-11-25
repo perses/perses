@@ -54,6 +54,7 @@ interface TestData {
     // datasources input. Considered empty if not defined
     datasources: {
       local: Record<string, DatasourceSpec | undefined>; // `| undefined` is to make jest accept the type as parametrizable
+      saved?: Record<string, DatasourceSpec | undefined>;
       project: Datasource[];
       global: Datasource[];
     };
@@ -130,6 +131,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
               {
                 name: 'localDatasourceA',
                 overridden: false,
+                saved: true,
                 selector: {
                   group: 'dashboard',
                   kind: FAKE_PLUGIN_KIND,
@@ -244,6 +246,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
               {
                 name: 'localDatasourceA',
                 overridden: false,
+                saved: true,
                 selector: {
                   group: 'dashboard',
                   kind: FAKE_PLUGIN_KIND,
@@ -380,6 +383,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
                 name: 'datasourceA',
                 overridden: false,
                 overriding: true,
+                saved: true,
                 selector: {
                   group: 'dashboard',
                   kind: FAKE_PLUGIN_KIND,
@@ -442,6 +446,51 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
         ],
       },
     },
+    {
+      title: 'datasource exists locally but not saved yet',
+      input: {
+        datasources: {
+          local: {
+            localDatasourceA: definedInDashboard({ default: false }),
+          },
+          saved: {},
+          project: [],
+          global: [],
+        },
+      },
+      expected: {
+        result: [
+          {
+            editLink: undefined,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_KIND}`,
+            items: [
+              {
+                name: 'Default (localDatasourceA from dashboard)',
+                selector: {
+                  kind: FAKE_PLUGIN_KIND,
+                },
+              },
+            ],
+          },
+          {
+            editLink: undefined,
+            group: 'dashboard',
+            items: [
+              {
+                name: 'localDatasourceA',
+                overridden: false,
+                saved: false,
+                selector: {
+                  group: 'dashboard',
+                  kind: FAKE_PLUGIN_KIND,
+                  name: 'localDatasourceA',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
   ])('$title', async (data: TestData) => {
     const datasourceApiMock = {
       buildProxyUrl: jest.fn().mockReturnValue(''),
@@ -462,6 +511,9 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
               dashboardResource={dashboard}
               projectName={PROJECT}
               datasourceApi={datasourceApiMock}
+              savedDatasources={
+                (data.input.datasources.saved ?? data.input.datasources.local) as Record<string, DatasourceSpec>
+              }
             >
               {children}
             </DatasourceStoreProvider>

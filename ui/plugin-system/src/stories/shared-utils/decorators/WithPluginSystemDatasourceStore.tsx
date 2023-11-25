@@ -87,6 +87,12 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
       }
       throw new Error(`WithDatasourceStore is not configured to support kind: ${datasourcePluginKind}`);
     },
+    getSavedDatasources: (): Record<string, DatasourceSpec> => {
+      return {};
+    },
+    setSavedDatasources: (datasources: Record<string, DatasourceSpec>) => {
+      return datasources;
+    },
     getLocalDatasources: (): Record<string, DatasourceSpec> => {
       return {};
     },
