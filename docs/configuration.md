@@ -94,11 +94,11 @@ Generic placeholders are defined as follows:
   # It contains any configuration that changes authorization behavior like default permissions
   [ authorization: <authorization_config> ]
 
-  # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
-  # Note that if it is not provided, it will be generated. 
-  # When Perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
-  # and therefore won't be able to decrypt what the other is encrypting.
-  # Also note that the key must be at least 32 bytes long.
+  # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
+  # Note that if it is not provided, it will use a default value.
+  # When Perses is used in a multi instance mode, you should provide the key.
+  # Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
+  # Also note the key must be at least 32 bytes long.
   [ encryption_key: <secret> ]
 
   # The path to the file containing the secret key.
