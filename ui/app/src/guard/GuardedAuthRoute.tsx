@@ -15,42 +15,34 @@ import { Await, Outlet, useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
-import { useGetConfigMutation } from '../model/config-client';
 import { useIsTokenExist } from '../model/auth-client';
 import { SignInRoute } from '../model/route';
+import { useConfigContext } from '../context/Config';
 
 function GuardedAuthRoute() {
-  const { mutateAsync } = useGetConfigMutation();
   const { exceptionSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const isTokenExist = useIsTokenExist();
+  const { config } = useConfigContext();
   const [authPromise, setAuthPromise] = useState<Promise<boolean>>();
 
   useEffect(() => {
     if (authPromise !== undefined) {
       return;
     }
-    setAuthPromise(
-      mutateAsync()
-        .catch((err) => {
-          exceptionSnackbar(err);
-          throw err;
-        })
-        .then((conf) => {
-          if (!conf.security.authorization.enable_authorization) {
-            return true;
-          }
-          // In case the token is null, it means we weren't able to find the cookie.
-          if (!isTokenExist) {
-            navigate(SignInRoute);
-            const err = new Error('session has expired');
-            exceptionSnackbar(err);
-            throw err;
-          }
-          return true;
-        })
-    );
-  }, [authPromise, exceptionSnackbar, isTokenExist, mutateAsync, navigate]);
+    setAuthPromise(() => {
+      if (!config.security.authorization.enable_authorization) {
+        return Promise.resolve(true);
+      }
+      if (!isTokenExist) {
+        navigate(SignInRoute);
+        const err = new Error('session has expired');
+        exceptionSnackbar(err);
+        throw err;
+      }
+      return Promise.resolve(true);
+    });
+  }, [authPromise, config, exceptionSnackbar, isTokenExist, navigate]);
   return (
     <Suspense fallback={<LinearProgress />}>
       <Await resolve={authPromise}>
