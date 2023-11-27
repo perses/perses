@@ -32,7 +32,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';

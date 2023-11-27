@@ -29,7 +29,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';

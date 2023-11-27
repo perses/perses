@@ -11,37 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Card, CardContent, CircularProgress, Stack } from '@mui/material';
+import { Card, CardContent, Stack } from '@mui/material';
 import InformationIcon from 'mdi-material-ui/Information';
-import { useInformation } from '../../model/config-client';
+import { useInformation } from '../../context/Config';
 
 /*
  * Information section is displayed if there is information provided by the config
  */
 export function InformationSection() {
-  const { data, isLoading } = useInformation();
-
-  if (isLoading) {
-    return (
-      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
+  const data = useInformation();
+  return (
+    <Stack my={2}>
+      <Stack direction="row" alignItems="center" gap={1}>
+        <InformationIcon />
+        <h2>Information</h2>
       </Stack>
-    );
-  }
-
-  if (data) {
-    return (
-      <Stack my={2}>
-        <Stack direction="row" alignItems="center" gap={1}>
-          <InformationIcon />
-          <h2>Information</h2>
-        </Stack>
-        <Card>
-          <CardContent dangerouslySetInnerHTML={{ __html: data }}></CardContent>
-        </Card>
-      </Stack>
-    );
-  }
-
-  return <></>;
+      <Card>
+        <CardContent dangerouslySetInnerHTML={{ __html: data }}></CardContent>
+      </Card>
+    </Stack>
+  );
 }

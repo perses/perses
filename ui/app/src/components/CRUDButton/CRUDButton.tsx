@@ -14,7 +14,7 @@
 import { Button, Tooltip } from '@mui/material';
 import { OverridableStringUnion } from '@mui/types';
 import { ButtonPropsColorOverrides, ButtonPropsVariantOverrides } from '@mui/material/Button/Button';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 
 interface CRUDButtonProps {
   text: string;

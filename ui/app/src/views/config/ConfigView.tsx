@@ -11,23 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CircularProgress, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
-import { useConfig } from '../../model/config-client';
+import { useConfigContext } from '../../context/Config';
 
 function ConfigView() {
-  const { data, isLoading } = useConfig();
+  const { config } = useConfigContext();
   return (
     <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={2}>
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize={'large'} />} />
-      {isLoading && (
-        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress />
-        </Stack>
-      )}
-      {data !== undefined && <JSONEditor value={data} readOnly />}
+      <JSONEditor value={config} readOnly />
     </Stack>
   );
 }
