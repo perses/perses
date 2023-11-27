@@ -13,7 +13,7 @@ dashboard.
 This section introduces you to the Perses project and provides you with an understanding of its role in the CoreDash
 community.
 
-### 2 - Installing Perses (Coming soon...)
+### [2 - Installing Perses](section-2.md)
 
 This section walks you through the steps for installing Perses on your local machine.
 
