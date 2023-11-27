@@ -21,23 +21,35 @@ import {
   GlobalDatasource,
   getVariableExtendedDisplayName,
   GlobalVariableResource,
+  GlobalRoleResource,
+  GlobalRoleBindingResource,
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
+import ShieldIcon from 'mdi-material-ui/Shield';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useIsReadonly } from '../../context/Config';
+import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
+import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebinding-client';
+import { useCreateGlobalRoleMutation } from '../../model/global-role-client';
+import { RoleDrawer } from '../../components/roles/RoleDrawer';
+import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecret';
+import { GlobalRoles } from './tabs/GlobalRoles';
+import { GlobalRoleBindings } from './tabs/GlobalRoleBindings';
 
-const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
+const rolesTabIndex = 'roles';
+const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
+const variablesTabIndex = 'variables';
 
 interface TabButtonProps {
   index: string;
@@ -45,12 +57,64 @@ interface TabButtonProps {
 
 function TabButton(props: TabButtonProps) {
   const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
+  const createGlobalRoleMutation = useCreateGlobalRoleMutation();
+  const createGlobalRoleBindingMutation = useCreateGlobalRoleBindingMutation();
   const createGlobalVariableMutation = useCreateGlobalVariableMutation();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
+  const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
+  const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
   const isReadonly = useIsReadonly();
+
+  const handleGlobalDatasourceCreation = useCallback(
+    (datasource: GlobalDatasource) => {
+      createGlobalDatasourceMutation.mutate(datasource, {
+        onSuccess: (createdDatasource: GlobalDatasource) => {
+          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          setDatasourceDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation]
+  );
+
+  const handleGlobalRoleCreation = useCallback(
+    (role: GlobalRoleResource) => {
+      createGlobalRoleMutation.mutate(role, {
+        onSuccess: (createdRole: GlobalRoleResource) => {
+          successSnackbar(`GlobalRole ${createdRole.metadata.name} has been successfully created`);
+          setRoleDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createGlobalRoleMutation]
+  );
+
+  const handleGlobalRoleBindingCreation = useCallback(
+    (roleBinding: GlobalRoleBindingResource) => {
+      createGlobalRoleBindingMutation.mutate(roleBinding, {
+        onSuccess: (createdRoleBinding: GlobalRoleBindingResource) => {
+          successSnackbar(`GlobalRoleBinding ${createdRoleBinding.metadata.name} has been successfully created`);
+          setRoleBindingDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation]
+  );
 
   const handleGlobalVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
@@ -68,22 +132,6 @@ function TabButton(props: TabButtonProps) {
       });
     },
     [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
-  );
-
-  const handleGlobalDatasourceCreation = useCallback(
-    (datasource: GlobalDatasource) => {
-      createGlobalDatasourceMutation.mutate(datasource, {
-        onSuccess: (createdDatasource: GlobalDatasource) => {
-          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setDatasourceDrawerOpened(false);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-          throw err;
-        },
-      });
-    },
-    [exceptionSnackbar, successSnackbar, createGlobalDatasourceMutation]
   );
 
   switch (props.index) {
@@ -144,6 +192,55 @@ function TabButton(props: TabButtonProps) {
           />
         </>
       );
+    case rolesTabIndex:
+      return (
+        <>
+          <CRUDButton text="Add Global Role" variant="contained" onClick={() => setRoleDrawerOpened(true)} />
+          <RoleDrawer
+            role={{
+              kind: 'GlobalRole',
+              metadata: {
+                name: 'NewRole',
+              },
+              spec: {
+                permissions: [],
+              },
+            }}
+            isOpen={isRoleDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleGlobalRoleCreation}
+            onClose={() => setRoleDrawerOpened(false)}
+          />
+        </>
+      );
+    case roleBindingsTabIndex:
+      return (
+        <>
+          <CRUDButton
+            text="Add Global Role Binding"
+            variant="contained"
+            onClick={() => setRoleBindingDrawerOpened(true)}
+          />
+          <RoleBindingDrawer
+            roleBinding={{
+              kind: 'GlobalRoleBinding',
+              metadata: {
+                name: 'NewRoleBinding',
+              },
+              spec: {
+                role: '',
+                subjects: [],
+              },
+            }}
+            isOpen={isRoleBindingDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleGlobalRoleBindingCreation}
+            onClose={() => setRoleBindingDrawerOpened(false)}
+          />
+        </>
+      );
     default:
       return <></>;
   }
@@ -184,6 +281,7 @@ interface AdminTabsProps {
 
 export function AdminTabs(props: AdminTabsProps) {
   const { initialTab } = props;
+  const isAuthorizationEnabled = useIsAuthorizationEnabled();
 
   const navigate = useNavigate();
 
@@ -204,25 +302,41 @@ export function AdminTabs(props: AdminTabsProps) {
       >
         <MenuTabs value={value} onChange={handleChange} aria-label="Admin tabs">
           <MenuTab
-            label="Global variables"
+            label="Global Variables"
             icon={<CodeJsonIcon />}
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}
           />
           <MenuTab
-            label="Global datasources"
+            label="Global Datasources"
             icon={<DatabaseIcon />}
             iconPosition="start"
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
           />
           <MenuTab
-            label="Global secrets"
+            label="Global Secrets"
             icon={<KeyIcon />}
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
+          />
+          <MenuTab
+            label="Global Roles"
+            icon={<ShieldIcon />}
+            iconPosition="start"
+            {...a11yProps(roleBindingsTabIndex)}
+            value={rolesTabIndex}
+            disabled={!isAuthorizationEnabled}
+          />
+          <MenuTab
+            label="Global Role Bindings"
+            icon={<ShieldAccountIcon />}
+            iconPosition="start"
+            {...a11yProps(roleBindingsTabIndex)}
+            value={roleBindingsTabIndex}
+            disabled={!isAuthorizationEnabled}
           />
         </MenuTabs>
         <TabButton index={value} />
@@ -236,6 +350,16 @@ export function AdminTabs(props: AdminTabsProps) {
       <TabPanel value={value} index={secretsTabIndex}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
+      {isAuthorizationEnabled && (
+        <>
+          <TabPanel value={value} index={rolesTabIndex}>
+            <GlobalRoles id="global-role-list" />
+          </TabPanel>
+          <TabPanel value={value} index={roleBindingsTabIndex}>
+            <GlobalRoleBindings id="global-rolebinding-list" />
+          </TabPanel>
+        </>
+      )}
     </Box>
   );
 }

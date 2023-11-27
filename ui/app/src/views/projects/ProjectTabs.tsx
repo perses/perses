@@ -357,6 +357,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(rolesTabIndex)}
             value={rolesTabIndex}
+            disabled={!isAuthorizationEnabled}
           />
           <MenuTab
             label="Role Bindings"
@@ -364,6 +365,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(roleBindingsTabIndex)}
             value={roleBindingsTabIndex}
+            disabled={!isAuthorizationEnabled}
           />
         </MenuTabs>
         <TabButton index={value} projectName={projectName} />
