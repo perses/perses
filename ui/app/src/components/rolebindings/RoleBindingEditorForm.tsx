@@ -29,6 +29,7 @@ import { useUserList } from '../../model/user-client';
 interface RoleBindingEditorFormProps {
   initialRoleBinding: RoleBinding;
   initialAction: Action;
+  roleSuggestions: string[];
   isDraft: boolean;
   isReadonly?: boolean;
   onSave: (def: RoleBinding) => void;
@@ -37,7 +38,7 @@ interface RoleBindingEditorFormProps {
 }
 
 export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
-  const { initialRoleBinding, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
+  const { initialRoleBinding, initialAction, roleSuggestions, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
@@ -60,10 +61,10 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
     name: 'spec.subjects',
   });
 
-  const { data } = useUserList();
+  const { data: users } = useUserList();
   const usernames = useMemo(() => {
-    return (data ?? []).map((user) => user.metadata.name);
-  }, [data]);
+    return (users ?? []).map((user) => user.metadata.name);
+  }, [users]);
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -155,21 +156,28 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
           <Controller
             name="spec.role"
             render={({ field, fieldState }) => (
-              <TextField
+              <Autocomplete
                 {...field}
-                required
+                disablePortal
+                freeSolo
+                options={roleSuggestions}
                 fullWidth
-                label="Role"
-                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                InputProps={{
-                  disabled: action === 'update',
-                  readOnly: action === 'read',
+                readOnly={action !== 'create'} // Role of a Role Binding can't be updated
+                onChange={(_, data) => {
+                  field.onChange(data);
                 }}
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-                onChange={(event) => {
-                  field.onChange(event);
-                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Role"
+                    required
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    onChange={(event) => {
+                      field.onChange(event.target.value);
+                    }}
+                  />
+                )}
               />
             )}
           />
@@ -191,6 +199,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                       freeSolo
                       options={usernames}
                       fullWidth
+                      readOnly={action === 'read'}
                       onChange={(_, data) => {
                         field.onChange(data);
                       }}
@@ -201,6 +210,9 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                           required
                           error={!!fieldState.error}
                           helperText={fieldState.error?.message}
+                          onChange={(event) => {
+                            field.onChange(event.target.value);
+                          }}
                         />
                       )}
                     />
@@ -208,8 +220,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
                 />
                 <IconButton
                   disabled={isReadonly || action === 'read'}
-                  style={{ width: 'fit-content' }}
-                  // Add a new subject
+                  style={{ width: 'fit-content', height: 'fit-content' }}
                   onClick={() => remove(index)}
                 >
                   <MinusIcon />
@@ -223,7 +234,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
           )}
           <IconButton
             disabled={isReadonly || action === 'read'}
-            style={{ width: 'fit-content' }}
+            style={{ width: 'fit-content', height: 'fit-content' }}
             // Add a new subject
             onClick={() => append({ kind: 'User', name: '' })}
           >

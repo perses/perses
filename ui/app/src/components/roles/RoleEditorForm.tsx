@@ -157,7 +157,6 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
                   <IconButton
                     disabled={isReadonly || action === 'read'}
                     style={{ width: 'fit-content', height: 'fit-content' }}
-                    // Add a new permission
                     onClick={() => remove(index)}
                   >
                     <MinusIcon />
@@ -173,7 +172,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
           )}
           <IconButton
             disabled={isReadonly || action === 'read'}
-            style={{ width: 'fit-content' }}
+            style={{ width: 'fit-content', height: 'fit-content' }}
             // Add a new subject
             onClick={() => append({ actions: ['read'], scopes: ['*'] })}
           >

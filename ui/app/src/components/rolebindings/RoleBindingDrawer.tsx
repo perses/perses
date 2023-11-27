@@ -19,6 +19,7 @@ import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
 interface RoleBindingDrawerProps<T extends RoleBinding> {
   roleBinding: T;
+  roleSuggestions?: string[];
   isOpen: boolean;
   action: Action;
   isReadonly?: boolean;
@@ -28,7 +29,7 @@ interface RoleBindingDrawerProps<T extends RoleBinding> {
 }
 
 export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawerProps<T>) {
-  const { roleBinding, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+  const { roleBinding, roleSuggestions, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
   const [isDeleteRoleBindingDialogStateOpened, setDeleteRoleBindingDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
@@ -44,6 +45,7 @@ export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawe
           <RoleBindingEditorForm
             initialRoleBinding={roleBinding}
             initialAction={action}
+            roleSuggestions={roleSuggestions ?? []}
             isDraft={false}
             isReadonly={isReadonly}
             onSave={onSave as Dispatch<RoleBinding>}

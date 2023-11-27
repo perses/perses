@@ -21,6 +21,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteRoleBindingDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
+import { subjectsSummary } from '../../utils/role';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
 
@@ -61,6 +62,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
         ({
           project: getMetadataProject(roleBinding.metadata),
           name: roleBinding.metadata.name,
+          subjects: subjectsSummary(roleBinding.spec.subjects, 5),
           version: roleBinding.metadata.version,
           createdAt: roleBinding.metadata.createdAt,
           updatedAt: roleBinding.metadata.updatedAt,
@@ -112,6 +114,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
       { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
+      { field: 'subjects', headerName: 'Subjects', type: 'string', flex: 3, minWidth: 150 },
       {
         field: 'version',
         headerName: 'Version',

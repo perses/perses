@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
+import { ReactNode, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
@@ -36,7 +36,7 @@ import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebinding-client';
-import { useCreateGlobalRoleMutation } from '../../model/global-role-client';
+import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
@@ -67,6 +67,11 @@ function TabButton(props: TabButtonProps) {
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
   const isReadonly = useIsReadonly();
+
+  const { data } = useGlobalRoleList();
+  const roleSuggestions = useMemo(() => {
+    return (data ?? []).map((role) => role.metadata.name);
+  }, [data]);
 
   const handleGlobalDatasourceCreation = useCallback(
     (datasource: GlobalDatasource) => {
@@ -233,6 +238,7 @@ function TabButton(props: TabButtonProps) {
                 subjects: [],
               },
             }}
+            roleSuggestions={roleSuggestions}
             isOpen={isRoleBindingDrawerOpened}
             action="create"
             isReadonly={isReadonly}
