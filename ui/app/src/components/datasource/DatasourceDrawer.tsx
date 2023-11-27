@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
+import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Action, DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
 

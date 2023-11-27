@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  getDatasourceDisplayName,
-  getMetadataProject,
-  Datasource,
-  DispatchWithPromise,
-  Action,
-} from '@perses-dev/core';
+import { getMetadataProject, Role, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Stack, Tooltip } from '@mui/material';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
@@ -25,12 +19,12 @@ import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { DeleteRoleDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
-import { DeleteDatasourceDialog } from '../dialogs';
-import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
-import { DatasourceDrawer } from './DatasourceDrawer';
+import { RoleDataGrid, Row } from './RoleDataGrid';
+import { RoleDrawer } from './RoleDrawer';
 
-export interface DatasourceListProperties<T extends Datasource> {
+export interface RoleListProperties<T extends Role> {
   data: T[];
   hideToolbar?: boolean;
   onUpdate: DispatchWithPromise<T>;
@@ -40,94 +34,82 @@ export interface DatasourceListProperties<T extends Datasource> {
 }
 
 /**
- * Display datasources in a table style.
- * @param props.data Contains all datasources to display
+ * Display roles in a table style.
+ * @param props.data Contains all roles to display
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.onUpdate Event received when an 'update' action has been requested
  * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DatasourceList<T extends Datasource>(props: DatasourceListProperties<T>) {
+export function RoleList<T extends Role>(props: RoleListProperties<T>) {
   const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
-  const findDatasource = useCallback(
+  const findRole = useCallback(
     (name: string, project?: string) => {
-      return data.find(
-        (datasource) => getMetadataProject(datasource.metadata) === project && datasource.metadata.name === name
-      );
+      return data.find((role) => getMetadataProject(role.metadata) === project && role.metadata.name === name);
     },
     [data]
   );
 
   const rows = useMemo(() => {
     return data.map(
-      (datasource) =>
+      (role) =>
         ({
-          project: getMetadataProject(datasource.metadata),
-          name: datasource.metadata.name,
-          displayName: getDatasourceDisplayName(datasource),
-          description: datasource.spec.display?.description,
-          type: datasource.spec.plugin.kind,
-          version: datasource.metadata.version,
-          createdAt: datasource.metadata.createdAt,
-          updatedAt: datasource.metadata.updatedAt,
+          project: getMetadataProject(role.metadata),
+          name: role.metadata.name,
+          version: role.metadata.version,
+          createdAt: role.metadata.createdAt,
+          updatedAt: role.metadata.updatedAt,
         } as Row)
     );
   }, [data]);
 
-  const [targetedDatasource, setTargetedDatasource] = useState<T>();
+  const [targetedRole, setTargetedRole] = useState<T>();
   const [action, setAction] = useState<Action>('read');
-  const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState<boolean>(false);
-  const [isDeleteDatasourceDialogOpened, setDeleteDatasourceDialogOpened] = useState<boolean>(false);
+  const [isRoleDrawerOpened, setRoleDrawerOpened] = useState<boolean>(false);
+  const [isDeleteRoleDialogOpened, setDeleteRoleDialogOpened] = useState<boolean>(false);
 
-  const handleDatasourceUpdate = useCallback(
-    async (datasource: T) => {
-      await onUpdate(datasource);
-      setDatasourceDrawerOpened(false);
+  const handleRoleUpdate = useCallback(
+    async (role: T) => {
+      await onUpdate(role);
+      setRoleDrawerOpened(false);
     },
     [onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
-      setTargetedDatasource(findDatasource(name, project));
+      setTargetedRole(findRole(name, project));
       setAction('read');
-      setDatasourceDrawerOpened(true);
+      setRoleDrawerOpened(true);
     },
-    [findDatasource]
+    [findRole]
   );
 
   const handleEditButtonClick = useCallback(
     (name: string, project?: string) => () => {
-      const datasource = findDatasource(name, project);
-      setTargetedDatasource(datasource);
+      const role = findRole(name, project);
+      setTargetedRole(role);
       setAction('update');
-      setDatasourceDrawerOpened(true);
+      setRoleDrawerOpened(true);
     },
-    [findDatasource]
+    [findRole]
   );
 
   const handleDeleteButtonClick = useCallback(
     (name: string, project?: string) => () => {
-      setTargetedDatasource(findDatasource(name, project));
-      setDeleteDatasourceDialogOpened(true);
+      setTargetedRole(findRole(name, project));
+      setDeleteRoleDialogOpened(true);
     },
-    [findDatasource]
+    [findRole]
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'name',
-        headerName: 'Name',
-        type: 'string',
-        flex: 2,
-        renderCell: (params) => <pre>{params.value}</pre>,
-      },
+      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
       {
         field: 'version',
         headerName: 'Version',
@@ -137,8 +119,6 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         flex: 1,
         minWidth: 80,
       },
-      { field: 'description', headerName: 'Description', type: 'string', flex: 3, minWidth: 300 },
-      { field: 'type', headerName: 'Type', type: 'string', flex: 2 },
       {
         field: 'createdAt',
         headerName: 'Creation Date',
@@ -194,7 +174,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
 
   return (
     <Stack width="100%">
-      <DatasourceDataGrid
+      <RoleDataGrid
         rows={rows}
         columns={columns}
         initialState={initialState}
@@ -202,22 +182,22 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         isLoading={isLoading}
         onRowClick={handleRowClick}
       />
-      {targetedDatasource && (
+      {targetedRole && (
         <>
-          <DatasourceDrawer
-            datasource={targetedDatasource}
-            isOpen={isDatasourceDrawerOpened}
+          <RoleDrawer
+            role={targetedRole}
+            isOpen={isRoleDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={handleDatasourceUpdate}
+            onSave={(v: T) => handleRoleUpdate(v).then(() => setRoleDrawerOpened(false))}
             onDelete={onDelete}
-            onClose={() => setDatasourceDrawerOpened(false)}
+            onClose={() => setRoleDrawerOpened(false)}
           />
-          <DeleteDatasourceDialog
-            open={isDeleteDatasourceDialogOpened}
-            onClose={() => setDeleteDatasourceDialogOpened(false)}
-            onSubmit={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
-            datasource={targetedDatasource}
+          <DeleteRoleDialog
+            open={isDeleteRoleDialogOpened}
+            onClose={() => setDeleteRoleDialogOpened(false)}
+            onSubmit={(v: T) => onDelete(v).then(() => setDeleteRoleDialogOpened(false))}
+            role={targetedRole}
           />
         </>
       )}

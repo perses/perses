@@ -12,14 +12,14 @@
 // limitations under the License.
 
 import { useImmer } from 'use-immer';
-import { Display, DatasourceSpec } from '@perses-dev/core';
+import { Action, Display, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
-import { Action, getSubmitText, getTitleAction } from '../../utils';
+import { getSubmitText, getTitleAction } from '../../utils';
 import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
 
 /**

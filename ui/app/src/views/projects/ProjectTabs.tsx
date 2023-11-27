@@ -16,6 +16,8 @@ import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
+import ShieldIcon from 'mdi-material-ui/Shield';
+import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import KeyIcon from 'mdi-material-ui/Key';
 import {
   getDatasourceDisplayName,
@@ -23,6 +25,8 @@ import {
   DashboardSelector,
   ProjectDatasource,
   VariableResource,
+  RoleResource,
+  RoleBindingResource,
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
@@ -32,17 +36,25 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsReadonly } from '../../context/Config';
+import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
+import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
+import { useCreateRoleMutation } from '../../model/role-client';
+import { RoleDrawer } from '../../components/roles/RoleDrawer';
+import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
 import { ProjectSecrets } from './tabs/ProjectSecrets';
+import { ProjectRoles } from './tabs/ProjectRoles';
+import { ProjectRoleBindings } from './tabs/ProjectRoleBindings';
 
 const dashboardsTabIndex = 'dashboards';
-const variablesTabIndex = 'variables';
 const datasourcesTabIndex = 'datasources';
+const rolesTabIndex = 'roles';
+const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
+const variablesTabIndex = 'variables';
 
 interface TabButtonProps {
   index: string;
@@ -51,13 +63,19 @@ interface TabButtonProps {
 
 function TabButton(props: TabButtonProps) {
   const navigate = useNavigate();
-  const createVariableMutation = useCreateVariableMutation(props.projectName);
-  const createDatasourceMutation = useCreateDatasourceMutation(props.projectName);
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
+  const createDatasourceMutation = useCreateDatasourceMutation(props.projectName);
+  const createRoleMutation = useCreateRoleMutation(props.projectName);
+  const createRoleBindingMutation = useCreateRoleBindingMutation(props.projectName);
+  const createVariableMutation = useCreateVariableMutation(props.projectName);
+
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
-  const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
+  const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
+  const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
+  const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
+
   const isReadonly = useIsReadonly();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
@@ -94,6 +112,38 @@ function TabButton(props: TabButtonProps) {
       });
     },
     [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+  );
+
+  const handleRoleCreation = useCallback(
+    (role: RoleResource) => {
+      createRoleMutation.mutate(role, {
+        onSuccess: (createdRole: RoleResource) => {
+          successSnackbar(`Role ${createdRole.metadata.name} has been successfully created`);
+          setRoleDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createRoleMutation]
+  );
+
+  const handleRoleBindingCreation = useCallback(
+    (roleBinding: RoleBindingResource) => {
+      createRoleBindingMutation.mutate(roleBinding, {
+        onSuccess: (createdRoleBinding: RoleBindingResource) => {
+          successSnackbar(`RoleBinding ${createdRoleBinding.metadata.name} has been successfully created`);
+          setRoleBindingDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
   );
 
   switch (props.index) {
@@ -165,6 +215,53 @@ function TabButton(props: TabButtonProps) {
           />
         </>
       );
+    case rolesTabIndex:
+      return (
+        <>
+          <CRUDButton text="Add Role" variant="contained" onClick={() => setRoleDrawerOpened(true)} />
+          <RoleDrawer
+            role={{
+              kind: 'Role',
+              metadata: {
+                name: 'NewRole',
+                project: props.projectName,
+              },
+              spec: {
+                permissions: [],
+              },
+            }}
+            isOpen={isRoleDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleRoleCreation}
+            onClose={() => setRoleDrawerOpened(false)}
+          />
+        </>
+      );
+    case roleBindingsTabIndex:
+      return (
+        <>
+          <CRUDButton text="Add Role Binding" variant="contained" onClick={() => setRoleBindingDrawerOpened(true)} />
+          <RoleBindingDrawer
+            roleBinding={{
+              kind: 'RoleBinding',
+              metadata: {
+                name: 'NewRoleBinding',
+                project: props.projectName,
+              },
+              spec: {
+                role: '',
+                subjects: [],
+              },
+            }}
+            isOpen={isRoleBindingDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleRoleBindingCreation}
+            onClose={() => setRoleBindingDrawerOpened(false)}
+          />
+        </>
+      );
     default:
       return <></>;
   }
@@ -206,6 +303,7 @@ interface DashboardVariableTabsProps {
 
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
+  const isAuthorizationEnabled = useIsAuthorizationEnabled();
 
   const navigate = useNavigate();
 
@@ -253,6 +351,20 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
           />
+          <MenuTab
+            label="Roles"
+            icon={<ShieldIcon />}
+            iconPosition="start"
+            {...a11yProps(rolesTabIndex)}
+            value={rolesTabIndex}
+          />
+          <MenuTab
+            label="Role Bindings"
+            icon={<ShieldAccountIcon />}
+            iconPosition="start"
+            {...a11yProps(roleBindingsTabIndex)}
+            value={roleBindingsTabIndex}
+          />
         </MenuTabs>
         <TabButton index={value} projectName={projectName} />
       </Stack>
@@ -266,8 +378,18 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         <ProjectDatasources projectName={projectName} id="project-datasource-list" />
       </TabPanel>
       <TabPanel value={value} index={secretsTabIndex}>
-        <ProjectSecrets projectName={projectName} id="secret-datasource-list" />
+        <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
+      {isAuthorizationEnabled && (
+        <>
+          <TabPanel value={value} index={rolesTabIndex}>
+            <ProjectRoles projectName={projectName} id="project-role-list" />
+          </TabPanel>
+          <TabPanel value={value} index={roleBindingsTabIndex}>
+            <ProjectRoleBindings projectName={projectName} id="project-rolebinding-list" />
+          </TabPanel>
+        </>
+      )}
     </Box>
   );
 }

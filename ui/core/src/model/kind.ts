@@ -11,4 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const CreateAction = 'create';
+export type Kind =
+  | 'Dashboard'
+  | 'Datasource'
+  | 'Folder'
+  | 'GlobalDatasource'
+  | 'GlobalRole'
+  | 'GlobalRoleBinding'
+  | 'GlobalSecret'
+  | 'GlobalVariable'
+  | 'Project'
+  | 'Role'
+  | 'RoleBinding'
+  | 'Secret'
+  | 'User'
+  | 'Variable';
+
+export const KINDS: Kind[] = [
+  'Dashboard',
+  'Datasource',
+  'Folder',
+  'GlobalDatasource',
+  'GlobalRole',
+  'GlobalRoleBinding',
+  'GlobalSecret',
+  'GlobalVariable',
+  'Project',
+  'Role',
+  'RoleBinding',
+  'Secret',
+  'User',
+  'Variable',
+];

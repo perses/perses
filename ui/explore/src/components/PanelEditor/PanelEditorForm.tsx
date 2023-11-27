@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { PanelEditorValues, PanelPreview } from '@perses-dev/dashboards';
-import { Action, usePluginEditor } from '@perses-dev/plugin-system';
+import { usePluginEditor } from '@perses-dev/plugin-system';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Button, Grid, Stack, Typography } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { Action, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { SetStateAction } from 'react';
 import { TimeSeriesQueryEditor } from '../TimeSeriesQueryEditor';
 import { ExploreToolbar } from '../ExploreToolbar';
