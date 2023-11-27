@@ -5,17 +5,9 @@ examples, and run the container on your local machine.
 
 ## Installing Podman tooling
 
-Installing Perses using a container image is going to be demonstrated here using the 
-[open source project Podman](https://podman.io/). It's assumed you have already installed the Podman commandline tooling 
-previously. For those using Docker, you'll find examples for running this tooling too.
-
-## Starting Podman machine
-You need to make sure that the Podman virtual machine has been started, so, assuming you have initialized a podman 
-machine already:
-
-```shell
-$ podman machine start
-```
+Installing Perses using a container image is going to be demonstrated here using the
+[open source project Podman](https://podman.io/) and [Docker](https://www.docker.com/). It's assumed you have already 
+installed and running either the Podman or the Docker commandline tooling.
 
 ## Running container image
 It's pretty straight forward to running Perses in a container, just start the Perses container image using one of
