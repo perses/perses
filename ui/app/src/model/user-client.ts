@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, Metadata } from '@perses-dev/core';
+import { fetchJson as initialFetchJSON, Metadata } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodGET, HTTPMethodPOST } from './http';
 import buildQueryKey from './querykey-builder';
+import { fetchJson } from './fetch';
 
 const resource = 'users';
 
@@ -54,7 +55,7 @@ export function useUserList() {
 
 export function createUser(entity: UserResource) {
   const url = buildURL({ resource });
-  return fetchJson<UserResource>(url, {
+  return initialFetchJSON<UserResource>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(entity),

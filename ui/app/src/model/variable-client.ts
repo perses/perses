@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, VariableResource } from '@perses-dev/core';
+import { VariableResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
+import { fetch, fetchJson } from './fetch';
 
 export const resource = 'variables';
 
