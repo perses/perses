@@ -20,6 +20,11 @@ import { useInformation } from '../../context/Config';
  */
 export function InformationSection() {
   const data = useInformation();
+
+  if (!data) {
+    return <></>;
+  }
+
   return (
     <Stack my={2}>
       <Stack direction="row" alignItems="center" gap={1}>
