@@ -13,7 +13,7 @@
 
 import { getMetadataProject, RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
 import { Stack, Tooltip } from '@mui/material';
-import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -22,6 +22,8 @@ import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateComm
 import { DeleteRoleBindingDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { GlobalProject } from '../../context/Authorization';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
 
@@ -157,24 +159,28 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
         flex: 0.5,
         minWidth: 100,
         getActions: (params: GridRowParams<Row>) => [
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
             label="Rename"
-            disabled={isReadonly}
+            action="update"
+            scope={params.row.project ? 'RoleBinding' : 'GlobalRoleBinding'}
+            project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
           />,
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
-            disabled={isReadonly}
+            action="delete"
+            scope={params.row.project ? 'RoleBinding' : 'GlobalRoleBinding'}
+            project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
           />,
         ],
       },
     ],
-    [isReadonly, handleEditButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDeleteButtonClick]
   );
 
   return (

@@ -17,6 +17,7 @@ export type URLParams = {
   resource: string;
   name?: string;
   project?: string;
+  pathSuffix?: string[];
   queryParams?: URLSearchParams;
   apiPrefix?: string;
 };
@@ -29,6 +30,10 @@ export default function buildURL(params: URLParams): string {
   url = `${url}/${params.resource}`;
   if (params.name !== undefined && params.name.length > 0) {
     url = `${url}/${encodeURIComponent(params.name)}`;
+  }
+
+  if (params.pathSuffix && params.pathSuffix.length > 0) {
+    url = `${url}/${params.pathSuffix.join('/')}`;
   }
 
   if (params.queryParams !== undefined) {

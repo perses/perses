@@ -30,23 +30,36 @@ export interface AuthBody {
   password: string;
 }
 
-export interface JWTToken {
-  sub: string;
-}
-
 export function useIsAccessTokenExist() {
   const [cookies] = useCookies();
   return cookies[jwtPayload] !== undefined;
 }
 
-export function useAuthToken() {
+// Remove error TS4058: Return type of exported function has or is using name X from external module Y but cannot be named
+interface IUseJwt {
+  isExpired: boolean;
+  decodedToken: Payload | null;
+  reEvaluateToken: (token: string) => void;
+}
+
+interface Payload {
+  iss?: string;
+  sub?: string;
+  aud?: string[];
+  exp?: Date;
+  nbf?: Date;
+  iat?: Date;
+  jti?: string;
+}
+
+export function useAuthToken(): IUseJwt {
   const [cookies] = useCookies();
   const partialToken = cookies[jwtPayload];
   // useJWT need a complete token (including a signature) to be able to decode it.
   // It doesn't need the accurate signature to decode the payload.
   // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-  return useJwt<JWTToken>(`${partialToken}.${fakeSignature}`);
+  return useJwt<Payload>(`${partialToken}.${fakeSignature}`);
 }
 
 export function useAuthMutation() {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson as initialFetchJSON, Metadata } from '@perses-dev/core';
+import { fetchJson as initialFetchJSON, Metadata, Permission } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodGET, HTTPMethodPOST } from './http';
@@ -19,6 +19,7 @@ import buildQueryKey from './querykey-builder';
 import { fetchJson } from './fetch';
 
 const resource = 'users';
+export const userKey = 'user';
 
 export interface UserResource {
   kind: 'User';
@@ -49,7 +50,17 @@ export function useCreateUserMutation() {
  */
 export function useUserList() {
   return useQuery<UserResource[], Error>(buildQueryKey({ resource }), () => {
-    return getRoles();
+    return getUsers();
+  });
+}
+
+/**
+ * Used to get users from the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useUserPermissions(username: string) {
+  return useQuery<Record<string, Permission[]>, Error>([userKey, username, 'permissions'], () => {
+    return getUserPermissions(username);
   });
 }
 
@@ -62,9 +73,21 @@ export function createUser(entity: UserResource) {
   });
 }
 
-function getRoles() {
+function getUsers() {
   const url = buildURL({ resource });
   return fetchJson<UserResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+function getUserPermissions(username: string) {
+  const url = buildURL({ resource, name: username, pathSuffix: ['permissions'] });
+  // If username is empty it's useless to request API
+  if (!username) {
+    return Promise.resolve({});
+  }
+  return fetchJson<Record<string, Permission[]>>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });

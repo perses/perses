@@ -143,7 +143,13 @@ function TabButton(props: TabButtonProps) {
     case variablesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Global Variable" variant="contained" onClick={() => setVariableDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Global Variable"
+            action="create"
+            scope="GlobalVariable"
+            variant="contained"
+            onClick={() => setVariableDrawerOpened(true)}
+          />
           <VariableDrawer
             variable={{
               kind: 'GlobalVariable',
@@ -171,6 +177,8 @@ function TabButton(props: TabButtonProps) {
         <>
           <CRUDButton
             text="Add Global Datasource"
+            action="create"
+            scope="GlobalDatasource"
             variant="contained"
             onClick={() => setDatasourceDrawerOpened(true)}
           />
@@ -200,7 +208,13 @@ function TabButton(props: TabButtonProps) {
     case rolesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Global Role" variant="contained" onClick={() => setRoleDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Global Role"
+            action="create"
+            scope="GlobalRole"
+            variant="contained"
+            onClick={() => setRoleDrawerOpened(true)}
+          />
           <RoleDrawer
             role={{
               kind: 'GlobalRole',
@@ -224,6 +238,8 @@ function TabButton(props: TabButtonProps) {
         <>
           <CRUDButton
             text="Add Global Role Binding"
+            action="create"
+            scope="GlobalRoleBinding"
             variant="contained"
             onClick={() => setRoleBindingDrawerOpened(true)}
           />

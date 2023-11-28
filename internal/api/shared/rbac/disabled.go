@@ -27,6 +27,10 @@ func (r *disabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Ro
 	return true
 }
 
+func (r *disabledImpl) GetPermissions(_ string) map[string][]*v1Role.Permission {
+	return nil
+}
+
 func (r *disabledImpl) Refresh() error {
 	return nil
 }

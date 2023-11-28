@@ -28,7 +28,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/role"
 )
 
-func extractParameters(ctx echo.Context) apiInterface.Parameters {
+func ExtractParameters(ctx echo.Context) apiInterface.Parameters {
 	return apiInterface.Parameters{
 		Project: utils.GetProjectParameter(ctx),
 		Name:    utils.GetNameParameter(ctx),
@@ -43,6 +43,7 @@ type Toolbox interface {
 	Delete(ctx echo.Context) error
 	Get(ctx echo.Context) error
 	List(ctx echo.Context, q databaseModel.Query) error
+	CheckPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error
 }
 
 func NewToolBox(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind) Toolbox {
@@ -105,7 +106,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.CheckPermission(ctx, entity, parameters, role.CreateAction); err != nil {
 		return err
 	}
@@ -120,7 +121,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.CheckPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
 		return err
 	}
@@ -132,7 +133,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.CheckPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
 	}
@@ -143,7 +144,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
@@ -158,7 +159,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	parameters := extractParameters(ctx)
+	parameters := ExtractParameters(ctx)
 	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
