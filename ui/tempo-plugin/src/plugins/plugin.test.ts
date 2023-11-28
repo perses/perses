@@ -50,6 +50,8 @@ const stubTempoContext: TraceQueryContext = {
     getDatasource: getDatasource,
     getDatasourceClient: getDatasourceClient,
     listDatasourceSelectItems: jest.fn(),
+    getLocalDatasources: jest.fn(),
+    setLocalDatasources: jest.fn(),
   },
 };
 
