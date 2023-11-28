@@ -1,7 +1,7 @@
 {
     "name": "@perses-dev/tempo-plugin",
     "version": "0.41.1",
-    "description": "The plugin feature in Perses",
+    "description": "A Perses plugin to interact with Tempo traces",
     "license": "Apache-2.0",
     "homepage": "https://github.com/perses/perses/blob/main/README.md",
     "repository": {

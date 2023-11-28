@@ -106,11 +106,13 @@ describe('useQueryType', () => {
     expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
   });
 
-  it('should return undefined if useLIstPluginMetadata is still loading', () => {
+  it('should return undefined if useListPluginMetadata is still loading', () => {
     (useListPluginMetadata as jest.Mock).mockReturnValue({ isLoading: true });
     const { result } = renderHook(() => useQueryType());
 
     const getQueryType = result.current;
-    expect(getQueryType('UnknownQuery')).toBeUndefined();
+    expect(getQueryType('PrometheusTimeSeriesQuery')).toBeUndefined();
+    expect(getQueryType('TempoTraceQuery')).toBeUndefined();
+    expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
   });
 });

@@ -59,7 +59,8 @@ export function transformQueryResults(results: UseQueryResult[], definitions: Qu
 }
 
 export function useQueryType(): (pluginKind: string) => string | undefined {
-  const { data: timeSeriesQueryPlugins, isLoading } = useListPluginMetadata('TimeSeriesQuery');
+  const { data: timeSeriesQueryPlugins, isLoading: isTimeSeriesQueryLoading } =
+    useListPluginMetadata('TimeSeriesQuery');
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata('TraceQuery');
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
@@ -85,10 +86,17 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
-      if (isLoading) {
-        return undefined;
-      }
-      if (isTraceQueryPluginLoading) {
+      const isLoading = (pluginKind: string) => {
+        switch (pluginKind) {
+          case 'PrometheusTimeSeriesQuery':
+            return isTimeSeriesQueryLoading;
+          case 'TempoTraceQuery':
+            return isTraceQueryPluginLoading;
+        }
+        throw new Error(`Unable to determine the query type: ${pluginKind}`);
+      };
+
+      if (isLoading(pluginKind)) {
         return undefined;
       }
 
@@ -100,7 +108,7 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
 
       throw new Error(`Unable to determine the query type: ${pluginKind}`);
     },
-    [queryTypeMap, isLoading, isTraceQueryPluginLoading]
+    [queryTypeMap, isTimeSeriesQueryLoading, isTraceQueryPluginLoading]
   );
 
   return getQueryType;
