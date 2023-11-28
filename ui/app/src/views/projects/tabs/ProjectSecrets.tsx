@@ -12,11 +12,10 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { Secret, SecretResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { SecretList } from '../../../components/secret/SecretList';
-import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { useDeleteSecretMutation, useUpdateSecretMutation, useSecretList } from '../../../model/secret-client';
 
 interface ProjectSecretsProps {
@@ -26,12 +25,6 @@ interface ProjectSecretsProps {
 
 export function ProjectSecrets(props: ProjectSecretsProps) {
   const { projectName, id } = props;
-  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-  useEffect(() => {
-    // warm up the caching of the datasources
-    datasourceApi.listDatasources(projectName);
-    datasourceApi.listGlobalDatasources();
-  }, [datasourceApi, projectName]);
 
   const { data, isLoading } = useSecretList(projectName);
 

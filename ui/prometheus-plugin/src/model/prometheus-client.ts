@@ -44,6 +44,22 @@ export interface QueryOptions {
 }
 
 /**
+ * Calls the `/-/healthy` endpoint to check if the datasource is healthy.
+ */
+export function healthCheck(queryOptions: QueryOptions) {
+  return async () => {
+    const url = `${queryOptions.datasourceUrl}/-/healthy`;
+
+    try {
+      const resp = await fetch(url, { headers: queryOptions.headers });
+      return resp.status === 200;
+    } catch {
+      return false;
+    }
+  };
+}
+
+/**
  * Calls the `/api/v1/query` endpoint to get metrics data.
  */
 export function instantQuery(params: InstantQueryRequestParameters, queryOptions: QueryOptions) {

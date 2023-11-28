@@ -35,7 +35,7 @@ import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
 import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { DeleteProjectDialog } from '../../components/dialogs';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 
 interface ProjectRow {
   project: string;

@@ -58,7 +58,7 @@ func TestGenerateProjectResourceSelectQuery(t *testing.T) {
 
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			sqlQuery, args := generatSelectQuery("perses.dashboard", test.project, test.name)
+			sqlQuery, args := generateSelectQuery("perses.dashboard", test.project, test.name)
 			assert.Equal(t, test.sqlQuery, sqlQuery)
 			assert.Equal(t, test.sqlArgs, args)
 		})

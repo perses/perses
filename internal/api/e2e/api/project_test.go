@@ -22,15 +22,15 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMainScenarioProject(t *testing.T) {
-	e2eframework.MainTestScenario(t, shared.PathProject, func(name string) api.Entity {
+	e2eframework.MainTestScenario(t, utils.PathProject, func(name string) api.Entity {
 		return e2eframework.NewProject(name)
 	})
 }
@@ -42,7 +42,7 @@ func TestDeleteProjectWithSubResources(t *testing.T) {
 		project := e2eframework.NewProject(projectName)
 		datasource := e2eframework.NewDatasource(t, "perses", "Demo")
 		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, project, dash, datasource)
-		expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, shared.PathProject, projectName)).
+		expect.DELETE(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathProject, projectName)).
 			Expect().
 			Status(http.StatusNoContent)
 

@@ -19,6 +19,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { EditVariablesButton } from '../Variables';
+import { EditDatasourcesButton } from '../Datasources';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
@@ -95,6 +96,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
               <Stack direction="row" spacing={1} ml={1} whiteSpace="nowrap">
                 <EditVariablesButton />
+                <EditDatasourcesButton />
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>

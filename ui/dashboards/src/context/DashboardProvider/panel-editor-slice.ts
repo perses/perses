@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelDefinition } from '@perses-dev/core';
+import { Action, PanelDefinition } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { Action } from '@perses-dev/plugin-system';
 import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import {

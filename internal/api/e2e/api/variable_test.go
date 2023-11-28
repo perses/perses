@@ -19,12 +19,12 @@ import (
 	"testing"
 
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioVariable(t *testing.T) {
-	e2eframework.MainTestScenarioWithProject(t, shared.PathVariable, func(projectName string, name string) (api.Entity, api.Entity) {
+	e2eframework.MainTestScenarioWithProject(t, utils.PathVariable, func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewVariable(projectName, name)
 	})
 }

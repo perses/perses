@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package utils
 
 import (
 	"fmt"
@@ -76,7 +76,7 @@ func validateMetadataVersusParameter(ctx echo.Context, paramName string, metadat
 	return nil
 }
 
-func validateMetadata(ctx echo.Context, metadata api.Metadata) error {
+func ValidateMetadata(ctx echo.Context, metadata api.Metadata) error {
 	if err := common.ValidateID(metadata.GetName()); err != nil {
 		return err
 	}
@@ -87,4 +87,12 @@ func validateMetadata(ctx echo.Context, metadata api.Metadata) error {
 		}
 	}
 	return nil
+}
+
+// GetMetadataProject Retrieve project from entity metadata
+func GetMetadataProject(metadata api.Metadata) string {
+	if projectMetadata, ok := metadata.(*v1.ProjectMetadata); ok {
+		return projectMetadata.Project
+	}
+	return ""
 }

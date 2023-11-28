@@ -13,13 +13,12 @@
 
 import { useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { PanelDefinition } from '@perses-dev/core';
+import { Action, PanelDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginKindSelect,
   usePluginEditor,
   PanelSpecEditor,
-  Action,
   getTitleAction,
   getSubmitText,
 } from '@perses-dev/plugin-system';

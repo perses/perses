@@ -21,6 +21,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/internal/api/shared/validate"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -39,11 +40,11 @@ func New(sch schemas.Schemas, dashboard dashboard.Service) *Endpoint {
 
 func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	group := g.Group("/validate")
-	group.POST(fmt.Sprintf("/%s", shared.PathDashboard), e.ValidateDashboard, true)
-	group.POST(fmt.Sprintf("/%s", shared.PathDatasource), e.ValidateDatasource, true)
-	group.POST(fmt.Sprintf("/%s", shared.PathGlobalDatasource), e.ValidateGlobalDatasource, true)
-	group.POST(fmt.Sprintf("/%s", shared.PathVariable), e.ValidateVariable, true)
-	group.POST(fmt.Sprintf("/%s", shared.PathGlobalVariable), e.ValidateGlobalVariable, true)
+	group.POST(fmt.Sprintf("/%s", utils.PathDashboard), e.ValidateDashboard, true)
+	group.POST(fmt.Sprintf("/%s", utils.PathDatasource), e.ValidateDatasource, true)
+	group.POST(fmt.Sprintf("/%s", utils.PathGlobalDatasource), e.ValidateGlobalDatasource, true)
+	group.POST(fmt.Sprintf("/%s", utils.PathVariable), e.ValidateVariable, true)
+	group.POST(fmt.Sprintf("/%s", utils.PathGlobalVariable), e.ValidateGlobalVariable, true)
 }
 
 func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {

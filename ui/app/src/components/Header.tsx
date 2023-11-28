@@ -32,7 +32,7 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Cog from 'mdi-material-ui/Cog';
 import Archive from 'mdi-material-ui/Archive';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
+import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Menu from 'mdi-material-ui/Menu';
 import Compass from 'mdi-material-ui/Compass';
 import React, { MouseEvent, useState } from 'react';
@@ -79,7 +79,7 @@ function ToolMenu() {
       >
         <MenuItem component={RouterLink} to={AdminRoute}>
           <ListItemIcon>
-            <ShieldAccount />
+            <ShieldStar />
           </ListItemIcon>
           <Typography>Admin</Typography>
         </MenuItem>
@@ -255,7 +255,7 @@ export default function Header(): JSX.Element {
                 component={RouterLink}
                 to={AdminRoute}
               >
-                <ShieldAccount sx={{ marginRight: 0.5 }} /> Admin
+                <ShieldStar sx={{ marginRight: 0.5 }} /> Admin
               </Button>
               <Button
                 aria-label="Config"

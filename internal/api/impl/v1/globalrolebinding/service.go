@@ -16,6 +16,7 @@ package globalrolebinding
 import (
 	"fmt"
 
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
@@ -38,7 +39,7 @@ func NewService(dao globalrolebinding.DAO, sch schemas.Schemas) globalrolebindin
 	}
 }
 
-func (s *service) Create(entity api.Entity) (interface{}, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
 	if object, ok := entity.(*v1.GlobalRoleBinding); ok {
 		return s.create(object)
 	}
@@ -55,14 +56,14 @@ func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, e
 	return entity, nil
 }
 
-func (s *service) Update(entity api.Entity, parameters shared.Parameters) (interface{}, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
 	if object, ok := entity.(*v1.GlobalRoleBinding); ok {
 		return s.update(object, parameters)
 	}
 	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalroleBinding format, received '%T'", entity))
 }
 
-func (s *service) update(entity *v1.GlobalRoleBinding, parameters shared.Parameters) (*v1.GlobalRoleBinding, error) {
+func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.Parameters) (*v1.GlobalRoleBinding, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -89,14 +90,14 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters shared.Paramet
 	return entity, nil
 }
 
-func (s *service) Delete(parameters shared.Parameters) error {
+func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(parameters shared.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(q databaseModel.Query, _ shared.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
 }

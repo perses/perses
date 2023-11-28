@@ -17,7 +17,7 @@ import { useSnackbar } from '@perses-dev/components';
 import { DashboardResource, getDashboardExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect } from 'react';
 import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
-import { useIsReadonly } from '../../../model/config-client';
+import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
 import { HelperDashboardView } from './HelperDashboardView';
 

@@ -41,7 +41,7 @@ interface QuerySummaryTableProps {
 
 export function QuerySummaryTable(props: QuerySummaryTableProps) {
   const { showTotalQueries = true } = props;
-  const datasourcClient = useDatasourceClient({ kind: 'PrometheusDatasource' });
+  const datasourceClient = useDatasourceClient({ kind: 'PrometheusDatasource' });
   const { absoluteTimeRange } = useTimeRange();
 
   // for displaying a summary of recent query results
@@ -51,7 +51,7 @@ export function QuerySummaryTable(props: QuerySummaryTableProps) {
   const completedQueries = queries.filter((query) => query.state.status === 'success');
   const querySummary = useActiveTimeSeriesQueries();
 
-  if (datasourcClient.isLoading === true) {
+  if (datasourceClient.isLoading === true) {
     return null;
   }
 

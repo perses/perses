@@ -19,69 +19,16 @@ import (
 	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 )
 
 type RoleInterface interface {
 	GetMetadata() modelAPI.Metadata
 }
 
-type ActionKind string
-
-const (
-	KindWildcard ActionKind = "*"
-	KindRead     ActionKind = "read"
-	KindCreate   ActionKind = "create"
-	KindUpdate   ActionKind = "update"
-	KindDelete   ActionKind = "delete"
-)
-
-type Permission struct {
-	// Actions of the permission (read, create, update, delete, ...)
-	Actions []ActionKind `json:"actions" yaml:"actions"`
-	// The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
-	// With Role, you can't target global kinds
-	Scopes []Kind `json:"scopes" yaml:"scopes"`
-}
-
-func (p *Permission) UnmarshalJSON(data []byte) error {
-	var tmp Permission
-	type plain Permission
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *Permission) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Permission
-	type plain Permission
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*p = tmp
-	return nil
-}
-
-func (p *Permission) validate() error {
-	if len(p.Actions) == 0 {
-		return fmt.Errorf("permission actions cannot be empty")
-	}
-	if len(p.Scopes) == 0 {
-		return fmt.Errorf("permission scopes cannot be empty")
-	}
-	return nil
-}
-
 type RoleSpec struct {
 	// List of permissions owned by the role
-	Permissions []Permission `json:"permissions" yaml:"permissions"`
+	Permissions []role.Permission `json:"permissions" yaml:"permissions"`
 }
 
 // GlobalRole is the struct representing the role shared to everybody.
@@ -188,7 +135,7 @@ func (r *Role) validate() error {
 	// Role can't have permissions targeting global resources
 	for _, permission := range r.Spec.Permissions {
 		for _, scope := range permission.Scopes {
-			if IsGlobal(scope) {
+			if role.IsGlobalScope(scope) {
 				return fmt.Errorf("invalid scope: %q for a Role scope", scope)
 			}
 		}
