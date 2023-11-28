@@ -98,8 +98,8 @@ export interface ConfigModel {
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
-  important_dashboards: DashboardSelector[];
-  information: string;
+  important_dashboards?: DashboardSelector[];
+  information?: string;
   provisioning?: ProvisioningConfig;
 }
 

@@ -55,14 +55,12 @@ export function useIsAuthorizationEnabled() {
 
 export function useImportantDashboardSelectors() {
   const { config } = useConfigContext();
-  return config.important_dashboards;
+  return config.important_dashboards ?? [];
 }
 
 export function useInformation() {
   const { config } = useConfigContext();
 
-  const html = useMemo(() => marked.parse(config.information, { gfm: true }), [config.information]);
-  const sanitizedHTML = useMemo(() => DOMPurify.sanitize(html), [html]);
-
-  return sanitizedHTML;
+  const html = useMemo(() => marked.parse(config.information ?? '', { gfm: true }), [config.information]);
+  return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
