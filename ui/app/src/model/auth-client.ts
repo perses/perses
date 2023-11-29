@@ -30,6 +30,11 @@ export interface AuthBody {
   password: string;
 }
 
+export function useIsAccessTokenExist() {
+  const [cookies] = useCookies();
+  return cookies[jwtPayload] !== undefined;
+}
+
 export function useAuthToken() {
   const [cookies] = useCookies();
   const partialToken = cookies[jwtPayload];
