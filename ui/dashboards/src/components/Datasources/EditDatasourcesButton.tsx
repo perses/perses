@@ -23,8 +23,9 @@ import { DatasourceEditor } from './DatasourceEditor';
 
 export function EditDatasourcesButton() {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
-  const { getLocalDatasources, setLocalDatasources } = useDatasourceStore();
+  const { getLocalDatasources, setLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
   const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
+  const savedDatasources: Record<string, DatasourceSpec> = getSavedDatasources();
   const { dashboard, setDashboard } = useDashboard();
 
   const openDatasourceEditor = () => {
@@ -32,6 +33,38 @@ export function EditDatasourcesButton() {
   };
 
   const closeDatasourceEditor = () => {
+    setIsDatasourceEditorOpen(false);
+  };
+
+  const handleChangeDatasources = (datasources: Record<string, DatasourceSpec>) => {
+    // Calculates the new list of datasources that are allowed to be used.
+    const newSavedDatasources: Record<string, DatasourceSpec> = Object.keys(datasources)
+      .filter((key) => {
+        // Datasources are allowed to be used if a) they are direct, or b) they are proxied, and their
+        // proxy is the same as what we have saved.
+        const isDirect = 'directUrl' in (datasources[key]?.plugin?.spec ?? {});
+        const isSavedProxy =
+          !isDirect &&
+          !('directUrl' in (savedDatasources[key]?.plugin?.spec ?? {})) &&
+          datasources[key]?.plugin?.spec?.proxy === savedDatasources[key]?.plugin?.spec?.proxy;
+
+        return isDirect || isSavedProxy;
+      })
+      .reduce((obj, key) => {
+        obj[key] = datasources[key] as DatasourceSpec;
+
+        return obj;
+      }, {} as Record<string, DatasourceSpec>);
+
+    setDashboard({
+      ...dashboard,
+      spec: {
+        ...dashboard.spec,
+        datasources: datasources,
+      },
+    });
+    setSavedDatasources(newSavedDatasources);
+    setLocalDatasources(datasources);
     setIsDatasourceEditorOpen(false);
   };
 
@@ -58,17 +91,7 @@ export function EditDatasourcesButton() {
         <DatasourceEditor
           datasources={localDatasources}
           onCancel={closeDatasourceEditor}
-          onChange={(datasources: Record<string, DatasourceSpec>) => {
-            setDashboard({
-              ...dashboard,
-              spec: {
-                ...dashboard.spec,
-                datasources: datasources,
-              },
-            });
-            setLocalDatasources(datasources);
-            setIsDatasourceEditorOpen(false);
-          }}
+          onChange={handleChangeDatasources}
         />
       </Drawer>
     </>
