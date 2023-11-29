@@ -42,6 +42,10 @@ func DefaultConfig() config.Config {
 		Security: config.Security{
 			Readonly:      false,
 			Authorization: config.AuthorizationConfig{EnableAuthorization: false},
+			Authentication: config.AuthenticationConfig{
+				AccessTokenTTL:  config.DefaultAccessTokenTTL,
+				RefreshTokenTTL: config.DefaultRefreshTokenTTL,
+			},
 			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: config.Schemas{

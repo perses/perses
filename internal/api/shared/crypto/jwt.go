@@ -33,11 +33,6 @@ const (
 	CookieKeyRefreshToken = "jwtRefreshToken"
 )
 
-var (
-	accessTokenExpiration  = time.Minute * 15
-	refreshTokenExpiration = time.Hour * 24
-)
-
 type JWTCustomClaims struct {
 	jwt.RegisteredClaims
 }
@@ -82,22 +77,24 @@ type JWT interface {
 }
 
 type jwtImpl struct {
-	accessKey  []byte
-	refreshKey []byte
+	accessKey       []byte
+	refreshKey      []byte
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
 func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(accessTokenExpiration), j.accessKey)
+	return signedToken(login, now, now.Add(j.accessTokenTTL), j.accessKey)
 }
 
 func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 	now := time.Now()
-	return signedToken(login, now, now.Add(refreshTokenExpiration), j.refreshKey)
+	return signedToken(login, now, now.Add(j.refreshTokenTTL), j.refreshKey)
 }
 
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
-	expireDate := time.Now().Add(accessTokenExpiration)
+	expireDate := time.Now().Add(j.accessTokenTTL)
 	tokenSplit := strings.Split(accessToken, ".")
 	path := "/"
 	sameSite := http.SameSiteNoneMode
@@ -106,7 +103,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     path,
-		MaxAge:   int(accessTokenExpiration.Seconds()),
+		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: false,
@@ -116,7 +113,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
 		Path:     path,
-		MaxAge:   int(accessTokenExpiration.Seconds()),
+		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
 		HttpOnly: true,
@@ -130,8 +127,8 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
 		Path:     "/",
-		MaxAge:   int(refreshTokenExpiration.Seconds()),
-		Expires:  time.Now().Add(refreshTokenExpiration),
+		MaxAge:   int(j.refreshTokenTTL.Seconds()),
+		Expires:  time.Now().Add(j.refreshTokenTTL),
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,

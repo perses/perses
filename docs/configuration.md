@@ -90,6 +90,9 @@ Generic placeholders are defined as follows:
   # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
   # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
+    
+  # It contains the config regarding the time to live of the refresh/access token.
+  [ authentication: <authentication_config> ]
 
   # It contains any configuration that changes authorization behavior like default permissions
   [ authorization: <authorization_config> ]
@@ -103,6 +106,17 @@ Generic placeholders are defined as follows:
 
   # The path to the file containing the secret key.
   [ encryption_key_file: <filename> ]
+```
+
+#### `<authentication_config>`
+
+```yaml
+  # It is the time to live of the access token. By default, it is 15 minutes.
+  [ access_token_ttl: <duration> | default = 15min ]
+
+  # It is the time to live of the refresh token. The refresh token is used to get a new access token when it is expired.
+  # By default, it is 24 hours.
+  [ refresh_token_ttl: <duration> | default = 24h ]
 ```
 
 #### `<authorization_config>`

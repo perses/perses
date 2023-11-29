@@ -40,6 +40,10 @@ func TestJSONMarshallConfig(t *testing.T) {
     "authorization": {
       "enable_authorization": false,
       "interval": "0s"
+    },
+    "authentication": {
+      "access_token_ttl": "0s",
+      "refresh_token_ttl": "0s"
     }
   },
   "database": {},
@@ -61,6 +65,10 @@ func TestJSONMarshallConfig(t *testing.T) {
     "authorization": {
       "enable_authorization": false,
       "interval": "10m0s"
+    },
+    "authentication": {
+      "access_token_ttl": "15m0s",
+      "refresh_token_ttl": "24h0m0s"
     }
   },
   "database": {
