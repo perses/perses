@@ -97,6 +97,10 @@ Generic placeholders are defined as follows:
   # It contains any configuration that changes authorization behavior like default permissions
   [ authorization: <authorization_config> ]
 
+  # When it is true, the authentication and authorization config are considered.
+  # And you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ enable_auth: <boolean> | default = false ]
+
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
   # Note that if it is not provided, it will use a default value.
   # When Perses is used in a multi instance mode, you should provide the key.
@@ -122,10 +126,6 @@ Generic placeholders are defined as follows:
 #### `<authorization_config>`
 
 ```yaml
-  # It is activating or deactivating the permission verification on each endpoint.
-  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ enable_authorization: <boolean> | default = true ]
-
   # The refresh interval of the cache if enabled
   [ interval: <duration> | default = 10m ]
 

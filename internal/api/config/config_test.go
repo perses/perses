@@ -37,8 +37,8 @@ func TestJSONMarshallConfig(t *testing.T) {
 			jason: `{
   "security": {
     "readonly": false,
+    "enable_auth": false,
     "authorization": {
-      "enable_authorization": false,
       "interval": "0s"
     },
     "authentication": {
@@ -62,8 +62,8 @@ func TestJSONMarshallConfig(t *testing.T) {
   "security": {
     "readonly": false,
     "encryption_key": "\u003csecret\u003e",
+    "enable_auth": false,
     "authorization": {
-      "enable_authorization": false,
       "interval": "10m0s"
     },
     "authentication": {

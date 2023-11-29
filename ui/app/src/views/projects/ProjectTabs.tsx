@@ -36,7 +36,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
+import { useIsAuthEnable, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
@@ -309,7 +309,7 @@ interface DashboardVariableTabsProps {
 
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
-  const isAuthorizationEnabled = useIsAuthorizationEnabled();
+  const isAuthEnable = useIsAuthEnable();
 
   const navigate = useNavigate();
 
@@ -363,7 +363,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(rolesTabIndex)}
             value={rolesTabIndex}
-            disabled={!isAuthorizationEnabled}
+            disabled={!isAuthEnable}
           />
           <MenuTab
             label="Role Bindings"
@@ -371,7 +371,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(roleBindingsTabIndex)}
             value={roleBindingsTabIndex}
-            disabled={!isAuthorizationEnabled}
+            disabled={!isAuthEnable}
           />
         </MenuTabs>
         <TabButton index={value} projectName={projectName} />
@@ -388,7 +388,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index={secretsTabIndex}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
-      {isAuthorizationEnabled && (
+      {isAuthEnable && (
         <>
           <TabPanel value={value} index={rolesTabIndex}>
             <ProjectRoles projectName={projectName} id="project-role-list" />

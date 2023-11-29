@@ -41,7 +41,8 @@ func DefaultConfig() config.Config {
 	return config.Config{
 		Security: config.Security{
 			Readonly:      false,
-			Authorization: config.AuthorizationConfig{EnableAuthorization: false},
+			EnableAuth:    false,
+			Authorization: config.AuthorizationConfig{},
 			Authentication: config.AuthenticationConfig{
 				AccessTokenTTL:  config.DefaultAccessTokenTTL,
 				RefreshTokenTTL: config.DefaultRefreshTokenTTL,

@@ -82,7 +82,6 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
-  enable_authorization: boolean;
   interval: Duration;
   guest_permissions: Permission[];
 }
@@ -96,6 +95,7 @@ export interface SecurityConfig {
   readonly: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+  enable_auth: boolean;
   authorization: AuthorizationConfig;
   authentication: AuthenticationConfig;
 }

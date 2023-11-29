@@ -33,7 +33,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
+import { useIsAuthEnable, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebinding-client';
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
@@ -287,7 +287,7 @@ interface AdminTabsProps {
 
 export function AdminTabs(props: AdminTabsProps) {
   const { initialTab } = props;
-  const isAuthorizationEnabled = useIsAuthorizationEnabled();
+  const isAuthEnable = useIsAuthEnable();
 
   const navigate = useNavigate();
 
@@ -334,7 +334,7 @@ export function AdminTabs(props: AdminTabsProps) {
             iconPosition="start"
             {...a11yProps(roleBindingsTabIndex)}
             value={rolesTabIndex}
-            disabled={!isAuthorizationEnabled}
+            disabled={!isAuthEnable}
           />
           <MenuTab
             label="Global Role Bindings"
@@ -342,7 +342,7 @@ export function AdminTabs(props: AdminTabsProps) {
             iconPosition="start"
             {...a11yProps(roleBindingsTabIndex)}
             value={roleBindingsTabIndex}
-            disabled={!isAuthorizationEnabled}
+            disabled={!isAuthEnable}
           />
         </MenuTabs>
         <TabButton index={value} />
@@ -356,7 +356,7 @@ export function AdminTabs(props: AdminTabsProps) {
       <TabPanel value={value} index={secretsTabIndex}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
-      {isAuthorizationEnabled && (
+      {isAuthEnable && (
         <>
           <TabPanel value={value} index={rolesTabIndex}>
             <GlobalRoles id="global-role-list" />

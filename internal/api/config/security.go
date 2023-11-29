@@ -74,6 +74,9 @@ type Security struct {
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	// When it is true, the authentication and authorization config are considered.
+	// And you will need a valid JWT token to contact most of the endpoints exposed by the API
+	EnableAuth bool `json:"enable_auth" yaml:"enable_auth"`
 	// Authorization contains all configs around rbac (permissions and roles)
 	Authorization AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
 	// Authentication contains configuration regarding the time to live of the access/refresh token

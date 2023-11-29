@@ -48,9 +48,9 @@ export function useIsReadonly() {
   return config.security.readonly;
 }
 
-export function useIsAuthorizationEnabled() {
+export function useIsAuthEnable() {
   const { config } = useConfigContext();
-  return config.security.authorization.enable_authorization;
+  return config.security.enable_auth;
 }
 
 export function useImportantDashboardSelectors() {
