@@ -79,7 +79,7 @@ function SignInView() {
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
-      {!config.security.authentication.deactivate_sign_up && (
+      {!config.security.authentication.disable_sign_up && (
         <Typography sx={{ textAlign: 'center' }}>
           Don&lsquo;t have an account yet?&nbsp;
           <Link underline="hover" component={RouterLink} to={SignUpRoute}>

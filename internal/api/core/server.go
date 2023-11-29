@@ -68,7 +68,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly),
 		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly),
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly),
-		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DeactivateSignUp, readonly),
+		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly),
 	}
 	apiEndpoints := []endpoint{

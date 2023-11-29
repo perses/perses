@@ -47,7 +47,7 @@ function Router() {
       <Suspense>
         <Routes>
           <Route path={SignInRoute} element={<SignInView />} />
-          {!config.security.authentication.deactivate_sign_up && <Route path={SignUpRoute} element={<SignUpView />} />}
+          {!config.security.authentication.disable_sign_up && <Route path={SignUpRoute} element={<SignUpView />} />}
           <Route path={AdminRoute} element={<AdminView />} />
           <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
           <Route path={ConfigRoute} element={<ConfigView />} />
