@@ -12,14 +12,17 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuthMutation } from '../../model/auth-client';
+import { useAuthMutation, useIsAccessTokenExist } from '../../model/auth-client';
 import { SignUpRoute } from '../../model/route';
+import { useConfigContext } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView() {
+  const { config } = useConfigContext();
+  const isAccessTokenExist = useIsAccessTokenExist();
   const authMutation = useAuthMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -56,6 +59,12 @@ function SignInView() {
     }
   };
 
+  useEffect(() => {
+    if (isAccessTokenExist) {
+      navigate('/');
+    }
+  });
+
   return (
     <SignWrapper>
       <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} onKeyPress={handleKeypress} />
@@ -70,12 +79,14 @@ function SignInView() {
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
-      <Typography sx={{ textAlign: 'center' }}>
-        Don&lsquo;t have an account yet?&nbsp;
-        <Link underline="hover" component={RouterLink} to={SignUpRoute}>
-          Register now
-        </Link>
-      </Typography>
+      {!config.security.authentication.deactivate_sign_up && (
+        <Typography sx={{ textAlign: 'center' }}>
+          Don&lsquo;t have an account yet?&nbsp;
+          <Link underline="hover" component={RouterLink} to={SignUpRoute}>
+            Register now
+          </Link>
+        </Typography>
+      )}
     </SignWrapper>
   );
 }

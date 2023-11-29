@@ -121,6 +121,9 @@ Generic placeholders are defined as follows:
   # It is the time to live of the refresh token. The refresh token is used to get a new access token when it is expired.
   # By default, it is 24 hours.
   [ refresh_token_ttl: <duration> | default = 24h ]
+
+  # With this attribute, you can deactivate the Sign-up page which induces the deactivation of the endpoint that gives the possibility to create a user.
+  [ deactivate_sign_up: <boolean> | default = false ]
 ```
 
 #### `<authorization_config>`

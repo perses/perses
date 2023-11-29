@@ -31,8 +31,9 @@ const (
 )
 
 type jsonAuthenticationConfig struct {
-	AccessTokenTTL  string `json:"access_token_ttl,omitempty"`
-	RefreshTokenTTL string `json:"refresh_token_ttl,omitempty"`
+	AccessTokenTTL   string `json:"access_token_ttl,omitempty"`
+	RefreshTokenTTL  string `json:"refresh_token_ttl,omitempty"`
+	DeactivateSignUp bool   `json:"deactivate_sign_up"`
 }
 
 type AuthenticationConfig struct {
@@ -41,7 +42,8 @@ type AuthenticationConfig struct {
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
-	RefreshTokenTTL time.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	RefreshTokenTTL  time.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	DeactivateSignUp bool          `json:"deactivate_sign_up" yaml:"deactivate_sign_up"`
 }
 
 func (a *AuthenticationConfig) Verify() error {
@@ -56,8 +58,9 @@ func (a *AuthenticationConfig) Verify() error {
 
 func (a AuthenticationConfig) MarshalJSON() ([]byte, error) {
 	j := &jsonAuthenticationConfig{
-		AccessTokenTTL:  a.AccessTokenTTL.String(),
-		RefreshTokenTTL: a.RefreshTokenTTL.String(),
+		AccessTokenTTL:   a.AccessTokenTTL.String(),
+		RefreshTokenTTL:  a.RefreshTokenTTL.String(),
+		DeactivateSignUp: a.DeactivateSignUp,
 	}
 	return json.Marshal(j)
 }

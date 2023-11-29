@@ -89,6 +89,7 @@ export interface AuthorizationConfig {
 export interface AuthenticationConfig {
   access_token_ttl: string;
   refresh_token_ttl: string;
+  deactivate_sign_up: boolean;
 }
 
 export interface SecurityConfig {
