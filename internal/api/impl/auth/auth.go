@@ -14,6 +14,7 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -39,6 +40,7 @@ func New(dao user.DAO, jwt crypto.JWT) *Endpoint {
 
 func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	g.POST("/auth", e.auth, true)
+	g.POST("/auth/refresh", e.refresh, true)
 }
 
 func (e *Endpoint) auth(ctx echo.Context) error {
@@ -56,15 +58,69 @@ func (e *Endpoint) auth(ctx echo.Context) error {
 	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {
 		return shared.HandleBadRequestError("wrong login or password ")
 	}
-	token, err := e.jwt.SignedToken(body.Login)
+	accessToken, err := e.accessToken(ctx, body.Login)
 	if err != nil {
-		logrus.WithError(err).Errorf("unable to generate the JWT token")
-		return shared.InternalError
+		return err
 	}
-	jwtHeaderPayloadCookie, signatureCookie := e.jwt.CreateJWTCookies(token)
+	refreshToken, err := e.refreshToken(ctx, body.Login)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, api.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
+}
+
+func (e *Endpoint) refresh(ctx echo.Context) error {
+	// First, let's try to get the refresh token from the Cookie
+	var refreshToken string
+	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
+	if errors.Is(err, http.ErrNoCookie) {
+		// In that case, let's decode the body if exists
+		body := &api.RefreshRequest{}
+		if bindErr := ctx.Bind(body); bindErr != nil {
+			return shared.HandleBadRequestError(bindErr.Error())
+		}
+		refreshToken = body.RefreshToken
+	} else {
+		refreshToken = refreshTokenCookie.Value
+	}
+	if len(refreshToken) == 0 {
+		return shared.HandleBadRequestError("no refresh token has been found")
+	}
+	claims, err := e.jwt.ValidateRefreshToken(refreshToken)
+	if err != nil {
+		return shared.HandleBadRequestError(err.Error())
+	}
+	accessToken, err := e.accessToken(ctx, claims.Subject)
+	if err != nil {
+		return err
+	}
+	return ctx.JSON(http.StatusOK, api.AuthResponse{
+		AccessToken: accessToken,
+	})
+}
+
+func (e *Endpoint) accessToken(ctx echo.Context, login string) (string, error) {
+	accessToken, err := e.jwt.SignedAccessToken(login)
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to generate the access token")
+		return "", shared.InternalError
+	}
+	jwtHeaderPayloadCookie, signatureCookie := e.jwt.CreateAccessTokenCookie(accessToken)
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
-	return ctx.JSON(http.StatusOK, api.AuthResponse{
-		Token: token,
-	})
+	return accessToken, nil
+}
+
+func (e *Endpoint) refreshToken(ctx echo.Context, login string) (string, error) {
+	refreshToken, err := e.jwt.SignedRefreshToken(login)
+	if err != nil {
+		logrus.WithError(err).Errorf("unable to generate the refresh token")
+		return "", shared.InternalError
+	}
+	ctx.SetCookie(e.jwt.CreateRefreshTokenCookie(refreshToken))
+	return refreshToken, nil
 }

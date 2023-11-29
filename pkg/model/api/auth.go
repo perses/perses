@@ -41,5 +41,30 @@ func (u *Auth) UnmarshalJSON(data []byte) error {
 }
 
 type AuthResponse struct {
-	Token string `json:"token"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken,omitempty"`
+}
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
+func (r *RefreshRequest) UnmarshalJSON(data []byte) error {
+	var tmp RefreshRequest
+	type plain RefreshRequest
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*r = tmp
+	return nil
+}
+
+func (r *RefreshRequest) validate() error {
+	if len(r.RefreshToken) == 0 {
+		return fmt.Errorf("refreshToken cannot be empty")
+	}
+	return nil
 }

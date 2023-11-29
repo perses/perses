@@ -36,7 +36,7 @@ type RBAC interface {
 
 func NewRBAC(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, jwtService crypto.JWT, conf config.Config) (RBAC, error) {
 
-	if !conf.Security.Authorization.EnableAuthorization {
+	if !conf.Security.EnableAuth {
 		return &rbac.DisabledImpl{}, nil
 	}
 

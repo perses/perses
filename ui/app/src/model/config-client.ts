@@ -81,17 +81,23 @@ export interface ProvisioningConfig {
   folders: string[];
 }
 
+export interface AuthorizationConfig {
+  interval: Duration;
+  guest_permissions: Permission[];
+}
+
+export interface AuthenticationConfig {
+  access_token_ttl: string;
+  refresh_token_ttl: string;
+}
+
 export interface SecurityConfig {
   readonly: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+  enable_auth: boolean;
   authorization: AuthorizationConfig;
-}
-
-export interface AuthorizationConfig {
-  enable_authorization: boolean;
-  interval: Duration;
-  guest_permissions: Permission[];
+  authentication: AuthenticationConfig;
 }
 
 export interface ConfigModel {

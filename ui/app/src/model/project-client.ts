@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, ProjectResource } from '@perses-dev/core';
+import { ProjectResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST } from './http';
@@ -19,6 +19,7 @@ import { resource as dashboardResource } from './dashboard-client';
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
+import { fetch, fetchJson } from './fetch';
 
 const resource = 'projects';
 

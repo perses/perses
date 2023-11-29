@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchJson } from '@perses-dev/core';
+import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { useJwt } from 'react-jwt';
 import buildURL from './url-builder';
@@ -28,11 +28,6 @@ export interface AuthResponse {
 export interface AuthBody {
   login: string;
   password: string;
-}
-
-export function useIsTokenExist() {
-  const [cookies] = useCookies();
-  return cookies[jwtPayload] !== undefined;
 }
 
 export function useAuthToken() {
@@ -64,5 +59,13 @@ export function auth(body: AuthBody) {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(body),
+  });
+}
+
+export function refreshToken() {
+  const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
+  return fetch(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
   });
 }

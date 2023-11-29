@@ -15,14 +15,52 @@ package config
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
-const defaultEncryptionKey = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
+const (
+	defaultEncryptionKey   = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
+	DefaultAccessTokenTTL  = time.Minute * 15
+	DefaultRefreshTokenTTL = time.Hour * 24
+)
+
+type jsonAuthenticationConfig struct {
+	AccessTokenTTL  string `json:"access_token_ttl,omitempty"`
+	RefreshTokenTTL string `json:"refresh_token_ttl,omitempty"`
+}
+
+type AuthenticationConfig struct {
+	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
+	AccessTokenTTL time.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	// RefreshTokenTTL is the time to live of the refresh token.
+	// The refresh token is used to get a new access token when it is expired.
+	// By default, it is 24 hours.
+	RefreshTokenTTL time.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+}
+
+func (a *AuthenticationConfig) Verify() error {
+	if a.AccessTokenTTL == 0 {
+		a.AccessTokenTTL = DefaultAccessTokenTTL
+	}
+	if a.RefreshTokenTTL == 0 {
+		a.RefreshTokenTTL = DefaultRefreshTokenTTL
+	}
+	return nil
+}
+
+func (a AuthenticationConfig) MarshalJSON() ([]byte, error) {
+	j := &jsonAuthenticationConfig{
+		AccessTokenTTL:  a.AccessTokenTTL.String(),
+		RefreshTokenTTL: a.RefreshTokenTTL.String(),
+	}
+	return json.Marshal(j)
+}
 
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
@@ -36,8 +74,13 @@ type Security struct {
 	EncryptionKey promConfig.Secret `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
+	// When it is true, the authentication and authorization config are considered.
+	// And you will need a valid JWT token to contact most of the endpoints exposed by the API
+	EnableAuth bool `json:"enable_auth" yaml:"enable_auth"`
 	// Authorization contains all configs around rbac (permissions and roles)
-	Authorization AuthorizationConfig `json:"authorization" yaml:"authorization"`
+	Authorization AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
+	// Authentication contains configuration regarding the time to live of the access/refresh token
+	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
 }
 
 func (s *Security) Verify() error {

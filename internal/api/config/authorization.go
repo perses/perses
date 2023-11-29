@@ -27,14 +27,11 @@ var (
 // jsonSchemas is only used to marshal the config in a proper json format
 // (mainly because of the duration that is not yet supported by json).
 type jsonAuthorizationConfig struct {
-	EnableAuthorization bool               `json:"enable_authorization"`
-	Interval            string             `json:"interval,omitempty"`
-	GuestPermissions    []*role.Permission `json:"guest_permissions,omitempty"`
+	Interval         string             `json:"interval,omitempty"`
+	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty"`
 }
 
 type AuthorizationConfig struct {
-	// ActivatePermission is activating or deactivating the permission verification on each endpoint
-	EnableAuthorization bool `json:"enable_authorization" yaml:"enable_authorization"`
 	// Interval is the refresh frequency of the cache
 	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
@@ -53,9 +50,8 @@ func (a *AuthorizationConfig) Verify() error {
 
 func (a AuthorizationConfig) MarshalJSON() ([]byte, error) {
 	j := &jsonAuthorizationConfig{
-		EnableAuthorization: a.EnableAuthorization,
-		Interval:            a.Interval.String(),
-		GuestPermissions:    a.GuestPermissions,
+		Interval:         a.Interval.String(),
+		GuestPermissions: a.GuestPermissions,
 	}
 	return json.Marshal(j)
 }

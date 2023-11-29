@@ -42,7 +42,7 @@ type partialObject struct {
 func CheckProject(svc project.Service) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// we don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
+			// We don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
 			// Also, we avoid an additional query to the DB like that.
 			// In case the body is nil, then there is nothing to do about it as well
 			method := c.Request().Method

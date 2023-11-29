@@ -27,7 +27,7 @@ const (
 	GlobalProject = "*"
 )
 
-// usersPermissions contains the mapping of all users and their permissions
+// usersPermissions contains the mapping of all users and their permission
 // username -> project name or global ("") -> permission list
 type usersPermissions = map[string]map[string][]*v1Role.Permission
 

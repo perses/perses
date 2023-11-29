@@ -27,7 +27,6 @@ import {
   SignUpRoute,
   ExploreRoute,
 } from './model/route';
-import GuardedAuthRoute from './guard/GuardedAuthRoute';
 
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
@@ -47,21 +46,19 @@ function Router() {
         <Routes>
           <Route path={SignInRoute} element={<SignInView />} />
           <Route path={SignUpRoute} element={<SignUpView />} />
-          <Route path="/" element={<GuardedAuthRoute />}>
-            <Route path={AdminRoute} element={<AdminView />} />
-            <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
-            <Route path={ConfigRoute} element={<ConfigView />} />
-            <Route path={MigrateRoute} element={<MigrateView />} />
-            <Route path={ProjectRoute} element={<HomeView />} />
-            <Route path={ExploreRoute} element={<ExploreView />} />
-            <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
-              <Route path="" element={<ProjectView />} />
-              <Route path=":tab" element={<ProjectView />} />
-              <Route path="dashboard/new" element={<CreateDashboardView />} />
-              <Route path="dashboards/:dashboardName" element={<DashboardView />} />
-            </Route>
-            <Route path="" element={<HomeView />} />
+          <Route path={AdminRoute} element={<AdminView />} />
+          <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
+          <Route path={ConfigRoute} element={<ConfigView />} />
+          <Route path={MigrateRoute} element={<MigrateView />} />
+          <Route path={ProjectRoute} element={<HomeView />} />
+          <Route path={ExploreRoute} element={<ExploreView />} />
+          <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
+            <Route path="" element={<ProjectView />} />
+            <Route path=":tab" element={<ProjectView />} />
+            <Route path="dashboard/new" element={<CreateDashboardView />} />
+            <Route path="dashboards/:dashboardName" element={<DashboardView />} />
           </Route>
+          <Route path="/" element={<HomeView />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

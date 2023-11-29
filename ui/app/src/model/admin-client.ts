@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasource, fetch, fetchJson } from '@perses-dev/core';
+import { GlobalDatasource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
+import { fetch, fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
 

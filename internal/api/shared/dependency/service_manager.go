@@ -104,7 +104,7 @@ type service struct {
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
-	cryptoService, jwtService, err := crypto.New(string(conf.Security.EncryptionKey))
+	cryptoService, jwtService, err := crypto.New(conf.Security)
 	if err != nil {
 		return nil, err
 	}
