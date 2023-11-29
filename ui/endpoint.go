@@ -35,6 +35,7 @@ var (
 		"/projects",
 		"/migrate",
 		"/config",
+		"/explore",
 	}
 )
 
