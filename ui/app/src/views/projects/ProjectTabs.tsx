@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
-import { ReactNode, SyntheticEvent, useCallback, useState } from 'react';
+import { ReactNode, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
@@ -39,7 +39,7 @@ import { useCreateVariableMutation } from '../../model/variable-client';
 import { useIsAuthorizationEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
-import { useCreateRoleMutation } from '../../model/role-client';
+import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
@@ -82,21 +82,10 @@ function TabButton(props: TabButtonProps) {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
-  const handleVariableCreation = useCallback(
-    (variable: VariableResource) => {
-      createVariableMutation.mutate(variable, {
-        onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`);
-          setVariableDrawerOpened(false);
-        },
-        onError: (err) => {
-          exceptionSnackbar(err);
-          throw err;
-        },
-      });
-    },
-    [exceptionSnackbar, successSnackbar, createVariableMutation]
-  );
+  const { data } = useRoleList(props.projectName);
+  const roleSuggestions = useMemo(() => {
+    return (data ?? []).map((role) => role.metadata.name);
+  }, [data]);
 
   const handleDatasourceCreation = useCallback(
     (datasource: ProjectDatasource) => {
@@ -144,6 +133,22 @@ function TabButton(props: TabButtonProps) {
       });
     },
     [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+  );
+
+  const handleVariableCreation = useCallback(
+    (variable: VariableResource) => {
+      createVariableMutation.mutate(variable, {
+        onSuccess: (updatedVariable: VariableResource) => {
+          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`);
+          setVariableDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createVariableMutation]
   );
 
   switch (props.index) {
@@ -254,6 +259,7 @@ function TabButton(props: TabButtonProps) {
                 subjects: [],
               },
             }}
+            roleSuggestions={roleSuggestions}
             isOpen={isRoleBindingDrawerOpened}
             action="create"
             isReadonly={isReadonly}
@@ -357,6 +363,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(rolesTabIndex)}
             value={rolesTabIndex}
+            disabled={!isAuthorizationEnabled}
           />
           <MenuTab
             label="Role Bindings"
@@ -364,6 +371,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(roleBindingsTabIndex)}
             value={roleBindingsTabIndex}
+            disabled={!isAuthorizationEnabled}
           />
         </MenuTabs>
         <TabButton index={value} projectName={projectName} />
