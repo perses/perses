@@ -17,6 +17,7 @@ import { PanelPlugin } from './panels';
 import { VariablePlugin } from './variables';
 import { DatasourcePlugin } from './datasource';
 import { Plugin } from './plugin-base';
+import { TraceQueryPlugin } from './trace-queries';
 
 /**
  * Information about a module/package that contains plugins.
@@ -60,6 +61,7 @@ export interface SupportedPlugins {
   Variable: VariablePlugin;
   Panel: PanelPlugin;
   TimeSeriesQuery: TimeSeriesQueryPlugin;
+  TraceQuery: TraceQueryPlugin;
   Datasource: DatasourcePlugin;
 }
 

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData } from '@perses-dev/core';
+import { TimeSeriesData, TraceData } from '@perses-dev/core';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {
@@ -35,4 +35,20 @@ export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
       ],
     },
   ],
+};
+
+export const MOCK_TRACE_DATA: TraceData = {
+  traces: [
+    {
+      durationMs: 1120,
+      errorCount: 0,
+      spanCount: 10,
+      startTimeUnixMs: 1699916103945861,
+      traceId: '95ba9202315c29c801b5aa41452aa775',
+      name: 'rootServiceName="shop-backend", rootTraceName="shop-backend"',
+    },
+  ],
+  metadata: {
+    executedQueryString: '{ duration > 1000ms }',
+  },
 };

@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './variables';
+import { TempoDatasource } from './plugins/tempo-datasource';
+import { TempoTraceQuery } from './plugins/TempoTraceQuery';
+
+// Export plugins under the same name as the kinds they handle from the plugin.json
+export { TempoTraceQuery, TempoDatasource };
+
+// For consumers to leverage in DatasourceStoreProvider onCreate
+export * from './model/tempo-client';
+export * from './model/tempo-selectors';

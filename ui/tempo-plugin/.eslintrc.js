@@ -11,12 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './variables';
+module.exports = require('../.eslintrc.base.js');

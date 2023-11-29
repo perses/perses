@@ -17,4 +17,5 @@ export * from './plugin-registry';
 export * from './template-variables';
 export * from './TimeRangeProvider';
 export * from './time-series-queries';
+export * from './trace-queries';
 export * from './DataQueriesProvider';

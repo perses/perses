@@ -1,0 +1,26 @@
+{
+  "kind": "PluginModule",
+  "metadata": {
+    "name": "Tempo"
+  },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "TraceQuery",
+        "kind": "TempoTraceQuery",
+        "display": {
+          "name": "Tempo Trace Query",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Datasource",
+        "kind": "TempoDatasource",
+        "display": {
+          "name": "Tempo Datasource",
+          "description": ""
+        }
+      }
+    ]
+  }
+}

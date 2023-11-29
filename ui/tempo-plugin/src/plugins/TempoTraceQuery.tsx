@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './variables';
+import { getTraceData } from './get-trace-data';
+
+/**
+ * The core Tempo TraceQuery plugin for Perses.
+ */
+export const TempoTraceQuery = {
+  getTraceData,
+  createInitialOptions: () => ({
+    query: '{}',
+    datasource: undefined,
+  }),
+};
