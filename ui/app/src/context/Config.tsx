@@ -53,6 +53,11 @@ export function useIsAuthEnable() {
   return config.security.enable_auth;
 }
 
+export function useIsSignUpDisable() {
+  const { config } = useConfigContext();
+  return config.security.authentication.disable_sign_up;
+}
+
 export function useImportantDashboardSelectors() {
   const { config } = useConfigContext();
   return config.important_dashboards ?? [];
