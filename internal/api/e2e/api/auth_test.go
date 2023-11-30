@@ -28,7 +28,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usrEntity := e2eframework.NewUser("foo")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).

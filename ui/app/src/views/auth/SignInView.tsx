@@ -17,11 +17,11 @@ import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuthMutation, useIsAccessTokenExist } from '../../model/auth-client';
 import { SignUpRoute } from '../../model/route';
-import { useConfigContext } from '../../context/Config';
+import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView() {
-  const { config } = useConfigContext();
+  const isSignUpDisable = useIsSignUpDisable();
   const isAccessTokenExist = useIsAccessTokenExist();
   const authMutation = useAuthMutation();
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ function SignInView() {
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
-      {!config.security.authentication.disable_sign_up && (
+      {!isSignUpDisable && (
         <Typography sx={{ textAlign: 'center' }}>
           Don&lsquo;t have an account yet?&nbsp;
           <Link underline="hover" component={RouterLink} to={SignUpRoute}>

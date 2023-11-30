@@ -12,7 +12,7 @@ if [[ $1 == "--e2e" ]]; then
   previous_file="./dev/config.previous.yaml"
   config_file="./dev/config.yaml"
   cp ${config_file} ${previous_file}
-  sed 's/enable_authorization: true/enable_authorization: false/g' ${previous_file} >${config_file}
+  sed 's/enable_auth: true/enable_auth: false/g' ${previous_file} >${config_file}
   rm ${previous_file}
 fi
 

@@ -27,20 +27,24 @@ import (
 )
 
 type Endpoint struct {
-	dao user.DAO
-	jwt crypto.JWT
+	dao          user.DAO
+	jwt          crypto.JWT
+	isAuthEnable bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT) *Endpoint {
+func New(dao user.DAO, jwt crypto.JWT, isAuthEnable bool) *Endpoint {
 	return &Endpoint{
-		dao: dao,
-		jwt: jwt,
+		dao:          dao,
+		jwt:          jwt,
+		isAuthEnable: isAuthEnable,
 	}
 }
 
 func (e *Endpoint) CollectRoutes(g *shared.Group) {
-	g.POST("/auth", e.auth, true)
-	g.POST("/auth/refresh", e.refresh, true)
+	if e.isAuthEnable {
+		g.POST("/auth", e.auth, true)
+		g.POST("/auth/refresh", e.refresh, true)
+	}
 }
 
 func (e *Endpoint) auth(ctx echo.Context) error {

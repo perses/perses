@@ -27,7 +27,7 @@ import {
   SignUpRoute,
   ExploreRoute,
 } from './model/route';
-import { useConfigContext } from './context/Config';
+import { useIsAuthEnable, useIsSignUpDisable } from './context/Config';
 
 // Other routes are lazy-loaded for code-splitting
 const MigrateView = lazy(() => import('./views/MigrateView'));
@@ -40,14 +40,15 @@ const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardVi
 const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
 
 function Router() {
-  const { config } = useConfigContext();
+  const isAuthEnable = useIsAuthEnable();
+  const isSignUpDisable = useIsSignUpDisable();
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
       {/* TODO: What sort of loading fallback do we want? */}
       <Suspense>
         <Routes>
-          <Route path={SignInRoute} element={<SignInView />} />
-          {!config.security.authentication.disable_sign_up && <Route path={SignUpRoute} element={<SignUpView />} />}
+          {isAuthEnable && <Route path={SignInRoute} element={<SignInView />} />}
+          {isAuthEnable && !isSignUpDisable && <Route path={SignUpRoute} element={<SignUpView />} />}
           <Route path={AdminRoute} element={<AdminView />} />
           <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
           <Route path={ConfigRoute} element={<ConfigView />} />
