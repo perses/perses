@@ -30,6 +30,10 @@ export interface AuthBody {
   password: string;
 }
 
+export interface JWTToken {
+  sub: string;
+}
+
 export function useIsAccessTokenExist() {
   const [cookies] = useCookies();
   return cookies[jwtPayload] !== undefined;
@@ -42,7 +46,7 @@ export function useAuthToken() {
   // It doesn't need the accurate signature to decode the payload.
   // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-  return useJwt(`${partialToken}.${fakeSignature}`);
+  return useJwt<JWTToken>(`${partialToken}.${fakeSignature}`);
 }
 
 export function useAuthMutation() {
@@ -58,6 +62,19 @@ export function useAuthMutation() {
   });
 }
 
+export function useLogoutMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: [`${authResource}/logout`],
+    mutationFn: () => {
+      return logout();
+    },
+    onSuccess: () => {
+      return queryClient.invalidateQueries([`${authResource}/logout`]);
+    },
+  });
+}
+
 export function auth(body: AuthBody) {
   const url = buildURL({ resource: authResource, apiPrefix: '/api' });
   return fetchJson<AuthResponse>(url, {
@@ -69,6 +86,14 @@ export function auth(body: AuthBody) {
 
 export function refreshToken() {
   const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
+  return fetch(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+  });
+}
+
+export function logout() {
+  const url = buildURL({ resource: `${authResource}/logout`, apiPrefix: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,

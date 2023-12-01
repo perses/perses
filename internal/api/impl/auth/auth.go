@@ -44,6 +44,7 @@ func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	if e.isAuthEnable {
 		g.POST("/auth", e.auth, true)
 		g.POST("/auth/refresh", e.refresh, true)
+		g.POST("/auth/logout", e.logout, true)
 	}
 }
 
@@ -105,6 +106,14 @@ func (e *Endpoint) refresh(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, api.AuthResponse{
 		AccessToken: accessToken,
 	})
+}
+
+func (e *Endpoint) logout(ctx echo.Context) error {
+	jwtHeaderPayloadCookie, signatureCookie := e.jwt.DeleteAccessTokenCookie()
+	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
+	ctx.SetCookie(jwtHeaderPayloadCookie)
+	ctx.SetCookie(signatureCookie)
+	return ctx.NoContent(http.StatusNoContent)
 }
 
 func (e *Endpoint) accessToken(ctx echo.Context, login string) (string, error) {

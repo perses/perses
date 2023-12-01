@@ -31,6 +31,7 @@ const (
 	CookieKeyJWTPayload   = "jwtPayload"
 	CookieKeyJWTSignature = "jwtSignature"
 	CookieKeyRefreshToken = "jwtRefreshToken"
+	cookiePath            = "/"
 )
 
 type JWTCustomClaims struct {
@@ -71,7 +72,9 @@ type JWT interface {
 	// The first cookie will contain the struct header.payload that can then be manipulated by Javascript
 	// The second cookie will contain the signature, and it won't be accessible by Javascript.
 	CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie)
+	DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie)
 	CreateRefreshTokenCookie(refreshToken string) *http.Cookie
+	DeleteRefreshTokenCookie() *http.Cookie
 	ValidateRefreshToken(token string) (*JWTCustomClaims, error)
 	Middleware(skipper middleware.Skipper) echo.MiddlewareFunc
 }
@@ -96,13 +99,12 @@ func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
 	tokenSplit := strings.Split(accessToken, ".")
-	path := "/"
 	sameSite := http.SameSiteNoneMode
 	secure := true
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
-		Path:     path,
+		Path:     cookiePath,
 		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
@@ -112,7 +114,7 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 	signatureCookie := &http.Cookie{
 		Name:     CookieKeyJWTSignature,
 		Value:    tokenSplit[2],
-		Path:     path,
+		Path:     cookiePath,
 		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
 		Secure:   secure,
@@ -122,16 +124,44 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 	return headerPayloadCookie, signatureCookie
 }
 
+func (j *jwtImpl) DeleteAccessTokenCookie() (*http.Cookie, *http.Cookie) {
+	headerPayloadCookie := &http.Cookie{
+		Name:     CookieKeyJWTPayload,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		HttpOnly: false,
+	}
+	signatureCookie := &http.Cookie{
+		Name:     CookieKeyJWTSignature,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+	}
+	return headerPayloadCookie, signatureCookie
+}
+
 func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 	return &http.Cookie{
 		Name:     CookieKeyRefreshToken,
 		Value:    refreshToken,
-		Path:     "/",
+		Path:     cookiePath,
 		MaxAge:   int(j.refreshTokenTTL.Seconds()),
 		Expires:  time.Now().Add(j.refreshTokenTTL),
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode,
+	}
+}
+
+func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
+	return &http.Cookie{
+		Name:     CookieKeyRefreshToken,
+		Value:    "",
+		Path:     cookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
 	}
 }
 
