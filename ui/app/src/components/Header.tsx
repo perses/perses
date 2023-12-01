@@ -23,7 +23,6 @@ import {
   Menu as MUIMenu,
   MenuItem,
   Stack,
-  Switch,
   Toolbar,
   Tooltip,
   Typography,
@@ -37,6 +36,8 @@ import Menu from 'mdi-material-ui/Menu';
 import Compass from 'mdi-material-ui/Compass';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
+import Brightness4 from 'mdi-material-ui/Brightness4';
+import Brightness5 from 'mdi-material-ui/Brightness5';
 import React, { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
@@ -50,17 +51,26 @@ import PersesLogoCropped from './logo/PersesLogoCropped';
 
 const ITEM_HEIGHT = 48;
 
-function ThemeSwitch() {
+function ThemeSwitch(props: { isAuthEnable: boolean }) {
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const { exceptionSnackbar } = useSnackbar();
-  const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDarkModeChange = () => {
     try {
-      setDarkMode(e.target.checked);
+      setDarkMode(!isDarkModeEnabled);
     } catch (e) {
       exceptionSnackbar(e);
     }
   };
-  return <Switch checked={isDarkModeEnabled} onChange={handleDarkModeChange} inputProps={{ 'aria-label': 'Theme' }} />;
+  if (props.isAuthEnable) {
+    return (
+      <ListItemIcon onClick={handleDarkModeChange}>
+        {isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}
+      </ListItemIcon>
+    );
+  }
+  return (
+    <IconButton onClick={handleDarkModeChange}>{isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}</IconButton>
+  );
 }
 
 function AccountMenu() {
@@ -116,7 +126,7 @@ function AccountMenu() {
         </MenuItem>
         <Divider />
         <MenuItem>
-          <ThemeSwitch />
+          <ThemeSwitch isAuthEnable />
           Theme
         </MenuItem>
         <MenuItem onClick={handleLogout}>
@@ -377,7 +387,7 @@ export default function Header(): JSX.Element {
             <AccountMenu />
           ) : (
             <Tooltip title="Theme">
-              <ThemeSwitch />
+              <ThemeSwitch isAuthEnable={false} />
             </Tooltip>
           )}
         </Stack>
