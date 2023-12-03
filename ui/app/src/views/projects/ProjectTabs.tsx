@@ -88,11 +88,10 @@ function TabButton(props: TabButtonProps) {
   }, [data]);
 
   const handleDatasourceCreation = useCallback(
-    (datasource: ProjectDatasource) => {
-      createDatasourceMutation.mutate(datasource, {
+    async (datasource: ProjectDatasource) => {
+      await createDatasourceMutation.mutateAsync(datasource, {
         onSuccess: (createdDatasource: ProjectDatasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
@@ -23,7 +23,8 @@ interface DatasourceDrawerProps<T extends Datasource> {
   isOpen: boolean;
   action: Action;
   isReadonly?: boolean;
-  onSave: Dispatch<T>;
+  shouldTest?: boolean;
+  onSave: DispatchWithPromise<T>;
   onDelete?: DispatchWithPromise<T>;
   onClose: DispatchWithoutAction;
 }
@@ -38,12 +39,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     /* do nothing */
   };
 
-  const handleSave = (name: string, spec: DatasourceSpec) => {
+  const handleSave = async (name: string, spec: DatasourceSpec) => {
     datasource.spec = spec;
     datasource.metadata.name = name;
-    if (onSave) {
-      onSave(datasource);
-    }
+    return onSave(datasource);
   };
 
   return (

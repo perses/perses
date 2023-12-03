@@ -101,10 +101,9 @@ export function DatasourceEditor(props: {
           initialSpec={datasourceEdit.spec}
           initialAction={datasourceFormAction}
           isDraft={true}
-          onSave={(name: string, spec: DatasourceSpec) => {
+          onSave={async (name: string, spec: DatasourceSpec) => {
             setDatasources((draft) => {
               draft[name] = spec;
-              setDatasourceEdit(null);
             });
           }}
           onClose={() => {

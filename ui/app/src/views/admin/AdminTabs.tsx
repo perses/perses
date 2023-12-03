@@ -74,11 +74,10 @@ function TabButton(props: TabButtonProps) {
   }, [data]);
 
   const handleGlobalDatasourceCreation = useCallback(
-    (datasource: GlobalDatasource) => {
-      createGlobalDatasourceMutation.mutate(datasource, {
+    async (datasource: GlobalDatasource) => {
+      await createGlobalDatasourceMutation.mutateAsync(datasource, {
         onSuccess: (createdDatasource: GlobalDatasource) => {
           successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
-          setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
           exceptionSnackbar(err);

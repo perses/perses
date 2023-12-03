@@ -47,7 +47,7 @@ interface DatasourceEditorFormProps {
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
-  onSave: (name: string, spec: DatasourceSpec) => void;
+  onSave: (name: string, spec: DatasourceSpec) => Promise<void>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }

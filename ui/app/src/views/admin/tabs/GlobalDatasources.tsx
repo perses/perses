@@ -36,21 +36,17 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
   const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: GlobalDatasource): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: GlobalDatasource) => {
-            successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
-            );
-            resolve();
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            reject();
-            throw err;
-          },
-        });
+    async (datasource: GlobalDatasource) => {
+      await updateDatasourceMutation.mutateAsync(datasource, {
+        onSuccess: (updatedDatasource: GlobalDatasource) => {
+          successSnackbar(
+            `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
+          );
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
       });
     },
     [exceptionSnackbar, successSnackbar, updateDatasourceMutation]

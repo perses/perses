@@ -82,14 +82,6 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState<boolean>(false);
   const [isDeleteDatasourceDialogOpened, setDeleteDatasourceDialogOpened] = useState<boolean>(false);
 
-  const handleDatasourceUpdate = useCallback(
-    async (datasource: T) => {
-      await onUpdate(datasource);
-      setDatasourceDrawerOpened(false);
-    },
-    [onUpdate]
-  );
-
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedDatasource(findDatasource(name, project));
@@ -209,7 +201,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
             isOpen={isDatasourceDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={handleDatasourceUpdate}
+            onSave={onUpdate}
             onDelete={onDelete}
             onClose={() => setDatasourceDrawerOpened(false)}
           />

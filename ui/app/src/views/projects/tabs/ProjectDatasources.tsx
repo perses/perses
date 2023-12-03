@@ -38,19 +38,15 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: ProjectDatasource) => {
-            successSnackbar(`Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`);
-            resolve();
-          },
-          onError: (err) => {
-            exceptionSnackbar(err);
-            reject();
-            throw err;
-          },
-        });
+    async (datasource: ProjectDatasource): Promise<void> => {
+      await updateDatasourceMutation.mutateAsync(datasource, {
+        onSuccess: (updatedDatasource: ProjectDatasource) => {
+          successSnackbar(`Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
       });
     },
     [exceptionSnackbar, successSnackbar, updateDatasourceMutation]
