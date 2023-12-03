@@ -35,6 +35,7 @@ import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export function DatasourceEditor(props: {
   datasources: Record<string, DatasourceSpec>;
+  shouldTest?: boolean;
   onChange: (datasources: Record<string, DatasourceSpec>) => void;
   onCancel: () => void;
 }) {
@@ -101,6 +102,7 @@ export function DatasourceEditor(props: {
           initialSpec={datasourceEdit.spec}
           initialAction={datasourceFormAction}
           isDraft={true}
+          shouldTest={props.shouldTest}
           onSave={async (name: string, spec: DatasourceSpec) => {
             setDatasources((draft) => {
               draft[name] = spec;

@@ -15,12 +15,14 @@ import { useImmer } from 'use-immer';
 import { Action, Display, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { DispatchWithoutAction, useCallback, useState } from 'react';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { useSnackbar, DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { getSubmitText, getTitleAction } from '../../utils';
 import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
+import { useDatasourceStore } from '../../runtime';
+import { DatasourceClient } from '../../model';
 
 /**
  * This preprocessing ensures that we always have a defined object for the `display` property
@@ -47,13 +49,14 @@ interface DatasourceEditorFormProps {
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
+  shouldTest?: boolean;
   onSave: (name: string, spec: DatasourceSpec) => Promise<void>;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
-  const { initialName, initialSpec, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
+  const { initialName, initialSpec, initialAction, isDraft, isReadonly, shouldTest, onSave, onClose, onDelete } = props;
 
   const initialState = getInitialState(initialName, initialSpec);
   const [state, setState] = useImmer(initialState);
@@ -61,6 +64,8 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
+  const { getDatasourceClient } = useDatasourceStore();
+  const { successSnackbar, errorSnackbar } = useSnackbar();
 
   const form = useForm<DatasourceEditValidationType>({
     resolver: zodResolver(datasourceEditValidationSchema),
@@ -73,7 +78,14 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
     },
   });
 
-  const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
+  const doTest = useCallback(async () => {
+    const client = await getDatasourceClient<DatasourceClient>({ name: state.name, kind: state.spec.plugin.kind });
+    if (client?.healthCheck !== undefined) {
+      return client.healthCheck();
+    }
+  }, [state, getDatasourceClient]);
+
+  const processForm: SubmitHandler<DatasourceEditValidationType> = async () => {
     // reset display name to undefined when empty, because we don't want an empty string as value
     const name = state.spec.display?.name;
     const finalDisplay: Display | undefined = {
@@ -81,10 +93,25 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
       name: name ? name : undefined,
     };
 
-    onSave(state.name, {
-      ...state.spec,
-      display: finalDisplay,
-    });
+    try {
+      await onSave(state.name, {
+        ...state.spec,
+        display: finalDisplay,
+      });
+    } catch {
+      // If we failed to save, theres no point in testing.
+      return;
+    }
+
+    if (shouldTest === true) {
+      const healthy = await doTest();
+      if (healthy) {
+        successSnackbar(`Datasource ${state.name} is healthy`);
+      } else {
+        errorSnackbar(`Datasource ${state.name} is unhealthy`);
+      }
+    }
+    onClose();
   };
 
   // When user click on cancel, several possibilities:
@@ -137,7 +164,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           ) : (
             <>
               <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
-                {submitText}
+                {submitText} {shouldTest && 'and Test'}
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel

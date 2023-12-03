@@ -15,8 +15,10 @@ import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses
 import { DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
+import { HTTPDatasourceAPI } from '../../model/datasource-api';
 
 interface DatasourceDrawerProps<T extends Datasource> {
   datasource: T;
@@ -45,6 +47,8 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     return onSave(datasource);
   };
 
+  const [datasourceApi] = useState(() => new HTTPDatasourceAPI());
+
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -57,16 +61,19 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           }}
         >
           {isOpen && (
-            <DatasourceEditorForm
-              initialName={datasource.metadata.name}
-              initialSpec={datasource.spec}
-              initialAction={action}
-              isDraft={false}
-              isReadonly={isReadonly}
-              onSave={handleSave}
-              onClose={onClose}
-              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
-            />
+            <DatasourceStoreProvider datasourceApi={datasourceApi}>
+              <DatasourceEditorForm
+                initialName={datasource.metadata.name}
+                initialSpec={datasource.spec}
+                initialAction={action}
+                isDraft={false}
+                isReadonly={isReadonly}
+                shouldTest={true}
+                onSave={handleSave}
+                onClose={onClose}
+                onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              />
+            </DatasourceStoreProvider>
           )}
         </PluginRegistry>
         {onDelete && (
