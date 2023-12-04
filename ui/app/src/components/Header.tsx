@@ -73,9 +73,11 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
     );
   }
   return (
-    <IconButton onClick={handleDarkModeChange} aria-label="Theme">
-      {swapIcon()}
-    </IconButton>
+    <Tooltip title="Theme">
+      <IconButton onClick={handleDarkModeChange} aria-label="Theme">
+        {swapIcon()}
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -386,13 +388,7 @@ export default function Header(): JSX.Element {
               </IconButton>
             </Tooltip>
           )}
-          {isAuthEnable ? (
-            <AccountMenu />
-          ) : (
-            <Tooltip title="Theme">
-              <ThemeSwitch isAuthEnable={false} />
-            </Tooltip>
-          )}
+          {isAuthEnable ? <AccountMenu /> : <ThemeSwitch isAuthEnable={false} />}
         </Stack>
       </Toolbar>
     </AppBar>
