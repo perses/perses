@@ -21,7 +21,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func TestUnmarshalJSONVariable(t *testing.T) {
@@ -347,7 +347,7 @@ spec:
 						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelNamesVariable",
-							Spec: map[interface{}]interface{}{
+							Spec: map[string]interface{}{
 								"matchers": []interface{}{"up"},
 							},
 						},
@@ -382,7 +382,7 @@ spec:
 						},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
-							Spec: map[interface{}]interface{}{
+							Spec: map[string]interface{}{
 								"labelName": "instance",
 								"matchers":  []interface{}{"up"},
 							},
@@ -419,7 +419,7 @@ spec:
 						DefaultValue: &variable.DefaultValue{SingleValue: "default"},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
-							Spec: map[interface{}]interface{}{
+							Spec: map[string]interface{}{
 								"labelName": "instance",
 								"matchers":  []interface{}{"up"},
 							},
@@ -460,7 +460,7 @@ spec:
 						DefaultValue:  &variable.DefaultValue{SliceValues: []string{"default1", "default2"}},
 						Plugin: common.Plugin{
 							Kind: "PrometheusLabelValuesVariable",
-							Spec: map[interface{}]interface{}{
+							Spec: map[string]interface{}{
 								"labelName": "instance",
 								"matchers":  []interface{}{"up"},
 							},

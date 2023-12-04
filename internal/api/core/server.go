@@ -38,6 +38,7 @@ import (
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 )
 
 type endpoint interface {
@@ -54,33 +55,33 @@ type api struct {
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
 	apiV1Endpoints := []endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard(), readonly),
-		datasource.NewEndpoint(serviceManager.GetDatasource(), readonly),
-		folder.NewEndpoint(serviceManager.GetFolder(), readonly),
-		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), readonly),
-		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), readonly),
-		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), readonly),
-		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), readonly),
-		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), readonly),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly),
+		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly),
+		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly),
+		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly),
+		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly),
+		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetRBAC(), readonly),
+		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly),
+		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly),
 		health.NewEndpoint(serviceManager.GetHealth()),
-		project.NewEndpoint(serviceManager.GetProject(), readonly),
-		role.NewEndpoint(serviceManager.GetRole(), readonly),
-		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), readonly),
-		secret.NewEndpoint(serviceManager.GetSecret(), readonly),
-		user.NewEndpoint(serviceManager.GetUser(), readonly),
-		variable.NewEndpoint(serviceManager.GetVariable(), readonly),
+		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly),
+		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly),
+		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly),
+		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly),
+		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly),
+		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly),
 	}
 	apiEndpoints := []endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
-		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetJWT()),
+		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetJWT(), cfg.Security.EnableAuth),
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
-			return !*cfg.Security.ActivatePermission
+			return !cfg.Security.EnableAuth
 		}),
 	}
 }
@@ -133,7 +134,7 @@ func (a *api) collectRoutes() []*shared.Group {
 	for _, ept := range a.apiEndpoints {
 		ept.CollectRoutes(apiGroup)
 	}
-	apiV1Group := &shared.Group{Path: shared.APIV1Prefix}
+	apiV1Group := &shared.Group{Path: utils.APIV1Prefix}
 	for _, ept := range a.apiV1Endpoints {
 		ept.CollectRoutes(apiV1Group)
 	}

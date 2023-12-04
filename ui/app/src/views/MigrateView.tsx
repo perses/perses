@@ -30,7 +30,7 @@ import { JSONEditor, useSnackbar } from '@perses-dev/components';
 import { useNavigate } from 'react-router-dom';
 import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboardMutation } from '../model/dashboard-client';
-import { useIsReadonly } from '../model/config-client';
+import { useIsReadonly } from '../context/Config';
 import { useProjectList } from '../model/project-client';
 
 interface GrafanaLightDashboard {

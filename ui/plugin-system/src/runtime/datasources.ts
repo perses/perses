@@ -28,6 +28,26 @@ export interface DatasourceStore {
    * Gets a list of datasource selection items for a plugin kind.
    */
   listDatasourceSelectItems(datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]>;
+
+  /**
+   * Gets the list of datasources defined in the dashboard
+   */
+  getLocalDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Sets the list of datasources defined in the dashboard
+   */
+  setLocalDatasources(datasources: Record<string, DatasourceSpec>): void;
+
+  /**
+   * Gets the list of datasources that are available in the dashboard (i.e. dashboards that have been created on the server side that we can use).
+   */
+  getSavedDatasources(): Record<string, DatasourceSpec>;
+
+  /**
+   * Sets the list of datasources that are saved in the dashboard
+   */
+  setSavedDatasources(datasources: Record<string, DatasourceSpec>): void;
 }
 
 export interface DatasourceSelectItemGroup {
@@ -40,6 +60,7 @@ export interface DatasourceSelectItem {
   name: string;
   overridden?: boolean;
   overriding?: boolean;
+  saved?: boolean;
   selector: DatasourceSelectItemSelector;
 }
 
@@ -68,9 +89,9 @@ export function useDatasourceStore() {
  * Lists all available Datasource selection items for a given datasource plugin kind.
  * Returns a list, with all information that can be used in a datasource selection context (group, name, selector, kind, ...)
  */
-export function useListDatasourceSelectItems(datasourcePluginKind: string) {
+export function useListDatasourceSelectItems(datasourcePluginKind: string, project?: string) {
   const { listDatasourceSelectItems } = useDatasourceStore();
-  return useQuery(['listDatasourceSelectItems', datasourcePluginKind], () =>
+  return useQuery(['listDatasourceSelectItems', datasourcePluginKind, project], () =>
     listDatasourceSelectItems(datasourcePluginKind)
   );
 }

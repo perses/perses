@@ -17,3 +17,4 @@ export const SignUpRoute = '/sign-up';
 export const ConfigRoute = '/config';
 export const MigrateRoute = '/migrate';
 export const ProjectRoute = '/projects';
+export const ExploreRoute = '/explore';

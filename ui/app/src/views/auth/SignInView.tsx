@@ -12,14 +12,17 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuthMutation } from '../../model/auth-client';
+import { useAuthMutation, useIsAccessTokenExist } from '../../model/auth-client';
 import { SignUpRoute } from '../../model/route';
+import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
 function SignInView() {
+  const isSignUpDisable = useIsSignUpDisable();
+  const isAccessTokenExist = useIsAccessTokenExist();
   const authMutation = useAuthMutation();
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
@@ -41,24 +44,49 @@ function SignInView() {
     );
   };
 
+  const isSignInDisabled = () => {
+    return authMutation.isLoading || login === '' || password === '';
+  };
+
+  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isSignInDisabled()) {
+      return;
+    }
+
+    // Sign in on pressing Enter button
+    if (e.charCode === 13) {
+      handleLogin();
+    }
+  };
+
+  useEffect(() => {
+    if (isAccessTokenExist) {
+      navigate('/');
+    }
+  });
+
   return (
     <SignWrapper>
-      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} />
-      <TextField type="password" label="Password" required onChange={(e) => setPassword(e.target.value)} />
-      <Button
-        variant="contained"
-        disabled={authMutation.isLoading || login === '' || password === ''}
-        onClick={() => handleLogin()}
-      >
+      <TextField label="Username" required onChange={(e) => setLogin(e.target.value)} onKeyPress={handleKeypress} />
+      <TextField
+        type="password"
+        label="Password"
+        required
+        onChange={(e) => setPassword(e.target.value)}
+        onKeyPress={handleKeypress}
+      />
+      <Button variant="contained" disabled={isSignInDisabled()} onClick={() => handleLogin()}>
         Sign in
       </Button>
       {authMutation.isLoading && <LinearProgress />}
-      <Typography sx={{ textAlign: 'center' }}>
-        Don&lsquo;t have an account yet?&nbsp;
-        <Link underline="hover" component={RouterLink} to={SignUpRoute}>
-          Register now
-        </Link>
-      </Typography>
+      {!isSignUpDisable && (
+        <Typography sx={{ textAlign: 'center' }}>
+          Don&lsquo;t have an account yet?&nbsp;
+          <Link underline="hover" component={RouterLink} to={SignUpRoute}>
+            Register now
+          </Link>
+        </Typography>
+      )}
     </SignWrapper>
   );
 }

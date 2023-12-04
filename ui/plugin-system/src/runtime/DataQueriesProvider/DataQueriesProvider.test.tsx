@@ -13,13 +13,17 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { MOCK_TIME_SERIES_DATA } from '../../test';
+import { MOCK_TIME_SERIES_DATA, MOCK_TRACE_DATA } from '../../test';
 import { useListPluginMetadata } from '../plugin-registry';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
 import { useQueryType } from './model';
 
 jest.mock('../time-series-queries', () => ({
   useTimeSeriesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
+}));
+
+jest.mock('../trace-queries', () => ({
+  useTraceQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TRACE_DATA }]),
 }));
 
 jest.mock('../plugin-registry', () => ({
@@ -31,6 +35,13 @@ jest.mock('../plugin-registry', () => ({
         },
         kind: 'PrometheusTimeSeriesQuery',
         pluginType: 'TimeSeriesQuery',
+      },
+      {
+        display: {
+          name: 'Tempo Query',
+        },
+        kind: 'TempoTraceQuery',
+        pluginType: 'TraceQuery',
       },
     ],
     isLoading: false,
@@ -57,6 +68,26 @@ describe('useDataQueries', () => {
     });
     expect(result.current.queryResults[0]?.data).toEqual(MOCK_TIME_SERIES_DATA);
   });
+
+  it('should return the correct data for TraceQuery', () => {
+    const definitions = [
+      {
+        kind: 'TempoTraceQuery',
+        spec: {
+          query: '{ duration > 1000ms }',
+        },
+      },
+    ];
+
+    const wrapper = ({ children }: React.PropsWithChildren) => {
+      return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
+    };
+
+    const { result: traceResult } = renderHook(() => useDataQueries('TraceQuery'), {
+      wrapper,
+    });
+    expect(traceResult.current.queryResults[0]?.data).toEqual(MOCK_TRACE_DATA);
+  });
 });
 
 describe('useQueryType', () => {
@@ -65,6 +96,7 @@ describe('useQueryType', () => {
 
     const getQueryType = result.current;
     expect(getQueryType('PrometheusTimeSeriesQuery')).toBe('TimeSeriesQuery');
+    expect(getQueryType('TempoTraceQuery')).toBe('TraceQuery');
   });
 
   it('should throw an error if query type is not found ', () => {
@@ -74,11 +106,13 @@ describe('useQueryType', () => {
     expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
   });
 
-  it('should return undefined if useLIstPluginMetadata is still loading', () => {
+  it('should return undefined if useListPluginMetadata is still loading', () => {
     (useListPluginMetadata as jest.Mock).mockReturnValue({ isLoading: true });
     const { result } = renderHook(() => useQueryType());
 
     const getQueryType = result.current;
-    expect(getQueryType('UnknownQuery')).toBeUndefined();
+    expect(getQueryType('PrometheusTimeSeriesQuery')).toBeUndefined();
+    expect(getQueryType('TempoTraceQuery')).toBeUndefined();
+    expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
   });
 });

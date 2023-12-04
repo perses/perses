@@ -45,7 +45,10 @@ export const WithPluginRegistry = (Story: StoryFn) => {
   return (
     <PluginRegistry
       pluginLoader={bundledPluginLoader}
-      defaultPluginKinds={{ TimeSeriesQuery: 'PrometheusTimeSeriesQuery' }}
+      defaultPluginKinds={{
+        TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
+        TraceQuery: 'TempoTraceQuery',
+      }}
     >
       <Story />
     </PluginRegistry>

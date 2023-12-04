@@ -14,7 +14,7 @@
 package variable
 
 import (
-	"github.com/perses/perses/internal/api/shared"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -38,5 +38,5 @@ type DAO interface {
 }
 
 type Service interface {
-	shared.ToolboxService
+	apiInterface.Service
 }

@@ -25,6 +25,7 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
   value: DatasourceSelector;
   onChange: (next: DatasourceSelector) => void;
   datasourcePluginKind: string;
+  project?: string;
 }
 
 /**
@@ -32,9 +33,8 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
  * the input deal with a `DatasourceSelector`.
  */
 export function DatasourceSelect(props: DatasourceSelectProps) {
-  const { datasourcePluginKind, value, onChange, ...others } = props;
-  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind);
-
+  const { datasourcePluginKind, value, project, onChange, ...others } = props;
+  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   // Rebuild the group of the value if not provided
   const defaultValue = useMemo(() => {
     const group = (data ?? [])
@@ -54,6 +54,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
         name: item.name,
         overriding: item.overriding,
         overridden: item.overridden,
+        saved: item.saved ?? true,
         group: item.selector.group,
         value: selectorToOptionValue(item.selector),
       })),
@@ -85,7 +86,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
       {menuItems.map((menuItemGroup) => [
         <Divider key={`${menuItemGroup.group}-divider`} />,
         ...menuItemGroup.items.map((menuItem) => (
-          <MenuItem key={menuItem.value} value={menuItem.value} disabled={menuItem.overridden}>
+          <MenuItem key={menuItem.value} value={menuItem.value} disabled={menuItem.overridden || !menuItem.saved}>
             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
               <ListItemText>
                 <DatasourceName
@@ -94,6 +95,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
                   overriding={menuItem.overriding}
                 />
               </ListItemText>
+              {!menuItem.saved && <ListItemText>Save the dashboard to enable this datasource</ListItemText>}
               <ListItemText style={{ textAlign: 'right' }}>
                 {menuItemGroup.group && menuItemGroup.group.length > 0 && (
                   <Chip

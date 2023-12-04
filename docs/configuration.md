@@ -60,6 +60,7 @@ Generic placeholders are defined as follows:
 * `<int>`: an integer value
 * `<secret>`: a regular string that is a secret, such as a password
 * `<string>`: a regular string
+* `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
   # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
@@ -89,20 +90,62 @@ Generic placeholders are defined as follows:
   # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
   # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
   [ readonly: <boolean> | default = false ]
+    
+  # It contains the config regarding the time to live of the refresh/access token.
+  [ authentication: <authentication_config> ]
 
-  # It is activating or deactivating the permission verification on each endpoint.
-  # When it is true, you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ activate_permission: <boolean> | default = true ]
+  # It contains any configuration that changes authorization behavior like default permissions
+  [ authorization: <authorization_config> ]
 
-  # The secret key used to encrypt and decrypt sensitive data stored in the database such as any data in the Secret and GlobalSecret object.
-  # Note that if it is not provided, it will be generated. 
-  # When Perses is used in a multi instance mode, you should provide the key, otherwise, each instance will have a different key 
-  # and therefore won't be able to decrypt what the other is encrypting.
-  # Also note that the key must be at least 32 bytes long.
+  # When it is true, the authentication and authorization config are considered.
+  # And you will need a valid JWT token to contact most of the endpoints exposed by the API
+  [ enable_auth: <boolean> | default = false ]
+
+  # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
+  # Note that if it is not provided, it will use a default value.
+  # When Perses is used in a multi instance mode, you should provide the key.
+  # Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
+  # Also note the key must be at least 32 bytes long.
   [ encryption_key: <secret> ]
 
   # The path to the file containing the secret key.
   [ encryption_key_file: <filename> ]
+```
+
+#### `<authentication_config>`
+
+```yaml
+  # It is the time to live of the access token. By default, it is 15 minutes.
+  [ access_token_ttl: <duration> | default = 15min ]
+
+  # It is the time to live of the refresh token. The refresh token is used to get a new access token when it is expired.
+  # By default, it is 24 hours.
+  [ refresh_token_ttl: <duration> | default = 24h ]
+
+  # With this attribute, you can deactivate the Sign-up page which induces the deactivation of the endpoint that gives the possibility to create a user.
+  [ disable_sign_up: <boolean> | default = false ]
+```
+
+#### `<authorization_config>`
+
+```yaml
+  # The refresh interval of the cache if enabled
+  [ interval: <duration> | default = 10m ]
+
+  # Default permissions for guest users (logged-in users)
+  guest_permissions:
+    - [ <permissions> ]
+```
+
+##### `<permissions>`
+
+```yaml
+  # Actions authorized by the permission
+  actions:
+    - <enum= "read" | "create" | "update" | "delete" | "*">
+  # Resource kinds that are concerned by the permission
+  scopes:
+    - <enum= kind | "*">
 ```
 
 ### `<database_config>`

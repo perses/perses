@@ -21,31 +21,37 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Endpoint struct {
-	toolbox  shared.Toolbox
-	readonly bool
+	toolbox       shared.Toolbox
+	readonly      bool
+	disableSignUp bool
 }
 
-func NewEndpoint(service user.Service, readonly bool) *Endpoint {
+func NewEndpoint(service user.Service, rbacService authorization.RBAC, disableSignUp bool, readonly bool) *Endpoint {
 	return &Endpoint{
-		toolbox:  shared.NewToolBox(service),
-		readonly: readonly,
+		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser),
+		readonly:      readonly,
+		disableSignUp: disableSignUp,
 	}
 }
 
 func (e *Endpoint) CollectRoutes(g *shared.Group) {
-	group := g.Group(fmt.Sprintf("/%s", shared.PathUser))
+	group := g.Group(fmt.Sprintf("/%s", utils.PathUser))
 
 	if !e.readonly {
-		group.POST("", e.Create, true)
-		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
-		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
+		if !e.disableSignUp {
+			group.POST("", e.Create, true)
+		}
+		group.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
+		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
 	}
 	group.GET("", e.List, false)
-	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
+	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
 }
 
 func (e *Endpoint) Create(ctx echo.Context) error {

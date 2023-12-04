@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, Metadata } from '@perses-dev/core';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { fetchJson as initialFetchJSON, Metadata } from '@perses-dev/core';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodPOST } from './http';
+import { HTTPHeader, HTTPMethodGET, HTTPMethodPOST } from './http';
+import buildQueryKey from './querykey-builder';
+import { fetchJson } from './fetch';
 
-const userResource = 'users';
+const resource = 'users';
 
 export interface UserResource {
   kind: 'User';
@@ -31,21 +33,39 @@ export interface UserResource {
 export function useCreateUserMutation() {
   const queryClient = useQueryClient();
   return useMutation<UserResource, Error, UserResource>({
-    mutationKey: [userResource],
+    mutationKey: [resource],
     mutationFn: (entity: UserResource) => {
       return createUser(entity);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([userResource]);
+      return queryClient.invalidateQueries([resource]);
     },
   });
 }
 
+/**
+ * Used to get users from the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useUserList() {
+  return useQuery<UserResource[], Error>(buildQueryKey({ resource }), () => {
+    return getRoles();
+  });
+}
+
 export function createUser(entity: UserResource) {
-  const url = buildURL({ resource: userResource });
-  return fetchJson<UserResource>(url, {
+  const url = buildURL({ resource });
+  return initialFetchJSON<UserResource>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(entity),
+  });
+}
+
+function getRoles() {
+  const url = buildURL({ resource });
+  return fetchJson<UserResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
   });
 }

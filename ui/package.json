@@ -29,12 +29,14 @@
     "components",
     "core",
     "dashboards",
+    "explore",
     "e2e",
     "internal-utils",
     "panels-plugin",
     "plugin-system",
     "prometheus-plugin",
-    "storybook"
+    "storybook",
+    "tempo-plugin"
   ],
   "devDependencies": {
     "@swc/cli": "^0.1.62",

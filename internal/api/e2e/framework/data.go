@@ -16,13 +16,13 @@
 package e2eframework
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
@@ -30,6 +30,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
@@ -233,7 +234,6 @@ func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
 		},
 	}
 
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(pluginSpec)
 	if err != nil {
 		t.Fatal(err)
@@ -323,7 +323,6 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
 	var list []*v1.Dashboard
 	data := test.ReadFile(dashboardJSONFilePath)
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
 		t.Fatal(unmarshallErr)
 	}
@@ -338,10 +337,10 @@ func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 
 func newRoleSpec() v1.RoleSpec {
 	return v1.RoleSpec{
-		Permissions: []v1.Permission{
+		Permissions: []role.Permission{
 			{
-				Actions: []v1.ActionKind{v1.KindCreate},
-				Scopes:  []v1.Kind{v1.KindVariable, v1.KindDatasource},
+				Actions: []role.Action{role.CreateAction},
+				Scopes:  []role.Scope{role.VariableScope, role.DatasourceScope},
 			},
 		},
 	}

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
@@ -35,6 +35,7 @@ export interface DatasourceStoreProviderProps {
   projectName?: string;
   datasourceApi: DatasourceApi;
   children?: ReactNode;
+  savedDatasources?: Record<string, DatasourceSpec>;
   onCreate?: (client: DatasourceClient) => DatasourceClient;
 }
 
@@ -65,7 +66,11 @@ export interface DatasourceApi {
  * A `DatasourceContext` provider that uses an external API to resolve datasource selectors.
  */
 export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
-  const { dashboardResource, projectName, datasourceApi, onCreate, children } = props;
+  const { projectName, datasourceApi, onCreate, children } = props;
+  const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
+  const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
+    props.savedDatasources ?? {}
+  );
   const project = projectName ?? dashboardResource?.metadata.project;
 
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
@@ -163,33 +168,74 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
           const spec = dashboardResource.spec.datasources[selectorName];
           if (spec === undefined || spec.plugin.kind !== datasourcePluginKind) continue;
 
-          addItem(spec, selectorName, 'dashboard');
+          const saved = selectorName in savedDatasources;
+          addItem({ spec, selectorName, selectorGroup: 'dashboard', saved });
         }
       }
 
       // Now look at project-level datasources
       for (const datasource of datasources) {
         const selectorName = datasource.metadata.name;
-        addItem(datasource.spec, selectorName, 'project', `/projects/${project}/datasources`);
+        addItem({
+          spec: datasource.spec,
+          selectorName,
+          selectorGroup: 'project',
+          editLink: `/projects/${project}/datasources`,
+        });
       }
 
       // And finally global datasources
       for (const globalDatasource of globalDatasources) {
         const selectorName = globalDatasource.metadata.name;
-        addItem(globalDatasource.spec, selectorName, 'global', '/admin/datasources');
+        addItem({ spec: globalDatasource.spec, selectorName, selectorGroup: 'global', editLink: '/admin/datasources' });
       }
 
       return results;
     }
   );
 
+  const getLocalDatasources = useCallback((): Record<string, DatasourceSpec> => {
+    return dashboardResource?.spec.datasources ?? {};
+  }, [dashboardResource]);
+
+  const getSavedDatasources = useCallback((): Record<string, DatasourceSpec> => {
+    return savedDatasources;
+  }, [savedDatasources]);
+
+  const setLocalDatasources = useCallback(
+    (datasources: Record<string, DatasourceSpec>) => {
+      if (dashboardResource) {
+        setDashboardResource({
+          ...dashboardResource,
+          spec: {
+            ...dashboardResource.spec,
+            datasources: datasources,
+          },
+        });
+      }
+    },
+    [dashboardResource]
+  );
+
   const ctxValue: DatasourceStore = useMemo(
     () => ({
       getDatasource,
       getDatasourceClient,
+      getLocalDatasources,
+      setLocalDatasources,
+      setSavedDatasources,
+      getSavedDatasources,
       listDatasourceSelectItems,
     }),
-    [getDatasource, getDatasourceClient, listDatasourceSelectItems]
+    [
+      getDatasource,
+      getDatasourceClient,
+      getLocalDatasources,
+      setLocalDatasources,
+      listDatasourceSelectItems,
+      setSavedDatasources,
+      getSavedDatasources,
+    ]
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
@@ -223,12 +269,15 @@ function findDashboardDatasource(
   return { name: result[0], spec: result[1] };
 }
 
-type AddDatasourceSelectItemFunc = (
-  spec: DatasourceSpec,
-  selectorName: string,
-  selectorGroup?: string,
-  editLink?: string
-) => void;
+interface AddDatasouceSelectItemParams {
+  spec: DatasourceSpec;
+  selectorName: string;
+  selectorGroup?: string;
+  editLink?: string;
+  saved?: boolean;
+}
+
+type AddDatasourceSelectItemFunc = (params: AddDatasouceSelectItemParams) => void;
 
 /**
  * Helper for building a list of DatasourceSelectItemGroup results.
@@ -245,7 +294,7 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
   const groupIndices: Record<string, number> = {};
   let currentGroupIndex = 1; // 0 is the default group, always there as it contains at least the first item.
 
-  const addItem = (spec: DatasourceSpec, selectorName: string, group?: string, editLink?: string) => {
+  const addItem = ({ spec, selectorName, selectorGroup: group, editLink, saved }: AddDatasouceSelectItemParams) => {
     group = group ?? '';
 
     // Ensure the default group is always present as soon as an item is added.
@@ -270,6 +319,7 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
     selectItemGroup.items.push({
       name: spec.display?.name ?? selectorName,
       overridden: isOverridden,
+      saved,
       selector: {
         kind: spec.plugin.kind,
         name: selectorName,

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetchJson, GlobalDatasource } from '@perses-dev/core';
+import { GlobalDatasource } from '@perses-dev/core';
 import buildURL from './url-builder';
 import { buildDatasourceQueryParameters } from './datasource-client';
+import { fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
 

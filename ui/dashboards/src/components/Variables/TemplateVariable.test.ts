@@ -53,7 +53,7 @@ interface TestParams {
     value: VariableValue;
     loading: boolean;
     options: VariableOption[];
-    selectedValue: VariableValue;
+    selectedOptions: VariableOption | VariableOption[];
     viewOptions: VariableOption[];
   };
 }
@@ -73,7 +73,7 @@ describe('useListVariableState', () => {
         value: 'hello',
         loading: true,
         options: [option('hello')],
-        selectedValue: 'hello',
+        selectedOptions: option('hello'),
         viewOptions: [option('hello')],
       },
     },
@@ -90,7 +90,7 @@ describe('useListVariableState', () => {
         value: 'hello',
         loading: false,
         options: [option('hello')],
-        selectedValue: 'hello',
+        selectedOptions: option('hello'),
         viewOptions: [option('hello')],
       },
     },
@@ -107,7 +107,7 @@ describe('useListVariableState', () => {
         value: ['hello'],
         loading: false,
         options: [option('hello')],
-        selectedValue: ['hello'],
+        selectedOptions: [option('hello')],
         viewOptions: [allOption(), option('hello')],
       },
     },
@@ -124,7 +124,7 @@ describe('useListVariableState', () => {
         value: 'hello',
         loading: false,
         options: [option('hello')],
-        selectedValue: '', // Not a problem. As long the value is good, next update will set it
+        selectedOptions: option('hello'),
         viewOptions: [option('hello')],
       },
     },
@@ -141,7 +141,7 @@ describe('useListVariableState', () => {
         value: ['hello'],
         loading: false,
         options: [option('hello')],
-        selectedValue: [], // Not a problem. As long the value is good, next update will set it
+        selectedOptions: [option('hello')],
         viewOptions: [allOption(), option('hello')],
       },
     },
@@ -158,7 +158,7 @@ describe('useListVariableState', () => {
         value: 'hello',
         loading: false,
         options: [option('hello')],
-        selectedValue: '', // Not a problem. As long the value is good, next update will set it
+        selectedOptions: option('hello'),
         viewOptions: [option('hello')],
       },
     },
@@ -175,7 +175,7 @@ describe('useListVariableState', () => {
         value: ['hello'],
         loading: false,
         options: [option('hello')],
-        selectedValue: [], // Not a problem. As long the value is good, next update will set it
+        selectedOptions: [option('hello')],
         viewOptions: [allOption(), option('hello')],
       },
     },
@@ -203,7 +203,7 @@ describe('useListVariableState', () => {
       value: params.output.value,
       loading: params.output.loading,
       options: params.output.options,
-      selectedValue: params.output.selectedValue,
+      selectedOptions: params.output.selectedOptions,
       viewOptions: params.output.viewOptions,
     });
   });

@@ -56,6 +56,11 @@ const pkgConfig: PkgConfig[] = [
     title: 'Dashboards',
   },
   {
+    pkg: '@perses-dev/explore',
+    directory: path.resolve(uiRoot, 'explore/src'),
+    title: 'Explore',
+  },
+  {
     pkg: '@perses-dev/panels-plugin',
     directory: path.resolve(uiRoot, 'panels-plugin/src'),
     title: 'Panels Plugin',

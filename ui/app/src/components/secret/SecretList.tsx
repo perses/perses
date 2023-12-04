@@ -22,7 +22,7 @@ import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 import { DeleteSecretDialog } from '../dialogs';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 

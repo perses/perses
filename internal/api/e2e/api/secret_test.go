@@ -23,8 +23,8 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +46,7 @@ func decodePublicSecret(t *testing.T, object interface{}) *modelV1.PublicSecret 
 }
 
 func TestMainScenarioSecret(t *testing.T) {
-	path := shared.PathSecret
+	path := utils.PathSecret
 	creator := func(projectName string, name string) (api.Entity, api.Entity) {
 		return e2eframework.NewProject(projectName), e2eframework.NewSecret(projectName, name)
 	}
@@ -58,7 +58,7 @@ func TestMainScenarioSecret(t *testing.T) {
 			e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			// call now the update endpoint, shouldn't return an error
-			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK).

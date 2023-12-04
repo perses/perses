@@ -11,12 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { DashboardSelector, fetchJson } from '@perses-dev/core';
-import { useMemo } from 'react';
-import { marked } from 'marked';
-import * as DOMPurify from 'dompurify';
-import { useSnackbar } from '@perses-dev/components';
+import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { DashboardSelector, fetchJson, Permission } from '@perses-dev/core';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -85,19 +81,32 @@ export interface ProvisioningConfig {
   folders: string[];
 }
 
+export interface AuthorizationConfig {
+  interval: Duration;
+  guest_permissions: Permission[];
+}
+
+export interface AuthenticationConfig {
+  access_token_ttl: string;
+  refresh_token_ttl: string;
+  disable_sign_up: boolean;
+}
+
 export interface SecurityConfig {
   readonly: boolean;
-  activate_permission: boolean;
   encryption_key?: string;
   encryption_key_file?: string;
+  enable_auth: boolean;
+  authorization: AuthorizationConfig;
+  authentication: AuthenticationConfig;
 }
 
 export interface ConfigModel {
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
-  important_dashboards: DashboardSelector[];
-  information: string;
+  important_dashboards?: DashboardSelector[];
+  information?: string;
   provisioning?: ProvisioningConfig;
 }
 
@@ -113,41 +122,7 @@ export function useConfig(options?: ConfigOptions) {
   );
 }
 
-export function useGetConfigMutation() {
-  return useMutation<ConfigModel, Error>({
-    mutationKey: [resource],
-    mutationFn: () => {
-      return fetchConfig();
-    },
-  });
-}
-
 export function fetchConfig() {
   const url = buildURL({ resource: resource, apiPrefix: '/api' });
   return fetchJson<ConfigModel>(url);
-}
-
-export function useIsReadonly() {
-  const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
-  if (isLoading || data === undefined) {
-    return undefined;
-  }
-  return data.security.readonly;
-}
-
-export function useImportantDashboardSelectors() {
-  const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
-  return { data: data?.important_dashboards || [], isLoading: isLoading };
-}
-
-export function useInformation() {
-  const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useConfig({ onError: exceptionSnackbar });
-
-  const html = useMemo(() => marked.parse(data?.information || '', { gfm: true }), [data?.information]);
-  const sanitizedHTML = useMemo(() => DOMPurify.sanitize(html), [html]);
-
-  return { data: sanitizedHTML, isLoading: isLoading };
 }

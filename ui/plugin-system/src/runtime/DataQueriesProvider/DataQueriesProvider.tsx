@@ -14,6 +14,8 @@
 import { createContext, useCallback, useContext, useMemo } from 'react';
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
+import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
+
 import {
   DataQueriesProviderProps,
   UseDataQueryResults,
@@ -38,11 +40,11 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
 
   // Filter the query results based on the specified query type
   const filteredQueryResults = ctx.queryResults.filter(
-    (queryResult) => queryResult.definition.kind === queryType
+    (queryResult) => queryResult?.definition?.kind === queryType
   ) as Array<QueryData<QueryType[T]>>;
 
   // Filter the errors based on the specified query type
-  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition.kind === queryType);
+  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType);
 
   // Create a new context object with the filtered results and errors
   const filteredCtx = {
@@ -59,6 +61,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
 export function DataQueriesProvider(props: DataQueriesProviderProps) {
   const { definitions, options, children, queryOptions } = props;
 
+  // Returns a query kind, for example "TimeSeriesQuery" = getQueryType("PrometheusTimeSeriesQuery")
   const getQueryType = useQueryType();
 
   const queryDefinitions = definitions.map((definition) => {
@@ -77,12 +80,21 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
   ) as TimeSeriesQueryDefinition[];
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
 
+  const traceQueries = queryDefinitions.filter(
+    (definition) => definition.kind === 'TraceQuery'
+  ) as TraceQueryDefinition[];
+  const traceResults = useTraceQueries(traceQueries);
+
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());
-  }, [timeSeriesResults]);
+    traceResults.forEach((result) => result.refetch());
+  }, [timeSeriesResults, traceResults]);
 
   const ctx = useMemo(() => {
-    const mergedQueryResults = [...transformQueryResults(timeSeriesResults, timeSeriesQueries)];
+    const mergedQueryResults = [
+      ...transformQueryResults(timeSeriesResults, timeSeriesQueries),
+      ...transformQueryResults(traceResults, traceQueries),
+    ];
 
     return {
       queryResults: mergedQueryResults,
@@ -91,7 +103,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
       refetchAll,
       errors: mergedQueryResults.map((result) => result.error),
     };
-  }, [timeSeriesQueries, timeSeriesResults, refetchAll]);
+  }, [timeSeriesQueries, timeSeriesResults, traceQueries, traceResults, refetchAll]);
 
   return <DataQueriesContext.Provider value={ctx}>{children}</DataQueriesContext.Provider>;
 }

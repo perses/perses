@@ -17,7 +17,7 @@ import (
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
-	"github.com/perses/perses/pkg/client/fake/api"
+	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 	"github.com/prometheus/common/version"
 )
 
@@ -31,9 +31,9 @@ func TestVersionCMD(t *testing.T) {
 			Args:            []string{},
 			IsErrorExpected: false,
 			ExpectedMessage: `client:
-  buildTime: "2022-03-24"
-  version: v0.2.0
-  commit: 5567c3dc05e122d309b0d78aea3d418bd9aaf968
+    buildTime: "2022-03-24"
+    version: v0.2.0
+    commit: 5567c3dc05e122d309b0d78aea3d418bd9aaf968
 
 `,
 		},
@@ -49,7 +49,7 @@ func TestVersionCMD(t *testing.T) {
 			Args:            []string{"--short"},
 			IsErrorExpected: false,
 			ExpectedMessage: `client:
-  version: v0.2.0
+    version: v0.2.0
 
 `,
 		},
@@ -59,13 +59,13 @@ func TestVersionCMD(t *testing.T) {
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `client:
-  buildTime: "2022-03-24"
-  version: v0.2.0
-  commit: 5567c3dc05e122d309b0d78aea3d418bd9aaf968
+    buildTime: "2022-03-24"
+    version: v0.2.0
+    commit: 5567c3dc05e122d309b0d78aea3d418bd9aaf968
 server:
-  buildTime: "2022-03-23"
-  version: v0.1.0
-  commit: ff30323938a15cfa9df3071bb84e3f3ef75153df
+    buildTime: "2022-03-23"
+    version: v0.1.0
+    commit: ff30323938a15cfa9df3071bb84e3f3ef75153df
 
 `,
 		},

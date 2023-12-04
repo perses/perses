@@ -23,8 +23,8 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +36,7 @@ func CreateTestScenario(t *testing.T, path string, creator func(name string) mod
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 
-			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK)
@@ -50,7 +50,7 @@ func CreateTestScenario(t *testing.T, path string, creator func(name string) mod
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("myResource")
 			CreateAndWaitUntilEntityExists(t, manager, entity)
-			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusConflict)
@@ -72,10 +72,10 @@ func DeleteTestScenario(t *testing.T, path string, creator func(name string) mod
 			// that the resource is well saved before delete
 			time.Sleep(3 * time.Second)
 
-			expect.DELETE(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusNoContent)
-			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusNotFound)
 
@@ -90,14 +90,14 @@ func NotFoundTestScenario(t *testing.T, path string, creator func(name string) m
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 			entity := creator("not-existing")
 
-			expect.GET(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+			expect.GET(fmt.Sprintf("%s/%s/not-existing", utils.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.PUT(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+			expect.PUT(fmt.Sprintf("%s/%s/not-existing", utils.APIV1Prefix, path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.DELETE(fmt.Sprintf("%s/%s/not-existing", shared.APIV1Prefix, path)).
+			expect.DELETE(fmt.Sprintf("%s/%s/not-existing", utils.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusNotFound)
 
@@ -116,7 +116,7 @@ func WriteTestScenario(t *testing.T, path string, creator func(name string) mode
 			CreateAndWaitUntilEntityExists(t, manager, entity)
 
 			// call now the update endpoint, shouldn't return an error
-			o := expect.PUT(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			o := expect.PUT(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK).
@@ -163,13 +163,13 @@ func MainTestScenario(t *testing.T, path string, creator func(name string) model
 			time.Sleep(3 * time.Second)
 
 			// Check the retrieval of the entity among all the others
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusOK).
 				JSON().Array().ContainsAny(entity)
 
 			// Check the retrieval of the entity by name
-			expect.GET(fmt.Sprintf("%s/%s/%s", shared.APIV1Prefix, path, entity.GetMetadata().GetName())).
+			expect.GET(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusOK).
 				JSON().IsEqual(entity)
@@ -188,7 +188,7 @@ func CreateTestScenarioWithProject(t *testing.T, path string, creator func(proje
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
-			expect.POST(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK)
@@ -202,7 +202,7 @@ func CreateTestScenarioWithProject(t *testing.T, path string, creator func(proje
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
-			expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK)
@@ -217,7 +217,7 @@ func CreateTestScenarioWithProject(t *testing.T, path string, creator func(proje
 			parent, entity := creator("myProject", "myResource")
 			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
-			expect.POST(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusConflict)
@@ -234,11 +234,11 @@ func DeleteTestScenarioWithProject(t *testing.T, path string, creator func(proje
 			parent, entity := creator("myParentResource", "myResource")
 			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusNoContent)
 
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusNotFound)
 
@@ -254,14 +254,14 @@ func NotFoundTestScenarioWithProject(t *testing.T, path string, creator func(pro
 			parent, entity := creator("myParentResource", "not-exisiting")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusNotFound)
@@ -281,7 +281,7 @@ func WriteTestScenarioWithProject(t *testing.T, path string, creator func(projec
 			CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 
 			// call now the update endpoint, shouldn't return an error
-			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+			o := expect.PUT(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusOK).
@@ -327,19 +327,19 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			time.Sleep(3 * time.Second)
 
 			// Check the retrieval of the entity among all the others
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusOK).
 				JSON().Array().ContainsAll(entity)
 
 			// Check again if we get the list by project, the entity is still there.
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				Expect().
 				Status(http.StatusOK).
 				JSON().Array().ContainsAll(entity)
 
 			// Check the retrieval of the entity by name
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", shared.APIV1Prefix, shared.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path, entity.GetMetadata().GetName())).
 				Expect().
 				Status(http.StatusOK).
 				JSON().IsEqual(entity)
@@ -358,7 +358,7 @@ func MainTestScenarioWithProject(t *testing.T, path string, creator func(project
 			// For the "get all" requests, we have no choice to wait a bit of time between the creation and the "get all"
 			time.Sleep(3 * time.Second)
 
-			expect.GET(fmt.Sprintf("%s/%s", shared.APIV1Prefix, path)).
+			expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)).
 				Expect().
 				Status(http.StatusOK).
 				JSON().Array().ContainsAll(entity1, entity2)

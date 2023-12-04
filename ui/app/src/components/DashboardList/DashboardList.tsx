@@ -20,7 +20,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties {

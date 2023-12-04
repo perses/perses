@@ -48,6 +48,7 @@ describe('PluginKindSelect', () => {
     renderComponent({
       pluginType: 'Variable',
       value: 'ErnieVariable1',
+      label: 'Ernie Variable 1',
     });
 
     // Use findByRole to wait for loading to finish and selected value to appear

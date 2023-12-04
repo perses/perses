@@ -28,7 +28,7 @@ describe('generateChartsTheme', () => {
       smooth: true,
     },
   };
-  const chartsTheme: PersesChartsTheme = generateChartsTheme(muiTheme, echartsThemeOverrides);
+  const chartsTheme: PersesChartsTheme = generateChartsTheme(muiTheme, { echartsTheme: echartsThemeOverrides });
 
   it('should return perses specific charts theme from converted MUI theme', () => {
     expect(chartsTheme).toMatchInlineSnapshot(`
@@ -271,7 +271,6 @@ describe('generateChartsTheme', () => {
             "#d32f2f",
           ],
         },
-        "tooltipPortalContainerId": undefined,
       }
     `);
   });

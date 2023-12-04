@@ -113,21 +113,23 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
       ];
 
   return (
-    <Stack spacing={1}>
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginLeft: 'auto' }} onClick={handleQueryAdd}>
+    <>
+      <Stack spacing={1}>
+        {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
+          <TimeSeriesQueryInput
+            key={i}
+            index={i}
+            query={query}
+            isCollapsed={!!queriesCollapsed[i]}
+            onChange={handleQueryChange}
+            onDelete={hasMoreThanOneQuery ? handleQueryDelete : undefined}
+            onCollapseExpand={handleQueryCollapseExpand}
+          />
+        ))}
+      </Stack>
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleQueryAdd}>
         Add Query
       </Button>
-      {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
-        <TimeSeriesQueryInput
-          key={i}
-          index={i}
-          query={query}
-          isCollapsed={!!queriesCollapsed[i]}
-          onChange={handleQueryChange}
-          onDelete={hasMoreThanOneQuery ? handleQueryDelete : undefined}
-          onCollapseExpand={handleQueryCollapseExpand}
-        />
-      ))}
-    </Stack>
+    </>
   );
 }

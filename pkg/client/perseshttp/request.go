@@ -16,14 +16,13 @@ package perseshttp
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 const (
@@ -123,7 +122,6 @@ func (r *Request) Query(query QueryInterface) *Request {
 // Body defines the body in the HTTP request.
 // The body shall be json compatible
 func (r *Request) Body(obj interface{}) *Request {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(obj)
 	if err != nil {
 		r.err = err
@@ -323,7 +321,6 @@ type errorResponse struct {
 
 // Error returns the error executing the request, nil if no error occurred.
 func (r *Response) Error() error {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	e := &RequestError{Err: r.err}
 	// check code result
 	if r.statusCode < http.StatusOK || r.statusCode > http.StatusPartialContent {
@@ -355,7 +352,6 @@ func (r *Response) Error() error {
 
 // Object stores the result into respObj.
 func (r *Response) Object(respObj interface{}) error {
-	json := jsoniter.ConfigCompatibleWithStandardLibrary
 	err := r.Error()
 
 	if err != nil {

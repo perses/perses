@@ -19,12 +19,12 @@ import (
 	"testing"
 
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioGlobalDatasource(t *testing.T) {
-	e2eframework.MainTestScenario(t, shared.PathGlobalDatasource, func(name string) api.Entity {
+	e2eframework.MainTestScenario(t, utils.PathGlobalDatasource, func(name string) api.Entity {
 		return e2eframework.NewGlobalDatasource(t, name)
 	})
 }

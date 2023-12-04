@@ -11,25 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack, Typography } from '@mui/material';
-import ShieldAccount from 'mdi-material-ui/ShieldAccount';
+import { Stack } from '@mui/material';
+import ShieldStar from 'mdi-material-ui/ShieldStar';
 import { useParams } from 'react-router-dom';
-import AppBreadcrumbs from '../../components/AppBreadcrumbs';
+import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { AdminTabs } from './AdminTabs';
 
 function AdminView() {
   const { tab } = useParams();
   return (
-    <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs rootPageName="Administration" />
-      <Box>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" alignItems="center" gap={1}>
-            <ShieldAccount fontSize={'large'} />
-            <Typography variant="h1">Administration</Typography>
-          </Stack>
-        </Stack>
-      </Box>
+    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={1}>
+      <AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar fontSize={'large'} />} />
       <AdminTabs initialTab={tab} />
     </Stack>
   );

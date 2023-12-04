@@ -22,6 +22,7 @@ import { CookiesProvider } from 'react-cookie';
 import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
+import { ConfigContextProvider } from './context/Config';
 
 /**
  * Renders the Perses application in the target container.
@@ -50,15 +51,17 @@ export function renderApp(container: Element | null) {
       <BrowserRouter>
         <CookiesProvider>
           <QueryClientProvider client={queryClient}>
-            <QueryParamProvider adapter={ReactRouter6Adapter}>
-              <DarkModeContextProvider>
-                <NavHistoryProvider>
-                  <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                    <App />
-                  </SnackbarProvider>
-                </NavHistoryProvider>
-              </DarkModeContextProvider>
-            </QueryParamProvider>
+            <ConfigContextProvider>
+              <QueryParamProvider adapter={ReactRouter6Adapter}>
+                <DarkModeContextProvider>
+                  <NavHistoryProvider>
+                    <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                      <App />
+                    </SnackbarProvider>
+                  </NavHistoryProvider>
+                </DarkModeContextProvider>
+              </QueryParamProvider>
+            </ConfigContextProvider>
           </QueryClientProvider>
         </CookiesProvider>
       </BrowserRouter>

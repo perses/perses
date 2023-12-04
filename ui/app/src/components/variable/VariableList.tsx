@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
-import { Action } from '@perses-dev/plugin-system';
+import { Action, DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -22,7 +21,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
-import { useIsReadonly } from '../../model/config-client';
+import { useIsReadonly } from '../../context/Config';
 import { DeleteVariableDialog } from '../dialogs';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';

@@ -19,10 +19,10 @@ export async function fetch(...args: Parameters<typeof global.fetch>) {
   if (response.ok === false) {
     const json = await response.json();
     if (json.error) {
-      throw new UserFriendlyError(json.error);
+      throw new UserFriendlyError(json.error, response.status);
     }
     if (json.message) {
-      throw new UserFriendlyError(json.message);
+      throw new UserFriendlyError(json.message, response.status);
     }
     throw new FetchError(response);
   }
@@ -44,8 +44,10 @@ export async function fetchJson<T>(...args: Parameters<typeof global.fetch>) {
  * Error thrown when fetch returns a non-200 response.
  */
 export class FetchError extends Error {
+  status: number;
   constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
+    this.status = response.status;
     Object.setPrototypeOf(this, FetchError.prototype);
   }
 }
@@ -54,8 +56,10 @@ export class FetchError extends Error {
  * General error type for an error that has a message that is OK to show to the end user.
  */
 export class UserFriendlyError extends Error {
-  constructor(message: string) {
+  status: number;
+  constructor(message: string, status: number) {
     super(message);
+    this.status = status;
     Object.setPrototypeOf(this, UserFriendlyError.prototype);
   }
 }

@@ -11,31 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
-import AppBreadcrumbs from '../../components/AppBreadcrumbs';
-import { useConfig } from '../../model/config-client';
+import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import { useConfigContext } from '../../context/Config';
 
 function ConfigView() {
-  const { data, isLoading } = useConfig();
+  const { config } = useConfigContext();
   return (
-    <Stack sx={{ width: '100%' }} m={2} gap={2}>
-      <AppBreadcrumbs rootPageName="Configuration" />
-      <Box>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <Stack direction="row" alignItems="center" gap={1}>
-            <Cog fontSize={'large'} />
-            <Typography variant="h1">Configuration</Typography>
-          </Stack>
-        </Stack>
-      </Box>
-      {isLoading && (
-        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-          <CircularProgress />
-        </Stack>
-      )}
-      {data !== undefined && <JSONEditor value={data} readOnly />}
+    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={2}>
+      <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize={'large'} />} />
+      <JSONEditor value={config} readOnly />
     </Stack>
   );
 }

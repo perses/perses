@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import { FormatOptions } from '@perses-dev/core';
+import { setupUserEventAndRender } from '@perses-dev/components';
 import { FormatControls } from './FormatControls';
 
 describe('FormatControls', () => {
   const renderFormatControls = (value: FormatOptions, onChange = jest.fn()) => {
-    render(
+    return setupUserEventAndRender(
       <div>
         <FormatControls value={value} onChange={onChange} />
       </div>
@@ -39,36 +39,36 @@ describe('FormatControls', () => {
 
   it('can change the unit by clicking', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'minutes' }, onChange);
+    const { user } = renderFormatControls({ unit: 'minutes' }, onChange);
 
     const unitSelector = getUnitSelector();
-    userEvent.click(unitSelector);
-    const decimalOption = screen.getByRole('option', {
-      name: 'Decimal',
+    user.click(unitSelector);
+    const decimalOption = screen.getByRole('combobox', {
+      name: 'Decimals',
     });
-    userEvent.click(decimalOption);
+    user.click(decimalOption);
 
     expect(onChange).toHaveBeenCalledWith({
-      unit: 'decimal',
+      unit: 'decimals',
     });
   });
 
   it('can change the unit using a keyboard', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'bytes' }, onChange);
+    const { user } = renderFormatControls({ unit: 'bytes' }, onChange);
 
     const unitSelector = getUnitSelector();
-    userEvent.tab();
-    userEvent.tab();
+    user.tab();
+    user.tab();
     expect(unitSelector).toHaveFocus();
 
-    userEvent.clear(unitSelector);
-    userEvent.keyboard('years');
+    user.clear(unitSelector);
+    user.keyboard('years');
     screen.getByRole('option', {
       name: 'Years',
     });
 
-    userEvent.keyboard('{arrowup}{enter}');
+    user.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'years',
@@ -77,13 +77,13 @@ describe('FormatControls', () => {
 
   it('can change the decimal places by clicking', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'decimal', decimalPlaces: 0, shortValues: true }, onChange);
+    const { user } = renderFormatControls({ unit: 'decimal', decimalPlaces: 0, shortValues: true }, onChange);
 
-    userEvent.click(getDecimalPlacesSelector());
+    user.click(getDecimalPlacesSelector());
     const decimalPlacesOption = screen.getByRole('option', {
       name: 'Default',
     });
-    userEvent.click(decimalPlacesOption);
+    user.click(decimalPlacesOption);
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'decimal',
@@ -94,19 +94,19 @@ describe('FormatControls', () => {
 
   it('can change the decimal places using a keyboard', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'percent' }, onChange);
+    const { user } = renderFormatControls({ unit: 'percent' }, onChange);
 
     const decimalPlacesSelector = getDecimalPlacesSelector();
-    userEvent.tab();
-    userEvent.tab();
+    user.tab();
+    user.tab();
     expect(decimalPlacesSelector).toHaveFocus();
 
-    userEvent.clear(decimalPlacesSelector);
-    userEvent.keyboard('3');
+    user.clear(decimalPlacesSelector);
+    user.keyboard('3');
     screen.getByRole('option', {
       name: '3',
     });
-    userEvent.keyboard('{arrowup}{enter}');
+    user.keyboard('{arrowup}{enter}');
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'percent',
@@ -116,9 +116,9 @@ describe('FormatControls', () => {
 
   it('can change shortValues by clicking', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'decimal', decimalPlaces: 3, shortValues: true }, onChange);
+    const { user } = renderFormatControls({ unit: 'decimal', decimalPlaces: 3, shortValues: true }, onChange);
 
-    userEvent.click(getShortValuesSwitch());
+    user.click(getShortValuesSwitch());
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'decimal',
@@ -129,10 +129,10 @@ describe('FormatControls', () => {
 
   it('can change shortValues using a keyboard', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'decimal', decimalPlaces: 0 }, onChange);
+    const { user } = renderFormatControls({ unit: 'decimal', decimalPlaces: 0 }, onChange);
 
-    userEvent.tab();
-    userEvent.keyboard('{space}');
+    user.tab();
+    user.keyboard('{space}');
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'decimal',
@@ -186,9 +186,9 @@ describe('FormatControls', () => {
 
   it('should not show an option for disabled units', () => {
     const onChange = jest.fn();
-    renderFormatControls({ unit: 'decimal' }, onChange);
+    const { user } = renderFormatControls({ unit: 'decimal' }, onChange);
 
-    userEvent.click(getUnitSelector());
+    user.click(getUnitSelector());
     const percentShorthandOption = screen.queryByRole('option', {
       name: '%',
     });

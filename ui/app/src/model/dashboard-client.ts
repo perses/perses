@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { DashboardResource, fetch, fetchJson } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
+import { useImportantDashboardSelectors } from '../context/Config';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
-import { useImportantDashboardSelectors } from './config-client';
+import { fetch, fetchJson } from './fetch';
 
 export const resource = 'dashboards';
 
@@ -110,7 +111,7 @@ export function useImportantDashboardList(project?: string) {
 
   const importantDashboards = useMemo(() => {
     const result: DashboardResource[] = [];
-    importantDashboardSelectors.data.forEach((selector) => {
+    importantDashboardSelectors.forEach((selector) => {
       const dashboard = (dashboards.data || []).find(
         (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
       );
@@ -119,9 +120,9 @@ export function useImportantDashboardList(project?: string) {
       }
     });
     return result;
-  }, [dashboards.data, importantDashboardSelectors.data]);
+  }, [dashboards.data, importantDashboardSelectors]);
 
-  return { data: importantDashboards, isLoading: dashboards.isLoading && importantDashboardSelectors.isLoading };
+  return { data: importantDashboards, isLoading: dashboards.isLoading };
 }
 
 /**

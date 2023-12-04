@@ -20,7 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
 
@@ -59,7 +60,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
       - name: Install UI deps
@@ -85,7 +87,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
       - name: Install UI deps
@@ -105,7 +108,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
       - name: Download react build
@@ -156,7 +160,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup_environment
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
       - name: Download react build

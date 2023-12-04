@@ -4,9 +4,11 @@
     "components",
     "core",
     "dashboards",
+    "explore",
     "panels-plugin",
     "plugin-system",
-    "prometheus-plugin"
+    "prometheus-plugin",
+    "tempo-plugin",
   ],
   "out": "typedoc"
 }

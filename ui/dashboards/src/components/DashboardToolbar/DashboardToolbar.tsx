@@ -19,6 +19,7 @@ import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
 import { TimeRangeControls } from '../TimeRangeControls';
 import { EditVariablesButton } from '../Variables';
+import { EditDatasourcesButton } from '../Datasources';
 import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
@@ -62,9 +63,9 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
     <>
       {isEditMode ? (
         <Stack spacing={1} data-testid={testId}>
-          <Box px={2} py={1} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
+          <Box px={2} py={1.5} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
             {dashboardTitle}
-            <Stack direction="row" spacing={1} marginLeft="auto">
+            <Stack direction="row" gap={1} ml="auto">
               {isReadonly && (
                 <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
                   Dashboard managed via code only. Download JSON and commit changes to save.
@@ -95,6 +96,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
               <Stack direction="row" spacing={1} ml={1} whiteSpace="nowrap">
                 <EditVariablesButton />
+                <EditDatasourcesButton />
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>
@@ -107,7 +109,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           </Box>
         </Stack>
       ) : (
-        <Stack spacing={1} px={2} pt={1} data-testid={testId}>
+        <Stack gap={1} mx={2} mt={1.5} data-testid={testId}>
           <Box sx={{ display: 'flex', width: '100%' }}>
             {dashboardTitle}
             <Stack direction="row" spacing={1} marginLeft="auto">
@@ -116,7 +118,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               {isBiggerThanSm && <EditButton onClick={onEditButtonClick} />}
             </Stack>
           </Box>
-          <Box>
+          <Box mt={1}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}

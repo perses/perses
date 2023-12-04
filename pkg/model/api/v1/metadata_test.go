@@ -55,6 +55,10 @@ func TestKind_validate(t *testing.T) {
 			title: "project",
 			kind:  KindProject,
 		},
+		{
+			title: "dashboard",
+			kind:  "dAsHbOaRd",
+		},
 	}
 	for i := range testSuites {
 		test := testSuites[i]

@@ -80,7 +80,6 @@ export class DashboardPage {
   readonly panelGroupHeadings: Locator;
 
   readonly variableList: Locator;
-  readonly variableListItems: Locator;
 
   readonly panelEditor: Locator;
   readonly variableEditor: Locator;
@@ -112,7 +111,6 @@ export class DashboardPage {
     this.panelGroupHeadings = this.panelGroups.getByTestId('panel-group-header').getByRole('heading', { level: 2 });
 
     this.variableList = page.getByTestId('variable-list');
-    this.variableListItems = this.variableList.getByTestId('template-variable');
 
     this.panelEditor = page.getByTestId('panel-editor');
     this.variableEditor = page.getByTestId('variable-editor');
@@ -135,6 +133,10 @@ export class DashboardPage {
     return this.page.getByRole('dialog', {
       name: name,
     });
+  }
+
+  getTemplateVariable(name: string) {
+    return this.page.getByTestId('template-variable-' + name).getByRole('combobox');
   }
 
   /**

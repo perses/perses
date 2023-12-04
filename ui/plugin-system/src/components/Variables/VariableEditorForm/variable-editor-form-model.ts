@@ -31,7 +31,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
     },
   };
   if (initialVariableDefinition.kind === 'ListVariable') {
-    listVariableFields.allowMultiple = initialVariableDefinition.spec.allowAllValue ?? false;
+    listVariableFields.allowMultiple = initialVariableDefinition.spec.allowMultiple ?? false;
     listVariableFields.allowAll = initialVariableDefinition.spec.allowAllValue ?? false;
     listVariableFields.customAllValue = initialVariableDefinition.spec.customAllValue;
     listVariableFields.capturingRegexp = initialVariableDefinition.spec.capturingRegexp;

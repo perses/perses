@@ -53,5 +53,25 @@
         }
       }
     }
+  },
+  {
+    "kind": "GlobalDatasource",
+    "metadata": {
+      "name": "TempoLocal"
+    },
+    "spec": {
+      "default": true,
+      "plugin": {
+        "kind": "TempoDatasource",
+        "spec": {
+          "proxy": {
+            "kind": "HTTPProxy",
+            "spec": {
+              "url": "http://localhost:3200"
+            }
+          }
+        }
+      }
+    }
   }
 ]

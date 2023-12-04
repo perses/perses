@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/perses/perses/internal/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -32,8 +33,8 @@ type Crypto interface {
 	Decrypt(spec *modelV1.SecretSpec) error
 }
 
-func New(encodedKey string) (Crypto, JWT, error) {
-	key, err := hex.DecodeString(encodedKey)
+func New(security config.Security) (Crypto, JWT, error) {
+	key, err := hex.DecodeString(string(security.EncryptionKey))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -47,7 +48,10 @@ func New(encodedKey string) (Crypto, JWT, error) {
 			block: aesBlock,
 		},
 		&jwtImpl{
-			key: key,
+			accessKey:       key,
+			refreshKey:      append(key, []byte("-refresh")...),
+			accessTokenTTL:  security.Authentication.AccessTokenTTL,
+			refreshTokenTTL: security.Authentication.RefreshTokenTTL,
 		}, nil
 }
 

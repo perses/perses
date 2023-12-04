@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func TestUnmarshalJSONDatasource(t *testing.T) {
@@ -110,7 +110,7 @@ func TestUnmarshalYAMLLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	var pluginSpecAsMapInterface map[interface{}]interface{}
+	var pluginSpecAsMapInterface map[string]interface{}
 	if err := yaml.Unmarshal(data, &pluginSpecAsMapInterface); err != nil {
 		t.Fatal(err)
 	}
