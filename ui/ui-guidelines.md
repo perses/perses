@@ -280,7 +280,6 @@ to ensure you are writing modular UI code.
 - Start thinking about breaking a module into smaller modules or sub components when
   it exceeds 300 lines, unless there is a good reason to couple all of the code in a
   single module)
-- Use explicit `null` or `undefined` checks instead of relying on JS falsiness
 - Bias towards using optional properties (i.e. `foo?: bar`) and `undefined` over
   `null`, unless an explicit `null` is required or has semantic meaning
 - Feature specific code within `/views` should not be imported by a different feature
