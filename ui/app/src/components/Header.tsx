@@ -63,13 +63,16 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
   };
   if (props.isAuthEnable) {
     return (
-      <ListItemIcon onClick={handleDarkModeChange}>
-        {isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}
-      </ListItemIcon>
+      <MenuItem onClick={handleDarkModeChange}>
+        <ListItemIcon>{isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}</ListItemIcon>
+        Theme
+      </MenuItem>
     );
   }
   return (
-    <IconButton onClick={handleDarkModeChange}>{isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}</IconButton>
+    <IconButton onClick={handleDarkModeChange} aria-label="Theme">
+      {isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}
+    </IconButton>
   );
 }
 
@@ -125,10 +128,7 @@ function AccountMenu() {
           {token.decodedToken?.sub}
         </MenuItem>
         <Divider />
-        <MenuItem>
-          <ThemeSwitch isAuthEnable />
-          Theme
-        </MenuItem>
+        <ThemeSwitch isAuthEnable />
         <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout />
