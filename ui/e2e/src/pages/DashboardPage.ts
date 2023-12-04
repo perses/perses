@@ -91,7 +91,7 @@ export class DashboardPage {
 
     this.root = page.locator('#root');
 
-    this.themeToggle = page.getByRole('checkbox', { name: 'Theme' });
+    this.themeToggle = page.getByRole('button', { name: 'Theme' });
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
     this.timePicker = page.getByRole('button', { name: 'Select time range' });
