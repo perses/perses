@@ -61,17 +61,20 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
       exceptionSnackbar(e);
     }
   };
+  const swapIcon = () => {
+    return isDarkModeEnabled ? <Brightness5 id="dark" /> : <Brightness4 id="light" />;
+  };
   if (props.isAuthEnable) {
     return (
       <MenuItem onClick={handleDarkModeChange}>
-        <ListItemIcon>{isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}</ListItemIcon>
+        <ListItemIcon>{swapIcon()}</ListItemIcon>
         Theme
       </MenuItem>
     );
   }
   return (
     <IconButton onClick={handleDarkModeChange} aria-label="Theme">
-      {isDarkModeEnabled ? <Brightness5 /> : <Brightness4 />}
+      {swapIcon()}
     </IconButton>
   );
 }

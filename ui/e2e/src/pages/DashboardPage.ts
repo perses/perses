@@ -142,12 +142,12 @@ export class DashboardPage {
   /**
    * THEME HELPERS
    */
-  async isDarkMode() {
-    await expect(this.themeToggle).toBeChecked();
+  isDarkMode() {
+    expect(this.themeToggle.locator('#dark')).toBeDefined();
   }
 
-  async isLightMode() {
-    await expect(this.themeToggle).not.toBeChecked();
+  isLightMode() {
+    expect(this.themeToggle.locator('#light')).toBeDefined();
   }
 
   async toggleTheme() {
@@ -162,11 +162,11 @@ export class DashboardPage {
    * theme.
    */
   async forEachTheme(callback: (themeName: ThemeName) => Promise<void>) {
-    await this.isLightMode();
+    this.isLightMode();
     await callback('light');
 
     await this.toggleTheme();
-    await this.isDarkMode();
+    this.isDarkMode();
     await callback('dark');
   }
 
