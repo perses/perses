@@ -68,12 +68,12 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
     return (
       <MenuItem onClick={handleDarkModeChange}>
         <ListItemIcon>{swapIcon()}</ListItemIcon>
-        Theme
+        Switch Theme
       </MenuItem>
     );
   }
   return (
-    <Tooltip title="Theme">
+    <Tooltip title="Switch Theme">
       <IconButton onClick={handleDarkModeChange} aria-label="Theme" style={{ color: 'white' }}>
         {swapIcon()}
       </IconButton>
