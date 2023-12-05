@@ -7,7 +7,7 @@ This section provides several paths to installing and running the Perses project
 There are several ways to install the Perses project, so please click on the option you want to use for the rest of 
 these instructions:
 
-- [Installing in a container using Podman (preferred)](section-2-podman.md)
+- [Installing in a container (preferred)](section-2-container.md)
 
 - [Installing from the source code](section-2-source.md)
 
