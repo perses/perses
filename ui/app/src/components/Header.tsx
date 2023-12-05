@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -23,7 +23,6 @@ import {
   Menu as MUIMenu,
   MenuItem,
   Stack,
-  Switch,
   Toolbar,
   Tooltip,
   Typography,
@@ -35,16 +34,116 @@ import Archive from 'mdi-material-ui/Archive';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import Menu from 'mdi-material-ui/Menu';
 import Compass from 'mdi-material-ui/Compass';
+import AccountCircle from 'mdi-material-ui/AccountCircle';
+import Logout from 'mdi-material-ui/Logout';
+import Brightness4 from 'mdi-material-ui/Brightness4';
+import Brightness5 from 'mdi-material-ui/Brightness5';
 import React, { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
-import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute } from '../model/route';
+import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute, SignInRoute } from '../model/route';
+import { useIsAuthEnable } from '../context/Config';
+import { useAuthToken, useLogoutMutation } from '../model/auth-client';
 import WhitePersesLogo from './logo/WhitePersesLogo';
 import PersesLogoCropped from './logo/PersesLogoCropped';
 
 const ITEM_HEIGHT = 48;
+
+function ThemeSwitch(props: { isAuthEnable: boolean }) {
+  const { isDarkModeEnabled, setDarkMode } = useDarkMode();
+  const { exceptionSnackbar } = useSnackbar();
+  const handleDarkModeChange = () => {
+    try {
+      setDarkMode(!isDarkModeEnabled);
+    } catch (e) {
+      exceptionSnackbar(e);
+    }
+  };
+  const swapIcon = () => {
+    return isDarkModeEnabled ? <Brightness5 id="dark" /> : <Brightness4 id="light" />;
+  };
+  if (props.isAuthEnable) {
+    return (
+      <MenuItem onClick={handleDarkModeChange}>
+        <ListItemIcon>{swapIcon()}</ListItemIcon>
+        Switch Theme
+      </MenuItem>
+    );
+  }
+  return (
+    <Tooltip title="Switch Theme">
+      <IconButton onClick={handleDarkModeChange} aria-label="Theme" style={{ color: 'white' }}>
+        {swapIcon()}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+function AccountMenu() {
+  const token = useAuthToken();
+  const logoutMutation = useLogoutMutation();
+  const navigate = useNavigate();
+  const { exceptionSnackbar } = useSnackbar();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+  const handleLogout = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate(SignInRoute);
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+      },
+    });
+  };
+  return (
+    <Box>
+      <IconButton
+        aria-label="Account menu"
+        aria-controls="menu-account-list-appbar"
+        aria-haspopup="true"
+        color="inherit"
+        onClick={handleMenu}
+      >
+        <AccountCircle />
+      </IconButton>
+      <MUIMenu
+        id="menu-account-list-appbar"
+        anchorEl={anchorEl}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        keepMounted
+        open={anchorEl !== null}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem>
+          <ListItemIcon>
+            <AccountCircle />
+          </ListItemIcon>
+          {token.decodedToken?.sub}
+        </MenuItem>
+        <Divider />
+        <ThemeSwitch isAuthEnable />
+        <MenuItem onClick={handleLogout}>
+          <ListItemIcon>
+            <Logout />
+          </ListItemIcon>
+          Logout
+        </MenuItem>
+      </MUIMenu>
+    </Box>
+  );
+}
 
 function ToolMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -201,15 +300,7 @@ function ProjectMenu(): JSX.Element {
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();
   const isMobileSize = useIsMobileSize();
-  const { exceptionSnackbar } = useSnackbar();
-  const { isDarkModeEnabled, setDarkMode } = useDarkMode();
-  const handleDarkModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setDarkMode(e.target.checked);
-    } catch (e) {
-      exceptionSnackbar(e);
-    }
-  };
+  const isAuthEnable = useIsAuthEnable();
 
   return (
     <AppBar position="relative">
@@ -297,13 +388,7 @@ export default function Header(): JSX.Element {
               </IconButton>
             </Tooltip>
           )}
-          <Tooltip title="Theme">
-            <Switch
-              checked={isDarkModeEnabled}
-              onChange={handleDarkModeChange}
-              inputProps={{ 'aria-label': 'Theme' }}
-            />
-          </Tooltip>
+          {isAuthEnable ? <AccountMenu /> : <ThemeSwitch isAuthEnable={false} />}
         </Stack>
       </Toolbar>
     </AppBar>
