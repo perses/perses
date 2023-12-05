@@ -17,6 +17,9 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/interface/v1/role"
+	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/internal/api/shared/rbac"
 
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/shared"
@@ -29,14 +32,20 @@ import (
 
 type service struct {
 	rolebinding.Service
-	dao rolebinding.DAO
-	sch schemas.Schemas
+	dao     rolebinding.DAO
+	roleDAO role.DAO
+	userDAO user.DAO
+	rbac    rbac.RBAC
+	sch     schemas.Schemas
 }
 
-func NewService(dao rolebinding.DAO, sch schemas.Schemas) rolebinding.Service {
+func NewService(dao rolebinding.DAO, roleDAO role.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schemas.Schemas) rolebinding.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:     dao,
+		rbac:    rbac,
+		roleDAO: roleDAO,
+		userDAO: userDAO,
+		sch:     sch,
 	}
 }
 
@@ -48,10 +57,15 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 }
 
 func (s *service) create(entity *v1.RoleBinding) (*v1.RoleBinding, error) {
-	// TODO: validate user + role exists
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
+	if err := s.validateRoleBinding(entity); err != nil {
+		return nil, err
+	}
 	if err := s.dao.Create(entity); err != nil {
+		return nil, err
+	}
+	if err := s.rbac.Refresh(); err != nil {
 		return nil, err
 	}
 	return entity, nil
@@ -76,11 +90,13 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 		return nil, shared.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
 	}
 
-	// TODO: validate user + role exists
-
-	// find the previous version of the roleBinding
+	// find the previous version of the RoleBinding
 	oldEntity, err := s.dao.Get(parameters.Project, parameters.Name)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.validateRoleBinding(entity); err != nil {
 		return nil, err
 	}
 
@@ -95,11 +111,17 @@ func (s *service) update(entity *v1.RoleBinding, parameters apiInterface.Paramet
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the roleBinding %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	if err := s.rbac.Refresh(); err != nil {
+		return nil, err
+	}
 	return entity, nil
 }
 
 func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Project, parameters.Name)
+	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
+		return err
+	}
+	return s.rbac.Refresh()
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
@@ -108,4 +130,23 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+// Validating role and subjects are existing
+func (s *service) validateRoleBinding(roleBinding *v1.RoleBinding) error {
+	_, err := s.roleDAO.Get(roleBinding.Metadata.Project, roleBinding.Spec.Role)
+	if err != nil {
+		return shared.HandleBadRequestError(fmt.Sprintf("role '%s' doesn't exist", roleBinding.Spec.Role))
+	}
+
+	for _, subject := range roleBinding.Spec.Subjects {
+		if subject.Kind == v1.KindUser {
+			_, err := s.userDAO.Get(subject.Name)
+			if err != nil {
+				return shared.HandleBadRequestError(fmt.Sprintf("user subject name '%s' doesn't exist", subject.Name))
+			}
+		}
+	}
+
+	return nil
 }

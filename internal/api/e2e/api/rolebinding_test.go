@@ -16,15 +16,50 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioRoleBinding(t *testing.T) {
-	e2eframework.MainTestScenarioWithProject(t, utils.PathRoleBinding, func(projectName string, name string) (api.Entity, api.Entity) {
-		return e2eframework.NewProject(projectName), e2eframework.NewRoleBinding(projectName, name)
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
+		project := e2eframework.NewProject("mysuperproject")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		role := e2eframework.NewRole(project.Metadata.Name, "admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, role)
+		entity := e2eframework.NewRoleBinding(project.Metadata.Name, "admin")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathRoleBinding)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{entity, role, project, user}
+	})
+}
+
+func TestUpdateScenarioRoleBindingRole(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
+		project := e2eframework.NewProject("mysuperproject")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
+		role := e2eframework.NewRole(project.Metadata.Name, "admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, role)
+		entity := e2eframework.NewRoleBinding(project.Metadata.Name, "admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+
+		entity.Spec.Role = "newRoleName"
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.PathProject, entity.Metadata.Project, utils.APIV1Prefix, utils.PathRoleBinding, entity.Metadata.Name)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{entity, role, project, user}
 	})
 }
