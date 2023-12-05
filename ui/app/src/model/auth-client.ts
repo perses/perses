@@ -65,12 +65,12 @@ export function useAuthMutation() {
 export function useLogoutMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: [`${authResource}`],
+    mutationKey: [authResource],
     mutationFn: () => {
       return logout();
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([`${authResource}`]);
+      return queryClient.invalidateQueries([authResource]);
     },
   });
 }
