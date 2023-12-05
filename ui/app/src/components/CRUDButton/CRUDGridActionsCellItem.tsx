@@ -45,7 +45,7 @@ export function CRUDGridActionsCellItem({
     return (
       <Tooltip title="Resource managed via code only" placement="top">
         <span>
-          <GridActionsCellItem icon={icon} label={label} disabled={true} />
+          <GridActionsCellItem icon={icon} label={label} disabled />
         </span>
       </Tooltip>
     );
@@ -60,7 +60,7 @@ export function CRUDGridActionsCellItem({
     return (
       <Tooltip title={errorMessage} placement="top">
         <span>
-          <GridActionsCellItem icon={icon} label={label} disabled={true} />
+          <GridActionsCellItem icon={icon} label={label} disabled />
         </span>
       </Tooltip>
     );

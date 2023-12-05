@@ -42,7 +42,7 @@ export function CRUDButton(props: CRUDButtonProps) {
             size="small"
             sx={{ textTransform: 'uppercase' }}
             onClick={onClick}
-            disabled={disabled || isReadonly}
+            disabled
           >
             {text}
           </Button>
@@ -66,7 +66,7 @@ export function CRUDButton(props: CRUDButtonProps) {
             size="small"
             sx={{ textTransform: 'uppercase' }}
             onClick={onClick}
-            disabled={true}
+            disabled
           >
             {text}
           </Button>
