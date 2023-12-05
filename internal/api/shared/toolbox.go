@@ -17,17 +17,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/shared/authorization"
-	"github.com/perses/perses/internal/api/shared/authorization/rbac"
 	"github.com/perses/perses/internal/api/shared/crypto"
+	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-
-	"github.com/labstack/echo/v4"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/pkg/model/api"
 )
 
 func extractParameters(ctx echo.Context) apiInterface.Parameters {
@@ -47,7 +45,7 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service apiInterface.Service, rbac authorization.RBAC, kind v1.Kind) Toolbox {
+func NewToolBox(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind) Toolbox {
 	return &toolbox{
 		service: service,
 		rbac:    rbac,
@@ -58,7 +56,7 @@ func NewToolBox(service apiInterface.Service, rbac authorization.RBAC, kind v1.K
 type toolbox struct {
 	Toolbox
 	service apiInterface.Service
-	rbac    authorization.RBAC
+	rbac    rbac.RBAC
 	kind    v1.Kind
 }
 

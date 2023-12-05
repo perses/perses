@@ -26,8 +26,8 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
@@ -44,10 +44,10 @@ type service struct {
 	roleBindingDAO rolebinding.DAO
 	secretDAO      secret.DAO
 	variableDAO    variable.DAO
-	rbac           authorization.RBAC
+	rbac           rbac.RBAC
 }
 
-func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac authorization.RBAC) project.Service {
+func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.DAO, dashboardDAO dashboard.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, secretDAO secret.DAO, variableDAO variable.DAO, rbac rbac.RBAC) project.Service {
 	return &service{
 		dao:            dao,
 		folderDAO:      folderDAO,

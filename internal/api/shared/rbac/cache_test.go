@@ -21,43 +21,43 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func generateMockCache(userCount int, projectCountByUser int) Cache {
-	usersPermissions := make(usersPermissions)
+func generateMockCache(userCount int, projectCountByUser int) cache {
+	permissions := make(usersPermissions)
 	for u := 1; u <= userCount; u++ {
 		for p := 1; p <= projectCountByUser; p++ {
-			addEntry(usersPermissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
+			addEntry(permissions, fmt.Sprintf("user%d", u), fmt.Sprintf("project%d", p), &role.Permission{
 				Actions: []role.Action{role.WildcardAction},
 				Scopes:  []role.Scope{role.WildcardScope},
 			})
 		}
 	}
-	return Cache{UsersPermissions: usersPermissions}
+	return cache{permissions: permissions}
 }
 
-func smallMockCache() Cache {
-	usersPermissions := make(usersPermissions)
-	addEntry(usersPermissions, "user0", "project0", &role.Permission{
+func smallMockCache() cache {
+	permissions := make(usersPermissions)
+	addEntry(permissions, "user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	addEntry(usersPermissions, "user0", "project0", &role.Permission{
+	addEntry(permissions, "user0", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.VariableScope},
 	})
-	addEntry(usersPermissions, "user1", "project0", &role.Permission{
+	addEntry(permissions, "user1", "project0", &role.Permission{
 		Actions: []role.Action{role.CreateAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
-	addEntry(usersPermissions, "user2", "project1", &role.Permission{
+	addEntry(permissions, "user2", "project1", &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.DashboardScope},
 	})
-	addEntry(usersPermissions, "admin", GlobalProject, &role.Permission{
+	addEntry(permissions, "admin", GlobalProject, &role.Permission{
 		Actions: []role.Action{role.WildcardAction},
 		Scopes:  []role.Scope{role.WildcardScope},
 	})
 
-	return Cache{UsersPermissions: usersPermissions}
+	return cache{permissions: permissions}
 }
 
 func TestCacheHasPermission(t *testing.T) {
@@ -65,7 +65,7 @@ func TestCacheHasPermission(t *testing.T) {
 
 	testSuites := []struct {
 		title          string
-		cache          Cache
+		cache          cache
 		user           string
 		reqAction      role.Action
 		reqProject     string
@@ -74,7 +74,7 @@ func TestCacheHasPermission(t *testing.T) {
 	}{
 		{
 			title:          "empty cache",
-			cache:          Cache{},
+			cache:          cache{},
 			user:           "user0",
 			reqAction:      role.CreateAction,
 			reqProject:     "project0",
@@ -205,7 +205,7 @@ func TestCacheHasPermission(t *testing.T) {
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
-			assert.Equal(t, test.expectedResult, test.cache.HasPermission(test.user, test.reqAction, test.reqProject, test.reqScope))
+			assert.Equal(t, test.expectedResult, test.cache.hasPermission(test.user, test.reqAction, test.reqProject, test.reqScope))
 		})
 	}
 }
@@ -253,15 +253,15 @@ func BenchmarkCacheHasPermission(b *testing.B) {
 		},
 	}
 	for _, bench := range benchSuites {
-		cache := generateMockCache(bench.userCount, bench.projectCountByUser)
+		mockCache := generateMockCache(bench.userCount, bench.projectCountByUser)
 		b.Run(fmt.Sprintf("HasPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cache.HasPermission("user0", role.CreateAction, "project0", role.DashboardScope)
+				mockCache.hasPermission("user0", role.CreateAction, "project0", role.DashboardScope)
 			}
 		})
 		b.Run(fmt.Sprintf("HasNotPermission(userCount:%d,projectCountByUser:%d)", bench.userCount, bench.projectCountByUser), func(b *testing.B) {
 			for i := 0; i < b.N; i++ {
-				cache.HasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
+				mockCache.hasPermission(fmt.Sprintf("user%d", bench.userCount), role.CreateAction, fmt.Sprintf("project%d", bench.projectCountByUser), role.DashboardScope)
 			}
 		})
 	}

@@ -17,16 +17,16 @@ import (
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
-type DisabledImpl struct{}
+type disabledImpl struct{}
 
-func (r *DisabledImpl) IsEnabled() bool {
+func (r *disabledImpl) IsEnabled() bool {
 	return false
 }
 
-func (r *DisabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
+func (r *disabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
 	return true
 }
 
-func (r *DisabledImpl) Refresh() error {
+func (r *disabledImpl) Refresh() error {
 	return nil
 }
