@@ -21,7 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/authorization"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -31,7 +31,7 @@ type Endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service folder.Service, rbacService authorization.RBAC, readonly bool) *Endpoint {
+func NewEndpoint(service folder.Service, rbacService rbac.RBAC, readonly bool) *Endpoint {
 	return &Endpoint{
 		toolbox:  shared.NewToolBox(service, rbacService, v1.KindFolder),
 		readonly: readonly,

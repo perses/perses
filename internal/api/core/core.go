@@ -21,9 +21,9 @@ import (
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/migrate"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
@@ -72,7 +72,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
 	if conf.Security.EnableAuth {
-		rbacTask := authorization.NewCronTask(serviceManager.GetRBAC())
+		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC())
 		runner.WithCronTasks(conf.Security.Authorization.Interval, rbacTask)
 	}
 

@@ -48,9 +48,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/shared/authorization"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/migrate"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/schemas"
 )
 
@@ -70,7 +70,7 @@ type ServiceManager interface {
 	GetProject() project.Service
 	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
-	GetRBAC() authorization.RBAC
+	GetRBAC() rbac.RBAC
 	GetRole() role.Service
 	GetRoleBinding() rolebinding.Service
 	GetSecret() secret.Service
@@ -95,7 +95,7 @@ type service struct {
 	project           project.Service
 	provisioning      async.SimpleTask
 	schemas           schemas.Schemas
-	rbac              authorization.RBAC
+	rbac              rbac.RBAC
 	role              role.Service
 	roleBinding       rolebinding.Service
 	secret            secret.Service
@@ -116,7 +116,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	if err != nil {
 		return nil, err
 	}
-	rbacService, err := authorization.NewRBAC(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), jwtService, conf)
+	rbacService, err := rbac.New(dao.GetUser(), dao.GetRole(), dao.GetRoleBinding(), dao.GetGlobalRole(), dao.GetGlobalRoleBinding(), conf)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +226,7 @@ func (s *service) GetSchemas() schemas.Schemas {
 	return s.schemas
 }
 
-func (s *service) GetRBAC() authorization.RBAC {
+func (s *service) GetRBAC() rbac.RBAC {
 	return s.rbac
 }
 
