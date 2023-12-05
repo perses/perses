@@ -41,6 +41,9 @@ function ProjectView() {
         <Box mt={0.5}>
           <CRUDButton
             text="Delete Project"
+            action="delete"
+            scope="Project"
+            project={projectName}
             variant="outlined"
             color="error"
             onClick={() => setIsDeleteProjectDialogOpen(true)}

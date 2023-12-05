@@ -71,6 +71,15 @@ func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requ
 	return r.cache.hasPermission(user, requestAction, requestProject, requestScope)
 }
 
+func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission {
+	userPermissions := make(map[string][]*v1Role.Permission)
+	userPermissions[GlobalProject] = r.guestPermissions
+	for project, projectPermissions := range r.cache.permissions[user] {
+		userPermissions[project] = append(userPermissions[project], projectPermissions...)
+	}
+	return userPermissions
+}
+
 func (r *cacheImpl) Refresh() error {
 	permissions, err := buildUsersPermissions(r.userDAO, r.roleDAO, r.roleBindingDAO, r.globalRoleDAO, r.globalRoleBindingDAO)
 	if err != nil {

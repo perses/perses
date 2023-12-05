@@ -28,7 +28,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/role"
 )
 
-func extractParameters(ctx echo.Context) apiInterface.Parameters {
+func ExtractParameters(ctx echo.Context) apiInterface.Parameters {
 	return apiInterface.Parameters{
 		Project: utils.GetProjectParameter(ctx),
 		Name:    utils.GetNameParameter(ctx),
@@ -60,7 +60,7 @@ type toolbox struct {
 	kind    v1.Kind
 }
 
-func (t *toolbox) CheckPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
+func (t *toolbox) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
 	projectName := parameters.Project
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {
@@ -105,8 +105,8 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, entity, parameters, role.CreateAction); err != nil {
+	parameters := ExtractParameters(ctx)
+	if err := t.checkPermission(ctx, entity, parameters, role.CreateAction); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Create(apiInterface.NewPersesContext(ctx), entity)
@@ -120,8 +120,8 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
+	parameters := ExtractParameters(ctx)
+	if err := t.checkPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
 		return err
 	}
 	newEntity, err := t.service.Update(apiInterface.NewPersesContext(ctx), entity, parameters)
@@ -132,8 +132,8 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
+	parameters := ExtractParameters(ctx)
+	if err := t.checkPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
 	}
 	if err := t.service.Delete(apiInterface.NewPersesContext(ctx), parameters); err != nil {
@@ -143,8 +143,8 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
+	parameters := ExtractParameters(ctx)
+	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
 	entity, err := t.service.Get(apiInterface.NewPersesContext(ctx), parameters)
@@ -158,8 +158,8 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return HandleBadRequestError(err.Error())
 	}
-	parameters := extractParameters(ctx)
-	if err := t.CheckPermission(ctx, nil, parameters, role.ReadAction); err != nil {
+	parameters := ExtractParameters(ctx)
+	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
 	result, err := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)

@@ -13,14 +13,14 @@
 
 import { getDashboardDisplayName, DashboardResource } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridActionsCellItem, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
-import { useIsReadonly } from '../../context/Config';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties {
@@ -39,8 +39,6 @@ export interface DashboardListProperties {
  */
 export function DashboardList(props: DashboardListProperties) {
   const { dashboardList, hideToolbar, isLoading, initialState } = props;
-
-  const isReadonly = useIsReadonly();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -131,24 +129,28 @@ export function DashboardList(props: DashboardListProperties) {
         flex: 0.5,
         minWidth: 100,
         getActions: (params: GridRowParams<Row>) => [
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
             label="Rename"
-            disabled={isReadonly}
+            action="update"
+            scope="Dashboard"
+            project={params.row.project}
             onClick={onRenameButtonClick(params.row.project, params.row.name)}
           />,
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
-            disabled={isReadonly}
+            action="delete"
+            scope="Dashboard"
+            project={params.row.project}
             onClick={onDeleteButtonClick(params.row.project, params.row.name)}
           />,
         ],
       },
     ],
-    [isReadonly, onRenameButtonClick, onDeleteButtonClick]
+    [onRenameButtonClick, onDeleteButtonClick]
   );
 
   return (

@@ -14,7 +14,7 @@
 import { DispatchWithPromise, getSecretProject, Secret } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
-import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -22,8 +22,9 @@ import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
-import { useIsReadonly } from '../../context/Config';
 import { DeleteSecretDialog } from '../dialogs';
+import { GlobalProject } from '../../context/Authorization';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 
 export interface SecretListProperties<T extends Secret> {
@@ -46,7 +47,6 @@ export interface SecretListProperties<T extends Secret> {
  */
 export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
   const { data, hideToolbar, isLoading, initialState, onDelete } = props;
-  const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
 
   const findSecret = useCallback(
@@ -184,17 +184,19 @@ export function SecretList<T extends Secret>(props: SecretListProperties<T>) {
         flex: 0.5,
         minWidth: 100,
         getActions: (params: GridRowParams<Row>) => [
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
-            disabled={isReadonly}
+            action="delete"
+            scope={params.row.project ? 'Secret' : 'GlobalSecret'}
+            project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
           />,
         ],
       },
     ],
-    [isReadonly, handleDeleteButtonClick, handleCopyVarNameButtonClick]
+    [handleDeleteButtonClick, handleCopyVarNameButtonClick]
   );
 
   return (

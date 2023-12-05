@@ -155,7 +155,14 @@ function TabButton(props: TabButtonProps) {
     case dashboardsTabIndex:
       return (
         <>
-          <CRUDButton text="Add Dashboard" variant="contained" onClick={() => setCreateDashboardDialogOpened(true)} />
+          <CRUDButton
+            text="Add Dashboard"
+            action="create"
+            scope="Dashboard"
+            project={props.projectName}
+            variant="contained"
+            onClick={() => setCreateDashboardDialogOpened(true)}
+          />
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
             projectOptions={[props.projectName]}
@@ -168,7 +175,14 @@ function TabButton(props: TabButtonProps) {
     case variablesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Variable" variant="contained" onClick={() => setVariableDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Variable"
+            action="create"
+            scope="Variable"
+            project={props.projectName}
+            variant="contained"
+            onClick={() => setVariableDrawerOpened(true)}
+          />
           <VariableDrawer
             variable={{
               kind: 'Variable',
@@ -195,7 +209,14 @@ function TabButton(props: TabButtonProps) {
     case datasourcesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Datasource" variant="contained" onClick={() => setDatasourceDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Datasource"
+            action="create"
+            scope="Datasource"
+            project={props.projectName}
+            variant="contained"
+            onClick={() => setDatasourceDrawerOpened(true)}
+          />
           <DatasourceDrawer
             datasource={{
               kind: 'Datasource',
@@ -223,7 +244,14 @@ function TabButton(props: TabButtonProps) {
     case rolesTabIndex:
       return (
         <>
-          <CRUDButton text="Add Role" variant="contained" onClick={() => setRoleDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Role"
+            action="create"
+            scope="Role"
+            project={props.projectName}
+            variant="contained"
+            onClick={() => setRoleDrawerOpened(true)}
+          />
           <RoleDrawer
             role={{
               kind: 'Role',
@@ -246,7 +274,14 @@ function TabButton(props: TabButtonProps) {
     case roleBindingsTabIndex:
       return (
         <>
-          <CRUDButton text="Add Role Binding" variant="contained" onClick={() => setRoleBindingDrawerOpened(true)} />
+          <CRUDButton
+            text="Add Role Binding"
+            action="create"
+            scope="RoleBinding"
+            project={props.projectName}
+            variant="contained"
+            onClick={() => setRoleBindingDrawerOpened(true)}
+          />
           <RoleBindingDrawer
             roleBinding={{
               kind: 'RoleBinding',

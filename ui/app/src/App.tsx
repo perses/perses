@@ -18,6 +18,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
+import { AuthorizationProvider } from './context/Authorization';
 
 function App() {
   const location = useLocation();
@@ -38,7 +39,9 @@ function App() {
           display: 'flex',
         }}
       >
-        <Router />
+        <AuthorizationProvider>
+          <Router />
+        </AuthorizationProvider>
       </Box>
       <Footer />
     </Box>

@@ -20,6 +20,7 @@ import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
 import { fetch, fetchJson } from './fetch';
+import { userKey } from './user-client';
 
 const resource = 'projects';
 
@@ -70,7 +71,7 @@ export function useAddProjectMutation() {
       });
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(key);
+      return Promise.all([queryClient.invalidateQueries(key), queryClient.invalidateQueries([userKey])]);
     },
   });
 }
@@ -108,6 +109,7 @@ export function useDeleteProjectMutation() {
 
       return Promise.all([
         ...dependingKeys.map((k) => queryClient.invalidateQueries(k)),
+        queryClient.invalidateQueries([userKey]),
         queryClient.invalidateQueries(key),
       ]);
     },

@@ -11,24 +11,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonProps, Tooltip } from '@mui/material';
+import { Tooltip } from '@mui/material';
 import { Action, Scope } from '@perses-dev/core';
+import { GridActionsCellItem } from '@mui/x-data-grid';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 
-interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
-  text: string;
+interface CRUDGridActionsCellItemProps {
+  icon: JSX.Element;
+  label: string;
   action?: Action;
   scope?: Scope;
   project?: string;
+  onClick: () => void;
 }
 
 /*
- * CRUDButton is an alias of MUI Button, that will add a Tooltip with a reason if the button need to be disabled.
+ * CRUDGridActionsCellItem is an alias of MUI GridActionsCellItem, that will add a Tooltip with a reason if the button need to be disabled.
  * If action, scope and project are provided, it will check if the user has the permission to execute the action.
  */
-export function CRUDButton(props: CRUDButtonProps) {
-  const { text, action, scope, project, variant, color, disabled, onClick } = props;
+export function CRUDGridActionsCellItem({
+  icon,
+  label,
+  action,
+  scope,
+  project,
+  onClick,
+}: CRUDGridActionsCellItemProps) {
   const isReadonly = useIsReadonly();
   const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
 
@@ -36,16 +45,7 @@ export function CRUDButton(props: CRUDButtonProps) {
     return (
       <Tooltip title="Resource managed via code only" placement="top">
         <span>
-          <Button
-            variant={variant}
-            color={color}
-            size="small"
-            sx={{ textTransform: 'uppercase' }}
-            onClick={onClick}
-            disabled
-          >
-            {text}
-          </Button>
+          <GridActionsCellItem icon={icon} label={label} disabled />
         </span>
       </Tooltip>
     );
@@ -60,31 +60,11 @@ export function CRUDButton(props: CRUDButtonProps) {
     return (
       <Tooltip title={errorMessage} placement="top">
         <span>
-          <Button
-            variant={variant}
-            color={color}
-            size="small"
-            sx={{ textTransform: 'uppercase' }}
-            onClick={onClick}
-            disabled
-          >
-            {text}
-          </Button>
+          <GridActionsCellItem icon={icon} label={label} disabled />
         </span>
       </Tooltip>
     );
   }
 
-  return (
-    <Button
-      variant={variant}
-      color={color}
-      size="small"
-      sx={{ textTransform: 'uppercase' }}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {text}
-    </Button>
-  );
+  return <GridActionsCellItem icon={icon} label={label} onClick={onClick} />;
 }

@@ -14,7 +14,7 @@
 import { Action, DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import React, { useCallback, useMemo, useState } from 'react';
-import { GridActionsCellItem, GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -23,6 +23,8 @@ import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import { useIsReadonly } from '../../context/Config';
 import { DeleteVariableDialog } from '../dialogs';
+import { GlobalProject } from '../../context/Authorization';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';
 
@@ -185,24 +187,28 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
         flex: 0.5,
         minWidth: 100,
         getActions: (params: GridRowParams<Row>) => [
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
             label="Rename"
-            disabled={isReadonly}
+            action="update"
+            scope={params.row.project ? 'Variable' : 'GlobalVariable'}
+            project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
           />,
-          <GridActionsCellItem
+          <CRUDGridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
-            disabled={isReadonly}
+            action="delete"
+            scope={params.row.project ? 'Variable' : 'GlobalVariable'}
+            project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
           />,
         ],
       },
     ],
-    [isReadonly, handleEditButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
+    [handleEditButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
   );
 
   return (

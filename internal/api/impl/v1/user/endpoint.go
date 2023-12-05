@@ -17,10 +17,12 @@ package user
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -28,6 +30,7 @@ import (
 
 type Endpoint struct {
 	toolbox       shared.Toolbox
+	rbac          rbac.RBAC
 	readonly      bool
 	disableSignUp bool
 }
@@ -35,6 +38,7 @@ type Endpoint struct {
 func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool) *Endpoint {
 	return &Endpoint{
 		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser),
+		rbac:          rbacService,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
 	}
@@ -52,6 +56,7 @@ func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	}
 	group.GET("", e.List, false)
 	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
+	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
 }
 
 func (e *Endpoint) Create(ctx echo.Context) error {
@@ -75,4 +80,17 @@ func (e *Endpoint) Get(ctx echo.Context) error {
 func (e *Endpoint) List(ctx echo.Context) error {
 	q := &user.Query{}
 	return e.toolbox.List(ctx, q)
+}
+
+func (e *Endpoint) GetPermissions(ctx echo.Context) error {
+	parameters := shared.ExtractParameters(ctx)
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		return shared.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
+	}
+	if claims.Subject != parameters.Name {
+		return shared.HandleUnauthorizedError("you can only retrieve your permissions")
+	}
+	permissions := e.rbac.GetPermissions(claims.Subject)
+	return ctx.JSON(http.StatusOK, permissions)
 }

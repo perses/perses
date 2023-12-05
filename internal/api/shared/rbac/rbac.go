@@ -26,6 +26,7 @@ import (
 type RBAC interface {
 	IsEnabled() bool
 	HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
+	GetPermissions(user string) map[string][]*v1Role.Permission
 	Refresh() error
 }
 
