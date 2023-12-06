@@ -216,6 +216,10 @@ func (d *DAO) HealthCheck() bool {
 	return true
 }
 
+func (d *DAO) CheckTablesLatestUpdateTime(_ []string) (*string, error) {
+	return nil, nil
+}
+
 func (d *DAO) upsert(key string, entity modelAPI.Entity) error {
 	filePath := d.buildPath(key)
 	if err := os.MkdirAll(filepath.Dir(filePath), 0700); err != nil {

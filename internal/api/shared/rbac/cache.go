@@ -14,6 +14,8 @@
 package rbac
 
 import (
+	"time"
+
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -50,6 +52,7 @@ func (c *cache) hasPermission(user string, requestAction v1Role.Action, requestP
 
 type cacheImpl struct {
 	cache                *cache
+	lastRefreshTime      time.Time
 	userDAO              user.DAO
 	roleDAO              role.DAO
 	roleBindingDAO       rolebinding.DAO
@@ -86,5 +89,10 @@ func (r *cacheImpl) Refresh() error {
 		return err
 	}
 	r.cache.permissions = permissions
+	r.lastRefreshTime = time.Now()
 	return nil
+}
+
+func (r *cacheImpl) LastRefreshTime() time.Time {
+	return r.lastRefreshTime
 }

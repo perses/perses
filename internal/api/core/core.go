@@ -72,7 +72,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
 	if conf.Security.EnableAuth {
-		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC())
+		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), conf.Database, persesDAO)
 		runner.WithCronTasks(conf.Security.Authorization.Interval, rbacTask)
 	}
 

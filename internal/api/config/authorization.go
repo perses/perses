@@ -32,7 +32,7 @@ type jsonAuthorizationConfig struct {
 }
 
 type AuthorizationConfig struct {
-	// Interval is the refresh frequency of the cache
+	// Interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
 	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
