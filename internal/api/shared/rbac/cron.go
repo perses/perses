@@ -49,15 +49,16 @@ func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 	lastUpdateTimeParsed, err := time.Parse("2006-01-02 15:04:05", *lastUpdateTime)
 	if err != nil {
 		logrus.WithError(err).Error("failed to parse last update time")
+		return nil
 	}
 
 	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
 		logrus.Debugf("refreshing rbac cache, previous last refresh time %v", r.lastRefreshTime)
 		if err := r.svc.Refresh(); err != nil {
 			logrus.WithError(err).Error("failed to refresh cache")
-		} else {
-			r.lastRefreshTime = lastUpdateTimeParsed
+			return nil
 		}
+		r.lastRefreshTime = lastUpdateTimeParsed
 	}
 	return nil
 }
