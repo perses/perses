@@ -1,43 +1,43 @@
 {
     "name": "@perses-dev/tempo-plugin",
-    "version": "0.41.1",
+    "version": "0.42.0",
     "description": "A Perses plugin to interact with Tempo traces",
     "license": "Apache-2.0",
     "homepage": "https://github.com/perses/perses/blob/main/README.md",
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/perses/perses.git"
+        "type": "git",
+        "url": "git+https://github.com/perses/perses.git"
     },
     "bugs": {
-      "url": "https://github.com/perses/perses/issues"
+        "url": "https://github.com/perses/perses/issues"
     },
     "module": "dist/index.js",
     "main": "dist/cjs/index.js",
     "types": "dist/index.d.ts",
     "sideEffects": false,
     "scripts": {
-      "clean": "rimraf dist/",
-      "build": "concurrently \"npm:build:*\"",
-      "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
-      "build:esm": "swc ./src -d dist --config-file ../.swcrc",
-      "build:types": "tsc --project tsconfig.build.json",
-      "type-check": "tsc --noEmit",
-      "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
-      "test": "TZ=UTC jest",
-      "test:watch": "TZ=UTC jest --watch",
-      "lint": "eslint src --ext .ts,.tsx",
-      "lint:fix": "eslint --fix src --ext .ts,.tsx"
+        "clean": "rimraf dist/",
+        "build": "concurrently \"npm:build:*\"",
+        "build:cjs": "swc ./src -d dist/cjs --config-file ../.cjs.swcrc",
+        "build:esm": "swc ./src -d dist --config-file ../.swcrc",
+        "build:types": "tsc --project tsconfig.build.json",
+        "type-check": "tsc --noEmit",
+        "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
+        "test": "TZ=UTC jest",
+        "test:watch": "TZ=UTC jest --watch",
+        "lint": "eslint src --ext .ts,.tsx",
+        "lint:fix": "eslint --fix src --ext .ts,.tsx"
     },
     "dependencies": {
-      "@perses-dev/components": "0.41.1",
-      "@perses-dev/core": "0.41.1",
-      "@perses-dev/plugin-system": "0.41.1"
+        "@perses-dev/components": "0.42.0",
+        "@perses-dev/core": "0.42.0",
+        "@perses-dev/plugin-system": "0.42.0"
     },
     "peerDependencies": {
-      "react": "^17.0.2 || ^18.0.0"
+        "react": "^17.0.2 || ^18.0.0"
     },
     "files": [
-      "dist",
-      "plugin.json"
+        "dist",
+        "plugin.json"
     ]
 }
