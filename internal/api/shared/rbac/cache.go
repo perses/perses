@@ -14,6 +14,8 @@
 package rbac
 
 import (
+	"sync"
+
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
@@ -56,6 +58,7 @@ type cacheImpl struct {
 	globalRoleDAO        globalrole.DAO
 	globalRoleBindingDAO globalrolebinding.DAO
 	guestPermissions     []*v1Role.Permission
+	mutex                sync.RWMutex
 }
 
 func (r *cacheImpl) IsEnabled() bool {
@@ -68,10 +71,14 @@ func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requ
 		return true
 	}
 	// Checking cached permissions
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 	return r.cache.hasPermission(user, requestAction, requestProject, requestScope)
 }
 
 func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 	userPermissions := make(map[string][]*v1Role.Permission)
 	userPermissions[GlobalProject] = r.guestPermissions
 	for project, projectPermissions := range r.cache.permissions[user] {
@@ -85,6 +92,8 @@ func (r *cacheImpl) Refresh() error {
 	if err != nil {
 		return err
 	}
+	r.mutex.Lock()
 	r.cache.permissions = permissions
+	r.mutex.Unlock()
 	return nil
 }

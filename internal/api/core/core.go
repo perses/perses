@@ -72,8 +72,8 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
 	}
 	if conf.Security.EnableAuth {
-		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC())
-		runner.WithCronTasks(conf.Security.Authorization.Interval, rbacTask)
+		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
+		runner.WithCronTasks(conf.Security.Authorization.CheckLatestUpdateInterval, rbacTask)
 	}
 
 	// register the API

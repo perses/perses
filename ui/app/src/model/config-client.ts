@@ -82,7 +82,7 @@ export interface ProvisioningConfig {
 }
 
 export interface AuthorizationConfig {
-  interval: Duration;
+  check_latest_update_interval: Duration;
   guest_permissions: Permission[];
 }
 

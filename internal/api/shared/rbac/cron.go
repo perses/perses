@@ -15,21 +15,53 @@ package rbac
 
 import (
 	"context"
+	"time"
 
 	"github.com/perses/common/async"
+	"github.com/perses/perses/internal/api/shared/database/model"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/sirupsen/logrus"
 )
 
-func NewCronTask(rbacService RBAC) async.SimpleTask {
-	return &rbacTask{svc: rbacService}
+func NewCronTask(rbacService RBAC, persesDAO model.DAO) async.SimpleTask {
+	return &rbacTask{svc: rbacService, persesDAO: persesDAO}
 }
 
 type rbacTask struct {
 	async.SimpleTask
-	svc RBAC
+	svc             RBAC
+	persesDAO       model.DAO
+	lastRefreshTime time.Time
 }
 
 func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
-	return r.svc.Refresh()
+	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime([]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding})
+	if err != nil {
+		logrus.WithError(err).Error("failed to retrieve last update time")
+		return nil
+	}
+
+	// If tables have never been updated, using older date than now and that can't be wrong with any timezones
+	if lastUpdateTime == nil {
+		timestampZero := "1970-01-01 12:00:00"
+		lastUpdateTime = &timestampZero
+	}
+
+	lastUpdateTimeParsed, err := time.Parse("2006-01-02 15:04:05", *lastUpdateTime)
+	if err != nil {
+		logrus.WithError(err).Error("failed to parse last update time")
+		return nil
+	}
+
+	if r.lastRefreshTime.Before(lastUpdateTimeParsed) {
+		logrus.Debugf("refreshing rbac cache, previous last refresh time %v", r.lastRefreshTime)
+		if err := r.svc.Refresh(); err != nil {
+			logrus.WithError(err).Error("failed to refresh cache")
+			return nil
+		}
+		r.lastRefreshTime = lastUpdateTimeParsed
+	}
+	return nil
 }
 
 func (r *rbacTask) String() string {
