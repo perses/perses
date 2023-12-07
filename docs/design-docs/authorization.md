@@ -1,4 +1,4 @@
-# Authorization / Permission
+# Authorization
 
 *WIP: The authorization is still not implemented in Perses*
 

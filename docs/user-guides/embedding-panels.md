@@ -1,4 +1,4 @@
-# Embed a perses panel in a React App
+# Embedding Perses panels
 
 This little documentation aims to provide you the minimum code needed to have a Perses panel into your React
 application.
@@ -158,7 +158,8 @@ export default App;
 ```
 
 You should see a perses panel going to your browser
-![embedded-panel-screenshot.png](images/embedded-panel-screenshot.png)
+
+<img src="../images/embedded-panel-screenshot.png">
 
 ### Definitions by provider
 

@@ -1,4 +1,4 @@
-# API
+# Reference
 
 This section will give you an insight on every resource supported by the Perses API. While it can give you some
 explanations about the purpose of each resource, this documentation is mainly for users that would like to interact
@@ -40,21 +40,21 @@ Generic placeholders are defined as follows:
    2. [Specification](./variable.md#variable-specification)
    3. [API definition](./variable.md#api-definition)
 7. [Role](./role.md)
-    1. [Choose a scope](./datasource.md#choose-a-scope)
-    2. [Specification](./role.md#role-specification)
-    3. [API definition](./role.md#api-definition)
+   1. [Choose a scope](./datasource.md#choose-a-scope)
+   2. [Specification](./role.md#role-specification)
+   3. [API definition](./role.md#api-definition)
 8. [RoleBinding](./rolebinding.md)
-    1. [Choose a scope](./rolebinding.md#choose-a-scope)
-    2. [Specification](./rolebinding.md#rolebinding-specification)
-    3. [API definition](./rolebinding.md#api-definition)
+   1. [Choose a scope](./rolebinding.md#choose-a-scope)
+   2. [Specification](./rolebinding.md#rolebinding-specification)
+   3. [API definition](./rolebinding.md#api-definition)
 9. Plugin
-   1. [Panel](./plugin/panel.md)
-      1. [BarChart](./plugin/panel.md#barchart)
-      2. [GaugeChart](./plugin/panel.md#gaugechart)
-      3. [Markdown](./plugin/panel.md#markdown)
-      4. [StatChart](./plugin/panel.md#statchart)
-      5. [TimeSeriesChart](./plugin/panel.md#timeserieschart)
-   2. [Prometheus](./plugin/prometheus.md)
-       1. [Datasource](./plugin/prometheus.md#datasource)
-       2. [Query](./plugin/prometheus.md#query)
-       3. [Variable](./plugin/prometheus.md#variable)
+   1. [Panel](../plugin/panel.md)
+      1. [BarChart](../plugin/panel.md#barchart)
+      2. [GaugeChart](../plugin/panel.md#gaugechart)
+      3. [Markdown](../plugin/panel.md#markdown)
+      4. [StatChart](../plugin/panel.md#statchart)
+      5. [TimeSeriesChart](../plugin/panel.md#timeserieschart)
+   2. [Prometheus](../plugin/prometheus.md)
+      1. [Datasource](../plugin/prometheus.md#datasource)
+      2. [Query](../plugin/prometheus.md#query)
+      3. [Variable](../plugin/prometheus.md#variable)

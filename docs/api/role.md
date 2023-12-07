@@ -56,8 +56,7 @@ In case you would like to set permissions at Global level , you will need to cre
 
 ### More info about authorization
 
-Please look at the [documentation](../authorization.md) to know more about permissions and roles.
-
+Please look at the [documentation](../design-docs//authorization.md) to know more about permissions and roles.
 
 ## API definition
 
