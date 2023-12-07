@@ -1,4 +1,4 @@
-# RoleBinding
+# Role Binding
 
 A role binding grants the permissions defined in a role to a user or set of users.
 It holds a list of subjects (users or teams) and a reference to the role being granted. A `RoleBinding` grants permissions within a specific project whereas a `GlobalRoleBinding` grants that access global-wide.
@@ -57,8 +57,7 @@ In case you would like to set a role binding for a GlobalRole , you will need to
 
 ### More info about authorization
 
-Please look at the [documentation](../authorization.md) to know more about permissions and role bindings.
-
+Please look at the [documentation](../design-docs/authorization.md) to know more about permissions and role bindings.
 
 ## API definition
 

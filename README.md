@@ -24,7 +24,7 @@ Perses is going to tackle multiple different goals:
    improve the display of the data in the Prometheus UI.
 3. It also aims to offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from
    individual application namespaces (Using CRDs). For more information you can take a look
-   at [the doc](./docs/kubernetes.md) that would give you an idea of how it would work.
+   at [the doc](./docs/design-docs/kubernetes.md) that would give you an idea of how it would work.
 4. To be friendly to dashboard as code users, we want to provide a complete static validation of the dashboard format.
    That means you will be able to validate your dashboard in a CI/CD using the Perses CLI (named `percli`)
 5. The architecture should support plugins (at least for the panels)
@@ -39,7 +39,7 @@ progress. The current pieces that are in place are:
   - To provide a good static validation, the backend is using multiple Cue schemas and the CLI has the `lint` command.
     All schemas are available in the [schemas](./schemas) folder.
 - A backend REST API provides R/W access to dashboard and datasource definitions.
-- A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/cli.md)
+- A CLI that can be used to interact with the REST API. A short docs is available [here](./docs/tooling/cli.md)
 - While the UI is still in progress, we already have:
   - a beginning of navigation that will help to move from a dashboard to another.
   - a support of the following panel types:

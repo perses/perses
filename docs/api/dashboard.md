@@ -97,7 +97,7 @@ spec:
   spec: <plugin_spec>
 ```
 
-See the [panel](./plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
+See the [panel](../plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
 
 #### `<query_spec>`
 
@@ -119,7 +119,7 @@ spec:
 ```
 
 We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
-Please look at the [Prometheus plugin documentation](./plugin/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
+Please look at the [Prometheus plugin documentation](../plugin/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
 
 ### `<layout_spec>`
 

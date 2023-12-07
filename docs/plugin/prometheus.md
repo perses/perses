@@ -1,4 +1,4 @@
-# Prometheus
+# Prometheus Plugin
 
 This documentation is providing the definition of the different plugin related to Prometheus
 

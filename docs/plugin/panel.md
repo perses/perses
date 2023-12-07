@@ -1,4 +1,4 @@
-# Panel
+# Panel Plugin
 
 This is the list of every panel plugin we are supporting.
 

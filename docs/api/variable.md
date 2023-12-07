@@ -161,7 +161,7 @@ spec: <list_spec>
 ```
 
 We are supporting only prometheus for the variables for the moment.
-Please take a look at the [documentation](./plugin/prometheus.md#variable) to know the spec for the Prometheus variable.
+Please take a look at the [documentation](../plugin/prometheus.md#variable) to know the spec for the Prometheus variable.
 
 ## API Definition
 
