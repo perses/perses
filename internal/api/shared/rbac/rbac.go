@@ -14,6 +14,7 @@
 package rbac
 
 import (
+	"sync"
 	"time"
 
 	"github.com/perses/perses/internal/api/config"
@@ -46,6 +47,7 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, glo
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
+		mutex:                sync.RWMutex{}, // TODO
 	}
 	return impl, impl.Refresh()
 }
