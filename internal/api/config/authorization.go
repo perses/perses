@@ -21,26 +21,26 @@ import (
 )
 
 var (
-	defaultCacheInterval = 10 * time.Minute
+	defaultCacheInterval = 30 * time.Second
 )
 
 // jsonSchemas is only used to marshal the config in a proper json format
 // (mainly because of the duration that is not yet supported by json).
 type jsonAuthorizationConfig struct {
-	Interval         string             `json:"interval,omitempty"`
-	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty"`
+	CheckLatestUpdateInterval string             `json:"check_latest_update_interval,omitempty"`
+	GuestPermissions          []*role.Permission `json:"guest_permissions,omitempty"`
 }
 
 type AuthorizationConfig struct {
-	// Interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
-	Interval time.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
+	// CheckLatestUpdateInterval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
+	CheckLatestUpdateInterval time.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
-	if a.Interval <= 0 {
-		a.Interval = defaultCacheInterval
+	if a.CheckLatestUpdateInterval <= 0 {
+		a.CheckLatestUpdateInterval = defaultCacheInterval
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*role.Permission{}
@@ -50,8 +50,8 @@ func (a *AuthorizationConfig) Verify() error {
 
 func (a AuthorizationConfig) MarshalJSON() ([]byte, error) {
 	j := &jsonAuthorizationConfig{
-		Interval:         a.Interval.String(),
-		GuestPermissions: a.GuestPermissions,
+		CheckLatestUpdateInterval: a.CheckLatestUpdateInterval.String(),
+		GuestPermissions:          a.GuestPermissions,
 	}
 	return json.Marshal(j)
 }

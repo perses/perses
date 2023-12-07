@@ -37,5 +37,5 @@ type DAO interface {
 	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error
 	DeleteByQuery(query Query) error
 	HealthCheck() bool
-	CheckTablesLatestUpdateTime(tables []string) (*string, error)
+	GetLatestUpdateTime(kind []modelV1.Kind) (*string, error)
 }

@@ -14,9 +14,6 @@
 package rbac
 
 import (
-	"sync"
-	"time"
-
 	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
@@ -31,7 +28,6 @@ type RBAC interface {
 	HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool
 	GetPermissions(user string) map[string][]*v1Role.Permission
 	Refresh() error
-	LastRefreshTime() time.Time
 }
 
 func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO, conf config.Config) (RBAC, error) {
@@ -47,7 +43,6 @@ func New(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, glo
 		globalRoleDAO:        globalRoleDAO,
 		globalRoleBindingDAO: globalRoleBindingDAO,
 		guestPermissions:     conf.Security.Authorization.GuestPermissions,
-		mutex:                sync.RWMutex{}, // TODO
 	}
 	return impl, impl.Refresh()
 }

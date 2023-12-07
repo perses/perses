@@ -130,7 +130,7 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
-  [ interval: <duration> | default = 5s ]
+  [ check_latest_update_interval: <duration> | default = 30s ]
 
   # Default permissions for guest users (logged-in users)
   guest_permissions:

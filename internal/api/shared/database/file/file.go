@@ -216,7 +216,7 @@ func (d *DAO) HealthCheck() bool {
 	return true
 }
 
-func (d *DAO) CheckTablesLatestUpdateTime(_ []string) (*string, error) {
+func (d *DAO) GetLatestUpdateTime(_ []modelV1.Kind) (*string, error) {
 	return nil, nil
 }
 

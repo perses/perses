@@ -151,13 +151,17 @@ func (d *DAO) createTable(query string) error {
 	return r.Close()
 }
 
-// CheckTablesLatestUpdateTime returns the latest update time of a group of tables
-func (d *DAO) CheckTablesLatestUpdateTime(tables []string) (*string, error) {
+// GetLatestUpdateTime queries the database to retrieve the latest update time for the specified table names.
+func (d *DAO) GetLatestUpdateTime(kinds []modelV1.Kind) (*string, error) {
 	sb := sqlbuilder.Select("UPDATE_TIME")
 	sb.From("information_schema.tables")
 	var whereConditions []string
-	for index := range tables {
-		whereConditions = append(whereConditions, sb.Equal("TABLE_NAME", tables[index]))
+	for _, kind := range kinds {
+		tableName, err := getTableName(kind)
+		if err != nil {
+			return nil, err
+		}
+		whereConditions = append(whereConditions, sb.Equal("TABLE_NAME", tableName))
 	}
 	sb.Where(sb.Equal("TABLE_SCHEMA", d.SchemaName), sb.Or(whereConditions...))
 	sb.OrderBy("UPDATE_TIME").Desc()
@@ -170,13 +174,13 @@ func (d *DAO) CheckTablesLatestUpdateTime(tables []string) (*string, error) {
 	defer r.Close()
 
 	if r.Next() {
-		var timestamp string
+		var timestamp *string
 		if scanErr := r.Scan(&timestamp); scanErr != nil {
 			return nil, scanErr
 		}
-		return &timestamp, nil
+		return timestamp, nil
 	}
-	return nil, fmt.Errorf("failed to retrieve last update time for tables: %v", tables)
+	return nil, fmt.Errorf("failed to retrieve last update time for tables: %v", kinds)
 }
 
 func (d *DAO) Close() error {

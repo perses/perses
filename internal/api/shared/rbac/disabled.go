@@ -14,8 +14,6 @@
 package rbac
 
 import (
-	"time"
-
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 
@@ -35,8 +33,4 @@ func (r *disabledImpl) GetPermissions(_ string) map[string][]*v1Role.Permission 
 
 func (r *disabledImpl) Refresh() error {
 	return nil
-}
-
-func (r *disabledImpl) LastRefreshTime() time.Time {
-	return time.Now()
 }
