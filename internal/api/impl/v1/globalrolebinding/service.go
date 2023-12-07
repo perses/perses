@@ -17,9 +17,12 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -28,14 +31,20 @@ import (
 
 type service struct {
 	globalrolebinding.Service
-	dao globalrolebinding.DAO
-	sch schemas.Schemas
+	dao           globalrolebinding.DAO
+	globalRoleDAO globalrole.DAO
+	userDAO       user.DAO
+	rbac          rbac.RBAC
+	sch           schemas.Schemas
 }
 
-func NewService(dao globalrolebinding.DAO, sch schemas.Schemas) globalrolebinding.Service {
+func NewService(dao globalrolebinding.DAO, globalRoleDAO globalrole.DAO, userDAO user.DAO, rbac rbac.RBAC, sch schemas.Schemas) globalrolebinding.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:           dao,
+		globalRoleDAO: globalRoleDAO,
+		userDAO:       userDAO,
+		rbac:          rbac,
+		sch:           sch,
 	}
 }
 
@@ -47,11 +56,17 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 }
 
 func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
-	// TODO: validate user + role exists
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
+	if err := s.validateGlobalRoleBinding(entity); err != nil {
+		return nil, err
+	}
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
+	}
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -69,10 +84,13 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 
-	// TODO: validate user + role exists
-	// find the previous version of the Datasource
+	// find the previous version of the GlobalRoleBinding
 	oldEntity, err := s.dao.Get(parameters.Name)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := s.validateGlobalRoleBinding(entity); err != nil {
 		return nil, err
 	}
 
@@ -87,11 +105,23 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalroleBinding %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
 	return entity, nil
 }
 
 func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Name)
+	if err := s.dao.Delete(parameters.Name); err != nil {
+		return err
+	}
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
+	return nil
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
@@ -100,4 +130,24 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
 	return s.dao.List(q)
+}
+
+// Validating role and subjects are existing
+func (s *service) validateGlobalRoleBinding(globalRoleBinding *v1.GlobalRoleBinding) error {
+	if _, err := s.globalRoleDAO.Get(globalRoleBinding.Spec.Role); err != nil {
+		return shared.HandleBadRequestError(fmt.Sprintf("global role %q doesn't exist", globalRoleBinding.Spec.Role))
+	}
+
+	for _, subject := range globalRoleBinding.Spec.Subjects {
+		if subject.Kind == v1.KindUser {
+			if _, err := s.userDAO.Get(subject.Name); err != nil {
+				if databaseModel.IsKeyNotFound(err) {
+					return shared.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
+				}
+				logrus.WithError(err).Errorf("unable to find the user with the name %q", subject.Name)
+				return err
+			}
+		}
+	}
+	return nil
 }

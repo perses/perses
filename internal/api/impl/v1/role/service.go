@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/shared/rbac"
 
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/shared"
@@ -29,14 +30,16 @@ import (
 
 type service struct {
 	role.Service
-	dao role.DAO
-	sch schemas.Schemas
+	dao  role.DAO
+	rbac rbac.RBAC
+	sch  schemas.Schemas
 }
 
-func NewService(dao role.DAO, sch schemas.Schemas) role.Service {
+func NewService(dao role.DAO, rbac rbac.RBAC, sch schemas.Schemas) role.Service {
 	return &service{
-		dao: dao,
-		sch: sch,
+		dao:  dao,
+		rbac: rbac,
+		sch:  sch,
 	}
 }
 
@@ -52,6 +55,10 @@ func (s *service) create(entity *v1.Role) (*v1.Role, error) {
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
+	}
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -85,11 +92,22 @@ func (s *service) update(entity *v1.Role, parameters apiInterface.Parameters) (*
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the role %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
 	return entity, nil
 }
 
 func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.Parameters) error {
-	return s.dao.Delete(parameters.Project, parameters.Name)
+	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
+		return err
+	}
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
+	return nil
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {

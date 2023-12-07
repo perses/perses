@@ -16,15 +16,46 @@
 package api
 
 import (
+	"fmt"
+	"net/http"
 	"testing"
 
+	"github.com/gavv/httpexpect/v2"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 func TestMainScenarioGlobalRoleBinding(t *testing.T) {
-	e2eframework.MainTestScenario(t, utils.PathGlobalRoleBinding, func(name string) api.Entity {
-		return e2eframework.NewGlobalRoleBinding(name)
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
+		globalRole := e2eframework.NewGlobalRole("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)
+		entity := e2eframework.NewGlobalRoleBinding("admin")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRoleBinding)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusOK)
+		return []api.Entity{entity, globalRole, user}
+	})
+}
+
+func TestUpdateScenarioGlobalRoleBindingRole(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
+		globalRole := e2eframework.NewGlobalRole("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)
+		entity := e2eframework.NewGlobalRoleBinding("admin")
+		e2eframework.CreateAndWaitUntilEntityExists(t, manager, entity)
+
+		entity.Spec.Role = "newRoleName"
+		expect.PUT(fmt.Sprintf("%s/%s/%s", utils.APIV1Prefix, utils.PathGlobalRoleBinding, entity.Metadata.Name)).
+			WithJSON(entity).
+			Expect().
+			Status(http.StatusBadRequest)
+		return []api.Entity{entity, globalRole, user}
 	})
 }
