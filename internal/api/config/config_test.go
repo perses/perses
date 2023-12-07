@@ -65,7 +65,7 @@ func TestJSONMarshallConfig(t *testing.T) {
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
     "authorization": {
-      "check_latest_update_interval": "10m0s"
+      "check_latest_update_interval": "30s"
     },
     "authentication": {
       "access_token_ttl": "15m0s",
