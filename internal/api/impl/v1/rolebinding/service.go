@@ -147,7 +147,11 @@ func (s *service) validateRoleBinding(roleBinding *v1.RoleBinding) error {
 	for _, subject := range roleBinding.Spec.Subjects {
 		if subject.Kind == v1.KindUser {
 			if _, err := s.userDAO.Get(subject.Name); err != nil {
-				return shared.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
+				if databaseModel.IsKeyNotFound(err) {
+					return shared.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
+				}
+				logrus.WithError(err).Errorf("unable to find the user with the name %q", subject.Name)
+				return err
 			}
 		}
 	}
