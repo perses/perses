@@ -10,12 +10,12 @@
 - [FEATURE] Add sorting capability for ListVariable (#1502)
 - [FEATURE] Add Secret & GlobalSecret list view (#1501)
 - [FEATURE] Display the server config (#1496)
+- [FEATURE] Local datasources CRUD (#1587)
 - [ENHANCEMENT] Prevent using dashboard datasources before they're saved (#1603)
-- [ENHANCEMENT] add a default encryption key (#1599)
+- [ENHANCEMENT] Add a default encryption key (#1599)
 - [ENHANCEMENT] Use a context for the config to share it across the whole app (#1604)
 - [ENHANCEMENT] Implement the `healthcheck` method for Prometheus datasources (#1595)
-- [ENHANCEMENT] Local datasources CRUD (#1587)
-- [ENHANCEMENT] several display improvements + bring back delete project button (#1590)
+- [ENHANCEMENT] Several display improvements + bring back delete project button (#1590)
 - [ENHANCEMENT] Panel editor: reposition Add Query button for better UX (#1588)
 - [ENHANCEMENT] Autocomplete & filtering for ListVariable (#1576)
 - [ENHANCEMENT] Reorder navbar button on mobile (#1569)
@@ -39,7 +39,6 @@
 - [BUGFIX] Avoid failing grafana migration in multiple cases (#1549)
 - [BUGFIX] Fix unwanted thresholds when migrating timeseries panels (#1495)
 - [BUGFIX] Fix grafana migration failing in some corner cases (#1487)
-- [BUGFIX] Fix too-restrictive regex used for URL validation (#1470)
 - [BREAKINGCHANGE] GenerateChartsTheme can override any value
 - [BREAKINGCHANGE] Move any security config to a dedicated struct (#1560)
 - [BREAKINGCHANGE] Allow TimeRangeProvider and TemplateVariableProvider to live without QueryParamsProvider
