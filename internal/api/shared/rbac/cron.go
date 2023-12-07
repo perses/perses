@@ -37,7 +37,8 @@ type rbacTask struct {
 func (r *rbacTask) Execute(_ context.Context, _ context.CancelFunc) error {
 	lastUpdateTime, err := r.persesDAO.GetLatestUpdateTime([]modelV1.Kind{modelV1.KindRole, modelV1.KindRoleBinding, modelV1.KindGlobalRole, modelV1.KindGlobalRoleBinding})
 	if err != nil {
-		return err
+		logrus.WithError(err).Error("failed to retrieve last update time")
+		return nil
 	}
 
 	// If tables have never been updated, using older date than now and that can't be wrong with any timezones
