@@ -64,8 +64,9 @@ func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, e
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
 	if err := s.rbac.Refresh(); err != nil {
-		return nil, err
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -104,8 +105,10 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the GlobalroleBinding %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
 	if err := s.rbac.Refresh(); err != nil {
-		return nil, err
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -114,7 +117,11 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 	if err := s.dao.Delete(parameters.Name); err != nil {
 		return err
 	}
-	return s.rbac.Refresh()
+	// Refreshing RBAC cache as the role binding can add or remove new permissions to concerned users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
+	return nil
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
@@ -127,19 +134,16 @@ func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ ap
 
 // Validating role and subjects are existing
 func (s *service) validateGlobalRoleBinding(globalRoleBinding *v1.GlobalRoleBinding) error {
-	_, err := s.globalRoleDAO.Get(globalRoleBinding.Spec.Role)
-	if err != nil {
-		return shared.HandleBadRequestError(fmt.Sprintf("global role '%s' doesn't exist", globalRoleBinding.Spec.Role))
+	if _, err := s.globalRoleDAO.Get(globalRoleBinding.Spec.Role); err != nil {
+		return shared.HandleBadRequestError(fmt.Sprintf("global role %q doesn't exist", globalRoleBinding.Spec.Role))
 	}
 
 	for _, subject := range globalRoleBinding.Spec.Subjects {
 		if subject.Kind == v1.KindUser {
-			_, err := s.userDAO.Get(subject.Name)
-			if err != nil {
-				return shared.HandleBadRequestError(fmt.Sprintf("user subject name '%s' doesn't exist", subject.Name))
+			if _, err := s.userDAO.Get(subject.Name); err != nil {
+				return shared.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
 			}
 		}
 	}
-
 	return nil
 }

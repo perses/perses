@@ -56,8 +56,9 @@ func (s *service) create(entity *v1.Role) (*v1.Role, error) {
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
 	}
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
 	if err := s.rbac.Refresh(); err != nil {
-		return nil, err
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -91,8 +92,9 @@ func (s *service) update(entity *v1.Role, parameters apiInterface.Parameters) (*
 		logrus.WithError(updateErr).Errorf("unable to perform the update of the role %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
 	if err := s.rbac.Refresh(); err != nil {
-		return nil, err
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
 	}
 	return entity, nil
 }
@@ -101,7 +103,11 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 	if err := s.dao.Delete(parameters.Project, parameters.Name); err != nil {
 		return err
 	}
-	return s.rbac.Refresh()
+	// Refreshing RBAC cache as the role can add or remove new permissions to users
+	if err := s.rbac.Refresh(); err != nil {
+		logrus.WithError(err).Error("failed to refresh RBAC cache")
+	}
+	return nil
 }
 
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
