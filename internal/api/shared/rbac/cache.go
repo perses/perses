@@ -77,6 +77,8 @@ func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requ
 }
 
 func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
 	userPermissions := make(map[string][]*v1Role.Permission)
 	userPermissions[GlobalProject] = r.guestPermissions
 	for project, projectPermissions := range r.cache.permissions[user] {

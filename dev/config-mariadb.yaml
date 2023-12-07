@@ -3,7 +3,6 @@ security:
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
   enable_auth: true
   authorization:
-    check_latest_update_interval: 30s
     guest_permissions:
       - actions:
           - read
