@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.42.0 / 2023-12-07
+## 0.42.0 / 2023-12-08
 
 - [FEATURE] Initial Tempo Plugin (#1561)
 - [FEATURE] Add authentication system (#1472) (#1473) (#1476) (#1478) (#1484) (#1547) (#1555) (#1557) (#1591) (#1602) (#1612) (#1615)
-- [FEATURE] Add authorization system based on rbac (#1570) (#1511) (#1613) (#1601) (#1605) (#1626)
+- [FEATURE] Add authorization system based on rbac (#1570) (#1511) (#1613) (#1601) (#1605) (#1626) (#1627)
 - [FEATURE] Adding explore page (#1477) (#1592) (#1610)
 - [FEATURE] Enabling data provisioning (#1486)
 - [FEATURE] Add sorting capability for ListVariable (#1502)
@@ -47,6 +47,8 @@
 - [DOC] Added section 2 with container installation (#1593) (#1624)
 - [DOC] Added user documentation for section 1, introduction to Perses. (#1574)
 - [DOC] Added first user documentation structure with ToC. (#1553)
+- [DOC] Complete documentation about the API. (#1471) (##1479) (##1483) (#1490) (#1491) (#1500)
+- [DOC] Complete documentation about the backend configuration. (#1467)
 
 ## 0.41.1 / 2023-10-13
 
