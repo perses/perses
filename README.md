@@ -1,4 +1,6 @@
-<h1 align="center" style="border-bottom: none">
+<div align="center">
+
+<h1 style="border-bottom: none">
     <a href="https://github.com/perses" target="_blank"><img alt="Perses" src="/docs/images/perses_logo_cropped.svg"></a><br>Perses
 </h1>
 
@@ -8,11 +10,16 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/perses/perses)](https://goreportcard.com/report/github.com/perses/perses)
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/perses/perses)
 
+</div>
+
 ## Overview
 
 Perses is part of the [CoreDash community](https://github.com/coredashio/community). It belongs to the Linux Foundation.
 At a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
 part of the monitoring tools like Prometheus or Thanos.
+
+| ![img.png](https://github.com/perses/perses/assets/5657041/3bd8ae57-da7b-4447-9478-cefe19d61a71) | ![img.png](https://github.com/perses/perses/assets/5657041/ba46beab-c8fb-4583-bc2f-71c9893f7906) |
+|:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
 
 Perses is going to tackle multiple different goals:
 

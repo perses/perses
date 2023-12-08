@@ -26,6 +26,6 @@
   See [Storybook](https://github.com/perses/perses/tree/main/ui/storybook#visual-tests)
   and [e2e](https://github.com/perses/perses/tree/main/ui/e2e#visual-tests) docs for more details. Common issues
   include:
-    - Is the data inconsistent? You need to mock API requests.
-    - Does the time change? You need to use consistent time values or mock time utilities.
-    - Does it have loading states? You need to wait for loading to complete.
+  - Is the data inconsistent? You need to mock API requests.
+  - Does the time change? You need to use consistent time values or mock time utilities.
+  - Does it have loading states? You need to wait for loading to complete.
