@@ -33,6 +33,7 @@ const (
 	breakingChange = "BREAKINGCHANGE"
 	unknown        = "UNKNOWN"
 	ignore         = "IGNORE"
+	doc            = "DOC"
 )
 
 // kind represents the type of change.
@@ -45,6 +46,7 @@ const (
 	kindBugfix
 	kindUnknown
 	KindToBeIgnored
+	kindDoc
 )
 
 func getStringInBetweenTwoString(str string, startS string, endS string) (result string, found bool) {
@@ -103,6 +105,8 @@ func parseCatalogEntry(entry string) (kind, string) {
 		return kindBreakingChange, catalog
 	case ignore:
 		return KindToBeIgnored, ""
+	case doc:
+		return kindDoc, catalog
 	default:
 		return kindUnknown, ""
 	}
@@ -147,6 +151,7 @@ type changelog struct {
 	enhancements    []string
 	bugfixes        []string
 	breakingChanges []string
+	docs            []string
 	unknown         []string
 }
 
@@ -163,6 +168,8 @@ func newChangelog(entries []string) *changelog {
 			clog.bugfixes = append(clog.bugfixes, newEntry)
 		case kindBreakingChange:
 			clog.breakingChanges = append(clog.breakingChanges, newEntry)
+		case kindDoc:
+			clog.docs = append(clog.docs, newEntry)
 		case kindUnknown:
 			clog.unknown = append(clog.unknown, newEntry)
 		}
@@ -184,6 +191,7 @@ func (c *changelog) generateChangelog(version string) string {
 	injectEntries(&buffer, c.enhancements, enhancement)
 	injectEntries(&buffer, c.bugfixes, bugfix)
 	injectEntries(&buffer, c.breakingChanges, breakingChange)
+	injectEntries(&buffer, c.docs, doc)
 	if len(c.unknown) > 0 {
 		buffer.WriteString("\n[//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>\n\n")
 		injectEntries(&buffer, c.unknown, unknown)

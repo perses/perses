@@ -29,6 +29,7 @@ where `catalog_entry` can be :
 - `ENHANCEMENT`
 - `BUGFIX`
 - `BREAKINGCHANGE`
+- `DOC`
 - `IGNORE` - Changes that should not generate entries in the changelog. Primarily used for internal tooling changes that
   do not impact consumers.
 
@@ -45,7 +46,7 @@ In the usual workflow, all PRs are squashed. There is two exceptions to this rul
 
 ## Documentation
 
-Documentation are written in Markdown. To ensure some quality on our documentation, we are
+Documentation is written in Markdown. To ensure some quality on our documentation, we are
 running [mdox](https://github.com/bwplotka/mdox) that will ensure the doc is well formatted and all links are working.
 
 To format the docs, you will have to install the tool mentioned above. An easy way is to run the following command:
