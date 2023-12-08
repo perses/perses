@@ -34,4 +34,4 @@ dev/local_db
 
 .goreleaser.yaml
 
-./.github/perses-ci/
+/.github/perses-ci/
