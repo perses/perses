@@ -36,10 +36,76 @@ import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { DeleteProjectDialog } from '../../components/dialogs';
 import { useIsReadonly } from '../../context/Config';
+import { useHasPermission } from '../../context/Authorization';
 
 interface ProjectRow {
   project: string;
   dashboards: DashboardResource[];
+}
+
+interface ProjectAccordionProps {
+  row: ProjectRow;
+}
+
+function ProjectAccordion({ row }: ProjectAccordionProps) {
+  const isReadonly = useIsReadonly();
+  const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);
+
+  const closeDeleteProjectConfirmDialog = () => {
+    setOpenDeleteProjectDialog(false);
+  };
+
+  const openDeleteProjectConfirmDialog = ($event: MouseEvent) => {
+    $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
+    setOpenDeleteProjectDialog(true);
+  };
+
+  const hasPermission = useHasPermission('delete', row.project, 'Project');
+
+  return (
+    <>
+      <Accordion TransitionProps={{ unmountOnExit: true }} key={row.project}>
+        <AccordionSummary expandIcon={<ChevronDown />}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
+            <Stack direction="row" alignItems="center" gap={1}>
+              <Archive sx={{ margin: 1 }} />
+              <Link component={RouterLink} to={`/projects/${row.project}`} variant="h3" underline="hover">
+                {row.project}
+              </Link>
+            </Stack>
+            {hasPermission && (
+              <IconButton onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event)} disabled={isReadonly}>
+                <DeleteOutline />
+              </IconButton>
+            )}
+          </Stack>
+        </AccordionSummary>
+        <AccordionDetails id={`${row.project}-dashboard-list`} sx={{ padding: 0 }}>
+          <DashboardList
+            dashboardList={row.dashboards}
+            hideToolbar={true}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 25, page: 0 },
+              },
+              columns: {
+                columnVisibilityModel: {
+                  id: false,
+                  project: false,
+                  version: false,
+                },
+              },
+            }}
+          />
+        </AccordionDetails>
+      </Accordion>
+      <DeleteProjectDialog
+        name={row.project}
+        open={openDeleteProjectDialog}
+        onClose={closeDeleteProjectConfirmDialog}
+      />
+    </>
+  );
 }
 
 interface RenderDashboardListProps {
@@ -48,64 +114,6 @@ interface RenderDashboardListProps {
 
 function RenderDashboardList(props: RenderDashboardListProps) {
   const { projectRows } = props;
-  const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);
-  const [projectToDelete, setProjectToDelete] = useState<string>();
-  const isReadonly = useIsReadonly();
-
-  const openDeleteProjectConfirmDialog = ($event: MouseEvent, name: string) => {
-    $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
-    setProjectToDelete(name);
-    setOpenDeleteProjectDialog(true);
-  };
-
-  const closeDeleteProjectConfirmDialog = () => {
-    setOpenDeleteProjectDialog(false);
-  };
-
-  const accordions = useMemo(() => {
-    return projectRows.map((row) => {
-      const projectLink = `/projects/${row.project}`;
-
-      return (
-        <Accordion TransitionProps={{ unmountOnExit: true }} key={row.project}>
-          <AccordionSummary expandIcon={<ChevronDown />}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
-              <Stack direction="row" alignItems="center" gap={1}>
-                <Archive />
-                <Link component={RouterLink} to={projectLink} variant="h3" underline="hover">
-                  {row.project}
-                </Link>
-              </Stack>
-              <IconButton
-                onClick={(event: MouseEvent) => openDeleteProjectConfirmDialog(event, row.project)}
-                disabled={isReadonly}
-              >
-                <DeleteOutline />
-              </IconButton>
-            </Stack>
-          </AccordionSummary>
-          <AccordionDetails id={`${row.project}-dashboard-list`}>
-            <DashboardList
-              dashboardList={row.dashboards}
-              hideToolbar={true}
-              initialState={{
-                pagination: {
-                  paginationModel: { pageSize: 25, page: 0 },
-                },
-                columns: {
-                  columnVisibilityModel: {
-                    id: false,
-                    project: false,
-                    version: false,
-                  },
-                },
-              }}
-            />
-          </AccordionDetails>
-        </Accordion>
-      );
-    });
-  }, [isReadonly, projectRows]);
 
   if (projectRows.length === 0) {
     return (
@@ -114,14 +122,11 @@ function RenderDashboardList(props: RenderDashboardListProps) {
   }
 
   return (
-    <>
-      <Box>{accordions}</Box>
-      <DeleteProjectDialog
-        name={projectToDelete || ''}
-        open={openDeleteProjectDialog}
-        onClose={closeDeleteProjectConfirmDialog}
-      />
-    </>
+    <Box>
+      {projectRows.map((row) => (
+        <ProjectAccordion key={row.project} row={row} />
+      ))}
+    </Box>
   );
 }
 

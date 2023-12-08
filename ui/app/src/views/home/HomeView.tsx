@@ -18,8 +18,9 @@ import { useNavigate } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
 import { useProjectList } from '../../model/project-client';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
+import { useIsMobileSize } from '../../utils/browser-size';
+import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -28,6 +29,7 @@ import { ImportantDashboards } from './ImportantDashboards';
 function HomeView() {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
+  const isMobileSize = useIsMobileSize();
 
   const { data } = useProjectList();
 
@@ -57,14 +59,14 @@ function HomeView() {
   };
 
   return (
-    <Stack sx={{ width: '100%' }} m={2} gap={1}>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
       <Box sx={{ width: '100%' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <StackCrumb>
             <HomeIcon fontSize={'large'} />
             <TitleCrumb>Home</TitleCrumb>
           </StackCrumb>
-          <Stack direction="row" gap={2}>
+          <Stack direction="row" gap={isMobileSize ? 0.5 : 2}>
             <CRUDButton
               text="Add Project"
               action="create"

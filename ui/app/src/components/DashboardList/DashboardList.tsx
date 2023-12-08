@@ -161,7 +161,7 @@ export function DashboardList(props: DashboardListProperties) {
         initialState={initialState}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
-      ></DashboardDataGrid>
+      />
       <Box>
         {targetedDashboard && (
           <>
