@@ -1,5 +1,60 @@
 # Changelog
 
+## 0.42.1 / 2023-12-08
+
+This release doesn't contain any changes regarding the Perses binaries.
+It only contains a fix in the CI to release Perses.
+
+## 0.42.0 / 2023-12-08
+
+- [FEATURE] Initial Tempo Plugin (#1561)
+- [FEATURE] Add authentication system (#1472) (#1473) (#1476) (#1478) (#1484) (#1547) (#1555) (#1557) (#1591) (#1602) (#1612) (#1615)
+- [FEATURE] Add authorization system based on rbac (#1570) (#1511) (#1613) (#1601) (#1605) (#1626) (#1627)
+- [FEATURE] Adding explore page (#1477) (#1592) (#1610)
+- [FEATURE] Enabling data provisioning (#1486)
+- [FEATURE] Add sorting capability for ListVariable (#1502)
+- [FEATURE] Add Secret & GlobalSecret list view (#1501)
+- [FEATURE] Display the server config (#1496)
+- [FEATURE] Local datasources CRUD (#1587)
+- [ENHANCEMENT] Prevent using dashboard datasources before they're saved (#1603)
+- [ENHANCEMENT] Add a default encryption key (#1599)
+- [ENHANCEMENT] Use a context for the config to share it across the whole app (#1604)
+- [ENHANCEMENT] Implement the `healthcheck` method for Prometheus datasources (#1595)
+- [ENHANCEMENT] Several display improvements + bring back delete project button (#1590)
+- [ENHANCEMENT] Panel editor: reposition Add Query button for better UX (#1588)
+- [ENHANCEMENT] Autocomplete & filtering for ListVariable (#1576)
+- [ENHANCEMENT] Reorder navbar button on mobile (#1569)
+- [ENHANCEMENT] File DB is the default choice if no db configuration is provided (#1559)
+- [ENHANCEMENT] Panel json view: add maxheight for better UX (#1563)
+- [ENHANCEMENT] Support more attributes in Grafana migration (#1554)
+- [ENHANCEMENT] Allow opening dashboards/projects in new tabs in all cases #1544 (#1548)
+- [ENHANCEMENT] Reduce navbars size (#1492)
+- [ENHANCEMENT] Add some throughput units (#1493)
+- [BUGFIX] Wrap PrometheusDatasourceEditor with react-hook-form Controllers (#1621)
+- [BUGFIX] Hide information card if empty (#1608)
+- [BUGFIX] Fix broken type-check on main branch (#1611)
+- [BUGFIX] Fix home page broken if config 'information' is empty (#1607)
+- [BUGFIX] Fix marshalling authorisation config in json (#1598)
+- [BUGFIX] Remove extra call to `setDatasourceDrawerOpened` in DatasourceList (#1597)
+- [BUGFIX] Fix typo in QuerySummaryTable (#1596)
+- [BUGFIX] Fix YAML files not working for provisioning (#1589)
+- [BUGFIX] ListVariable: fix scroll reset after a new option is selected (#1579)
+- [BUGFIX] Saved value for allowMultiple was not retrieved (#1577)
+- [BUGFIX] Fix several issues with JSON views (#1562)
+- [BUGFIX] Avoid failing grafana migration in multiple cases (#1549)
+- [BUGFIX] Fix unwanted thresholds when migrating timeseries panels (#1495)
+- [BUGFIX] Fix grafana migration failing in some corner cases (#1487)
+- [BREAKINGCHANGE] GenerateChartsTheme can override any value
+- [BREAKINGCHANGE] Move any security config to a dedicated struct (#1560)
+- [BREAKINGCHANGE] Allow TimeRangeProvider and TemplateVariableProvider to live without QueryParamsProvider
+- [BREAKINGCHANGE] Change plugin structure to rely on regular .cue files only (#1489)
+- [BREAKINGCHANGE] Separate the datasource selector frontend from backend (#1488)
+- [DOC] Added section 2 with container installation (#1593) (#1624)
+- [DOC] Added user documentation for section 1, introduction to Perses. (#1574)
+- [DOC] Added first user documentation structure with ToC. (#1553)
+- [DOC] Complete documentation about the API. (#1471) (##1479) (##1483) (#1490) (#1491) (#1500)
+- [DOC] Complete documentation about the backend configuration. (#1467)
+
 ## 0.41.1 / 2023-10-13
 
 - [ENHANCEMENT] Improve validation error feedback to end user (#1470)
