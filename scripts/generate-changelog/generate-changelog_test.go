@@ -65,6 +65,12 @@ func TestParseCatalogEntry(t *testing.T) {
 			expectedCatalogEntry: "BUGFIX",
 		},
 		{
+			title:                "doc catalog entry",
+			entry:                "[DOC] commit message",
+			expectedKind:         kindDoc,
+			expectedCatalogEntry: "DOC",
+		},
+		{
 			title:                "catalog entry with different case (1)",
 			entry:                "[Feature] commit message",
 			expectedKind:         kindFeature,
@@ -168,6 +174,7 @@ func TestGenerateChangelog(t *testing.T) {
 				},
 				bugfixes:        []string{"Fix time units display, allow decimalPlaces to be used (#837)"},
 				breakingChanges: []string{"legend.position now required in time series panel (#848)"},
+				docs:            []string{"Complete documentation about the API. (#1471) (##1479) (##1483) (#1490) (#1491) (#1500)"},
 				unknown:         []string{"Use exact versions for internal npm dependencies (#846)", "Support snapshot UI releases (#844)"},
 			},
 			expected: fmt.Sprintf("%s\n%s", title, `
@@ -177,6 +184,7 @@ func TestGenerateChangelog(t *testing.T) {
 - [ENHANCEMENT] Make it possible to adjust the height of the time range controls (#829)
 - [BUGFIX] Fix time units display, allow decimalPlaces to be used (#837)
 - [BREAKINGCHANGE] legend.position now required in time series panel (#848)
+- [DOC] Complete documentation about the API. (#1471) (##1479) (##1483) (#1490) (#1491) (#1500)
 
 [//]: <UNKNOWN ENTRIES. Release shepherd, please review the following list and categorize them or remove them>
 
