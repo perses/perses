@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.42.1 / 2023-12-08
+
+This release doesn't contain any changes regarding the Perses binaries.
+It only contains a fix in the CI to release Perses.
+
 ## 0.42.0 / 2023-12-08
 
 - [FEATURE] Initial Tempo Plugin (#1561)
