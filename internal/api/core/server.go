@@ -40,6 +40,7 @@ import (
 	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/sirupsen/logrus"
 )
 
 type api struct {
@@ -69,11 +70,21 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly),
 	}
+
+	authEndpoint, err := authendpoint.New(
+		persistenceManager.GetUser(),
+		serviceManager.GetJWT(),
+		cfg.Security.Authentication.Providers,
+		cfg.Security.EnableAuth,
+	)
+	if err != nil {
+		logrus.WithError(err).Fatal("error initializing authentication endpoints")
+	}
 	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
-		authendpoint.New(persistenceManager.GetUser(), serviceManager.GetJWT(), cfg.Security.EnableAuth),
+		authEndpoint,
 	}
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
@@ -129,7 +140,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 }
 
 func (a *api) collectRoutes() []*route.Group {
-	apiGroup := &route.Group{Path: "/api"}
+	apiGroup := &route.Group{Path: utils.APIPrefix}
 	for _, ept := range a.apiEndpoints {
 		ept.CollectRoutes(apiGroup)
 	}

@@ -18,7 +18,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 )
 
-const authResource = "auth"
+const authResource = "auth/providers/native/login"
 
 // AuthInterface has methods to work with Auth resource
 type AuthInterface interface {

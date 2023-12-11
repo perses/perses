@@ -40,7 +40,7 @@ func TestAuth(t *testing.T) {
 			Password: usrEntity.Spec.Password,
 		}
 
-		expect.POST("/api/auth").
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
 			Expect().
 			Status(http.StatusOK)

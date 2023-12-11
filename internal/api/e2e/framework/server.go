@@ -47,6 +47,7 @@ func DefaultConfig() apiConfig.Config {
 			Authentication: apiConfig.AuthenticationConfig{
 				AccessTokenTTL:  model.Duration(apiConfig.DefaultAccessTokenTTL),
 				RefreshTokenTTL: model.Duration(apiConfig.DefaultRefreshTokenTTL),
+				Providers:       apiConfig.AuthProviders{EnableNative: true},
 			},
 			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},

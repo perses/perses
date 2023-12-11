@@ -12,7 +12,9 @@ security:
           - create
         scopes:
           - Project
-
+  authentication:
+    providers:
+      enable_native: true
 database:
   sql:
     user: "user"

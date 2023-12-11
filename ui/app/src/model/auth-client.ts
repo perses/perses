@@ -21,11 +21,11 @@ import { HTTPHeader, HTTPMethodPOST } from './http';
 const authResource = 'auth';
 const jwtPayload = 'jwtPayload';
 
-export interface AuthResponse {
+export interface NativeAuthResponse {
   token: string;
 }
 
-export interface AuthBody {
+export interface NativeAuthBody {
   login: string;
   password: string;
 }
@@ -62,12 +62,12 @@ export function useAuthToken(): IUseJwt {
   return useJwt<Payload>(`${partialToken}.${fakeSignature}`);
 }
 
-export function useAuthMutation() {
+export function useNativeAuthMutation() {
   const queryClient = useQueryClient();
-  return useMutation<AuthResponse, Error, AuthBody>({
+  return useMutation<NativeAuthResponse, Error, NativeAuthBody>({
     mutationKey: [authResource],
-    mutationFn: (body: AuthBody) => {
-      return auth(body);
+    mutationFn: (body: NativeAuthBody) => {
+      return nativeAuth(body);
     },
     onSuccess: () => {
       return queryClient.invalidateQueries([authResource]);
@@ -75,22 +75,9 @@ export function useAuthMutation() {
   });
 }
 
-export function useLogoutMutation() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationKey: [authResource],
-    mutationFn: () => {
-      return logout();
-    },
-    onSuccess: () => {
-      return queryClient.invalidateQueries([authResource]);
-    },
-  });
-}
-
-export function auth(body: AuthBody) {
-  const url = buildURL({ resource: authResource, apiPrefix: '/api' });
-  return fetchJson<AuthResponse>(url, {
+export function nativeAuth(body: NativeAuthBody) {
+  const url = buildURL({ resource: `${authResource}/native/login`, apiPrefix: '/api' });
+  return fetchJson<NativeAuthResponse>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(body),
@@ -99,14 +86,6 @@ export function auth(body: AuthBody) {
 
 export function refreshToken() {
   const url = buildURL({ resource: `${authResource}/refresh`, apiPrefix: '/api' });
-  return fetch(url, {
-    method: HTTPMethodPOST,
-    headers: HTTPHeader,
-  });
-}
-
-export function logout() {
-  const url = buildURL({ resource: `${authResource}/logout`, apiPrefix: '/api' });
   return fetch(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,

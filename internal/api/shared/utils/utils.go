@@ -27,6 +27,16 @@ const (
 	ParamDashboard        = "dashboard"
 	ParamName             = "name"
 	ParamProject          = "project"
+	APIPrefix             = "/api"
+	PathAuth              = "auth"
+	PathAuthProviders     = "auth/providers"
+	PathLogin             = "login"
+	PathCallback          = "callback"
+	PathLogout            = "logout"
+	PathRefresh           = "refresh"
+	AuthKindNative        = "native"
+	AuthKindOIDC          = "oidc"
+	AuthKindOAuth         = "oauth"
 	APIV1Prefix           = "/api/v1"
 	PathDashboard         = "dashboards"
 	PathDatasource        = "datasources"
@@ -96,4 +106,15 @@ func GetMetadataProject(metadata api.Metadata) string {
 		return projectMetadata.Project
 	}
 	return ""
+}
+
+// AppendIfMissing will append the value in the slice, only if not already present.
+// Will return a boolean saying if the value has been appended or not.
+func AppendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
+	for _, e := range slice {
+		if e == value {
+			return slice, false
+		}
+	}
+	return append(slice, value), true
 }
