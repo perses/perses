@@ -19,7 +19,7 @@ import (
 
 	"github.com/perses/perses/internal/api/shared/schemas"
 	testUtils "github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )

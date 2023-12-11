@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
