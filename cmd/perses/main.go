@@ -17,7 +17,7 @@ import (
 	"flag"
 
 	"github.com/perses/perses/internal/api/core"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 )
 

@@ -18,7 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
 type Endpoint struct {

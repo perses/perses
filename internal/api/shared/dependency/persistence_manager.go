@@ -46,7 +46,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/database"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
 type PersistenceManager interface {

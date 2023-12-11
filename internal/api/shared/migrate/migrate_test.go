@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	testUtils "github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

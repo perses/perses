@@ -27,8 +27,8 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/test"
-	"github.com/perses/perses/pkg/api/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
 	promConfig "github.com/prometheus/common/config"
@@ -36,24 +36,24 @@ import (
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
 
-func DefaultConfig() config.Config {
+func DefaultConfig() apiConfig.Config {
 	projectPath := test.GetRepositoryPath()
-	return config.Config{
-		Security: config.Security{
+	return apiConfig.Config{
+		Security: apiConfig.Security{
 			Readonly:      false,
 			EnableAuth:    false,
-			Authorization: config.AuthorizationConfig{},
-			Authentication: config.AuthenticationConfig{
-				AccessTokenTTL:  config.DefaultAccessTokenTTL,
-				RefreshTokenTTL: config.DefaultRefreshTokenTTL,
+			Authorization: apiConfig.AuthorizationConfig{},
+			Authentication: apiConfig.AuthenticationConfig{
+				AccessTokenTTL:  apiConfig.DefaultAccessTokenTTL,
+				RefreshTokenTTL: apiConfig.DefaultRefreshTokenTTL,
 			},
 			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
-		Schemas: config.Schemas{
-			PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
+		Schemas: apiConfig.Schemas{
+			PanelsPath:      filepath.Join(projectPath, apiConfig.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, apiConfig.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, apiConfig.DefaultDatasourcesPath),
+			VariablesPath:   filepath.Join(projectPath, apiConfig.DefaultVariablesPath),
 			Interval:        0,
 		},
 	}
@@ -68,17 +68,17 @@ func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Enti
 	}
 }
 
-func defaultFileConfig() *config.File {
-	return &config.File{
+func defaultFileConfig() *apiConfig.File {
+	return &apiConfig.File{
 		Folder:    "./test",
-		Extension: config.JSONExtension,
+		Extension: apiConfig.JSONExtension,
 	}
 }
 
-func CreateServer(t *testing.T, conf config.Config) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
+func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) {
 	if useSQL == "true" {
-		conf.Database = config.Database{
-			SQL: &config.SQL{
+		conf.Database = apiConfig.Database{
+			SQL: &apiConfig.SQL{
 				User:                 "user",
 				Password:             "password",
 				Net:                  "tcp",
@@ -88,7 +88,7 @@ func CreateServer(t *testing.T, conf config.Config) (*httptest.Server, *httpexpe
 			},
 		}
 	} else {
-		conf.Database = config.Database{
+		conf.Database = apiConfig.Database{
 			File: defaultFileConfig(),
 		}
 	}
@@ -116,7 +116,7 @@ func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.Persi
 	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
 }
 
-func WithServerConfig(t *testing.T, config config.Config, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	server, expect, persistenceManager := CreateServer(t, config)
 	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()

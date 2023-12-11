@@ -25,16 +25,16 @@ import (
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/utils"
-	"github.com/perses/perses/pkg/api/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 )
 
-func serverAuthConfig() config.Config {
+func serverAuthConfig() apiConfig.Config {
 	conf := e2eframework.DefaultConfig()
 	conf.Security.EnableAuth = true
-	conf.Security.Authorization = config.AuthorizationConfig{GuestPermissions: []*role.Permission{
+	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
 		{
 			Actions: []role.Action{role.ReadAction},
 			Scopes:  []role.Scope{role.WildcardScope},

@@ -24,9 +24,9 @@ import (
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
-	apiConfig "github.com/perses/perses/pkg/api/config"
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )

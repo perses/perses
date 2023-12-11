@@ -38,7 +38,7 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/utils"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
 type endpoint interface {

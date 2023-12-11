@@ -21,7 +21,7 @@ import (
 	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/shared/database/sql"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )

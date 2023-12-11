@@ -25,7 +25,7 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/schemas"
-	"github.com/perses/perses/pkg/api/config"
+	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )

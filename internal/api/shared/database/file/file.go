@@ -24,8 +24,8 @@ import (
 	"strings"
 
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/pkg/api/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"gopkg.in/yaml.v3"
 )
