@@ -17,7 +17,6 @@ package dependency
 
 import (
 	"github.com/perses/common/async"
-	"github.com/perses/perses/internal/api/config"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
@@ -52,6 +51,7 @@ import (
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/pkg/api/config"
 )
 
 type ServiceManager interface {

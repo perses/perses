@@ -16,8 +16,8 @@ package main
 import (
 	"flag"
 
-	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/pkg/api/config"
 	"github.com/sirupsen/logrus"
 )
 

@@ -18,10 +18,10 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/perses/perses/internal/api/config"
 	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	databaseSQL "github.com/perses/perses/internal/api/shared/database/sql"
+	"github.com/perses/perses/pkg/api/config"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )

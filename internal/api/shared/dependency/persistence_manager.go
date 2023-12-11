@@ -14,7 +14,6 @@
 package dependency
 
 import (
-	"github.com/perses/perses/internal/api/config"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
@@ -47,6 +46,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/shared/database"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/pkg/api/config"
 )
 
 type PersistenceManager interface {

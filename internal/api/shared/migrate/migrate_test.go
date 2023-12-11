@@ -18,8 +18,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/perses/perses/internal/api/config"
 	testUtils "github.com/perses/perses/internal/test"
+	"github.com/perses/perses/pkg/api/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
