@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"io"
 
-	apiConfig "github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
@@ -25,6 +24,7 @@ import (
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
+	apiConfig "github.com/perses/perses/pkg/api/config"
 	"github.com/perses/perses/pkg/client/api"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"

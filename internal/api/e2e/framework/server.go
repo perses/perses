@@ -23,11 +23,11 @@ import (
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/test"
+	"github.com/perses/perses/pkg/api/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"

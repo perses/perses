@@ -19,12 +19,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
-	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/pkg/api/config"
 	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
 )

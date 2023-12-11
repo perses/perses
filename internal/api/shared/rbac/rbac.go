@@ -14,12 +14,12 @@
 package rbac
 
 import (
-	"github.com/perses/perses/internal/api/config"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/pkg/api/config"
 	v1Role "github.com/perses/perses/pkg/model/api/v1/role"
 )
 

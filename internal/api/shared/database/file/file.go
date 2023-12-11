@@ -23,8 +23,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/perses/perses/internal/api/config"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/pkg/api/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"gopkg.in/yaml.v3"
