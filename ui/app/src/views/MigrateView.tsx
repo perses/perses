@@ -32,6 +32,7 @@ import { useMigrate } from '../model/migrate-client';
 import { useCreateDashboardMutation } from '../model/dashboard-client';
 import { useIsReadonly } from '../context/Config';
 import { useProjectList } from '../model/project-client';
+import { useIsMobileSize } from '../utils/browser-size';
 
 interface GrafanaLightDashboard {
   // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
@@ -54,6 +55,7 @@ function MigrateView() {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
   const { exceptionSnackbar } = useSnackbar();
+  const isMobileSize = useIsMobileSize();
   const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
 
   const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -93,12 +95,12 @@ function MigrateView() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ marginY: 2 }}>
+    <Container maxWidth="lg" sx={{ padding: isMobileSize ? 1 : 2, overflowX: 'hidden' }}>
       <Stack direction="row" alignItems="center" gap={1} mb={2}>
         <AutoFix fontSize="large" />
         <Typography variant="h1">Migrate</Typography>
       </Stack>
-      <Stack direction="column" spacing={1} mt={2}>
+      <Stack direction="column" spacing={1}>
         <Alert variant="outlined" severity="warning">
           <Typography>
             As we do not support every feature from Grafana, the migration to Perses can only be partial. For example,

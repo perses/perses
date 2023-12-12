@@ -34,7 +34,6 @@ interface CreateProjectDialogProps {
  */
 export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
   const { open, onClose, onSuccess } = props;
-
   const validationSchema = useProjectValidationSchema();
 
   const form = useForm<ProjectNameValidationType>({
@@ -65,11 +64,11 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
     form.reset();
   };
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} fullWidth={true}>
       <Dialog.Header>Add Project</Dialog.Header>
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(processForm)}>
-          <Dialog.Content>
+          <Dialog.Content sx={{ width: '100%' }}>
             <Controller
               name="name"
               render={({ field, fieldState }) => (

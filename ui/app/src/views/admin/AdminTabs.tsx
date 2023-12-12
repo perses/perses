@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
-import { ReactNode, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { Box, BoxProps, Stack } from '@mui/material';
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
@@ -28,7 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ShieldIcon from 'mdi-material-ui/Shield';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
@@ -39,6 +39,8 @@ import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebindi
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
+import { GlobalProject } from '../../context/Authorization';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecret';
@@ -51,11 +53,11 @@ const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
 const variablesTabIndex = 'variables';
 
-interface TabButtonProps {
+interface TabButtonProps extends CRUDButtonProps {
   index: string;
 }
 
-function TabButton(props: TabButtonProps) {
+function TabButton({ index, ...props }: TabButtonProps) {
   const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalRoleMutation = useCreateGlobalRoleMutation();
   const createGlobalRoleBindingMutation = useCreateGlobalRoleBindingMutation();
@@ -139,17 +141,20 @@ function TabButton(props: TabButtonProps) {
     [exceptionSnackbar, successSnackbar, createGlobalVariableMutation]
   );
 
-  switch (props.index) {
+  switch (index) {
     case variablesTabIndex:
       return (
         <>
           <CRUDButton
-            text="Add Global Variable"
             action="create"
             scope="GlobalVariable"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setVariableDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Global Variable
+          </CRUDButton>
           <VariableDrawer
             variable={{
               kind: 'GlobalVariable',
@@ -169,6 +174,7 @@ function TabButton(props: TabButtonProps) {
             isReadonly={isReadonly}
             onSave={handleGlobalVariableCreation}
             onClose={() => setVariableDrawerOpened(false)}
+            {...props}
           />
         </>
       );
@@ -176,12 +182,15 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Datasource"
             action="create"
             scope="GlobalDatasource"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setDatasourceDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Global Datasource
+          </CRUDButton>
           <DatasourceDrawer
             datasource={{
               kind: 'GlobalDatasource',
@@ -209,12 +218,15 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Role"
             action="create"
             scope="GlobalRole"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setRoleDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Global Role
+          </CRUDButton>
           <RoleDrawer
             role={{
               kind: 'GlobalRole',
@@ -237,12 +249,15 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Role Binding"
             action="create"
             scope="GlobalRoleBinding"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setRoleBindingDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Global Role Binding
+          </CRUDButton>
           <RoleBindingDrawer
             roleBinding={{
               kind: 'GlobalRoleBinding',
@@ -268,25 +283,22 @@ function TabButton(props: TabButtonProps) {
   }
 }
 
-interface TabPanelProps {
-  children?: ReactNode;
+interface TabPanelProps extends BoxProps {
   index: string;
   value: string;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({ children, value, index, ...props }: TabPanelProps) {
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`admin-tabpanel-${index}`}
       aria-labelledby={`admin-tab-${index}`}
-      {...other}
+      {...props}
     >
-      {value === index && <Box sx={{ paddingTop: 2 }}>{children}</Box>}
-    </div>
+      {value === index && children}
+    </Box>
   );
 }
 
@@ -306,6 +318,7 @@ export function AdminTabs(props: AdminTabsProps) {
   const isAuthEnable = useIsAuthEnable();
 
   const navigate = useNavigate();
+  const isMobileSize = useIsMobileSize();
 
   const [value, setValue] = useState((initialTab ?? variablesTabIndex).toLowerCase());
 
@@ -322,7 +335,14 @@ export function AdminTabs(props: AdminTabsProps) {
         justifyContent="space-between"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <MenuTabs value={value} onChange={handleChange} aria-label="Admin tabs">
+        <MenuTabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          aria-label="Admin tabs"
+        >
           <MenuTab
             label="Global Variables"
             icon={<CodeJsonIcon />}
@@ -361,23 +381,24 @@ export function AdminTabs(props: AdminTabsProps) {
             disabled={!isAuthEnable}
           />
         </MenuTabs>
-        <TabButton index={value} />
+        {!isMobileSize && <TabButton index={value} />}
       </Stack>
-      <TabPanel value={value} index={variablesTabIndex}>
+      {isMobileSize && <TabButton index={value} fullWidth sx={{ marginTop: 0.5 }} />}
+      <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <GlobalVariables id="global-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index={datasourcesTabIndex}>
+      <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <GlobalDatasources id="global-datasource-list" />
       </TabPanel>
-      <TabPanel value={value} index={secretsTabIndex}>
+      <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
       {isAuthEnable && (
         <>
-          <TabPanel value={value} index={rolesTabIndex}>
+          <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <GlobalRoles id="global-role-list" />
           </TabPanel>
-          <TabPanel value={value} index={roleBindingsTabIndex}>
+          <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <GlobalRoleBindings id="global-rolebinding-list" />
           </TabPanel>
         </>

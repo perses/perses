@@ -15,12 +15,15 @@ import { Stack } from '@mui/material';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
 import { useParams } from 'react-router-dom';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { AdminTabs } from './AdminTabs';
 
 function AdminView() {
   const { tab } = useParams();
+  const isMobileSize = useIsMobileSize();
+
   return (
-    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={1}>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
       <AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar fontSize={'large'} />} />
       <AdminTabs initialTab={tab} />
     </Stack>

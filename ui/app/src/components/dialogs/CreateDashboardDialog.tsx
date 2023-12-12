@@ -58,11 +58,11 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
     form.reset();
   };
   return (
-    <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog">
+    <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog" fullWidth={true}>
       <Dialog.Header>Create Dashboard</Dialog.Header>
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(processForm)}>
-          <Dialog.Content>
+          <Dialog.Content sx={{ width: '100%' }}>
             <Stack gap={1}>
               {!hideProjectSelect && (
                 <Controller

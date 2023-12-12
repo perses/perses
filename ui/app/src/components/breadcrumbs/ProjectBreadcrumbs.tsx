@@ -26,7 +26,19 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
 
   if (dashboardName) {
     return (
-      <Breadcrumbs>
+      <Breadcrumbs
+        id="breadcrumbs"
+        sx={{
+          overflowX: 'scroll',
+          scrollbarWidth: 'none' /* Firefox */,
+          '& .MuiBreadcrumbs-ol': {
+            flexWrap: 'nowrap',
+          },
+          '&::-webkit-scrollbar': {
+            display: 'none' /* Safari and Chrome */,
+          },
+        }}
+      >
         <HomeLinkCrumb />
         <LinkCrumb to={`/projects/${projectName}`}>
           <StackCrumb>
@@ -43,7 +55,19 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
   }
 
   return (
-    <Breadcrumbs>
+    <Breadcrumbs
+      id="breadcrumbs"
+      sx={{
+        overflowX: 'scroll',
+        scrollbarWidth: 'none' /* Firefox */,
+        '& .MuiBreadcrumbs-ol': {
+          flexWrap: 'nowrap',
+        },
+        '&::-webkit-scrollbar': {
+          display: 'none' /* Safari and Chrome */,
+        },
+      }}
+    >
       <HomeLinkCrumb />
       <StackCrumb>
         <Archive fontSize={'large'} />
