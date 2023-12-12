@@ -17,8 +17,7 @@ import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
 
-interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
-  text: string;
+export interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
   action?: Action;
   scope?: Scope;
   project?: string;
@@ -28,8 +27,17 @@ interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
  * CRUDButton is an alias of MUI Button, that will add a Tooltip with a reason if the button need to be disabled.
  * If action, scope and project are provided, it will check if the user has the permission to execute the action.
  */
-export function CRUDButton(props: CRUDButtonProps) {
-  const { text, action, scope, project, variant, color, disabled, onClick } = props;
+export function CRUDButton({
+  children,
+  action,
+  scope,
+  project,
+  variant,
+  color,
+  disabled,
+  onClick,
+  ...props
+}: CRUDButtonProps) {
   const isReadonly = useIsReadonly();
   const isMobileSize = useIsMobileSize();
   const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
@@ -45,8 +53,9 @@ export function CRUDButton(props: CRUDButtonProps) {
             sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
             onClick={onClick}
             disabled
+            {...props}
           >
-            {text}
+            {children}
           </Button>
         </span>
       </Tooltip>
@@ -69,8 +78,9 @@ export function CRUDButton(props: CRUDButtonProps) {
             sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
             onClick={onClick}
             disabled
+            {...props}
           >
-            {text}
+            {children}
           </Button>
         </span>
       </Tooltip>
@@ -85,8 +95,9 @@ export function CRUDButton(props: CRUDButtonProps) {
       sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
       onClick={onClick}
       disabled={disabled}
+      {...props}
     >
-      {text}
+      {children}
     </Button>
   );
 }

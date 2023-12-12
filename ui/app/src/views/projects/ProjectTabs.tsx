@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
+import { Box, BoxProps, ButtonProps, Stack } from '@mui/material';
 import { ReactNode, SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
@@ -42,6 +42,7 @@ import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
@@ -56,19 +57,19 @@ const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
 const variablesTabIndex = 'variables';
 
-interface TabButtonProps {
+interface TabButtonProps extends Omit<ButtonProps, 'action'> {
   index: string;
   projectName: string;
 }
 
-function TabButton(props: TabButtonProps) {
+function TabButton({ index, projectName, ...props }: TabButtonProps) {
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const createDatasourceMutation = useCreateDatasourceMutation(props.projectName);
-  const createRoleMutation = useCreateRoleMutation(props.projectName);
-  const createRoleBindingMutation = useCreateRoleBindingMutation(props.projectName);
-  const createVariableMutation = useCreateVariableMutation(props.projectName);
+  const createDatasourceMutation = useCreateDatasourceMutation(projectName);
+  const createRoleMutation = useCreateRoleMutation(projectName);
+  const createRoleBindingMutation = useCreateRoleBindingMutation(projectName);
+  const createVariableMutation = useCreateVariableMutation(projectName);
 
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
@@ -82,7 +83,7 @@ function TabButton(props: TabButtonProps) {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
-  const { data } = useRoleList(props.projectName);
+  const { data } = useRoleList(projectName);
   const roleSuggestions = useMemo(() => {
     return (data ?? []).map((role) => role.metadata.name);
   }, [data]);
@@ -151,21 +152,23 @@ function TabButton(props: TabButtonProps) {
     [exceptionSnackbar, successSnackbar, createVariableMutation]
   );
 
-  switch (props.index) {
+  switch (index) {
     case dashboardsTabIndex:
       return (
         <>
           <CRUDButton
-            text="Add Dashboard"
             action="create"
             scope="Dashboard"
-            project={props.projectName}
+            project={projectName}
             variant="contained"
             onClick={() => setCreateDashboardDialogOpened(true)}
-          />
+            {...props}
+          >
+            Add Dashboard
+          </CRUDButton>
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
-            projectOptions={[props.projectName]}
+            projectOptions={[projectName]}
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
@@ -176,19 +179,21 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Variable"
             action="create"
             scope="Variable"
-            project={props.projectName}
+            project={projectName}
             variant="contained"
             onClick={() => setVariableDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Variable
+          </CRUDButton>
           <VariableDrawer
             variable={{
               kind: 'Variable',
               metadata: {
                 name: 'NewVariable',
-                project: props.projectName,
+                project: projectName,
               },
               spec: {
                 kind: 'TextVariable',
@@ -210,19 +215,21 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Datasource"
             action="create"
             scope="Datasource"
-            project={props.projectName}
+            project={projectName}
             variant="contained"
             onClick={() => setDatasourceDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Datasource
+          </CRUDButton>
           <DatasourceDrawer
             datasource={{
               kind: 'Datasource',
               metadata: {
                 name: 'NewDatasource',
-                project: props.projectName,
+                project: projectName,
               },
               spec: {
                 default: false,
@@ -245,19 +252,21 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Role"
             action="create"
             scope="Role"
-            project={props.projectName}
+            project={projectName}
             variant="contained"
             onClick={() => setRoleDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Role
+          </CRUDButton>
           <RoleDrawer
             role={{
               kind: 'Role',
               metadata: {
                 name: 'NewRole',
-                project: props.projectName,
+                project: projectName,
               },
               spec: {
                 permissions: [],
@@ -275,19 +284,21 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Role Binding"
             action="create"
             scope="RoleBinding"
-            project={props.projectName}
+            project={projectName}
             variant="contained"
             onClick={() => setRoleBindingDrawerOpened(true)}
-          />
+            {...props}
+          >
+            Add Role Binding
+          </CRUDButton>
           <RoleBindingDrawer
             roleBinding={{
               kind: 'RoleBinding',
               metadata: {
                 name: 'NewRoleBinding',
-                project: props.projectName,
+                project: projectName,
               },
               spec: {
                 role: '',
@@ -308,25 +319,23 @@ function TabButton(props: TabButtonProps) {
   }
 }
 
-interface TabPanelProps {
-  children?: ReactNode;
+interface TabPanelProps extends BoxProps {
   index: string;
   value: string;
+  children?: ReactNode;
 }
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
+function TabPanel({ children, value, index, ...props }: TabPanelProps) {
   return (
-    <div
+    <Box
       role="tabpanel"
       hidden={value !== index}
       id={`project-tabpanel-${index}`}
       aria-labelledby={`project-tab-${index}`}
-      {...other}
+      {...props}
     >
-      {value === index && <Box sx={{ paddingTop: 2 }}>{children}</Box>}
-    </div>
+      {value === index && children}
+    </Box>
   );
 }
 
@@ -347,6 +356,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
   const isAuthEnable = useIsAuthEnable();
 
   const navigate = useNavigate();
+  const isMobileSize = useIsMobileSize();
 
   const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
@@ -363,7 +373,14 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
         justifyContent="space-between"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <MenuTabs value={value} onChange={handleChange} aria-label="Project tabs">
+        <MenuTabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          aria-label="Project tabs"
+        >
           <MenuTab
             label="Dashboards"
             icon={<ViewDashboardIcon />}
@@ -409,26 +426,27 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             disabled={!isAuthEnable}
           />
         </MenuTabs>
-        <TabButton index={value} projectName={projectName} />
+        {!isMobileSize && <TabButton index={value} projectName={projectName} />}
       </Stack>
-      <TabPanel value={value} index={dashboardsTabIndex}>
+      {isMobileSize && <TabButton index={value} projectName={projectName} fullWidth sx={{ marginTop: 0.5 }} />}
+      <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
-      <TabPanel value={value} index={variablesTabIndex}>
+      <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectVariables projectName={projectName} id="project-variable-list" />
       </TabPanel>
-      <TabPanel value={value} index={datasourcesTabIndex}>
+      <TabPanel value={value} index={datasourcesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectDatasources projectName={projectName} id="project-datasource-list" />
       </TabPanel>
-      <TabPanel value={value} index={secretsTabIndex}>
+      <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
       {isAuthEnable && (
         <>
-          <TabPanel value={value} index={rolesTabIndex}>
+          <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <ProjectRoles projectName={projectName} id="project-role-list" />
           </TabPanel>
-          <TabPanel value={value} index={roleBindingsTabIndex}>
+          <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <ProjectRoleBindings projectName={projectName} id="project-rolebinding-list" />
           </TabPanel>
         </>

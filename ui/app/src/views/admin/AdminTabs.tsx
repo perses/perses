@@ -39,6 +39,7 @@ import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebindi
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
+import { GlobalProject } from '../../context/Authorization';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecret';
@@ -144,12 +145,14 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Variable"
             action="create"
             scope="GlobalVariable"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setVariableDrawerOpened(true)}
-          />
+          >
+            Add Global Variable
+          </CRUDButton>
           <VariableDrawer
             variable={{
               kind: 'GlobalVariable',
@@ -176,12 +179,14 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Datasource"
             action="create"
             scope="GlobalDatasource"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setDatasourceDrawerOpened(true)}
-          />
+          >
+            Add Global Datasource
+          </CRUDButton>
           <DatasourceDrawer
             datasource={{
               kind: 'GlobalDatasource',
@@ -209,12 +214,14 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Role"
             action="create"
             scope="GlobalRole"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setRoleDrawerOpened(true)}
-          />
+          >
+            Add Global Role
+          </CRUDButton>
           <RoleDrawer
             role={{
               kind: 'GlobalRole',
@@ -237,12 +244,14 @@ function TabButton(props: TabButtonProps) {
       return (
         <>
           <CRUDButton
-            text="Add Global Role Binding"
             action="create"
             scope="GlobalRoleBinding"
+            project={GlobalProject}
             variant="contained"
             onClick={() => setRoleBindingDrawerOpened(true)}
-          />
+          >
+            Add Global Role Binding
+          </CRUDButton>
           <RoleBindingDrawer
             roleBinding={{
               kind: 'GlobalRoleBinding',

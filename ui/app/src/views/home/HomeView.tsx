@@ -67,19 +67,16 @@ function HomeView() {
             <TitleCrumb>Home</TitleCrumb>
           </StackCrumb>
           <Stack direction="row" gap={isMobileSize ? 0.5 : 2}>
+            <CRUDButton action="create" scope="Project" variant="contained" onClick={handleAddProjectDialogOpen}>
+              Add Project
+            </CRUDButton>
             <CRUDButton
-              text="Add Project"
-              action="create"
-              scope="Project"
-              variant="contained"
-              onClick={handleAddProjectDialogOpen}
-            />
-            <CRUDButton
-              text="Add Dashboard"
               variant="contained"
               onClick={handleAddDashboardDialogOpen}
               disabled={projectOptions.length === 0}
-            />
+            >
+              Add Dashboard
+            </CRUDButton>
             <CreateProjectDialog
               open={isAddProjectDialogOpen}
               onClose={handleAddProjectDialogClose}

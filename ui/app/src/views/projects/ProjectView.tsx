@@ -14,9 +14,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Stack, Grid } from '@mui/material';
 import { useCallback, useState } from 'react';
+import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { DeleteProjectDialog } from '../../components/dialogs';
 import ProjectBreadcrumbs from '../../components/breadcrumbs/ProjectBreadcrumbs';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { RecentlyViewedDashboards } from './RecentlyViewedDashboards';
 import { ProjectTabs } from './ProjectTabs';
 
@@ -28,6 +30,7 @@ function ProjectView() {
 
   // Navigate to the home page if the project has been successfully deleted
   const navigate = useNavigate();
+  const isMobileSize = useIsMobileSize();
 
   const handleDeleteProjectDialogSuccess = useCallback(() => navigate(`/`), [navigate]);
 
@@ -35,19 +38,20 @@ function ProjectView() {
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
 
   return (
-    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={1}>
-      <Box display="flex" justifyContent="space-between">
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
+      <Box display="flex" justifyContent="space-between" gap={1}>
         <ProjectBreadcrumbs projectName={projectName} />
         <Box mt={0.5}>
           <CRUDButton
-            text="Delete Project"
             action="delete"
             scope="Project"
             project={projectName}
             variant="outlined"
             color="error"
             onClick={() => setIsDeleteProjectDialogOpen(true)}
-          />
+          >
+            {isMobileSize ? <DeleteOutline /> : 'Delete project'}
+          </CRUDButton>
         </Box>
         <DeleteProjectDialog
           name={projectName}
@@ -56,11 +60,11 @@ function ProjectView() {
           onSuccess={handleDeleteProjectDialogSuccess}
         />
       </Box>
-      <Grid container columnSpacing={8}>
-        <Grid item xs={12} lg={8}>
+      <Grid container columnSpacing={8} rowSpacing={1}>
+        <Grid item xs={12} xl={8}>
           <ProjectTabs projectName={projectName} initialTab={tab} />
         </Grid>
-        <Grid item xs={12} lg={4}>
+        <Grid item xs={12} xl={4}>
           <RecentlyViewedDashboards projectName={projectName} id="recent-dashboard-list" />
         </Grid>
       </Grid>

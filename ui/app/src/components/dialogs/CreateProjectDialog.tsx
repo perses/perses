@@ -80,7 +80,7 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
                   id="name"
                   label="Name"
                   type="text"
-                  fullWidth
+                  fullWidth // TODO: responsive
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
                 />
