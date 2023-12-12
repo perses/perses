@@ -24,19 +24,20 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/rbac"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type Endpoint struct {
+type endpoint struct {
 	toolbox       shared.Toolbox
 	rbac          rbac.RBAC
 	readonly      bool
 	disableSignUp bool
 }
 
-func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool) *Endpoint {
-	return &Endpoint{
+func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool) route.Endpoint {
+	return &endpoint{
 		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser),
 		rbac:          rbacService,
 		readonly:      readonly,
@@ -44,7 +45,7 @@ func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool
 	}
 }
 
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group(fmt.Sprintf("/%s", utils.PathUser))
 
 	if !e.readonly {
@@ -59,30 +60,30 @@ func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	group.GET(fmt.Sprintf("/:%s/permissions", utils.ParamName), e.GetPermissions, false)
 }
 
-func (e *Endpoint) Create(ctx echo.Context) error {
+func (e *endpoint) Create(ctx echo.Context) error {
 	entity := &v1.User{}
 	return e.toolbox.Create(ctx, entity)
 }
 
-func (e *Endpoint) Update(ctx echo.Context) error {
+func (e *endpoint) Update(ctx echo.Context) error {
 	entity := &v1.User{}
 	return e.toolbox.Update(ctx, entity)
 }
 
-func (e *Endpoint) Delete(ctx echo.Context) error {
+func (e *endpoint) Delete(ctx echo.Context) error {
 	return e.toolbox.Delete(ctx)
 }
 
-func (e *Endpoint) Get(ctx echo.Context) error {
+func (e *endpoint) Get(ctx echo.Context) error {
 	return e.toolbox.Get(ctx)
 }
 
-func (e *Endpoint) List(ctx echo.Context) error {
+func (e *endpoint) List(ctx echo.Context) error {
 	q := &user.Query{}
 	return e.toolbox.List(ctx, q)
 }
 
-func (e *Endpoint) GetPermissions(ctx echo.Context) error {
+func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	parameters := shared.ExtractParameters(ctx)
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {

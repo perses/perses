@@ -20,25 +20,26 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/internal/api/shared/validate"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type Endpoint struct {
+type endpoint struct {
 	sch       schemas.Schemas
 	dashboard dashboard.Service
 }
 
-func New(sch schemas.Schemas, dashboard dashboard.Service) *Endpoint {
-	return &Endpoint{
+func New(sch schemas.Schemas, dashboard dashboard.Service) route.Endpoint {
+	return &endpoint{
 		sch:       sch,
 		dashboard: dashboard,
 	}
 }
 
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	group := g.Group("/validate")
 	group.POST(fmt.Sprintf("/%s", utils.PathDashboard), e.ValidateDashboard, true)
 	group.POST(fmt.Sprintf("/%s", utils.PathDatasource), e.ValidateDatasource, true)
@@ -47,7 +48,7 @@ func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	group.POST(fmt.Sprintf("/%s", utils.PathGlobalVariable), e.ValidateGlobalVariable, true)
 }
 
-func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
+func (e *endpoint) ValidateDashboard(ctx echo.Context) error {
 	entity := &v1.Dashboard{}
 	if err := ctx.Bind(entity); err != nil {
 		return shared.HandleBadRequestError(err.Error())
@@ -60,19 +61,19 @@ func (e *Endpoint) ValidateDashboard(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusOK)
 }
 
-func (e *Endpoint) ValidateDatasource(ctx echo.Context) error {
+func (e *endpoint) ValidateDatasource(ctx echo.Context) error {
 	return validateDatasource(&v1.Datasource{}, e.sch, ctx)
 }
 
-func (e *Endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
+func (e *endpoint) ValidateGlobalDatasource(ctx echo.Context) error {
 	return validateDatasource(&v1.GlobalDatasource{}, e.sch, ctx)
 }
 
-func (e *Endpoint) ValidateVariable(ctx echo.Context) error {
+func (e *endpoint) ValidateVariable(ctx echo.Context) error {
 	return validateVariable(&v1.Variable{}, e.sch, ctx)
 }
 
-func (e *Endpoint) ValidateGlobalVariable(ctx echo.Context) error {
+func (e *endpoint) ValidateGlobalVariable(ctx echo.Context) error {
 	return validateVariable(&v1.GlobalVariable{}, e.sch, ctx)
 }
 

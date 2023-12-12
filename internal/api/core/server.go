@@ -35,26 +35,22 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
-	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
-type endpoint interface {
-	CollectRoutes(g *shared.Group)
-}
-
 type api struct {
 	echoUtils.Register
-	apiV1Endpoints []endpoint
-	apiEndpoints   []endpoint
+	apiV1Endpoints []route.Endpoint
+	apiEndpoints   []route.Endpoint
 	jwtMiddleware  echo.MiddlewareFunc
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
-	apiV1Endpoints := []endpoint{
+	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly),
@@ -71,7 +67,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly),
 		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly),
 	}
-	apiEndpoints := []endpoint{
+	apiEndpoints := []route.Endpoint{
 		configendpoint.New(cfg),
 		migrateendpoint.New(serviceManager.GetMigration()),
 		validateendpoint.New(serviceManager.GetSchemas(), serviceManager.GetDashboard()),
@@ -93,7 +89,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 	// Now let's create a simple struct that will help us to loop over the route tree.
 	type queueElement struct {
 		parent *echo.Group
-		group  *shared.Group
+		group  *route.Group
 	}
 	var queue []queueElement
 	for _, g := range groups {
@@ -119,24 +115,24 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 		}
 		// Finally, register the route with the echo.Group previously created.
 		// We will consider also if the route needs to remain anonymous or not and then inject the JWT middleware accordingly.
-		for _, route := range el.group.Routes {
+		for _, rte := range el.group.Routes {
 			var mdws []echo.MiddlewareFunc
-			if !route.IsAnonymous {
+			if !rte.IsAnonymous {
 				mdws = append(mdws, a.jwtMiddleware)
 			}
-			route.Register(group, mdws...)
+			rte.Register(group, mdws...)
 		}
 	}
 }
 
-func (a *api) collectRoutes() []*shared.Group {
-	apiGroup := &shared.Group{Path: "/api"}
+func (a *api) collectRoutes() []*route.Group {
+	apiGroup := &route.Group{Path: "/api"}
 	for _, ept := range a.apiEndpoints {
 		ept.CollectRoutes(apiGroup)
 	}
-	apiV1Group := &shared.Group{Path: utils.APIV1Prefix}
+	apiV1Group := &route.Group{Path: utils.APIV1Prefix}
 	for _, ept := range a.apiV1Endpoints {
 		ept.CollectRoutes(apiV1Group)
 	}
-	return []*shared.Group{apiGroup, apiV1Group}
+	return []*route.Group{apiGroup, apiV1Group}
 }
