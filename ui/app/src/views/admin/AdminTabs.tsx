@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, BoxProps, Stack } from '@mui/material';
-import { ReactNode, SyntheticEvent, useCallback, useMemo, useState } from 'react';
+import { SyntheticEvent, useCallback, useMemo, useState } from 'react';
 import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';

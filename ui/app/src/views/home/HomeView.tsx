@@ -34,7 +34,7 @@ function HomeView() {
   const { data } = useProjectList();
 
   const projectOptions = useMemo(() => {
-    return (data || []).map((project) => project.metadata.name);
+    return (data || []).map((project) => project.metadata.name); // TODO: remove projects without create dashboard perm
   }, [data]);
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);

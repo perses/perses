@@ -30,7 +30,7 @@ import (
 		url: common.#url
 		// allowedEndpoints is a list of tuples of http methods and http endpoints that will be accessible.
 		// Leave it empty if you don't want to restrict the access to the datasource.
-		allowedEndpoints?: [ ...#HTTPAllowedEndpoint]
+		allowedEndpoints?: [...#HTTPAllowedEndpoint]
 		// headers can be used to provide additional headers that need to be forwarded when requesting the datasource
 		headers?: {[string]: string}
 		// secret is the name of the secret that should be used for the proxy or discovery configuration

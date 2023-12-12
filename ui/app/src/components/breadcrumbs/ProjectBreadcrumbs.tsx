@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
@@ -30,8 +30,12 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
         id="breadcrumbs"
         sx={{
           overflowX: 'scroll',
+          scrollbarWidth: 'none' /* Firefox */,
           '& .MuiBreadcrumbs-ol': {
             flexWrap: 'nowrap',
+          },
+          '&::-webkit-scrollbar': {
+            display: 'none' /* Safari and Chrome */,
           },
         }}
       >

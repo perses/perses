@@ -16,11 +16,14 @@ import Cog from 'mdi-material-ui/Cog';
 import { JSONEditor } from '@perses-dev/components';
 import AppBreadcrumbs from '../../components/breadcrumbs/AppBreadcrumbs';
 import { useConfigContext } from '../../context/Config';
+import { useIsMobileSize } from '../../utils/browser-size';
 
 function ConfigView() {
   const { config } = useConfigContext();
+  const isMobileSize = useIsMobileSize();
+
   return (
-    <Stack sx={{ width: '100%' }} mx={2} mb={2} mt={1.5} gap={2}>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
       <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize={'large'} />} />
       <JSONEditor value={config} readOnly />
     </Stack>
