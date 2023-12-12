@@ -22,25 +22,26 @@ import (
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/sirupsen/logrus"
 )
 
-type Endpoint struct {
+type endpoint struct {
 	dao          user.DAO
 	jwt          crypto.JWT
 	isAuthEnable bool
 }
 
-func New(dao user.DAO, jwt crypto.JWT, isAuthEnable bool) *Endpoint {
-	return &Endpoint{
+func New(dao user.DAO, jwt crypto.JWT, isAuthEnable bool) route.Endpoint {
+	return &endpoint{
 		dao:          dao,
 		jwt:          jwt,
 		isAuthEnable: isAuthEnable,
 	}
 }
 
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	if e.isAuthEnable {
 		g.POST("/auth", e.auth, true)
 		g.POST("/auth/refresh", e.refresh, true)
@@ -48,7 +49,7 @@ func (e *Endpoint) CollectRoutes(g *shared.Group) {
 	}
 }
 
-func (e *Endpoint) auth(ctx echo.Context) error {
+func (e *endpoint) auth(ctx echo.Context) error {
 	body := &api.Auth{}
 	if err := ctx.Bind(body); err != nil {
 		return shared.HandleBadRequestError(err.Error())
@@ -78,7 +79,7 @@ func (e *Endpoint) auth(ctx echo.Context) error {
 	})
 }
 
-func (e *Endpoint) refresh(ctx echo.Context) error {
+func (e *endpoint) refresh(ctx echo.Context) error {
 	// First, let's try to get the refresh token from the Cookie
 	var refreshToken string
 	refreshTokenCookie, err := ctx.Cookie(crypto.CookieKeyRefreshToken)
@@ -108,7 +109,7 @@ func (e *Endpoint) refresh(ctx echo.Context) error {
 	})
 }
 
-func (e *Endpoint) logout(ctx echo.Context) error {
+func (e *endpoint) logout(ctx echo.Context) error {
 	jwtHeaderPayloadCookie, signatureCookie := e.jwt.DeleteAccessTokenCookie()
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
@@ -116,7 +117,7 @@ func (e *Endpoint) logout(ctx echo.Context) error {
 	return ctx.NoContent(http.StatusNoContent)
 }
 
-func (e *Endpoint) accessToken(ctx echo.Context, login string) (string, error) {
+func (e *endpoint) accessToken(ctx echo.Context, login string) (string, error) {
 	accessToken, err := e.jwt.SignedAccessToken(login)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the access token")
@@ -128,7 +129,7 @@ func (e *Endpoint) accessToken(ctx echo.Context, login string) (string, error) {
 	return accessToken, nil
 }
 
-func (e *Endpoint) refreshToken(ctx echo.Context, login string) (string, error) {
+func (e *endpoint) refreshToken(ctx echo.Context, login string) (string, error) {
 	refreshToken, err := e.jwt.SignedRefreshToken(login)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the refresh token")

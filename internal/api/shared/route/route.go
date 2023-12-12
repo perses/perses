@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package route
 
 import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
+
+type Endpoint interface {
+	CollectRoutes(g *Group)
+}
 
 type Route struct {
 	// Method is the HTTP method such as POST, PUT, DELETE, etc.

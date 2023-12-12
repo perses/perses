@@ -19,30 +19,31 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/migrate"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/pkg/model/api"
 )
 
 // Endpoint is the struct that defines all endpoint delivered by the path /migrate
-type Endpoint struct {
+type endpoint struct {
 	migrationService migrate.Migration
 }
 
 // New create an instance of the object Endpoint.
 // You should have at most one instance of this object as it is only used by the struct api in the method api.registerRoute
-func New(migrationService migrate.Migration) *Endpoint {
-	return &Endpoint{
+func New(migrationService migrate.Migration) route.Endpoint {
+	return &endpoint{
 		migrationService: migrationService,
 	}
 }
 
 // CollectRoutes is the method to use to register the routes prefixed by /api
 // If the version is not v1, then look at the same method but in the package with the version as the name.
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	g.POST("/migrate", e.Migrate, true)
 }
 
 // Migrate is the endpoint that provides the Perses dashboard corresponding to the provided grafana dashboard.
-func (e *Endpoint) Migrate(ctx echo.Context) error {
+func (e *endpoint) Migrate(ctx echo.Context) error {
 	body := &api.Migrate{}
 	if err := ctx.Bind(body); err != nil {
 		return shared.HandleBadRequestError(err.Error())

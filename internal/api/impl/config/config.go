@@ -17,24 +17,24 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
-type Endpoint struct {
+type endpoint struct {
 	cfg config.Config
 }
 
-func New(cfg config.Config) *Endpoint {
-	return &Endpoint{
+func New(cfg config.Config) route.Endpoint {
+	return &endpoint{
 		cfg: cfg,
 	}
 }
 
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	g.GET("/config", e.getConfig, true)
 }
 
-func (e *Endpoint) getConfig(ctx echo.Context) error {
+func (e *endpoint) getConfig(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, e.cfg)
 }

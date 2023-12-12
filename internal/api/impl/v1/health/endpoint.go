@@ -18,30 +18,30 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/health"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/route"
 )
 
 // Endpoint is the struct that define all endpoint delivered by the path /health
-type Endpoint struct {
+type endpoint struct {
 	service health.Service
 }
 
 // NewEndpoint create an instance of the object Endpoint.
 // You should have at most one instance of this object as it is only used by the struct api in the method api.registerRoute
-func NewEndpoint(service health.Service) *Endpoint {
-	return &Endpoint{
+func NewEndpoint(service health.Service) route.Endpoint {
+	return &endpoint{
 		service: service,
 	}
 }
 
 // CollectRoutes is the method to use to register the routes prefixed by /api
 // If the version is not v1, then look at the same method but in the package with the version as the name.
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
+func (e *endpoint) CollectRoutes(g *route.Group) {
 	g.GET("/health", e.Check, true)
 }
 
 // Check is the endpoint that provides the health status of the API.
-func (e *Endpoint) Check(ctx echo.Context) error {
+func (e *endpoint) Check(ctx echo.Context) error {
 	healthData := e.service.HealthCheck()
 
 	if !healthData.Database {
