@@ -30,7 +30,7 @@ import {
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
@@ -57,7 +57,7 @@ const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
 const variablesTabIndex = 'variables';
 
-interface TabButtonProps extends Omit<ButtonProps, 'action'> {
+interface TabButtonProps extends CRUDButtonProps {
   index: string;
   projectName: string;
 }
@@ -322,7 +322,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
 interface TabPanelProps extends BoxProps {
   index: string;
   value: string;
-  children?: ReactNode;
 }
 
 function TabPanel({ children, value, index, ...props }: TabPanelProps) {

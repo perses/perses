@@ -64,7 +64,6 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
         },
       }}
     >
-      {' '}
       <HomeLinkCrumb />
       <StackCrumb>
         <Archive fontSize={'large'} />

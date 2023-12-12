@@ -38,7 +38,7 @@ function ProjectView() {
   const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
 
   return (
-    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} gap={1}>
+    <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
       <Box display="flex" justifyContent="space-between" gap={1}>
         <ProjectBreadcrumbs projectName={projectName} />
         <Box mt={0.5}>
