@@ -15,6 +15,7 @@ import { Button, ButtonProps, Tooltip } from '@mui/material';
 import { Action, Scope } from '@perses-dev/core';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject, useHasPermission } from '../../context/Authorization';
+import { useIsMobileSize } from '../../utils/browser-size';
 
 interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
   text: string;
@@ -30,6 +31,7 @@ interface CRUDButtonProps extends Omit<ButtonProps, 'action'> {
 export function CRUDButton(props: CRUDButtonProps) {
   const { text, action, scope, project, variant, color, disabled, onClick } = props;
   const isReadonly = useIsReadonly();
+  const isMobileSize = useIsMobileSize();
   const hasPermission = useHasPermission(action ?? '*', project ?? GlobalProject, scope ?? '*');
 
   if (isReadonly) {
@@ -40,7 +42,7 @@ export function CRUDButton(props: CRUDButtonProps) {
             variant={variant}
             color={color}
             size="small"
-            sx={{ textTransform: 'uppercase' }}
+            sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
             onClick={onClick}
             disabled
           >
@@ -64,7 +66,7 @@ export function CRUDButton(props: CRUDButtonProps) {
             variant={variant}
             color={color}
             size="small"
-            sx={{ textTransform: 'uppercase' }}
+            sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
             onClick={onClick}
             disabled
           >
@@ -80,7 +82,7 @@ export function CRUDButton(props: CRUDButtonProps) {
       variant={variant}
       color={color}
       size="small"
-      sx={{ textTransform: 'uppercase' }}
+      sx={{ textTransform: 'uppercase', paddingX: isMobileSize ? 1 : undefined }}
       onClick={onClick}
       disabled={disabled}
     >

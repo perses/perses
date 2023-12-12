@@ -15,9 +15,11 @@ import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
+import { useIsMobileSize } from '../../utils/browser-size';
 
 function RecentDashboardsMosaic() {
   const { data, isLoading } = useRecentDashboardList(undefined, 6);
+  const isMobileSize = useIsMobileSize();
 
   if (isLoading) {
     return (
@@ -36,7 +38,7 @@ function RecentDashboardsMosaic() {
   }
 
   return (
-    <Grid container spacing={2} data-testid="recent-dashboards-mosaic">
+    <Grid container spacing={isMobileSize ? 1 : 2} data-testid="recent-dashboards-mosaic">
       {data.map((datedDashboard) => (
         <Grid
           key={`${datedDashboard.dashboard.metadata.project}-${datedDashboard.dashboard.metadata.name}`}
@@ -44,7 +46,7 @@ function RecentDashboardsMosaic() {
           xs={6}
           lg={4}
         >
-          <DashboardCard dashboard={datedDashboard.dashboard}></DashboardCard>
+          <DashboardCard dashboard={datedDashboard.dashboard} hideIcon={isMobileSize}></DashboardCard>
         </Grid>
       ))}
     </Grid>

@@ -20,30 +20,63 @@ import { Link as RouterLink } from 'react-router-dom';
 
 interface DashboardCardProps {
   dashboard: DashboardResource;
+  hideIcon?: boolean;
 }
 
-export function DashboardCard(props: DashboardCardProps) {
+export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps) {
   return (
     <Button
       variant="contained"
       fullWidth
-      sx={{ justifyContent: 'start', backgroundColor: (theme) => theme.palette.designSystem.blue[700] }}
-      title={getDashboardDisplayName(props.dashboard)}
+      sx={{
+        justifyContent: 'start',
+        backgroundColor: (theme) => theme.palette.designSystem.blue[700],
+      }}
+      title={getDashboardDisplayName(dashboard)}
       component={RouterLink}
-      to={`/projects/${props.dashboard.metadata.project}/dashboards/${props.dashboard.metadata.name}`}
-      data-testid={`dashboard-card-${props.dashboard.metadata.project}-${props.dashboard.metadata.name}`}
+      to={`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`}
+      data-testid={`dashboard-card-${dashboard.metadata.project}-${dashboard.metadata.name}`}
     >
-      <Stack sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, maxWidth: '100%' }}>
-        <ViewDashboardIcon />
+      <Stack
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 2,
+          width: '100%',
+          overflowX: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        {!hideIcon && <ViewDashboardIcon />}
         <Stack sx={{ flexDirection: 'column', maxWidth: '90%' }}>
           <Typography
             variant="h3"
-            sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'initial', textAlign: 'start' }}
+            sx={{
+              textAlign: 'start',
+              overflowX: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={getDashboardDisplayName(dashboard)}
           >
-            {getDashboardDisplayName(props.dashboard)}
+            {getDashboardDisplayName(dashboard)}
           </Typography>
-          <Typography variant="subtitle1" sx={{ display: 'flex', alignItems: 'center', gap: 1, textAlign: 'start' }}>
-            <Archive fontSize={'small'} /> {props.dashboard.metadata.project}
+          <Typography
+            variant="subtitle1"
+            sx={{
+              textAlign: 'start',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              overflowX: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+            }}
+            title={dashboard.metadata.project}
+          >
+            <Archive fontSize={'small'} /> {dashboard.metadata.project}
           </Typography>
         </Stack>
       </Stack>
