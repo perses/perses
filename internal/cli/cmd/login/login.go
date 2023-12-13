@@ -51,6 +51,8 @@ type option struct {
 	password    string
 	token       string
 	insecureTLS bool
+	apiClient   api.ClientInterface
+	restConfig  perseshttp.RestConfigClient
 }
 
 func (o *option) Complete(args []string) error {
@@ -66,6 +68,15 @@ func (o *option) Complete(args []string) error {
 	if len(o.url) == 0 {
 		return fmt.Errorf("no URL has been provided neither found in the previous configuration")
 	}
+	o.restConfig = perseshttp.RestConfigClient{
+		URL:         o.url,
+		InsecureTLS: o.insecureTLS,
+	}
+	restClient, err := perseshttp.NewFromConfig(o.restConfig)
+	if err != nil {
+		return err
+	}
+	o.apiClient = api.NewWithClient(restClient)
 	return nil
 }
 
@@ -80,23 +91,23 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	httpConfig := perseshttp.RestConfigClient{
-		URL:         o.url,
-		InsecureTLS: o.insecureTLS,
-	}
-	if len(o.token) == 0 {
-		if err := o.readAndSetCredentialInput(); err != nil {
-			return err
-		}
-		if err := o.setToken(httpConfig); err != nil {
-			return err
-		}
-	}
-	httpConfig.Token = o.token
-	if err := config.Write(&config.Config{
-		RestClientConfig: httpConfig,
-	}); err != nil {
+	cfg, err := o.apiClient.Config()
+	if err != nil {
 		return err
+	}
+	if cfg.Security.EnableAuth && len(o.token) == 0 {
+		if readErr := o.readAndSetCredentialInput(); readErr != nil {
+			return readErr
+		}
+		if authErr := o.authAndSetToken(); authErr != nil {
+			return authErr
+		}
+	}
+	o.restConfig.Token = o.token
+	if writeErr := config.Write(&config.Config{
+		RestClientConfig: o.restConfig,
+	}); writeErr != nil {
+		return writeErr
 	}
 	return output.HandleString(o.writer, fmt.Sprintf("successfully logged in %s", o.url))
 }
@@ -105,12 +116,8 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
-func (o *option) setToken(httpConfig perseshttp.RestConfigClient) error {
-	restClient, err := perseshttp.NewFromConfig(httpConfig)
-	if err != nil {
-		return err
-	}
-	token, err := api.NewWithClient(restClient).Auth().Login(o.username, o.password)
+func (o *option) authAndSetToken() error {
+	token, err := o.apiClient.Auth().Login(o.username, o.password)
 	if err != nil {
 		return err
 	}
