@@ -44,7 +44,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			// We don't need to verify if a project exists in case we are in a PUT / DELETE request since if the project doesn't exist, then the dashboard won't exist either.
 			// Also, we avoid an additional query to the DB like that.
-			// In case the body is nil, then there is nothing to do about it as well
+			// In case the body is nil, then there is nothing to do with it as well
 			method := c.Request().Method
 			if (method != http.MethodPost && method != http.MethodGet) || c.Request().Body == nil {
 				return next(c)
@@ -56,7 +56,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 				// And just to avoid a non-necessary deserialization, we will ensure we are managing a resource that is part of a project by checking the HTTP Path.
 				for _, path := range utils.ProjectResourcePathList {
 					if strings.HasPrefix(c.Path(), fmt.Sprintf("%s/%s", utils.APIV1Prefix, path)) {
-						// Parsing the body in an Echo middleware may cause the error code=400, message=EOF.
+						// Parsing the body in Echo middleware may cause the error code=400, message=EOF.
 						//
 						// Context.Bind only can be called only once in the life of the request as it read the body which can only be read once.
 						// The request data reader is running out, Context.Bind() function read request body data from the socket buffer, once you took it out, it is just gone

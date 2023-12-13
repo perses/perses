@@ -45,7 +45,7 @@ const (
 
 // ProjectResourcePathList is containing the list of the resource path that is part of a project.
 var ProjectResourcePathList = []string{
-	PathDashboard, PathDatasource, PathFolder, PathSecret, PathVariable,
+	PathDashboard, PathDatasource, PathFolder, PathRole, PathRoleBinding, PathSecret, PathVariable,
 }
 
 func GetNameParameter(ctx echo.Context) string {
