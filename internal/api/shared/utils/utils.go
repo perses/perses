@@ -24,6 +24,7 @@ import (
 )
 
 const (
+	ParamDashboard        = "dashboard"
 	ParamName             = "name"
 	ParamProject          = "project"
 	APIV1Prefix           = "/api/v1"

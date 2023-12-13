@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package middleware
+package proxy
 
 import (
 	"crypto/tls"
@@ -19,7 +19,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -30,69 +30,15 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	globalProxyMatcher    = regexp.MustCompile(`/proxy/globaldatasources/([a-zA-Z-0-9_-]+)(/.*)?`)
-	projectProxyMatcher   = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
-	dashboardProxyMatcher = regexp.MustCompile(`/proxy/projects/([a-zA-Z-0-9_-]+)/dashboards/([a-zA-Z-0-9_-]+)/datasources/([a-zA-Z-0-9_-]+)(/.*)?`)
-)
-
-// TODO cache the request to the database
-
-func extractGlobalDatasourceAndPath(requestPath string) (dtsName string, path string, err error) {
-	matchingGroups := globalProxyMatcher.FindAllStringSubmatch(requestPath, -1)
-	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 1 {
-		return "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
-	}
-	dtsName = matchingGroups[0][1]
-	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
-	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
-	path = "/"
-	if len(matchingGroups[0]) > 2 && len(matchingGroups[0][2]) > 0 {
-		path = matchingGroups[0][2]
-	}
-	return
-}
-
-func extractProjectDatasourceAndPath(requestPath string) (projectName string, dtsName string, path string, err error) {
-	matchingGroups := projectProxyMatcher.FindAllStringSubmatch(requestPath, -1)
-	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 2 {
-		return "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
-	}
-	projectName = matchingGroups[0][1]
-	dtsName = matchingGroups[0][2]
-	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
-	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
-	path = "/"
-	if len(matchingGroups[0]) > 3 && len(matchingGroups[0][3]) > 0 {
-		path = matchingGroups[0][3]
-	}
-	return
-}
-
-func extractProjectDashboardDatasourceAndPath(requestPath string) (projectName string, dashboardName string, dtsName string, path string, err error) {
-	matchingGroups := dashboardProxyMatcher.FindAllStringSubmatch(requestPath, -1)
-	if len(matchingGroups) > 1 || len(matchingGroups) == 0 || len(matchingGroups[0]) <= 3 {
-		return "", "", "", "", echo.NewHTTPError(http.StatusBadGateway, "unable to forward the request to the datasource, request not properly formatted")
-	}
-	projectName = matchingGroups[0][1]
-	dashboardName = matchingGroups[0][2]
-	dtsName = matchingGroups[0][3]
-	// Based on the HTTP 1.1 RFC, a `/` should be the minimum path.
-	// https://datatracker.ietf.org/doc/html/rfc2616#section-5.1.2
-	path = "/"
-	if len(matchingGroups[0]) > 4 && len(matchingGroups[0][4]) > 0 {
-		path = matchingGroups[0][4]
-	}
-	return
-}
-
-type Proxy struct {
+type endpoint struct {
 	Dashboard    dashboard.DAO
 	Secret       secret.DAO
 	GlobalSecret globalsecret.DAO
@@ -101,33 +47,26 @@ type Proxy struct {
 	Crypto       crypto.Crypto
 }
 
-func (e *Proxy) Proxy() echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			requestPath := c.Request().URL.Path
-			globalDatasourceMatch := globalProxyMatcher.MatchString(requestPath)
-			projectDatasourceMatch := projectProxyMatcher.MatchString(requestPath)
-			dashboardDatasourceMatch := dashboardProxyMatcher.MatchString(requestPath)
-			if !globalDatasourceMatch && !projectDatasourceMatch && !dashboardDatasourceMatch {
-				// this is likely a request for the API itself
-				return next(c)
-			}
-			if globalDatasourceMatch {
-				return e.proxyGlobalDatasource(c)
-			}
-			if projectDatasourceMatch {
-				return e.proxyProjectDatasource(c)
-			}
-			return e.proxyDashboardDatasource(c)
-		}
+func New(dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO, dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto) route.Endpoint {
+	return &endpoint{
+		Dashboard:    dashboardDAO,
+		Secret:       secretDAO,
+		GlobalSecret: globalSecretDAO,
+		DTS:          dtsDAO,
+		GlobalDTS:    globalDtsDAO,
+		Crypto:       crypto,
 	}
 }
 
-func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
-	dtsName, path, err := extractGlobalDatasourceAndPath(ctx.Request().URL.Path)
-	if err != nil {
-		return err
-	}
+func (e *endpoint) CollectRoutes(g *route.Group) {
+	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxyGlobalDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxyProjectDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxyDashboardDatasource, true)
+}
+
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context) error {
+	dtsName := ctx.Param(utils.ParamName)
+	path := ctx.Param("*")
 	dts, err := e.getGlobalDatasource(dtsName)
 	if err != nil {
 		return err
@@ -141,11 +80,10 @@ func (e *Proxy) proxyGlobalDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
-	projectName, dtsName, path, err := extractProjectDatasourceAndPath(ctx.Request().URL.Path)
-	if err != nil {
-		return err
-	}
+func (e *endpoint) proxyProjectDatasource(ctx echo.Context) error {
+	projectName := ctx.Param(utils.ParamProject)
+	dtsName := ctx.Param(utils.ParamName)
+	path := ctx.Param("*")
 	dts, err := e.getProjectDatasource(projectName, dtsName)
 	if err != nil {
 		return err
@@ -159,11 +97,11 @@ func (e *Proxy) proxyProjectDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
-	projectName, dashboardName, dtsName, path, err := extractProjectDashboardDatasourceAndPath(ctx.Request().URL.Path)
-	if err != nil {
-		return err
-	}
+func (e *endpoint) proxyDashboardDatasource(ctx echo.Context) error {
+	projectName := ctx.Param(utils.ParamProject)
+	dashboardName := ctx.Param(utils.ParamDashboard)
+	dtsName := ctx.Param(utils.ParamName)
+	path := ctx.Param("*")
 	dts, err := e.getDashboardDatasource(projectName, dashboardName, dtsName)
 	if err != nil {
 		return err
@@ -177,7 +115,7 @@ func (e *Proxy) proxyDashboardDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *Proxy) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
+func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	dts, err := e.GlobalDTS.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -190,7 +128,7 @@ func (e *Proxy) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	return dts.Spec, nil
 }
 
-func (e *Proxy) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
+func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
 	dts, err := e.DTS.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -203,7 +141,7 @@ func (e *Proxy) getProjectDatasource(projectName string, name string) (v1.Dataso
 	return dts.Spec, nil
 }
 
-func (e *Proxy) getDashboardDatasource(projectName string, dashboardName string, name string) (v1.DatasourceSpec, error) {
+func (e *endpoint) getDashboardDatasource(projectName string, dashboardName string, name string) (v1.DatasourceSpec, error) {
 	db, err := e.Dashboard.Get(projectName, dashboardName)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -221,7 +159,7 @@ func (e *Proxy) getDashboardDatasource(projectName string, dashboardName string,
 	return *dtsSpec, nil
 }
 
-func (e *Proxy) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
+func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
 	scrt, err := e.GlobalSecret.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -234,7 +172,7 @@ func (e *Proxy) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
 	return &scrt.Spec, nil
 }
 
-func (e *Proxy) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
+func (e *endpoint) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
 	scrt, err := e.Secret.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
@@ -268,6 +206,10 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 			return nil, echo.NewHTTPError(http.StatusInternalServerError)
 		}
 	}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+
 	if cfg != nil {
 		return &httpProxy{
 			config: cfg,

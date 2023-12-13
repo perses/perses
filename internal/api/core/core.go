@@ -44,14 +44,6 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
-	proxyMiddleware := &middleware.Proxy{
-		Dashboard:    persistenceManager.GetDashboard(),
-		Secret:       persistenceManager.GetSecret(),
-		GlobalSecret: persistenceManager.GetGlobalSecret(),
-		DTS:          persistenceManager.GetDatasource(),
-		GlobalDTS:    persistenceManager.GetGlobalDatasource(),
-		Crypto:       serviceManager.GetCrypto(),
-	}
 	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
 
 	// enable hot reload of CUE schemas for dashboard validation:
@@ -84,7 +76,6 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
 		}).
-		Middleware(proxyMiddleware.Proxy()).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 	return runner, persistenceManager, nil

@@ -19,6 +19,8 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const methodAny = "all"
+
 type Endpoint interface {
 	CollectRoutes(g *Group)
 }
@@ -33,7 +35,11 @@ type Route struct {
 }
 
 func (r *Route) Register(g *echo.Group, middleware ...echo.MiddlewareFunc) {
-	g.Add(r.Method, r.Path, r.Handler, middleware...)
+	if r.Method == methodAny {
+		g.Any(r.Path, r.Handler, middleware...)
+	} else {
+		g.Add(r.Method, r.Path, r.Handler, middleware...)
+	}
 }
 
 type Group struct {
@@ -48,6 +54,15 @@ func (g *Group) Group(path string) *Group {
 	}
 	g.Groups = append(g.Groups, newGroup)
 	return newGroup
+}
+
+func (g *Group) ANY(path string, h echo.HandlerFunc, isAnonymous bool) {
+	g.Routes = append(g.Routes, &Route{
+		Method:      methodAny,
+		Path:        path,
+		Handler:     h,
+		IsAnonymous: isAnonymous,
+	})
 }
 
 func (g *Group) POST(path string, h echo.HandlerFunc, isAnonymous bool) {
