@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Drawer as MuiDrawer, DrawerProps as MuiDrawerProps } from '@mui/material';
+import { Drawer as MuiDrawer, DrawerProps as MuiDrawerProps, useMediaQuery } from '@mui/material';
 import { combineSx } from '../utils';
 
 export interface DrawerProps extends MuiDrawerProps {
@@ -23,6 +23,8 @@ export interface DrawerProps extends MuiDrawerProps {
 const DRAWER_DEFAULT_WIDTH = 1080;
 
 export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children, ...rest }: DrawerProps) => {
+  const isSmaller = useMediaQuery(`(max-width:${DRAWER_DEFAULT_WIDTH}px)`);
+
   return (
     <MuiDrawer
       {...rest}
@@ -33,7 +35,7 @@ export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children
         ...PaperProps,
         sx: combineSx(
           {
-            width: `${DRAWER_DEFAULT_WIDTH}px`,
+            width: isSmaller ? '100%' : `${DRAWER_DEFAULT_WIDTH}px`,
             overflow: 'hidden',
           },
           PaperProps?.sx

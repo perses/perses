@@ -175,6 +175,7 @@ function ToolMenu() {
         keepMounted
         open={anchorEl !== null}
         onClose={handleCloseMenu}
+        onClick={handleCloseMenu}
       >
         <MenuItem component={RouterLink} to={AdminRoute}>
           <ListItemIcon>

@@ -18,5 +18,5 @@ export function useIsLaptopSize() {
 }
 
 export function useIsMobileSize() {
-  return useMediaQuery(useTheme().breakpoints.between('xs', 'sm'));
+  return useMediaQuery(useTheme().breakpoints.down('md'));
 }
