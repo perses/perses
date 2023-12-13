@@ -19,6 +19,7 @@ import (
 	authendpoint "github.com/perses/perses/internal/api/impl/auth"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
 	migrateendpoint "github.com/perses/perses/internal/api/impl/migrate"
+	"github.com/perses/perses/internal/api/impl/proxy"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
@@ -45,6 +46,7 @@ type api struct {
 	echoUtils.Register
 	apiV1Endpoints []route.Endpoint
 	apiEndpoints   []route.Endpoint
+	proxyEndpoint  route.Endpoint
 	jwtMiddleware  echo.MiddlewareFunc
 }
 
@@ -76,6 +78,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
+		proxyEndpoint:  proxy.New(persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(), persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto()),
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),
@@ -134,5 +137,7 @@ func (a *api) collectRoutes() []*route.Group {
 	for _, ept := range a.apiV1Endpoints {
 		ept.CollectRoutes(apiV1Group)
 	}
-	return []*route.Group{apiGroup, apiV1Group}
+	proxyGroup := &route.Group{Path: "/proxy"}
+	a.proxyEndpoint.CollectRoutes(proxyGroup)
+	return []*route.Group{apiGroup, apiV1Group, proxyGroup}
 }
