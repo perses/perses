@@ -13,18 +13,44 @@
 
 import { TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
 
-export function getInitialState(initialVariableDefinition: VariableDefinition) {
-  const textVariableFields = {
+interface textVariableFields {
+  value: string;
+  constant: boolean;
+}
+
+interface listVariableFields {
+  allowMultiple: boolean;
+  allowAll: boolean;
+  customAllValue?: string;
+  capturingRegexp?: string;
+  sort?: string;
+  plugin: {
+    kind: string;
+    spec: Record<string, unknown>;
+  };
+}
+
+export type VariableEditorState = {
+  name: string;
+  title?: string;
+  kind: 'TextVariable' | 'ListVariable' | 'BuiltinVariable';
+  description?: string;
+  listVariableFields: listVariableFields;
+  textVariableFields: textVariableFields;
+};
+
+export function getInitialState(initialVariableDefinition: VariableDefinition): VariableEditorState {
+  const textVariableFields: textVariableFields = {
     value: (initialVariableDefinition as TextVariableDefinition).spec.value ?? '',
     constant: (initialVariableDefinition as TextVariableDefinition).spec.constant ?? false,
   };
 
-  const listVariableFields = {
+  const listVariableFields: listVariableFields = {
     allowMultiple: false,
     allowAll: false,
-    customAllValue: undefined as string | undefined,
-    capturingRegexp: undefined as string | undefined,
-    sort: undefined as string | undefined,
+    customAllValue: undefined,
+    capturingRegexp: undefined,
+    sort: undefined,
     plugin: {
       kind: '',
       spec: {},
@@ -48,8 +74,6 @@ export function getInitialState(initialVariableDefinition: VariableDefinition) {
     textVariableFields,
   };
 }
-
-export type VariableEditorState = ReturnType<typeof getInitialState>;
 
 export function getVariableDefinitionFromState(state: VariableEditorState): VariableDefinition {
   const { name, title, kind, description } = state;

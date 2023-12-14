@@ -33,6 +33,7 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
           scrollbarWidth: 'none' /* Firefox */,
           '& .MuiBreadcrumbs-ol': {
             flexWrap: 'nowrap',
+            whiteSpace: 'nowrap',
           },
           '&::-webkit-scrollbar': {
             display: 'none' /* Safari and Chrome */,
@@ -62,6 +63,7 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
         scrollbarWidth: 'none' /* Firefox */,
         '& .MuiBreadcrumbs-ol': {
           flexWrap: 'nowrap',
+          whiteSpace: 'nowrap',
         },
         '&::-webkit-scrollbar': {
           display: 'none' /* Safari and Chrome */,

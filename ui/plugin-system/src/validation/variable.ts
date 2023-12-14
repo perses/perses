@@ -13,15 +13,30 @@
 
 import { z } from 'zod';
 
-export const variableEditValidationSchema = z.object({
+export const variableEditorValidationSchema = z.object({
   name: z
     .string()
     .nonempty('Required')
     .regex(/^\w+$/, 'Must only contains alphanumerical characters and underscores')
     .refine((val) => !val.startsWith('__'), '__ prefix is reserved to builtin variables'),
-  title: z.string().optional(), // display name
+  title: z.string().optional(),
   description: z.string().optional(),
-  kind: z.string().nonempty('Required'),
+  kind: z.enum(['TextVariable', 'ListVariable', 'BuiltinVariable']),
+  textVariableFields: z.object({
+    value: z.string(),
+    constant: z.boolean(),
+  }),
+  listVariableFields: z.object({
+    allowMultiple: z.boolean(),
+    allowAll: z.boolean(),
+    customAllValue: z.string().optional(),
+    capturingRegexp: z.string().optional(),
+    sort: z.string().optional(),
+    plugin: z.object({
+      kind: z.string(),
+      spec: z.object({}),
+    }),
+  }),
 });
 
-export type VariableEditValidationType = z.infer<typeof variableEditValidationSchema>;
+export type VariableEditorValidationType = z.infer<typeof variableEditorValidationSchema>;
