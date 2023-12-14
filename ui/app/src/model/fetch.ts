@@ -20,13 +20,16 @@ export async function fetch(...args: Parameters<typeof global.fetch>) {
     if (error.status !== 401) {
       throw error;
     }
-    refreshToken().catch((refreshTokenError: UserFriendlyError | FetchError) => {
-      if (refreshTokenError.status === 400) {
-        window.location.href = SignInRoute;
-      }
-      throw error;
-    });
-    return initialFetch(...args);
+    return refreshToken()
+      .catch((refreshTokenError: UserFriendlyError | FetchError) => {
+        if (refreshTokenError.status === 400) {
+          window.location.href = SignInRoute;
+        }
+        throw error;
+      })
+      .then(() => {
+        return initialFetch(...args);
+      });
   });
 }
 
