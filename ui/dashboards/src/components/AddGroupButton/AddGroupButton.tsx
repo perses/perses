@@ -14,7 +14,7 @@
 import { Button } from '@mui/material';
 import AddGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import { InfoTooltip } from '@perses-dev/components';
-import { TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardActions } from '../../context';
 
 export const AddGroupButton = () => {
@@ -22,7 +22,12 @@ export const AddGroupButton = () => {
 
   return (
     <InfoTooltip description={TOOLTIP_TEXT.addGroup}>
-      <Button startIcon={<AddGroupIcon />} onClick={openAddPanelGroup} aria-label={TOOLTIP_TEXT.addGroup}>
+      <Button
+        startIcon={<AddGroupIcon />}
+        onClick={openAddPanelGroup}
+        aria-label={TOOLTIP_TEXT.addGroup}
+        sx={editButtonStyle}
+      >
         Panel Group
       </Button>
     </InfoTooltip>

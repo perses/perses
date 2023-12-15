@@ -14,7 +14,7 @@
 import { Button, ButtonProps } from '@mui/material';
 import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { InfoTooltip } from '@perses-dev/components';
-import { TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardActions } from '../../context';
 
 export interface AddPanelButtonProps extends Pick<ButtonProps, 'fullWidth'> {
@@ -51,7 +51,7 @@ export const AddPanelButton = ({
         variant={variant}
         color={color}
         fullWidth={fullWidth}
-        sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+        sx={editButtonStyle}
       >
         {label}
       </Button>

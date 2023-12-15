@@ -17,7 +17,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
-import { TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import {
   ExternalVariableDefinition,
   useTemplateExternalVariableDefinitions,
@@ -73,7 +73,7 @@ export function EditVariablesButton({
           variant={variant}
           color={color}
           fullWidth={fullWidth}
-          sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+          sx={editButtonStyle}
         >
           {label}
         </Button>

@@ -76,6 +76,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
+              <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
+                <EditVariablesButton />
+                <EditDatasourcesButton />
+                <AddPanelButton />
+                <AddGroupButton />
+              </Stack>
               <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
                 Cancel
@@ -113,14 +119,6 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             </ErrorBoundary>
           </Box>
           <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
-            {isEditMode && (
-              <Stack mt={1} direction="row" spacing={1} ml={1} whiteSpace="nowrap">
-                <EditVariablesButton />
-                <EditDatasourcesButton />
-                <AddPanelButton />
-                <AddGroupButton />
-              </Stack>
-            )}
             <Stack direction="row" spacing={1} mt={1} ml={1}>
               <TimeRangeControls />
               <DownloadButton />
