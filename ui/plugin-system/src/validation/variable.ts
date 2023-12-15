@@ -28,7 +28,7 @@ export const variableEditorValidationSchema = z.object({
   }),
   listVariableFields: z.object({
     allowMultiple: z.boolean(),
-    allowAll: z.boolean(),
+    allowAllValue: z.boolean(),
     customAllValue: z.string().optional(),
     capturingRegexp: z.string().optional(),
     sort: z.string().optional(),

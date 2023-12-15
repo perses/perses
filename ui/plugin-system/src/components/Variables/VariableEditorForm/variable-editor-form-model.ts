@@ -11,43 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextVariableDefinition, VariableDefinition } from '@perses-dev/core';
-
-interface textVariableFields {
-  value: string;
-  constant: boolean;
-}
-
-interface listVariableFields {
-  allowMultiple: boolean;
-  allowAll: boolean;
-  customAllValue?: string;
-  capturingRegexp?: string;
-  sort?: string;
-  plugin: {
-    kind: string;
-    spec: Record<string, unknown>;
-  };
-}
+import {
+  ListVariableSpec,
+  TextVariableDefinition,
+  TextVariableSpec,
+  UnknownSpec,
+  VariableDefinition,
+} from '@perses-dev/core';
 
 export type VariableEditorState = {
   name: string;
   title?: string;
   kind: 'TextVariable' | 'ListVariable' | 'BuiltinVariable';
   description?: string;
-  listVariableFields: listVariableFields;
-  textVariableFields: textVariableFields;
+  listVariableFields: Omit<ListVariableSpec<UnknownSpec>, 'name' | 'display'>;
+  textVariableFields: Omit<TextVariableSpec, 'name' | 'display'>;
 };
 
 export function getInitialState(initialVariableDefinition: VariableDefinition): VariableEditorState {
-  const textVariableFields: textVariableFields = {
+  const textVariableFields: Omit<TextVariableSpec, 'name' | 'display'> = {
     value: (initialVariableDefinition as TextVariableDefinition).spec.value ?? '',
     constant: (initialVariableDefinition as TextVariableDefinition).spec.constant ?? false,
   };
 
-  const listVariableFields: listVariableFields = {
+  const listVariableFields: Omit<ListVariableSpec<UnknownSpec>, 'name' | 'display'> = {
     allowMultiple: false,
-    allowAll: false,
+    allowAllValue: false,
     customAllValue: undefined,
     capturingRegexp: undefined,
     sort: undefined,
@@ -58,7 +47,7 @@ export function getInitialState(initialVariableDefinition: VariableDefinition): 
   };
   if (initialVariableDefinition.kind === 'ListVariable') {
     listVariableFields.allowMultiple = initialVariableDefinition.spec.allowMultiple ?? false;
-    listVariableFields.allowAll = initialVariableDefinition.spec.allowAllValue ?? false;
+    listVariableFields.allowAllValue = initialVariableDefinition.spec.allowAllValue ?? false;
     listVariableFields.customAllValue = initialVariableDefinition.spec.customAllValue;
     listVariableFields.capturingRegexp = initialVariableDefinition.spec.capturingRegexp;
     listVariableFields.sort = initialVariableDefinition.spec.sort;
@@ -98,7 +87,7 @@ export function getVariableDefinitionFromState(state: VariableEditorState): Vari
         name,
         display,
         allowMultiple: state.listVariableFields.allowMultiple,
-        allowAllValue: state.listVariableFields.allowAll,
+        allowAllValue: state.listVariableFields.allowAllValue,
         customAllValue: state.listVariableFields.customAllValue,
         capturingRegexp: state.listVariableFields.capturingRegexp,
         sort: state.listVariableFields.sort,

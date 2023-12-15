@@ -469,7 +469,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
               </Stack>
               <Stack>
                 <Controller
-                  name="listVariableFields.allowAll"
+                  name="listVariableFields.allowAllValue"
                   render={({ field }) => (
                     <FormControlLabel
                       label="Allow All option"
@@ -478,12 +478,12 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                           {...field}
                           checked={!!field.value}
                           readOnly={action === 'read'}
-                          value={state.listVariableFields.allowAll}
+                          value={state.listVariableFields.allowAllValue}
                           onChange={(event) => {
                             if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                             field.onChange(event);
                             setState((draft) => {
-                              draft.listVariableFields.allowAll = event.target.checked;
+                              draft.listVariableFields.allowAllValue = event.target.checked;
                             });
                           }}
                         />
@@ -494,7 +494,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                 <Typography mb={1} variant="caption">
                   Enables an option to include all variable values
                 </Typography>
-                {state.listVariableFields.allowAll && (
+                {state.listVariableFields.allowAllValue && (
                   <Controller
                     name="listVariableFields.customAllValue"
                     render={({ field, fieldState }) => (
