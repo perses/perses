@@ -12,7 +12,17 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { AppBar, Box, IconButton, Stack, SxProps, Theme, useMediaQuery, useScrollTrigger, useTheme } from '@mui/material';
+import {
+  AppBar,
+  Box,
+  IconButton,
+  Stack,
+  SxProps,
+  Theme,
+  useMediaQuery,
+  useScrollTrigger,
+  useTheme,
+} from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TemplateVariableList } from '../Variables';
