@@ -70,6 +70,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
                 background: (theme) => theme.palette.grey['600'],
               },
             }}
+            gap={1}
           >
             <TemplateVariableList></TemplateVariableList>
             {props.initialVariableIsSticky && (
@@ -81,9 +82,9 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
           {isSticky && (
             <Stack
               m={isBiggerThanMd ? 1.5 : 1}
-              mt={isBiggerThanMd ? 1.5 : 1}
+              mt={isBiggerThanMd ? 1.5 : 0}
+              ml={isBiggerThanMd ? 1.5 : 'auto'}
               direction="row"
-              ml="auto"
               justifyContent="end"
             >
               <TimeRangeControls></TimeRangeControls>
