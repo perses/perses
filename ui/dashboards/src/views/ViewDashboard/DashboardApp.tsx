@@ -55,7 +55,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
 
   const chartsTheme = useChartsTheme();
 
-  const { setEditMode } = useEditMode();
+  const { isEditMode, setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
   const { setSavedDatasources } = useDatasourceStore();
@@ -132,7 +132,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         <DeletePanelGroupDialog />
         <DeletePanelDialog />
         <DashboardDiscardChangesConfirmationDialog />
-        <EditJsonDialog disableMetadataEdition={!isCreating} />
+        <EditJsonDialog isReadonly={!isEditMode} disableMetadataEdition={!isCreating} />
         <SaveChangesConfirmationDialog />
       </Box>
     </Box>
