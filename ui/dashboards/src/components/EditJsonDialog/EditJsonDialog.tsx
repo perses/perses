@@ -19,23 +19,26 @@ import { useEditJsonDialog } from '../../context/DashboardProvider';
 import { useDashboard } from '../../context/useDashboard';
 
 export interface EditJsonDialogProps {
+  isReadonly: boolean;
   disableMetadataEdition?: boolean;
 }
 
 export const EditJsonDialog = (props: EditJsonDialogProps) => {
-  const { disableMetadataEdition } = props;
+  const { isReadonly, disableMetadataEdition } = props;
   const { editJsonDialog, closeEditJsonDialog } = useEditJsonDialog();
 
   return (
     <Dialog open={!!editJsonDialog?.isOpen} scroll="paper" fullWidth maxWidth="lg">
-      <Dialog.Header onClose={() => closeEditJsonDialog()}>Edit Dashboard JSON</Dialog.Header>
-      {editJsonDialog?.isOpen && <EditJsonDialogForm disableMetadataEdition={disableMetadataEdition} />}
+      <Dialog.Header onClose={() => closeEditJsonDialog()}>{!isReadonly && 'Edit '} Dashboard JSON</Dialog.Header>
+      {editJsonDialog?.isOpen && (
+        <EditJsonDialogForm isReadonly={isReadonly} disableMetadataEdition={disableMetadataEdition} />
+      )}
     </Dialog>
   );
 };
 
 const EditJsonDialogForm = (props: EditJsonDialogProps) => {
-  const { disableMetadataEdition } = props;
+  const { isReadonly, disableMetadataEdition } = props;
   const { closeEditJsonDialog } = useEditJsonDialog();
   const { setTimeRange, setRefreshInterval } = useTimeRange();
   const { dashboard, setDashboard } = useDashboard();
@@ -63,7 +66,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
   return (
     <Dialog.Form onSubmit={handleApply}>
       <Dialog.Content sx={{ width: '100%' }}>
-        {disableMetadataEdition && (
+        {disableMetadataEdition && !isReadonly && (
           <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
             Metadata cannot be modified or saved.
           </Alert>
@@ -74,12 +77,15 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
             maxHeight="70vh"
             value={draftDashboard}
             onChange={(value: string) => completeDraftDashboard(value)}
+            readOnly={isReadonly}
           />
         </FormControl>
       </Dialog.Content>
-      <Dialog.Actions>
-        <Dialog.PrimaryButton onClick={handleApply}>Apply</Dialog.PrimaryButton>
-      </Dialog.Actions>
+      {!isReadonly && (
+        <Dialog.Actions>
+          <Dialog.PrimaryButton onClick={handleApply}>Apply</Dialog.PrimaryButton>
+        </Dialog.Actions>
+      )}
     </Dialog.Form>
   );
 };

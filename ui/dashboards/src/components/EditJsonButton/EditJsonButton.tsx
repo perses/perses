@@ -17,11 +17,19 @@ import { TOOLTIP_TEXT } from '../../constants';
 import { ToolbarIconButton } from '../ToolbarIconButton';
 import { useEditJsonDialog } from '../../context';
 
-export const EditJsonButton = () => {
+export interface EditJsonButtonProps {
+  isReadonly: boolean;
+}
+
+export const EditJsonButton = (props: EditJsonButtonProps) => {
+  const { isReadonly } = props;
   const { openEditJsonDialog } = useEditJsonDialog();
+
+  const info = isReadonly ? TOOLTIP_TEXT.viewJson : TOOLTIP_TEXT.editJson;
+
   return (
-    <InfoTooltip description={TOOLTIP_TEXT.editJson}>
-      <ToolbarIconButton aria-label={TOOLTIP_TEXT.editJson} variant="outlined" onClick={() => openEditJsonDialog()}>
+    <InfoTooltip description={info}>
+      <ToolbarIconButton aria-label={info} variant="outlined" onClick={() => openEditJsonDialog()}>
         <CodeIcon />
       </ToolbarIconButton>
     </InfoTooltip>

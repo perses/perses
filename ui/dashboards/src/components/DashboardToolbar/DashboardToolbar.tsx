@@ -122,7 +122,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             <Stack direction="row" spacing={1} mt={1} ml={1}>
               <TimeRangeControls />
               <DownloadButton />
-              {isEditMode && <EditJsonButton />}
+              <EditJsonButton isReadonly={!isEditMode} />
             </Stack>
           </Stack>
         </Box>
