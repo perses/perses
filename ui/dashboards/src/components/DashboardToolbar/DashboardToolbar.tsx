@@ -108,7 +108,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             gap: 1,
           }}
         >
-          <Box>
+          <Box width="100%">
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
