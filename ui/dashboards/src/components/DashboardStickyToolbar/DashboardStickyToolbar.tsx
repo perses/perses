@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { AppBar, Box, IconButton, SxProps, Theme, useMediaQuery, useScrollTrigger, useTheme } from '@mui/material';
+import { AppBar, Box, IconButton, Stack, SxProps, Theme, useMediaQuery, useScrollTrigger, useTheme } from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TemplateVariableList } from '../Variables';
@@ -77,9 +77,15 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
             )}
           </Box>
           {isSticky && (
-            <Box m={isBiggerThanMd ? 1.5 : 1} mt={isBiggerThanMd ? 1.5 : 0.5}>
+            <Stack
+              m={isBiggerThanMd ? 1.5 : 1}
+              mt={isBiggerThanMd ? 1.5 : 1}
+              direction="row"
+              ml="auto"
+              justifyContent="end"
+            >
               <TimeRangeControls></TimeRangeControls>
-            </Box>
+            </Stack>
           )}
         </Box>
       </AppBar>
