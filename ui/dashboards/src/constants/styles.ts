@@ -11,6 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './grid-layout-config';
-export * from './styles';
-export * from './user-interface-text';
+import { SxProps, Theme } from '@mui/material';
+
+export const editButtonStyle: SxProps<Theme> = {
+  whiteSpace: 'nowrap',
+  minWidth: 'auto',
+  '& .MuiButton-startIcon': {
+    marginRight: 0.5,
+  },
+};

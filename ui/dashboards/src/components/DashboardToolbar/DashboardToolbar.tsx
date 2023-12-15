@@ -49,7 +49,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { isEditMode } = useEditMode();
 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
-  const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
+  const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
@@ -61,64 +61,54 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   return (
     <>
-      {isEditMode ? (
-        <Stack spacing={1} data-testid={testId}>
-          <Box px={2} py={1.5} display="flex" sx={{ backgroundColor: (theme) => theme.palette.primary.main + '30' }}>
-            {dashboardTitle}
+      <Stack data-testid={testId}>
+        <Box
+          px={2}
+          py={1.5}
+          display="flex"
+          sx={{ backgroundColor: (theme) => theme.palette.primary.main + (isEditMode ? '30' : '0') }}
+        >
+          {dashboardTitle}
+          {isEditMode ? (
             <Stack direction="row" gap={1} ml="auto">
               {isReadonly && (
                 <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
-              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
-              <Button variant="outlined" onClick={onCancelButtonClick}>
-                Cancel
-              </Button>
-            </Stack>
-          </Box>
-          <Box
-            sx={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'start',
-              padding: (theme) => theme.spacing(1, 2, 0, 2),
-            }}
-          >
-            <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardStickyToolbar
-                initialVariableIsSticky={initialVariableIsSticky}
-                sx={{
-                  backgroundColor: ({ palette }) => palette.background.default,
-                }}
-              />
-            </ErrorBoundary>
-            <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
-              <Stack direction="row" spacing={1} ml={1} whiteSpace="nowrap">
+              <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <EditDatasourcesButton />
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>
-              <Stack direction="row" spacing={1} ml={1}>
-                <TimeRangeControls />
-                <DownloadButton />
-                <EditJsonButton />
-              </Stack>
+              <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
+              <Button variant="outlined" onClick={onCancelButtonClick}>
+                Cancel
+              </Button>
             </Stack>
-          </Box>
-        </Stack>
-      ) : (
-        <Stack gap={1} mx={2} mt={1.5} data-testid={testId}>
-          <Box sx={{ display: 'flex', width: '100%' }}>
-            {dashboardTitle}
-            <Stack direction="row" spacing={1} marginLeft="auto">
-              <TimeRangeControls />
-              <DownloadButton />
-              {isBiggerThanSm && <EditButton onClick={onEditButtonClick} />}
-            </Stack>
-          </Box>
-          <Box mt={1}>
+          ) : (
+            <>
+              {isBiggerThanSm && (
+                <Stack direction="row" gap={1} ml="auto">
+                  <EditButton onClick={onEditButtonClick} />
+                </Stack>
+              )}
+            </>
+          )}
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            width: '100%',
+            alignItems: 'start',
+            padding: (theme) => theme.spacing(1, 2, 0, 2),
+            flexDirection: isBiggerThanMd ? 'row' : 'column',
+            flexWrap: 'nowrap',
+            gap: 1,
+          }}
+        >
+          <Box width="100%">
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardStickyToolbar
                 initialVariableIsSticky={initialVariableIsSticky}
@@ -128,8 +118,15 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
               />
             </ErrorBoundary>
           </Box>
-        </Stack>
-      )}
+          <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
+            <Stack direction="row" spacing={1} mt={1} ml={1}>
+              <TimeRangeControls />
+              <DownloadButton />
+              {isEditMode && <EditJsonButton />}
+            </Stack>
+          </Stack>
+        </Box>
+      </Stack>
     </>
   );
 };

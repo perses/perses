@@ -17,7 +17,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { DatasourceSpec } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
-import { TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboard } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
@@ -77,7 +77,7 @@ export function EditDatasourcesButton() {
           aria-label={TOOLTIP_TEXT.editDatasources}
           variant="text"
           color="primary"
-          sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+          sx={editButtonStyle}
         >
           Datasources
         </Button>
