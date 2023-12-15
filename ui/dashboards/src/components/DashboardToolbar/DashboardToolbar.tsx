@@ -49,7 +49,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
   const { isEditMode } = useEditMode();
 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
-  const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
+  const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
 
   const dashboardTitle = dashboardTitleComponent ? (
     dashboardTitleComponent
@@ -61,7 +61,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
 
   return (
     <>
-      <Stack spacing={1} data-testid={testId}>
+      <Stack data-testid={testId}>
         <Box
           px={2}
           py={1.5}
@@ -97,26 +97,31 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
             width: '100%',
             alignItems: 'start',
             padding: (theme) => theme.spacing(1, 2, 0, 2),
+            flexDirection: isBiggerThanMd ? 'row' : 'column',
+            flexWrap: 'nowrap',
+            gap: 1,
           }}
         >
-          <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <DashboardStickyToolbar
-              initialVariableIsSticky={initialVariableIsSticky}
-              sx={{
-                backgroundColor: ({ palette }) => palette.background.default,
-              }}
-            />
-          </ErrorBoundary>
-          <Stack ml="auto" direction="row" flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'} justifyContent="end">
+          <Box flexGrow={1} flexShrink={1}>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <DashboardStickyToolbar
+                initialVariableIsSticky={initialVariableIsSticky}
+                sx={{
+                  backgroundColor: ({ palette }) => palette.background.default,
+                }}
+              />
+            </ErrorBoundary>
+          </Box>
+          <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
             {isEditMode && (
-              <Stack direction="row" spacing={1} ml={1} whiteSpace="nowrap">
+              <Stack mt={1} direction="row" spacing={1} ml={1} whiteSpace="nowrap">
                 <EditVariablesButton />
                 <EditDatasourcesButton />
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>
             )}
-            <Stack direction="row" spacing={1} ml={1}>
+            <Stack direction="row" spacing={1} mt={1} ml={1}>
               <TimeRangeControls />
               <DownloadButton />
               {isEditMode && <EditJsonButton />}
