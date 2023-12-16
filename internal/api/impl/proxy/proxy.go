@@ -16,6 +16,7 @@ package proxy
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -38,6 +39,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// unsavedProxyBody is the body of the request when the datasource is not saved yet.
+// It contains the body of the request and the datasource spec, which is used to build the proxy rather than
+// retrieving the datasource from the database.
+type unsavedProxyBody struct {
+	Method string             `json:"method" yaml:"method"`
+	Body   []byte             `json:"body" yaml:"body"`
+	Spec   *v1.DatasourceSpec `json:"spec" yaml:"spec"`
+}
+
+func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
+	req := ctx.Request()
+	req.Method = u.Method
+
+	if len(u.Body) > 0 {
+		req.Body = io.NopCloser(strings.NewReader(string(u.Body)))
+	} else {
+		req.Body = nil
+	}
+
+	ctx.SetRequest(req)
+}
+
 type endpoint struct {
 	Dashboard    dashboard.DAO
 	Secret       secret.DAO
@@ -59,20 +82,51 @@ func New(dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globa
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
-	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxyGlobalDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxyProjectDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxyDashboardDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, true)
+
+	g.POST(fmt.Sprintf("/%s/%s/*", utils.PathUnsaved, utils.PathGlobalDatasource), e.proxyUnsavedGlobalDatasource, true)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDatasource), e.proxyUnsavedProjectDatasource, true)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource), e.proxyUnsavedDashboardDatasource, true)
 }
 
-func (e *endpoint) proxyGlobalDatasource(ctx echo.Context) error {
-	dtsName := ctx.Param(utils.ParamName)
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
+	pr, err := newProxy(spec, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
+		return e.getGlobalSecret(spec.Display.Name, name)
+	})
+	if err != nil {
+		return err
+	}
+	return pr.serve(ctx)
+}
+
+func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyGlobalDatasource(ctx, *body.Spec)
+}
+
+func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
+	dtsName := ctx.Param(utils.ParamName)
 	dts, err := e.getGlobalDatasource(dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(dtsName, name)
+
+	return e.proxyGlobalDatasource(ctx, dts)
+}
+
+func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
+	path := ctx.Param("*")
+	pr, err := newProxy(spec, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
+		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
 		return err
@@ -80,15 +134,33 @@ func (e *endpoint) proxyGlobalDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *endpoint) proxyProjectDatasource(ctx echo.Context) error {
+func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyProjectDatasource(ctx, projectName, body.Spec.Display.Name, *body.Spec)
+}
+
+func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
 	dtsName := ctx.Param(utils.ParamName)
-	path := ctx.Param("*")
+	projectName := ctx.Param(utils.ParamProject)
 	dts, err := e.getProjectDatasource(projectName, dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
+
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, dts)
+}
+
+func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
+	path := ctx.Param("*")
+
+	pr, err := newProxy(spec, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -97,22 +169,29 @@ func (e *endpoint) proxyProjectDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *endpoint) proxyDashboardDatasource(ctx echo.Context) error {
+func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {
+	projectName := ctx.Param(utils.ParamProject)
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyDashboardDatasource(ctx, projectName, body.Spec.Display.Name, *body.Spec)
+}
+
+func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
 	dashboardName := ctx.Param(utils.ParamDashboard)
 	dtsName := ctx.Param(utils.ParamName)
-	path := ctx.Param("*")
+
 	dts, err := e.getDashboardDatasource(projectName, dashboardName, dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(projectName, dtsName, name)
-	})
-	if err != nil {
-		return err
-	}
-	return pr.serve(ctx)
+
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts)
 }
 
 func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {

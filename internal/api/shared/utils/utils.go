@@ -40,6 +40,7 @@ const (
 	PathRole              = "roles"
 	PathRoleBinding       = "rolebindings"
 	PathSecret            = "secrets"
+	PathUnsaved           = "unsaved"
 	PathUser              = "users"
 	PathVariable          = "variables"
 )
