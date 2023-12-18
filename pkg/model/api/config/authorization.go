@@ -14,44 +14,29 @@
 package config
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/prometheus/common/model"
 )
 
 var (
 	defaultCacheInterval = 30 * time.Second
 )
 
-// jsonSchemas is only used to marshal the config in a proper json format
-// (mainly because of the duration that is not yet supported by json).
-type jsonAuthorizationConfig struct {
-	CheckLatestUpdateInterval string             `json:"check_latest_update_interval,omitempty"`
-	GuestPermissions          []*role.Permission `json:"guest_permissions,omitempty"`
-}
-
 type AuthorizationConfig struct {
-	// CheckLatestUpdateInterval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
-	CheckLatestUpdateInterval time.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
+	// CheckLatestUpdateInterval that checks if the RBAC cache needs to be refreshed with db content. Only for SQL database setup.
+	CheckLatestUpdateInterval model.Duration `json:"check_latest_update_interval,omitempty" yaml:"check_latest_update_interval,omitempty"`
 	// Default permissions for guest users (logged-in users)
 	GuestPermissions []*role.Permission `json:"guest_permissions,omitempty" yaml:"guest_permissions,omitempty"`
 }
 
 func (a *AuthorizationConfig) Verify() error {
 	if a.CheckLatestUpdateInterval <= 0 {
-		a.CheckLatestUpdateInterval = defaultCacheInterval
+		a.CheckLatestUpdateInterval = model.Duration(defaultCacheInterval)
 	}
 	if a.GuestPermissions == nil {
 		a.GuestPermissions = []*role.Permission{}
 	}
 	return nil
-}
-
-func (a AuthorizationConfig) MarshalJSON() ([]byte, error) {
-	j := &jsonAuthorizationConfig{
-		CheckLatestUpdateInterval: a.CheckLatestUpdateInterval.String(),
-		GuestPermissions:          a.GuestPermissions,
-	}
-	return json.Marshal(j)
 }

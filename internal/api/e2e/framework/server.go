@@ -32,6 +32,7 @@ import (
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
 	promConfig "github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 )
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
@@ -44,8 +45,8 @@ func DefaultConfig() apiConfig.Config {
 			EnableAuth:    false,
 			Authorization: apiConfig.AuthorizationConfig{},
 			Authentication: apiConfig.AuthenticationConfig{
-				AccessTokenTTL:  apiConfig.DefaultAccessTokenTTL,
-				RefreshTokenTTL: apiConfig.DefaultRefreshTokenTTL,
+				AccessTokenTTL:  model.Duration(apiConfig.DefaultAccessTokenTTL),
+				RefreshTokenTTL: model.Duration(apiConfig.DefaultRefreshTokenTTL),
 			},
 			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},

@@ -21,6 +21,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"time"
 
 	"github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -50,8 +51,8 @@ func New(security config.Security) (Crypto, JWT, error) {
 		&jwtImpl{
 			accessKey:       key,
 			refreshKey:      append(key, []byte("-refresh")...),
-			accessTokenTTL:  security.Authentication.AccessTokenTTL,
-			refreshTokenTTL: security.Authentication.RefreshTokenTTL,
+			accessTokenTTL:  time.Duration(security.Authentication.AccessTokenTTL),
+			refreshTokenTTL: time.Duration(security.Authentication.RefreshTokenTTL),
 		}, nil
 }
 

@@ -14,9 +14,15 @@
 package config
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"testing"
+	"time"
 
+	"github.com/perses/common/config"
+	"github.com/perses/perses/pkg/model/api/v1/role"
+	promConfig "github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,22 +44,14 @@ func TestJSONMarshallConfig(t *testing.T) {
   "security": {
     "readonly": false,
     "enable_auth": false,
-    "authorization": {
-      "check_latest_update_interval": "0s"
-    },
+    "authorization": {},
     "authentication": {
-      "access_token_ttl": "0s",
-      "refresh_token_ttl": "0s",
       "disable_sign_up": false
     }
   },
   "database": {},
-  "schemas": {
-    "interval": "0s"
-  },
-  "provisioning": {
-    "interval": "0s"
-  }
+  "schemas": {},
+  "provisioning": {}
 }`,
 		},
 		{
@@ -68,8 +66,8 @@ func TestJSONMarshallConfig(t *testing.T) {
       "check_latest_update_interval": "30s"
     },
     "authentication": {
-      "access_token_ttl": "15m0s",
-      "refresh_token_ttl": "24h0m0s",
+      "access_token_ttl": "15m",
+      "refresh_token_ttl": "1d",
       "disable_sign_up": false
     }
   },
@@ -84,10 +82,10 @@ func TestJSONMarshallConfig(t *testing.T) {
     "queries_path": "schemas/queries",
     "datasources_path": "schemas/datasources",
     "variables_path": "schemas/variables",
-    "interval": "1h0m0s"
+    "interval": "1h"
   },
   "provisioning": {
-    "interval": "1h0m0s"
+    "interval": "1h"
   }
 }`,
 		},
@@ -98,6 +96,283 @@ func TestJSONMarshallConfig(t *testing.T) {
 			data, err := json.MarshalIndent(test.cfg, "", "  ")
 			assert.NoError(t, err)
 			assert.Equal(t, test.jason, string(data))
+		})
+	}
+}
+
+func TestUnMarshallJSONConfig(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		result Config
+	}{
+		{
+			title: "perses dev config",
+			jason: `
+{
+  "security": {
+    "readonly": false,
+    "encryption_key": "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
+    "enable_auth": true,
+    "authorization": {
+      "guest_permissions": [
+        {
+          "actions": [
+            "read"
+          ],
+          "scopes": [
+            "*"
+          ]
+        },
+        {
+          "actions": [
+            "create"
+          ],
+          "scopes": [
+            "Project"
+          ]
+        }
+      ]
+    }
+  },
+  "database": {
+    "file": {
+      "folder": "dev/local_db",
+      "extension": "json"
+    }
+  },
+  "schemas": {
+    "panels_path": "schemas/panels",
+    "queries_path": "schemas/queries",
+    "datasources_path": "schemas/datasources",
+    "variables_path": "schemas/variables",
+    "interval": "5m"
+  },
+  "important_dashboards": [
+    {
+      "project": "perses",
+      "dashboard": "Demo"
+    },
+    {
+      "project": "testing",
+      "dashboard": "DuplicatePanels"
+    },
+    {
+      "project": "Unknown",
+      "dashboard": "Dashboard"
+    }
+  ],
+  "information": "# Hello World\n## File Database setup",
+  "provisioning": {
+    "folders": [
+      "dev/data"
+    ],
+    "interval": "1h"
+  }
+}`,
+			result: Config{
+				Security: Security{
+					Readonly:      false,
+					EncryptionKey: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc",
+					EnableAuth:    true,
+					Authorization: AuthorizationConfig{
+						GuestPermissions: []*role.Permission{
+							{
+								Actions: []role.Action{
+									role.ReadAction,
+								},
+								Scopes: []role.Scope{
+									role.WildcardScope,
+								},
+							},
+							{
+								Actions: []role.Action{
+									role.CreateAction,
+								},
+								Scopes: []role.Scope{
+									role.ProjectScope,
+								},
+							},
+						},
+					},
+				},
+				Database: Database{
+					File: &File{
+						Folder:    "dev/local_db",
+						Extension: "json",
+					},
+				},
+				Schemas: Schemas{
+					PanelsPath:      DefaultPanelsPath,
+					QueriesPath:     DefaultQueriesPath,
+					DatasourcesPath: DefaultDatasourcesPath,
+					VariablesPath:   DefaultVariablesPath,
+					Interval:        model.Duration(5 * time.Minute),
+				},
+				ImportantDashboards: []dashboardSelector{
+					{
+						Project:   "perses",
+						Dashboard: "Demo",
+					},
+					{
+						Project:   "testing",
+						Dashboard: "DuplicatePanels",
+					},
+					{
+						Project:   "Unknown",
+						Dashboard: "Dashboard",
+					},
+				},
+				Information: "# Hello World\n## File Database setup",
+				Provisioning: ProvisioningConfig{
+					Folders: []string{
+						"dev/data",
+					},
+					Interval: model.Duration(defaultInterval),
+				},
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			c := Config{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &c))
+			assert.Equal(t, test.result, c)
+		})
+	}
+}
+
+func TestUnmarshalYAMLConfig(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		yamele string
+		result Config
+	}{
+		{
+			title: "perses dev config",
+			yamele: `
+security:
+  readonly: false
+  encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+  enable_auth: true
+  authorization:
+    guest_permissions:
+      - actions:
+          - read
+        scopes:
+          - "*"
+      - actions:
+          - create
+        scopes:
+          - Project
+
+database:
+  file:
+    folder: "dev/local_db"
+    extension: "json"
+
+provisioning:
+  folders:
+  - "dev/data"
+
+schemas:
+  panels_path: "schemas/panels"
+  queries_path: "schemas/queries"
+  datasources_path: "schemas/datasources"
+  variables_path: "schemas/variables"
+  interval: "5m"
+
+important_dashboards:
+  - project: "perses"
+    dashboard: "Demo"
+  - project: "testing"
+    dashboard: "DuplicatePanels"
+  - project: "Unknown"
+    dashboard: "Dashboard"
+
+information: |-
+  # Hello World
+  ## File Database setup
+`,
+			result: Config{
+				Security: Security{
+					Readonly:      false,
+					EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+					EnableAuth:    true,
+					Authorization: AuthorizationConfig{
+						CheckLatestUpdateInterval: model.Duration(defaultCacheInterval),
+						GuestPermissions: []*role.Permission{
+							{
+								Actions: []role.Action{
+									role.ReadAction,
+								},
+								Scopes: []role.Scope{
+									role.WildcardScope,
+								},
+							},
+							{
+								Actions: []role.Action{
+									role.CreateAction,
+								},
+								Scopes: []role.Scope{
+									role.ProjectScope,
+								},
+							},
+						},
+					},
+					Authentication: AuthenticationConfig{
+						AccessTokenTTL:  model.Duration(DefaultAccessTokenTTL),
+						RefreshTokenTTL: model.Duration(DefaultRefreshTokenTTL),
+						DisableSignUp:   false,
+					},
+				},
+				Database: Database{
+					File: &File{
+						Folder:    "dev/local_db",
+						Extension: "json",
+					},
+				},
+				Schemas: Schemas{
+					PanelsPath:      DefaultPanelsPath,
+					QueriesPath:     DefaultQueriesPath,
+					DatasourcesPath: DefaultDatasourcesPath,
+					VariablesPath:   DefaultVariablesPath,
+					Interval:        model.Duration(5 * time.Minute),
+				},
+				ImportantDashboards: []dashboardSelector{
+					{
+						Project:   "perses",
+						Dashboard: "Demo",
+					},
+					{
+						Project:   "testing",
+						Dashboard: "DuplicatePanels",
+					},
+					{
+						Project:   "Unknown",
+						Dashboard: "Dashboard",
+					},
+				},
+				Information: "# Hello World\n## File Database setup",
+				Provisioning: ProvisioningConfig{
+					Folders: []string{
+						"dev/data",
+					},
+					Interval: model.Duration(defaultInterval),
+				},
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			c := Config{}
+			assert.NoError(t, config.NewResolver[Config]().
+				SetConfigData([]byte(test.yamele)).
+				SetEnvPrefix("PERSES").
+				Resolve(&c).
+				Verify())
+			assert.NoError(t, c.Verify())
+			assert.Equal(t, test.result, c)
 		})
 	}
 }

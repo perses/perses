@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -70,11 +71,11 @@ type SQL struct {
 	// Server public key name
 	ServerPubKey string `json:"server_pub_key" yaml:"server_pub_key"`
 	// Dial timeout
-	Timeout time.Duration `json:"timeout" yaml:"timeout"`
+	Timeout model.Duration `json:"timeout" yaml:"timeout"`
 	// I/O read timeout
-	ReadTimeout time.Duration `json:"read_timeout" yaml:"read_timeout"`
+	ReadTimeout model.Duration `json:"read_timeout" yaml:"read_timeout"`
 	// I/O write timeout
-	WriteTimeout time.Duration `json:"write_timeout" yaml:"write_timeout"`
+	WriteTimeout model.Duration `json:"write_timeout" yaml:"write_timeout"`
 	// Allow all files to be used with LOAD DATA LOCAL INFILE
 	AllowAllFiles bool `json:"allow_all_files" yaml:"allow_all_files"`
 	// Allows the cleartext client side plugin

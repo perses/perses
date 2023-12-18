@@ -14,34 +14,18 @@
 package config
 
 import (
-	"encoding/json"
-	"time"
+	"github.com/prometheus/common/model"
 )
 
-// jsonSchemas is only used to marshal the config in a proper json format
-// (mainly because of the duration that is not yet supported by json).
-type jsonProvisioningConfig struct {
-	Folders  []string `json:"folders,omitempty"`
-	Interval string   `json:"interval,omitempty"`
-}
-
 type ProvisioningConfig struct {
-	Folders []string `json:"folders" yaml:"folders"`
+	Folders []string `json:"folders,omitempty" yaml:"folders,omitempty"`
 	// Interval is the refresh frequency
-	Interval time.Duration `json:"interval" yaml:"interval"`
+	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 
 func (p *ProvisioningConfig) Verify() error {
 	if p.Interval <= 0 {
-		p.Interval = defaultInterval
+		p.Interval = model.Duration(defaultInterval)
 	}
 	return nil
-}
-
-func (p ProvisioningConfig) MarshalJSON() ([]byte, error) {
-	j := &jsonProvisioningConfig{
-		Folders:  p.Folders,
-		Interval: p.Interval.String(),
-	}
-	return json.Marshal(j)
 }
