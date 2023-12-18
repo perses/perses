@@ -25,11 +25,11 @@ type dashboardSelector struct {
 }
 type Config struct {
 	// Security contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
-	Security Security `json:"security" yaml:"security"`
+	Security Security `json:"security,omitempty" yaml:"security,omitempty"`
 	// Database contains the different configuration depending on the database you want to use
-	Database Database `json:"database" yaml:"database"`
+	Database Database `json:"database,omitempty" yaml:"database,omitempty"`
 	// Schemas contain the configuration to get access to the CUE schemas
-	Schemas Schemas `json:"schemas" yaml:"schemas"`
+	Schemas Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// Information contains markdown content to be display on the home page

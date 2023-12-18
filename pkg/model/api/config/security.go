@@ -15,12 +15,12 @@ package config
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"os"
 	"time"
 
 	promConfig "github.com/prometheus/common/config"
+	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,19 +30,13 @@ const (
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
 
-type jsonAuthenticationConfig struct {
-	AccessTokenTTL  string `json:"access_token_ttl,omitempty"`
-	RefreshTokenTTL string `json:"refresh_token_ttl,omitempty"`
-	DisableSignUp   bool   `json:"disable_sign_up"`
-}
-
 type AuthenticationConfig struct {
 	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
-	AccessTokenTTL time.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	AccessTokenTTL model.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
-	RefreshTokenTTL time.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	RefreshTokenTTL model.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
 	// DisableSignUp deactivates the Sign-up page in the UI.
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
@@ -50,21 +44,12 @@ type AuthenticationConfig struct {
 
 func (a *AuthenticationConfig) Verify() error {
 	if a.AccessTokenTTL == 0 {
-		a.AccessTokenTTL = DefaultAccessTokenTTL
+		a.AccessTokenTTL = model.Duration(DefaultAccessTokenTTL)
 	}
 	if a.RefreshTokenTTL == 0 {
-		a.RefreshTokenTTL = DefaultRefreshTokenTTL
+		a.RefreshTokenTTL = model.Duration(DefaultRefreshTokenTTL)
 	}
 	return nil
-}
-
-func (a AuthenticationConfig) MarshalJSON() ([]byte, error) {
-	j := &jsonAuthenticationConfig{
-		AccessTokenTTL:  a.AccessTokenTTL.String(),
-		RefreshTokenTTL: a.RefreshTokenTTL.String(),
-		DisableSignUp:   a.DisableSignUp,
-	}
-	return json.Marshal(j)
 }
 
 type Security struct {

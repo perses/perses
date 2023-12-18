@@ -16,6 +16,7 @@ package core
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
@@ -59,13 +60,13 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
 	}
 	runner.WithTasks(watcher, migrateWatcher)
-	runner.WithCronTasks(conf.Schemas.Interval, reloader, migrateReloader)
+	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
-		runner.WithCronTasks(conf.Provisioning.Interval, serviceManager.GetProvisioning())
+		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), serviceManager.GetProvisioning())
 	}
 	if conf.Security.EnableAuth {
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
-		runner.WithCronTasks(conf.Security.Authorization.CheckLatestUpdateInterval, rbacTask)
+		runner.WithCronTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
 
 	// register the API

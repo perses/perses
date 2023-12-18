@@ -16,6 +16,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
@@ -44,9 +45,9 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 			Loc:                      c.Loc,
 			MaxAllowedPacket:         c.MaxAllowedPacket,
 			ServerPubKey:             c.ServerPubKey,
-			Timeout:                  c.Timeout,
-			ReadTimeout:              c.ReadTimeout,
-			WriteTimeout:             c.WriteTimeout,
+			Timeout:                  time.Duration(c.Timeout),
+			ReadTimeout:              time.Duration(c.ReadTimeout),
+			WriteTimeout:             time.Duration(c.WriteTimeout),
 			AllowAllFiles:            c.AllowAllFiles,
 			AllowCleartextPasswords:  c.AllowCleartextPasswords,
 			AllowFallbackToPlaintext: c.AllowFallbackToPlaintext,
