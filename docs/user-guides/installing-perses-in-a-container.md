@@ -1,24 +1,20 @@
 # Installing Perses in a container
 
-This section continues with installing using a container image with Podman open-source container tooling, configure
-examples, and run the container on your local machine.
+This section is explaining how you can install Perses using a container image like [Podman](https://podman.io/) or [Docker](https://www.docker.com/).
 
-## Installing container tooling
-
-Installing Perses using a container image is going to be demonstrated here using[Podman](https://podman.io/) and [Docker](https://www.docker.com/). 
-It's assumed you have already installed and running either the Podman or the Docker commandline tooling.
+It assumes you have already installed and are familiar with either the Podman or the Docker commandline tooling.
 
 ## Running container image
 
-It's pretty straight forward to running Perses in a container, start the Perses container image using one of
-the following depending on your tooling choice:
+Start the Perses container image using one of the following commands depending on your tooling choice:
 
 ```shell
 # podman command.
 #
 $ podman run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
+```
 
-
+```shell
 # docker command.
 #
 $ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
@@ -52,10 +48,10 @@ Examples:
 
 ## Connect a browser (default)
 
-Open the Perses console at http://localhost:8080.
+Open the Perses UI at http://localhost:8080.
 
-You are presented with an empty home dashboard, in light mode.
-For fun, you can choose optionally to flip the switch in the top right corner to enable dark mode.
+You are presented with the home page, in light mode.
+For fun, you can optionally flip the switch in the top right corner to enable dark mode.
 
 ## What's next?
 
