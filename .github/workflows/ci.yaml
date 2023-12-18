@@ -47,7 +47,7 @@ jobs:
       - name: Build the app and all packages
         run: cd ./ui && npm run build
       - name: store react production build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ui-libs
           path: |
@@ -77,7 +77,7 @@ jobs:
       - name: Run storybook tests
         run: cd ./ui && npm run storybook:serve-and-test
       - name: store storybook build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: storybook
           path: ui/storybook/storybook-static
@@ -97,7 +97,7 @@ jobs:
       - name: Build the typedoc docs
         run: cd ./ui && npm run build && npm run typedoc
       - name: store typedoc build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: typedoc
           path: ui/typedoc
