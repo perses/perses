@@ -83,7 +83,14 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   });
 
   const processForm: SubmitHandler<VariableEditorValidationType> = () => {
-    onSave(getVariableDefinitionFromState(state));
+    // reset display attributes to undefined when empty, because we don't want to save empty strings
+    onSave(
+      getVariableDefinitionFromState({
+        ...state,
+        title: state.title === '' ? undefined : state.title,
+        description: state.description === '' ? undefined : state.description,
+      })
+    );
   };
 
   // When user click on cancel, several possibilities:

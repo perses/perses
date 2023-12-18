@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useImmer } from 'use-immer';
-import { Action, Display, DatasourceSpec } from '@perses-dev/core';
+import { Action, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
@@ -74,16 +74,13 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   });
 
   const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
-    // reset display name to undefined when empty, because we don't want an empty string as value
-    const name = state.spec.display?.name;
-    const finalDisplay: Display | undefined = {
-      ...state.spec.display,
-      name: name ? name : undefined,
-    };
-
+    // reset display attributes to undefined when empty, because we don't want to save empty strings
     onSave(state.name, {
       ...state.spec,
-      display: finalDisplay,
+      display: {
+        name: state.spec.display?.name === '' ? undefined : state.spec.display?.name,
+        description: state.spec.display?.description === '' ? undefined : state.spec.display?.description,
+      },
     });
   };
 
