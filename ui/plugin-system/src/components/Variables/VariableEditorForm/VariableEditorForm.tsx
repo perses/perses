@@ -170,7 +170,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   label="Name"
                   InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
-                    disabled: action === 'update',
+                    disabled: action === 'update' && !isDraft,
                     readOnly: action === 'read',
                   }}
                   error={!!fieldState.error}
