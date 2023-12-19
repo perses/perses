@@ -157,7 +157,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   label="Name"
                   InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
                   InputProps={{
-                    disabled: action === 'update',
+                    disabled: action === 'update' && !isDraft,
                     readOnly: action === 'read',
                   }}
                   error={!!fieldState.error}

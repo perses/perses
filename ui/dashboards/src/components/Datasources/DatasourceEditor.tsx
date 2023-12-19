@@ -103,6 +103,7 @@ export function DatasourceEditor(props: {
           isDraft={true}
           onSave={(name: string, spec: DatasourceSpec) => {
             setDatasources((draft) => {
+              delete draft[datasourceEdit.name]; // to tackle the case where datasource name has been changed
               draft[name] = spec;
               setDatasourceEdit(null);
             });
