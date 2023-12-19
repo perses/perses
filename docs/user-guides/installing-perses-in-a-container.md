@@ -1,6 +1,6 @@
 # Installing Perses in a container
 
-This section is explaining how you can install Perses using a container image like [Podman](https://podman.io/) or [Docker](https://www.docker.com/).
+This section is explaining how you can install Perses using a container manager like [Podman](https://podman.io/) or [Docker](https://www.docker.com/).
 
 It assumes you have already installed and are familiar with either the Podman or the Docker commandline tooling.
 
