@@ -1,25 +1,20 @@
 # Installing Perses in a container
 
-This sections continues with installing using a container image with Podman open source container tooling, configure
-examples, and run the container on your local machine.
+This section is explaining how you can install Perses using a container manager like [Podman](https://podman.io/) or [Docker](https://www.docker.com/).
 
-## Installing container tooling
-
-Installing Perses using a container image is going to be demonstrated here using the
-[open source project Podman](https://podman.io/) and [Docker](https://www.docker.com/). It's assumed you have already
-installed and running either the Podman or the Docker commandline tooling.
+It assumes you have already installed and are familiar with either the Podman or the Docker commandline tooling.
 
 ## Running container image
 
-It's pretty straight forward to running Perses in a container, just start the Perses container image using one of
-the following depending on your tooling choice:
+Start the Perses container image using one of the following commands depending on your tooling choice:
 
 ```shell
 # podman command.
 #
 $ podman run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
+```
 
-
+```shell
 # docker command.
 #
 $ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
@@ -28,39 +23,36 @@ $ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
 The details in this command are that we give the container a referencable name (--name perses), detach the container
 from the command line (-d), map the local machine port 8080 to the container port 8080 (-p 127.0.0.1:8080:8080), and use
 the image version supported in these instructions (latest). Note: you can use any local port you have available, but you
-need to map to the container port 8080.
+need to map to container port 8080.
 
-### Note: What to do with failures?
+### Tags
 
-Don't worry if at anytime in these instructions you encounter failures during installation, testing, data population, or build
-results. The container can be rerun anytime after you fix any problems reported. You might have to remove the perses
-container depending on how far you get before something goes wrong. Just stop, remove, and restart it:
+We are publishing a set of tags to match different requirements when running Perses in a container:
 
-```shell
-# podman command.
-#
-$ podman container stop perses
+1. Our images can run either on **arm64** or on **amd64** platform.
+2. We have two different types of image: `distroless` and `distroless-debug`.
+   The first one is meant to be used in production as it doesn't contain anything excepting the Perses binaries.
+   The second one contains a shell and should be used to debug any issue you might encounter with your container.
+3. The tag `latest` is an alias for the `distroless` distribution and is erased with the latest release.
+4. The tag `latest-debug` is an alias for the `distroless-debug` distribution and is erased with the latest release.
+5. We are also providing an image for each commit created on the `main` branch.
+   The tag created for each commit is following this pattern: `main-<YYYY-MM-DD>-<short commit ID>-<distribution>`
 
-$ podman container rm perses
+Examples:
 
-$ podman run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
-
-# docker command.
-#
-$ docker container stop perses
-
-$ docker container rm perses 
-
-$ docker run --name perses -d -p 127.0.0.1:8080:8080 persesdev/perses
-```
+- images built from the main branch:  `persesdev/perses:main-2023-12-14-f66e10ce-distroless-debug`
+  or `persesdev/perses:main-2023-12-14-f66e10ce-distroless`
+- latest Perses image: `persesdev/perses` or `persesdev/perses:latest-debug`
+- precise release image: `persesdev/perses:v0.42.1`, `persesdev/perses:v0.42.1-debug`, `persesdev/perses:v0.42.1-distroless`, `persesdev/perses:v0.42.1-distroless-debug`
+- minor release image: `persesdev/perses:v0.42`, `persesdev/perses:v0.42-debug`, `persesdev/perses:v0.42-distroless`, `persesdev/perses:v0.42-distroless-debug`
 
 ## Connect a browser (default)
 
-Open the Perses console at http://localhost:8080.
+Open the Perses UI at http://localhost:8080.
 
-You are presented with an empty home dashboard, in light mode. For fun you can choose optionally to flip the switch in
-the top right corner to enable dark mode.
+You are presented with the home page, in light mode.
+For fun, you can optionally flip the switch in the top right corner to enable dark mode.
 
 ## What's next?
 
-In the next section you start exploring Perses and the available tooling.
+In the next section, you start exploring Perses and the available tooling.
