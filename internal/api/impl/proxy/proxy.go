@@ -15,7 +15,9 @@ package proxy
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -28,51 +30,165 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/rbac"
 	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"
 )
 
-type endpoint struct {
-	Dashboard    dashboard.DAO
-	Secret       secret.DAO
-	GlobalSecret globalsecret.DAO
-	DTS          datasource.DAO
-	GlobalDTS    globaldatasource.DAO
-	Crypto       crypto.Crypto
+var _ = json.Unmarshaler(&unsavedProxyBody{})
+
+// unsavedProxyBody is the body of the request when the datasource is not saved yet.
+// It contains the body of the request and the datasource spec, which is used to build the proxy rather than
+// retrieving the datasource from the database.
+type unsavedProxyBody struct {
+	Method string            `json:"method" yaml:"method"`
+	Body   []byte            `json:"body,omitempty" yaml:"body"`
+	Spec   v1.DatasourceSpec `json:"spec" yaml:"spec"`
 }
 
-func New(dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO, dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto) route.Endpoint {
+func (u *unsavedProxyBody) UnmarshalJSON(data []byte) error {
+	type Alias unsavedProxyBody
+	aux := Alias{}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	if aux.Method == "" {
+		return fmt.Errorf("missing field 'method'")
+	}
+
+	if aux.Method != http.MethodGet && aux.Method != http.MethodPost && aux.Method != http.MethodPut && aux.Method != http.MethodDelete {
+		return fmt.Errorf("invalid method %q", aux.Method)
+	}
+
+	if _, err := datasourceHTTP.ValidateAndExtract(aux.Spec.Plugin.Spec); err != nil {
+		return fmt.Errorf("invalid http config: %w", err)
+	}
+
+	*u = unsavedProxyBody(aux)
+	return nil
+}
+
+func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
+	req := ctx.Request()
+	req.Method = u.Method
+
+	if len(u.Body) > 0 {
+		req.Body = io.NopCloser(strings.NewReader(string(u.Body)))
+	} else {
+		req.Body = nil
+	}
+
+	ctx.SetRequest(req)
+}
+
+type endpoint struct {
+	dashboard    dashboard.DAO
+	secret       secret.DAO
+	globalSecret globalsecret.DAO
+	dts          datasource.DAO
+	globalDTS    globaldatasource.DAO
+	crypto       crypto.Crypto
+	rbac         rbac.RBAC
+}
+
+func New(dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globalsecret.DAO, dtsDAO datasource.DAO, globalDtsDAO globaldatasource.DAO, crypto crypto.Crypto, rbac rbac.RBAC) route.Endpoint {
 	return &endpoint{
-		Dashboard:    dashboardDAO,
-		Secret:       secretDAO,
-		GlobalSecret: globalSecretDAO,
-		DTS:          dtsDAO,
-		GlobalDTS:    globalDtsDAO,
-		Crypto:       crypto,
+		dashboard:    dashboardDAO,
+		secret:       secretDAO,
+		globalSecret: globalSecretDAO,
+		dts:          dtsDAO,
+		globalDTS:    globalDtsDAO,
+		crypto:       crypto,
+
+		rbac: rbac,
 	}
 }
 
-func (e *endpoint) CollectRoutes(g *route.Group) {
-	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxyGlobalDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxyProjectDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxyDashboardDatasource, true)
+func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// If we're running without authentication, claims can be nil - just let requests through.
+		return nil
+	}
+
+	if role.IsGlobalScope(scope) {
+		if ok := e.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, scope); !ok {
+			return shared.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
+		}
+		return nil
+	}
+
+	if ok := e.rbac.HasPermission(claims.Subject, action, projectName, scope); !ok {
+		return shared.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
+	}
+
+	return nil
 }
 
-func (e *endpoint) proxyGlobalDatasource(ctx echo.Context) error {
-	dtsName := ctx.Param(utils.ParamName)
+func (e *endpoint) CollectRoutes(g *route.Group) {
+	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, true)
+
+	g.POST(fmt.Sprintf("/%s/%s/*", utils.PathUnsaved, utils.PathGlobalDatasource), e.proxyUnsavedGlobalDatasource, false)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDatasource), e.proxyUnsavedProjectDatasource, false)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource), e.proxyUnsavedDashboardDatasource, false)
+}
+
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
+	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+		return e.getGlobalSecret(spec.Display.Name, name)
+	})
+	if err != nil {
+		return err
+	}
+	return pr.serve(ctx)
+}
+
+func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	if err := e.checkPermission(ctx, rbac.GlobalProject, role.GlobalDatasourceScope, role.CreateAction); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyGlobalDatasource(ctx, body.Spec)
+}
+
+func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
+	if err := e.checkPermission(ctx, rbac.GlobalProject, role.GlobalDatasourceScope, role.ReadAction); err != nil {
+		return err
+	}
+
+	dtsName := ctx.Param(utils.ParamName)
 	dts, err := e.getGlobalDatasource(dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(dtsName, name)
+
+	return e.proxyGlobalDatasource(ctx, dts)
+}
+
+func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
+	path := ctx.Param("*")
+	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
+		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
 		return err
@@ -80,15 +196,41 @@ func (e *endpoint) proxyGlobalDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *endpoint) proxyProjectDatasource(ctx echo.Context) error {
+func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.CreateAction); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyProjectDatasource(ctx, projectName, body.Spec.Display.Name, body.Spec)
+}
+
+func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
+	projectName := ctx.Param(utils.ParamProject)
+	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.ReadAction); err != nil {
+		return err
+	}
+
 	dtsName := ctx.Param(utils.ParamName)
-	path := ctx.Param("*")
 	dts, err := e.getProjectDatasource(projectName, dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
+
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, dts)
+}
+
+func (e *endpoint) proxyDashboardDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
+	path := ctx.Param("*")
+
+	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
 		return e.getProjectSecret(projectName, dtsName, name)
 	})
 	if err != nil {
@@ -97,26 +239,41 @@ func (e *endpoint) proxyProjectDatasource(ctx echo.Context) error {
 	return pr.serve(ctx)
 }
 
-func (e *endpoint) proxyDashboardDatasource(ctx echo.Context) error {
+func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {
 	projectName := ctx.Param(utils.ParamProject)
+	body := &unsavedProxyBody{}
+	if err := ctx.Bind(body); err != nil {
+		return err
+	}
+
+	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.CreateAction); err != nil {
+		return err
+	}
+
+	body.setRequestParams(ctx)
+
+	return e.proxyDashboardDatasource(ctx, projectName, body.Spec.Display.Name, body.Spec)
+}
+
+func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
+	projectName := ctx.Param(utils.ParamProject)
+	if err := e.checkPermission(ctx, projectName, role.DatasourceScope, role.ReadAction); err != nil {
+		return err
+	}
+
 	dashboardName := ctx.Param(utils.ParamDashboard)
 	dtsName := ctx.Param(utils.ParamName)
-	path := ctx.Param("*")
+
 	dts, err := e.getDashboardDatasource(projectName, dashboardName, dtsName)
 	if err != nil {
 		return err
 	}
-	pr, err := newProxy(dts, path, e.Crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getProjectSecret(projectName, dtsName, name)
-	})
-	if err != nil {
-		return err
-	}
-	return pr.serve(ctx)
+
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts)
 }
 
 func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
-	dts, err := e.GlobalDTS.Get(name)
+	dts, err := e.globalDTS.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
@@ -129,7 +286,7 @@ func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 }
 
 func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
-	dts, err := e.DTS.Get(projectName, name)
+	dts, err := e.dts.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", name, projectName)
@@ -142,7 +299,7 @@ func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.Dat
 }
 
 func (e *endpoint) getDashboardDatasource(projectName string, dashboardName string, name string) (v1.DatasourceSpec, error) {
-	db, err := e.Dashboard.Get(projectName, dashboardName)
+	db, err := e.dashboard.Get(projectName, dashboardName)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Dashboard %q in project %q", dashboardName, projectName)
@@ -160,7 +317,7 @@ func (e *endpoint) getDashboardDatasource(projectName string, dashboardName stri
 }
 
 func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error) {
-	scrt, err := e.GlobalSecret.Get(name)
+	scrt, err := e.globalSecret.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
@@ -173,7 +330,7 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 }
 
 func (e *endpoint) getProjectSecret(projectName string, dtsName string, name string) (*v1.SecretSpec, error) {
-	scrt, err := e.Secret.Get(projectName, name)
+	scrt, err := e.secret.Get(projectName, name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)

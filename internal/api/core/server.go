@@ -78,7 +78,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	return &api{
 		apiV1Endpoints: apiV1Endpoints,
 		apiEndpoints:   apiEndpoints,
-		proxyEndpoint:  proxy.New(persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(), persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto()),
+		proxyEndpoint:  proxy.New(persistenceManager.GetDashboard(), persistenceManager.GetSecret(), persistenceManager.GetGlobalSecret(), persistenceManager.GetDatasource(), persistenceManager.GetGlobalDatasource(), serviceManager.GetCrypto(), serviceManager.GetRBAC()),
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(c echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),
