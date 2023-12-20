@@ -50,7 +50,7 @@ export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec;
       key={spec.name + source ?? ''}
       display={ctx.state?.overridden || spec.display?.hidden ? 'none' : undefined}
       minWidth={`${MIN_TEMPLATE_VARIABLE_WIDTH}px`}
-      maxWidth={MAX_TEMPLATE_VARIABLE_WIDTH + 'px'}
+      maxWidth={`${MAX_TEMPLATE_VARIABLE_WIDTH}px`}
       flexShrink={0}
       data-testid={'template-variable-' + spec.name}
     >
