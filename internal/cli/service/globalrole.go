@@ -14,12 +14,52 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"strings"
+	apiRole "github.com/perses/perses/pkg/model/api/v1/role"
 )
+
+// buildPermissionMatrix is transforming a list of permissions into a matrix that will be displayed later.
+// permissions is the list of permissions we want to display in the matrix
+// spaces is the number of empty columns we need to have before starting to display the action.
+// firstLine is the line containing the name of the role, and the creation date
+// matrix is the final matrix we need to feed
+func buildPermissionMatrix(permissions []apiRole.Permission, spaces []string, firstLine []string, matrix [][]string) [][]string {
+	isFirstLine := true
+	for _, permission := range permissions {
+		var currentActionLine []string
+		if isFirstLine {
+			currentActionLine = firstLine
+			isFirstLine = false
+		} else {
+			currentActionLine = spaces
+		}
+		var actions []string
+		for _, action := range permission.Actions {
+			actions = append(actions, string(action))
+		}
+		currentActionLine = append(currentActionLine, strings.Join(actions, ","))
+
+		firstScopeLine := true
+		for _, scope := range permission.Scopes {
+			var currentScopeLine []string
+			if firstScopeLine {
+				currentScopeLine = currentActionLine
+				firstScopeLine = false
+			} else {
+				currentScopeLine = append(currentScopeLine, spaces...)
+				currentScopeLine = append(currentScopeLine, "")
+			}
+			currentScopeLine = append(currentScopeLine, string(scope))
+			matrix = append(matrix, currentScopeLine)
+		}
+	}
+	return matrix
+}
 
 type globalRole struct {
 	Service
@@ -55,37 +95,7 @@ func (g *globalRole) BuildMatrix(hits []modelAPI.Entity) [][]string {
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 
-		if len(entity.Spec.Permissions) == 0 {
-			line = append(line, "EMPTY", "EMPTY")
-			data = append(data, line)
-			continue
-		}
-
-		firstLine := true
-		for _, permission := range entity.Spec.Permissions {
-			var actions []string
-			for _, action := range permission.Actions {
-				actions = append(actions, string(action))
-			}
-
-			if len(permission.Scopes) == 0 {
-				line = append(line, strings.Join(actions, ","), "EMPTY")
-				data = append(data, line)
-				continue
-			}
-
-			for _, scope := range permission.Scopes {
-				if firstLine {
-					line = append(line, strings.Join(actions, ","), string(scope))
-					data = append(data, line)
-					firstLine = false
-					continue
-				}
-
-				newLine := []string{"", "", "", string(scope)}
-				data = append(data, newLine)
-			}
-		}
+		data = buildPermissionMatrix(entity.Spec.Permissions, []string{"", ""}, line, data)
 	}
 	return data
 }

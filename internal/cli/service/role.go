@@ -18,7 +18,6 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"strings"
 )
 
 type role struct {
@@ -49,43 +48,13 @@ func (r *role) DeleteResource(name string) error {
 func (r *role) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.GlobalRole)
+		entity := hit.(*modelV1.Role)
 		line := []string{
 			entity.Metadata.Name,
+			entity.Metadata.Project,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
-
-		if len(entity.Spec.Permissions) == 0 {
-			line = append(line, "EMPTY", "EMPTY")
-			data = append(data, line)
-			continue
-		}
-
-		firstLine := true
-		for _, permission := range entity.Spec.Permissions {
-			var actions []string
-			for _, action := range permission.Actions {
-				actions = append(actions, string(action))
-			}
-
-			if len(permission.Scopes) == 0 {
-				line = append(line, strings.Join(actions, ","), "EMPTY")
-				data = append(data, line)
-				continue
-			}
-
-			for _, scope := range permission.Scopes {
-				if firstLine {
-					line = append(line, strings.Join(actions, ","), string(scope))
-					data = append(data, line)
-					firstLine = false
-					continue
-				}
-
-				newLine := []string{"", "", "", string(scope)}
-				data = append(data, newLine)
-			}
-		}
+		data = buildPermissionMatrix(entity.Spec.Permissions, []string{"", "", ""}, line, data)
 	}
 	return data
 }
