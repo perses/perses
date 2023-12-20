@@ -17,6 +17,7 @@ import (
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
+	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -26,6 +27,7 @@ type ClientInterface interface {
 	Migrate(body *api.Migrate) (*modelV1.Dashboard, error)
 	Validate() ValidateInterface
 	Auth() AuthInterface
+	Config() (*apiConfig.Config, error)
 }
 
 type client struct {
@@ -64,4 +66,14 @@ func (c *client) Validate() ValidateInterface {
 
 func (c *client) Auth() AuthInterface {
 	return newAuth(c.restClient)
+}
+
+func (c *client) Config() (*apiConfig.Config, error) {
+	cfg := &apiConfig.Config{}
+	err := c.restClient.Get().
+		APIVersion("").
+		Resource("config").
+		Do().
+		Object(cfg)
+	return cfg, err
 }
