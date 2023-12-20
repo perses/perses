@@ -14,6 +14,8 @@
 package utils
 
 import (
+	"time"
+
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 )
@@ -25,11 +27,14 @@ var (
 )
 
 func DefaultOwnerRole(projectName string) *v1.Role {
+	now := time.Now().UTC()
 	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: owner,
+				Name:      owner,
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 			Project: projectName,
 		},
@@ -45,11 +50,14 @@ func DefaultOwnerRole(projectName string) *v1.Role {
 }
 
 func DefaultEditorRole(projectName string) *v1.Role {
+	now := time.Now().UTC()
 	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: editor,
+				Name:      editor,
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 			Project: projectName,
 		},
@@ -69,11 +77,14 @@ func DefaultEditorRole(projectName string) *v1.Role {
 }
 
 func DefaultViewerRole(projectName string) *v1.Role {
+	now := time.Now().UTC()
 	return &v1.Role{
 		Kind: v1.KindRole,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: viewer,
+				Name:      viewer,
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 			Project: projectName,
 		},
