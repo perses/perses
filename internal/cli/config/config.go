@@ -19,6 +19,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"reflect"
 
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
@@ -137,9 +138,15 @@ func Write(config *Config) error {
 	if err == nil {
 		// the config already exists, so we should update it with the one provided in the parameter.
 		if config != nil {
-			previousConf.RestClientConfig.InsecureTLS = config.RestClientConfig.InsecureTLS
-			if len(config.RestClientConfig.URL) > 0 {
-				previousConf.RestClientConfig.URL = config.RestClientConfig.URL
+			restConfig := config.RestClientConfig
+			if !reflect.DeepEqual(restConfig, perseshttp.RestConfigClient{}) {
+				previousConf.RestClientConfig.InsecureTLS = restConfig.InsecureTLS
+				if len(restConfig.URL) > 0 {
+					previousConf.RestClientConfig.URL = restConfig.URL
+				}
+				if len(restConfig.Token) > 0 {
+					previousConf.RestClientConfig.Token = restConfig.Token
+				}
 			}
 			if len(config.Project) > 0 {
 				previousConf.Project = config.Project
