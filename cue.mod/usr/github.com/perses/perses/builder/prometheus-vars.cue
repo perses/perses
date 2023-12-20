@@ -11,6 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// This package offers an utility to build prometheus variables easily.
+// It's a superset of the generic vars builder.
+
 package prometheusVars
 
 import (

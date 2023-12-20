@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This package offers an utility to build simple, standard layouts easily,
+// This package offers an utility to build a simple, standard layout easily,
 // without having to manipulate directly the {x,y,w,h} coordinates of each
 // and every panel.
 
