@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package panel
+// This package offers utilities to build panels meant to run prometheus
+// queries.
+
+package prometheusPanel
 
 import (
 	"strings"
