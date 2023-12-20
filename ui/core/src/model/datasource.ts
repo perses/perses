@@ -56,3 +56,9 @@ export interface DatasourceSelector {
    */
   name?: string;
 }
+
+export interface UnsavedDatasourceSelector {
+  spec: DatasourceSpec;
+  project?: string;
+  dashboard?: string;
+}

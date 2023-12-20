@@ -17,7 +17,7 @@ interface TestData {
   input: {
     project?: string;
     dashboard?: string;
-    name: string;
+    name?: string;
   };
   expected: string;
 }
@@ -38,6 +38,21 @@ describe('buildProxyUrl', () => {
       title: 'should build dashboard datasource proxy url',
       input: { project: 'projectA', dashboard: 'dashboardA', name: 'datasourceA' },
       expected: '/proxy/projects/projectA/dashboards/dashboardA/datasources/datasourceA',
+    },
+    {
+      title: 'should build unsaved global datasource proxy url',
+      input: { },
+      expected: '/proxy/unsaved/globaldatasources',
+    },
+    {
+      title: 'should build unsaved project datasource proxy url',
+      input: { project: 'projectA' },
+      expected: '/proxy/unsaved/projects/projectA/datasources',
+    },
+    {
+      title: 'should build unsaved dashboard datasource proxy url',
+      input: { project: 'projectA', dashboard: 'dashboardA' },
+      expected: '/proxy/unsaved/projects/projectA/dashboards/dashboardA/datasources',
     },
   ])('$title', (data: TestData) => {
     expect(new HTTPDatasourceAPI().buildProxyUrl(data.input)).toEqual(data.expected);

@@ -23,7 +23,10 @@ export class HTTPDatasourceAPI implements DatasourceApi {
    * Give the following output according to the definition or not of the input.
    * - /proxy/globaldatasources/{name}
    * - /proxy/projects/{project}/datasources/{name}
-   * - /proxy/projects/{project}/dashboards/{dashboard}/{name}
+   * - /proxy/projects/{project}/dashboards/{dashboard}/datasources/{name}
+   * - /proxy/unsaved/globaldatasources
+   * - /proxy/unsaved/{project}/datasources
+   * - /proxy/unsaved/{project}/dashboards/{dashboard}/datasources
    *
    * NB: despite the fact it's possible, it is useless to give a dashboard without a project as the url will for sure
    * correspond to nothing.
@@ -31,15 +34,29 @@ export class HTTPDatasourceAPI implements DatasourceApi {
    * @param dashboard
    * @param project
    */
-  buildProxyUrl({ project, dashboard, name }: { project?: string; dashboard?: string; name: string }): string {
-    let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
+  buildProxyUrl({
+    project,
+    dashboard,
+    name,
+  }: {
+    project?: string;
+    dashboard?: string;
+    name?: string;
+  }): string {
+    const unsaved = name === undefined;
+    const prefix = unsaved ? '/proxy/unsaved/' : '/proxy/';
+    const type = !project && !dashboard ? 'globaldatasources' : 'datasources';
+    let url = unsaved ? `${type}` : `${type}/${encodeURIComponent(name || '')}`;
+
     if (dashboard) {
       url = `dashboards/${encodeURIComponent(dashboard)}/${url}`;
     }
+
     if (project) {
       url = `projects/${encodeURIComponent(project)}/${url}`;
     }
-    return `/proxy/${url}`;
+
+    return `${prefix}${url}`;
   }
 
   getDatasource(project: string, selector: DatasourceSelector): Promise<ProjectDatasource | undefined> {

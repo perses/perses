@@ -20,6 +20,7 @@ import {
   DatasourceSpec,
   GlobalDatasource,
   useEvent,
+  UnsavedDatasourceSelector,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -42,7 +43,7 @@ export interface DatasourceStoreProviderProps {
 export type BuildDatasourceProxyUrlParams = {
   project?: string;
   dashboard?: string;
-  name: string;
+  name?: string;
 };
 
 export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => string;
@@ -130,19 +131,47 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   );
 
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
-  const getDatasourceClient = useCallback(
-    async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
+  const getSavedDatasourceClient = useCallback(
+    async (selector: DatasourceSelector) => {
       const { kind } = selector;
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
 
-      // allows extending client
-      const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+      return plugin.createClient(spec.plugin.spec, { proxyUrl });
+    },
+    [findDatasource, getPlugin]
+  );
+
+  // Given an UnsavedDatasource selector, uses its corresponding plugin the create a client from the spec in the selector.
+  const getUnsavedDatasourceClient = useCallback(
+    async (selector: UnsavedDatasourceSelector) => {
+      const datasource = selector as UnsavedDatasourceSelector;
+      const plugin = await getPlugin('Datasource', datasource.spec.plugin.kind);
+      const proxyURL = buildDatasourceProxyUrl(datasourceApi, {
+        project: datasource.project,
+        dashboard: datasource.dashboard,
+      });
+
+      return plugin.createClient(datasource.spec.plugin.spec, { proxyUrl: proxyURL });
+    },
+    [getPlugin, datasourceApi]
+  );
+
+  const getDatasourceClient = useCallback(
+    async function getClient<Client extends DatasourceClient>(
+      selector: DatasourceSelector | UnsavedDatasourceSelector
+    ): Promise<Client> {
+      const isUnsaved = 'spec' in selector;
+      const client = (
+        isUnsaved ? await getUnsavedDatasourceClient(selector) : await getSavedDatasourceClient(selector)
+      ) as Client;
+
       if (onCreate !== undefined) {
         return onCreate(client) as Client;
       }
+
       return client;
     },
-    [findDatasource, getPlugin, onCreate]
+    [onCreate, getSavedDatasourceClient, getUnsavedDatasourceClient]
   );
 
   const listDatasourceSelectItems = useEvent(
