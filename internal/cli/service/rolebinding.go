@@ -48,9 +48,10 @@ func (r *roleBinding) DeleteResource(name string) error {
 func (r *roleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.GlobalRoleBinding)
+		entity := hit.(*modelV1.RoleBinding)
 		line := []string{
 			entity.Metadata.Name,
+			entity.Metadata.Project,
 			entity.Spec.Role,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
@@ -80,6 +81,7 @@ func (r *roleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 func (r *roleBinding) GetColumHeader() []string {
 	return []string{
 		"NAME",
+		"PROJECT",
 		"ROLE",
 		"AGE",
 		"SUBJECT KIND",

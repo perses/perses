@@ -14,11 +14,12 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"strings"
 )
 
 type role struct {
@@ -49,9 +50,10 @@ func (r *role) DeleteResource(name string) error {
 func (r *role) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.GlobalRole)
+		entity := hit.(*modelV1.Role)
 		line := []string{
 			entity.Metadata.Name,
+			entity.Metadata.Project,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
 
@@ -82,7 +84,7 @@ func (r *role) BuildMatrix(hits []modelAPI.Entity) [][]string {
 					continue
 				}
 
-				newLine := []string{"", "", "", string(scope)}
+				newLine := []string{"", "", "", "", string(scope)}
 				data = append(data, newLine)
 			}
 		}
