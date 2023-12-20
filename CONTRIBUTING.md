@@ -126,7 +126,7 @@ The secure way to configure your monitoring.               <\
 
 ```
 
-The API backend is now available on port 8080 :).
+The API backend is now available on port 8080 :). You can log in with user: `admin` and password: `password`.
 
 ### Web App
 
