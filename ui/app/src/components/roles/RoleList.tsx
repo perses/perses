@@ -157,7 +157,7 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope={params.row.project ? 'Role' : 'GlobalRole'}
             project={params.row.project ? params.row.project : GlobalProject}

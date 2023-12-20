@@ -162,7 +162,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope={params.row.project ? 'RoleBinding' : 'GlobalRoleBinding'}
             project={params.row.project ? params.row.project : GlobalProject}

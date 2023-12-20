@@ -16,7 +16,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { GlobalSecretResource, Secret } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
-import { SecretList } from '../../../components/secret/SecretList';
+import { SecretList } from '../../../components/secrets/SecretList';
 import {
   useDeleteGlobalSecretMutation,
   useGlobalSecretList,

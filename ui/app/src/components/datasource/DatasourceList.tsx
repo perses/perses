@@ -177,7 +177,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope={params.row.project ? 'Datasource' : 'GlobalDatasource'}
             project={params.row.project ? params.row.project : GlobalProject}
