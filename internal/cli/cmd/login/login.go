@@ -45,14 +45,15 @@ func readPassword() (string, error) {
 
 type option struct {
 	persesCMD.Option
-	writer      io.Writer
-	url         string
-	username    string
-	password    string
-	token       string
-	insecureTLS bool
-	apiClient   api.ClientInterface
-	restConfig  perseshttp.RestConfigClient
+	writer       io.Writer
+	url          string
+	username     string
+	password     string
+	accessToken  string
+	refreshToken string
+	insecureTLS  bool
+	apiClient    api.ClientInterface
+	restConfig   perseshttp.RestConfigClient
 }
 
 func (o *option) Complete(args []string) error {
@@ -84,7 +85,7 @@ func (o *option) Validate() error {
 	if _, err := url.Parse(o.url); err != nil {
 		return err
 	}
-	if len(o.username) > 0 && len(o.token) > 0 {
+	if len(o.username) > 0 && len(o.accessToken) > 0 {
 		return fmt.Errorf("--token and --username are mutually exclusive")
 	}
 	return nil
@@ -95,7 +96,7 @@ func (o *option) Execute() error {
 	if err != nil {
 		return err
 	}
-	if cfg.Security.EnableAuth && len(o.token) == 0 {
+	if cfg.Security.EnableAuth && len(o.accessToken) == 0 {
 		if readErr := o.readAndSetCredentialInput(); readErr != nil {
 			return readErr
 		}
@@ -103,9 +104,10 @@ func (o *option) Execute() error {
 			return authErr
 		}
 	}
-	o.restConfig.Token = o.token
+	o.restConfig.Token = o.accessToken
 	if writeErr := config.Write(&config.Config{
 		RestClientConfig: o.restConfig,
+		RefreshToken:     o.refreshToken,
 	}); writeErr != nil {
 		return writeErr
 	}
@@ -121,7 +123,8 @@ func (o *option) authAndSetToken() error {
 	if err != nil {
 		return err
 	}
-	o.token = token.AccessToken
+	o.accessToken = token.AccessToken
+	o.refreshToken = token.RefreshToken
 	return nil
 }
 
@@ -161,6 +164,6 @@ percli login https://perses.dev
 	cmd.Flags().BoolVar(&o.insecureTLS, "insecure-skip-tls-verify", o.insecureTLS, "If true the server's certificate will not be checked for validity. This will make your HTTPS connections insecure.")
 	cmd.Flags().StringVarP(&o.username, "username", "u", "", "Username used for the authentication.")
 	cmd.Flags().StringVarP(&o.password, "password", "p", "", "Password used for the authentication.")
-	cmd.Flags().StringVar(&o.token, "token", "", "Bearer token for authentication to the API server")
+	cmd.Flags().StringVar(&o.accessToken, "token", "", "Bearer token for authentication to the API server")
 	return cmd
 }

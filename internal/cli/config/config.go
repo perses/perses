@@ -50,7 +50,8 @@ func Init(configPath string) {
 
 type Config struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
-	Project          string                      `json:"project"`
+	Project          string                      `json:"project,omitempty"`
+	RefreshToken     string                      `json:"refresh_token,omitempty"`
 	filePath         string
 	apiClient        api.ClientInterface
 }
@@ -118,6 +119,12 @@ func SetProject(project string) error {
 	})
 }
 
+func SetAccessToken(token string) error {
+	return Write(&Config{
+		RestClientConfig: perseshttp.RestConfigClient{Token: token},
+	})
+}
+
 // Write writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
 func Write(config *Config) error {
@@ -150,6 +157,9 @@ func Write(config *Config) error {
 			}
 			if len(config.Project) > 0 {
 				previousConf.Project = config.Project
+			}
+			if len(config.RefreshToken) > 0 {
+				previousConf.RefreshToken = config.RefreshToken
 			}
 		}
 	} else {
