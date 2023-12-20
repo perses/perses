@@ -14,8 +14,6 @@
 package service
 
 import (
-	"strings"
-
 	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -56,38 +54,7 @@ func (r *role) BuildMatrix(hits []modelAPI.Entity) [][]string {
 			entity.Metadata.Project,
 			output.FormatTime(entity.Metadata.UpdatedAt),
 		}
-
-		if len(entity.Spec.Permissions) == 0 {
-			line = append(line, "EMPTY", "EMPTY")
-			data = append(data, line)
-			continue
-		}
-
-		firstLine := true
-		for _, permission := range entity.Spec.Permissions {
-			var actions []string
-			for _, action := range permission.Actions {
-				actions = append(actions, string(action))
-			}
-
-			if len(permission.Scopes) == 0 {
-				line = append(line, strings.Join(actions, ","), "EMPTY")
-				data = append(data, line)
-				continue
-			}
-
-			for _, scope := range permission.Scopes {
-				if firstLine {
-					line = append(line, strings.Join(actions, ","), string(scope))
-					data = append(data, line)
-					firstLine = false
-					continue
-				}
-
-				newLine := []string{"", "", "", "", string(scope)}
-				data = append(data, newLine)
-			}
-		}
+		data = buildPermissionMatrix(entity.Spec.Permissions, []string{"", "", ""}, line, data)
 	}
 	return data
 }
