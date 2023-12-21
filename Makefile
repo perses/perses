@@ -28,6 +28,7 @@ COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
 GORELEASER_PARALLEL   ?= 0
+GO_SOURCES            ?= $(shell $(GO) list ./... | grep -v /cue/)
 
 export LDFLAGS
 export DATE
@@ -48,7 +49,7 @@ tag:
 checkformat:
 	@echo ">> checking go code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
-	@echo ">> running check for cue file format"
+	@echo ">> running check for CUE file format"
 	./scripts/cue.sh --checkformat
 
 .PHONY: checkdocs
@@ -101,22 +102,24 @@ cue-gen:
 	$(CUE) get go github.com/perses/perses/pkg/model/api/v1 --local
 
 .PHONY: cue-test
-cue-test:
-	@echo ">> test cue schemas with json data"
+cue-test: cue-gen
+	@echo ">> test CUE schemas with json data"
 	$(GO) run ./scripts/cue-test/cue-test.go
+	@echo ">> validate DaC libraries"
+	$(GO) test -count=1 -v ./cue/...
 
 .PHONY: test
-test: generate cue-gen
+test: generate
 	@echo ">> running all tests"
-	$(GO) test -count=1 -v ./...
+	$(GO) test -count=1 -v $(GO_SOURCES)
 
 .PHONY: integration-test
 integration-test: generate
-	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=$(GO_SOURCES) $(GO_SOURCES)
 
 .PHONY: mysql-integration-test
 mysql-integration-test: generate
-	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
+	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=$(GO_SOURCES) $(GO_SOURCES)
 
 .PHONY: coverage-html
 coverage-html: integration-test

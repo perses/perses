@@ -24,13 +24,13 @@ package dashboard
 import "github.com/perses/perses/pkg/model/api/v1/variable"
 
 #TextVariableSpec: {
-    name: string @go(Name)
-    variable.#TextSpec
+	name: string @go(Name)
+	variable.#TextSpec
 }
 
 #ListVariableSpec: {
-    name: string @go(Name)
-    variable.#ListSpec
+	name: string @go(Name)
+	variable.#ListSpec
 }
 
 #Variable: {

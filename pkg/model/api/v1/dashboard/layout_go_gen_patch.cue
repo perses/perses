@@ -42,7 +42,7 @@ import "github.com/perses/perses/pkg/model/api/v1/common"
 
 #GridLayoutSpec: {
 	display: #GridLayoutDisplay @go(Title)
-	items?:  [...#GridItem]     @go(Items,[]GridItem)
+	items?: [...#GridItem] @go(Items,[]GridItem)
 }
 
 #LayoutKind: "Grid"
@@ -51,5 +51,5 @@ import "github.com/perses/perses/pkg/model/api/v1/common"
 
 #Layout: {
 	kind: #LayoutKind @go(Kind)
-    spec: #LayoutSpec @go(Spec)
+	spec: #LayoutSpec @go(Spec)
 }

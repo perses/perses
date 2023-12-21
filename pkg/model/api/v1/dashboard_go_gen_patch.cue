@@ -36,13 +36,17 @@ import (
 }
 
 #DashboardSpec: {
-	display?:         common.#Display           @go(Display)
-	datasources?:     [string]: #DatasourceSpec @go(Datasources)
-	variables?:       [...dashboard.#Variable]  @go(Variables,[]Variable)
-	panels:           [string]: #Panel          @go(Panels)
-	layouts:          [...dashboard.#Layout]    @go(Layouts,[]Layout)
-	duration:         _ | *"1h"                 @go(Duration)        // TODO def should come from github.com/prometheus/common/model 
-	refreshInterval?: _                         @go(RefreshInterval) // TODO def should come from github.com/prometheus/common/model
+	display?: common.#Display @go(Display)
+	datasources?: {
+		[string]: #DatasourceSpec @go(Datasources)
+	}
+	variables?: [...dashboard.#Variable] @go(Variables,[]Variable)
+	panels: {
+		[string]: #Panel @go(Panels)
+	}
+	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
+	duration:         _ | *"1h" @go(Duration)        // TODO def should come from github.com/prometheus/common/model 
+	refreshInterval?: _         @go(RefreshInterval) // TODO def should come from github.com/prometheus/common/model
 }
 
 #Dashboard: {
