@@ -47,10 +47,10 @@ func TestDashboard(t *testing.T) {
 			projectPath := testUtils.GetRepositoryPath()
 			schemasService, schErr := schemas.New(config.Schemas{
 				// use the real schemas for these tests
-				PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-				QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-				DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-				VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
+				PanelsPath:      filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
+				QueriesPath:     filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
+				DatasourcesPath: filepath.Join(projectPath, "cue", config.DefaultDatasourcesPath),
+				VariablesPath:   filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
 			})
 			if schErr != nil {
 				t.Fatal(schErr)
@@ -99,10 +99,10 @@ func TestDatasource(t *testing.T) {
 			projectPath := testUtils.GetRepositoryPath()
 			schemasService, schErr := schemas.New(config.Schemas{
 				// use the real schemas for these tests
-				PanelsPath:      filepath.Join(projectPath, config.DefaultPanelsPath),
-				QueriesPath:     filepath.Join(projectPath, config.DefaultQueriesPath),
-				DatasourcesPath: filepath.Join(projectPath, config.DefaultDatasourcesPath),
-				VariablesPath:   filepath.Join(projectPath, config.DefaultVariablesPath),
+				PanelsPath:      filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
+				QueriesPath:     filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
+				DatasourcesPath: filepath.Join(projectPath, "cue", config.DefaultDatasourcesPath),
+				VariablesPath:   filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
 			})
 			if schErr != nil {
 				t.Fatal(schErr)

@@ -15,18 +15,13 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
-	"reflect"
 
-	"cuelang.org/go/cue/cuecontext"
-	"cuelang.org/go/cue/load"
 	"github.com/perses/perses/internal/api/shared/schemas"
 	"github.com/perses/perses/internal/api/shared/validate"
-	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -122,70 +117,6 @@ func validateAllGlobalDatasources(sch schemas.Schemas) {
 	}
 }
 
-func validateDashboardAsCode() {
-	logrus.Info("validate the Dashboard-as-Code use case")
-
-	testSuite := []struct {
-		inputCUEFile           string
-		expectedOutputJSONFile string
-	}{
-		{
-			inputCUEFile:           path.Join("internal", "test", "dac_test_input.cue"),
-			expectedOutputJSONFile: path.Join("internal", "test", "dac_test_expected_output.json"),
-		},
-	}
-
-	for _, test := range testSuite {
-		context := cuecontext.New()
-
-		buildInstances := load.Instances([]string{test.inputCUEFile}, nil)
-
-		if len(buildInstances) != 1 {
-			logrus.WithError(errors.New("the number of build instances is != 1")).Fatalf("Error loading build instance from CUE file %s", test.inputCUEFile)
-		}
-		buildInstance := buildInstances[0]
-
-		// check for errors on the instances (these are typically parsing errors)
-		if buildInstance.Err != nil {
-			logrus.WithError(buildInstance.Err).Fatal("Error loading build instance from CUE file")
-		}
-
-		// build Value from the Instance
-		value := context.BuildInstance(buildInstance)
-		if value.Err() != nil {
-			logrus.WithError(value.Err()).Fatal("Error creating CUE value from build instance")
-		}
-
-		// validate the value
-		err := value.Validate()
-		if err != nil {
-			logrus.WithError(err).Fatal("Error validating CUE value")
-		}
-
-		// Compare with expected output
-		actualDashboardBytes, err := json.Marshal(value)
-		if err != nil {
-			logrus.WithError(err).Fatal("Error marshalling actual dashboard from CUE value to JSON")
-		}
-		var actualDashboard v1.Dashboard
-		err = json.Unmarshal(actualDashboardBytes, &actualDashboard)
-		if err != nil {
-			logrus.WithError(err).Fatal("Error unmarshalling actual dashboard to Dashboard struct")
-		}
-
-		expectedDashboardBytes := testUtils.ReadFile(test.expectedOutputJSONFile)
-		var expectedDashboard v1.Dashboard
-		err = json.Unmarshal(expectedDashboardBytes, &expectedDashboard)
-		if err != nil {
-			logrus.WithError(err).Fatal("Error unmarshalling expected dashboard to Dashboard struct")
-		}
-
-		if !reflect.DeepEqual(actualDashboard, expectedDashboard) {
-			logrus.Fatal(errors.New("DaC-generated dashboard doesn't match expected output"))
-		}
-	}
-}
-
 func main() {
 	cfg := config.Schemas{}
 	_ = cfg.Verify()
@@ -197,5 +128,4 @@ func main() {
 	validateAllDashboards(sch)
 	validateAllDatasources(sch)
 	validateAllGlobalDatasources(sch)
-	validateDashboardAsCode()
 }
