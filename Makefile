@@ -90,9 +90,10 @@ fmt-docs:
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*"  -print) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
-cue-eval:
-	@echo ">> eval cue schemas"
-	$(CUE) eval ./schemas/...
+cue-eval: cue-gen
+	@echo ">> eval CUE files"
+	$(CUE) eval ./cue/schemas/...
+	find ./cue/dac-utils -name "*.cue" -exec $(CUE) eval {} \;
 
 .PHONY: cue-gen
 cue-gen:
