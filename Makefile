@@ -94,8 +94,14 @@ cue-eval:
 	@echo ">> eval cue schemas"
 	$(CUE) eval ./schemas/...
 
+
+.PHONY: cue-gen
+cue-gen:
+	@echo ">> generate cue from golang datamodel"
+	$(CUE) get go github.com/perses/perses/pkg/model/api/v1 --local
+
 .PHONY: cue-test
-cue-test:
+cue-test: cue-gen
 	@echo ">> test cue schemas with json data"
 	$(GO) run ./scripts/cue-test/cue-test.go
 

@@ -21,7 +21,7 @@ import (
 	promQLVar "github.com/perses/perses/schemas/variables/prometheus-promql:model"
 	promLabelValuesVar "github.com/perses/perses/schemas/variables/prometheus-label-values:model"
 	promLabelNamesVar "github.com/perses/perses/schemas/variables/prometheus-label-names:model"
-	varsBuilder "github.com/perses/perses/builder:vars"
+	varsBuilder "github.com/perses/perses/schemas/builder:vars"
 )
 
 // expected user input
@@ -103,7 +103,7 @@ variables: {varsBuilder & { input: alias }}.variables & [ for i, var in input {
             plugin: promLabelNamesVar & {
                 spec: {
                     datasource: kind: "PrometheusDatasource"
-                    matchers: [exprs[id]]
+                    matchers: [exprs[i]]
                 }
             }
         },

@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package v1
 
-#JSONRef: {
-	// Ref is the JSON reference. That's the only thing that is used during the marshalling / unmarshalling process.
-	// Other attributes are ignored during these processes.
-	$ref: string @go(Ref)
+// This definition provides placeholder values for the dashboard metadata,
+// required to pass the CUE evaluation, as those attributes are flagged as
+// mandatory in the (Go) datamodel but populated by the server in the end.
+#Metadata: {
+	createdAt: "1970-01-01T00:00:00.000000000Z"
+	updatedAt: "1970-01-01T00:00:00.000000000Z"
+	version:   1
 }
