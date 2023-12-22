@@ -19,10 +19,8 @@ import {
   useTemplateVariable,
   useTemplateVariableDefinitions,
 } from '../../context';
+import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
 import { TemplateVariable } from './TemplateVariable';
-
-const VARIABLE_INPUT_MIN_WIDTH = '120px';
-const VARIABLE_INPUT_MAX_WIDTH = '500px';
 
 export function TemplateVariableList() {
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
@@ -51,8 +49,8 @@ export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec;
     <Box
       key={spec.name + source ?? ''}
       display={ctx.state?.overridden || spec.display?.hidden ? 'none' : undefined}
-      minWidth={VARIABLE_INPUT_MIN_WIDTH}
-      maxWidth={VARIABLE_INPUT_MAX_WIDTH}
+      minWidth={`${MIN_TEMPLATE_VARIABLE_WIDTH}px`}
+      maxWidth={`${MAX_TEMPLATE_VARIABLE_WIDTH}px`}
       flexShrink={0}
       data-testid={'template-variable-' + spec.name}
     >

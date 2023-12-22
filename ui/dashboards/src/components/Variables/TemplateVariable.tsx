@@ -25,6 +25,7 @@ import {
 import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
 import { useTemplateVariable, useTemplateVariableActions } from '../../context';
+import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
 
 type TemplateVariableProps = {
   name: VariableName;
@@ -166,6 +167,19 @@ const StyledPopper = (props: PopperProps) => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
+const LETTER_HSIZE = 8; // approximation
+const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
+const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
+  const width = (inputValue.length + 1) * LETTER_HSIZE + (kind == 'list' ? ARROW_OFFSET : 0);
+  if (width < MIN_TEMPLATE_VARIABLE_WIDTH) {
+    return MIN_TEMPLATE_VARIABLE_WIDTH;
+  } else if (width > MAX_TEMPLATE_VARIABLE_WIDTH) {
+    return MAX_TEMPLATE_VARIABLE_WIDTH;
+  } else {
+    return width;
+  }
+};
+
 function ListVariable({ name, source }: TemplateVariableProps) {
   const ctx = useTemplateVariable(name, source);
   const definition = ctx.definition as ListVariableDefinition;
@@ -177,6 +191,7 @@ function ListVariable({ name, source }: TemplateVariableProps) {
     variablesOptionsQuery
   );
   const [inputValue, setInputValue] = useState<string>('');
+  const [inputWidth, setInputWidth] = useState(MIN_TEMPLATE_VARIABLE_WIDTH);
 
   const title = definition?.spec.display?.name ?? name;
   const allowMultiple = definition?.spec.allowMultiple === true;
@@ -200,23 +215,6 @@ function ListVariable({ name, source }: TemplateVariableProps) {
       setVariableOptions(name, options, source);
     }
   }, [setVariableOptions, name, options, source]);
-
-  const LETTER_HSIZE = 8; // approximation
-  const ARROW_OFFSET = 40;
-  const MIN_INPUT_WIDTH = 120;
-  const MAX_INPUT_WIDTH = 500;
-  const [inputWidth, setInputWidth] = useState(MIN_INPUT_WIDTH);
-
-  const handleInputResize = (newInputValue: string) => {
-    const newInputValueSize = (newInputValue.length + 1) * LETTER_HSIZE + ARROW_OFFSET;
-    if (newInputValueSize < MIN_INPUT_WIDTH) {
-      setInputWidth(MIN_INPUT_WIDTH);
-    } else if (newInputValueSize > MAX_INPUT_WIDTH) {
-      setInputWidth(MAX_INPUT_WIDTH);
-    } else {
-      setInputWidth(newInputValueSize);
-    }
-  };
 
   return (
     <>
@@ -257,7 +255,7 @@ function ListVariable({ name, source }: TemplateVariableProps) {
         onInputChange={(_, newInputValue) => {
           setInputValue(newInputValue);
           if (!allowMultiple) {
-            handleInputResize(newInputValue);
+            setInputWidth(getWidthPx(newInputValue, 'list'));
           }
         }}
         options={viewOptions}
@@ -272,6 +270,7 @@ function TextVariable({ name, source }: TemplateVariableProps) {
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
+  const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
   const { setVariableValue } = useTemplateVariableActions();
 
   useEffect(() => {
@@ -282,7 +281,11 @@ function TextVariable({ name, source }: TemplateVariableProps) {
     <TextField
       title={tempValue as string}
       value={tempValue}
-      onChange={(e) => setTempValue(e.target.value)}
+      //onChange={(e) => setTempValue(e.target.value)}
+      onChange={(e) => {
+        setTempValue(e.target.value);
+        setInputWidth(getWidthPx(e.target.value, 'text'));
+      }}
       onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}
       label={definition?.spec.display?.name ?? name}
@@ -290,8 +293,12 @@ function TextVariable({ name, source }: TemplateVariableProps) {
         readOnly: definition?.spec.constant ?? false,
       }}
       sx={{
+        width: `${inputWidth}px`,
         '& .MuiInputBase-root': {
           minHeight: '38px',
+        },
+        '& .MuiInputBase-input': {
+          textOverflow: 'ellipsis',
         },
       }}
     />

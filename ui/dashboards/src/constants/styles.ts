@@ -20,3 +20,6 @@ export const editButtonStyle: SxProps<Theme> = {
     marginRight: 0.5,
   },
 };
+
+export const MIN_TEMPLATE_VARIABLE_WIDTH = 120;
+export const MAX_TEMPLATE_VARIABLE_WIDTH = 500;
