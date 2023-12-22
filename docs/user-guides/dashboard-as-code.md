@@ -2,7 +2,7 @@
 
 Perses offers the possibility to define dashboards as code instead of going through manipulations on the UI.
 But why would you want to do this? Basically Dashboard-as-Code (DaC) is something that becomes useful
-at scale, when you have many dashboards to maintain, to keep align on certain parts, etc.
+at scale, when you have many dashboards to maintain, to keep aligned on certain parts, etc.
 
 DaC benefits can be summarized as follows:
 - **Operational efficiency**, by the reusability of a common basis of dashboard components for standard monitoring use cases.
@@ -22,7 +22,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 ### Prerequisites
 
 - `percli`, the [CLI of Perses](../tooling/cli.md).
-- (for the moment) `cue`, the [CLI of Cuelang](https://cuelang.org/).
+- `cue`, the [CLI of Cuelang](https://cuelang.org/).
 - [Go](https://go.dev/).
 
 ### Repository setup
@@ -52,9 +52,9 @@ See the [CUE documentation](https://cuelang.org/docs/integrations/go/#extract-cu
 
 #### 4. Add the CUE sources from Perses
 
-To ease further the experience with DaC, you should import some CUE sources available in the Perses repo. These are about plugin schemas, DaC helper libraries & some patches to fix some gaps that remain after the previous step.
+To ease further the experience with DaC, you should import some CUE sources available in the Perses repo. These are about plugin schemas, DaC helper libraries & some patches to fix gaps that remain after the previous step.
 
-For now unfortunately there is no clean way to do these imports (no proper dependency management available in CUE as already mentionned), so in the meantime we provide the script [dac_setup.sh](../../scripts/dac_setup.sh) that takes care of adding the CUE sources from Perses as external dependencies of your repo. Simply copy this script at the root of your repository and run it. You will have to indicate the version of Perses from which to retrieve the files - unless specific case you should look for the latest one.
+Unfortunately for now there is no clean way to do these imports (no proper dependency management available in CUE as already mentionned), so in the meantime we provide the script [dac_setup.sh](../../scripts/dac_setup.sh) that takes care of adding the CUE sources from Perses as external dependencies of your repo. Simply copy this script at the root of your repository and run it. You will have to indicate the version of Perses from which to retrieve the files - unless you have specific case, better to look for the latest one.
 
 ## Develop dashboards
 
@@ -62,7 +62,7 @@ You are now fully ready to start developping dashboards as code!
 
 It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. For this have a look at:
 - The [official website](https://cuelang.org/) of Cuelang.
-- [Cuetorials](https://cuetorials.com/), a 3rd party that is also a very reliable source of information here.
+- [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
 Then, you can check an example of DaC usage [here](../../cue/test/dac_test_input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
 

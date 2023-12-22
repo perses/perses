@@ -11,7 +11,7 @@ USER nobody
 COPY --chown=nobody:nobody perses                            /bin/perses
 COPY --chown=nobody:nobody percli                            /bin/percli
 COPY --chown=nobody:nobody LICENSE                           /LICENSE
-COPY --chown=nobody:nobody cue/schemas/                          /etc/perses/schemas/
+COPY --chown=nobody:nobody cue/schemas/                      /etc/perses/schemas/
 COPY --chown=nobody:nobody cue.mod/                          /etc/perses/cue.mod/
 COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
 COPY --from=build-env --chown=nobody:nobody                  /perses /perses

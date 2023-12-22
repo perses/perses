@@ -16,7 +16,7 @@ $ ./dac_setup.sh -v 0.42.1"
 function dacSetup() {
     echo "Starting DaC setup with Perses version $VERSION"
 
-    # Create the destination folder (see https://cuelang.org/docs/concepts/packages/)
+    # Create the destination folders (see https://cuelang.org/docs/concepts/packages/)
     mkdir -p cue.mod/pkg/github.com/perses/perses/pkg/model/api/v1/
 
     # Download  & extract sources

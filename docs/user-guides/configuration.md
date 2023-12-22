@@ -250,16 +250,16 @@ Generic placeholders are defined as follows:
 
 ```yaml
     # Path to the Cue schemas of the panels
-  [ panels_path: <path> | default = "cue/schemas/panels" ]
+  [ panels_path: <path> | default = "schemas/panels" ]
 
   # Path to the Cue schemas of the queries
-  [ queries_path: <path> | default = "cue/schemas/queries" ]
+  [ queries_path: <path> | default = "schemas/queries" ]
 
   # Path to the Cue schemas of the datasources
-  [ datasources_path: <path> | default = "cue/schemas/datasources" ]
+  [ datasources_path: <path> | default = "schemas/datasources" ]
 
   # Path to the Cue schemas of the variables
-  [ variables_path: <path> | default = "cue/schemas/variables" ]
+  [ variables_path: <path> | default = "schemas/variables" ]
 
   # The refresh interval of the cue schemas regardless their paths
   [ interval: <duration> | default = 1h ]
