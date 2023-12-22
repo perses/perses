@@ -51,6 +51,14 @@ spec:
   [ width: <int> ]
 ```
 
+## ScatterChart
+Note: Currently, ther are are no spec options avaiable for this panel
+
+```yaml
+kind: "ScatterChart"
+spec:
+```
+
 ## TimeSeriesChart
 
 ```yaml

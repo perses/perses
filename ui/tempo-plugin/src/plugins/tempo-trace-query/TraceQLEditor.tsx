@@ -11,5 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './mock-query-results';
-export * from './mock-trace-query-results';
+import { useTheme } from '@mui/material';
+import CodeMirror from '@uiw/react-codemirror';
+
+export function TraceQLEditor({ ...rest }) {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
+
+  return (
+    <CodeMirror
+      {...rest}
+      style={{ border: `1px solid ${theme.palette.divider}` }}
+      theme={isDarkMode ? 'dark' : 'light'}
+      basicSetup={{
+        highlightActiveLine: false,
+        highlightActiveLineGutter: false,
+        foldGutter: false,
+      }}
+    />
+  );
+}

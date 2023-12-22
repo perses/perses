@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TempoDatasource } from './plugins/tempo-datasource';
-import { TempoTraceQuery } from './plugins/TempoTraceQuery';
+import { TempoTraceQuery } from './plugins/tempo-trace-query/TempoTraceQuery';
 
 // Export plugins under the same name as the kinds they handle from the plugin.json
 export { TempoTraceQuery, TempoDatasource };

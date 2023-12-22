@@ -17,6 +17,7 @@ import { usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { TimeSeriesQueryEditor } from '../TimeSeriesQueryEditor';
+import { TraceQueryEditor } from '../TraceQueryEditor';
 
 export interface PanelSpecEditorProps {
   panelDefinition: PanelDefinition;
@@ -43,14 +44,40 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
+  const getQueryType = (): string => {
+    const queriesList = panelDefinition?.spec?.queries;
+    if (queriesList === undefined) {
+      return '';
+    }
+    const queryType: string = queriesList[0]?.kind;
+    return queryType;
+  };
+
+  // Get the corresponding queryEditor depending on the queryType
+  const getQueryEditorComponent = () => {
+    const queryType = getQueryType();
+    // default case handles cause where there is no queryType yet (e.g. UI > 'editing' mode > 'Add Panel')
+    switch (queryType) {
+      case 'TimeSeriesQuery':
+        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
+      case 'TraceQuery':
+        return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
+      default:
+        // ScatterChart only handles trace queries for now
+        if (kind === 'ScatterChart') {
+          return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
+        }
+        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
+    }
+  };
+
   const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
   if (!hideQueryEditor) {
-    // Since we only support TimeSeriesQuery for now, we will always show a TimeSeriesQueryEditor
     tabs.push({
       label: 'Query',
-      content: <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />,
+      content: getQueryEditorComponent(),
     });
   }
 
