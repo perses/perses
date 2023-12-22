@@ -34,7 +34,7 @@
         "@perses-dev/plugin-system": "0.42.1"
     },
     "peerDependencies": {
-        "react": "^17.0.2 || ^18.0.0"
+        "react": "^17.0.2 || ^18.2.0"
     },
     "files": [
         "dist",

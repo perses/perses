@@ -29,15 +29,15 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "date-fns": "^2.28.0",
+    "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
     "mathjs": "^10.6.4",
-    "numbro": "^2.3.6",
-    "zod": "^3.21.4"
+    "numbro": "^2.4.0",
+    "zod": "^3.22.4"
   },
   "peerDependencies": {
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
+    "react": "^17.0.2 || ^18.2.0",
+    "react-dom": "^17.0.2 || ^18.2.0"
   },
   "files": [
     "dist"
