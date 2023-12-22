@@ -82,6 +82,22 @@ test.describe('ProjectView', () => {
     await expect(projectPage.variableList).toContainText('$list_var');
   });
 
+  test('can create a secret', async ({ page }) => {
+    const projectPage = new AppProjectPage(page);
+    await projectPage.goto(project);
+
+    await projectPage.gotoSecretsTab();
+
+    await projectPage.addSecretButton.click();
+    const secretEditor = projectPage.getSecretEditor();
+    await secretEditor.setName('mysupersecret');
+    await secretEditor.setBasicAuthUsername('mysuperusername');
+    await secretEditor.setBasicAuthPassword('mysuperpassword');
+    await secretEditor.saveButton.click();
+
+    await expect(projectPage.secretList).toContainText('mysupersecret');
+  });
+
   test('can create a datasource', async ({ page }) => {
     const projectPage = new AppProjectPage(page);
     await projectPage.goto(project);

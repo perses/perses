@@ -14,6 +14,7 @@
 import { Locator, Page } from '@playwright/test';
 import { DatasourceEditor } from './DatasourceEditor';
 import { VariableEditor } from './VariableEditor';
+import { SecretEditor } from './SecretEditor';
 
 const mainDashboardListId = 'main-dashboard-list';
 const recentDashboardListId = 'recent-dashboard-list';
@@ -27,13 +28,17 @@ export class AppProjectPage {
   readonly addDashboardButton: Locator;
   readonly createDashboardDialog: Locator;
 
-  readonly variableEditor: Locator;
-  readonly addVariableButton: Locator;
-  readonly variableList: Locator;
-
   readonly datasourceEditor: Locator;
   readonly addDatasourceButton: Locator;
   readonly datasourceList: Locator;
+
+  readonly secretEditor: Locator;
+  readonly addSecretButton: Locator;
+  readonly secretList: Locator;
+
+  readonly variableEditor: Locator;
+  readonly addVariableButton: Locator;
+  readonly variableList: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -43,13 +48,17 @@ export class AppProjectPage {
       name: 'Create Dashboard',
     });
 
-    this.addVariableButton = page.getByRole('button', { name: 'Add Variable' });
-    this.variableEditor = page.getByTestId('variable-editor');
-    this.variableList = page.locator('#project-variable-list');
-
     this.addDatasourceButton = page.getByRole('button', { name: 'Add Datasource' });
     this.datasourceEditor = page.getByTestId('datasource-editor');
     this.datasourceList = page.locator('#project-datasource-list');
+
+    this.addSecretButton = page.getByRole('button', { name: 'Add Secret' });
+    this.secretEditor = page.getByTestId('secret-editor');
+    this.secretList = page.locator('#project-secret-list');
+
+    this.addVariableButton = page.getByRole('button', { name: 'Add Variable' });
+    this.variableEditor = page.getByTestId('variable-editor');
+    this.variableList = page.locator('#project-variable-list');
   }
 
   async goto(projectName: string) {
@@ -62,15 +71,21 @@ export class AppProjectPage {
     await navigationPromise;
   }
 
-  async gotoVariablesTab() {
-    const navigationPromise = this.page.waitForNavigation();
-    await this.clickTab('Variables');
-    await navigationPromise;
-  }
-
   async gotoDatasourcesTab() {
     const navigationPromise = this.page.waitForNavigation();
     await this.clickTab('Datasources');
+    await navigationPromise;
+  }
+
+  async gotoSecretsTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Secrets');
+    await navigationPromise;
+  }
+
+  async gotoVariablesTab() {
+    const navigationPromise = this.page.waitForNavigation();
+    await this.clickTab('Variables');
     await navigationPromise;
   }
 
@@ -125,23 +140,15 @@ export class AppProjectPage {
     await dashboardButton.click();
   }
 
-  async startCreatingVariables() {
-    await this.addVariableButton.click();
-    const variableEditor = this.getVariableEditor();
-    await variableEditor.isVisible();
+  getDatasourceEditor() {
+    return new DatasourceEditor(this.datasourceEditor);
+  }
+
+  getSecretEditor() {
+    return new SecretEditor(this.secretEditor);
   }
 
   getVariableEditor() {
     return new VariableEditor(this.variableEditor);
-  }
-
-  async startCreatingDatasources() {
-    await this.addDatasourceButton.click();
-    const datasourceEditor = this.getDatasourceEditor();
-    await datasourceEditor.isVisible();
-  }
-
-  getDatasourceEditor() {
-    return new DatasourceEditor(this.datasourceEditor);
   }
 }
