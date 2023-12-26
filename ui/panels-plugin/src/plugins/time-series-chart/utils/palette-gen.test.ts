@@ -37,7 +37,11 @@ describe('getSeriesColor', () => {
   it('should return the first color from default Categorical palette', () => {
     const props: SeriesColorProps = {
       categoricalPalette: testCategoricalPalette,
-      visual: {},
+      visual: {
+        palette: {
+          mode: 'categorical',
+        },
+      },
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
@@ -49,7 +53,11 @@ describe('getSeriesColor', () => {
   it('should return the last color from default Categorical palette', () => {
     const props: SeriesColorProps = {
       categoricalPalette: testCategoricalPalette,
-      visual: {},
+      visual: {
+        palette: {
+          mode: 'categorical',
+        },
+      },
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 6,

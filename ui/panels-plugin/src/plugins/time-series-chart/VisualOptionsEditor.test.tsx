@@ -12,12 +12,17 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart-model';
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
   const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()) => {
-    render(<VisualOptionsEditor value={value} onChange={onChange} />);
+    render(
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <VisualOptionsEditor value={value} onChange={onChange} />
+      </ChartsProvider>
+    );
   };
 
   const getLineWidthSlider = () => {
