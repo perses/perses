@@ -45,6 +45,7 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
+      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -61,6 +62,7 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 6,
+      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#D55E00');
@@ -78,6 +80,7 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
+      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
@@ -95,6 +98,7 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
+      totalSeries: 8,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -107,9 +111,29 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
+      totalSeries: 8,
     } as unknown as SeriesColorProps;
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
+  });
+
+  it('should return color set in singleSeriesColor', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+        singleSeriesColor: '#000',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 1,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
   });
 });
 

@@ -20,13 +20,19 @@ export interface SeriesColorProps {
   muiPrimaryColor: string;
   seriesName: string;
   seriesIndex: number;
+  totalSeries: number;
 }
 
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
  */
 export function getSeriesColor(props: SeriesColorProps) {
-  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex } = props;
+  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex, totalSeries } = props;
+
+  if (visual.palette?.singleSeriesColor && totalSeries === 1) {
+    return visual.palette?.singleSeriesColor;
+  }
+
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
   const fallbackColor =
     Array.isArray(categoricalPalette) && categoricalPalette[0]

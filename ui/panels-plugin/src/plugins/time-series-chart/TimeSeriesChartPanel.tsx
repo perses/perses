@@ -183,19 +183,17 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by seriesNameFormat in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // Color is used for line, tooltip, and legend
-        // When only one series returned check if custom color is defined
-        const seriesColor =
-          visual.palette?.singleSeriesColor && totalSeries === 1
-            ? visual.palette.singleSeriesColor
-            : getSeriesColor({
-                // ECharts type for color is not always an array but it is always an array in ChartsProvider
-                categoricalPalette: categoricalPalette as string[],
-                visual,
-                muiPrimaryColor: muiTheme.palette.primary.main,
-                seriesName: formattedSeriesName,
-                seriesIndex,
-              });
+        // Color is used for line, tooltip, and legend, categorical palette set in ChartsProvider.
+        // When only one series returned check if custom color is defined, otherwise fallback to visual.palette.mode.
+        const seriesColor = getSeriesColor({
+          // ECharts type for color is not always an array but it is always an array in ChartsProvider
+          categoricalPalette: categoricalPalette as string[],
+          visual,
+          muiPrimaryColor: muiTheme.palette.primary.main,
+          seriesName: formattedSeriesName,
+          seriesIndex,
+          totalSeries,
+        });
 
         // We add a unique id for the chart to disambiguate items across charts
         // when there are multiple on the page.

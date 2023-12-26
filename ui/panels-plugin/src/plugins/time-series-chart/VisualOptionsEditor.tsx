@@ -29,7 +29,7 @@ import {
 } from './time-series-chart-model';
 import { SingleSeriesColorPicker } from './SingleSeriesColorPicker';
 
-const EMPTY_TEMP_COLOR = '#555';
+const EMPTY_TEMP_COLOR = '#555'; // Never visible on rendered lines, used since color picker can't be disabled
 
 export interface VisualOptionsEditorProps {
   value: TimeSeriesChartVisualOptions;
