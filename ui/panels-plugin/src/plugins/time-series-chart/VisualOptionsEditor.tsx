@@ -35,7 +35,6 @@ export interface VisualOptionsEditorProps {
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  console.debug('VisualOptionsEditor -> value: ', value);
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
