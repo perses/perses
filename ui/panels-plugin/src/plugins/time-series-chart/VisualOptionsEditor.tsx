@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
+// import { produce } from 'immer';
+import { Box, Slider, Switch, ToggleButton, ToggleButtonGroup, Typography, Stack } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -24,7 +25,9 @@ import {
   STACK_OPTIONS,
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
+  TimeSeriesChartPaletteOptions,
 } from './time-series-chart-model';
+import { SingleSeriesColorPicker } from './SingleSeriesColorEditor';
 
 export interface VisualOptionsEditorProps {
   value: TimeSeriesChartVisualOptions;
@@ -32,6 +35,7 @@ export interface VisualOptionsEditorProps {
 }
 
 export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
+  console.debug('VisualOptionsEditor -> value: ', value);
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
@@ -52,6 +56,18 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
 
   const currentStack: StackOptions = value.stack ?? 'none';
   const stackConfig = STACK_CONFIG[currentStack];
+
+  const handleSingleSeriesColorChange = (color: string) => {
+    const singleSeriesColor: TimeSeriesChartPaletteOptions['singleSeriesColor'] = color;
+    onChange({
+      ...value,
+      palette: {
+        ...value.palette,
+        mode: 'auto',
+        singleSeriesColor,
+      },
+    });
+  };
 
   return (
     <OptionsEditorGroup title="Visual">
@@ -112,6 +128,37 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
             disabled={value.display === 'bar'}
             onChange={handleAreaOpacityChange}
           />
+        }
+      />
+      <OptionsEditorControl
+        label={'Palette'}
+        control={
+          <Box>
+            <ToggleButtonGroup
+              color="primary"
+              exclusive
+              value={value.palette?.mode ?? 'auto'}
+              onChange={(__, newValue) => {
+                const palette: TimeSeriesChartVisualOptions['palette'] =
+                  newValue === 'categorical' ? { mode: 'categorical' } : undefined;
+                onChange({
+                  ...value,
+                  palette,
+                });
+              }}
+            >
+              <ToggleButton value="auto">Auto</ToggleButton>
+              <ToggleButton value="categorical">Categorical</ToggleButton>
+            </ToggleButtonGroup>
+            <Stack flex={1} direction="row" alignItems="center" spacing={1}>
+              <Typography>Single Series Color</Typography>
+              <SingleSeriesColorPicker
+                label="default"
+                color={value.palette?.singleSeriesColor ?? '#000'}
+                onColorChange={handleSingleSeriesColorChange}
+              />
+            </Stack>
+          </Box>
         }
       />
       <OptionsEditorControl

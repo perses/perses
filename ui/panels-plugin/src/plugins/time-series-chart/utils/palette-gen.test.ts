@@ -41,7 +41,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -54,23 +53,9 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 6,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#D55E00');
-  });
-
-  it('should return color from the generative Auto palette when all Categorical colors have been used', () => {
-    const props: SeriesColorProps = {
-      categoricalPalette: testCategoricalPalette,
-      visual: {},
-      muiPrimaryColor: fallbackColor,
-      seriesName: testSeriesName,
-      seriesIndex: 0,
-      totalSeries: 8,
-    };
-    const paletteColor = getSeriesColor(props);
-    expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 
   it('should return color from the generative Auto palette when visual option is defined', () => {
@@ -85,7 +70,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
@@ -103,7 +87,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -116,7 +99,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     } as unknown as SeriesColorProps;
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);

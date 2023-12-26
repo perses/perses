@@ -20,38 +20,25 @@ export interface SeriesColorProps {
   muiPrimaryColor: string;
   seriesName: string;
   seriesIndex: number;
-  totalSeries: number;
 }
 
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
  */
 export function getSeriesColor(props: SeriesColorProps) {
-  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex, totalSeries } = props;
+  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex } = props;
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
   const fallbackColor =
     Array.isArray(categoricalPalette) && categoricalPalette[0]
       ? (categoricalPalette[0] as string) // Needed since echarts color property isn't always an array.
       : muiPrimaryColor;
 
-  // Explicit way to opt-in to generative palette with consistent colors for same series names.
-  if (visual.palette?.mode === 'auto') {
-    return getAutoPaletteColor(seriesName, fallbackColor);
-  }
-
   // Explicit way to always cycle through classical palette instead of changing when based on number of series.
   if (visual.palette?.mode === 'categorical') {
     return getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor);
   }
 
-  // Decide which palette to use based on total series returned.
-  // When series number exceeds number of colors in palette, use generative colors instead.
-  const paletteLength = Array.isArray(categoricalPalette) ? categoricalPalette.length : 0;
-  const seriesColor =
-    totalSeries <= paletteLength
-      ? getCategoricalPaletteColor(categoricalPalette, seriesIndex, fallbackColor)
-      : getAutoPaletteColor(seriesName, fallbackColor);
-  return seriesColor;
+  return getAutoPaletteColor(seriesName, fallbackColor);
 }
 
 /**
