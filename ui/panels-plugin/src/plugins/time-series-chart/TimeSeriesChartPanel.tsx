@@ -174,7 +174,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Color is used for line, tooltip, and legend
         // When only one series returned check if custom color is defined
         const seriesColor =
-          visual.palette.singleSeriesColor && result.data.series.length === 1
+          visual.palette?.singleSeriesColor && result.data.series.length === 1
             ? visual.palette.singleSeriesColor
             : getSeriesColor({
                 // ECharts type for color is not always an array but it is always an array in ChartsProvider
