@@ -33,7 +33,6 @@ import (
 #palette: {
 	mode:               "auto" | "categorical"
 	singleSeriesColor?: string
-	// colors: [...string]; // TODO: add colors to override ECharts theme
 }
 
 #visual: {
