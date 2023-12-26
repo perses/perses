@@ -135,6 +135,25 @@ describe('getSeriesColor', () => {
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#000');
   });
+
+  it('should fallback to regular palette instead of using singleSeriesColor when more than one series', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+        singleSeriesColor: '#000',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      totalSeries: 2,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('hsla(27.48,50%,50%,0.9)');
+  });
 });
 
 describe('getCategoricalPaletteColor', () => {
