@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Box, Slider, Switch, ToggleButton, ToggleButtonGroup, Typography, Stack } from '@mui/material';
+import { Slider, Switch, ToggleButton, ToggleButtonGroup, Stack, IconButton } from '@mui/material';
+import CloseCircleOutline from 'mdi-material-ui/CloseCircleOutline';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -133,36 +134,55 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
       <OptionsEditorControl
         label={'Palette'}
         control={
-          <Box>
-            <ToggleButtonGroup
-              color="primary"
-              exclusive
-              value={value.palette?.mode ?? 'auto'}
-              onChange={(__, newValue) => {
-                onChange(
-                  produce(value, (draft) => {
-                    if (!draft.palette) {
-                      draft.palette = {
-                        mode: 'auto',
-                      };
-                    }
-                    draft.palette.mode = newValue === 'categorical' ? 'categorical' : 'auto';
-                  })
-                );
-              }}
-            >
-              <ToggleButton value="auto">Auto</ToggleButton>
-              <ToggleButton value="categorical">Categorical</ToggleButton>
-            </ToggleButtonGroup>
-            <Stack flex={1} direction="row" alignItems="center" spacing={1}>
-              <Typography>Single Series Color</Typography>
+          <ToggleButtonGroup
+            color="primary"
+            exclusive
+            value={value.palette?.mode ?? 'auto'}
+            onChange={(__, newValue) => {
+              onChange(
+                produce(value, (draft) => {
+                  if (!draft.palette) {
+                    draft.palette = {
+                      mode: 'auto',
+                    };
+                  }
+                  draft.palette.mode = newValue === 'categorical' ? 'categorical' : 'auto';
+                })
+              );
+            }}
+          >
+            <ToggleButton value="auto">Auto</ToggleButton>
+            <ToggleButton value="categorical">Categorical</ToggleButton>
+          </ToggleButtonGroup>
+        }
+      />
+      <OptionsEditorControl
+        label={'Single Series Color'}
+        control={
+          <Stack gap={1}>
+            <Stack direction="row" spacing={0.5}>
               <SingleSeriesColorPicker
                 label="default"
-                color={value.palette?.singleSeriesColor ?? '#000'}
+                color={value.palette?.singleSeriesColor ?? '#555'}
                 onColorChange={handleSingleSeriesColorChange}
               />
+              <IconButton
+                size="small"
+                onClick={() =>
+                  onChange(
+                    produce(value, (draft) => {
+                      if (draft.palette) {
+                        draft.palette.singleSeriesColor = undefined;
+                      }
+                    })
+                  )
+                }
+                aria-label="reset color"
+              >
+                <CloseCircleOutline />
+              </IconButton>
             </Stack>
-          </Box>
+          </Stack>
         }
       />
       <OptionsEditorControl
