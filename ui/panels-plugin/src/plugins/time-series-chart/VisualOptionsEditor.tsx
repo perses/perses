@@ -27,7 +27,9 @@ import {
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
-import { SingleSeriesColorPicker } from './SingleSeriesColorEditor';
+import { SingleSeriesColorPicker } from './SingleSeriesColorPicker';
+
+const EMPTY_TEMP_COLOR = '#555';
 
 export interface VisualOptionsEditorProps {
   value: TimeSeriesChartVisualOptions;
@@ -130,8 +132,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
           <Stack gap={1}>
             <Stack direction="row" spacing={0.5}>
               <SingleSeriesColorPicker
-                label="default"
-                color={value.palette?.singleSeriesColor ?? '#555'}
+                color={value.palette?.singleSeriesColor ?? EMPTY_TEMP_COLOR}
                 onColorChange={handleSingleSeriesColorChange}
               />
               <IconButton

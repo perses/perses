@@ -16,13 +16,13 @@ import { styled, IconButton, Popover } from '@mui/material';
 import type { Color } from 'echarts';
 import CircleIcon from 'mdi-material-ui/Circle';
 import { useChartsTheme, ColorPicker } from '@perses-dev/components';
-import { SingleValueColorInputProps } from './SingleSeriesColorInput';
 
-export function SingleSeriesColorPicker({
-  color,
-  onColorChange,
-  label,
-}: Pick<SingleValueColorInputProps, 'color' | 'onColorChange' | 'label'>) {
+export interface SingleSeriesColorPickerProps {
+  color: string;
+  onColorChange: (color: string) => void;
+}
+
+export function SingleSeriesColorPicker({ color, onColorChange }: SingleSeriesColorPickerProps) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -47,7 +47,7 @@ export function SingleSeriesColorPicker({
     <>
       <ColorIconButton
         size="small"
-        aria-label={`change threshold ${label} color`}
+        aria-label={`change single series color`}
         isSelected={isOpen}
         iconColor={color}
         onClick={openColorPicker}
@@ -55,7 +55,7 @@ export function SingleSeriesColorPicker({
         <CircleIcon />
       </ColorIconButton>
       <Popover
-        data-testid="threshold color picker"
+        data-testid="single series color picker"
         open={isOpen}
         anchorEl={anchorEl}
         onClose={closeColorPicker}
