@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { produce } from 'immer';
+import { produce } from 'immer';
 import { Box, Slider, Switch, ToggleButton, ToggleButtonGroup, Typography, Stack } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
@@ -25,7 +25,6 @@ import {
   STACK_OPTIONS,
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
-  TimeSeriesChartPaletteOptions,
 } from './time-series-chart-model';
 import { SingleSeriesColorPicker } from './SingleSeriesColorEditor';
 
@@ -38,34 +37,36 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
-    onChange({
-      ...value,
-      lineWidth: newValue,
-      pointRadius: symbolSize,
-    });
+    onChange(
+      produce(value, (draft) => {
+        draft.lineWidth = newValue;
+        draft.pointRadius = symbolSize;
+      })
+    );
   };
 
   const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      areaOpacity: newValue,
-    });
+    onChange(
+      produce(value, (draft) => {
+        draft.areaOpacity = newValue;
+      })
+    );
   };
 
   const currentStack: StackOptions = value.stack ?? 'none';
   const stackConfig = STACK_CONFIG[currentStack];
 
   const handleSingleSeriesColorChange = (color: string) => {
-    const singleSeriesColor: TimeSeriesChartPaletteOptions['singleSeriesColor'] = color;
-    onChange({
-      ...value,
-      palette: {
-        ...value.palette,
-        mode: 'auto',
-        singleSeriesColor,
-      },
-    });
+    onChange(
+      produce(value, (draft) => {
+        draft.palette = {
+          ...draft.palette,
+          mode: 'auto',
+          singleSeriesColor: color,
+        };
+      })
+    );
   };
 
   return (
@@ -138,12 +139,16 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
               exclusive
               value={value.palette?.mode ?? 'auto'}
               onChange={(__, newValue) => {
-                const palette: TimeSeriesChartVisualOptions['palette'] =
-                  newValue === 'categorical' ? { mode: 'categorical' } : undefined;
-                onChange({
-                  ...value,
-                  palette,
-                });
+                onChange(
+                  produce(value, (draft) => {
+                    if (!draft.palette) {
+                      draft.palette = {
+                        mode: 'auto',
+                      };
+                    }
+                    draft.palette.mode = newValue === 'categorical' ? 'categorical' : 'auto';
+                  })
+                );
               }}
             >
               <ToggleButton value="auto">Auto</ToggleButton>
