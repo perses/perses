@@ -24,13 +24,14 @@ export interface SeriesColorProps {
 }
 
 /**
- * Get line color as well as color for tooltip and legend, account for whether palette is 'Cateogrical' or 'Auto' (generative)
+ * Get line color as well as color for tooltip and legend, account for whether palette is 'categorical' or 'auto' aka generative
  */
 export function getSeriesColor(props: SeriesColorProps) {
   const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex, totalSeries } = props;
 
+  // When single series is returned, check if a color override is set in singleSeriesColor
   if (visual.palette?.singleSeriesColor && totalSeries === 1) {
-    return visual.palette?.singleSeriesColor;
+    return visual.palette.singleSeriesColor;
   }
 
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
