@@ -161,6 +161,13 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
 
+    // Total series count across all queries is needed before mapping below to determine which color palette to use
+    // This calculation should not impact performance since total number of queries rarely exceeds ~5
+    let totalSeries = 0;
+    for (let i = 0; i < queryResults.length; i++) {
+      totalSeries += queryResults[i]?.data?.series?.length ?? 0;
+    }
+
     // Mapping of each set of query results to be ECharts option compatible
     // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
     for (const result of queryResults) {
@@ -179,7 +186,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Color is used for line, tooltip, and legend
         // When only one series returned check if custom color is defined
         const seriesColor =
-          visual.palette?.singleSeriesColor && result.data.series.length === 1
+          visual.palette?.singleSeriesColor && totalSeries === 1
             ? visual.palette.singleSeriesColor
             : getSeriesColor({
                 // ECharts type for color is not always an array but it is always an array in ChartsProvider
