@@ -16,7 +16,6 @@ import { Box, Skeleton, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
-  useDeepMemo,
   getTimeSeriesValues,
   DEFAULT_LEGEND,
   getCalculations,
@@ -108,19 +107,25 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     : undefined;
 
   // populate default 'position' and other future properties
-  const legend =
-    props.spec.legend && validateLegendSpec(props.spec.legend)
+  const legend = useMemo(() => {
+    return props.spec.legend && validateLegendSpec(props.spec.legend)
       ? merge({}, DEFAULT_LEGEND, props.spec.legend)
       : undefined;
+  }, [props.spec.legend]);
 
   // TODO: add support for y_axis_alt.format
   const format = props.spec.yAxis?.format ?? DEFAULT_FORMAT;
 
   // ensures there are fallbacks for unset properties since most
   // users should not need to customize visual display
-  const visual = merge({}, DEFAULT_VISUAL, props.spec.visual);
+  const visual = useMemo(() => {
+    return merge({}, DEFAULT_VISUAL, props.spec.visual);
+  }, [props.spec.visual]);
+
   // convert Perses dashboard format to be ECharts compatible
-  const echartsYAxis = convertPanelYAxis(yAxis);
+  const echartsYAxis = useMemo(() => {
+    return convertPanelYAxis(yAxis);
+  }, [yAxis]);
 
   const [selectedLegendItems, setSelectedLegendItems] = useState<SelectedLegendItemState>('ALL');
   const [legendSorting, setLegendSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
@@ -128,7 +133,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const { setTimeRange } = useTimeRange();
 
   // Populate series data based on query results
-  const { timeScale, timeChartData, timeSeriesMapping, legendItems } = useDeepMemo(() => {
+  const { timeScale, timeChartData, timeSeriesMapping, legendItems } = useMemo(() => {
     // If loading or fetching, we display a loading indicator.
     // We skip the expensive loops below until we are done loading or fetching.
     if (isLoading || isFetching) {
@@ -272,7 +277,21 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       timeSeriesMapping,
       legendItems,
     };
-  }, [queryResults, thresholds, selectedLegendItems, legend, visual, isFetching, isLoading, yAxis?.max, yAxis?.min]);
+  }, [
+    queryResults,
+    thresholds,
+    selectedLegendItems,
+    legend,
+    visual,
+    isFetching,
+    isLoading,
+    yAxis?.max,
+    yAxis?.min,
+    categoricalPalette,
+    chartId,
+    chartsTheme.thresholds,
+    muiTheme.palette.primary.main,
+  ]);
 
   // Translate the legend values into columns for the table legend.
   const legendColumns = useMemo(() => {
