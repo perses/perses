@@ -34,15 +34,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
    * @param dashboard
    * @param project
    */
-  buildProxyUrl({
-    project,
-    dashboard,
-    name,
-  }: {
-    project?: string;
-    dashboard?: string;
-    name?: string;
-  }): string {
+  buildProxyUrl({ project, dashboard, name }: { project?: string; dashboard?: string; name?: string }): string {
     const unsaved = name === undefined;
     const prefix = unsaved ? '/proxy/unsaved/' : '/proxy/';
     const type = !project && !dashboard ? 'globaldatasources' : 'datasources';

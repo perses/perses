@@ -136,7 +136,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
       const { kind } = selector;
       const [{ spec, proxyUrl }, plugin] = await Promise.all([findDatasource(selector), getPlugin('Datasource', kind)]);
 
-      return plugin.createClient(spec.plugin.spec, { proxyUrl });
+      return plugin.createClient(spec.plugin.spec, { proxyUrl, fetch });
     },
     [findDatasource, getPlugin]
   );
@@ -151,10 +151,38 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
         dashboard: datasource.dashboard,
       });
 
-      return plugin.createClient(datasource.spec.plugin.spec, { proxyUrl: proxyURL });
+      return plugin.createClient(datasource.spec.plugin.spec, {
+        proxyUrl: proxyURL,
+        fetch: getUnsavedFetchProxy(datasource.spec),
+      });
     },
     [getPlugin, datasourceApi]
   );
+
+  // Helper to create a fetch proxy for unsaved datasources.
+  // Unsaved datasources have to package the spec into their body so that the proxy can use it to create the client.
+  const getUnsavedFetchProxy = (spec: DatasourceSpec) =>
+    new Proxy(fetch, {
+      apply: async (target, thisArg, args) => {
+        const [url, init] = args;
+
+        const body = {
+          spec,
+          method: init?.method ?? 'GET',
+          body: init?.body,
+        };
+
+        return fetch(url, {
+          ...init,
+          body: JSON.stringify(body),
+          method: 'POST',
+          headers: {
+            ...init?.headers,
+            'Content-Type': 'application/json',
+          },
+        });
+      },
+    });
 
   const getDatasourceClient = useCallback(
     async function getClient<Client extends DatasourceClient>(

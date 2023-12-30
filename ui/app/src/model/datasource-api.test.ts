@@ -41,7 +41,7 @@ describe('buildProxyUrl', () => {
     },
     {
       title: 'should build unsaved global datasource proxy url',
-      input: { },
+      input: {},
       expected: '/proxy/unsaved/globaldatasources',
     },
     {

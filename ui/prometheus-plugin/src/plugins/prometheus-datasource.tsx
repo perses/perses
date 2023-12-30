@@ -22,7 +22,7 @@ import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
  */
 const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>['createClient'] = (spec, options) => {
   const { directUrl, proxy } = spec;
-  const { proxyUrl } = options;
+  const { proxyUrl, fetch } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
   const datasourceUrl = directUrl ?? proxyUrl;
@@ -37,11 +37,11 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     options: {
       datasourceUrl,
     },
-    healthCheck: healthCheck({ datasourceUrl, headers: specHeaders }),
-    instantQuery: (params, headers) => instantQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
-    labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    healthCheck: healthCheck({ fetch, datasourceUrl, headers: specHeaders }),
+    instantQuery: (params, headers) => instantQuery(params, { fetch, datasourceUrl, headers: headers ?? specHeaders }),
+    rangeQuery: (params, headers) => rangeQuery(params, { fetch, datasourceUrl, headers: headers ?? specHeaders }),
+    labelNames: (params, headers) => labelNames(params, { fetch, datasourceUrl, headers: headers ?? specHeaders }),
+    labelValues: (params, headers) => labelValues(params, { fetch, datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 

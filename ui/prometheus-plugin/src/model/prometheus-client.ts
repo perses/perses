@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, fetchJson, RequestHeaders } from '@perses-dev/core';
+import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
 import {
   InstantQueryRequestParameters,
@@ -41,6 +41,7 @@ export interface PrometheusClient extends DatasourceClient {
 export interface QueryOptions {
   datasourceUrl: string;
   headers?: RequestHeaders;
+  fetch: typeof fetch;
 }
 
 /**
@@ -51,7 +52,7 @@ export function healthCheck(queryOptions: QueryOptions) {
     const url = `${queryOptions.datasourceUrl}/-/healthy`;
 
     try {
-      const resp = await fetch(url, { headers: queryOptions.headers });
+      const resp = await queryOptions.fetch(url, { headers: queryOptions.headers });
       return resp.status === 200;
     } catch {
       return false;
@@ -109,7 +110,7 @@ function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, par
   if (urlParams !== '') {
     url += `?${urlParams}`;
   }
-  return fetchJson<TResponse>(url, { method: 'GET' });
+  return fetchResults<TResponse>(queryOptions.fetch, url, { method: 'GET' });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
@@ -124,7 +125,7 @@ function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, pa
     },
     body: createSearchParams(params),
   };
-  return fetchResults<TResponse>(url, init);
+  return fetchResults<TResponse>(queryOptions.fetch, url, init);
 }
 
 // Request parameter values we know how to serialize
@@ -165,7 +166,7 @@ function createSearchParams<T extends RequestParams<T>>(params: T) {
 /**
  * Fetch JSON and parse warnings for query inspector
  */
-export async function fetchResults<T>(...args: Parameters<typeof global.fetch>) {
+export async function fetchResults<T>(fetch: typeof global.fetch, ...args: Parameters<typeof global.fetch>) {
   const response = await fetch(...args);
   const json: T = await response.json();
   return { ...json, rawResponse: response };
