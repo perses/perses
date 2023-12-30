@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
+import { Action, Datasource, DatasourceSpec, DispatchWithPromise, getMetadataProject } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
+import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 
 interface DatasourceDrawerProps<T extends Datasource> {
   datasource: T;
@@ -31,6 +33,8 @@ interface DatasourceDrawerProps<T extends Datasource> {
 export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
   const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
+  const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
+  const project = getMetadataProject(datasource.metadata);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
@@ -58,16 +62,19 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           }}
         >
           {isOpen && (
-            <DatasourceEditorForm
-              initialName={datasource.metadata.name}
-              initialSpec={datasource.spec}
-              initialAction={action}
-              isDraft={false}
-              isReadonly={isReadonly}
-              onSave={handleSave}
-              onClose={onClose}
-              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
-            />
+            <DatasourceStoreProvider datasourceApi={datasourceApi}>
+              <DatasourceEditorForm
+                initialName={datasource.metadata.name}
+                initialSpec={datasource.spec}
+                project={project}
+                initialAction={action}
+                isDraft={false}
+                isReadonly={isReadonly}
+                onSave={handleSave}
+                onClose={onClose}
+                onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              />
+            </DatasourceStoreProvider>
           )}
         </PluginRegistry>
         {onDelete && (

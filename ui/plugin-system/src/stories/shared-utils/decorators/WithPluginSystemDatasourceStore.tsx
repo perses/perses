@@ -67,7 +67,10 @@ export const WithPluginSystemDatasourceStore = (Story: StoryFn, context: StoryCo
     getDatasourceClient: async <Client,>(selector: DatasourceSelector) => {
       if (selector.kind === 'PrometheusDatasource') {
         const plugin = await getPlugin('Datasource', 'PrometheusDatasource');
-        const client = plugin.createClient({ directUrl: prometheusDemoUrl }, { proxyUrl: prometheusDemoUrl, fetch }) as Client;
+        const client = plugin.createClient(
+          { directUrl: prometheusDemoUrl },
+          { proxyUrl: prometheusDemoUrl, fetch }
+        ) as Client;
         return client;
       }
       throw new Error(`WithDatasourceStore is not configured to support kind: ${selector.kind}`);

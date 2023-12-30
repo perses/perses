@@ -15,12 +15,14 @@ import { useImmer } from 'use-immer';
 import { Action, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { DispatchWithoutAction, useCallback, useState } from 'react';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, useSnackbar } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { getSubmitText, getTitleAction } from '../../utils';
 import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
+import { useDatasourceStore } from '../../runtime';
+import { DatasourceClient } from '../../model';
 
 /**
  * This preprocessing ensures that we always have a defined object for the `display` property
@@ -47,6 +49,8 @@ interface DatasourceEditorFormProps {
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
+  project?: string;
+  dashboard?: string;
   onSave: (name: string, spec: DatasourceSpec) => void;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
@@ -61,6 +65,8 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
+  const datasourceStore = useDatasourceStore();
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const form = useForm<DatasourceEditValidationType>({
     resolver: zodResolver(datasourceEditValidationSchema),
@@ -83,6 +89,24 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
       },
     });
   };
+
+  const onTest = useCallback(async () => {
+    const client = await datasourceStore.getDatasourceClient<DatasourceClient>({
+      spec: state.spec,
+      project: props.project,
+      dashboard: props.dashboard,
+    });
+    let healthy = true;
+    if (client.healthCheck) {
+      healthy = await client.healthCheck();
+    }
+
+    if (healthy) {
+      successSnackbar('Datasource is healthy');
+    } else {
+      exceptionSnackbar('Datasource is unhealthy');
+    }
+  }, [datasourceStore, state.spec, successSnackbar, exceptionSnackbar, props.project, props.dashboard]);
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
@@ -135,6 +159,9 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
             <>
               <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
                 {submitText}
+              </Button>
+              <Button variant="contained" disabled={!form.formState.isValid} onClick={onTest}>
+                Test
               </Button>
               <Button color="secondary" variant="outlined" onClick={handleCancel}>
                 Cancel
