@@ -7,7 +7,7 @@ and run the Perses dashboard project on your local machine.
 
 To build the Perses project from source you need minimum versions of the following:
 
-- GO v1.18+
+- GO v1.21+
 - Node v16+
 - NPM v8+
 
