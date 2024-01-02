@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import {
   AppBar,
   Box,
@@ -43,9 +43,9 @@ import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
-import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute, SignInRoute } from '../model/route';
+import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute } from '../model/route';
 import { useIsAuthEnable } from '../context/Config';
-import { useAuthToken, useLogoutMutation } from '../model/auth-client';
+import { useAuthToken } from '../model/auth-client';
 import WhitePersesLogo from './logo/WhitePersesLogo';
 import PersesLogoCropped from './logo/PersesLogoCropped';
 
@@ -83,9 +83,6 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
 
 function AccountMenu() {
   const token = useAuthToken();
-  const logoutMutation = useLogoutMutation();
-  const navigate = useNavigate();
-  const { exceptionSnackbar } = useSnackbar();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -93,16 +90,6 @@ function AccountMenu() {
   };
   const handleCloseMenu = () => {
     setAnchorEl(null);
-  };
-  const handleLogout = () => {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        navigate(SignInRoute);
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-      },
-    });
   };
   return (
     <Box>
@@ -134,7 +121,7 @@ function AccountMenu() {
         </MenuItem>
         <Divider />
         <ThemeSwitch isAuthEnable />
-        <MenuItem onClick={handleLogout}>
+        <MenuItem component="a" href={'/api/auth/logout'}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
