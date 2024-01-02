@@ -100,7 +100,7 @@ func (e *oIDCEndpoint) buildAuthHandler() echo.HandlerFunc {
 
 func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 	// TODO(cegarcia): Make a user synchronization operation on the database
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *UserInfo) {
 		redirectURI := r.URL.Query().Get("redirect_uri")
 		if redirectURI == "" {
 			redirectURI = "/"
