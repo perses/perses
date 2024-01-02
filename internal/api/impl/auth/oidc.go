@@ -56,7 +56,10 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 	options := []rp.Option{
 		rp.WithVerifierOpts(rp.WithIssuedAtOffset(5 * time.Second)),
 		rp.WithHTTPClient(client),
-		rp.WithPKCE(cookieHandler),
+		rp.WithCookieHandler(cookieHandler),
+	}
+	if !provider.DisablePKCE {
+		options = append(options, rp.WithPKCE(cookieHandler))
 	}
 	if provider.DiscoveryURL != "" {
 		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL))

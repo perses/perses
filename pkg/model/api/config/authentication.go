@@ -36,6 +36,7 @@ type OIDCProvider struct {
 	Scopes       []string          `json:"scopes" yaml:"scopes"`
 	Issuer       string            `json:"issuer" yaml:"issuer"`
 	DiscoveryURL string            `json:"discovery_url" yaml:"discovery_url"`
+	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 	URLParams    map[string]string `json:"url_params" yaml:"url_params"`
 }
 
