@@ -34,7 +34,8 @@ type OIDCProvider struct {
 	ClientSecret config.Secret     `json:"client_secret" yaml:"client_secret"`
 	RedirectURI  string            `json:"redirect_uri" yaml:"redirect_uri"`
 	Scopes       []string          `json:"scopes" yaml:"scopes"`
-	Issuer       config.Secret     `json:"issuer" yaml:"issuer"`
+	Issuer       string            `json:"issuer" yaml:"issuer"`
+	DiscoveryURL string            `json:"discovery_url" yaml:"discovery_url"`
 	URLParams    map[string]string `json:"url_params" yaml:"url_params"`
 }
 

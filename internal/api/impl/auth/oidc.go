@@ -58,9 +58,12 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 		rp.WithHTTPClient(client),
 		rp.WithPKCE(cookieHandler),
 	}
+	if provider.DiscoveryURL != "" {
+		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL))
+	}
 	relyingParty, err := rp.NewRelyingPartyOIDC(
 		context.Background(),
-		string(provider.Issuer), string(provider.ClientID), string(provider.ClientSecret),
+		provider.Issuer, string(provider.ClientID), string(provider.ClientSecret),
 		provider.RedirectURI, provider.Scopes, options...,
 	)
 	if err != nil {
