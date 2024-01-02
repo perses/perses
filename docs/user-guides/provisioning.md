@@ -1,6 +1,6 @@
 # Provisioning
 
-The provisioning feature allows user to inject any kind of resources in the database when Perses is starting.
+The provisioning feature allows to inject any kind of resources in the database when Perses is starting.
 
 That can be useful in case you would like to populate your database with a set of predefined datasources for example.
 
