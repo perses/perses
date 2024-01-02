@@ -67,7 +67,7 @@ Generic placeholders are defined as follows:
   [ security: <security_config> ]
 
   # Database configuration 
-  database: <database_config>
+  [ database: <database_config> ]
 
   # The configuration to access the CUE schemas
   [ schemas: <schemas_config> ]
