@@ -294,6 +294,7 @@ export function VariableEditor(props: {
                   (extVar) =>
                     extVar.definitions.length > 0 && (
                       <Accordion
+                        key={extVar.source}
                         sx={(theme) => ({
                           '.MuiAccordionSummary-root': {
                             backgroundColor: theme.palette.background.lighter,

@@ -23,7 +23,7 @@ describe('PluginKindSelect', () => {
 
   // Opens the select and waits for loading to finish (i.e. options to appear)
   const openSelect = async () => {
-    const select = screen.getByRole('button');
+    const select = screen.getByRole('combobox');
     userEvent.click(select);
     const options = await screen.findAllByTestId('option');
     return options;
@@ -52,7 +52,7 @@ describe('PluginKindSelect', () => {
     });
 
     // Use findByRole to wait for loading to finish and selected value to appear
-    const select = await screen.findByRole('button', { name: 'Ernie Variable 1' });
+    const select = await screen.findByDisplayValue('ErnieVariable1');
     expect(select).toBeInTheDocument();
   });
 

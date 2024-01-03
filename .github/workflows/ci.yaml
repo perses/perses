@@ -67,6 +67,8 @@ jobs:
           enable_npm: true
       - name: Install UI deps
         run: cd ./ui && npm install
+      - name: Install Playwright Browsers
+        run: cd ./ui && npx playwright install --with-deps chromium
       - name: Build the storybook
         run: cd ./ui && npm run storybook:build
       - name: Run storybook tests
