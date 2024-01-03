@@ -16,13 +16,29 @@ package config
 import (
 	"testing"
 
+	"github.com/perses/common/config"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAuthProvidersVerify(t *testing.T) {
-	wrongOAuth := AuthProviders{OAuth: []OAuthProvider{{SlugID: "hello"}, {SlugID: "hello"}}}
+func TestAuthProviders_Verify(t *testing.T) {
+	wrongOAuth := AuthProviders{OAuth: []OAuthProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
 	assert.ErrorContains(t, wrongOAuth.Verify(), "several OAuth providers exist with the same slug_id")
 
-	wrongOIDC := AuthProviders{OIDC: []OIDCProvider{{SlugID: "hello"}, {SlugID: "hello"}}}
+	wrongOIDC := AuthProviders{OIDC: []OIDCProvider{{Provider: Provider{SlugID: "hello"}}, {Provider: Provider{SlugID: "hello"}}}}
 	assert.ErrorContains(t, wrongOIDC.Verify(), "several OIDC providers exist with the same slug_id")
+}
+
+// TestProvider_Verify makes sure the Verify of parent struct is well called by the config Resolver
+func TestProvider_Verify(t *testing.T) {
+	// Make sure it a valid OIDCProvider but not a valid Provider (Verify of the son is call before the parent's one)
+	testYamlInput := `issuer: "http://localhost:4200"`
+
+	// Run the resolver
+	err := config.NewResolver[OIDCProvider]().
+		SetConfigData([]byte(testYamlInput)).
+		Resolve(&OIDCProvider{}).
+		Verify()
+
+	// Check the error is well an error coming from the parent "Provider" struct
+	assert.ErrorContains(t, err, "`slug_id` is mandatory")
 }

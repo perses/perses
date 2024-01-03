@@ -33,12 +33,43 @@ import (
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
 
+// oidcUserInfo implements externalUserInfo for the OIDC providers
+type oidcUserInfo struct {
+	externalUserInfoProfile
+	Subject string `json:"sub,omitempty"`
+	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
+	issuer string
+}
+
+// GetSubject implements [rp.SubjectGetter]
+func (u *oidcUserInfo) GetSubject() string {
+	return u.Subject
+}
+
+// GetLogin implements [externalUserInfo]
+// It uses the first part of the email to create the username.
+func (u *oidcUserInfo) GetLogin() string {
+	return buildLoginFromEmail(u.Email)
+}
+
+// GetProfile implements [externalUserInfo]
+func (u *oidcUserInfo) GetProfile() externalUserInfoProfile {
+	return u.externalUserInfoProfile
+}
+
+// GetIssuer implements [externalUserInfo]
+func (u *oidcUserInfo) GetIssuer() string {
+	return u.issuer
+}
+
 type oIDCEndpoint struct {
 	relyingParty    rp.RelyingParty
 	jwt             crypto.JWT
 	tokenManagement tokenManagement
 	slugID          string
 	urlParams       map[string]string
+	issuer          string
+	svc             service
 }
 
 func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoint, error) {
@@ -78,6 +109,8 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 		tokenManagement: tokenManagement{jwt: jwt},
 		slugID:          provider.SlugID,
 		urlParams:       provider.URLParams,
+		issuer:          provider.Issuer,
+		svc:             service{},
 	}, nil
 }
 
@@ -99,24 +132,32 @@ func (e *oIDCEndpoint) buildAuthHandler() echo.HandlerFunc {
 }
 
 func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
-	// TODO(cegarcia): Make a user synchronization operation on the database
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *UserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidcUserInfo) {
 		redirectURI := r.URL.Query().Get("redirect_uri")
 		if redirectURI == "" {
 			redirectURI = "/"
 		}
-		login := info.Subject
+		// We don´t forget to set the issuer before making any sync in the database.
+		info.issuer = e.issuer
+
+		user, err := e.svc.SyncUser(info)
+		if err != nil {
+			w.WriteHeader(500)
+			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
+		}
+
+		username := user.GetMetadata().GetName()
 		setCookie := func(cookie *http.Cookie) {
 			http.SetCookie(w, cookie)
 		}
-		if _, err := e.tokenManagement.accessToken(login, setCookie); err != nil {
+		if _, err := e.tokenManagement.accessToken(username, setCookie); err != nil {
 			w.WriteHeader(500)
-			writeResponse(w, []byte(shared.InternalError.Error()))
+			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
 			return
 		}
-		if _, err := e.tokenManagement.refreshToken(login, setCookie); err != nil {
+		if _, err := e.tokenManagement.refreshToken(username, setCookie); err != nil {
 			w.WriteHeader(500)
-			writeResponse(w, []byte(shared.InternalError.Error()))
+			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
 			return
 		}
 

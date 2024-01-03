@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
@@ -34,30 +35,48 @@ import (
 
 const stateParam = "state"
 const codeVerifierParam = "code_verifier"
+const unidentifiedOauthIssuer = "unidentified-oauth-issuer"
 
-// userInfo is a structure used only in the context of oauth 2.0 user info retrieval.
-// This is used to gather information before saving the user in database.
-type userInfo struct {
-	Login     string
-	Email     string
-	FirstName string
-	LastName  string
+var defaultLoginProps = []string{"login"}
+
+type oauthUserInfo struct {
+	externalUserInfoProfile
+	RawProperties map[string]interface{}
+	loginKeys     []string
+	authURL       string
 }
 
-// buildUserInfo will collect all the information needed to create/update the user in database.
-// Two source of information are considered:
-// - the access_token generated from the oauth 2.0 provider
-// - [optionally] the body of a possible request to a user infos url
-// In the future, this function could evolve into a method of a struct taking some configuration parameters
-// to allow more customization on claim paths/JSON paths used.
-func buildUserInfo(_ *oauth2.Token, body []byte, result *userInfo) error {
-	// TODO(cegarcia): User Infos retrieval is currently strongly coupled with github provider
-	//   (GET /user and take login from the json `login` field) but it's probably not the case with others.
-	//   We should have user infos discovery to try to get the login from different ways (tokens/api with different claim paths/json paths)
-	if body != nil {
-		return json.Unmarshal(body, result)
+func (u *oauthUserInfo) getProperty(keys []string) string {
+	for _, key := range keys {
+		if value, ok := u.RawProperties[key]; ok {
+			// Ensure it is a string. This makes sure for example that an int is well transformed into a string
+			return fmt.Sprint(value)
+		}
 	}
-	return fmt.Errorf("not yet implemented")
+	return ""
+}
+
+// GetLogin implements [externalUserInfo]
+func (u *oauthUserInfo) GetLogin() string {
+	if login := u.getProperty(u.loginKeys); login != "" {
+		return login
+	}
+	return buildLoginFromEmail(u.Email)
+}
+
+// GetProfile implements [externalUserInfo]
+func (u *oauthUserInfo) GetProfile() externalUserInfoProfile {
+	return u.externalUserInfoProfile
+}
+
+// GetIssuer implements [externalUserInfo]
+// As there's no particular issuer in oauth2 generic, we recreate a fake issuer from authURL
+func (u *oauthUserInfo) GetIssuer() string {
+	if uri, _ := url.Parse(u.authURL); uri != nil {
+		return uri.Hostname()
+	}
+	//TODO(cegarcia): Make sure the config library could parse url properly into url.URL would save us from this crap
+	return unidentifiedOauthIssuer
 }
 
 type oAuthEndpoint struct {
@@ -67,6 +86,9 @@ type oAuthEndpoint struct {
 	tokenManagement tokenManagement
 	slugID          string
 	userInfoURL     string
+	authURL         string
+	svc             service
+	loginProps      []string
 }
 
 func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoint {
@@ -85,6 +107,11 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoin
 		RedirectURL: params.RedirectURI,
 	}
 
+	loginProps := defaultLoginProps
+	if customProp := params.CustomLoginProperty; customProp != "" {
+		loginProps = []string{customProp}
+	}
+
 	return &oAuthEndpoint{
 		conf:            conf,
 		secureCookie:    secureCookie,
@@ -92,6 +119,9 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoin
 		tokenManagement: tokenManagement{jwt: jwt},
 		slugID:          params.SlugID,
 		userInfoURL:     params.UserInfosURL,
+		authURL:         params.AuthURL,
+		svc:             service{},
+		loginProps:      loginProps,
 	}
 }
 
@@ -227,26 +257,31 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return shared.UnauthorizedError
 	}
 
-	userInfosBody, err := e.requestUserInfos(ctx, token)
+	uInfoBody, err := e.requestUserInfo(ctx, token)
 	if err != nil {
 		e.logWithError(err).Warn("An error occurred while requesting user infos. User infos will be ignored.")
 		// We continue here on purpose, to give a chance to the token to be parsed
 	}
 
-	var userInfos userInfo
-	err = buildUserInfo(token, userInfosBody, &userInfos)
+	uInfo, err := e.buildUserInfo(uInfoBody)
 	if err != nil {
 		e.logWithError(err).Error("Failed to collect user infos.")
 		return shared.UnauthorizedError
 	}
 
-	// TODO(cegarcia): Make a user synchronization operation on the database
-	login := userInfos.Login
-	_, err = e.tokenManagement.accessToken(login, ctx.SetCookie)
+	// Save the user in database
+	user, err := e.svc.SyncUser(uInfo)
+	if err != nil {
+		e.logWithError(err).Error("Failed to sync user in database.")
+		return shared.UnauthorizedError
+	}
+
+	username := user.GetMetadata().GetName()
+	_, err = e.tokenManagement.accessToken(username, ctx.SetCookie)
 	if err != nil {
 		return shared.UnauthorizedError
 	}
-	_, err = e.tokenManagement.refreshToken(login, ctx.SetCookie)
+	_, err = e.tokenManagement.refreshToken(username, ctx.SetCookie)
 	if err != nil {
 		return shared.UnauthorizedError
 	}
@@ -254,18 +289,35 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	return ctx.Redirect(302, "/")
 }
 
-// requestUserInfos execute an HTTP request on the user infos url if provided. The response is an array of bytes and is nil if user infos url is not provided.
-func (e *oAuthEndpoint) requestUserInfos(ctx echo.Context, token *oauth2.Token) ([]byte, error) {
-	if e.userInfoURL != "" {
-		resp, err := e.conf.Client(ctx.Request().Context(), token).Get(e.userInfoURL)
-		defer func() { _ = resp.Body.Close() }()
-		if err != nil {
-			return nil, err
-		}
-
-		return io.ReadAll(resp.Body)
+// requestUserInfo execute an HTTP request on the user infos url if provided.
+func (e *oAuthEndpoint) requestUserInfo(ctx echo.Context, token *oauth2.Token) ([]byte, error) {
+	resp, err := e.conf.Client(ctx.Request().Context(), token).Get(e.userInfoURL)
+	defer func() { _ = resp.Body.Close() }()
+	if err != nil {
+		return nil, err
 	}
-	return nil, nil
+
+	return io.ReadAll(resp.Body)
+}
+
+// buildUserInfo will collect all the information needed to create/update the user in database.
+func (e *oAuthEndpoint) buildUserInfo(body []byte) (externalUserInfo, error) {
+	userInfos := oauthUserInfo{
+		authURL:   e.authURL,
+		loginKeys: e.loginProps,
+	}
+
+	if err := json.Unmarshal(body, &userInfos); err != nil {
+		return nil, err
+	}
+
+	// Parse a second time into a more generic structure in order to possibly make some extra retrievals.
+	// Indeed, oauth providers are not constraint to respect any guidance and login/subject can come from any field.
+	if err := json.Unmarshal(body, &userInfos.RawProperties); err != nil {
+		return nil, err
+	}
+
+	return &userInfos, nil
 }
 
 func (e *oAuthEndpoint) logWithError(err error) *logrus.Entry {

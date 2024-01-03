@@ -13,12 +13,14 @@
 
 package auth
 
-import "github.com/zitadel/oidc/v3/pkg/oidc"
+import (
+	"strings"
 
-// UserInfoProfile is a simplified version of the oidc.UserInfoProfile structure.
-// It's been created as we want only a limited amount of user information in Perses and some data like locale can be
-// provided wrongly by some OIDC providers.
-type UserInfoProfile struct {
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+)
+
+// externalUserInfoProfile is a subset of oidc.UserInfoProfile structure with only the interesting information.
+type externalUserInfoProfile struct {
 	Name              string `json:"name,omitempty"`
 	GivenName         string `json:"given_name,omitempty"`
 	FamilyName        string `json:"family_name,omitempty"`
@@ -27,21 +29,36 @@ type UserInfoProfile struct {
 	Profile           string `json:"profile,omitempty"`
 	Picture           string `json:"picture,omitempty"`
 	PreferredUsername string `json:"preferred_username,omitempty"`
+	Email             string `json:"email,omitempty"`
 }
 
-// UserInfo is a simplified version of the oidc.UserInfo structure.
-// It's been created as we want only a limited amount of user information in Perses and some data like locale can be
-// provided wrongly by some OIDC providers.
-// It is also an opportunity to use the same structure to parse OIDC and OAuth provider's user information.
-type UserInfo struct {
-	Subject string `json:"sub,omitempty"`
-	UserInfoProfile
-	oidc.UserInfoEmail
-
-	Claims map[string]any `json:"-"`
+// externalUserInfo defines the way to build user info which is different according to each provider kind.
+type externalUserInfo interface {
+	// GetLogin returns the login designating the ``metadata.name`` of the user entity.
+	GetLogin() string
+	// GetProfile returns various user information that may be set in the ``specs`` of the user entity.
+	GetProfile() externalUserInfoProfile
+	// GetIssuer returns the provider issuer. It identifies the external provider used to collect this user information.
+	GetIssuer() string
 }
 
-// GetSubject implements [rp.SubjectGetter]
-func (u *UserInfo) GetSubject() string {
-	return u.Subject
+func buildLoginFromEmail(email string) string {
+	return strings.Split(email, "@")[0]
+}
+
+type service struct {
+}
+
+func (s *service) SyncUser(uInfo externalUserInfo) (v1.User, error) {
+	//TODO(cegarcia): to be implemented
+	return v1.User{
+		Kind: v1.KindUser,
+		Metadata: v1.Metadata{
+			Name: uInfo.GetLogin(),
+		},
+		Spec: v1.UserSpec{
+			FirstName: uInfo.GetProfile().GivenName,
+			LastName:  uInfo.GetProfile().FamilyName,
+		},
+	}, nil
 }

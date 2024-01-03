@@ -210,6 +210,9 @@ Generic placeholders are defined as follows:
   # The provider User Infos URL
   [ user_infos_url: <string> ]
 
+  # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
+  # The login is mandatory to store in the database the name of the user.
+  [ custom_login_property: <string>]
 ```
 
 #### `<authorization_config>`
