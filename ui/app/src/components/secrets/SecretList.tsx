@@ -85,7 +85,7 @@ export function SecretList<T extends Secret>({
   const [isSecretDrawerOpened, setSecretDrawerOpened] = useState<boolean>(false);
   const [isDeleteSecretDialogOpened, setDeleteSecretDialogOpened] = useState<boolean>(false);
 
-  const handleCopyVarNameButtonClick = useCallback(
+  const handleCopyNameButtonClick = useCallback(
     async (secretName: string) => {
       await navigator.clipboard.writeText(secretName);
       infoSnackbar('Secret copied to clipboard!');
@@ -146,7 +146,7 @@ export function SecretList<T extends Secret>({
               <IconButton
                 onClick={async ($event) => {
                   $event.stopPropagation();
-                  await handleCopyVarNameButtonClick(params.value);
+                  await handleCopyNameButtonClick(params.value);
                 }}
                 size="small"
               >
@@ -228,7 +228,7 @@ export function SecretList<T extends Secret>({
         ],
       },
     ],
-    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDeleteButtonClick]
+    [handleCopyNameButtonClick, handleEditButtonClick, handleDeleteButtonClick]
   );
 
   return (

@@ -23,21 +23,6 @@ const secretSpecSchema = z
         passwordFile: z.string().optional(),
       })
       .superRefine((val, ctx) => {
-        if (
-          (val.password === undefined || val.password.length === 0) &&
-          (val.passwordFile === undefined || val.passwordFile.length === 0)
-        ) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'One of the fields must be defined',
-            path: ['password'],
-          });
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: 'One of the fields must be defined',
-            path: ['passwordFile'],
-          });
-        }
         if (val.password && val.password.length > 0 && val.passwordFile && val.passwordFile.length > 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

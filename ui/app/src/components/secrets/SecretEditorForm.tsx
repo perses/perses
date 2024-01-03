@@ -25,8 +25,11 @@ import {
   BoxProps,
   Button,
   Divider,
+  FormControl,
   FormControlLabel,
   IconButton,
+  Radio,
+  RadioGroup,
   Stack,
   Switch,
   TextField,
@@ -35,9 +38,6 @@ import {
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import PlusIcon from 'mdi-material-ui/Plus';
-import LockIcon from 'mdi-material-ui/Lock';
-import LockPlusIcon from 'mdi-material-ui/LockPlus';
-import { MenuTab, MenuTabs } from '../tabs';
 
 const basicAuthIndex = 'basicAuth';
 const authorizationIndex = 'authorization';
@@ -210,22 +210,22 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
             justifyContent="space-between"
             sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
           >
-            <MenuTabs aria-label="Secret Authorization Setup" value={tabValue} onChange={handleTabChange}>
-              <MenuTab
-                label="Basic Authorization"
-                icon={<LockIcon />}
-                iconPosition="start"
-                {...a11yProps(basicAuthIndex)}
-                value={basicAuthIndex}
-              />
-              <MenuTab
-                label="Custom Authorization"
-                icon={<LockPlusIcon />}
-                iconPosition="start"
-                {...a11yProps(authorizationIndex)}
-                value={authorizationIndex}
-              />
-            </MenuTabs>
+            <FormControl>
+              <RadioGroup row value={tabValue} onChange={handleTabChange} aria-labelledby="Secret Authorization Setup">
+                <FormControlLabel
+                  disabled={isReadonly}
+                  value={basicAuthIndex}
+                  control={<Radio />}
+                  label="Basic Authorization"
+                />
+                <FormControlLabel
+                  disabled={isReadonly}
+                  value={authorizationIndex}
+                  control={<Radio />}
+                  label="Custom Authorization"
+                />
+              </RadioGroup>
+            </FormControl>
           </Stack>
           <TabPanel value={tabValue} index={basicAuthIndex}>
             <Stack gap={2}>
@@ -579,13 +579,6 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
       />
     </FormProvider>
   );
-}
-
-function a11yProps(index: string) {
-  return {
-    id: `secret-form-tab-${index}`,
-    'aria-controls': `secret-form-tabpanel-${index}`,
-  };
 }
 
 interface TabPanelProps extends BoxProps {
