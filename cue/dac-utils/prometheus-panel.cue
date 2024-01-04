@@ -21,9 +21,9 @@ import (
 	"github.com/perses/perses/cue/model/api/v1"
 )
 
-
 // expected user inputs
 #clause: "by" | "without" | *""
+
 #clauseLabels: [...string] | *[]
 
 // outputs:
@@ -32,7 +32,7 @@ import (
 //   It can be used in your promQL expressions via string interpolation as follows: `sum \(#aggr) (up{job="prometheus"})`. 
 #aggr: string | *""
 if #clause != "" {
-    #aggr: """
+	#aggr: """
     \(#clause) (\(strings.Join(#clauseLabels, ",")))
     """
 }

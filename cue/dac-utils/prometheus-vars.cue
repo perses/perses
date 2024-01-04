@@ -19,94 +19,99 @@ package prometheusVars
 import (
 	"strings"
 	promQLVar "github.com/perses/perses/cue/schemas/variables/prometheus-promql:model"
-	promLabelValuesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-values:model"
-	promLabelNamesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-names:model"
+	labelValuesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-values:model"
+	labelNamesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-names:model"
 	varsBuilder "github.com/perses/perses/cue/dac-utils:vars"
 )
 
-// expected user input
+// expected user input: a list of variables, in a simplified format.
+// /!\ Order matters! Each new variable will be "linked" to the previous ones, when applicable.
 input: #input
-#input: [...#listInputItem | #textInputItem]
-#listInputItem: {
-	varsBuilder.#listInputItem
-	name: string | *label // map name to label by default
-	metric: string
-	label: string
+#input: [...#promQLInputItem | #labelValuesInputItem | #labelNamesInputItem | #textInputItem]
+#promQLInputItem: this=varsBuilder.#listInputItem & {
+	pluginKind: promQLVar.kind
+	metric:     string
+	label:      string | *this.name
 }
-#textInputItem: {
-	varsBuilder.#textInputItem
-	name: string | *label // map name to label by default
-	label: string
+#labelValuesInputItem: this=varsBuilder.#listInputItem & {
+	pluginKind: labelValuesVar.kind
+	metric:     string
+	label:      string | *this.name
+}
+#labelNamesInputItem: varsBuilder.#listInputItem & {
+	pluginKind: labelNamesVar.kind
+	metric:     string
 }
 
-// This allows the lib users to not have to specify the main variable kind when it's a 
-// ListVariable (redundant given TextVariable has no plugin).
-input: [for var in input {
-	if var.pluginKind != _|_ {
-		kind: "ListVariable"
-	}
-}]
+#textInputItem: this=varsBuilder.#textInputItem & {
+	pluginKind: this.kind // hack, dummy field to allow evaluations on pluginKind in all cases
+	label:      string | *this.name
+}
 
 // outputs:
 
 // - `filters` is a list of filters, in a "russian dolls" manner.
 //   Its main purpose is to help build the list of expressions below, but it's also made available for external use.
 //   NB: the term filter here means a list of label matchers (= the part between curly braces in a promQL expression, used to filter the timeseries).
-filters: [for i, _ in input {
+filters: [ for i, _ in input {
 	strings.Join(
-		[for i2, var in input if i2 < i if var.label != _|_ {
-			"\(var.label)=\"$\(var.label)\""
-		}],
-		","
+	[ for i2, var in input if i2 < i if var.pluginKind != labelNamesVar.kind {
+		"\(var.label)=\"$\(var.label)\""
+	}],
+	",",
 	)
 }]
 
 // - `fullFilter` is a filter that contains all the labels available
-fullFilter: strings.Join([for var in input if var.label != _|_ {"\(var.label)=\"$\(var.label)\""}], ",")
+fullFilter:
+	strings.Join(
+	[ for var in input if var.pluginKind != labelNamesVar.kind {
+		"\(var.label)=\"$\(var.label)\""
+	}],
+	",",
+	)
 
 // - `exprs` is a list of promQL expressions.
 //   Its main purpose is to help build the list of variables below, but it's also made available for external use.
-exprs: [for i, var in input {
-    [ // switch
-        if var.pluginKind == "PrometheusPromQLVariable" {
-            "group by (" + var.label + ") (" + var.metric + "{" + filters[i] + "})"
-        },
-        if var.pluginKind == "PrometheusLabelValuesVariable" || var.pluginKind == "PrometheusLabelNamesVariable" {
-            var.metric + "{" + filters[i] + "}"
-        },
-    ][0]
+exprs: [ for i, var in input {
+	[ // switch
+		if var.pluginKind == promQLVar.kind {
+			"group by (" + var.label + ") (" + var.metric + "{" + filters[i] + "})"
+		},
+		var.metric + "{" + filters[i] + "}",
+	][0]
 }]
 
 // - `variables` is the final list of variables, in the format expected by the Perses dashboard.
 let alias = input
-variables: {varsBuilder & { input: alias }}.variables & [ for i, var in input {
-    spec: [ // switch
-        if var.kind == "ListVariable" if var.pluginKind == "PrometheusPromQLVariable" {
-            plugin: promQLVar & {
-                spec: {
-                    datasource: kind: "PrometheusDatasource"
-                    expr: exprs[i]
-                    labelName: var.label
-                }
-            }
-        },
-        if var.kind == "ListVariable" if var.pluginKind == "PrometheusLabelValuesVariable" {
-            plugin: promLabelValuesVar & {
-                spec: {
-                    datasource: kind: "PrometheusDatasource"
-                    labelName: var.label
-                    matchers: [exprs[i]]
-                }
-            }
-        },
-        if var.kind == "ListVariable" if var.pluginKind == "PrometheusLabelNamesVariable" {
-            plugin: promLabelNamesVar & {
-                spec: {
-                    datasource: kind: "PrometheusDatasource"
-                    matchers: [exprs[i]]
-                }
-            }
-        },
-        {}
-    ][0]
+variables: {varsBuilder & {input: alias}}.variables & [ for i, var in input {
+	spec: [ // switch
+		if var.kind == "ListVariable" if var.pluginKind == promQLVar.kind {
+			plugin: promQLVar & {
+				spec: {
+					datasource: kind: "PrometheusDatasource"
+					expr:      exprs[i]
+					labelName: var.label
+				}
+			}
+		},
+		if var.kind == "ListVariable" if var.pluginKind == labelValuesVar.kind {
+			plugin: labelValuesVar & {
+				spec: {
+					datasource: kind: "PrometheusDatasource"
+					labelName: var.label
+					matchers: [exprs[i]]
+				}
+			}
+		},
+		if var.kind == "ListVariable" if var.pluginKind == labelNamesVar.kind {
+			plugin: labelNamesVar & {
+				spec: {
+					datasource: kind: "PrometheusDatasource"
+					matchers: [exprs[i]]
+				}
+			}
+		},
+		{},
+	][0]
 }]

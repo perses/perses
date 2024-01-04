@@ -6,7 +6,7 @@ set -e
 
 function fmt() {
   # exclude migration files from the formatting since it removes the trailing commas we need
-  find ./internal ./pkg ./cue/schemas -name "*.cue" -and -not -name "migrate.cue" -exec cue fmt {} \;
+  find ./internal ./pkg ./cue -name "*.cue" -and -not -name "migrate.cue" -exec cue fmt {} \;
 }
 
 function checkfmt {

@@ -19,21 +19,21 @@ import (
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
-// expected user input
+// expected user input: a list of variables, in a simplified format
 input: [...#listInputItem | #textInputItem]
 #listInputItem: {
-	kind: "ListVariable"
-	name: string
-	pluginKind: string
+	kind:           "ListVariable"
+	name:           string
+	pluginKind:     string
 	datasourceName: string
-	allowAllValue: bool | *false
-	allowMultiple: bool | *false
+	allowAllValue:  bool | *false
+	allowMultiple:  bool | *false
 	...
 }
 #textInputItem: {
-	kind: "TextVariable"
-	name: string
-	value: string
+	kind:     "TextVariable"
+	name:     string
+	value:    string
 	constant: bool | *false
 	...
 }
@@ -44,7 +44,7 @@ variables: [...v1Dashboard.#Variable] & [ for id, var in input {
 	spec: [ // switch
 		if var.kind == "ListVariable" {
 			v1Dashboard.#ListVariableSpec & {
-				name: var.name
+				name:          var.name
 				allowAllValue: var.allowAllValue
 				allowMultiple: var.allowMultiple
 				plugin: {
@@ -57,8 +57,8 @@ variables: [...v1Dashboard.#Variable] & [ for id, var in input {
 		},
 		if var.kind == "TextVariable" {
 			v1Dashboard.#TextVariableSpec & {
-				name: var.name
-				value: var.value
+				name:     var.name
+				value:    var.value
 				constant: var.constant
 			}
 		},

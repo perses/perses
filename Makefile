@@ -1,4 +1,4 @@
-# Copyright 2021 The Perses Authors
+# Copyright 2024 The Perses Authors
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -94,6 +94,7 @@ fmt-docs:
 cue-eval: cue-gen
 	@echo ">> eval CUE files"
 	$(CUE) eval ./cue/schemas/...
+	$(CUE) eval ./cue/model/...
 	find ./cue/dac-utils -name "*.cue" -exec $(CUE) eval {} \;
 
 .PHONY: cue-gen

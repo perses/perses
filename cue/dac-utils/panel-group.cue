@@ -25,33 +25,33 @@ import (
 
 // expected user inputs
 #panels: [string]: v1.#Panel
-#title: string
-#cols: >0 & <=#gridCols
+#title:  string
+#cols:   >0 & <=#gridCols
 #height: number | *6
 
 // intermediary compute
 #gridCols: 24
-#panelsAsList: [for k, p in #panels {p, name: k}]
+#panelsAsList: [ for k, p in #panels {p, name: k}]
 #width: math.Trunc(#gridCols / #cols)
-#panelsX: [for i, _ in #panelsAsList {
-    #width * math.Round(math.Mod(i, #cols))
+#panelsX: [ for i, _ in #panelsAsList {
+	#width * math.Round(math.Mod(i, #cols))
 }]
-#panelsY: [for i, _ in #panelsAsList {
-    #height * math.Trunc(i / #cols)
+#panelsY: [ for i, _ in #panelsAsList {
+	#height * math.Trunc(i/#cols)
 }]
 
 // output: the final layout, in the format expected by the Perses dashboard.
 v1Dashboard.#Layout & {
-    spec: v1Dashboard.#GridLayoutSpec & {
-        display: title: #title
-        items: [for i, panel in #panelsAsList {
-            x: #panelsX[i],
-            y: #panelsY[i],
-            width: #width,
-            height: #height,
-            content: {
-                "$ref": "#/spec/panels/\(panel.name)"
-            }
-        }]
-    }
+	spec: v1Dashboard.#GridLayoutSpec & {
+		display: title: #title
+		items: [ for i, panel in #panelsAsList {
+			x:      #panelsX[i]
+			y:      #panelsY[i]
+			width:  #width
+			height: #height
+			content: {
+				"$ref": "#/spec/panels/\(panel.name)"
+			}
+		}]
+	}
 }
