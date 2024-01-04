@@ -35,7 +35,7 @@ import (
 
 #myPanels: {
 	"memory": this=panelBuilder & {
-		#filter: #myVarsBuilder.fullMatcher
+		#filter: #myVarsBuilder.fullFilter
 		#clause: "by"
 		#clauseLabels: ["container"]
 
@@ -53,7 +53,7 @@ import (
 		}
 	}
 	"cpu": this=panelBuilder & {
-		#filter: #myVarsBuilder.fullMatcher
+		#filter: #myVarsBuilder.fullFilter
 		spec: {
 			display: name: "Container CPU"
 			plugin: timeseriesChart

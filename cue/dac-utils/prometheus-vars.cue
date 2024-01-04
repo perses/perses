@@ -62,7 +62,7 @@ filters: [for i, _ in input {
 }]
 
 // - `fullFilter` is a filter that contains all the labels available
-fullMatcher: strings.Join([for var in input if var.label != _|_ {"\(var.label)=\"$\(var.label)\""}], ",")
+fullFilter: strings.Join([for var in input if var.label != _|_ {"\(var.label)=\"$\(var.label)\""}], ",")
 
 // - `exprs` is a list of promQL expressions.
 //   Its main purpose is to help build the list of variables below, but it's also made available for external use.
