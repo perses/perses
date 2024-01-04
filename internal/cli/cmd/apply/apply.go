@@ -31,6 +31,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func SaveEntity(entity modelAPI.Entity, project string, apiClient api.ClientInterface) error {
+	kind := modelV1.Kind(entity.GetKind())
+	name := entity.GetMetadata().GetName()
+	svc, svcErr := service.New(kind, project, apiClient)
+	if svcErr != nil {
+		return svcErr
+	}
+
+	// retrieve if exists the entity from the Perses API
+	_, apiError := svc.GetResource(name)
+	if apiError != nil && !errors.Is(apiError, perseshttp.RequestNotFoundError) {
+		return fmt.Errorf("unable to retrieve the %q from the Perses API. %w", kind, apiError)
+	}
+
+	if errors.Is(apiError, perseshttp.RequestNotFoundError) {
+		// the document doesn't exist, so we have to create it.
+		if _, createError := svc.CreateResource(entity); createError != nil {
+			return createError
+		}
+	} else {
+		// the document doesn't exist, so we have to create it.
+		if _, updateError := svc.UpdateResource(entity); updateError != nil {
+			return updateError
+		}
+	}
+	return nil
+}
+
 type option struct {
 	persesCMD.Option
 	opt.ProjectOption
@@ -92,27 +120,8 @@ func (o *option) applyEntity(entities []modelAPI.Entity) error {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
-		svc, svcErr := service.New(kind, project, o.apiClient)
-		if svcErr != nil {
-			return svcErr
-		}
-
-		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.GetResource(name)
-		if apiError != nil && !errors.Is(apiError, perseshttp.RequestNotFoundError) {
-			return fmt.Errorf("unable to retrieve the %q from the Perses API. %w", kind, apiError)
-		}
-
-		if errors.Is(apiError, perseshttp.RequestNotFoundError) {
-			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.CreateResource(entity); createError != nil {
-				return createError
-			}
-		} else {
-			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.UpdateResource(entity); updateError != nil {
-				return updateError
-			}
+		if err := SaveEntity(entity, project, o.apiClient); err != nil {
+			return err
 		}
 
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {
