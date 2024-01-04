@@ -21,7 +21,7 @@ import (
 
 	"github.com/perses/common/config"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	promConfig "github.com/prometheus/common/config"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
@@ -297,7 +297,7 @@ information: |-
 			result: Config{
 				Security: Security{
 					Readonly:      false,
-					EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
 						CheckLatestUpdateInterval: model.Duration(defaultCacheInterval),

@@ -18,6 +18,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
@@ -51,15 +52,15 @@ type SQL struct {
 	// TLS configuration
 	TLSConfig *config.TLSConfig `json:"tls_config,omitempty" yaml:"tls_config,omitempty"`
 	// Username
-	User config.Secret `json:"user,omitempty" yaml:"user,omitempty"`
+	User secret.Hidden `json:"user,omitempty" yaml:"user,omitempty"`
 	// Password (requires User)
-	Password config.Secret `json:"password,omitempty" yaml:"password,omitempty"`
+	Password secret.Hidden `json:"password,omitempty" yaml:"password,omitempty"`
 	// PasswordFile is a path to a file that contains a password
 	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
 	// Network type
 	Net string `json:"net,omitempty" yaml:"net,omitempty"`
 	// Network address (requires Net)
-	Addr config.Secret `json:"addr,omitempty" yaml:"addr,omitempty"`
+	Addr secret.Hidden `json:"addr,omitempty" yaml:"addr,omitempty"`
 	// Database name
 	DBName string `json:"db_name" yaml:"db_name"`
 	// Connection collation
@@ -118,7 +119,7 @@ func (s *SQL) Verify() error {
 		if err != nil {
 			return err
 		}
-		s.Password = config.Secret(data)
+		s.Password = secret.Hidden(data)
 	}
 	return nil
 }
