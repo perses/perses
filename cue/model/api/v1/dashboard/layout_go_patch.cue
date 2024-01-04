@@ -19,11 +19,37 @@
 // any type that defines a custom UnmarshallJSON or UnmarshallYAML.
 // For more info see https://github.com/cue-lang/cue/issues/2466.
 
-package v1
+package dashboard
 
-import "github.com/perses/perses/pkg/model/api/v1/variable"
+import "github.com/perses/perses/cue/model/api/v1/common"
 
-#VariableSpec: {
-	kind: variable.#Kind @go(Kind)
-	spec: _              @go(Spec)
+#GridItem: {
+	x:       int             @go(X)
+	y:       int             @go(Y)
+	width:   int             @go(Width)
+	height:  int             @go(Height)
+	content: common.#JSONRef @go(Content)
+}
+
+#GridLayoutCollapse: {
+	open: bool @go(Open)
+}
+
+#GridLayoutDisplay: {
+	title:     string              @go(Title)
+	collapse?: #GridLayoutCollapse @go(Collapse)
+}
+
+#GridLayoutSpec: {
+	display: #GridLayoutDisplay @go(Title)
+	items?: [...#GridItem] @go(Items,[]GridItem)
+}
+
+#LayoutKind: "Grid"
+
+#LayoutSpec: #GridLayoutSpec
+
+#Layout: {
+	kind: #LayoutKind @go(Kind)
+	spec: #LayoutSpec @go(Spec)
 }

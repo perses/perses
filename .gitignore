@@ -28,7 +28,6 @@ coverage.txt
 EXTRACTED_CHANGELOG.md
 
 cue.mod/gen
-/pkg/model/api/v1/**/*_go_gen.cue
 
 dev/local_db
 

@@ -35,8 +35,8 @@ func TestDashboardAsCodeUtilities(t *testing.T) {
 	}{
 		{
 			title:                  "Nominal case - DaC def that relies on all the DaC utils provided",
-			inputCUEFile:           "dac_test_input.cue",
-			expectedOutputJSONFile: "dac_test_expected_output.json",
+			inputCUEFile:           "input.cue",
+			expectedOutputJSONFile: "expected_output.json",
 		},
 	}
 

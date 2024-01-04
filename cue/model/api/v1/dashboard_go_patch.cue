@@ -19,37 +19,38 @@
 // any type that defines a custom UnmarshallJSON or UnmarshallYAML.
 // For more info see https://github.com/cue-lang/cue/issues/2466.
 
-package dashboard
+package v1
 
-import "github.com/perses/perses/pkg/model/api/v1/common"
+import (
+	"github.com/perses/perses/cue/model/api/v1/common"
+	"github.com/perses/perses/cue/model/api/v1/dashboard"
+)
 
-#GridItem: {
-	x:       int             @go(X)
-	y:       int             @go(Y)
-	width:   int             @go(Width)
-	height:  int             @go(Height)
-	content: common.#JSONRef @go(Content)
+#PanelDisplay: {
+	name:         string @go(Name)
+	description?: string @go(Description)
 }
 
-#GridLayoutCollapse: {
-	open: bool @go(Open)
+#Panel: {
+	kind: "Panel"
 }
 
-#GridLayoutDisplay: {
-	title:     string              @go(Title)
-	collapse?: #GridLayoutCollapse @go(Collapse)
+#DashboardSpec: {
+	display?: common.#Display @go(Display)
+	datasources?: {
+		[string]: #DatasourceSpec @go(Datasources)
+	}
+	variables?: [...dashboard.#Variable] @go(Variables,[]Variable)
+	panels: {
+		[string]: #Panel @go(Panels)
+	}
+	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
+	duration:         _ | *"1h" @go(Duration)        // TODO def should come from github.com/prometheus/common/model 
+	refreshInterval?: _         @go(RefreshInterval) // TODO def should come from github.com/prometheus/common/model
 }
 
-#GridLayoutSpec: {
-	display: #GridLayoutDisplay @go(Title)
-	items?: [...#GridItem] @go(Items,[]GridItem)
-}
-
-#LayoutKind: "Grid"
-
-#LayoutSpec: #GridLayoutSpec
-
-#Layout: {
-	kind: #LayoutKind @go(Kind)
-	spec: #LayoutSpec @go(Spec)
+#Dashboard: {
+	kind:     #KindDashboard   @go(Kind)
+	metadata: #ProjectMetadata @go(Metadata)
+	spec:     #DashboardSpec   @go(Spec)
 }

@@ -16,7 +16,7 @@
 package vars
 
 import (
-	v1Dashboard "github.com/perses/perses/pkg/model/api/v1/dashboard"
+	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
 // expected user input

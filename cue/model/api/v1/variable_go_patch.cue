@@ -19,21 +19,11 @@
 // any type that defines a custom UnmarshallJSON or UnmarshallYAML.
 // For more info see https://github.com/cue-lang/cue/issues/2466.
 
-package dashboard
+package v1
 
-import "github.com/perses/perses/pkg/model/api/v1/variable"
+import "github.com/perses/perses/cue/model/api/v1/variable"
 
-#TextVariableSpec: {
-	name: string @go(Name)
-	variable.#TextSpec
-}
-
-#ListVariableSpec: {
-	name: string @go(Name)
-	variable.#ListSpec
-}
-
-#Variable: {
-	kind:  variable.#Kind                        @go(Kind)
-	spec?: #TextVariableSpec | #ListVariableSpec @go(Spec)
+#VariableSpec: {
+	kind: variable.#Kind @go(Kind)
+	spec: _              @go(Spec)
 }

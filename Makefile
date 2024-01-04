@@ -28,7 +28,7 @@ COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
 GORELEASER_PARALLEL   ?= 0
-GO_SOURCES            ?= $(shell $(GO) list ./... | grep -v /cue/)
+GO_SOURCES            ?= $(shell $(GO) list ./... | grep -v internal/test/dac)
 
 export LDFLAGS
 export DATE
@@ -99,14 +99,16 @@ cue-eval: cue-gen
 .PHONY: cue-gen
 cue-gen:
 	@echo ">> generate CUE definitions from golang datamodel"
-	$(CUE) get go github.com/perses/perses/pkg/model/api/v1 --local
+	$(CUE) get go github.com/perses/perses/pkg/model/api/v1
+	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
 
 .PHONY: cue-test
 cue-test: cue-gen
 	@echo ">> test CUE schemas with json data"
 	$(GO) run ./scripts/cue-test/cue-test.go
 	@echo ">> validate DaC libraries"
-	$(GO) test -count=1 -v ./cue/...
+	$(GO) test -count=1 -v ./internal/test/dac/...
 
 .PHONY: test
 test: generate

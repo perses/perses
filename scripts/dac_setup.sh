@@ -16,21 +16,16 @@ $ ./dac_setup.sh -v 0.42.1"
 function dacSetup() {
     echo "Starting DaC setup with Perses version $VERSION"
 
-    # Create the destination folders (see https://cuelang.org/docs/concepts/packages/)
-    mkdir -p cue.mod/pkg/github.com/perses/perses/pkg/model/api/v1/
+    # Create the destination folder (see https://cuelang.org/docs/concepts/packages/)
+    mkdir -p cue.mod/pkg/github.com/perses/perses
 
     # Download  & extract sources
     curl -L https://github.com/perses/perses/archive/refs/tags/v$VERSION.tar.gz --output sources.tar.gz
     tar -xzf sources.tar.gz
 
     # Copy the dependencies to the destination folder
-    cd perses-$VERSION/
-    # - plugin schemas
-    cp -r --parents cue/schemas ../cue.mod/pkg/github.com/perses/perses/
-    # - DaC utilities
-    cp -r --parents cue/dac-utils ../cue.mod/pkg/github.com/perses/perses/
-    # - CUE definitions patches
-    find "pkg/model/api/v1/" -name "*.cue" -exec cp --parents {} "../cue.mod/pkg/github.com/perses/perses/" \;
+    cd perses-$VERSION
+    cp -r --parents cue ../cue.mod/pkg/github.com/perses/perses
 
     # Cleanup
     cd ..

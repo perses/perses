@@ -14,7 +14,7 @@
 package test
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/cue/model/api/v1"
 	panelBuilder "github.com/perses/perses/cue/dac-utils:prometheusPanel"
 	panelGroupBuilder "github.com/perses/perses/cue/dac-utils:panelGroup"
 	varsBuilder "github.com/perses/perses/cue/dac-utils:prometheusVars"

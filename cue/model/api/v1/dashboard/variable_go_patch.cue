@@ -19,38 +19,21 @@
 // any type that defines a custom UnmarshallJSON or UnmarshallYAML.
 // For more info see https://github.com/cue-lang/cue/issues/2466.
 
-package v1
+package dashboard
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-)
+import "github.com/perses/perses/cue/model/api/v1/variable"
 
-#PanelDisplay: {
-	name:         string @go(Name)
-	description?: string @go(Description)
+#TextVariableSpec: {
+	name: string @go(Name)
+	variable.#TextSpec
 }
 
-#Panel: {
-	kind: "Panel"
+#ListVariableSpec: {
+	name: string @go(Name)
+	variable.#ListSpec
 }
 
-#DashboardSpec: {
-	display?: common.#Display @go(Display)
-	datasources?: {
-		[string]: #DatasourceSpec @go(Datasources)
-	}
-	variables?: [...dashboard.#Variable] @go(Variables,[]Variable)
-	panels: {
-		[string]: #Panel @go(Panels)
-	}
-	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
-	duration:         _ | *"1h" @go(Duration)        // TODO def should come from github.com/prometheus/common/model 
-	refreshInterval?: _         @go(RefreshInterval) // TODO def should come from github.com/prometheus/common/model
-}
-
-#Dashboard: {
-	kind:     #KindDashboard   @go(Kind)
-	metadata: #ProjectMetadata @go(Metadata)
-	spec:     #DashboardSpec   @go(Spec)
+#Variable: {
+	kind:  variable.#Kind                        @go(Kind)
+	spec?: #TextVariableSpec | #ListVariableSpec @go(Spec)
 }
