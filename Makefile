@@ -28,7 +28,6 @@ COVER_PROFILE         := coverage.txt
 PKG_LDFLAGS           := github.com/prometheus/common/version
 LDFLAGS               := -s -w -X ${PKG_LDFLAGS}.Version=${VERSION} -X ${PKG_LDFLAGS}.Revision=${COMMIT} -X ${PKG_LDFLAGS}.BuildDate=${DATE} -X ${PKG_LDFLAGS}.Branch=${BRANCH}
 GORELEASER_PARALLEL   ?= 0
-GO_SOURCES            ?= $(shell $(GO) list ./... | grep -v internal/test/dac)
 
 export LDFLAGS
 export DATE
@@ -91,11 +90,9 @@ fmt-docs:
 	$(MDOX) fmt --soft-wraps -l $$(find . -name '*.md' -not -path "./ui/node_modules/*" -not -path "./ui/app/node_modules/*"  -not -path "./ui/storybook/node_modules/*" -not -path "./ui/prometheus-plugin/node_modules/*"  -print) --links.validate.config-file=./.mdox.validate.yaml
 
 .PHONY: cue-eval
-cue-eval: cue-gen
+cue-eval:
 	@echo ">> eval CUE files"
-	$(CUE) eval ./cue/schemas/...
-	$(CUE) eval ./cue/model/...
-	find ./cue/dac-utils -name "*.cue" -exec $(CUE) eval {} \;
+	$(CUE) eval ./cue/...
 
 .PHONY: cue-gen
 cue-gen:
@@ -105,24 +102,22 @@ cue-gen:
 	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
 
 .PHONY: cue-test
-cue-test: cue-gen
+cue-test:
 	@echo ">> test CUE schemas with json data"
 	$(GO) run ./scripts/cue-test/cue-test.go
-	@echo ">> validate DaC libraries"
-	$(GO) test -count=1 -v ./internal/test/dac/...
 
 .PHONY: test
 test: generate
 	@echo ">> running all tests"
-	$(GO) test -count=1 -v $(GO_SOURCES)
+	$(GO) test -count=1 -v ./...
 
 .PHONY: integration-test
 integration-test: generate
-	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=$(GO_SOURCES) $(GO_SOURCES)
+	$(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: mysql-integration-test
 mysql-integration-test: generate
-	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=$(GO_SOURCES) $(GO_SOURCES)
+	PERSES_TEST_USE_SQL=true $(GO) test -tags=integration -v -count=1 -cover -coverprofile=$(COVER_PROFILE) -coverpkg=./... ./...
 
 .PHONY: coverage-html
 coverage-html: integration-test

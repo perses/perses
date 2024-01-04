@@ -14,7 +14,7 @@
 // This package offers utilities to build panels meant to run prometheus
 // queries.
 
-package prometheusPanel
+package panel
 
 import (
 	"strings"

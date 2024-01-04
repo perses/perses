@@ -15,9 +15,9 @@ package test
 
 import (
 	"github.com/perses/perses/cue/model/api/v1"
-	panelBuilder "github.com/perses/perses/cue/dac-utils:prometheusPanel"
-	panelGroupBuilder "github.com/perses/perses/cue/dac-utils:panelGroup"
-	varsBuilder "github.com/perses/perses/cue/dac-utils:prometheusVars"
+	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
+	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panel-group:panelGroup"
+	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )

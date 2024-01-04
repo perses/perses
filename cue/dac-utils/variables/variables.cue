@@ -13,7 +13,7 @@
 
 // This package offers an utility to build variables easily.
 
-package vars
+package variables
 
 import (
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"

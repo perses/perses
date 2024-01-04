@@ -14,14 +14,14 @@
 // This package offers an utility to build prometheus variables easily.
 // It's a superset of the generic vars builder.
 
-package prometheusVars
+package variables
 
 import (
 	"strings"
 	promQLVar "github.com/perses/perses/cue/schemas/variables/prometheus-promql:model"
 	labelValuesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-values:model"
 	labelNamesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-names:model"
-	varsBuilder "github.com/perses/perses/cue/dac-utils:vars"
+	varsBuilder "github.com/perses/perses/cue/dac-utils/variables"
 )
 
 // expected user input: a list of variables, in a simplified format.
