@@ -15,6 +15,7 @@ require (
 	github.com/huandu/go-sqlbuilder v1.25.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
+	github.com/nexucis/lamenv v0.5.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.22.0
 	github.com/prometheus/client_golang v1.18.0
@@ -78,7 +79,6 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/mwitkow/go-conntrack v0.0.0-20190716064945-2f068394615f // indirect
-	github.com/nexucis/lamenv v0.5.0 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
 	github.com/onsi/gomega v1.23.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
