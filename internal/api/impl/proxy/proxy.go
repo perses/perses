@@ -410,10 +410,9 @@ func (h *httpProxy) serve(c echo.Context) error {
 
 	// Set up the proxy
 	var proxyErr error
-	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL)
+	reverseProxy := httputil.NewSingleHostReverseProxy(h.config.URL.URL)
 	reverseProxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, err error) {
-		desc := h.config.URL.String()
-		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", desc, err)
+		logrus.WithError(err).Errorf("error proxying, remote unreachable: target=%s, err=%v", h.config.URL.String(), err)
 		proxyErr = err
 	}
 	// use a dedicated HTTP transport to avoid any TLS encryption issues

@@ -38,9 +38,11 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 }
 `,
 			result: Config{
-				URL: &url.URL{
-					Scheme: "http",
-					Host:   "localhost:9090",
+				URL: &common.URL{
+					URL: &url.URL{
+						Scheme: "http",
+						Host:   "localhost:9090",
+					},
 				},
 			},
 		},
@@ -66,9 +68,11 @@ func TestUnmarshalYAMLConfig(t *testing.T) {
 url: "http://localhost:9090"
 `,
 			result: Config{
-				URL: &url.URL{
-					Scheme: "http",
-					Host:   "localhost:9090",
+				URL: &common.URL{
+					URL: &url.URL{
+						Scheme: "http",
+						Host:   "localhost:9090",
+					},
 				},
 			},
 		},
@@ -247,7 +251,7 @@ func TestValidateAndExtract(t *testing.T) {
 		}
 	}
 
-	u, _ := url.Parse("http://localhost:8080")
+	u, _ := common.ParseURL("http://localhost:8080")
 
 	b := &aStruct{
 		A: struct {

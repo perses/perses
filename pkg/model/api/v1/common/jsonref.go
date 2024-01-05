@@ -28,7 +28,8 @@ var (
 )
 
 type JSONRef struct {
-	// Ref is the JSON reference. That's the only thing that is used during the marshalling / unmarshalling process.
+	// Ref is the JSON reference.
+	// That's the only thing used during the marshalling / unmarshalling process.
 	// Other attributes are ignored during these processes.
 	Ref string `json:"$ref" yaml:"$ref"`
 	// Path is a list of string that will be used to find from the root of the struct the object pointed.
