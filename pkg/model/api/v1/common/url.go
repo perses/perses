@@ -18,6 +18,14 @@ import (
 	"net/url"
 )
 
+func ParseURL(rawURL string) (*URL, error) {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return nil, err
+	}
+	return &URL{URL: u}, nil
+}
+
 type URL struct {
 	*url.URL
 }

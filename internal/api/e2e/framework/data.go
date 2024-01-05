@@ -18,7 +18,6 @@ package e2eframework
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
@@ -194,7 +193,7 @@ func NewProject(name string) *v1.Project {
 }
 
 func newDatasourceSpec(t *testing.T) v1.DatasourceSpec {
-	promURL, err := url.Parse("https://prometheus.demo.do.prometheus.io")
+	promURL, err := common.ParseURL("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
 		t.Fatal(err)
 	}
