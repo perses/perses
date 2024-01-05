@@ -73,6 +73,8 @@ type oIDCEndpoint struct {
 }
 
 func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoint, error) {
+	issuer := provider.Issuer.String()
+	redirectURI := provider.RedirectURI.String()
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// The OIDC library will use it this way:
 	// - Right before calling the /authorize provider's endpoint, it set "state" in a cookie and the "PKCE code challenge" in another
@@ -92,13 +94,13 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 	if !provider.DisablePKCE {
 		options = append(options, rp.WithPKCE(cookieHandler))
 	}
-	if provider.DiscoveryURL != "" {
-		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL))
+	if !provider.DiscoveryURL.IsNilOrEmpty() {
+		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL.String()))
 	}
 	relyingParty, err := rp.NewRelyingPartyOIDC(
 		context.Background(),
-		provider.Issuer, string(provider.ClientID), string(provider.ClientSecret),
-		provider.RedirectURI, provider.Scopes, options...,
+		issuer, string(provider.ClientID), string(provider.ClientSecret),
+		redirectURI, provider.Scopes, options...,
 	)
 	if err != nil {
 		return nil, err
@@ -109,7 +111,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 		tokenManagement: tokenManagement{jwt: jwt},
 		slugID:          provider.SlugID,
 		urlParams:       provider.URLParams,
-		issuer:          provider.Issuer,
+		issuer:          issuer,
 		svc:             service{},
 	}, nil
 }

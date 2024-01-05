@@ -35,7 +35,6 @@ import (
 
 const stateParam = "state"
 const codeVerifierParam = "code_verifier"
-const unidentifiedOauthIssuer = "unidentified-oauth-issuer"
 
 var defaultLoginProps = []string{"login"}
 
@@ -43,7 +42,7 @@ type oauthUserInfo struct {
 	externalUserInfoProfile
 	RawProperties map[string]interface{}
 	loginKeys     []string
-	authURL       string
+	authURL       url.URL
 }
 
 func (u *oauthUserInfo) getProperty(keys []string) string {
@@ -72,11 +71,7 @@ func (u *oauthUserInfo) GetProfile() externalUserInfoProfile {
 // GetIssuer implements [externalUserInfo]
 // As there's no particular issuer in oauth2 generic, we recreate a fake issuer from authURL
 func (u *oauthUserInfo) GetIssuer() string {
-	if uri, _ := url.Parse(u.authURL); uri != nil {
-		return uri.Hostname()
-	}
-	//TODO(cegarcia): Make sure the config library could parse url properly into url.URL would save us from this crap
-	return unidentifiedOauthIssuer
+	return u.authURL.Hostname()
 }
 
 type oAuthEndpoint struct {
@@ -86,12 +81,18 @@ type oAuthEndpoint struct {
 	tokenManagement tokenManagement
 	slugID          string
 	userInfoURL     string
-	authURL         string
+	authURL         url.URL
 	svc             service
 	loginProps      []string
 }
 
 func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoint {
+	// URLS are validated as non nil from the config (see config.OauthProvider.Verify)
+	authURL := *params.AuthURL.URL
+	tokenURL := params.TokenURL.String()
+	userInfosURL := params.UserInfosURL.String()
+	redirectURI := params.RedirectURI.String()
+
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -101,10 +102,10 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoin
 		ClientSecret: string(params.ClientSecret),
 		Scopes:       params.Scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  params.AuthURL,
-			TokenURL: params.TokenURL,
+			AuthURL:  authURL.String(),
+			TokenURL: tokenURL,
 		},
-		RedirectURL: params.RedirectURI,
+		RedirectURL: redirectURI,
 	}
 
 	loginProps := defaultLoginProps
@@ -118,8 +119,8 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT) route.Endpoin
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
 		slugID:          params.SlugID,
-		userInfoURL:     params.UserInfosURL,
-		authURL:         params.AuthURL,
+		userInfoURL:     userInfosURL,
+		authURL:         authURL,
 		svc:             service{},
 		loginProps:      loginProps,
 	}

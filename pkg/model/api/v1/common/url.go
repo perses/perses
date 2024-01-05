@@ -22,6 +22,10 @@ type URL struct {
 	*url.URL
 }
 
+func (u *URL) IsNilOrEmpty() bool {
+	return u == nil || u.URL == nil || u.URL.String() == ""
+}
+
 // UnmarshalYAML implements the yaml.Unmarshaler interface for URLs.
 func (u *URL) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var s string
