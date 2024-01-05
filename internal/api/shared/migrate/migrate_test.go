@@ -68,9 +68,9 @@ func TestMigrate(t *testing.T) {
 			projectPath := testUtils.GetRepositoryPath()
 			svc, err := New(config.Schemas{
 				// use the real schemas for these tests
-				PanelsPath:    filepath.Join(projectPath, config.DefaultPanelsPath),
-				QueriesPath:   filepath.Join(projectPath, config.DefaultQueriesPath),
-				VariablesPath: filepath.Join(projectPath, config.DefaultVariablesPath),
+				PanelsPath:    filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
+				QueriesPath:   filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
+				VariablesPath: filepath.Join(projectPath, "cue", config.DefaultVariablesPath),
 			})
 			assert.NoError(t, err)
 

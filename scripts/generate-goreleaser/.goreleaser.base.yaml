@@ -39,7 +39,7 @@ archives:
       - LICENSE
       - README.md
       - CHANGELOG.md
-      - schemas/
+      - cue/schemas/
       - cue.mod/
       - src: "docs/examples/config.archive.yaml"
         dst: "./config.yaml"

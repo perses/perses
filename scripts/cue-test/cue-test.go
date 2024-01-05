@@ -28,6 +28,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var panelsPath = filepath.Join("cue", config.DefaultPanelsPath)
+var queriesPath = filepath.Join("cue", config.DefaultQueriesPath)
+var datasourcesPath = filepath.Join("cue", config.DefaultDatasourcesPath)
+var variablesPath = filepath.Join("cue", config.DefaultVariablesPath)
+
 type validateFunc func(plugin common.Plugin, name string) error
 
 func validateSchemas(folder string, vf validateFunc) {
@@ -55,19 +60,19 @@ func validateSchemas(folder string, vf validateFunc) {
 }
 
 func validateAllSchemas(sch schemas.Schemas) {
-	validateSchemas(config.DefaultPanelsPath, func(plugin common.Plugin, name string) error {
+	validateSchemas(panelsPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidatePanel(plugin, name)
 	})
-	validateSchemas(config.DefaultDatasourcesPath, func(plugin common.Plugin, name string) error {
+	validateSchemas(datasourcesPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidateDatasource(plugin, name)
 	})
-	validateSchemas(config.DefaultVariablesPath, func(plugin common.Plugin, name string) error {
+	validateSchemas(variablesPath, func(plugin common.Plugin, name string) error {
 		return sch.ValidateVariable(plugin, name)
 	})
 }
 
 func validateAllDashboards(sch schemas.Schemas) {
-	logrus.Info("validate all dashboard in dev/data")
+	logrus.Info("validate all dashboards in dev/data")
 	data, err := os.ReadFile(path.Join("dev", "data", "dashboard.json"))
 	if err != nil {
 		logrus.Fatal(err)
@@ -118,7 +123,12 @@ func validateAllGlobalDatasources(sch schemas.Schemas) {
 }
 
 func main() {
-	cfg := config.Schemas{}
+	cfg := config.Schemas{
+		PanelsPath:      panelsPath,
+		QueriesPath:     queriesPath,
+		DatasourcesPath: datasourcesPath,
+		VariablesPath:   variablesPath,
+	}
 	_ = cfg.Verify()
 	sch, err := schemas.New(cfg)
 	if err != nil {
