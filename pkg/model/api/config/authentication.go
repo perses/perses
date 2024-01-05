@@ -73,11 +73,11 @@ func (p *OIDCProvider) Verify() error {
 }
 
 type OAuthProvider struct {
-	Provider              `json:",inline" yaml:",inline"`
-	AuthURL               common.URL `json:"auth_url" yaml:"auth_url"`
-	TokenURL              common.URL `json:"token_url" yaml:"token_url"`
-	UserInfosURL          common.URL `json:"user_infos_url" yaml:"user_infos_url"`
-	CustomLoginProperty   string     `json:"custom_login_property" yaml:"custom_login_property"`
+	Provider            `json:",inline" yaml:",inline"`
+	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
+	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
+	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
+	CustomLoginProperty string     `json:"custom_login_property" yaml:"custom_login_property"`
 }
 
 func (p *OAuthProvider) Verify() error {

@@ -36,7 +36,7 @@ import (
 const stateParam = "state"
 const codeVerifierParam = "code_verifier"
 
-var defaultLoginProps = []string{"login"}
+var defaultLoginProps = []string{"login", "username"}
 
 type oauthUserInfo struct {
 	externalUserInfoProfile
