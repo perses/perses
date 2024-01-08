@@ -79,14 +79,14 @@ function NoSecretRowOverlay() {
 export interface SecretDataGridProperties {
   columns: Array<GridColDef<Row>>;
   rows: Row[];
-  onRowClick?: (name: string, project?: string) => void;
+  onRowClick: (name: string, project?: string) => void;
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
   isLoading?: boolean;
 }
 
 export function SecretDataGrid(props: SecretDataGridProperties) {
-  const { columns, rows, initialState, hideToolbar, isLoading } = props;
+  const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
@@ -99,6 +99,9 @@ export function SecretDataGrid(props: SecretDataGridProperties) {
   return (
     <DataGrid
       autoHeight={true}
+      onRowClick={(params) => {
+        onRowClick(params.row.name, params.row.project);
+      }}
       rows={rows}
       columns={columns}
       getRowId={(row) => row.name}
