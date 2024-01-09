@@ -33,7 +33,7 @@ function SignUpView() {
       {
         kind: 'User',
         metadata: { name: login },
-        spec: { firstName: firstname, lastName: lastname, password: password },
+        spec: { firstName: firstname, lastName: lastname, nativeProvider: { password: password } },
       },
       {
         onSuccess: () => {

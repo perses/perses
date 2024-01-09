@@ -35,11 +35,6 @@ export function SignWrapper(props: { children: ReactNode }) {
   const socialProviders = [...oidcProviders, ...oauthProviders];
   const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
 
-  // If there is only one social provider, we automatically redirect to its login page
-  // TODO(cegarcia): Discuss that with other mates as it gives some weird behavior with automatic re-login when we logout
-  if (!nativeProviderIsEnabled && socialProviders.length == 1 && socialProviders[0]) {
-    location.href = `/api/auth/providers/${socialProviders[0].path}/login`;
-  }
   return (
     <Stack
       width="100%"

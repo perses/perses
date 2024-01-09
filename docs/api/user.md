@@ -14,9 +14,28 @@ spec:
   [ lastName: <string> ]
 
   # Password when provided is hashed and salted before going to the database
-  # Password is optional because depending on the Perses configuration, you might not be able to create a user.
+  # Password is optional because depending on the Perses configuration, you might be able to login with external
+  # authentication provider or not be able to create a user at all.
   # It can happen when the Perses server relies on a ldap database for authentication.
-  [ password: <string> ]
+  [ nativeProvider: [ password: <string>]] 
+
+  # Save the context of the oauth provider used if the user has been created from an external OIDC or OAuth
+  # authentication provider.
+  oauthProviders:  
+  - [ <oauthProvider> ]
+```
+
+### `<oauthProvider>`
+
+```yaml
+  # Identifying the provider
+  issuer: <string>
+
+  # Email of the user in the provider
+  email: <string>
+
+  # Identifying the user in the provider
+  subject: <string>
 ```
 
 ## API definition

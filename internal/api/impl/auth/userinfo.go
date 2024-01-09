@@ -38,27 +38,11 @@ type externalUserInfo interface {
 	GetLogin() string
 	// GetProfile returns various user information that may be set in the ``specs`` of the user entity.
 	GetProfile() externalUserInfoProfile
-	// GetIssuer returns the provider issuer. It identifies the external provider used to collect this user information.
-	GetIssuer() string
+	// GetProviderContext returns the provider context. It identifies the external provider used to collect this user
+	// information, as well as the identity of the user in that context.
+	GetProviderContext() v1.OAuthProvider
 }
 
 func buildLoginFromEmail(email string) string {
 	return strings.Split(email, "@")[0]
-}
-
-type service struct {
-}
-
-func (s *service) SyncUser(uInfo externalUserInfo) (v1.User, error) {
-	//TODO(cegarcia): to be implemented
-	return v1.User{
-		Kind: v1.KindUser,
-		Metadata: v1.Metadata{
-			Name: uInfo.GetLogin(),
-		},
-		Spec: v1.UserSpec{
-			FirstName: uInfo.GetProfile().GivenName,
-			LastName:  uInfo.GetProfile().FamilyName,
-		},
-	}, nil
 }

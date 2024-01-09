@@ -49,7 +49,7 @@ func New(dao user.DAO, jwt crypto.JWT, providers config.AuthProviders, isAuthEna
 
 	// Register the OIDC providers if any
 	for _, provider := range providers.OIDC {
-		oidcEp, err := newOIDCEndpoint(provider, jwt)
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao)
 		if err != nil {
 			return nil, err
 		}
@@ -58,7 +58,7 @@ func New(dao user.DAO, jwt crypto.JWT, providers config.AuthProviders, isAuthEna
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		ep.endpoints = append(ep.endpoints, newOAuthEndpoint(provider, jwt))
+		ep.endpoints = append(ep.endpoints, newOAuthEndpoint(provider, jwt, dao))
 	}
 	return ep, nil
 }

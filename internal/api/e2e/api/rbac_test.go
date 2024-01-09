@@ -58,7 +58,7 @@ func TestNewProjectEndpoints(t *testing.T) {
 
 		authEntity := modelAPI.Auth{
 			Login:    usrEntity.GetMetadata().GetName(),
-			Password: usrEntity.Spec.Password,
+			Password: usrEntity.Spec.NativeProvider.Password,
 		}
 		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
@@ -99,7 +99,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 
 		authEntity := modelAPI.Auth{
 			Login:    usrEntity.GetMetadata().GetName(),
-			Password: usrEntity.Spec.Password,
+			Password: usrEntity.Spec.NativeProvider.Password,
 		}
 		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
@@ -129,7 +129,7 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 
 		authEntity := modelAPI.Auth{
 			Login:    usrEntity.GetMetadata().GetName(),
-			Password: usrEntity.Spec.Password,
+			Password: usrEntity.Spec.NativeProvider.Password,
 		}
 		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
