@@ -144,8 +144,10 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 
 		user, err := e.svc.SyncUser(info)
 		if err != nil {
+			e.logWithError(err).Error("Failed to sync user in database.")
 			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(shared.InternalError.Error()))
+			return
 		}
 
 		username := user.GetMetadata().GetName()
@@ -153,11 +155,13 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 			http.SetCookie(w, cookie)
 		}
 		if _, err := e.tokenManagement.accessToken(username, setCookie); err != nil {
+			e.logWithError(err).Error("Failed to generate and save access token.")
 			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
 		}
 		if _, err := e.tokenManagement.refreshToken(username, setCookie); err != nil {
+			e.logWithError(err).Error("Failed to generate and save refresh token.")
 			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
@@ -167,6 +171,10 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty)
 	return echo.WrapHandler(codeExchangeHandler)
+}
+
+func (e *oIDCEndpoint) logWithError(err error) *logrus.Entry {
+	return logrus.WithError(err).WithField("provider", e.slugID)
 }
 
 func writeResponse(w http.ResponseWriter, response []byte) {

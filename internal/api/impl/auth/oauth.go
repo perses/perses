@@ -215,12 +215,14 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 	// Save the state cookie, will be verified in the codeExchangeHandler
 	state := uuid.NewString()
 	if err := e.saveStateCookie(ctx, state); err != nil {
+		e.logWithError(err).Error("Failed to save state in a cookie.")
 		return shared.InternalError
 	}
 
 	// Save the PKCE code verifier cookie, will be verified in the codeExchangeHandler
 	verifier := oauth2.GenerateVerifier()
 	if err := e.saveCodeVerifierCookie(ctx, verifier); err != nil {
+		e.logWithError(err).Error("Failed to save code verifier in a cookie.")
 		return shared.InternalError
 	}
 
@@ -280,10 +282,12 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	username := user.GetMetadata().GetName()
 	_, err = e.tokenManagement.accessToken(username, ctx.SetCookie)
 	if err != nil {
+		e.logWithError(err).Error("Failed to generate and save access token.")
 		return shared.InternalError
 	}
 	_, err = e.tokenManagement.refreshToken(username, ctx.SetCookie)
 	if err != nil {
+		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return shared.InternalError
 	}
 
