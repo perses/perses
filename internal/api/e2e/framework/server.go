@@ -30,8 +30,8 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/client_golang/prometheus"
-	promConfig "github.com/prometheus/common/config"
 	"github.com/prometheus/common/model"
 )
 
@@ -48,7 +48,7 @@ func DefaultConfig() apiConfig.Config {
 				AccessTokenTTL:  model.Duration(apiConfig.DefaultAccessTokenTTL),
 				RefreshTokenTTL: model.Duration(apiConfig.DefaultRefreshTokenTTL),
 			},
-			EncryptionKey: promConfig.Secret(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
+			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: apiConfig.Schemas{
 			PanelsPath:      filepath.Join(projectPath, apiConfig.DefaultPanelsPath),

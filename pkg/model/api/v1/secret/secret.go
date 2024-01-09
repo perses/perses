@@ -34,10 +34,18 @@ func (h *Hidden) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	return unmarshal((*plain)(h))
 }
 
-// MarshalJSON implements the json.Marshaler interface for Secret.
+// MarshalJSON implements the json.Marshaler interface for Hidden.
 func (h Hidden) MarshalJSON() ([]byte, error) {
 	if len(h) == 0 {
 		return json.Marshal("")
 	}
 	return json.Marshal(secretToken)
+}
+
+// MarshalText implements the encoding.TextMarshaler interface for Hidden.
+func (h Hidden) MarshalText() ([]byte, error) {
+	if len(h) == 0 {
+		return []byte{}, nil
+	}
+	return []byte(secretToken), nil
 }
