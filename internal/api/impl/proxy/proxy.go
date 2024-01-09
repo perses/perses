@@ -114,6 +114,16 @@ func New(dashboardDAO dashboard.DAO, secretDAO secret.DAO, globalSecretDAO globa
 	}
 }
 
+func (e *endpoint) CollectRoutes(g *route.Group) {
+	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, true)
+	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, true)
+
+	g.POST(fmt.Sprintf("/%s/%s/*", utils.PathUnsaved, utils.PathGlobalDatasource), e.proxyUnsavedGlobalDatasource, false)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDatasource), e.proxyUnsavedProjectDatasource, false)
+	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource), e.proxyUnsavedDashboardDatasource, false)
+}
+
 func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope role.Scope, action role.Action) error {
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {
@@ -123,26 +133,16 @@ func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope r
 
 	if role.IsGlobalScope(scope) {
 		if ok := e.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, scope); !ok {
-			return shared.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
+			return shared.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
 		}
 		return nil
 	}
 
 	if ok := e.rbac.HasPermission(claims.Subject, action, projectName, scope); !ok {
-		return shared.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
+		return shared.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
 	}
 
 	return nil
-}
-
-func (e *endpoint) CollectRoutes(g *route.Group) {
-	g.ANY(fmt.Sprintf("/%s/:%s/*", utils.PathGlobalDatasource, utils.ParamName), e.proxySavedGlobalDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDatasource, utils.ParamName), e.proxySavedProjectDatasource, true)
-	g.ANY(fmt.Sprintf("/%s/:%s/%s/:%s/%s/:%s/*", utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource, utils.ParamName), e.proxySavedDashboardDatasource, true)
-
-	g.POST(fmt.Sprintf("/%s/%s/*", utils.PathUnsaved, utils.PathGlobalDatasource), e.proxyUnsavedGlobalDatasource, false)
-	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDatasource), e.proxyUnsavedProjectDatasource, false)
-	g.POST(fmt.Sprintf("/%s/%s/:%s/%s/:%s/%s/*", utils.PathUnsaved, utils.PathProject, utils.ParamProject, utils.PathDashboard, utils.ParamDashboard, utils.PathDatasource), e.proxyUnsavedDashboardDatasource, false)
 }
 
 func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, spec v1.DatasourceSpec) error {
@@ -277,10 +277,10 @@ func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, shared.InternalError
 	}
 	return dts.Spec, nil
 }
@@ -290,10 +290,10 @@ func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.Dat
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", name, projectName)
-			return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, shared.InternalError
 	}
 	return dts.Spec, nil
 }
@@ -303,15 +303,15 @@ func (e *endpoint) getDashboardDatasource(projectName string, dashboardName stri
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Dashboard %q in project %q", dashboardName, projectName)
-			return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return v1.DatasourceSpec{}, shared.InternalError
 	}
 	dtsSpec, ok := db.Spec.Datasources[name]
 	if !ok {
 		logrus.Debugf("unable to find the Datasource %q from Dashboard %q in project %q", name, dashboardName, projectName)
-		return v1.DatasourceSpec{}, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+		return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 	}
 	return *dtsSpec, nil
 }
@@ -321,10 +321,10 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
+			return nil, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
 		}
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return nil, shared.InternalError
 	}
 	return &scrt.Spec, nil
 }
@@ -334,10 +334,10 @@ func (e *endpoint) getProjectSecret(projectName string, dtsName string, name str
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
+			return nil, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
 		}
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, "internal server error")
+		return nil, shared.InternalError
 	}
 	return &scrt.Spec, nil
 }
@@ -360,7 +360,7 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 		}
 		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 			logrus.WithError(err).Errorf("unable to decrypt the secret")
-			return nil, echo.NewHTTPError(http.StatusInternalServerError)
+			return nil, shared.InternalError
 		}
 	}
 	if !strings.HasPrefix(path, "/") {
@@ -396,12 +396,12 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 
 	if len(h.config.AllowedEndpoints) > 0 && !isAllowed {
-		return echo.NewHTTPError(http.StatusForbidden, fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
+		return shared.HandleForbiddenError(fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
 	if err := h.prepareRequest(c); err != nil {
 		logrus.WithError(err).Errorf("unable to prepare the request")
-		return echo.NewHTTPError(http.StatusInternalServerError)
+		return shared.InternalError
 	}
 
 	// redirect the request to the datasource
@@ -424,15 +424,25 @@ func (h *httpProxy) serve(c echo.Context) error {
 	// Reverse proxy request.
 	reverseProxy.ServeHTTP(res, req)
 	// Return any error handled during proxying request.
-	return proxyErr
+	if proxyErr != nil {
+		// we need to wrap the error with an Echo Error,
+		// otherwise the error will be hidden by the middleware "middleware.HandleError".
+		status := res.Status
+		if status < 400 {
+			// if there is an error and the status code doesn't match the error, then let's use a default one
+			status = 500
+		}
+		return echo.NewHTTPError(status, proxyErr.Error())
+	}
+	return nil
 }
 
 func (h *httpProxy) prepareRequest(c echo.Context) error {
 	req := c.Request()
-	// We have to modify the HOST of the request in order to match the host of the targetURL
-	// So far I'm not sure to understand exactly why, but if you are going to remove it, be sure of what you are doing.
+	// We have to modify the HOST of the request to match the host of the targetURL
+	// So far I'm not sure to understand exactly why. However, if you are going to remove it, be sure of what you are doing.
 	// It has been done to fix an error returned by Openshift itself saying the target doesn't exist.
-	// Since we are using HTTP/1, setting the HOST is setting also an header so if the host and the header are different
+	// Since we are using HTTP/1, setting the HOST is setting also a header, so if the host and the header are different,
 	// then maybe it is blocked by the Openshift router.
 	req.Host = h.config.URL.Host
 	// Fix header
