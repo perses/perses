@@ -33,15 +33,48 @@ import (
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
 
+// oidcUserInfo implements externalUserInfo for the OIDC providers
+type oidcUserInfo struct {
+	externalUserInfoProfile
+	Subject string `json:"sub,omitempty"`
+	// issuer is not supposed to be taken from json, but instead it must be set right before the db sync.
+	issuer string
+}
+
+// GetSubject implements [rp.SubjectGetter]
+func (u *oidcUserInfo) GetSubject() string {
+	return u.Subject
+}
+
+// GetLogin implements [externalUserInfo]
+// It uses the first part of the email to create the username.
+func (u *oidcUserInfo) GetLogin() string {
+	return buildLoginFromEmail(u.Email)
+}
+
+// GetProfile implements [externalUserInfo]
+func (u *oidcUserInfo) GetProfile() externalUserInfoProfile {
+	return u.externalUserInfoProfile
+}
+
+// GetIssuer implements [externalUserInfo]
+func (u *oidcUserInfo) GetIssuer() string {
+	return u.issuer
+}
+
 type oIDCEndpoint struct {
 	relyingParty    rp.RelyingParty
 	jwt             crypto.JWT
 	tokenManagement tokenManagement
 	slugID          string
 	urlParams       map[string]string
+	issuer          string
+	svc             service
 }
 
 func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoint, error) {
+	issuer := provider.Issuer.String()
+	redirectURI := provider.RedirectURI.String()
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// The OIDC library will use it this way:
 	// - Right before calling the /authorize provider's endpoint, it set "state" in a cookie and the "PKCE code challenge" in another
@@ -56,12 +89,18 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 	options := []rp.Option{
 		rp.WithVerifierOpts(rp.WithIssuedAtOffset(5 * time.Second)),
 		rp.WithHTTPClient(client),
-		rp.WithPKCE(cookieHandler),
+		rp.WithCookieHandler(cookieHandler),
+	}
+	if !provider.DisablePKCE {
+		options = append(options, rp.WithPKCE(cookieHandler))
+	}
+	if !provider.DiscoveryURL.IsNilOrEmpty() {
+		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL.String()))
 	}
 	relyingParty, err := rp.NewRelyingPartyOIDC(
 		context.Background(),
-		string(provider.Issuer), string(provider.ClientID), string(provider.ClientSecret),
-		provider.RedirectURI, provider.Scopes, options...,
+		issuer, string(provider.ClientID), string(provider.ClientSecret),
+		redirectURI, provider.Scopes, options...,
 	)
 	if err != nil {
 		return nil, err
@@ -72,6 +111,8 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 		tokenManagement: tokenManagement{jwt: jwt},
 		slugID:          provider.SlugID,
 		urlParams:       provider.URLParams,
+		issuer:          issuer,
+		svc:             service{},
 	}, nil
 }
 
@@ -93,23 +134,35 @@ func (e *oIDCEndpoint) buildAuthHandler() echo.HandlerFunc {
 }
 
 func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
-	// TODO(cegarcia): Make a user synchronization operation on the database
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidc.UserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidcUserInfo) {
 		redirectURI := r.URL.Query().Get("redirect_uri")
 		if redirectURI == "" {
 			redirectURI = "/"
 		}
-		login := info.Subject
-		setCookie := func(cookie *http.Cookie) {
-			http.SetCookie(w, cookie)
-		}
-		if _, err := e.tokenManagement.accessToken(login, setCookie); err != nil {
-			w.WriteHeader(500)
+		// We don´t forget to set the issuer before making any sync in the database.
+		info.issuer = e.issuer
+
+		user, err := e.svc.SyncUser(info)
+		if err != nil {
+			e.logWithError(err).Error("Failed to sync user in database.")
+			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
 		}
-		if _, err := e.tokenManagement.refreshToken(login, setCookie); err != nil {
-			w.WriteHeader(500)
+
+		username := user.GetMetadata().GetName()
+		setCookie := func(cookie *http.Cookie) {
+			http.SetCookie(w, cookie)
+		}
+		if _, err := e.tokenManagement.accessToken(username, setCookie); err != nil {
+			e.logWithError(err).Error("Failed to generate and save access token.")
+			w.WriteHeader(http.StatusInternalServerError)
+			writeResponse(w, []byte(shared.InternalError.Error()))
+			return
+		}
+		if _, err := e.tokenManagement.refreshToken(username, setCookie); err != nil {
+			e.logWithError(err).Error("Failed to generate and save refresh token.")
+			w.WriteHeader(http.StatusInternalServerError)
 			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
 		}
@@ -118,6 +171,10 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 	}
 	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty)
 	return echo.WrapHandler(codeExchangeHandler)
+}
+
+func (e *oIDCEndpoint) logWithError(err error) *logrus.Entry {
+	return logrus.WithError(err).WithField("provider", e.slugID)
 }
 
 func writeResponse(w http.ResponseWriter, response []byte) {

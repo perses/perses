@@ -19,7 +19,11 @@ import (
 )
 
 type URL struct {
-	*url.URL
+	*url.URL `json:"-" yaml:"-"`
+}
+
+func (u *URL) IsNilOrEmpty() bool {
+	return u.URL == nil || u.URL.String() == ""
 }
 
 // UnmarshalYAML implements the yaml.Unmarshaler interface for URLs.

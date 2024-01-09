@@ -55,6 +55,7 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		if databaseModel.IsKeyNotFound(err) {
 			return shared.HandleBadRequestError("wrong login or password ")
 		}
+		return shared.InternalError
 	}
 
 	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {

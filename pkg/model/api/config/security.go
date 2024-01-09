@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 

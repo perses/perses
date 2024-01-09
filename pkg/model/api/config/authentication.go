@@ -14,11 +14,13 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/perses/perses/internal/api/shared/utils"
-	"github.com/prometheus/common/config"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/model"
 )
 
@@ -27,28 +29,68 @@ const (
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
 
+type Provider struct {
+	SlugID       string        `json:"slug_id" yaml:"slug_id"`
+	Name         string        `json:"name" yaml:"name"`
+	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
+	RedirectURI  common.URL    `json:"redirect_uri" yaml:"redirect_uri"`
+	Scopes       []string      `json:"scopes" yaml:"scopes"`
+	DisablePKCE  bool          `json:"disable_pkce" yaml:"disable_pkce"`
+}
+
+func (p *Provider) Verify() error {
+	if p.SlugID == "" {
+		return errors.New("provider's `slug_id` is mandatory")
+	}
+	if p.Name == "" {
+		return errors.New("provider's `name` is mandatory")
+	}
+	if p.ClientID == "" {
+		return errors.New("provider's `client_id` is mandatory")
+	}
+	if p.ClientSecret == "" {
+		return errors.New("provider's `client_secret` is mandatory")
+	}
+	if p.RedirectURI.IsNilOrEmpty() {
+		return errors.New("provider's `redirect_uri` is mandatory")
+	}
+	return nil
+}
+
 type OIDCProvider struct {
-	SlugID       string            `json:"slug_id" yaml:"slug_id"`
-	Name         string            `json:"name" yaml:"name"`
-	ClientID     config.Secret     `json:"client_id" yaml:"client_id"`
-	ClientSecret config.Secret     `json:"client_secret" yaml:"client_secret"`
-	RedirectURI  string            `json:"redirect_uri" yaml:"redirect_uri"`
-	Scopes       []string          `json:"scopes" yaml:"scopes"`
-	Issuer       config.Secret     `json:"issuer" yaml:"issuer"`
+	Provider     `json:",inline" yaml:",inline"`
+	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
+	DiscoveryURL common.URL        `json:"discovery_url" yaml:"discovery_url"`
 	URLParams    map[string]string `json:"url_params" yaml:"url_params"`
 }
 
+func (p *OIDCProvider) Verify() error {
+	if p.Issuer.IsNilOrEmpty() {
+		return errors.New("provider's `issuer` is mandatory")
+	}
+	return nil
+}
+
 type OAuthProvider struct {
-	SlugID       string        `json:"slug_id" yaml:"slug_id"`
-	Name         string        `json:"name" yaml:"name"`
-	ClientID     config.Secret `json:"client_id" yaml:"client_id"`
-	ClientSecret config.Secret `json:"client_secret" yaml:"client_secret"`
-	RedirectURI  string        `json:"redirect_uri" yaml:"redirect_uri"`
-	Scopes       []string      `json:"scopes" yaml:"scopes"`
-	AuthURL      string        `json:"auth_url" yaml:"auth_url"`
-	TokenURL     string        `json:"token_url" yaml:"token_url"`
-	LogoutURL    string        `json:"logout_url" yaml:"logout_url"`
-	UserInfosURL string        `json:"user_infos_url" yaml:"user_infos_url"`
+	Provider            `json:",inline" yaml:",inline"`
+	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
+	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
+	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
+	CustomLoginProperty string     `json:"custom_login_property" yaml:"custom_login_property"`
+}
+
+func (p *OAuthProvider) Verify() error {
+	if p.AuthURL.IsNilOrEmpty() {
+		return errors.New("provider's `auth_url` is mandatory")
+	}
+	if p.TokenURL.IsNilOrEmpty() {
+		return errors.New("provider's `token_url` is mandatory")
+	}
+	if p.UserInfosURL.IsNilOrEmpty() {
+		return errors.New("provider's `user_infos_url` is mandatory")
+	}
+	return nil
 }
 
 type AuthProviders struct {

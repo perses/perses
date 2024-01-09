@@ -133,7 +133,7 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # Enable the native authentication providers
-  [ enable_auth: <boolean> | default = false ]
+  [ enable_native: <boolean> | default = false ]
   
   # List of the OIDC authentication providers
   oidc:
@@ -167,6 +167,12 @@ Generic placeholders are defined as follows:
 
   # The provider issuer URL
   [ issuer: <string> ]
+
+  # A custom discovery URL if different from {issuer}/.well-known/openid-configuration
+  [ discovery_url: <string> ]
+
+  # Disable PKCE verification
+  [ disable_pkce: <boolean> | default = false ]
   
   # The additional url params that will be appended to /authorize provider's endpoint
   [ url_params:
@@ -204,6 +210,9 @@ Generic placeholders are defined as follows:
   # The provider User Infos URL
   [ user_infos_url: <string> ]
 
+  # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
+  # The login is mandatory to store in the database the name of the user.
+  [ custom_login_property: <string>]
 ```
 
 #### `<authorization_config>`
