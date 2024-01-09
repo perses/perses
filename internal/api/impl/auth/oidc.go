@@ -144,8 +144,8 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 
 		user, err := e.svc.SyncUser(info)
 		if err != nil {
-			w.WriteHeader(500)
-			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			writeResponse(w, []byte(shared.InternalError.Error()))
 		}
 
 		username := user.GetMetadata().GetName()
@@ -153,13 +153,13 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 			http.SetCookie(w, cookie)
 		}
 		if _, err := e.tokenManagement.accessToken(username, setCookie); err != nil {
-			w.WriteHeader(500)
-			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
 		}
 		if _, err := e.tokenManagement.refreshToken(username, setCookie); err != nil {
-			w.WriteHeader(500)
-			writeResponse(w, []byte(shared.UnauthorizedError.Error()))
+			w.WriteHeader(http.StatusInternalServerError)
+			writeResponse(w, []byte(shared.InternalError.Error()))
 			return
 		}
 

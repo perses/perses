@@ -215,13 +215,13 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 	// Save the state cookie, will be verified in the codeExchangeHandler
 	state := uuid.NewString()
 	if err := e.saveStateCookie(ctx, state); err != nil {
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	// Save the PKCE code verifier cookie, will be verified in the codeExchangeHandler
 	verifier := oauth2.GenerateVerifier()
 	if err := e.saveCodeVerifierCookie(ctx, verifier); err != nil {
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	// Redirect user to consent page to ask for permission
@@ -241,21 +241,21 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// Verify that the state in the query match the saved one
 	if _, err := e.readStateCookie(ctx); err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	// Exchange the authorization code with a token
 	token, err := e.conf.Exchange(ctx.Request().Context(), code, oauth2.VerifierOption(verifier))
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while exchanging code with token")
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	uInfoBody, err := e.requestUserInfo(ctx, token)
@@ -267,24 +267,24 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	uInfo, err := e.buildUserInfo(uInfoBody)
 	if err != nil {
 		e.logWithError(err).Error("Failed to collect user infos.")
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	// Save the user in database
 	user, err := e.svc.SyncUser(uInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	username := user.GetMetadata().GetName()
 	_, err = e.tokenManagement.accessToken(username, ctx.SetCookie)
 	if err != nil {
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 	_, err = e.tokenManagement.refreshToken(username, ctx.SetCookie)
 	if err != nil {
-		return shared.UnauthorizedError
+		return shared.InternalError
 	}
 
 	return ctx.Redirect(302, "/")
