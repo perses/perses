@@ -27,6 +27,7 @@ import {
   VariableResource,
   RoleResource,
   RoleBindingResource,
+  SecretResource,
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
@@ -43,6 +44,8 @@ import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { SecretDrawer } from '../../components/secrets/SecretDrawer';
+import { useCreateSecretMutation } from '../../model/secret-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
@@ -69,12 +72,14 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
   const createDatasourceMutation = useCreateDatasourceMutation(projectName);
   const createRoleMutation = useCreateRoleMutation(projectName);
   const createRoleBindingMutation = useCreateRoleBindingMutation(projectName);
+  const createSecretMutation = useCreateSecretMutation(projectName);
   const createVariableMutation = useCreateVariableMutation(projectName);
 
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
+  const [isSecretDrawerOpened, setSecretDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
 
   const isReadonly = useIsReadonly();
@@ -136,6 +141,22 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
     [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
   );
 
+  const handleSecretCreation = useCallback(
+    (secret: SecretResource) => {
+      createSecretMutation.mutate(secret, {
+        onSuccess: (createdSecret: SecretResource) => {
+          successSnackbar(`Secret ${createdSecret.metadata.name} has been successfully created`);
+          setSecretDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createSecretMutation]
+  );
+
   const handleVariableCreation = useCallback(
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
@@ -172,42 +193,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
-          />
-        </>
-      );
-    case variablesTabIndex:
-      return (
-        <>
-          <CRUDButton
-            action="create"
-            scope="Variable"
-            project={projectName}
-            variant="contained"
-            onClick={() => setVariableDrawerOpened(true)}
-            {...props}
-          >
-            Add Variable
-          </CRUDButton>
-          <VariableDrawer
-            variable={{
-              kind: 'Variable',
-              metadata: {
-                name: 'NewVariable',
-                project: projectName,
-              },
-              spec: {
-                kind: 'TextVariable',
-                spec: {
-                  name: 'NewVariable',
-                  value: '',
-                },
-              },
-            }}
-            isOpen={isVariableDrawerOpened}
-            action="create"
-            isReadonly={isReadonly}
-            onSave={handleVariableCreation}
-            onClose={() => setVariableDrawerOpened(false)}
           />
         </>
       );
@@ -311,6 +296,78 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
             isReadonly={isReadonly}
             onSave={handleRoleBindingCreation}
             onClose={() => setRoleBindingDrawerOpened(false)}
+          />
+        </>
+      );
+    case secretsTabIndex:
+      return (
+        <>
+          <CRUDButton
+            action="create"
+            scope="Secret"
+            project={projectName}
+            variant="contained"
+            onClick={() => setSecretDrawerOpened(true)}
+            {...props}
+          >
+            Add Secret
+          </CRUDButton>
+          <SecretDrawer
+            secret={{
+              kind: 'Secret',
+              metadata: {
+                name: 'NewSecret',
+                project: projectName,
+              },
+              spec: {
+                basicAuth: {
+                  username: '',
+                  password: '',
+                  passwordFile: '',
+                },
+              },
+            }}
+            isOpen={isSecretDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleSecretCreation}
+            onClose={() => setSecretDrawerOpened(false)}
+          />
+        </>
+      );
+    case variablesTabIndex:
+      return (
+        <>
+          <CRUDButton
+            action="create"
+            scope="Variable"
+            project={projectName}
+            variant="contained"
+            onClick={() => setVariableDrawerOpened(true)}
+            {...props}
+          >
+            Add Variable
+          </CRUDButton>
+          <VariableDrawer
+            variable={{
+              kind: 'Variable',
+              metadata: {
+                name: 'NewVariable',
+                project: projectName,
+              },
+              spec: {
+                kind: 'TextVariable',
+                spec: {
+                  name: 'NewVariable',
+                  value: '',
+                },
+              },
+            }}
+            isOpen={isVariableDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleVariableCreation}
+            onClose={() => setVariableDrawerOpened(false)}
           />
         </>
       );

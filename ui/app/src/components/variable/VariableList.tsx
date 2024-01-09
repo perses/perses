@@ -190,7 +190,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
             icon={<PencilIcon />}
-            label="Rename"
+            label="Edit"
             action="update"
             scope={params.row.project ? 'Variable' : 'GlobalVariable'}
             project={params.row.project ? params.row.project : GlobalProject}

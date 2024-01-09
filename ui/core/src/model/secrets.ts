@@ -61,8 +61,3 @@ export interface GlobalSecretResource {
 }
 
 export type Secret = SecretResource | GlobalSecretResource;
-
-// TODO: check
-export function getSecretProject(secret: Secret) {
-  return 'project' in secret.metadata ? secret.metadata.project : undefined;
-}
