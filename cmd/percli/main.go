@@ -17,6 +17,7 @@ import (
 	"os"
 
 	"github.com/perses/perses/internal/cli/cmd/apply"
+	"github.com/perses/perses/internal/cli/cmd/dac"
 	"github.com/perses/perses/internal/cli/cmd/describe"
 	"github.com/perses/perses/internal/cli/cmd/get"
 	"github.com/perses/perses/internal/cli/cmd/lint"
@@ -42,19 +43,20 @@ func newRootCommand() *cobra.Command {
 		Short: "Command line interface to interact with the Perses API",
 	}
 
-	// The list of the commands supported
+	// The list of supported commands
 	cmd.AddCommand(apply.NewCMD())
+	cmd.AddCommand(dac.NewCMD())
 	cmd.AddCommand(describe.NewCMD())
 	cmd.AddCommand(get.NewCMD())
 	cmd.AddCommand(lint.NewCMD())
 	cmd.AddCommand(login.NewCMD())
 	cmd.AddCommand(migrate.NewCMD())
-	cmd.AddCommand(refresh.NewCMD())
 	cmd.AddCommand(project.NewCMD())
+	cmd.AddCommand(refresh.NewCMD())
 	cmd.AddCommand(remove.NewCMD())
 	cmd.AddCommand(version.NewCMD())
 
-	// the list of the global flags supported
+	// the list of supported global flags
 	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", config.GetDefaultPath(), "Path to the percliconfig file to use for CLI requests.")
 	cmd.PersistentFlags().StringVar(&logLevel, "log.level", "info", "Set the log verbosity level. Possible values: panic, fatal, error, warning, info, debug, trace")
 

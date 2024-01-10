@@ -19,7 +19,7 @@ function dacSetup() {
     # Create the destination folder (see https://cuelang.org/docs/concepts/packages/)
     mkdir -p cue.mod/pkg/github.com/perses/perses
 
-    # Download  & extract sources
+    # Download & extract sources
     curl -L https://github.com/perses/perses/archive/refs/tags/v$VERSION.tar.gz --output sources.tar.gz
     tar -xzf sources.tar.gz
 
