@@ -24,17 +24,17 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 const archiveName = "sources.tar.gz"
-const depsParentFolder = "cue"
-const depsDstFolder = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
+const depsFolderName = "cue/"
+const depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
 
 type option struct {
 	persesCMD.Option
 	writer  io.Writer
-	verbose bool
 	version string
 }
 
@@ -44,9 +44,7 @@ func (o *option) Complete(args []string) error {
 	}
 	// If no version provided it should default to the version of the Perses server
 	if o.version == "" {
-		if o.verbose {
-			fmt.Println("version flag not provided, retrieving version from Perses server..")
-		}
+		logrus.Debug("version flag not provided, retrieving version from Perses server..")
 		apiClient, err := config.Global.GetAPIClient()
 		if err != nil {
 			return fmt.Errorf("you need to either provide a version or be connected to a Perses server")
@@ -66,19 +64,19 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	fmt.Printf("Starting DaC setup with Perses %s\n", o.version)
+	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
 
 	// Create the destination folder
-	os.MkdirAll(depsDstFolder, 0666)
+	os.MkdirAll(depsRootDstPath, 0666)
 
-	// Retrieve the Perses sources
-	err := retrieveSources(o.version, o.verbose)
+	// Download the source code from the provided Perses version
+	err := downloadSources(o.version)
 	if err != nil {
 		return fmt.Errorf("error retrieving the Perses sources: %v", err)
 	}
 
 	// Extract the CUE deps from the archive to the destination folder
-	err = extractCUEDepsToDst(o.version, o.verbose)
+	err = extractCUEDepsToDst(o.version)
 	if err != nil {
 		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
 	}
@@ -94,7 +92,7 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func retrieveSources(version string, verbose bool) error {
+func downloadSources(version string) error {
 	// Download the sources
 	url := fmt.Sprintf("https://github.com/perses/perses/archive/refs/tags/v%s.tar.gz", version)
 
@@ -120,31 +118,29 @@ func retrieveSources(version string, verbose bool) error {
 		return fmt.Errorf("error copying content to file: %v", err)
 	}
 
-	if verbose {
-		fmt.Println("Perses release archive downloaded successfully")
-	}
+	logrus.Debug("Perses release archive downloaded successfully")
 
 	return nil
 }
 
-func extractCUEDepsToDst(version string, verbose bool) error {
+func extractCUEDepsToDst(version string) error {
 	file, err := os.Open(archiveName)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	// Open the gzip reader
+	// Open the tar reader
 	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		return err
 	}
 	defer gzipReader.Close()
-
-	// Open the tar reader
 	tarReader := tar.NewReader(gzipReader)
 
-	// Extract the CUE deps folder to the destination path
+	// Extract each CUE dep to the destination path
+	// TODO simplify the code with https://github.com/mholt/archiver? Wait for stable release of v4 maybe
+	depsFolderFound := false
 	for {
 		header, err := tarReader.Next()
 		if err == io.EOF {
@@ -155,51 +151,53 @@ func extractCUEDepsToDst(version string, verbose bool) error {
 		}
 
 		// Remove the wrapping folder for following evaluations
-		depFilepath := removeFirstFolder(header.Name)
+		currentDepPath := removeFirstFolder(header.Name)
 
-		if !strings.HasPrefix(depFilepath, depsParentFolder+"/") { // adding slash to avoid matching cue.mod dir
+		if currentDepPath == depsFolderName {
+			depsFolderFound = true
+		}
+		if !strings.HasPrefix(currentDepPath, depsFolderName) {
 			continue
 		}
 
-		targetPath := depsDstFolder + "/" + depFilepath
+		newDepPath := fmt.Sprintf("%s/%s", depsRootDstPath, currentDepPath)
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if err := os.Mkdir(targetPath, 0666); err != nil {
-				return fmt.Errorf("can't create dir %s: %v", targetPath, err)
+			if err := os.Mkdir(newDepPath, 0666); err != nil {
+				return fmt.Errorf("can't create dir %s: %v", newDepPath, err)
 			}
-			if verbose {
-				fmt.Printf("dir %s created succesfully\n", targetPath)
-			}
+			logrus.Debugf("dir %s created succesfully", newDepPath)
 		case tar.TypeReg:
-			outFile, err := os.Create(targetPath)
+			outFile, err := os.Create(newDepPath)
 			if err != nil {
-				return fmt.Errorf("can't create file %s: %v", targetPath, err)
+				return fmt.Errorf("can't create file %s: %v", newDepPath, err)
 			}
 			defer outFile.Close()
 			if _, err := io.Copy(outFile, tarReader); err != nil {
 				return fmt.Errorf("can't copy content from %s: %v", header.Name, err)
 			}
-			if verbose {
-				fmt.Printf("file %s extracted succesfully\n", targetPath)
-			}
+			logrus.Debugf("file %s extracted succesfully", newDepPath)
 		default:
 			return fmt.Errorf("unknown type: %b in %s", header.Typeflag, header.Name)
 		}
+	}
+
+	if !depsFolderFound {
+		return fmt.Errorf("CUE dependencies not found in archive")
 	}
 
 	return nil
 }
 
 func removeFirstFolder(filePath string) string {
-	separatorChar := "/"
+	separatorChar := "/" // force the usage of forward slash for strings comparison
 
 	// Split the path into individual components
 	components := strings.Split(filePath, separatorChar)
 
-	// Check if there is at least one folder in the path
+	// Remove the top folder if there is at least one folder in the path
 	if len(components) > 1 {
-		// Remove the first folder
 		components = components[1:]
 	}
 
@@ -223,10 +221,10 @@ takes care of adding the CUE sources from Perses as external dependencies to you
 /!\ It must be executed at the root of your repo.
 `,
 		Example: `
-# If you are connected to a server simply run
+# DaC setup when you are connected to a server
 percli dac setup
 
-# If you are not, you need to provide the Perses version to consider for dependencies retrieval
+# DaC setup when you are not connected to a server, you need to provide the Perses version to consider for dependencies retrieval
 percli dac setup --version 0.42.1
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -234,7 +232,6 @@ percli dac setup --version 0.42.1
 		},
 	}
 	cmd.Flags().StringVar(&o.version, "version", "", "Version of Perses from which to retrieve the CUE dependencies.")
-	cmd.Flags().BoolVar(&o.verbose, "verbose", false, "Enable verbose output")
 
 	return cmd
 }
