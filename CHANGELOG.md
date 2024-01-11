@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.43.0-rc0 / 2024-01-11
+
+- [FEATURE] Add Secret Form Editor (#1671)
+- [FEATURE] Authentication with external OAuth/OIDC providers (#1637) (#1685) (#1692)
+- [FEATURE] Add a new command to refresh the access token (#1668)
+- [FEATURE] Allow visualizing the dashboard's JSON in read mode (#1651)
+- [ENHANCEMENT] Use common.URL in the proxy (#1688)
+- [ENHANCEMENT] New type for URL and Secret suitable for configuration (#1687)
+- [ENHANCEMENT] Auto input resize for text variables (#1654)
+- [ENHANCEMENT] Move the proxy endpoint from a middleware to a route (#1644)
+- [ENHANCEMENT] Add in a proxy for unsaved datasources (#1635)
+- [ENHANCEMENT] Allow editing the name of the local resources (#1660)
+- [ENHANCEMENT] Use mode.Duration from Prometheus (#1658)
+- [ENHANCEMENT] Improve dashboard toolbar UX (#1646)
+- [ENHANCEMENT] Improve variable editor form state update (#1648)
+- [ENHANCEMENT] Improve drawers responsive (#1647)
+- [ENHANCEMENT] UI - Improve project, admin, migrate and config pages responsive (#1643)
+- [ENHANCEMENT] UI - Improve home page responsive (#1633)
+- [ENHANCEMENT] move config to pkg so its available publicly (#1636)
+- [BUGFIX] Fix the error generated when datasource is contacted (#1693)
+- [BUGFIX] Fix creation date of the default role created for a new project (#1670)
+- [BUGFIX] CLI: Fix get role and rolebinding (#1669)
+- [BUGFIX] CLI: Fix login command that didn't rewrite the token after a second connection (#1667)
+- [BUGFIX] CLI: Fix the login cmd when the auth is not activated (#1666)
+- [BUGFIX] Fix missing tooltip on updated variables (#1659)
+- [BUGFIX] Fix the token refresh that required a complete refresh of the page to be considered (#1649)
+- [BUGFIX] Fix the list of project resources used in the verification middleware (#1645)
+- [BREAKINGCHANGE] Spec user changed to reflect the usage of OAuth/OIDC (#1692)
+- [DOC] Docs update to add installing perses from source section. (#1679)
+- [DOC] Add a doc about the provisioning (#1683)
+- [DOC] Rephrase some parts of the main README (#1673)
+- [DOC] Add a section about the different container tags provided (#1650)
+- [DOC] Add the preview of a dashboard in the README (#1634)
+
 ## 0.42.1 / 2023-12-08
 
 This release doesn't contain any changes regarding the Perses binaries.
