@@ -77,7 +77,7 @@ func (o *option) Execute() error {
 	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
 
 	// Create the destination folder
-	err := os.MkdirAll(depsRootDstPath, 0666)
+	err := os.MkdirAll(depsRootDstPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
 	}
