@@ -13,6 +13,11 @@
 
 package sdk
 
+import (
+	"fmt"
+	"math"
+)
+
 type Row struct {
 	Title        string
 	PanelsWidth  int
@@ -55,16 +60,29 @@ func (b *RowBuilder) Collapsed(enabled bool) *RowBuilder {
 	return b
 }
 
-// TODO: utils for calculating width automatically with X panels per line
+func (b *RowBuilder) WithPanelsPerLine(panelsPerLine int) *RowBuilder {
+	if panelsPerLine < 1 || panelsPerLine > 24 {
+		fmt.Print("at least 1 panel and 24 panels max per row line")
+		return b
+	}
+	b.PanelsWidth = int(math.Floor(float64(24 / panelsPerLine)))
+	return b
+}
 
 func (b *RowBuilder) WithPanelWidth(width int) *RowBuilder {
-	// TODO: validation
+	if width < 1 || width > 24 {
+		fmt.Print("panel width is contained to 1 and 24")
+		return b
+	}
 	b.PanelsWidth = width
 	return b
 }
 
 func (b *RowBuilder) WithPanelHeight(height int) *RowBuilder {
-	// TODO: validation
+	if height < 1 || height > 24 {
+		fmt.Print("panel height can't be negative or zero")
+		return b
+	}
 	b.PanelsHeight = height
 	return b
 }

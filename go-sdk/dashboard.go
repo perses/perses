@@ -20,6 +20,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/prometheus/common/model"
 )
 
 func NewDashboard(name string) *DashboardBuilder {
@@ -30,6 +31,15 @@ func NewDashboard(name string) *DashboardBuilder {
 				Metadata: v1.Metadata{
 					Name: name,
 				},
+			},
+			Spec: v1.DashboardSpec{
+				Display:         nil,
+				Datasources:     make(map[string]*v1.DatasourceSpec),
+				Variables:       []dashboard.Variable{},
+				Panels:          make(map[string]*v1.Panel),
+				Layouts:         []dashboard.Layout{},
+				Duration:        1 * 60 * 60, // 1 hour
+				RefreshInterval: 5 * 60,      // 5 minutes
 			},
 		},
 	}
@@ -77,6 +87,16 @@ func (b *DashboardBuilder) WithProjectName(projectName string) *DashboardBuilder
 
 func (b *DashboardBuilder) WithVersion(version uint64) *DashboardBuilder {
 	b.Dashboard.Metadata.Version = version
+	return b
+}
+
+func (b *DashboardBuilder) WithRefreshInterval(seconds int) *DashboardBuilder {
+	b.Dashboard.Spec.RefreshInterval = model.Duration(seconds)
+	return b
+}
+
+func (b *DashboardBuilder) WithDuration(seconds int) *DashboardBuilder {
+	b.Dashboard.Spec.Duration = model.Duration(seconds)
 	return b
 }
 

@@ -23,8 +23,7 @@ import (
 )
 
 func Example_dashboardAsCode() {
-	dash := sdk.NewDashboard("mysuperdashboard")
-	dash.WithDescription("example of a super dashboard as code")
+	dash := sdk.NewDashboard("mysuperdashboard").WithDescription("example of a super dashboard as code")
 
 	row := sdk.NewRow("system").Build()
 	panel := markdown.NewPanel("info", "Hello world!").Build()
