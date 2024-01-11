@@ -30,6 +30,12 @@ func TestDacSetupCMD(t *testing.T) {
 			ExpectedMessage: "you need to either provide a version or be connected to a Perses server",
 		},
 		{
+			Title:           "invalid version provided",
+			Args:            []string{"--version", "beta-0.8"},
+			IsErrorExpected: true,
+			ExpectedMessage: "invalid version: beta-0.8",
+		},
+		{
 			Title:           "too-old Perses version submitted",
 			Args:            []string{"--version", "0.42.1"},
 			IsErrorExpected: true,

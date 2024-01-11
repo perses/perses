@@ -26,11 +26,13 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"golang.org/x/mod/semver"
 )
 
 const archiveName = "sources.tar.gz"
 const depsFolderName = "cue/"
 const depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
+const maxFileSize = 10240                                      // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
 
 type option struct {
 	persesCMD.Option
@@ -42,7 +44,8 @@ func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'setup'")
 	}
-	// If no version provided it should default to the version of the Perses server
+
+	// If no version provided, it should default to the version of the Perses server
 	if o.version == "" {
 		logrus.Debug("version flag not provided, retrieving version from Perses server..")
 		apiClient, err := config.Global.GetAPIClient()
@@ -57,6 +60,12 @@ func (o *option) Complete(args []string) error {
 		}
 		o.version = health.Version
 	}
+
+	// Validate the format of the provided version
+	if !semver.IsValid(fmt.Sprintf("v%s", o.version)) {
+		return fmt.Errorf("invalid version: %s", o.version)
+	}
+
 	return nil
 }
 
@@ -68,16 +77,19 @@ func (o *option) Execute() error {
 	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
 
 	// Create the destination folder
-	os.MkdirAll(depsRootDstPath, 0666)
+	err := os.MkdirAll(depsRootDstPath, 0666)
+	if err != nil {
+		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
+	}
 
 	// Download the source code from the provided Perses version
-	err := downloadSources(o.version)
+	err = downloadSources(o.version)
 	if err != nil {
 		return fmt.Errorf("error retrieving the Perses sources: %v", err)
 	}
 
 	// Extract the CUE deps from the archive to the destination folder
-	err = extractCUEDepsToDst(o.version)
+	err = extractCUEDepsToDst()
 	if err != nil {
 		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
 	}
@@ -96,8 +108,8 @@ func (o *option) Execute() error {
 func downloadSources(version string) error {
 	// Download the sources
 	url := fmt.Sprintf("https://github.com/perses/perses/archive/refs/tags/v%s.tar.gz", version)
-
-	response, err := http.Get(url)
+	// NB: wrongly spotted as unsecure by gosec; we are validating/sanitizing the string interpolated upfront thus no risk here
+	response, err := http.Get(url) // nolint: gosec
 	if err != nil {
 		return err
 	}
@@ -124,7 +136,7 @@ func downloadSources(version string) error {
 	return nil
 }
 
-func extractCUEDepsToDst(version string) error {
+func extractCUEDepsToDst() error {
 	file, err := os.Open(archiveName)
 	if err != nil {
 		return err
@@ -175,7 +187,7 @@ func extractCUEDepsToDst(version string) error {
 				return fmt.Errorf("can't create file %s: %v", newDepPath, err)
 			}
 			defer outFile.Close()
-			if _, err := io.Copy(outFile, tarReader); err != nil {
+			if _, err := io.CopyN(outFile, tarReader, maxFileSize); err != nil {
 				return fmt.Errorf("can't copy content from %s: %v", header.Name, err)
 			}
 			logrus.Debugf("file %s extracted succesfully", newDepPath)
