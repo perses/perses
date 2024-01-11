@@ -17,7 +17,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"reflect"
 	"strings"
 
@@ -74,7 +73,7 @@ func (h *AllowedEndpoint) validate() error {
 
 type Config struct {
 	// URL is the url required to contact the datasource
-	URL *url.URL `json:"url" yaml:"url"`
+	URL *common.URL `json:"url" yaml:"url"`
 	// AllowedEndpoints is a list of tuple of http method and http endpoint that will be accessible.
 	// If not set, then everything is accessible.
 	AllowedEndpoints []AllowedEndpoint `json:"allowedEndpoints,omitempty" yaml:"allowedEndpoints,omitempty"`
@@ -86,68 +85,36 @@ type Config struct {
 	Secret string `json:"secret,omitempty" yaml:"secret,omitempty"`
 }
 
-// tmpHTTPConfig is only used to custom the json/yaml marshalling/unmarshalling step.
-// It shouldn't be used for other purpose.
-type tmpHTTPConfig struct {
-	URL              string            `json:"url" yaml:"url"`
-	AllowedEndpoints []AllowedEndpoint `json:"allowedEndpoints,omitempty" yaml:"allowedEndpoints,omitempty"`
-	Headers          map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
-	Secret           string            `json:"secret,omitempty" yaml:"secret,omitempty"`
-}
-
-func (h Config) MarshalJSON() ([]byte, error) {
-	urlAsString := ""
-	if h.URL != nil {
-		urlAsString = h.URL.String()
-	}
-	tmp := &tmpHTTPConfig{
-		URL:              urlAsString,
-		AllowedEndpoints: h.AllowedEndpoints,
-		Headers:          h.Headers,
-		Secret:           h.Secret,
-	}
-	return json.Marshal(tmp)
-}
-
-func (h Config) MarshalYAML() (interface{}, error) {
-	urlAsString := ""
-	if h.URL != nil {
-		urlAsString = h.URL.String()
-	}
-	tmp := &tmpHTTPConfig{
-		URL:              urlAsString,
-		AllowedEndpoints: h.AllowedEndpoints,
-		Headers:          h.Headers,
-		Secret:           h.Secret,
-	}
-	return tmp, nil
-}
-
 func (h *Config) UnmarshalJSON(data []byte) error {
-	var tmp tmpHTTPConfig
-	if err := json.Unmarshal(data, &tmp); err != nil {
+	var tmp Config
+	type plain Config
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
-	return h.validate(tmp)
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*h = tmp
+	return nil
 }
 
 func (h *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp tmpHTTPConfig
-	if err := unmarshal(&tmp); err != nil {
+	var tmp Config
+	type plain Config
+	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
-	return h.validate(tmp)
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*h = tmp
+	return nil
 }
 
-func (h *Config) validate(conf tmpHTTPConfig) error {
-	u, err := url.Parse(conf.URL)
-	if err != nil {
-		return err
+func (h *Config) validate() error {
+	if h.URL == nil {
+		return fmt.Errorf("url cannot be empty")
 	}
-	h.URL = u
-	h.Headers = conf.Headers
-	h.AllowedEndpoints = conf.AllowedEndpoints
-	h.Secret = conf.Secret
 	return nil
 }
 

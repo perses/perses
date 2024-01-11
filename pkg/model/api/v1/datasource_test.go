@@ -15,7 +15,6 @@ package v1
 
 import (
 	"encoding/json"
-	"net/url"
 	"testing"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -26,7 +25,7 @@ import (
 )
 
 func TestUnmarshalJSONDatasource(t *testing.T) {
-	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
+	u, _ := common.ParseURL("https://prometheus.demo.do.prometheus.io")
 	pluginSpec := &datasource.Prometheus{
 		Proxy: &datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",
@@ -97,7 +96,7 @@ func TestUnmarshalJSONDatasource(t *testing.T) {
 }
 
 func TestUnmarshalYAMLLayout(t *testing.T) {
-	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
+	u, _ := common.ParseURL("https://prometheus.demo.do.prometheus.io")
 	pluginSpec := &datasource.Prometheus{
 		Proxy: &datasourceHTTP.Proxy{
 			Kind: "HTTPProxy",

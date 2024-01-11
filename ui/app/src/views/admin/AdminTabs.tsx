@@ -23,6 +23,7 @@ import {
   GlobalVariableResource,
   GlobalRoleResource,
   GlobalRoleBindingResource,
+  GlobalSecretResource,
 } from '@perses-dev/core';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
@@ -41,6 +42,8 @@ import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
 import { GlobalProject } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
+import { useCreateGlobalSecretMutation } from '../../model/global-secret-client';
+import { SecretDrawer } from '../../components/secrets/SecretDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
 import { GlobalSecrets } from './tabs/GlobalSecret';
@@ -61,12 +64,14 @@ function TabButton({ index, ...props }: TabButtonProps) {
   const createGlobalDatasourceMutation = useCreateGlobalDatasourceMutation();
   const createGlobalRoleMutation = useCreateGlobalRoleMutation();
   const createGlobalRoleBindingMutation = useCreateGlobalRoleBindingMutation();
+  const createGlobalSecretMutation = useCreateGlobalSecretMutation();
   const createGlobalVariableMutation = useCreateGlobalVariableMutation();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
+  const [isSecretDrawerOpened, setSecretDrawerOpened] = useState(false);
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState(false);
   const isReadonly = useIsReadonly();
 
@@ -123,6 +128,22 @@ function TabButton({ index, ...props }: TabButtonProps) {
     [exceptionSnackbar, successSnackbar, createGlobalRoleBindingMutation]
   );
 
+  const handleGlobalSecretCreation = useCallback(
+    (secret: GlobalSecretResource) => {
+      createGlobalSecretMutation.mutate(secret, {
+        onSuccess: (updatedSecret: GlobalSecretResource) => {
+          successSnackbar(`Global Secret ${updatedSecret.metadata.name} has been successfully created`);
+          setSecretDrawerOpened(false);
+        },
+        onError: (err) => {
+          exceptionSnackbar(err);
+          throw err;
+        },
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createGlobalSecretMutation]
+  );
+
   const handleGlobalVariableCreation = useCallback(
     (variable: GlobalVariableResource) => {
       createGlobalVariableMutation.mutate(variable, {
@@ -142,42 +163,6 @@ function TabButton({ index, ...props }: TabButtonProps) {
   );
 
   switch (index) {
-    case variablesTabIndex:
-      return (
-        <>
-          <CRUDButton
-            action="create"
-            scope="GlobalVariable"
-            project={GlobalProject}
-            variant="contained"
-            onClick={() => setVariableDrawerOpened(true)}
-            {...props}
-          >
-            Add Global Variable
-          </CRUDButton>
-          <VariableDrawer
-            variable={{
-              kind: 'GlobalVariable',
-              metadata: {
-                name: 'NewVariable',
-              },
-              spec: {
-                kind: 'TextVariable',
-                spec: {
-                  name: 'NewVariable',
-                  value: '',
-                },
-              },
-            }}
-            isOpen={isVariableDrawerOpened}
-            action="create"
-            isReadonly={isReadonly}
-            onSave={handleGlobalVariableCreation}
-            onClose={() => setVariableDrawerOpened(false)}
-            {...props}
-          />
-        </>
-      );
     case datasourcesTabIndex:
       return (
         <>
@@ -275,6 +260,78 @@ function TabButton({ index, ...props }: TabButtonProps) {
             isReadonly={isReadonly}
             onSave={handleGlobalRoleBindingCreation}
             onClose={() => setRoleBindingDrawerOpened(false)}
+          />
+        </>
+      );
+    case secretsTabIndex:
+      return (
+        <>
+          <CRUDButton
+            action="create"
+            scope="GlobalSecret"
+            project={GlobalProject}
+            variant="contained"
+            onClick={() => setSecretDrawerOpened(true)}
+            {...props}
+          >
+            Add Global Secret
+          </CRUDButton>
+          <SecretDrawer
+            secret={{
+              kind: 'GlobalSecret',
+              metadata: {
+                name: 'NewSecret',
+              },
+              spec: {
+                basicAuth: {
+                  username: '',
+                  password: '',
+                  passwordFile: '',
+                },
+              },
+            }}
+            isOpen={isSecretDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleGlobalSecretCreation}
+            onClose={() => setSecretDrawerOpened(false)}
+            {...props}
+          />
+        </>
+      );
+    case variablesTabIndex:
+      return (
+        <>
+          <CRUDButton
+            action="create"
+            scope="GlobalVariable"
+            project={GlobalProject}
+            variant="contained"
+            onClick={() => setVariableDrawerOpened(true)}
+            {...props}
+          >
+            Add Global Variable
+          </CRUDButton>
+          <VariableDrawer
+            variable={{
+              kind: 'GlobalVariable',
+              metadata: {
+                name: 'NewVariable',
+              },
+              spec: {
+                kind: 'TextVariable',
+                spec: {
+                  name: 'NewVariable',
+                  value: '',
+                },
+              },
+            }}
+            isOpen={isVariableDrawerOpened}
+            action="create"
+            isReadonly={isReadonly}
+            onSave={handleGlobalVariableCreation}
+            onClose={() => setVariableDrawerOpened(false)}
+            {...props}
           />
         </>
       );

@@ -14,7 +14,6 @@
 package fakev1
 
 import (
-	"net/url"
 	"strings"
 
 	v1 "github.com/perses/perses/pkg/client/api/v1"
@@ -25,8 +24,8 @@ import (
 )
 
 func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
-	u, _ := url.Parse("https://prometheus.demo.do.prometheus.io")
-	localURL, _ := url.Parse("http://localhost:9090")
+	u, _ := common.ParseURL("https://prometheus.demo.do.prometheus.io")
+	localURL, _ := common.ParseURL("http://localhost:9090")
 	initialList := []*modelV1.GlobalDatasource{
 		{
 			Kind: modelV1.KindGlobalDatasource,
@@ -58,7 +57,7 @@ func GlobalDatasourceList(prefix string) []*modelV1.GlobalDatasource {
 				Plugin: common.Plugin{
 					Kind: "PrometheusDatasource",
 					Spec: &datasource.Prometheus{
-						DirectURL: u,
+						DirectURL: u.URL,
 					},
 				},
 			},
