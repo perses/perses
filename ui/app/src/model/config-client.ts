@@ -86,10 +86,36 @@ export interface AuthorizationConfig {
   guest_permissions: Permission[];
 }
 
+export interface OIDCProvider {
+  slug_id: string;
+  name: string;
+  redirect_uri: string;
+  scopes: string[];
+  url_params: Record<string, string>;
+}
+
+export interface OauthProvider {
+  slug_id: string;
+  name: string;
+  redirect_uri: string;
+  scopes: string[];
+  auth_url: string;
+  token_url: string;
+  logout_url: string;
+  user_infos_url: string;
+}
+
+export interface AuthProviders {
+  enable_native: boolean;
+  oauth: OauthProvider[];
+  oidc: OIDCProvider[];
+}
+
 export interface AuthenticationConfig {
   access_token_ttl: string;
   refresh_token_ttl: string;
   disable_sign_up: boolean;
+  providers: AuthProviders;
 }
 
 export interface SecurityConfig {

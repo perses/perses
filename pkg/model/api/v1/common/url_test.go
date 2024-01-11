@@ -28,7 +28,7 @@ type testURLStruct struct {
 	URL URL `json:"url" yaml:"url"`
 }
 
-func TestSecret_YAML(t *testing.T) {
+func TestURL_YAML(t *testing.T) {
 	c := &testURLStruct{}
 	err := yaml.Unmarshal([]byte(`url: http://localhost:8080`), c)
 	assert.NoError(t, err)
@@ -39,7 +39,7 @@ func TestSecret_YAML(t *testing.T) {
 	assert.Contains(t, string(res), `url: http://localhost:8080`)
 
 }
-func TestSecret_JSON(t *testing.T) {
+func TestURL_JSON(t *testing.T) {
 	c := &testURLStruct{}
 	err := json.Unmarshal([]byte(`{"url": "http://localhost:8080"}`), c)
 	assert.NoError(t, err)
@@ -50,7 +50,7 @@ func TestSecret_JSON(t *testing.T) {
 	assert.Equal(t, string(res), `{"url":"http://localhost:8080"}`)
 }
 
-func TestSecret_ENV(t *testing.T) {
+func TestURL_ENV(t *testing.T) {
 	_ = os.Setenv("PREFIX_URL", "http://localhost:8080")
 	c := &testURLStruct{}
 	err := lamenv.Unmarshal(c, []string{"PREFIX"})

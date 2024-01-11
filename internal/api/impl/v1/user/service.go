@@ -49,16 +49,16 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	// check that the password is correctly filled
-	if len(entity.Spec.Password) == 0 {
+	if len(entity.Spec.NativeProvider.Password) == 0 {
 		return nil, fmt.Errorf("%w: password cannot be empty", shared.BadRequestError)
 	}
-	hash, err := crypto.HashAndSalt([]byte(entity.Spec.Password))
+	hash, err := crypto.HashAndSalt([]byte(entity.Spec.NativeProvider.Password))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %s", entity.Metadata.Name)
 		return nil, shared.InternalError
 	}
 	// save the hash in the password field
-	entity.Spec.Password = string(hash)
+	entity.Spec.NativeProvider.Password = string(hash)
 	if createErr := s.dao.Create(entity); createErr != nil {
 		return nil, createErr
 	}
@@ -84,15 +84,15 @@ func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*
 	}
 	entity.Metadata.Update(oldEntity.Metadata)
 	// in case the user updated his password, then we should hash it again, otherwise the old password should be kept
-	if len(entity.Spec.Password) > 0 {
-		hash, hashErr := crypto.HashAndSalt([]byte(entity.Spec.Password))
+	if len(entity.Spec.NativeProvider.Password) > 0 {
+		hash, hashErr := crypto.HashAndSalt([]byte(entity.Spec.NativeProvider.Password))
 		if hashErr != nil {
 			logrus.WithError(hashErr).Errorf("unable to generate the hash for the password of the user %q", entity.Metadata.Name)
 			return nil, hashErr
 		}
-		entity.Spec.Password = string(hash)
+		entity.Spec.NativeProvider.Password = string(hash)
 	} else {
-		entity.Spec.Password = oldEntity.Spec.Password
+		entity.Spec.NativeProvider.Password = oldEntity.Spec.NativeProvider.Password
 	}
 	// in case the user is updating the firstname / lastname, then it should be updated, otherwise the old one should be kept
 	if len(entity.Spec.FirstName) == 0 {

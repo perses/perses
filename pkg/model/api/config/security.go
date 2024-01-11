@@ -15,42 +15,17 @@ package config
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
 const (
-	defaultEncryptionKey   = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
-	DefaultAccessTokenTTL  = time.Minute * 15
-	DefaultRefreshTokenTTL = time.Hour * 24
+	defaultEncryptionKey = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
 )
-
-type AuthenticationConfig struct {
-	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
-	AccessTokenTTL model.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
-	// RefreshTokenTTL is the time to live of the refresh token.
-	// The refresh token is used to get a new access token when it is expired.
-	// By default, it is 24 hours.
-	RefreshTokenTTL model.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
-	// DisableSignUp deactivates the Sign-up page in the UI.
-	// It also disables the endpoint that gives the possibility to create a user.
-	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
-}
-
-func (a *AuthenticationConfig) Verify() error {
-	if a.AccessTokenTTL == 0 {
-		a.AccessTokenTTL = model.Duration(DefaultAccessTokenTTL)
-	}
-	if a.RefreshTokenTTL == 0 {
-		a.RefreshTokenTTL = model.Duration(DefaultRefreshTokenTTL)
-	}
-	return nil
-}
 
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
@@ -69,7 +44,7 @@ type Security struct {
 	EnableAuth bool `json:"enable_auth" yaml:"enable_auth"`
 	// Authorization contains all configs around rbac (permissions and roles)
 	Authorization AuthorizationConfig `json:"authorization,omitempty" yaml:"authorization,omitempty"`
-	// Authentication contains configuration regarding the time to live of the access/refresh token
+	// Authentication contains configuration regarding management of access/refresh token
 	Authentication AuthenticationConfig `json:"authentication,omitempty" yaml:"authentication,omitempty"`
 }
 
@@ -93,5 +68,11 @@ func (s *Security) Verify() error {
 		return fmt.Errorf("encryption_key must be longer than 32 bytes")
 	}
 	s.EncryptionKey = secret.Hidden(hex.EncodeToString([]byte(s.EncryptionKey)))
+
+	if s.EnableAuth && !s.Authentication.Providers.EnableNative &&
+		len(s.Authentication.Providers.OIDC) == 0 &&
+		len(s.Authentication.Providers.OAuth) == 0 {
+		return errors.New("impossible to enable auth if no provider is setup")
+	}
 	return nil
 }

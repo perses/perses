@@ -5,7 +5,9 @@
       "name": "admin"
     },
     "spec": {
-      "password": "password"
+      "nativeProvider": {
+        "password": "password"
+      }
     }
   },
   {
@@ -14,7 +16,9 @@
       "name": "guest"
     },
     "spec": {
-      "password": "password"
+      "nativeProvider": {
+        "password": "password"
+      }
     }
   }
 ]

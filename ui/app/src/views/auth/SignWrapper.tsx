@@ -11,17 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, Stack } from '@mui/material';
+import { Button, Divider, Stack } from '@mui/material';
 import { ReactNode } from 'react';
 import { useDarkMode } from '../../context/DarkMode';
 import PersesLogoCropped from '../../components/logo/PersesLogoCropped';
 import DarkThemePersesLogo from '../../components/logo/DarkThemePersesLogo';
 import LightThemePersesLogo from '../../components/logo/LightThemePersesLogo';
 import { useIsLaptopSize } from '../../utils/browser-size';
+import { useConfigContext } from '../../context/Config';
 
 export function SignWrapper(props: { children: ReactNode }) {
   const { isDarkModeEnabled } = useDarkMode();
   const isLaptopSize = useIsLaptopSize();
+  const config = useConfigContext();
+  const oauthProviders = (config.config?.security?.authentication?.providers?.oauth || []).map((provider) => ({
+    path: `oauth/${provider.slug_id}`,
+    name: provider.name,
+  }));
+  const oidcProviders = (config.config?.security?.authentication?.providers?.oidc || []).map((provider) => ({
+    path: `oidc/${provider.slug_id}`,
+    name: provider.name,
+  }));
+  const socialProviders = [...oidcProviders, ...oauthProviders];
+  const nativeProviderIsEnabled = config.config?.security?.authentication?.providers?.enable_native;
+
   return (
     <Stack
       width="100%"
@@ -37,7 +50,25 @@ export function SignWrapper(props: { children: ReactNode }) {
         flexItem
         sx={{ marginTop: isLaptopSize ? '30vh' : undefined, marginBottom: isLaptopSize ? '30vh' : undefined }}
       />
-      <Stack gap={1}>{props.children}</Stack>
+      <Stack gap={1} sx={{ maxWidth: '85%', minWidth: '200px' }}>
+        {nativeProviderIsEnabled && props.children}
+        {socialProviders.length > 0 && (
+          <div>
+            <Divider sx={{ marginTop: '16px' }}>{nativeProviderIsEnabled && 'or'} sign in with</Divider>
+          </div>
+        )}
+        {socialProviders.map((provider) => (
+          <Button
+            fullWidth={true}
+            variant={'contained'}
+            color={'secondary'}
+            key={provider.path}
+            href={`/api/auth/providers/${provider.path}/login`}
+          >
+            {provider.name}
+          </Button>
+        ))}
+      </Stack>
     </Stack>
   );
 }

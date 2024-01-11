@@ -27,7 +27,9 @@ export interface UserResource {
   spec: {
     firstName?: string;
     lastName?: string;
-    password: string;
+    nativeProvider: {
+      password: string;
+    };
   };
 }
 
