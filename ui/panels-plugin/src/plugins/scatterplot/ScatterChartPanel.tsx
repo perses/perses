@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps, useDataQueries, useTimeRange } from '@perses-dev/plugin-system';
+import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { AbsoluteTimeRange, TraceValue } from '@perses-dev/core';
@@ -63,10 +63,8 @@ export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
  * visuzliation of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps) {
-  const { contentDimensions, definition } = props;
-  const { absoluteTimeRange } = useTimeRange();
+  const { contentDimensions } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
-  const queries = definition?.spec?.queries;
 
   // Generate dataset
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
@@ -95,25 +93,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     }
     return dataset;
   }, [traceIsLoading, traceResults]);
-
-  // Error check: Tempo API only supports queries from the past 7 days (as of Dec. 17, 2023)
-  const containsTempoQuery = () => {
-    let isTempoQuery = false;
-    queries?.forEach((query) => {
-      if (query.spec.plugin.kind === 'TempoTraceQuery') {
-        isTempoQuery = true;
-      }
-    });
-    return isTempoQuery;
-  };
-  const isGreaterThanSevenDays = (): boolean => {
-    const { start, end } = getUnixTimeRange(absoluteTimeRange);
-    const sevenDays = 604800;
-    return end - start > sevenDays;
-  };
-  if (isGreaterThanSevenDays() === true && containsTempoQuery() === true) {
-    return generateErrorAlert('Tempo queries can not exceed a time range of 7 days.');
-  }
 
   // Error check: specify an alert if no traces are returned from the query
   const traceData = traceResults[0]?.data;
