@@ -14,6 +14,7 @@
 package sdk
 
 import (
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -34,6 +35,15 @@ func NewClient(persesURL string) (*Client, error) {
 			BaseURL: u,
 			Client:  http.DefaultClient,
 		}),
+	}, nil
+}
+
+func NewClientBuilder(client api.ClientInterface) (*Client, error) {
+	if client == nil {
+		return nil, fmt.Errorf("client can't be empty")
+	}
+	return &Client{
+		client: client,
 	}, nil
 }
 

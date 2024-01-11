@@ -19,16 +19,16 @@ import (
 
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/panels/markdown"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func Example_dashboardAsCode() {
 	dash := sdk.NewDashboard("mysuperdashboard")
 	dash.WithDescription("example of a super dashboard as code")
 
-	row := sdk.NewRow("system")
-	panel := markdown.NewPanel("info", "Hello world!")
-	row.AddPanel(panel.Build())
-	dash.AddRow(row)
+	row := sdk.NewRow("system").Build()
+	panel := markdown.NewPanel("info", "Hello world!").Build()
+	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
 
 	datasource := sdk.NewDatasource("prometheus")
 	datasource, err := datasource.WithPrometheusHTTPProxy("https://prometheus.demo.do.prometheus.io")

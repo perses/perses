@@ -38,6 +38,10 @@ func NewSecret(name string) *SecretBuilder {
 	}
 }
 
+func NewSecretBuilder(Secret v1.Secret) *SecretBuilder {
+	return &SecretBuilder{Secret}
+}
+
 type SecretBuilder struct {
 	v1.Secret
 }

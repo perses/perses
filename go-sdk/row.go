@@ -13,72 +13,58 @@
 
 package sdk
 
-import (
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-)
+type Row struct {
+	Title        string
+	PanelsWidth  int
+	PanelsHeight int
+	IsCollapsed  bool
+}
 
 func NewRow(title string) *RowBuilder {
 	return &RowBuilder{
-		grid: dashboard.GridLayoutSpec{
-			Display: &dashboard.GridLayoutDisplay{
-				Title:    title,
-				Collapse: &dashboard.GridLayoutCollapse{Open: true},
-			},
-			Items: []dashboard.GridItem{},
+		Row: Row{
+			Title:        title,
+			PanelsWidth:  12,
+			PanelsHeight: 6,
+			IsCollapsed:  false,
 		},
-		columns: 2,
-		panels:  []v1.Panel{},
+	}
+}
+
+func NewRowBuilder(row Row) *RowBuilder {
+	return &RowBuilder{
+		Row: row,
 	}
 }
 
 type RowBuilder struct {
-	grid    dashboard.GridLayoutSpec
-	columns int
-	panels  []v1.Panel
+	Row
 }
 
-func (b *RowBuilder) Build() dashboard.GridLayoutSpec {
-	return b.grid
+func (b *RowBuilder) Build() Row {
+	return b.Row
 }
 
 func (b *RowBuilder) WithTitle(title string) *RowBuilder {
-	if b.grid.Display == nil {
-		b.grid.Display = &dashboard.GridLayoutDisplay{
-			Title: title,
-		}
-	}
-	b.grid.Display.Title = title
+	b.Title = title
 	return b
 }
 
-func (b *RowBuilder) IsCollapsing(enabled bool) *RowBuilder {
-	if b.grid.Display == nil {
-		b.grid.Display = &dashboard.GridLayoutDisplay{
-			Collapse: &dashboard.GridLayoutCollapse{Open: !enabled},
-		}
-	}
-	if b.grid.Display.Collapse == nil {
-		b.grid.Display.Collapse = &dashboard.GridLayoutCollapse{Open: !enabled}
-	}
-	b.grid.Display.Collapse.Open = !enabled
+func (b *RowBuilder) Collapsed(enabled bool) *RowBuilder {
+	b.IsCollapsed = enabled
 	return b
 }
 
-func (b *RowBuilder) AddPanel(panel v1.Panel) *RowBuilder {
-	x := (len(b.grid.Items) * (24 / b.columns)) % 24
-	y := (len(b.grid.Items) * (24 / b.columns)) / 24
-	//ref := strconv.Itoa(len(b.grid.Items))
-	b.grid.Items = append(b.grid.Items, dashboard.GridItem{
-		X:      x,
-		Y:      y,
-		Width:  24 / b.columns,
-		Height: 6,
-		Content: &common.JSONRef{
-			Ref: "#/spec/panels/", // TODO
-		},
-	})
-	b.panels = append(b.panels, panel)
+// TODO: utils for calculating width automatically with X panels per line
+
+func (b *RowBuilder) WithPanelWidth(width int) *RowBuilder {
+	// TODO: validation
+	b.PanelsWidth = width
+	return b
+}
+
+func (b *RowBuilder) WithPanelHeight(height int) *RowBuilder {
+	// TODO: validation
+	b.PanelsHeight = height
 	return b
 }

@@ -35,6 +35,10 @@ func NewDatasource(name string) *DatasourceBuilder {
 	}
 }
 
+func NewDatasourceBuilder(datasource v1.Datasource) *DatasourceBuilder {
+	return &DatasourceBuilder{datasource}
+}
+
 type DatasourceBuilder struct {
 	v1.Datasource
 }

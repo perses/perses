@@ -47,6 +47,10 @@ func NewPanel(name string, content string) *PanelBuilder {
 	}
 }
 
+func NewPanelBuilder(panel v1.Panel) *PanelBuilder {
+	return &PanelBuilder{PanelBuilder: sdk.PanelBuilder{Panel: panel}}
+}
+
 type PanelBuilder struct {
 	sdk.PanelBuilder
 }

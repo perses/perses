@@ -35,6 +35,10 @@ func NewDashboard(name string) *DashboardBuilder {
 	}
 }
 
+func NewDashboardBuilder(dashboard v1.Dashboard) *DashboardBuilder {
+	return &DashboardBuilder{dashboard}
+}
+
 type DashboardBuilder struct {
 	v1.Dashboard
 }
@@ -76,11 +80,7 @@ func (b *DashboardBuilder) WithVersion(version uint64) *DashboardBuilder {
 	return b
 }
 
-func (b *DashboardBuilder) AddRow(rb *RowBuilder) *DashboardBuilder {
-	if rb == nil {
-		return b
-	}
-
+func (b *DashboardBuilder) AddRow(row Row, panels []v1.Panel) *DashboardBuilder {
 	if b.Dashboard.Spec.Layouts == nil {
 		b.Dashboard.Spec.Layouts = []dashboard.Layout{}
 	}
@@ -89,17 +89,34 @@ func (b *DashboardBuilder) AddRow(rb *RowBuilder) *DashboardBuilder {
 		b.Dashboard.Spec.Panels = make(map[string]*v1.Panel)
 	}
 
-	for i := range rb.grid.Items {
+	gridLayoutSpec := dashboard.GridLayoutSpec{
+		Display: &dashboard.GridLayoutDisplay{
+			Title:    row.Title,
+			Collapse: &dashboard.GridLayoutCollapse{Open: !row.IsCollapsed},
+		},
+		Items: []dashboard.GridItem{},
+	}
+
+	for i := range panels {
 		panelRef := fmt.Sprintf("%d_%d", len(b.Dashboard.Spec.Layouts), i)
-		rb.grid.Items[i].Content.Ref = fmt.Sprintf("#/spec/panels/%s", panelRef)
-		b.Dashboard.Spec.Panels[panelRef] = &rb.panels[i]
+		x := (len(gridLayoutSpec.Items) * row.PanelsWidth) % 24
+		y := (len(gridLayoutSpec.Items) * row.PanelsWidth) / 24
+		gridLayoutSpec.Items = append(gridLayoutSpec.Items, dashboard.GridItem{
+			X:      x,
+			Y:      y,
+			Width:  row.PanelsWidth,
+			Height: row.PanelsHeight,
+			Content: &common.JSONRef{
+				Ref: fmt.Sprintf("#/spec/panels/%s", panelRef),
+			},
+		})
+		b.Dashboard.Spec.Panels[panelRef] = &panels[i]
 	}
 
 	b.Dashboard.Spec.Layouts = append(b.Dashboard.Spec.Layouts, dashboard.Layout{
 		Kind: "Grid",
-		Spec: rb.grid,
+		Spec: gridLayoutSpec,
 	})
-
 	return b
 }
 
