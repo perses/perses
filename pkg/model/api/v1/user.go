@@ -20,10 +20,21 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 )
 
+type NativeProvider struct {
+	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+}
+
+type OAuthProvider struct {
+	Issuer  string `json:"issuer,omitempty" yaml:"issuer,omitempty"`
+	Email   string `json:"email,omitempty" yaml:"email,omitempty"`
+	Subject string `json:"subject,omitempty" yaml:"subject,omitempty"`
+}
+
 type UserSpec struct {
-	FirstName string `json:"firstName,omitempty" yaml:"firstName,omitempty"`
-	LastName  string `json:"lastName,omitempty" yaml:"lastName,omitempty"`
-	Password  string `json:"password,omitempty" yaml:"password,omitempty"`
+	FirstName      string          `json:"firstName,omitempty" yaml:"firstName,omitempty"`
+	LastName       string          `json:"lastName,omitempty" yaml:"lastName,omitempty"`
+	NativeProvider NativeProvider  `json:"nativeProvider,omitempty" yaml:"nativeProvider,omitempty"`
+	OauthProviders []OAuthProvider `json:"oauthProviders,omitempty" yaml:"oauthProviders,omitempty"`
 }
 
 type User struct {

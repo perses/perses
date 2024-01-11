@@ -22,11 +22,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
 	"github.com/perses/perses/internal/api/shared/route"
 	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api/config"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/zitadel/oidc/v3/pkg/client/rp"
 	httphelper "github.com/zitadel/oidc/v3/pkg/http"
@@ -57,9 +59,13 @@ func (u *oidcUserInfo) GetProfile() externalUserInfoProfile {
 	return u.externalUserInfoProfile
 }
 
-// GetIssuer implements [externalUserInfo]
-func (u *oidcUserInfo) GetIssuer() string {
-	return u.issuer
+// GetProviderContext implements [externalUserInfo]
+func (u *oidcUserInfo) GetProviderContext() v1.OAuthProvider {
+	return v1.OAuthProvider{
+		Issuer:  u.issuer,
+		Email:   u.Email,
+		Subject: u.Subject,
+	}
 }
 
 type oIDCEndpoint struct {
@@ -72,7 +78,7 @@ type oIDCEndpoint struct {
 	svc             service
 }
 
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoint, error) {
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
 	issuer := provider.Issuer.String()
 	redirectURI := provider.RedirectURI.String()
 	// As the cookie is used only at login time, we don't need a persistent value here.
@@ -112,7 +118,7 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT) (route.Endpoi
 		slugID:          provider.SlugID,
 		urlParams:       provider.URLParams,
 		issuer:          issuer,
-		svc:             service{},
+		svc:             service{dao: dao},
 	}, nil
 }
 
@@ -142,7 +148,7 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 		// We don´t forget to set the issuer before making any sync in the database.
 		info.issuer = e.issuer
 
-		user, err := e.svc.SyncUser(info)
+		user, err := e.svc.syncUser(info)
 		if err != nil {
 			e.logWithError(err).Error("Failed to sync user in database.")
 			w.WriteHeader(http.StatusInternalServerError)

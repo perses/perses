@@ -463,7 +463,9 @@ func NewUser(name string) *v1.User {
 		Kind:     v1.KindUser,
 		Metadata: newMetadata(name),
 		Spec: v1.UserSpec{
-			Password: "password",
+			NativeProvider: v1.NativeProvider{
+				Password: "password",
+			},
 		},
 	}
 	entity.Metadata.CreateNow()
@@ -475,7 +477,7 @@ func NewPublicUser(name string) *v1.PublicUser {
 		Kind:     v1.KindUser,
 		Metadata: newMetadata(name),
 		Spec: v1.PublicUserSpec{
-			Password: "<secret>",
+			NativeProvider: v1.PublicNativeProvider{Password: "<secret>"},
 		},
 	}
 	entity.Metadata.CreateNow()

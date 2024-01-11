@@ -58,7 +58,7 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		return shared.InternalError
 	}
 
-	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {
+	if !crypto.ComparePasswords(usr.Spec.NativeProvider.Password, body.Password) {
 		return shared.HandleBadRequestError("wrong login or password ")
 	}
 	login := body.Login
