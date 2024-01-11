@@ -14,9 +14,12 @@
 package sdk
 
 import (
+	"fmt"
+
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 )
 
 func NewDashboard(name string) *DashboardBuilder {
@@ -73,7 +76,48 @@ func (b *DashboardBuilder) WithVersion(version uint64) *DashboardBuilder {
 	return b
 }
 
+func (b *DashboardBuilder) AddRow(rb *RowBuilder) *DashboardBuilder {
+	if rb == nil {
+		return b
+	}
+
+	if b.Dashboard.Spec.Layouts == nil {
+		b.Dashboard.Spec.Layouts = []dashboard.Layout{}
+	}
+
+	if b.Dashboard.Spec.Panels == nil {
+		b.Dashboard.Spec.Panels = make(map[string]*v1.Panel)
+	}
+
+	for i := range rb.grid.Items {
+		panelRef := fmt.Sprintf("%d_%d", len(b.Dashboard.Spec.Layouts), i)
+		rb.grid.Items[i].Content.Ref = fmt.Sprintf("#/spec/panels/%s", panelRef)
+		b.Dashboard.Spec.Panels[panelRef] = &rb.panels[i]
+	}
+
+	b.Dashboard.Spec.Layouts = append(b.Dashboard.Spec.Layouts, dashboard.Layout{
+		Kind: "Grid",
+		Spec: rb.grid,
+	})
+
+	return b
+}
+
 func (b *DashboardBuilder) AddPanel(panel v1.Panel) *DashboardBuilder {
+	if b.Dashboard.Spec.Layouts == nil {
+		b.Dashboard.Spec.Layouts = []dashboard.Layout{}
+	}
+
+	if len(b.Dashboard.Spec.Layouts) == 0 {
+		b.Dashboard.Spec.Layouts = append(b.Dashboard.Spec.Layouts, dashboard.Layout{
+			Kind: "Grid",
+			Spec: dashboard.GridLayoutSpec{
+				Display: nil,
+				Items:   nil,
+			},
+		})
+	}
+
 	// TODO: Check how to handle layout
 	if b.Dashboard.Spec.Panels == nil {
 		b.Dashboard.Spec.Panels = make(map[string]*v1.Panel)

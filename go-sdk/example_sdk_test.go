@@ -22,16 +22,16 @@ import (
 )
 
 func Example_dashboardAsCode() {
-	project := "mysuperproject"
-
 	dash := sdk.NewDashboard("mysuperdashboard")
 	dash.WithDescription("example of a super dashboard as code")
 
+	row := sdk.NewRow("system")
 	panel := markdown.NewPanel("info", "Hello world!")
-	dash.AddPanel(panel.Build())
+	row.AddPanel(panel.Build())
+	dash.AddRow(row)
 
 	datasource := sdk.NewDatasource("prometheus")
-	datasource, err := datasource.WithHTTPProxy("https://prometheus.demo.do.prometheus.io")
+	datasource, err := datasource.WithPrometheusHTTPProxy("https://prometheus.demo.do.prometheus.io")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -43,13 +43,13 @@ func Example_dashboardAsCode() {
 		fmt.Println(err)
 		return
 	}
-	client, err = client.AuthWithUserPassword("admin", "password")
+	client, err = client.AuthWithUserPassword("a", "a")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = client.UpsertToProject(dash, project)
+	err = client.UpsertToProject(dash, "testa")
 	if err != nil {
 		fmt.Println(err)
 		return

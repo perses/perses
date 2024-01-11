@@ -23,7 +23,7 @@ import (
 )
 
 type PluginSpec struct {
-	Text string
+	Text string `json:"text" yaml:"text"`
 }
 
 func NewPanel(name string, content string) *PanelBuilder {

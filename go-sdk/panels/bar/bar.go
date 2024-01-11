@@ -38,10 +38,10 @@ const (
 )
 
 type PluginSpec struct {
-	Calculation commonSdk.Calculation
-	Format      commonSdk.Format
-	Sort        Sort
-	Mode        Mode
+	Calculation commonSdk.Calculation `json:"calculation" yaml:"calculation"`
+	Format      commonSdk.Format      `json:"format" yaml:"format"`
+	Sort        Sort                  `json:"sort" yaml:"sort"`
+	Mode        Mode                  `json:"mode" yaml:"mode"`
 }
 
 func NewPanel(name string) *PanelBuilder {

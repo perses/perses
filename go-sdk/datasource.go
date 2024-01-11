@@ -18,7 +18,8 @@ import (
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
 func NewDatasource(name string) *DatasourceBuilder {
@@ -66,17 +67,20 @@ func (b *DatasourceBuilder) WithVersion(version uint64) *DatasourceBuilder {
 	return b
 }
 
-func (b *DatasourceBuilder) WithHTTPProxy(proxyURL string) (*DatasourceBuilder, error) {
-	b.Datasource.Spec.Plugin.Kind = "HTTPProxy"
+func (b *DatasourceBuilder) WithPrometheusHTTPProxy(proxyURL string) (*DatasourceBuilder, error) {
 	u, err := url.Parse(proxyURL)
 	if err != nil {
 		return b, err
 	}
-	b.Datasource.Spec.Plugin.Spec = datasourceHTTP.Config{
-		URL: u,
-		//AllowedEndpoints: nil,
-		//Headers:          nil,
-		//Secret:           "",
+
+	b.Datasource.Spec.Plugin.Kind = "PrometheusDatasource"
+	b.Datasource.Spec.Plugin.Spec = &datasource.Prometheus{
+		Proxy: &http.Proxy{
+			Kind: "HTTPProxy",
+			Spec: http.Config{
+				URL: u,
+			},
+		},
 	}
 	return b, nil
 }
