@@ -52,7 +52,8 @@ func (o *option) Complete(args []string) error {
 
 		health, err := apiClient.V1().Health().Check()
 		if err != nil {
-			return fmt.Errorf("can't retrieve version from Perses server: %v", err)
+			logrus.WithError(err).Debug("can't reach Perses server")
+			return fmt.Errorf("can't retrieve version from Perses server")
 		}
 		o.version = health.Version
 	}
