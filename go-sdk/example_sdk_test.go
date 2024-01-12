@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk"
+	"github.com/perses/perses/go-sdk/datasources/prometheus"
 	"github.com/perses/perses/go-sdk/panels/markdown"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -29,12 +30,7 @@ func Example_dashboardAsCode() {
 	panel := markdown.NewPanel("info", "Hello world!").Build()
 	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
 
-	datasource := sdk.NewDatasource("prometheus")
-	datasource, err := datasource.WithPrometheusHTTPProxy("https://prometheus.demo.do.prometheus.io")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	datasource := prometheus.NewDatasource("PrometheusDemo", "https://prometheus.demo.do.prometheus.io")
 	dash.AddDatasource(datasource.Build())
 
 	client, err := sdk.NewClient("http://localhost:8080")

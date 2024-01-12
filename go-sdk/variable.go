@@ -16,7 +16,6 @@ package sdk
 import (
 	"fmt"
 
-	"github.com/perses/perses/go-sdk/variables/static-list"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -101,60 +100,11 @@ func (b *TextVariableBuilder) WithValue(value string) *TextVariableBuilder {
 	return b
 }
 
-func NewStaticListVariable(name string, options []string) *StaticListVariableBuilder {
-	return &StaticListVariableBuilder{
-		VariableBuilder{
-			Variable: v1.Variable{
-				Kind: v1.KindVariable,
-				Metadata: v1.ProjectMetadata{
-					Metadata: v1.Metadata{
-						Name: name,
-					},
-				},
-				Spec: v1.VariableSpec{
-					Kind: "ListVariable",
-					Spec: dashboard.ListVariableSpec{
-						ListSpec: variable.ListSpec{
-							Display:         nil,
-							DefaultValue:    nil,
-							AllowAllValue:   false,
-							AllowMultiple:   false,
-							CustomAllValue:  "",
-							CapturingRegexp: "",
-							Sort:            nil,
-							Plugin: common.Plugin{
-								Kind: "StaticListVariable",
-								Spec: staticlist.PluginSpec{Values: options},
-							},
-						},
-						Name: name,
-					},
-				},
-			},
-		},
-	}
-}
-
-type StaticListVariableBuilder struct {
+type ListVariableBuilder struct {
 	VariableBuilder
 }
 
-func (b *StaticListVariableBuilder) WithOptions(options []string) *StaticListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
-		return b
-	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*staticlist.PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
-		return b
-	}
-	pluginSpec.Values = options
-	return b
-}
-
-func (b *StaticListVariableBuilder) WithDefaultValue(value string) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) WithDefaultValue(value string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to set default value: %q", value))
@@ -166,7 +116,7 @@ func (b *StaticListVariableBuilder) WithDefaultValue(value string) *StaticListVa
 	return b
 }
 
-func (b *StaticListVariableBuilder) WithMultipleValues(enabled bool) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) WithMultipleValues(enabled bool) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to enable multiple values: %t", enabled))
@@ -176,7 +126,7 @@ func (b *StaticListVariableBuilder) WithMultipleValues(enabled bool) *StaticList
 	return b
 }
 
-func (b *StaticListVariableBuilder) WithAllValue(enabled bool) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) WithAllValue(enabled bool) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to enable all values: %t", enabled))
@@ -186,7 +136,7 @@ func (b *StaticListVariableBuilder) WithAllValue(enabled bool) *StaticListVariab
 	return b
 }
 
-func (b *StaticListVariableBuilder) WithCustomAllValue(value string) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) WithCustomAllValue(value string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to set custom all value: %q", value))
@@ -196,7 +146,7 @@ func (b *StaticListVariableBuilder) WithCustomAllValue(value string) *StaticList
 	return b
 }
 
-func (b *StaticListVariableBuilder) WithCapturingRegex(regex string) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) WithCapturingRegex(regex string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to set capturing regex: %q", regex))
@@ -206,12 +156,22 @@ func (b *StaticListVariableBuilder) WithCapturingRegex(regex string) *StaticList
 	return b
 }
 
-func (b *StaticListVariableBuilder) SortingBy(sort variable.Sort) *StaticListVariableBuilder {
+func (b *ListVariableBuilder) SortingBy(sort variable.Sort) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
 		logrus.Error(fmt.Sprintf("failed to set sort: %q", sort))
 		return b
 	}
 	listSpec.Sort = &sort
+	return b
+}
+
+func (b *ListVariableBuilder) WithPlugin(plugin common.Plugin) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		logrus.Error(fmt.Sprintf("failed to set plugin: %q", plugin))
+		return b
+	}
+	listSpec.Plugin = plugin
 	return b
 }

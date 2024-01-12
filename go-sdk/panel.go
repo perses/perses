@@ -15,6 +15,7 @@ package sdk
 
 import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type PanelBuilder struct {
@@ -27,5 +28,10 @@ func (b *PanelBuilder) Build() v1.Panel {
 
 func (b *PanelBuilder) WithDescription(description string) *PanelBuilder {
 	b.Panel.Spec.Display.Description = description
+	return b
+}
+
+func (b *PanelBuilder) WithPlugin(plugin common.Plugin) *PanelBuilder {
+	b.Panel.Spec.Plugin = plugin
 	return b
 }

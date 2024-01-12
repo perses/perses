@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package staticlist
+package prometheus_label_values
 
 import (
 	"fmt"
@@ -24,11 +24,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type PluginSpec struct {
-	Values []string `json:"values" yaml:"values"`
+type datasourceSelector struct {
+	Kind string
+	Name *string
 }
 
-func NewStaticListVariable(name string, options []string) *ListVariableBuilder {
+type PluginSpec struct {
+	Datasource datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	LabelName  string
+	Matchers   []string
+}
+
+func NewPrometheusLabelValueVariable(name string, labelName string) *ListVariableBuilder {
 	return &ListVariableBuilder{
 		ListVariableBuilder: sdk.ListVariableBuilder{
 			VariableBuilder: sdk.VariableBuilder{
@@ -51,8 +58,8 @@ func NewStaticListVariable(name string, options []string) *ListVariableBuilder {
 								CapturingRegexp: "",
 								Sort:            nil,
 								Plugin: common.Plugin{
-									Kind: "StaticListVariable",
-									Spec: PluginSpec{Values: options},
+									Kind: "PrometheusLabelValuesVariable",
+									Spec: PluginSpec{LabelName: labelName},
 								},
 							},
 							Name: name,
@@ -68,17 +75,47 @@ type ListVariableBuilder struct {
 	sdk.ListVariableBuilder
 }
 
-func (b *ListVariableBuilder) WithOptions(options []string) *ListVariableBuilder {
+func (b *ListVariableBuilder) WithLabelName(label string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
+		logrus.Error(fmt.Sprintf("failed to set label name: %q", label))
 		return b
 	}
 	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
+		logrus.Error(fmt.Sprintf("failed to set label name: %q", label))
 		return b
 	}
-	pluginSpec.Values = options
+	pluginSpec.LabelName = label
+	return b
+}
+
+func (b *ListVariableBuilder) WithMatchers(matchers []string) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		logrus.Error(fmt.Sprintf("failed to set matchers: %q", matchers))
+		return b
+	}
+	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
+	if !ok {
+		logrus.Error(fmt.Sprintf("failed to set matchers: %q", matchers))
+		return b
+	}
+	pluginSpec.Matchers = matchers
+	return b
+}
+
+func (b *ListVariableBuilder) AddMatcher(matcher string) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		logrus.Error(fmt.Sprintf("failed to add matchers: %q", matcher))
+		return b
+	}
+	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
+	if !ok {
+		logrus.Error(fmt.Sprintf("failed to add matchers: %q", matcher))
+		return b
+	}
+	pluginSpec.Matchers = append(pluginSpec.Matchers, matcher)
 	return b
 }
