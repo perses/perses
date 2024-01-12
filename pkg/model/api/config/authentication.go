@@ -52,9 +52,6 @@ func (p *Provider) Verify() error {
 	if p.ClientSecret == "" {
 		return errors.New("provider's `client_secret` is mandatory")
 	}
-	if p.RedirectURI.IsNilOrEmpty() {
-		return errors.New("provider's `redirect_uri` is mandatory")
-	}
 	return nil
 }
 

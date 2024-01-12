@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -27,6 +28,19 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 )
+
+func getRedirectURI(r *http.Request, authKind string, slugID string) string {
+	rd := url.URL{}
+	rd.Host = r.Host
+	rd.Scheme = r.URL.Scheme
+	// If there's no scheme in the request, we should still include one
+	if rd.Scheme == "" {
+		rd.Scheme = "http"
+	}
+
+	rd.Path = fmt.Sprintf("%s/%s/%s/%s/callback", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID)
+	return rd.String()
+}
 
 type endpoint struct {
 	endpoints       []route.Endpoint

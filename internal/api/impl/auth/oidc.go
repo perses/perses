@@ -80,7 +80,10 @@ type oIDCEndpoint struct {
 
 func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
 	issuer := provider.Issuer.String()
-	redirectURI := provider.RedirectURI.String()
+	redirectURI := ""
+	if !provider.RedirectURI.IsNilOrEmpty() {
+		redirectURI = provider.RedirectURI.String()
+	}
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// The OIDC library will use it this way:
 	// - Right before calling the /authorize provider's endpoint, it set "state" in a cookie and the "PKCE code challenge" in another
@@ -131,16 +134,23 @@ func (e *oIDCEndpoint) buildAuthHandler() echo.HandlerFunc {
 	state := func() string {
 		return uuid.New().String()
 	}
-	var urlParamOpts []rp.URLParamOpt
-	for key, val := range e.urlParams {
-		urlParamOpts = append(urlParamOpts, rp.WithURLParam(key, val))
+	return func(ctx echo.Context) error {
+		var opts []rp.URLParamOpt
+		for key, val := range e.urlParams {
+			opts = append(opts, rp.WithURLParam(key, val))
+		}
+		// If the Redirect URL is not setup by config, we build it from request
+		if e.relyingParty.OAuthConfig().RedirectURL == "" {
+			opts = append(opts, rp.WithURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		}
+		codeExchangeHandler := rp.AuthURLHandler(state, e.relyingParty, opts...)
+		handler := echo.WrapHandler(codeExchangeHandler)
+		return handler(ctx)
 	}
-	handler := rp.AuthURLHandler(state, e.relyingParty, urlParamOpts...)
-	return echo.WrapHandler(handler)
 }
 
 func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
-	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, tokens *oidc.Tokens[*oidc.IDTokenClaims], state string, rp rp.RelyingParty, info *oidcUserInfo) {
+	marshalUserinfo := func(w http.ResponseWriter, r *http.Request, _ *oidc.Tokens[*oidc.IDTokenClaims], _ string, _ rp.RelyingParty, info *oidcUserInfo) {
 		redirectURI := r.URL.Query().Get("redirect_uri")
 		if redirectURI == "" {
 			redirectURI = "/"
@@ -175,8 +185,17 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 
 		http.Redirect(w, r, redirectURI, http.StatusFound)
 	}
-	codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty)
-	return echo.WrapHandler(codeExchangeHandler)
+
+	return func(ctx echo.Context) error {
+		var opts []rp.URLParamOpt
+		// If the Redirect URL is not setup by config, we build it from request
+		if e.relyingParty.OAuthConfig().RedirectURL == "" {
+			opts = append(opts, rp.WithURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOIDC, e.slugID)))
+		}
+		codeExchangeHandler := rp.CodeExchangeHandler(rp.UserinfoCallback(marshalUserinfo), e.relyingParty, opts...)
+		handler := echo.WrapHandler(codeExchangeHandler)
+		return handler(ctx)
+	}
 }
 
 func (e *oIDCEndpoint) logWithError(err error) *logrus.Entry {

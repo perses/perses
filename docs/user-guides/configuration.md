@@ -159,6 +159,7 @@ Generic placeholders are defined as follows:
   [ client_secret: <secret> ]
 
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
+  # If not set it will get it from the request.
   [ redirect_uri: <string> ]
 
   # scopes the needed scopes to authenticate a user in the provider
