@@ -14,23 +14,14 @@
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import { AbsoluteTimeRange, TraceValue } from '@perses-dev/core';
+import { TraceValue } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
-import { ErrorAlert } from '@perses-dev/components';
-import { getUnixTime } from 'date-fns';
+import { ErrorAlert, useChartsTheme } from '@perses-dev/components';
 import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
 export interface EChartTraceValue extends Omit<TraceValue, 'startTimeUnixMs'> {
   startTime: Date;
-}
-
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
-  const { start, end } = timeRange;
-  return {
-    start: Math.ceil(getUnixTime(start)),
-    end: Math.ceil(getUnixTime(end)),
-  };
 }
 
 const generateErrorAlert = (message: string) => {
@@ -65,6 +56,8 @@ export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
 export function ScatterChartPanel(props: ScatterChartPanelProps) {
   const { contentDimensions } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
+  const chartsTheme = useChartsTheme();
+  const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
 
   // Generate dataset
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
@@ -94,48 +87,50 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     return dataset;
   }, [traceIsLoading, traceResults]);
 
+  // Formatting for the dataset
+  // 1. Map x,y coordinates
+  // 2. Datapoint size corresponds to the number of spans in a trace
+  // 3. Color datapoint red if the trace contains an error
+  const series = useMemo(() => {
+    const seriesTemplate2: SeriesOption = {
+      type: 'scatter',
+      encode: {
+        // Map to x-axis.
+        x: 'startTime',
+        // Map to y-axis.
+        y: 'durationMs',
+      },
+      symbolSize: function (data) {
+        // Changes datapoint to correspond to number of spans in a trace
+        const scaleSymbolSize = 10;
+        return data.spanCount * scaleSymbolSize;
+      },
+      itemStyle: {
+        color: function (params) {
+          const traceData: EChartTraceValue = params.data as EChartTraceValue;
+          // If the trace contains an error, color the datapoint in red
+          if (traceData.errorCount !== undefined && traceData.errorCount > 0) {
+            return 'red';
+          }
+          // Else return default color
+          return defaultColor;
+        },
+      },
+    };
+
+    // Each data set needs to have a corresponding series formatting object
+    const series = [];
+    for (let i = 0; i < dataset.length; i++) {
+      series.push({ ...seriesTemplate2, datasetIndex: i });
+    }
+    return series;
+  }, [dataset, defaultColor]);
+
   // Error check: specify an alert if no traces are returned from the query
   const traceData = traceResults[0]?.data;
   if (!traceIsLoading && traceData?.traces.length === 0) {
     const query = traceData?.metadata?.executedQueryString;
     return generateErrorAlert(`No traces found for the query : " ${query} " .`);
-  }
-
-  // Formatting for the dataset
-  // 1. Map x,y coordinates
-  // 2. Datapoint size corresponds to the number of spans in a trace
-  // 3. Color datapoint red if the trace contains an error
-  const seriesTemplate: SeriesOption = {
-    type: 'scatter',
-    encode: {
-      // Map to x-axis.
-      x: 'startTime',
-      // Map to y-axis.
-      y: 'durationMs',
-    },
-    symbolSize: function (data) {
-      // Changes datapoint to correspond to number of spans in a trace
-      const scaleSymbolSize = 10;
-      return data.spanCount * scaleSymbolSize;
-    },
-    itemStyle: {
-      color: function (params) {
-        const traceData: EChartTraceValue = params.data as EChartTraceValue;
-        // If the trace contains an error, color the datapoint in red
-        if (traceData.errorCount !== undefined && traceData.errorCount > 0) {
-          return 'red';
-        }
-        // Else return default color
-        const defaultColor = '#56B4E9';
-        return defaultColor;
-      },
-    },
-  };
-
-  // Each data set needs to have a corresponding series formatting object
-  const series = [];
-  for (let i = 0; i < dataset.length; i++) {
-    series.push({ ...seriesTemplate, datasetIndex: i });
   }
 
   const options: EChartsOption = {
