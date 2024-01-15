@@ -48,7 +48,7 @@ func (o *FileOption) Validate() error {
 	// Check if the path corresponds to an existing file or directory.
 	_, err := os.Stat(o.File)
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid value set to the File flag: %v", err)
 	}
 
 	return nil

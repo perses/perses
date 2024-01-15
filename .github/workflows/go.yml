@@ -62,6 +62,7 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
       - name: test
         run: make integration-test
   test-mysql:
@@ -84,6 +85,7 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
+          enable_cue: true # needed for DaC CLI commands unit tests
       - name: test
         run: make mysql-integration-test
   golangci:
