@@ -24,6 +24,7 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
@@ -100,9 +101,7 @@ func (o *option) Execute() error {
 		return fmt.Errorf("error removing the temp archive: %v", err)
 	}
 
-	fmt.Println("DaC setup finished")
-
-	return nil
+	return output.HandleString(o.writer, "DaC setup finished")
 }
 
 func downloadSources(version string) error {
