@@ -90,7 +90,7 @@ func (o *option) Execute() error {
 		return fmt.Errorf("error writing to %s: %v", outputFilePath, err)
 	}
 
-	return nil
+	return output.HandleString(o.writer, fmt.Sprintf("Succesfully built %s at %s", o.File, outputFilePath))
 }
 
 // buildOutputFilePath generates the output file path based on the input file path
