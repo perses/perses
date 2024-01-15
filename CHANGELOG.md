@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.43.0-rc1 / 2024-01-15
+
+- [ENHANCEMENT] OAuth/OIDC possibly get redirect_uri from request (#1698)
+
 ## 0.43.0-rc0 / 2024-01-11
 
 - [FEATURE] Add Secret Form Editor (#1671)
