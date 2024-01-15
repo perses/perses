@@ -47,7 +47,7 @@ v1.#Dashboard & {
 		project: "My project"
 	}
 	spec: {
-		panels:    #myPanels
+		panels: #myPanels
 		layouts: [
 			panelGroupBuilder & {#panels: #myPanels, #title: "Resource usage", #cols: 3},
 		]
