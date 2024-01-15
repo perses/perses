@@ -56,7 +56,7 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	return nil
+	return o.FileOption.Validate()
 }
 
 func (o *option) Execute() error {
@@ -64,7 +64,7 @@ func (o *option) Execute() error {
 	// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
 	//      However the cue code is (for now at least) not well packaged for such external reuse.
 	//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
-	cmd := exec.Command("cue", "eval", o.File, "--out", o.Output, "--concrete")
+	cmd := exec.Command("cue", "eval", o.File, "--out", o.Output, "--concrete") // #nosec
 
 	// Capture the output of the command
 	cmdOutput, err := cmd.Output()

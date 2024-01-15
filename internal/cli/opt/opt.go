@@ -15,6 +15,7 @@ package opt
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
@@ -36,6 +37,21 @@ type FileOption struct {
 
 func AddFileFlags(cmd *cobra.Command, o *FileOption) {
 	cmd.Flags().StringVarP(&o.File, "file", "f", o.File, "Path to the file that contains the resources consumed by the command.")
+}
+
+func (o *FileOption) Validate() error {
+	// Nothing to check when the file content is passed via stdin
+	if o.File == "-" {
+		return nil
+	}
+
+	// Check if the path corresponds to an existing file or directory.
+	_, err := os.Stat(o.File)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func MarkFileFlagAsMandatory(cmd *cobra.Command) {
