@@ -121,16 +121,16 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "build",
-		Short: "Build the given Dashboard-as-Code CUE file",
+		Short: "Build the given CUE file",
 		Long: `
-Build a file containing a Perses dashboard in CUE format, to generate the final Dashboard output in the format expected by Perses.
-The dashboard built is stored in an output folder.
+Generate the final output (YAML by default, or JSON) of the given CUE file & store the result in the 'built' folder.
+The generation part is the same as if you were running the 'eval' command of the cue CLI. 
 `,
 		Example: `
-# build a given dashboard file
+# build a given CUE file
 percli dac build -f my_dashboard.cue
 
-# build a given dashboard file as JSON
+# build a given CUE file as JSON
 percli dac build -f my_dashboard.cue -ojson
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {

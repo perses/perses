@@ -37,7 +37,7 @@ See the [CUE documentation](https://cuelang.org/docs/concepts/packages/) for mor
 
 #### 2. Retrieve the CUE sources from Perses
 
-Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentionned, we provide in the meantime a dedicated CLI command in order to add the CUE sources from Perses as external dependencies to your repo:
+Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentionned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
 
 ```
 percli dac setup --version 0.42.1
@@ -55,23 +55,23 @@ It's first strongly recommended to ramp up on CUE if you are not familiar with t
 
 Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
 
-Anytime you want to visualize the final dashboard definition corresponding to your as-code definition, you have to use the `cue` CLI with its `eval` command, as the following:
+Anytime you want to build the final dashboard definition (i.e Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
 
 ```
-cue eval my_dashboard.cue --out json
+percli dac build my_dashboard.cue -ojson
 ```
+
+If the build is successful, the result can be found in the generated `built` folder.
 
 > [!NOTE]
-> the `--out` flag with either 'json' or 'yaml' is recommended to get a clean output, without all the intermediary CUE definitions involved in the dashboard generation process.
+> the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
 ## Deploy dashboards
 
-Once you are satisfied with the result of your DaC definition for a given dashboard, you can finally deploy it to Perses by passing the result of `cue eval` to `percli`:
+Once you are satisfied with the result of your DaC definition for a given dashboard, you can finally deploy it to Perses with the `apply` command:
 ```
-cue eval dashboards/* --out yaml | percli apply -f -
+percli apply -f built/my_dashboard.json
 ```
-> [!NOTE]
-> This time `--out` is required as `percli` expects either a JSON or YAML input.
 
 ### CICD setup
 
