@@ -44,6 +44,12 @@ func TestDacBuildCMD(t *testing.T) {
 			ExpectedMessage: strings.Replace("Succesfully built testdata/working_dac.cue at built%stestdata%sworking_dac_output.yaml\n", "%s", separator, -1),
 		},
 		{
+			Title:           "print on stdout as json",
+			Args:            []string{"-f", "testdata/working_dac_2.cue", "-m", "stdout", "-o", "json"},
+			IsErrorExpected: false,
+			ExpectedMessage: "{\n    \"success\": true\n}\n\n",
+		},
+		{
 			Title:           "invalid CUE definition",
 			Args:            []string{"-f", "testdata/invalid_dac.cue"},
 			IsErrorExpected: true,

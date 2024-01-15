@@ -28,6 +28,8 @@ import (
 )
 
 const outputFolderName = "built"
+const modeFile = "file"
+const modeStdout = "stdout"
 
 type option struct {
 	persesCMD.Option
@@ -35,6 +37,7 @@ type option struct {
 	opt.DirectoryOption
 	opt.OutputOption
 	writer io.Writer
+	Mode   string
 }
 
 func (o *option) Complete(args []string) error {
@@ -50,6 +53,10 @@ func (o *option) Complete(args []string) error {
 	} else {
 		// Put explicitely a value when not provided, as we use it for file generation in Execute()
 		o.Output = output.YAMLOutput
+	}
+
+	if o.Mode != modeFile && o.Mode != modeStdout {
+		return fmt.Errorf("invalid mode provided: must be either `file` or `stdout`")
 	}
 
 	return nil
@@ -74,6 +81,12 @@ func (o *option) Execute() error {
 		}
 		return err
 	}
+
+	// If mode = stdout, print the command result on the standard output & don't go further
+	if o.Mode == modeStdout {
+		return output.HandleString(o.writer, string(cmdOutput))
+	}
+	// Otherwise, create an output file under the "built" directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
 	err = os.MkdirAll(filepath.Join(outputFolderName, filepath.Dir(o.File)), os.ModePerm)
@@ -123,7 +136,7 @@ func NewCMD() *cobra.Command {
 		Use:   "build",
 		Short: "Build the given CUE file",
 		Long: `
-Generate the final output (YAML by default, or JSON) of the given CUE file & store the result in the 'built' folder.
+Generate the final output (YAML by default, or JSON) of the given CUE file. The result is by default stored in a file under the 'built' folder, but can also be printed on the standard output instead.
 The generation part is the same as if you were running the 'eval' command of the cue CLI. 
 `,
 		Example: `
@@ -132,11 +145,15 @@ percli dac build -f my_dashboard.cue
 
 # build a given CUE file as JSON
 percli dac build -f my_dashboard.cue -ojson
+
+# build a given CUE file & deploy the resulting resource right away
+percli dac build -f my_dashboard.cue -m stdout | percli apply -f -
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
+	cmd.Flags().StringVarP(&o.Mode, "mode", "m", "file", "Mode for the output. Must be either `file` to automatically save the content to file(s), or `stdout` to print on the standard output. Default is file.")
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.AddOutputFlags(cmd, &o.OutputOption)
