@@ -171,8 +171,10 @@ func NewCMD() *cobra.Command {
 		Short: "Build the given DaC file, or directory containing DaC files",
 		Long: `
 Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
-Only CUE files are supported for now (the generation part is the same as if you were running the 'eval' command of the cue CLI).
+Only CUE files are supported for now.
 The result(s) is/are by default stored in a/multiple file(s) under the 'built' folder, but can also be printed on the standard output instead.
+
+NB: "percli dac build -f my_dashboard.cue -m stdout" is basically doing the same as "cue eval my_dashboard.cue", however be aware that "percli dac build -d mydir -m stdout" is not equivalent to "cue eval mydir": in the case of percli each CUE file encountered in the directory is evaluated independently.
 `,
 		Example: `
 # build a given file
