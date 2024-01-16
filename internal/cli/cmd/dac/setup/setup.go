@@ -34,7 +34,7 @@ const (
 	archiveName     = "sources.tar.gz"
 	depsFolderName  = "cue/"
 	depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
-	maxFileSize     = 102400                                 // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
+	maxFileSize     = 10240                                  // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
 	minVersion      = "v0.43.0"                              // TODO upgrade this number once DaC CUE SDK is released
 )
 
