@@ -187,6 +187,9 @@ func extractCUEDepsToDst() error {
 			}
 			defer outFile.Close()
 			if _, err := io.CopyN(outFile, tarReader, maxFileSize); err != nil {
+				if err == io.EOF {
+					continue
+				}
 				return fmt.Errorf("can't copy content from %s: %v", header.Name, err)
 			}
 			logrus.Debugf("file %s extracted succesfully", newDepPath)
