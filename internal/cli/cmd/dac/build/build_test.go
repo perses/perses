@@ -27,21 +27,33 @@ import (
 func TestDacBuildCMD(t *testing.T) {
 	separator := string(os.PathSeparator)
 
-	// vars for the "file not found" case
-	unknownFilename := "idontexist.cue"
-	var osSpecificErrStr string
+	// vars for the "not found" cases
+	winSpecificErrStr := "CreateFile %s: The system cannot find the file specified."
+	linuxSpecificErrStr := "stat %s: no such file or directory"
+	unknownFileName := "idontexist.cue"
+	unknownDirName := "idontexist"
+	var fileNotFoundErrStr string
+	var dirNotFoundErrStr string
 	if runtime.GOOS == "windows" {
-		osSpecificErrStr = fmt.Sprintf("CreateFile %s: The system cannot find the file specified.", unknownFilename)
+		fileNotFoundErrStr = fmt.Sprintf(winSpecificErrStr, unknownFileName)
+		dirNotFoundErrStr = fmt.Sprintf(winSpecificErrStr, unknownDirName)
 	} else {
-		osSpecificErrStr = fmt.Sprintf("stat %s: no such file or directory", unknownFilename)
+		fileNotFoundErrStr = fmt.Sprintf(linuxSpecificErrStr, unknownFileName)
+		dirNotFoundErrStr = fmt.Sprintf(linuxSpecificErrStr, unknownDirName)
 	}
 
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "nominal case",
+			Title:           "nominal case with a single file",
 			Args:            []string{"-f", "testdata/working_dac.cue"},
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata/working_dac.cue at built%stestdata%sworking_dac_output.yaml\n", "%s", separator, -1),
+		},
+		{
+			Title:           "nominal case with a directory",
+			Args:            []string{"-d", "testdata"},
+			IsErrorExpected: false,
+			ExpectedMessage: strings.Replace("Succesfully built testdata%sworking_dac.cue at built%stestdata%sworking_dac_output.yaml\nSuccesfully built testdata%sworking_dac_2.cue at built%stestdata%sworking_dac_2_output.yaml\n", "%s", separator, -1),
 		},
 		{
 			Title:           "print on stdout as json",
@@ -57,9 +69,21 @@ func TestDacBuildCMD(t *testing.T) {
 		},
 		{
 			Title:           "file not found",
-			Args:            []string{"-f", "idontexist.cue"},
+			Args:            []string{"-f", unknownFileName},
 			IsErrorExpected: true,
-			ExpectedMessage: fmt.Sprintf("invalid value set to the File flag: %s", osSpecificErrStr),
+			ExpectedMessage: fmt.Sprintf("invalid value set to the File flag: %s", fileNotFoundErrStr),
+		},
+		{
+			Title:           "directory not found",
+			Args:            []string{"-d", unknownDirName},
+			IsErrorExpected: true,
+			ExpectedMessage: fmt.Sprintf("invalid value set to the Directory flag: %s", dirNotFoundErrStr),
+		},
+		{
+			Title:           "file & directory options should not be both provided",
+			Args:            []string{"-f", "whatever.cue", "-d", "whocares"},
+			IsErrorExpected: true,
+			ExpectedMessage: "if any flags in the group [file directory] are set none of the others can be; [directory file] were all set",
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

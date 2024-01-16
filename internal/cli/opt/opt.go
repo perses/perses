@@ -27,16 +27,22 @@ type DirectoryOption struct {
 	Directory string
 }
 
+func (o *DirectoryOption) Validate() error {
+	// Check if the path corresponds to an existing directory.
+	_, err := os.Stat(o.Directory)
+	if err != nil {
+		return fmt.Errorf("invalid value set to the Directory flag: %v", err)
+	}
+
+	return nil
+}
+
 func AddDirectoryFlags(cmd *cobra.Command, o *DirectoryOption) {
 	cmd.Flags().StringVarP(&o.Directory, "directory", "d", "", "Path to the directory containing the resources consumed by the command.")
 }
 
 type FileOption struct {
 	File string
-}
-
-func AddFileFlags(cmd *cobra.Command, o *FileOption) {
-	cmd.Flags().StringVarP(&o.File, "file", "f", o.File, "Path to the file that contains the resources consumed by the command.")
 }
 
 func (o *FileOption) Validate() error {
@@ -54,10 +60,19 @@ func (o *FileOption) Validate() error {
 	return nil
 }
 
+func AddFileFlags(cmd *cobra.Command, o *FileOption) {
+	cmd.Flags().StringVarP(&o.File, "file", "f", o.File, "Path to the file that contains the resources consumed by the command.")
+}
+
 func MarkFileFlagAsMandatory(cmd *cobra.Command) {
 	if err := cmd.MarkFlagRequired("file"); err != nil {
 		logrus.Panic(err)
 	}
+}
+
+func MarkFileAndDirFlagsAsXOR(cmd *cobra.Command) {
+	cmd.MarkFlagsOneRequired("file", "directory")
+	cmd.MarkFlagsMutuallyExclusive("file", "directory")
 }
 
 type OutputOption struct {

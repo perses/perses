@@ -27,9 +27,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const outputFolderName = "built"
-const modeFile = "file"
-const modeStdout = "stdout"
+const (
+	outputFolderName = "built"
+	modeFile         = "file"
+	modeStdout       = "stdout"
+)
 
 type option struct {
 	persesCMD.Option
@@ -63,21 +65,53 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	return o.FileOption.Validate()
+	if o.File != "" {
+		return o.FileOption.Validate()
+	}
+	return o.DirectoryOption.Validate()
 }
 
 func (o *option) Execute() error {
+	if o.File != "" {
+		return o.processFile(o.File)
+	}
+	// Else it's a directory, thus walk it and process each file
+	err := filepath.Walk(o.Directory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Process regular files only
+		if !info.IsDir() {
+			err = o.processFile(path)
+			if err != nil {
+				// Tell the user about the error but don't stop the processing
+				fmt.Printf("error processing file %s: %v\n", path, err)
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return fmt.Errorf("error processing directory %s: %v", o.Directory, err)
+	}
+
+	return nil
+}
+
+func (o *option) processFile(file string) error {
 	// NB: this command is mostly based on the `eval` command of the cue CLI.
 	// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
 	//      However the cue code is (for now at least) not well packaged for such external reuse.
 	//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
-	cmd := exec.Command("cue", "eval", o.File, "--out", o.Output, "--concrete") // #nosec
+	cmd := exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
 
 	// Capture the output of the command
 	cmdOutput, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("failed to build %s: %s", o.File, string(exitErr.Stderr))
+			return fmt.Errorf("failed to build %s: %s", file, string(exitErr.Stderr))
 		}
 		return err
 	}
@@ -89,13 +123,13 @@ func (o *option) Execute() error {
 	// Otherwise, create an output file under the "built" directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
-	err = os.MkdirAll(filepath.Join(outputFolderName, filepath.Dir(o.File)), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(outputFolderName, filepath.Dir(file)), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating the output folder: %v", err)
 	}
 
 	// Build the path of the file where to store the command output
-	outputFilePath := buildOutputFilePath(o.File, o.OutputOption.Output)
+	outputFilePath := buildOutputFilePath(file, o.OutputOption.Output)
 
 	// Write the output to the file
 	err = writeToFile(outputFilePath, cmdOutput)
@@ -103,7 +137,7 @@ func (o *option) Execute() error {
 		return fmt.Errorf("error writing to %s: %v", outputFilePath, err)
 	}
 
-	return output.HandleString(o.writer, fmt.Sprintf("Succesfully built %s at %s", o.File, outputFilePath))
+	return output.HandleString(o.writer, fmt.Sprintf("Succesfully built %s at %s", file, outputFilePath))
 }
 
 // buildOutputFilePath generates the output file path based on the input file path
@@ -134,20 +168,27 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "build",
-		Short: "Build the given CUE file",
+		Short: "Build the given DaC file, or directory containing DaC files",
 		Long: `
-Generate the final output (YAML by default, or JSON) of the given CUE file. The result is by default stored in a file under the 'built' folder, but can also be printed on the standard output instead.
-The generation part is the same as if you were running the 'eval' command of the cue CLI. 
+Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
+Only CUE files are supported for now (the generation part is the same as if you were running the 'eval' command of the cue CLI).
+The result(s) is/are by default stored in a/multiple file(s) under the 'built' folder, but can also be printed on the standard output instead.
 `,
 		Example: `
-# build a given CUE file
+# build a given file
 percli dac build -f my_dashboard.cue
 
-# build a given CUE file as JSON
+# build a given file as JSON
 percli dac build -f my_dashboard.cue -ojson
 
-# build a given CUE file & deploy the resulting resource right away
+# build a given file & deploy the resulting resource right away
 percli dac build -f my_dashboard.cue -m stdout | percli apply -f -
+
+# build all the files under a given directory
+percli dac build -d my_dashboards
+
+# build all the files under a given directory & deploy the resulting resources right away
+percli dac build -d my_dashboards && percli apply -d built
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
@@ -157,7 +198,7 @@ percli dac build -f my_dashboard.cue -m stdout | percli apply -f -
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.AddOutputFlags(cmd, &o.OutputOption)
-	opt.MarkFileFlagAsMandatory(cmd)
+	opt.MarkFileAndDirFlagsAsXOR(cmd)
 
 	return cmd
 }
