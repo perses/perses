@@ -30,110 +30,12 @@ import (
 	"golang.org/x/mod/semver"
 )
 
-const archiveName = "sources.tar.gz"
-const depsFolderName = "cue/"
-const depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
-const maxFileSize = 10240                                      // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
-
-type option struct {
-	persesCMD.Option
-	writer  io.Writer
-	version string
-}
-
-func (o *option) Complete(args []string) error {
-	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'setup'")
-	}
-
-	// If no version provided, it should default to the version of the Perses server
-	if o.version == "" {
-		logrus.Debug("version flag not provided, retrieving version from Perses server..")
-		apiClient, err := config.Global.GetAPIClient()
-		if err != nil {
-			return fmt.Errorf("you need to either provide a version or be connected to a Perses server")
-		}
-
-		health, err := apiClient.V1().Health().Check()
-		if err != nil {
-			logrus.WithError(err).Debug("can't reach Perses server")
-			return fmt.Errorf("can't retrieve version from Perses server")
-		}
-		o.version = health.Version
-	}
-
-	// Validate the format of the provided version
-	if !semver.IsValid(fmt.Sprintf("v%s", o.version)) {
-		return fmt.Errorf("invalid version: %s", o.version)
-	}
-
-	return nil
-}
-
-func (o *option) Validate() error {
-	return nil
-}
-
-func (o *option) Execute() error {
-	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
-
-	// Create the destination folder
-	err := os.MkdirAll(depsRootDstPath, os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
-	}
-
-	// Download the source code from the provided Perses version
-	err = downloadSources(o.version)
-	if err != nil {
-		return fmt.Errorf("error retrieving the Perses sources: %v", err)
-	}
-
-	// Extract the CUE deps from the archive to the destination folder
-	err = extractCUEDepsToDst()
-	if err != nil {
-		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
-	}
-
-	// Cleanup
-	err = os.Remove(archiveName)
-	if err != nil {
-		return fmt.Errorf("error removing the temp archive: %v", err)
-	}
-
-	return output.HandleString(o.writer, "DaC setup finished")
-}
-
-func downloadSources(version string) error {
-	// Download the sources
-	url := fmt.Sprintf("https://github.com/perses/perses/archive/refs/tags/v%s.tar.gz", version)
-	// NB: wrongly spotted as unsecure by gosec; we are validating/sanitizing the string interpolated upfront thus no risk here
-	response, err := http.Get(url) // nolint: gosec
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("error: Unable to fetch release. Status code: %d", response.StatusCode)
-	}
-
-	// Save the content to a local file
-	outFile, err := os.Create(archiveName)
-	if err != nil {
-		return fmt.Errorf("error creating file: %v", err)
-	}
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, response.Body)
-	if err != nil {
-		return fmt.Errorf("error copying content to file: %v", err)
-	}
-
-	logrus.Debug("Perses release archive downloaded successfully")
-
-	return nil
-}
+const (
+	archiveName     = "sources.tar.gz"
+	depsFolderName  = "cue/"
+	depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
+	maxFileSize     = 102400                                 // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
+)
 
 func extractCUEDepsToDst() error {
 	file, err := os.Open(archiveName)
@@ -220,6 +122,113 @@ func removeFirstFolder(filePath string) string {
 	resultPath := strings.Join(components, separatorChar)
 
 	return resultPath
+}
+
+type option struct {
+	persesCMD.Option
+	writer  io.Writer
+	version string
+}
+
+func (o *option) Complete(args []string) error {
+	if len(args) > 0 {
+		return fmt.Errorf("no args are supported by the command 'setup'")
+	}
+
+	// If no version provided, it should default to the version of the Perses server
+	if o.version == "" {
+		logrus.Debug("version flag not provided, retrieving version from Perses server..")
+		apiClient, err := config.Global.GetAPIClient()
+		if err != nil {
+			return fmt.Errorf("you need to either provide a version or be connected to a Perses server")
+		}
+
+		health, err := apiClient.V1().Health().Check()
+		if err != nil {
+			logrus.WithError(err).Debug("can't reach Perses server")
+			return fmt.Errorf("can't retrieve version from Perses server")
+		}
+		o.version = health.Version
+	}
+
+	// Add "v" prefix to the version if not present
+	if !strings.HasPrefix(o.version, "v") {
+		o.version = fmt.Sprintf("v%s", o.version)
+	}
+
+	return nil
+}
+
+func (o *option) Validate() error {
+	// Validate the format of the provided version
+	if !semver.IsValid(o.version) {
+		return fmt.Errorf("invalid version: %s", o.version)
+	}
+
+	return nil
+}
+
+func (o *option) Execute() error {
+	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
+
+	// Create the destination folder
+	err := os.MkdirAll(depsRootDstPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
+	}
+
+	// Download the source code from the provided Perses version
+	err = o.downloadSources()
+	if err != nil {
+		return fmt.Errorf("error retrieving the Perses sources: %v", err)
+	}
+
+	defer func() {
+		// Cleanup
+		err = os.Remove(archiveName)
+		if err != nil {
+			fmt.Printf("error removing the temp archive: %v\n", err)
+		}
+	}()
+
+	// Extract the CUE deps from the archive to the destination folder
+	err = extractCUEDepsToDst()
+	if err != nil {
+		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
+	}
+
+	return output.HandleString(o.writer, "DaC setup finished")
+}
+
+func (o *option) downloadSources() error {
+	// Download the sources
+	url := fmt.Sprintf("https://github.com/perses/perses/archive/refs/tags/%s.tar.gz", o.version)
+	// NB: wrongly spotted as unsecure by gosec; we are validating/sanitizing the string interpolated upfront thus no risk here
+	response, err := http.Get(url) // nolint: gosec
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("error: Unable to fetch release. Status code: %d", response.StatusCode)
+	}
+
+	// Save the content to a local file
+	outFile, err := os.Create(archiveName)
+	if err != nil {
+		return fmt.Errorf("error creating file: %v", err)
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, response.Body)
+	if err != nil {
+		return fmt.Errorf("error copying content to file: %v", err)
+	}
+
+	logrus.Debug("Perses release archive downloaded successfully")
+
+	return nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
