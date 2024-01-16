@@ -35,6 +35,7 @@ const (
 	depsFolderName  = "cue/"
 	depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
 	maxFileSize     = 102400                                 // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
+	minVersion      = "v0.43.0"                              // TODO upgrade this number once DaC CUE SDK is released
 )
 
 func extractCUEDepsToDst() error {
@@ -163,6 +164,11 @@ func (o *option) Validate() error {
 	// Validate the format of the provided version
 	if !semver.IsValid(o.version) {
 		return fmt.Errorf("invalid version: %s", o.version)
+	}
+
+	// Verify that it is >= to the minimum required version
+	if semver.Compare(o.version, minVersion) == -1 {
+		return fmt.Errorf("version should be at least %s or higher", minVersion)
 	}
 
 	return nil

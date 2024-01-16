@@ -23,6 +23,7 @@ import (
 
 func TestDacSetupCMD(t *testing.T) {
 	testSuite := []cmdTest.Suite{
+		// TODO add test for nominal case once a Perses release with the updated structure (= `cue` folder at the root) is available
 		{
 			Title:           "no version provided & no server",
 			Args:            []string{},
@@ -39,9 +40,8 @@ func TestDacSetupCMD(t *testing.T) {
 			Title:           "too-old Perses version submitted",
 			Args:            []string{"--version", "0.42.1"},
 			IsErrorExpected: true,
-			ExpectedMessage: "error extracting the CUE dependencies: CUE dependencies not found in archive",
+			ExpectedMessage: "version should be at least v0.43.0 or higher",
 		},
-		// TODO add test for nominal case once a Perses release with the updated structure (= `cue` folder at the root) is available
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 
