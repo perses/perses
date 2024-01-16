@@ -1,6 +1,6 @@
 {
     "name": "@perses-dev/tempo-plugin",
-    "version": "0.43.0-rc1",
+    "version": "0.43.0-rc2",
     "description": "A Perses plugin to interact with Tempo traces",
     "license": "Apache-2.0",
     "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -29,9 +29,9 @@
         "lint:fix": "eslint --fix src --ext .ts,.tsx"
     },
     "dependencies": {
-        "@perses-dev/components": "0.43.0-rc1",
-        "@perses-dev/core": "0.43.0-rc1",
-        "@perses-dev/plugin-system": "0.43.0-rc1"
+        "@perses-dev/components": "0.43.0-rc2",
+        "@perses-dev/core": "0.43.0-rc2",
+        "@perses-dev/plugin-system": "0.43.0-rc2"
     },
     "peerDependencies": {
         "react": "^17.0.2 || ^18.0.0"
