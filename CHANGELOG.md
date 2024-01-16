@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.43.0-rc2 / 2024-01-16
+
+- [BUGFIX] OAuth/OIDC get redirect_uri from request considering X-Forwarded-* headers + guess scheme from request.TLS (#1706)
+
 ## 0.43.0-rc1 / 2024-01-15
 
 - [ENHANCEMENT] OAuth/OIDC possibly get redirect_uri from request (#1698)
