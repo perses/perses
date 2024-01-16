@@ -29,13 +29,27 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
+const (
+	xForwardedProto = "X-Forwarded-Proto"
+	xForwardedHost  = "X-Forwarded-Host"
+)
+
 func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 	rd := url.URL{}
-	rd.Host = r.Host
-	rd.Scheme = r.URL.Scheme
-	// If there's no scheme in the request, we should still include one
+
+	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
+	rd.Host = r.Header.Get(xForwardedHost)
+	if rd.Host == "" {
+		rd.Host = r.Host
+	}
+
+	// Get the scheme trying first the X-Forwarded-Proto header, otherwise take it from request
+	rd.Scheme = r.Header.Get(xForwardedProto)
 	if rd.Scheme == "" {
 		rd.Scheme = "http"
+		if r.TLS != nil {
+			rd.Scheme = "https"
+		}
 	}
 
 	rd.Path = fmt.Sprintf("%s/%s/%s/%s/callback", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID)
