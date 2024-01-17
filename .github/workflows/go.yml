@@ -37,7 +37,6 @@ jobs:
         run: go install github.com/bwplotka/mdox@latest
       - name: check docs
         run: make checkdocs
-
   gofmt:
     name: "check code format"
     runs-on: ubuntu-latest
@@ -123,3 +122,19 @@ jobs:
         run: make cue-eval
       - name: test cue schema
         run: make cue-test
+  check-cue-gen:
+    name: "check cue gen files"
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - uses: perses/github-actions@v0.1.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_go: true
+      - name: install cue
+        run: go install cuelang.org/go/cmd/cue@latest
+      - name: generate cue files
+        run: make cue-gen
+      - name: check for changes
+        run: git diff --exit-code || { echo "CUE generated files are not up to date. Please run 'make cue-gen' and commit the changes."; exit 1; } 
