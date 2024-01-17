@@ -17,6 +17,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -27,6 +28,33 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 )
+
+const (
+	xForwardedProto = "X-Forwarded-Proto"
+	xForwardedHost  = "X-Forwarded-Host"
+)
+
+func getRedirectURI(r *http.Request, authKind string, slugID string) string {
+	rd := url.URL{}
+
+	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
+	rd.Host = r.Header.Get(xForwardedHost)
+	if rd.Host == "" {
+		rd.Host = r.Host
+	}
+
+	// Get the scheme trying first the X-Forwarded-Proto header, otherwise take it from request
+	rd.Scheme = r.Header.Get(xForwardedProto)
+	if rd.Scheme == "" {
+		rd.Scheme = "http"
+		if r.TLS != nil {
+			rd.Scheme = "https"
+		}
+	}
+
+	rd.Path = fmt.Sprintf("%s/%s/%s/%s/callback", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID)
+	return rd.String()
+}
 
 type endpoint struct {
 	endpoints       []route.Endpoint

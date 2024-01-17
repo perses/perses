@@ -97,7 +97,10 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT, dao user.DAO)
 	authURL := *params.AuthURL.URL
 	tokenURL := params.TokenURL.String()
 	userInfosURL := params.UserInfosURL.String()
-	redirectURI := params.RedirectURI.String()
+	redirectURI := ""
+	if !params.RedirectURI.IsNilOrEmpty() {
+		redirectURI = params.RedirectURI.String()
+	}
 
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
@@ -231,10 +234,16 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 		e.logWithError(err).Error("Failed to save code verifier in a cookie.")
 		return shared.InternalError
 	}
+	opts := []oauth2.AuthCodeOption{oauth2.S256ChallengeOption(verifier)}
+
+	// If the Redirect URL is not setup by config, we build it from request
+	if e.conf.RedirectURL == "" {
+		opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+	}
 
 	// Redirect user to consent page to ask for permission
 	// for the scopes specified above.
-	return ctx.Redirect(302, e.conf.AuthCodeURL(state, oauth2.S256ChallengeOption(verifier)))
+	return ctx.Redirect(302, e.conf.AuthCodeURL(state, opts...))
 }
 
 // codeExchangeHandler is the http handler on Perses side that will be called back by the oauth 2.0 provider during "Authorization Code" flow.
@@ -259,8 +268,15 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return shared.InternalError
 	}
 
+	opts := []oauth2.AuthCodeOption{oauth2.VerifierOption(verifier)}
+
+	// If the Redirect URL is not setup by config, we build it from request
+	if e.conf.RedirectURL == "" {
+		opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
+	}
+
 	// Exchange the authorization code with a token
-	token, err := e.conf.Exchange(ctx.Request().Context(), code, oauth2.VerifierOption(verifier))
+	token, err := e.conf.Exchange(ctx.Request().Context(), code, opts...)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while exchanging code with token")
 		return shared.InternalError
