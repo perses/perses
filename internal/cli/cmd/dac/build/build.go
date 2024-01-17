@@ -33,6 +33,18 @@ const (
 	modeStdout       = "stdout"
 )
 
+// writeToFile writes data to a file
+func writeToFile(filePath string, data []byte) error {
+	file, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.Write(data)
+	return err
+}
+
 type option struct {
 	persesCMD.Option
 	opt.FileOption
@@ -82,12 +94,14 @@ func (o *option) Execute() error {
 		}
 
 		// Process regular files only
-		if !info.IsDir() {
-			err = o.processFile(path)
-			if err != nil {
-				// Tell the user about the error but don't stop the processing
-				fmt.Printf("error processing file %s: %v\n", path, err)
-			}
+		if info.IsDir() {
+			return nil
+		}
+
+		err = o.processFile(path)
+		if err != nil {
+			// Tell the user about the error but don't stop the processing
+			fmt.Printf("error processing file %s: %v\n", path, err)
 		}
 
 		return nil
@@ -101,10 +115,11 @@ func (o *option) Execute() error {
 }
 
 func (o *option) processFile(file string) error {
-	// NB: this command is mostly based on the `eval` command of the cue CLI.
+	// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
 	// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
 	//      However the cue code is (for now at least) not well packaged for such external reuse.
 	//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
+	// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
 	cmd := exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
 
 	// Capture the output of the command
@@ -129,7 +144,7 @@ func (o *option) processFile(file string) error {
 	}
 
 	// Build the path of the file where to store the command output
-	outputFilePath := buildOutputFilePath(file, o.OutputOption.Output)
+	outputFilePath := o.buildOutputFilePath(file)
 
 	// Write the output to the file
 	err = writeToFile(outputFilePath, cmdOutput)
@@ -141,23 +156,11 @@ func (o *option) processFile(file string) error {
 }
 
 // buildOutputFilePath generates the output file path based on the input file path
-func buildOutputFilePath(inputFilePath string, ext string) string {
+func (o *option) buildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
-	return filepath.Join(outputFolderName, fmt.Sprintf("%s_output.%s", baseName, ext)) // Change the extension as needed
-}
-
-// writeToFile writes data to a file
-func writeToFile(filePath string, data []byte) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(data)
-	return err
+	return filepath.Join(outputFolderName, fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
 }
 
 func (o *option) SetWriter(writer io.Writer) {
