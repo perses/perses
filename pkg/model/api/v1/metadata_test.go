@@ -76,7 +76,9 @@ func TestProjectMetadata_UpdateVersion(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Version:   0,
 		},
-		Project: "Perses",
+		ProjectAsStruct: ProjectAsStruct{
+			Project: "Perses",
+		},
 	}
 	// The idea here is to verify if we update multiple times a ProjectMetadata based on a previous version of the struct,
 	// we will have the correct version number.

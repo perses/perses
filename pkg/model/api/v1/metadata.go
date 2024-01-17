@@ -14,7 +14,10 @@
 package v1
 
 import (
+	"encoding/json"
 	"time"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func NewMetadata(name string) *Metadata {
@@ -54,14 +57,73 @@ func NewProjectMetadata(project string, name string) *ProjectMetadata {
 		Metadata: Metadata{
 			Name: name,
 		},
-		Project: project,
+		ProjectAsStruct: ProjectAsStruct{
+			Project: project,
+		},
 	}
+}
+
+func (m *Metadata) UnmarshalJSON(data []byte) error {
+	var tmp Metadata
+	type plain Metadata
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
+}
+
+func (m *Metadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp Metadata
+	type plain Metadata
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*m = tmp
+	return nil
+}
+
+func (m *Metadata) validate() error {
+	return common.ValidateID(m.Name)
+}
+
+// This wrapping struct is required to allow defining a custom unmarshall on Metadata
+// without breaking the Project attribute (the fact Metadata is injected line in
+// ProjectMetadata caused Project string to be ignored when unmarshalling)
+type ProjectAsStruct struct {
+	Project string `json:"project" yaml:"project"`
+}
+
+func (p *ProjectAsStruct) UnmarshalJSON(data []byte) error {
+	var tmp ProjectAsStruct
+	type plain ProjectAsStruct
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
+}
+
+func (p *ProjectAsStruct) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp ProjectAsStruct
+	type plain ProjectAsStruct
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	*p = tmp
+	return nil
 }
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 type ProjectMetadata struct {
-	Metadata `json:",inline" yaml:",inline"`
-	Project  string `json:"project" yaml:"project"`
+	Metadata        `json:",inline" yaml:",inline"`
+	ProjectAsStruct `json:",inline" yaml:",inline"`
 }
 
 func (m *ProjectMetadata) GetName() string {

@@ -13,11 +13,30 @@
 
 package v1
 
-// This definition provides placeholder values for the dashboard metadata,
-// required to pass the CUE evaluation, as those attributes are flagged as
-// mandatory in the (Go) datamodel but populated by the server in the end.
+import (
+	"strings"
+	"time"
+)
+
 #Metadata: {
+	name: string @go(Name)
+	// extra constraints for the name attribute, that reproduces some validation we have on
+	// the Golang side placeholder values for the dashboard metadata,
+	name: strings.MinRunes(1) & strings.MaxRunes(75)
+	name: =~"^[a-zA-Z0-9_.-]+$"
+
+	createdAt: time.Time @go(CreatedAt)
+	updatedAt: time.Time @go(UpdatedAt)
+	version:   uint64    @go(Version)
+	// placeholder values required to pass the CUE evaluation, as those attributes are flagged
+	// as mandatory in the (Go) datamodel but populated by the server in the end.
 	createdAt: "1970-01-01T00:00:00.000000000Z"
 	updatedAt: "1970-01-01T00:00:00.000000000Z"
 	version:   1
+}
+
+// ProjectMetadata is the metadata struct for resources that belongs to a project.
+#ProjectMetadata: {
+	#Metadata
+	project: string @go(Project)
 }

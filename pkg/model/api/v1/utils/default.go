@@ -36,7 +36,9 @@ func DefaultOwnerRole(projectName string) *v1.Role {
 				CreatedAt: now,
 				UpdatedAt: now,
 			},
-			Project: projectName,
+			ProjectAsStruct: v1.ProjectAsStruct{
+				Project: projectName,
+			},
 		},
 		Spec: v1.RoleSpec{
 			Permissions: []role.Permission{
@@ -59,7 +61,9 @@ func DefaultEditorRole(projectName string) *v1.Role {
 				CreatedAt: now,
 				UpdatedAt: now,
 			},
-			Project: projectName,
+			ProjectAsStruct: v1.ProjectAsStruct{
+				Project: projectName,
+			},
 		},
 		Spec: v1.RoleSpec{
 			Permissions: []role.Permission{
@@ -86,7 +90,9 @@ func DefaultViewerRole(projectName string) *v1.Role {
 				CreatedAt: now,
 				UpdatedAt: now,
 			},
-			Project: projectName,
+			ProjectAsStruct: v1.ProjectAsStruct{
+				Project: projectName,
+			},
 		},
 		Spec: v1.RoleSpec{
 			Permissions: []role.Permission{
@@ -106,7 +112,9 @@ func DefaultOwnerRoleBinding(projectName string, username string) *v1.RoleBindin
 			Metadata: v1.Metadata{
 				Name: owner,
 			},
-			Project: projectName,
+			ProjectAsStruct: v1.ProjectAsStruct{
+				Project: projectName,
+			},
 		},
 		Spec: v1.RoleBindingSpec{
 			Role: owner,

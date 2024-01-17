@@ -75,7 +75,9 @@ func TestValidatePanels(t *testing.T) {
 		Metadata: v1.Metadata{
 			Name: "SimpleDashboard",
 		},
-		Project: "perses",
+		ProjectAsStruct: v1.ProjectAsStruct{
+			Project: "perses",
+		},
 	}
 
 	testSuite := []struct {
@@ -231,7 +233,9 @@ func TestValidateDashboardVariables(t *testing.T) {
 		Metadata: v1.Metadata{
 			Name: "SimpleDashboard",
 		},
-		Project: "perses",
+		ProjectAsStruct: v1.ProjectAsStruct{
+			Project: "perses",
+		},
 	}
 
 	testSuite := []struct {

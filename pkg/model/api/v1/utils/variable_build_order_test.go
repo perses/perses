@@ -131,7 +131,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 						Metadata: v1.Metadata{
 							Name: "bar",
 						},
-						Project: "myProject",
+						ProjectAsStruct: v1.ProjectAsStruct{
+							Project: "myProject",
+						},
 					},
 					Spec: v1.VariableSpec{
 						Kind: variable.KindList,
@@ -152,7 +154,9 @@ func TestBuildVariableDependencies(t *testing.T) {
 						Metadata: v1.Metadata{
 							Name: "myVariable",
 						},
-						Project: "myProject",
+						ProjectAsStruct: v1.ProjectAsStruct{
+							Project: "myProject",
+						},
 					},
 					Spec: v1.VariableSpec{
 						Kind: variable.KindList,

@@ -28,7 +28,9 @@ func FolderList(project string, prefix string) []*modelV1.Folder {
 				Metadata: modelV1.Metadata{
 					Name: "FF15",
 				},
-				Project: "perses",
+				ProjectAsStruct: modelV1.ProjectAsStruct{
+					Project: "perses",
+				},
 			},
 		},
 		{
@@ -37,7 +39,9 @@ func FolderList(project string, prefix string) []*modelV1.Folder {
 				Metadata: modelV1.Metadata{
 					Name: "AnotherFolder",
 				},
-				Project: "AnotherProject",
+				ProjectAsStruct: modelV1.ProjectAsStruct{
+					Project: "AnotherProject",
+				},
 			},
 		},
 	}
@@ -75,7 +79,9 @@ func (c *folder) Get(name string) (*modelV1.Folder, error) {
 			Metadata: modelV1.Metadata{
 				Name: name,
 			},
-			Project: c.project,
+			ProjectAsStruct: modelV1.ProjectAsStruct{
+				Project: c.project,
+			},
 		},
 	}, nil
 }

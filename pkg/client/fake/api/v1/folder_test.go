@@ -36,7 +36,9 @@ func TestFolderList(t *testing.T) {
 						Metadata: modelV1.Metadata{
 							Name: "FF15",
 						},
-						Project: "perses",
+						ProjectAsStruct: modelV1.ProjectAsStruct{
+							Project: "perses",
+						},
 					},
 				},
 				{
@@ -45,7 +47,9 @@ func TestFolderList(t *testing.T) {
 						Metadata: modelV1.Metadata{
 							Name: "AnotherFolder",
 						},
-						Project: "AnotherProject",
+						ProjectAsStruct: modelV1.ProjectAsStruct{
+							Project: "AnotherProject",
+						},
 					},
 				},
 			},
@@ -60,7 +64,9 @@ func TestFolderList(t *testing.T) {
 						Metadata: modelV1.Metadata{
 							Name: "FF15",
 						},
-						Project: "perses",
+						ProjectAsStruct: modelV1.ProjectAsStruct{
+							Project: "perses",
+						},
 					},
 				},
 			},
@@ -75,7 +81,9 @@ func TestFolderList(t *testing.T) {
 						Metadata: modelV1.Metadata{
 							Name: "AnotherFolder",
 						},
-						Project: "AnotherProject",
+						ProjectAsStruct: modelV1.ProjectAsStruct{
+							Project: "AnotherProject",
+						},
 					},
 				},
 			},
@@ -91,7 +99,9 @@ func TestFolderList(t *testing.T) {
 						Metadata: modelV1.Metadata{
 							Name: "AnotherFolder",
 						},
-						Project: "AnotherProject",
+						ProjectAsStruct: modelV1.ProjectAsStruct{
+							Project: "AnotherProject",
+						},
 					},
 				},
 			},
