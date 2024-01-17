@@ -37,7 +37,13 @@ See the [CUE documentation](https://cuelang.org/docs/concepts/packages/) for mor
 
 #### 2. Retrieve the CUE sources from Perses
 
-Unfortunately for now there is no clean way to import the CUE sources from Perses (no proper dependency management available in CUE as already mentionned), so in the meantime we provide the script [dac_setup.sh](../../scripts/dac_setup.sh) that takes care of adding the CUE sources from Perses as external dependencies of your repo. Simply copy this script at the root of your repository and run it. You will have to indicate the version of Perses from which to retrieve the files - unless you have specific case, better to look for the latest one.
+Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentionned, we provide in the meantime a dedicated CLI command in order to add the CUE sources from Perses as external dependencies to your repo:
+
+```
+percli dac setup --version 0.42.1
+```
+
+You can omit the version flag if your are connected to a Perses server (it will retrieve its version). Ottherwise, unless you have a specific case, better to pass the latest version available.
 
 ## Develop dashboards
 
