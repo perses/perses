@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/storybook",
-  "version": "0.43.0-rc2",
+  "version": "0.43.0",
   "private": true,
   "main": "src/index.js",
   "scripts": {

@@ -1,17 +1,9 @@
 # Changelog
 
-## 0.43.0-rc2 / 2024-01-16
-
-- [BUGFIX] OAuth/OIDC get redirect_uri from request considering X-Forwarded-* headers + guess scheme from request.TLS (#1706)
-
-## 0.43.0-rc1 / 2024-01-15
-
-- [ENHANCEMENT] OAuth/OIDC possibly get redirect_uri from request (#1698)
-
-## 0.43.0-rc0 / 2024-01-11
+## 0.43.0 / 2024-01-17
 
 - [FEATURE] Add Secret Form Editor (#1671)
-- [FEATURE] Authentication with external OAuth/OIDC providers (#1637) (#1685) (#1692)
+- [FEATURE] Authentication with external OAuth/OIDC providers (#1637) (#1685) (#1692) (#1698) (#1706)
 - [FEATURE] Add a new command to refresh the access token (#1668)
 - [FEATURE] Allow visualizing the dashboard's JSON in read mode (#1651)
 - [ENHANCEMENT] Use common.URL in the proxy (#1688)
