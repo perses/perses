@@ -11,5 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './mock-query-results';
-export * from './mock-trace-query-results';
+import { getTraceData } from './get-trace-data';
+import { TempoTraceQueryEditor } from './TempoTraceQueryEditor';
+
+/**
+ * The core Tempo TraceQuery plugin for Perses.
+ */
+export const TempoTraceQuery = {
+  getTraceData,
+  OptionsEditorComponent: TempoTraceQueryEditor,
+  createInitialOptions: () => ({
+    query: '{}',
+    datasource: undefined,
+  }),
+};

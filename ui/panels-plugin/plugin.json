@@ -44,6 +44,14 @@
           "name": "Markdown",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "ScatterChart",
+        "display": {
+          "name": "Scatter Chart",
+          "description": ""
+        }
       }
     ]
   }
