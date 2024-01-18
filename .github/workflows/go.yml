@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -43,12 +43,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-      - name: install cue
-        run: go install cuelang.org/go/cmd/cue@v0.4.2
+          enable_cue: true
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -59,7 +58,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -81,7 +80,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -93,7 +92,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -113,12 +112,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.2.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-      - name: install cue
-        run: go install cuelang.org/go/cmd/cue@latest
+          enable_cue: true
       - name: eval cue schema
         run: make cue-eval
       - name: test cue schema
@@ -129,12 +127,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.1.0
+      - uses: perses/github-actions@v0.3.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
-      - name: install cue
-        run: go install cuelang.org/go/cmd/cue@latest
+          enable_cue: true
       - name: generate cue files
         run: make cue-gen
       - name: check for changes
