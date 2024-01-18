@@ -4,10 +4,21 @@
 
 package v1
 
+#NativeProvider: {
+	password?: string @go(Password)
+}
+
+#OAuthProvider: {
+	issuer?:  string @go(Issuer)
+	email?:   string @go(Email)
+	subject?: string @go(Subject)
+}
+
 #UserSpec: {
-	firstName?: string @go(FirstName)
-	lastName?:  string @go(LastName)
-	password?:  string @go(Password)
+	firstName?:      string          @go(FirstName)
+	lastName?:       string          @go(LastName)
+	nativeProvider?: #NativeProvider @go(NativeProvider)
+	oauthProviders?: [...#OAuthProvider] @go(OauthProviders,[]OAuthProvider)
 }
 
 #User: _
