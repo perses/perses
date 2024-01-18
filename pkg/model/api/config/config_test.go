@@ -47,7 +47,10 @@ func TestJSONMarshallConfig(t *testing.T) {
     "enable_auth": false,
     "authorization": {},
     "authentication": {
-      "disable_sign_up": false
+      "disable_sign_up": false,
+      "providers": {
+        "enable_native": false
+      }
     }
   },
   "database": {},
@@ -69,7 +72,10 @@ func TestJSONMarshallConfig(t *testing.T) {
     "authentication": {
       "access_token_ttl": "15m",
       "refresh_token_ttl": "1d",
-      "disable_sign_up": false
+      "disable_sign_up": false,
+      "providers": {
+        "enable_native": false
+      }
     }
   },
   "database": {
@@ -256,6 +262,9 @@ security:
   readonly: false
   encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
   enable_auth: true
+  authentication:
+    providers:
+      enable_native: true
   authorization:
     guest_permissions:
       - actions:
@@ -325,6 +334,9 @@ information: |-
 						AccessTokenTTL:  model.Duration(DefaultAccessTokenTTL),
 						RefreshTokenTTL: model.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
+						Providers: AuthProviders{
+							EnableNative: true,
+						},
 					},
 				},
 				Database: Database{

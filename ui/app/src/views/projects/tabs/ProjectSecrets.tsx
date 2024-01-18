@@ -15,7 +15,7 @@ import { Card } from '@mui/material';
 import { useCallback } from 'react';
 import { Secret, SecretResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { SecretList } from '../../../components/secret/SecretList';
+import { SecretList } from '../../../components/secrets/SecretList';
 import { useDeleteSecretMutation, useUpdateSecretMutation, useSecretList } from '../../../model/secret-client';
 
 interface ProjectSecretsProps {

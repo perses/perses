@@ -16,7 +16,7 @@ import { TraceQueryContext } from '@perses-dev/plugin-system';
 import { MOCK_ENRICHED_TRACE_QUERY_RESPONSE, MOCK_TRACE_DATA } from '../test';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
-import { TempoTraceQuery } from './TempoTraceQuery';
+import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
 
 jest.mock('echarts/core');
 
@@ -50,10 +50,15 @@ const stubTempoContext: TraceQueryContext = {
     getDatasource: getDatasource,
     getDatasourceClient: getDatasourceClient,
     listDatasourceSelectItems: jest.fn(),
+
     getLocalDatasources: jest.fn(),
     setLocalDatasources: jest.fn(),
     getSavedDatasources: jest.fn(),
     setSavedDatasources: jest.fn(),
+  },
+  absoluteTimeRange: {
+    start: new Date('2023-12-16T21:57:48.057Z'), // last 1 hour
+    end: new Date('2023-12-16T22:57:48.057Z'),
   },
 };
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Query, QueryKey } from '@tanstack/react-query';
-import { UnknownSpec, TraceData } from '@perses-dev/core';
+import { UnknownSpec, TraceData, AbsoluteTimeRange } from '@perses-dev/core';
 import { DatasourceStore } from '../runtime';
 import { Plugin } from './plugin-base';
 
@@ -28,6 +28,7 @@ export interface TraceQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
  */
 export interface TraceQueryContext {
   datasourceStore: DatasourceStore;
+  absoluteTimeRange?: AbsoluteTimeRange;
 }
 
 export type TraceDataQuery = Query<TraceData, unknown, TraceData, QueryKey>;

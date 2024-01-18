@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
+import { resourceIdValidationSchema } from './resource';
 
 const permissionValidationSchema = z.object({
   // TODO: use SCOPE & ACTIONS constants

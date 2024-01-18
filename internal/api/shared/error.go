@@ -37,6 +37,7 @@ var (
 	ConflictError     = &PersesError{message: "document already exists"}
 	BadRequestError   = &PersesError{message: "bad request"}
 	UnauthorizedError = &PersesError{message: "unauthorized"}
+	ForbiddenError    = &PersesError{message: "forbidden access"}
 )
 
 // HandleError is translating the given error to the echoHTTPError
@@ -45,14 +46,21 @@ func HandleError(err error) error {
 		return nil
 	}
 
-	if errors.Is(err, InternalError) {
-		return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
-	}
-	if databaseModel.IsKeyNotFound(err) || errors.Is(err, NotFoundError) {
+	if databaseModel.IsKeyNotFound(err) {
 		return echo.NewHTTPError(http.StatusNotFound, NotFoundError.message)
 	}
-	if databaseModel.IsKeyConflict(err) || errors.Is(err, ConflictError) {
+	if databaseModel.IsKeyConflict(err) {
 		return echo.NewHTTPError(http.StatusConflict, ConflictError.message)
+	}
+
+	if errors.Is(err, InternalError) {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+	if errors.Is(err, ConflictError) {
+		return echo.NewHTTPError(http.StatusConflict, err.Error())
+	}
+	if errors.Is(err, NotFoundError) {
+		return echo.NewHTTPError(http.StatusNotFound, err.Error())
 	}
 	if errors.Is(err, BadRequestError) {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -60,9 +68,12 @@ func HandleError(err error) error {
 	if errors.Is(err, UnauthorizedError) {
 		return echo.NewHTTPError(http.StatusUnauthorized, err.Error())
 	}
+	if errors.Is(err, ForbiddenError) {
+		return echo.NewHTTPError(http.StatusForbidden, err.Error())
+	}
 
 	if _, ok := err.(*echo.HTTPError); ok {
-		// the error is coming from the echo framework likely because the route doesn't exist.
+		// The error is coming from the echo framework likely because the route doesn't exist.
 		// In this particular case, we shouldn't touch to the error and let it like that
 		return err
 	}
@@ -70,10 +81,22 @@ func HandleError(err error) error {
 	return echo.NewHTTPError(http.StatusInternalServerError, InternalError.message)
 }
 
+func HandleNotFoundError(msg string) error {
+	return handleErrorMsg(msg, NotFoundError)
+}
+
 func HandleBadRequestError(msg string) error {
-	return fmt.Errorf("%w: %s", BadRequestError, msg)
+	return handleErrorMsg(msg, BadRequestError)
 }
 
 func HandleUnauthorizedError(msg string) error {
-	return fmt.Errorf("%w: %s", UnauthorizedError, msg)
+	return handleErrorMsg(msg, UnauthorizedError)
+}
+
+func HandleForbiddenError(msg string) error {
+	return handleErrorMsg(msg, ForbiddenError)
+}
+
+func handleErrorMsg(msg string, err *PersesError) error {
+	return fmt.Errorf("%w: %s", err, msg)
 }

@@ -37,13 +37,34 @@ func TestAuth(t *testing.T) {
 
 		authEntity := modelAPI.Auth{
 			Login:    usrEntity.GetMetadata().GetName(),
-			Password: usrEntity.Spec.Password,
+			Password: usrEntity.Spec.NativeProvider.Password,
 		}
 
-		expect.POST("/api/auth").
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
 			WithJSON(authEntity).
 			Expect().
 			Status(http.StatusOK)
+		return []modelAPI.Entity{usrEntity}
+	})
+}
+
+func TestAuth_EmptyPassword(t *testing.T) {
+	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+		usrEntity := e2eframework.NewUser("foo")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+			WithJSON(usrEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authEntity := modelAPI.Auth{
+			Login:    usrEntity.GetMetadata().GetName(),
+			Password: "",
+		}
+
+		expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+			WithJSON(authEntity).
+			Expect().
+			Status(http.StatusBadRequest)
 		return []modelAPI.Entity{usrEntity}
 	})
 }

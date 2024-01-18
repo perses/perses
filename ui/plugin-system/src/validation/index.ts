@@ -13,4 +13,5 @@
 
 export * from './datasource';
 export * from './resource';
+export * from './secret';
 export * from './variable';

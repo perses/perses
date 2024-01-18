@@ -15,68 +15,92 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/shared"
 	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/shared/utils"
 	"github.com/perses/perses/pkg/model/api"
-	"github.com/sirupsen/logrus"
+	"github.com/perses/perses/pkg/model/api/config"
 )
 
-type endpoint struct {
-	dao          user.DAO
-	jwt          crypto.JWT
-	isAuthEnable bool
-}
+const (
+	xForwardedProto = "X-Forwarded-Proto"
+	xForwardedHost  = "X-Forwarded-Host"
+)
 
-func New(dao user.DAO, jwt crypto.JWT, isAuthEnable bool) route.Endpoint {
-	return &endpoint{
-		dao:          dao,
-		jwt:          jwt,
-		isAuthEnable: isAuthEnable,
-	}
-}
+func getRedirectURI(r *http.Request, authKind string, slugID string) string {
+	rd := url.URL{}
 
-func (e *endpoint) CollectRoutes(g *route.Group) {
-	if e.isAuthEnable {
-		g.POST("/auth", e.auth, true)
-		g.POST("/auth/refresh", e.refresh, true)
-		g.POST("/auth/logout", e.logout, true)
+	// Get the host trying first the X-Forwarded-Host header, otherwise take it from request
+	rd.Host = r.Header.Get(xForwardedHost)
+	if rd.Host == "" {
+		rd.Host = r.Host
 	}
-}
 
-func (e *endpoint) auth(ctx echo.Context) error {
-	body := &api.Auth{}
-	if err := ctx.Bind(body); err != nil {
-		return shared.HandleBadRequestError(err.Error())
-	}
-	usr, err := e.dao.Get(body.Login)
-	if err != nil {
-		if databaseModel.IsKeyNotFound(err) {
-			return shared.HandleBadRequestError("wrong login or password ")
+	// Get the scheme trying first the X-Forwarded-Proto header, otherwise take it from request
+	rd.Scheme = r.Header.Get(xForwardedProto)
+	if rd.Scheme == "" {
+		rd.Scheme = "http"
+		if r.TLS != nil {
+			rd.Scheme = "https"
 		}
 	}
 
-	if !crypto.ComparePasswords(usr.Spec.Password, body.Password) {
-		return shared.HandleBadRequestError("wrong login or password ")
-	}
-	accessToken, err := e.accessToken(ctx, body.Login)
-	if err != nil {
-		return err
-	}
-	refreshToken, err := e.refreshToken(ctx, body.Login)
-	if err != nil {
-		return err
+	rd.Path = fmt.Sprintf("%s/%s/%s/%s/callback", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID)
+	return rd.String()
+}
+
+type endpoint struct {
+	endpoints       []route.Endpoint
+	jwt             crypto.JWT
+	tokenManagement tokenManagement
+	isAuthEnable    bool
+}
+
+func New(dao user.DAO, jwt crypto.JWT, providers config.AuthProviders, isAuthEnable bool) (route.Endpoint, error) {
+	ep := &endpoint{
+		jwt:             jwt,
+		tokenManagement: tokenManagement{jwt: jwt},
+		isAuthEnable:    isAuthEnable,
 	}
 
-	return ctx.JSON(http.StatusOK, api.AuthResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	})
+	// Register the native provider if enabled
+	if providers.EnableNative {
+		ep.endpoints = append(ep.endpoints, newNativeEndpoint(dao, jwt))
+	}
+
+	// Register the OIDC providers if any
+	for _, provider := range providers.OIDC {
+		oidcEp, err := newOIDCEndpoint(provider, jwt, dao)
+		if err != nil {
+			return nil, err
+		}
+		ep.endpoints = append(ep.endpoints, oidcEp)
+	}
+
+	// Register the OAuth providers if any
+	for _, provider := range providers.OAuth {
+		ep.endpoints = append(ep.endpoints, newOAuthEndpoint(provider, jwt, dao))
+	}
+	return ep, nil
+}
+
+func (e *endpoint) CollectRoutes(g *route.Group) {
+	if !e.isAuthEnable {
+		return
+	}
+	providersGroup := g.Group(fmt.Sprintf("/%s", utils.PathAuthProviders))
+	for _, ep := range e.endpoints {
+		ep.CollectRoutes(providersGroup)
+	}
+	g.POST(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathRefresh), e.refresh, true)
+	g.GET(fmt.Sprintf("/%s/%s", utils.PathAuth, utils.PathLogout), e.logout, true)
 }
 
 func (e *endpoint) refresh(ctx echo.Context) error {
@@ -100,7 +124,7 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return shared.HandleBadRequestError(err.Error())
 	}
-	accessToken, err := e.accessToken(ctx, claims.Subject)
+	accessToken, err := e.tokenManagement.accessToken(claims.Subject, ctx.SetCookie)
 	if err != nil {
 		return err
 	}
@@ -114,27 +138,6 @@ func (e *endpoint) logout(ctx echo.Context) error {
 	ctx.SetCookie(e.jwt.DeleteRefreshTokenCookie())
 	ctx.SetCookie(jwtHeaderPayloadCookie)
 	ctx.SetCookie(signatureCookie)
-	return ctx.NoContent(http.StatusNoContent)
-}
 
-func (e *endpoint) accessToken(ctx echo.Context, login string) (string, error) {
-	accessToken, err := e.jwt.SignedAccessToken(login)
-	if err != nil {
-		logrus.WithError(err).Errorf("unable to generate the access token")
-		return "", shared.InternalError
-	}
-	jwtHeaderPayloadCookie, signatureCookie := e.jwt.CreateAccessTokenCookie(accessToken)
-	ctx.SetCookie(jwtHeaderPayloadCookie)
-	ctx.SetCookie(signatureCookie)
-	return accessToken, nil
-}
-
-func (e *endpoint) refreshToken(ctx echo.Context, login string) (string, error) {
-	refreshToken, err := e.jwt.SignedRefreshToken(login)
-	if err != nil {
-		logrus.WithError(err).Errorf("unable to generate the refresh token")
-		return "", shared.InternalError
-	}
-	ctx.SetCookie(e.jwt.CreateRefreshTokenCookie(refreshToken))
-	return refreshToken, nil
+	return ctx.Redirect(302, "/")
 }

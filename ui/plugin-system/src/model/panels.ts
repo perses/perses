@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
 import { OptionsEditorProps, Plugin } from './plugin-base';
 
@@ -44,4 +44,5 @@ export interface PanelProps<Spec> {
     width: number;
     height: number;
   };
+  definition?: PanelDefinition;
 }

@@ -860,7 +860,7 @@ export const MOCK_ENRICHED_TRACE_QUERY_RESPONSE: EnrichedTraceQueryResponse = {
 export const MOCK_TRACE_DATA: TraceData = {
   traces: [
     {
-      startTimeUnixMs: 1699916836928525,
+      startTimeUnixMs: 1699916836928.525,
       durationMs: 1096,
       spanCount: 10,
       errorCount: 0,

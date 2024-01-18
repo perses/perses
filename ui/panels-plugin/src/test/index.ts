@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './mock-query-results';
+export * from './mock-trace-query-results';
