@@ -11,21 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dac
+package test
 
-import (
-	"github.com/perses/perses/internal/cli/cmd/dac/build"
-	"github.com/perses/perses/internal/cli/cmd/dac/setup"
-	"github.com/spf13/cobra"
-)
-
-func NewCMD() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "dac",
-		Short: "Commands related to Dashboard-as-Code",
-	}
-	cmd.AddCommand(build.NewCMD())
-	cmd.AddCommand(setup.NewCMD())
-
-	return cmd
-}
+success: true

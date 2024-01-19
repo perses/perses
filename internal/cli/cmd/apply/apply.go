@@ -148,6 +148,6 @@ cat ./resources.json | percli apply -f -
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
-	cmd.MarkFlagsMutuallyExclusive("file", "directory")
+	opt.MarkFileAndDirFlagsAsXOR(cmd)
 	return cmd
 }

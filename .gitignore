@@ -17,6 +17,7 @@ Thumbs.db
 
 
 /bin
+/built
 /dist
 
 coverage.txt

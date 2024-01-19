@@ -17,7 +17,7 @@ import (
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
-	"github.com/perses/perses/pkg/client/fake/api"
+	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestApplyCMD(t *testing.T) {
@@ -26,7 +26,7 @@ func TestApplyCMD(t *testing.T) {
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: "you need to set the flag --directory or --file for this command",
+			ExpectedMessage: "at least one of the flags in the group [file directory] is required",
 		},
 		{
 			Title:           "not connected to any API",
