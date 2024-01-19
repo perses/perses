@@ -126,10 +126,48 @@ type ProjectMetadata struct {
 	ProjectMetadataWrapper `json:",inline" yaml:",inline"`
 }
 
-func (m *ProjectMetadata) GetName() string {
-	return m.Name
+// This method is needed in the case of JSON otherwise parts of the fields are missed when unmarshalling
+func (pm *ProjectMetadata) UnmarshalJSON(data []byte) error {
+	// Call UnmarshalJSON methods of the embedded structs
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	var projectMetadataWrapperTmp ProjectMetadataWrapper
+	if err := projectMetadataWrapperTmp.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	pm.Metadata = metadataTmp
+	pm.ProjectMetadataWrapper = projectMetadataWrapperTmp
+
+	return nil
 }
 
-func (m *ProjectMetadata) Update(previous ProjectMetadata) {
-	m.Metadata.Update(previous.Metadata)
+// This method is needed in the case of YAML otherwise the validation part is not triggered when unmarshalling
+func (pm *ProjectMetadata) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	// Call UnmarshalYAML methods of the embedded structs
+	var metadataTmp Metadata
+	if err := metadataTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	var projectMetadataWrapperTmp ProjectMetadataWrapper
+	if err := projectMetadataWrapperTmp.UnmarshalYAML(unmarshal); err != nil {
+		return err
+	}
+
+	pm.Metadata = metadataTmp
+	pm.ProjectMetadataWrapper = projectMetadataWrapperTmp
+
+	return nil
+}
+
+func (pm *ProjectMetadata) GetName() string {
+	return pm.Name
+}
+
+func (pm *ProjectMetadata) Update(previous ProjectMetadata) {
+	pm.Metadata.Update(previous.Metadata)
 }

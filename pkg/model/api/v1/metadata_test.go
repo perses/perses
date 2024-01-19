@@ -14,12 +14,23 @@
 package v1
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v3"
 )
+
+func getDummyDate() time.Time {
+	dummyDate, err := time.Parse("2006-01-02 15:04:05", "1970-01-01 00:00:00")
+	if err != nil {
+		panic(err)
+	}
+
+	return dummyDate
+}
 
 func TestKind_validateError(t *testing.T) {
 	testSuites := []struct {
@@ -90,4 +101,189 @@ func TestProjectMetadata_UpdateVersion(t *testing.T) {
 		m.Update(old)
 	}
 	assert.Equal(t, m.Version, uint64(10))
+}
+
+func TestUnmarshalMetadata(t *testing.T) {
+	dummyDate := getDummyDate()
+
+	testSuite := []struct {
+		title  string
+		jason  string
+		yamele string
+		result Metadata
+	}{
+		{
+			title: "simple Prometheus datasource",
+			jason: `
+{
+  "name": "foo",
+  "createdAt": "1970-01-01T00:00:00.000000000Z",
+  "updatedAt": "1970-01-01T00:00:00.000000000Z",
+  "version": 1
+}
+`,
+			yamele: `
+name: "foo"
+createdAt: "1970-01-01T00:00:00.000000000Z"
+updatedAt: "1970-01-01T00:00:00.000000000Z"
+version: 1
+`,
+			result: Metadata{
+				Name:      "foo",
+				CreatedAt: dummyDate,
+				UpdatedAt: dummyDate,
+				Version:   1,
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			resultFromJSON := Metadata{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &resultFromJSON))
+			assert.Equal(t, test.result, resultFromJSON)
+			resultFromYAML := Metadata{}
+			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &resultFromYAML))
+			assert.Equal(t, test.result, resultFromYAML)
+		})
+	}
+}
+
+func TestUnmarshalMetadataError(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		yamele string
+		err    error
+	}{
+		{
+			title: "name cannot be empty",
+			jason: `
+{
+  "version": 1
+}
+`,
+			yamele: `
+version: 1
+`,
+			err: fmt.Errorf("name cannot be empty"),
+		},
+		{
+			title: "name cannot contain spaces",
+			jason: `
+{
+  "name": "f o o",
+  "version": 1
+}
+`,
+			yamele: `
+name: "f o o"
+version: 1
+`,
+			err: fmt.Errorf("\"f o o\" is not a correct name. It should match the regexp: ^[a-zA-Z0-9_.-]+$"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			mFromJSON := Metadata{}
+			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &mFromJSON))
+			mFromYAML := Metadata{}
+			assert.Equal(t, test.err, yaml.Unmarshal([]byte(test.yamele), &mFromYAML))
+		})
+	}
+}
+
+func TestUnmarshalProjectMetadata(t *testing.T) {
+	dummyDate := getDummyDate()
+
+	testSuite := []struct {
+		title  string
+		jason  string
+		yamele string
+		result ProjectMetadata
+	}{
+		{
+			title: "simple Prometheus datasource",
+			jason: `
+{
+  "name": "foo",
+  "createdAt": "1970-01-01T00:00:00.000000000Z",
+  "updatedAt": "1970-01-01T00:00:00.000000000Z",
+  "version": 1,
+  "project": "bar"
+}
+`,
+			yamele: `
+name: "foo"
+createdAt: "1970-01-01T00:00:00.000000000Z"
+updatedAt: "1970-01-01T00:00:00.000000000Z"
+version: 1
+project: "bar"
+`,
+			result: ProjectMetadata{
+				Metadata: Metadata{
+					Name:      "foo",
+					CreatedAt: dummyDate,
+					UpdatedAt: dummyDate,
+					Version:   1,
+				},
+				ProjectMetadataWrapper: ProjectMetadataWrapper{
+					Project: "bar",
+				},
+			},
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			resultFromJSON := ProjectMetadata{}
+			assert.NoError(t, json.Unmarshal([]byte(test.jason), &resultFromJSON))
+			assert.Equal(t, test.result, resultFromJSON)
+			resultFromYAML := ProjectMetadata{}
+			assert.NoError(t, yaml.Unmarshal([]byte(test.yamele), &resultFromYAML))
+			assert.Equal(t, test.result, resultFromYAML)
+		})
+	}
+}
+
+func TestUnmarshalProjectMetadataError(t *testing.T) {
+	testSuite := []struct {
+		title  string
+		jason  string
+		yamele string
+		err    error
+	}{
+		{
+			title: "name cannot be empty",
+			jason: `
+{
+  "project": "foo"
+}
+`,
+			yamele: `
+project: "foo"
+`,
+			err: fmt.Errorf("name cannot be empty"),
+		},
+		{
+			title: "name cannot contain spaces",
+			jason: `
+{
+  "name": "f o o",
+  "project": "bar"
+}
+`,
+			yamele: `
+name: "f o o"
+project: "bar"
+`,
+			err: fmt.Errorf("\"f o o\" is not a correct name. It should match the regexp: ^[a-zA-Z0-9_.-]+$"),
+		},
+	}
+	for _, test := range testSuite {
+		t.Run(test.title, func(t *testing.T) {
+			mFromJSON := ProjectMetadata{}
+			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &mFromJSON))
+			mfromYAML := ProjectMetadata{}
+			assert.Equal(t, test.err, yaml.Unmarshal([]byte(test.yamele), &mfromYAML))
+		})
+	}
 }

@@ -12,8 +12,4 @@ package v1
 #ProjectMetadataWrapper: _
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
-#ProjectMetadata: {
-	#Metadata
-
-	#ProjectMetadataWrapper
-}
+#ProjectMetadata: _

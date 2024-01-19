@@ -35,7 +35,12 @@ import (
 	version:   1
 }
 
-// ProjectMetadata is the metadata struct for resources that belongs to a project.
 #ProjectMetadataWrapper: {
 	project: #metadataName @go(Project)
+}
+
+#ProjectMetadata: {
+	#Metadata
+
+	#ProjectMetadataWrapper
 }
