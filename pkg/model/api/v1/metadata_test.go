@@ -113,7 +113,7 @@ func TestUnmarshalMetadata(t *testing.T) {
 		result Metadata
 	}{
 		{
-			title: "simple Prometheus datasource",
+			title: "nominal case",
 			jason: `
 {
   "name": "foo",
@@ -202,7 +202,7 @@ func TestUnmarshalProjectMetadata(t *testing.T) {
 		result ProjectMetadata
 	}{
 		{
-			title: "simple Prometheus datasource",
+			title: "nominal case",
 			jason: `
 {
   "name": "foo",
