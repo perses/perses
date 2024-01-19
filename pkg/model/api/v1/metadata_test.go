@@ -76,7 +76,7 @@ func TestProjectMetadata_UpdateVersion(t *testing.T) {
 			UpdatedAt: time.Now(),
 			Version:   0,
 		},
-		ProjectAsStruct: ProjectAsStruct{
+		ProjectMetadataWrapper: ProjectMetadataWrapper{
 			Project: "Perses",
 		},
 	}

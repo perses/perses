@@ -57,7 +57,7 @@ func NewProjectMetadata(project string, name string) *ProjectMetadata {
 		Metadata: Metadata{
 			Name: name,
 		},
-		ProjectAsStruct: ProjectAsStruct{
+		ProjectMetadataWrapper: ProjectMetadataWrapper{
 			Project: project,
 		},
 	}
@@ -96,13 +96,13 @@ func (m *Metadata) validate() error {
 // This wrapping struct is required to allow defining a custom unmarshall on Metadata
 // without breaking the Project attribute (the fact Metadata is injected line in
 // ProjectMetadata caused Project string to be ignored when unmarshalling)
-type ProjectAsStruct struct {
+type ProjectMetadataWrapper struct {
 	Project string `json:"project" yaml:"project"`
 }
 
-func (p *ProjectAsStruct) UnmarshalJSON(data []byte) error {
-	var tmp ProjectAsStruct
-	type plain ProjectAsStruct
+func (p *ProjectMetadataWrapper) UnmarshalJSON(data []byte) error {
+	var tmp ProjectMetadataWrapper
+	type plain ProjectMetadataWrapper
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -110,9 +110,9 @@ func (p *ProjectAsStruct) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (p *ProjectAsStruct) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp ProjectAsStruct
-	type plain ProjectAsStruct
+func (p *ProjectMetadataWrapper) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp ProjectMetadataWrapper
+	type plain ProjectMetadataWrapper
 	if err := unmarshal((*plain)(&tmp)); err != nil {
 		return err
 	}
@@ -122,8 +122,8 @@ func (p *ProjectAsStruct) UnmarshalYAML(unmarshal func(interface{}) error) error
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
 type ProjectMetadata struct {
-	Metadata        `json:",inline" yaml:",inline"`
-	ProjectAsStruct `json:",inline" yaml:",inline"`
+	Metadata               `json:",inline" yaml:",inline"`
+	ProjectMetadataWrapper `json:",inline" yaml:",inline"`
 }
 
 func (m *ProjectMetadata) GetName() string {

@@ -131,7 +131,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 						Metadata: v1.Metadata{
 							Name: "bar",
 						},
-						ProjectAsStruct: v1.ProjectAsStruct{
+						ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
 							Project: "myProject",
 						},
 					},
@@ -154,7 +154,7 @@ func TestBuildVariableDependencies(t *testing.T) {
 						Metadata: v1.Metadata{
 							Name: "myVariable",
 						},
-						ProjectAsStruct: v1.ProjectAsStruct{
+						ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
 							Project: "myProject",
 						},
 					},

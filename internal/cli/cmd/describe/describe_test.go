@@ -92,7 +92,7 @@ func TestDescribeCMD(t *testing.T) {
 					Metadata: modelV1.Metadata{
 						Name: "myFolder",
 					},
-					ProjectAsStruct: modelV1.ProjectAsStruct{
+					ProjectMetadataWrapper: modelV1.ProjectMetadataWrapper{
 						Project: "perses",
 					},
 				},
@@ -110,7 +110,7 @@ func TestDescribeCMD(t *testing.T) {
 					Metadata: modelV1.Metadata{
 						Name: "myFolder",
 					},
-					ProjectAsStruct: modelV1.ProjectAsStruct{
+					ProjectMetadataWrapper: modelV1.ProjectMetadataWrapper{
 						Project: "perses",
 					},
 				},

@@ -46,7 +46,7 @@ func TestMarshalDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					ProjectAsStruct: ProjectAsStruct{
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
 						Project: "perses",
 					},
 				},
@@ -152,7 +152,7 @@ func TestMarshalDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					ProjectAsStruct: ProjectAsStruct{
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
 						Project: "perses",
 					},
 				},
@@ -435,7 +435,7 @@ func TestUnmarshallDashboard(t *testing.T) {
 			Metadata: Metadata{
 				Name: "SimpleDashboard",
 			},
-			ProjectAsStruct: ProjectAsStruct{
+			ProjectMetadataWrapper: ProjectMetadataWrapper{
 				Project: "perses",
 			},
 		},
