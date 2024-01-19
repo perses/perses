@@ -20,6 +20,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
@@ -171,6 +172,9 @@ func (o *option) Validate() error {
 		return fmt.Errorf("version should be at least %s or higher", minVersion)
 	}
 
+	if err := exec.Command("cue", "version").Run(); err != nil {
+		return fmt.Errorf("unable to use the cue binary: %w", err)
+	}
 	return nil
 }
 
