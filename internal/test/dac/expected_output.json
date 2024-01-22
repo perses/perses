@@ -1,10 +1,10 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "Containers monitoring",
+    "name": "ContainersMonitoring",
     "createdAt": "1970-01-01T00:00:00.000000000Z",
     "updatedAt": "1970-01-01T00:00:00.000000000Z",
-    "project": "My project",
+    "project": "MyProject",
     "version": 1
   },
   "spec": {

@@ -173,7 +173,9 @@ func newProjectMetadata(projectName string, name string) v1.ProjectMetadata {
 		Metadata: v1.Metadata{
 			Name: name,
 		},
-		Project: projectName,
+		ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
+			Project: projectName,
+		},
 	}
 }
 

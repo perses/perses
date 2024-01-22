@@ -110,8 +110,8 @@ import (
 
 v1.#Dashboard & {
 	metadata: {
-		name:    "Containers monitoring"
-		project: "My project"
+		name:    "ContainersMonitoring"
+		project: "MyProject"
 	}
 	spec: {
 		panels:    #myPanels

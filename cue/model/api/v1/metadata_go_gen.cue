@@ -4,17 +4,12 @@
 
 package v1
 
-import "time"
+#Metadata: _
 
-#Metadata: {
-	name:      string    @go(Name)
-	createdAt: time.Time @go(CreatedAt)
-	updatedAt: time.Time @go(UpdatedAt)
-	version:   uint64    @go(Version)
-}
+// This wrapping struct is required to allow defining a custom unmarshall on Metadata
+// without breaking the Project attribute (the fact Metadata is injected line in
+// ProjectMetadata caused Project string to be ignored when unmarshalling)
+#ProjectMetadataWrapper: _
 
 // ProjectMetadata is the metadata struct for resources that belongs to a project.
-#ProjectMetadata: {
-	#Metadata
-	project: string @go(Project)
-}
+#ProjectMetadata: _

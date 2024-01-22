@@ -19,7 +19,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
@@ -89,9 +88,6 @@ func validateMetadataVersusParameter(ctx echo.Context, paramName string, metadat
 }
 
 func ValidateMetadata(ctx echo.Context, metadata api.Metadata) error {
-	if err := common.ValidateID(metadata.GetName()); err != nil {
-		return err
-	}
 	switch met := metadata.(type) {
 	case *v1.ProjectMetadata:
 		if err := validateMetadataVersusParameter(ctx, ParamProject, &met.Project); err != nil {
