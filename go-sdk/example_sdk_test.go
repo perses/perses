@@ -16,9 +16,12 @@ package sdk_test
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"time"
 
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/datasources/prometheus"
+	"github.com/perses/perses/go-sdk/http"
 	"github.com/perses/perses/go-sdk/panels/markdown"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -30,7 +33,15 @@ func Example_dashboardAsCode() {
 	panel := markdown.NewPanel("info", "Hello world!").Build()
 	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
 
-	datasource := prometheus.NewDatasource("PrometheusDemo", "https://prometheus.demo.do.prometheus.io")
+	datasourceURL := url.URL{
+		Scheme: "https",
+		Host:   "prometheus.demo.do.prometheus.io",
+	}
+	datasource := sdk.NewDatasource("PrometheusDemo").
+		WithPlugin(prometheus.NewDatasourcePlugin().
+			WithScrapeInterval(30 * time.Second).
+			WithProxy(http.NewHTTPProxy(datasourceURL).AddHeader("Authorization", "mytoken").Build()).
+			Build())
 	dash.AddDatasource(datasource.Build())
 
 	client, err := sdk.NewClient("http://localhost:8080")

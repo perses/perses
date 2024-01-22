@@ -85,11 +85,6 @@ func (b *DashboardBuilder) WithProjectName(projectName string) *DashboardBuilder
 	return b
 }
 
-func (b *DashboardBuilder) WithVersion(version uint64) *DashboardBuilder {
-	b.Dashboard.Metadata.Version = version
-	return b
-}
-
 func (b *DashboardBuilder) WithRefreshInterval(seconds int) *DashboardBuilder {
 	b.Dashboard.Spec.RefreshInterval = model.Duration(seconds)
 	return b

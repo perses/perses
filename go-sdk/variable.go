@@ -51,11 +51,6 @@ func (b *VariableBuilder) WithProjectName(projectName string) *VariableBuilder {
 	return b
 }
 
-func (b *VariableBuilder) WithVersion(version uint64) *VariableBuilder {
-	b.Variable.Metadata.Version = version
-	return b
-}
-
 func NewTextVariable(name string, value string) *TextVariableBuilder {
 	return &TextVariableBuilder{
 		VariableBuilder{

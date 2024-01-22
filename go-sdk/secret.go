@@ -69,11 +69,6 @@ func (b *SecretBuilder) WithProjectName(projectName string) *SecretBuilder {
 	return b
 }
 
-func (b *SecretBuilder) WithVersion(version uint64) *SecretBuilder {
-	b.Secret.Metadata.Version = version
-	return b
-}
-
 func (b *SecretBuilder) WithBasicAuth(basicAuth secret.BasicAuth) *SecretBuilder {
 	b.Secret.Spec.Authorization = nil
 	b.Secret.Spec.BasicAuth = &basicAuth

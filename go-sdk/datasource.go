@@ -32,10 +32,6 @@ func NewDatasource(name string) *DatasourceBuilder {
 	}
 }
 
-func NewDatasourceBuilder(datasource v1.Datasource) *DatasourceBuilder {
-	return &DatasourceBuilder{datasource}
-}
-
 type DatasourceBuilder struct {
 	v1.Datasource
 }
@@ -63,8 +59,8 @@ func (b *DatasourceBuilder) WithProjectName(projectName string) *DatasourceBuild
 	return b
 }
 
-func (b *DatasourceBuilder) WithVersion(version uint64) *DatasourceBuilder {
-	b.Datasource.Metadata.Version = version
+func (b *DatasourceBuilder) WithDefault(isDefault bool) *DatasourceBuilder {
+	b.Datasource.Spec.Default = isDefault
 	return b
 }
 

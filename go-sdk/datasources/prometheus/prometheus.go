@@ -14,86 +14,94 @@
 package prometheus
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/url"
+	"time"
 
-	"github.com/perses/perses/go-sdk"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/prometheus/common/model"
-	"github.com/sirupsen/logrus"
 )
 
 type PluginSpec struct {
-	DirectURL      *string         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval *model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL      string         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *http.Proxy    `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }
 
-func NewDatasource(name string, url string) *DatasourceBuilder {
-	return &DatasourceBuilder{
-		sdk.DatasourceBuilder{
-			Datasource: v1.Datasource{
-				Kind: v1.KindDatasource,
-				Metadata: v1.ProjectMetadata{
-					Metadata: v1.Metadata{
-						Name: name,
-					},
-				},
-				Spec: v1.DatasourceSpec{
-					Display: nil,
-					Default: false,
-					Plugin: common.Plugin{
-						Kind: "PrometheusDatasource",
-						Spec: &PluginSpec{
-							DirectURL: &url,
-						},
-					},
-				},
-			},
-		},
+func (s *PluginSpec) UnmarshalJSON(data []byte) error {
+	type plain PluginSpec
+	var tmp PluginSpec
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *PluginSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp PluginSpec
+	type plain PluginSpec
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*s = tmp
+	return nil
+}
+
+func (s *PluginSpec) validate() error {
+	if len(s.DirectURL) == 0 && s.Proxy == nil {
+		return fmt.Errorf("directUrl or proxy cannot be empty")
+	}
+	if len(s.DirectURL) > 0 && s.Proxy != nil {
+		return fmt.Errorf("at most directUrl or proxy must be configured")
+	}
+	return nil
+}
+
+func NewDatasourcePlugin() *DatasourcePlugin {
+	return &DatasourcePlugin{
+		PluginSpec: PluginSpec{},
 	}
 }
 
-type DatasourceBuilder struct {
-	sdk.DatasourceBuilder
+type DatasourcePlugin struct {
+	PluginSpec
 }
 
-func (b *DatasourceBuilder) WithDirectUrl(url string) (*DatasourceBuilder, error) {
-	b.Datasource.Spec.Plugin.Spec = &PluginSpec{
-		DirectURL: &url,
-		Proxy:     nil,
+func (b *DatasourcePlugin) Build() common.Plugin {
+	return common.Plugin{
+		Kind: "PrometheusDatasource",
+		Spec: b.PluginSpec,
 	}
-	return b, nil
 }
 
-func (b *DatasourceBuilder) WithHTTPProxy(proxyURL string) (*DatasourceBuilder, error) {
-	u, err := url.Parse(proxyURL)
-	if err != nil {
-		return b, err
+func (b *DatasourcePlugin) WithDirectUrl(url string) *DatasourcePlugin {
+	b.PluginSpec = PluginSpec{
+		DirectURL:      url,
+		Proxy:          nil,
+		ScrapeInterval: b.PluginSpec.ScrapeInterval,
 	}
-
-	b.Datasource.Spec.Plugin.Spec = &PluginSpec{
-		Proxy: &http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{
-				URL: u,
-			},
-		},
-		DirectURL: nil,
-	}
-	return b, nil
+	return b
 }
 
-func (b *DatasourceBuilder) WithScrapeInterval(seconds int) *DatasourceBuilder {
-	pluginSpec, ok := b.Datasource.Spec.Plugin.Spec.(*datasource.Prometheus)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set scrape interval: %q", seconds))
-		return b
-	}
-	duration := model.Duration(seconds)
-	pluginSpec.ScrapeInterval = &duration
+func (b *DatasourcePlugin) WithProxy(proxy http.Proxy) *DatasourcePlugin {
+	b.PluginSpec =
+		PluginSpec{
+			Proxy:          &proxy,
+			DirectURL:      "",
+			ScrapeInterval: b.PluginSpec.ScrapeInterval,
+		}
+	return b
+}
+
+func (b *DatasourcePlugin) WithScrapeInterval(duration time.Duration) *DatasourcePlugin {
+	b.PluginSpec.ScrapeInterval = model.Duration(duration)
 	return b
 }
