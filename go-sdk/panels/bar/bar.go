@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,13 +14,8 @@
 package bar
 
 import (
-	"fmt"
-
-	"github.com/perses/perses/go-sdk"
 	commonSdk "github.com/perses/perses/go-sdk/common"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/sirupsen/logrus"
 )
 
 type Sort string
@@ -44,134 +39,74 @@ type PluginSpec struct {
 	Mode        Mode                  `json:"mode" yaml:"mode"`
 }
 
-func NewPanel(name string) *PanelBuilder {
-	return &PanelBuilder{
-		PanelBuilder: sdk.PanelBuilder{
-			Panel: v1.Panel{
-				Kind: "Panel",
-				Spec: v1.PanelSpec{
-					Display: v1.PanelDisplay{
-						Name: name,
-					},
-					Plugin: common.Plugin{
-						Kind: "BarChart",
-						Spec: PluginSpec{
-							Calculation: commonSdk.LastCalculation, // default in cue
-							Format: commonSdk.Format{
-								Unit: commonSdk.DecimalUnit,
-							},
-						},
-					},
-				},
+func NewPanelPlugin() *PanelPluginBuilder {
+	return &PanelPluginBuilder{
+		PluginSpec{
+			Calculation: commonSdk.LastCalculation, // default in cue
+			Format: commonSdk.Format{
+				Unit: commonSdk.DecimalUnit,
 			},
 		},
 	}
 }
 
-func NewPanelBuilder(panel v1.Panel) *PanelBuilder {
-	return &PanelBuilder{PanelBuilder: sdk.PanelBuilder{Panel: panel}}
+type PanelPluginBuilder struct {
+	PluginSpec
 }
 
-type PanelBuilder struct {
-	sdk.PanelBuilder
-}
-
-func (b *PanelBuilder) WithCalculation(calculation commonSdk.Calculation) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set calculation %q", calculation))
-		return b
+func (b *PanelPluginBuilder) Build() common.Plugin {
+	return common.Plugin{
+		Kind: "BarChart",
+		Spec: b.PluginSpec,
 	}
-	pluginSpec.Calculation = calculation
+}
+
+func (b *PanelPluginBuilder) WithCalculation(calculation commonSdk.Calculation) *PanelPluginBuilder {
+	b.Calculation = calculation
 	return b
 }
 
-func (b *PanelBuilder) WithTimeFormat(unit commonSdk.TimeUnit) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set time format with %q unit", unit))
-		return b
-	}
-	pluginSpec.Format.Unit = string(unit)
+func (b *PanelPluginBuilder) WithTimeFormat(unit commonSdk.TimeUnit) *PanelPluginBuilder {
+	b.Format.Unit = string(unit)
 	return b
 }
 
-func (b *PanelBuilder) WithPercentFormat(unit commonSdk.TimeUnit) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set percent format with %q unit", unit))
-		return b
-	}
-	pluginSpec.Format.Unit = string(unit)
+func (b *PanelPluginBuilder) WithPercentFormat(unit commonSdk.TimeUnit) *PanelPluginBuilder {
+	b.Format.Unit = string(unit)
 	return b
 }
 
-func (b *PanelBuilder) WithDecimalFormat() *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set decimal format with %q unit", commonSdk.DecimalUnit))
-		return b
-	}
-	pluginSpec.Format.Unit = commonSdk.DecimalUnit
+func (b *PanelPluginBuilder) WithDecimalFormat() *PanelPluginBuilder {
+	b.Format.Unit = commonSdk.DecimalUnit
 	return b
 }
 
-func (b *PanelBuilder) WithBytesFormat() *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set bytes format with %q unit", commonSdk.BytesUnit))
-		return b
-	}
-	pluginSpec.Format.Unit = commonSdk.BytesUnit
+func (b *PanelPluginBuilder) WithBytesFormat() *PanelPluginBuilder {
+	b.Format.Unit = commonSdk.BytesUnit
 	return b
 }
 
-func (b *PanelBuilder) WithThroughputFormat(unit commonSdk.ThroughputUnit) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set throughput format with %q unit", unit))
-		return b
-	}
-	pluginSpec.Format.Unit = string(unit)
+func (b *PanelPluginBuilder) WithThroughputFormat(unit commonSdk.ThroughputUnit) *PanelPluginBuilder {
+	b.Format.Unit = string(unit)
 	return b
 }
 
-func (b *PanelBuilder) WithDecimalPlace(decimal int) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set decimal place at %d", decimal))
-		return b
-	}
-	pluginSpec.Format.DecimalPlaces = &decimal
+func (b *PanelPluginBuilder) WithDecimalPlace(decimal int) *PanelPluginBuilder {
+	b.Format.DecimalPlaces = &decimal
 	return b
 }
 
-func (b *PanelBuilder) WithShortValues(enabled bool) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set short values"))
-		return b
-	}
-	pluginSpec.Format.ShortValues = &enabled
+func (b *PanelPluginBuilder) WithShortValues(enabled bool) *PanelPluginBuilder {
+	b.Format.ShortValues = &enabled
 	return b
 }
 
-func (b *PanelBuilder) SortingBy(sort Sort) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set sort %q", sort))
-		return b
-	}
-	pluginSpec.Sort = sort
+func (b *PanelPluginBuilder) SortingBy(sort Sort) *PanelPluginBuilder {
+	b.Sort = sort
 	return b
 }
 
-func (b *PanelBuilder) UsingMode(mode Mode) *PanelBuilder {
-	pluginSpec, ok := b.Panel.Spec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set mode %q", mode))
-		return b
-	}
-	pluginSpec.Mode = mode
+func (b *PanelPluginBuilder) UsingMode(mode Mode) *PanelPluginBuilder {
+	b.Mode = mode
 	return b
 }

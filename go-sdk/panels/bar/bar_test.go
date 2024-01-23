@@ -17,7 +17,6 @@ import (
 	"testing"
 
 	commonSdk "github.com/perses/perses/go-sdk/common"
-	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,26 +24,18 @@ import (
 func TestPanelBuilder(t *testing.T) {
 	testSuites := []struct {
 		title          string
-		sdkResult      modelV1.Panel
-		expectedResult modelV1.Panel
+		sdkResult      common.Plugin
+		expectedResult common.Plugin
 	}{
 		{
 			title:     "default bar panel",
-			sdkResult: NewPanel("test").Build(),
-			expectedResult: modelV1.Panel{
-				Kind: "Panel",
-				Spec: modelV1.PanelSpec{
-					Display: modelV1.PanelDisplay{
-						Name: "test",
-					},
-					Plugin: common.Plugin{
-						Kind: "BarChart",
-						Spec: PluginSpec{
-							Calculation: commonSdk.LastCalculation,
-							Format: commonSdk.Format{
-								Unit: commonSdk.DecimalUnit,
-							},
-						},
+			sdkResult: NewPanelPlugin().Build(),
+			expectedResult: common.Plugin{
+				Kind: "BarChart",
+				Spec: PluginSpec{
+					Calculation: commonSdk.LastCalculation,
+					Format: commonSdk.Format{
+						Unit: commonSdk.DecimalUnit,
 					},
 				},
 			},

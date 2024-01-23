@@ -16,7 +16,6 @@ package markdown
 import (
 	"testing"
 
-	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,23 +23,15 @@ import (
 func TestPanelBuilder(t *testing.T) {
 	testSuites := []struct {
 		title          string
-		sdkResult      modelV1.Panel
-		expectedResult modelV1.Panel
+		sdkResult      common.Plugin
+		expectedResult common.Plugin
 	}{
 		{
 			title:     "basic markdown panel",
-			sdkResult: NewPanel("test", "mysupertext").Build(),
-			expectedResult: modelV1.Panel{
-				Kind: "Panel",
-				Spec: modelV1.PanelSpec{
-					Display: modelV1.PanelDisplay{
-						Name: "test",
-					},
-					Plugin: common.Plugin{
-						Kind: "Markdown",
-						Spec: PluginSpec{Text: "mysupertext"},
-					},
-				},
+			sdkResult: NewPanelPlugin("mysupertext").Build(),
+			expectedResult: common.Plugin{
+				Kind: "Markdown",
+				Spec: PluginSpec{Text: "mysupertext"},
 			},
 		},
 	}

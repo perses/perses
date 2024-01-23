@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,94 +13,50 @@
 
 package prometheus_promql
 
-import (
-	"fmt"
-
-	"github.com/perses/perses/go-sdk"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/sirupsen/logrus"
-)
+import "github.com/perses/perses/pkg/model/api/v1/common"
 
 type datasourceSelector struct {
-	Kind string
-	Name *string
+	Kind string `json:"kind" yaml:"kind"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type PluginSpec struct {
-	Datasource datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Expr       string
-	LabelName  *string
+	Datasource *datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Expr       string              `json:"expr" yaml:"expr"`
+	LabelName  string              `json:"labelName,omitempty" yaml:"labelName,omitempty"`
 }
 
-func NewPrometheusPromQLVariable(name string, expr string) *ListVariableBuilder {
-	return &ListVariableBuilder{
-		ListVariableBuilder: sdk.ListVariableBuilder{
-			VariableBuilder: sdk.VariableBuilder{
-				Variable: v1.Variable{
-					Kind: v1.KindVariable,
-					Metadata: v1.ProjectMetadata{
-						Metadata: v1.Metadata{
-							Name: name,
-						},
-					},
-					Spec: v1.VariableSpec{
-						Kind: "ListVariable",
-						Spec: dashboard.ListVariableSpec{
-							ListSpec: variable.ListSpec{
-								Display:         nil,
-								DefaultValue:    nil,
-								AllowAllValue:   false,
-								AllowMultiple:   false,
-								CustomAllValue:  "",
-								CapturingRegexp: "",
-								Sort:            nil,
-								Plugin: common.Plugin{
-									Kind: "PrometheusLabelNamesVariable",
-									Spec: PluginSpec{Expr: expr},
-								},
-							},
-							Name: name,
-						},
-					},
-				},
-			},
-		},
+func NewPromQLVariablePlugin(expr string) *ListVariablePluginBuilder {
+	return &ListVariablePluginBuilder{
+		PluginSpec: PluginSpec{Expr: expr},
 	}
 }
 
-type ListVariableBuilder struct {
-	sdk.ListVariableBuilder
+type ListVariablePluginBuilder struct {
+	PluginSpec
 }
 
-func (b *ListVariableBuilder) WithExpr(expr string) *ListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set expr: %q", expr))
-		return b
+func (b *ListVariablePluginBuilder) Build() common.Plugin {
+	return common.Plugin{
+		Kind: "PrometheusPromQLVariable",
+		Spec: b.PluginSpec,
 	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set expr: %q", expr))
-		return b
-	}
-	pluginSpec.Expr = expr
+}
+
+func (b *ListVariablePluginBuilder) WithExpr(expr string) *ListVariablePluginBuilder {
+	b.Expr = expr
 	return b
 }
 
-func (b *ListVariableBuilder) WithLabelName(label string) *ListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set label name: %q", label))
-		return b
+func (b *ListVariablePluginBuilder) WithLabelName(label string) *ListVariablePluginBuilder {
+	b.LabelName = label
+	return b
+}
+
+func (b *ListVariablePluginBuilder) WithDatasource(name string) *ListVariablePluginBuilder {
+	b.Datasource = &datasourceSelector{
+		Kind: "PrometheusDatasource",
+		Name: name,
 	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set label name: %q", label))
-		return b
-	}
-	pluginSpec.LabelName = &label
 	return b
 }

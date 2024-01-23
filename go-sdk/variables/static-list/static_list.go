@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,71 +14,38 @@
 package staticlist
 
 import (
-	"fmt"
-
-	"github.com/perses/perses/go-sdk"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/sirupsen/logrus"
 )
 
 type PluginSpec struct {
 	Values []string `json:"values" yaml:"values"`
 }
 
-func NewStaticListVariable(name string, options []string) *ListVariableBuilder {
-	return &ListVariableBuilder{
-		ListVariableBuilder: sdk.ListVariableBuilder{
-			VariableBuilder: sdk.VariableBuilder{
-				Variable: v1.Variable{
-					Kind: v1.KindVariable,
-					Metadata: v1.ProjectMetadata{
-						Metadata: v1.Metadata{
-							Name: name,
-						},
-					},
-					Spec: v1.VariableSpec{
-						Kind: "ListVariable",
-						Spec: dashboard.ListVariableSpec{
-							ListSpec: variable.ListSpec{
-								Display:         nil,
-								DefaultValue:    nil,
-								AllowAllValue:   false,
-								AllowMultiple:   false,
-								CustomAllValue:  "",
-								CapturingRegexp: "",
-								Sort:            nil,
-								Plugin: common.Plugin{
-									Kind: "StaticListVariable",
-									Spec: PluginSpec{Values: options},
-								},
-							},
-							Name: name,
-						},
-					},
-				},
-			},
+func NewListVariablePlugin() *VariableSpecBuilder {
+	return &VariableSpecBuilder{
+		PluginSpec: PluginSpec{
+			Values: []string{},
 		},
 	}
 }
 
-type ListVariableBuilder struct {
-	sdk.ListVariableBuilder
+type VariableSpecBuilder struct {
+	PluginSpec
 }
 
-func (b *ListVariableBuilder) WithOptions(options []string) *ListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
-		return b
+func (b *VariableSpecBuilder) Build() common.Plugin {
+	return common.Plugin{
+		Kind: "StaticListVariable",
+		Spec: b.PluginSpec,
 	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set options: %q", options))
-		return b
-	}
-	pluginSpec.Values = options
+}
+
+func (b *VariableSpecBuilder) WithValues(values []string) *VariableSpecBuilder {
+	b.Values = values
+	return b
+}
+
+func (b *VariableSpecBuilder) AddValue(values string) *VariableSpecBuilder {
+	b.Values = append(b.Values, values)
 	return b
 }

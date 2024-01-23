@@ -135,33 +135,55 @@ func (b *DashboardBuilder) AddRow(row Row, panels []v1.Panel) *DashboardBuilder 
 	return b
 }
 
-func (b *DashboardBuilder) AddPanel(panel v1.Panel) *DashboardBuilder {
-	if b.Dashboard.Spec.Layouts == nil {
-		b.Dashboard.Spec.Layouts = []dashboard.Layout{}
-	}
-
-	if len(b.Dashboard.Spec.Layouts) == 0 {
-		b.Dashboard.Spec.Layouts = append(b.Dashboard.Spec.Layouts, dashboard.Layout{
-			Kind: "Grid",
-			Spec: dashboard.GridLayoutSpec{
-				Display: nil,
-				Items:   nil,
-			},
-		})
-	}
-
-	// TODO: Check how to handle layout
-	if b.Dashboard.Spec.Panels == nil {
-		b.Dashboard.Spec.Panels = make(map[string]*v1.Panel)
-	}
-	b.Dashboard.Spec.Panels["0_0"] = &panel
-	return b
-}
-
 func (b *DashboardBuilder) AddDatasource(datasource v1.Datasource) *DashboardBuilder {
 	if b.Dashboard.Spec.Datasources == nil {
 		b.Dashboard.Spec.Datasources = make(map[string]*v1.DatasourceSpec)
 	}
 	b.Dashboard.Spec.Datasources[datasource.Metadata.Name] = &datasource.Spec
 	return b
+}
+
+func (b *DashboardBuilder) AddDatasources(datasources ...v1.Datasource) *DashboardBuilder {
+	for _, datasource := range datasources {
+		b.AddDatasource(datasource)
+	}
+	return b
+}
+
+func (b *DashboardBuilder) AddVariable(variable v1.Variable) *DashboardBuilder {
+	if spec, ok := variable.Spec.Spec.(*dashboard.ListVariableSpec); ok {
+		spec.Name = variable.Metadata.Name
+		b.Dashboard.Spec.Variables = append(b.Dashboard.Spec.Variables, dashboard.Variable{
+			Kind: variable.Spec.Kind,
+			Spec: spec,
+		})
+		return b
+	}
+
+	if spec, ok := variable.Spec.Spec.(*dashboard.TextVariableSpec); ok {
+		spec.Name = variable.Metadata.Name
+		b.Dashboard.Spec.Variables = append(b.Dashboard.Spec.Variables, dashboard.Variable{
+			Kind: variable.Spec.Kind,
+			Spec: spec,
+		})
+		return b
+	}
+	// TODO: error?
+	return b
+}
+
+func (b *DashboardBuilder) AddVariables(variables ...v1.Variable) *DashboardBuilder {
+	for _, variable := range variables {
+		b.AddVariable(variable)
+	}
+	return b
+}
+
+func (b *DashboardBuilder) Validate() error {
+	// TODO
+	return nil
+}
+
+func (b *DashboardBuilder) Complete() {
+	// TODO
 }

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,93 +13,49 @@
 
 package prometheus_label_names
 
-import (
-	"fmt"
-
-	"github.com/perses/perses/go-sdk"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/sirupsen/logrus"
-)
+import "github.com/perses/perses/pkg/model/api/v1/common"
 
 type datasourceSelector struct {
-	Kind string
-	Name *string
+	Kind string `json:"kind" yaml:"kind"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type PluginSpec struct {
-	Datasource datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Matchers   []string
+	Datasource *datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Matchers   []string            `json:"matchers,omitempty" yaml:"matchers,omitempty"`
 }
 
-func NewPrometheusLabelValueVariable(name string) *ListVariableBuilder {
-	return &ListVariableBuilder{
-		ListVariableBuilder: sdk.ListVariableBuilder{
-			VariableBuilder: sdk.VariableBuilder{
-				Variable: v1.Variable{
-					Kind: v1.KindVariable,
-					Metadata: v1.ProjectMetadata{
-						Metadata: v1.Metadata{
-							Name: name,
-						},
-					},
-					Spec: v1.VariableSpec{
-						Kind: "ListVariable",
-						Spec: dashboard.ListVariableSpec{
-							ListSpec: variable.ListSpec{
-								Display:         nil,
-								DefaultValue:    nil,
-								AllowAllValue:   false,
-								AllowMultiple:   false,
-								CustomAllValue:  "",
-								CapturingRegexp: "",
-								Sort:            nil,
-								Plugin: common.Plugin{
-									Kind: "PrometheusLabelNamesVariable",
-									Spec: PluginSpec{},
-								},
-							},
-							Name: name,
-						},
-					},
-				},
-			},
-		},
+func NewLabelNamesVariablePlugin() *ListVariablePluginBuilder {
+	return &ListVariablePluginBuilder{
+		PluginSpec: PluginSpec{},
 	}
 }
 
-type ListVariableBuilder struct {
-	sdk.ListVariableBuilder
+type ListVariablePluginBuilder struct {
+	PluginSpec
 }
 
-func (b *ListVariableBuilder) WithMatchers(matchers []string) *ListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set matchers: %q", matchers))
-		return b
+func (b *ListVariablePluginBuilder) Build() common.Plugin {
+	return common.Plugin{
+		Kind: "PrometheusLabelNamesVariable",
+		Spec: b.PluginSpec,
 	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set matchers: %q", matchers))
-		return b
-	}
-	pluginSpec.Matchers = matchers
+}
+
+func (b *ListVariablePluginBuilder) WithMatchers(matchers []string) *ListVariablePluginBuilder {
+	b.Matchers = matchers
 	return b
 }
 
-func (b *ListVariableBuilder) AddMatcher(matcher string) *ListVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to add matchers: %q", matcher))
-		return b
+func (b *ListVariablePluginBuilder) AddMatcher(matcher string) *ListVariablePluginBuilder {
+	b.Matchers = append(b.Matchers, matcher)
+	return b
+}
+
+func (b *ListVariablePluginBuilder) WithDatasource(name string) *ListVariablePluginBuilder {
+	b.Datasource = &datasourceSelector{
+		Kind: "PrometheusDatasource",
+		Name: name,
 	}
-	pluginSpec, ok := listSpec.Plugin.Spec.(*PluginSpec)
-	if !ok {
-		logrus.Error(fmt.Sprintf("failed to add matchers: %q", matcher))
-		return b
-	}
-	pluginSpec.Matchers = append(pluginSpec.Matchers, matcher)
 	return b
 }

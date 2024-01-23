@@ -23,14 +23,61 @@ import (
 	"github.com/perses/perses/go-sdk/datasources/prometheus"
 	"github.com/perses/perses/go-sdk/http"
 	"github.com/perses/perses/go-sdk/panels/markdown"
+	prometheus_label_names "github.com/perses/perses/go-sdk/variables/prometheus-label-names"
+	prometheus_label_values "github.com/perses/perses/go-sdk/variables/prometheus-label-values"
+	prometheus_promql "github.com/perses/perses/go-sdk/variables/prometheus-promql"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func Example_dashboardAsCode() {
 	dash := sdk.NewDashboard("mysuperdashboard").WithDescription("example of a super dashboard as code")
 
+	stackVar := sdk.NewListVariable("stack").
+		WithPlugin(prometheus_label_values.NewLabelValuesVariablePlugin("stack").
+			AddMatcher("thanos_build_info{}").Build()).
+		Build()
+
+	prometheusVar := sdk.NewTextVariable("prometheus").
+		WithValue("platform").Constant(true).
+		Build()
+
+	prometheusNamespaceVar := sdk.NewTextVariable("prometheusNamespace").
+		WithValue("observability").Constant(true).
+		Build()
+
+	namespaceVar := sdk.NewListVariable("namespace").
+		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_namespace_labels").Build()). // TODO: filter labels
+		WithMultipleValues(true).
+		Build()
+
+	namespaceLabelsVar := sdk.NewListVariable("namespaceLabels").
+		WithPlugin(prometheus_label_names.NewLabelNamesVariablePlugin().AddMatcher("kube_namespace_labels{}").Build()). // TODO: filter labels
+		WithMultipleValues(true).
+		Build()
+
+	podVar := sdk.NewListVariable("pod").
+		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_pod_info").Build()). // TODO: filter labels
+		WithAllValue(true).
+		WithMultipleValues(true).
+		Build()
+
+	containerVar := sdk.NewListVariable("container").
+		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_pod_container_info").Build()). // TODO: filter labels
+		WithAllValue(true).
+		WithMultipleValues(true).
+		Build()
+
+	containerLabelsVar := sdk.NewListVariable("containerLabels").
+		WithDisplayDescription("zedzed").
+		WithPlugin(prometheus_label_names.NewLabelNamesVariablePlugin().AddMatcher("kube_pod_container_info{}").Build()). // TODO: filter labels
+		WithMultipleValues(true).
+		Hidden(true).
+		Build()
+
+	dash.AddVariables(stackVar, prometheusVar, prometheusNamespaceVar, namespaceVar, namespaceLabelsVar, podVar, containerVar, containerLabelsVar)
+
 	row := sdk.NewRow("system").Build()
-	panel := markdown.NewPanel("info", "Hello world!").Build()
+	panel := sdk.NewPanel("test").WithPlugin(markdown.NewPanelPlugin("Hello world!").Build()).Build()
 	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
 
 	datasourceURL := url.URL{

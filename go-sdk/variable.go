@@ -14,14 +14,11 @@
 package sdk
 
 import (
-	"fmt"
-
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
-	"github.com/sirupsen/logrus"
 )
 
 type VariableBuilder struct {
@@ -51,7 +48,7 @@ func (b *VariableBuilder) WithProjectName(projectName string) *VariableBuilder {
 	return b
 }
 
-func NewTextVariable(name string, value string) *TextVariableBuilder {
+func NewTextVariable(name string) *TextVariableBuilder {
 	return &TextVariableBuilder{
 		VariableBuilder{
 			v1.Variable{
@@ -66,7 +63,7 @@ func NewTextVariable(name string, value string) *TextVariableBuilder {
 					Spec: dashboard.TextVariableSpec{
 						TextSpec: variable.TextSpec{
 							Display:  nil,
-							Value:    value,
+							Value:    "",
 							Constant: false,
 						},
 						Name: name,
@@ -77,22 +74,89 @@ func NewTextVariable(name string, value string) *TextVariableBuilder {
 	}
 }
 
-func NewTextVariableBuilder(variable v1.Variable) *TextVariableBuilder {
-	return &TextVariableBuilder{VariableBuilder{variable}}
-}
-
 type TextVariableBuilder struct {
 	VariableBuilder
 }
 
 func (b *TextVariableBuilder) WithValue(value string) *TextVariableBuilder {
-	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
+	textSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set value: %q", value))
-		return b
+		textSpec = &dashboard.TextVariableSpec{}
+		b.Variable.Spec.Spec = textSpec
 	}
-	listSpec.Value = value
+	textSpec.Value = value
 	return b
+}
+
+func (b *TextVariableBuilder) WithDisplayName(name string) *TextVariableBuilder {
+	textSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
+	if !ok {
+		textSpec = &dashboard.TextVariableSpec{}
+		b.Variable.Spec.Spec = textSpec
+	}
+	if textSpec.Display == nil {
+		textSpec.Display = &variable.Display{}
+	}
+	textSpec.Display.Name = name
+	return b
+}
+
+func (b *TextVariableBuilder) WithDisplayDescription(desc string) *TextVariableBuilder {
+	textSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
+	if !ok {
+		textSpec = &dashboard.TextVariableSpec{}
+		b.Variable.Spec.Spec = textSpec
+	}
+	if textSpec.Display == nil {
+		textSpec.Display = &variable.Display{}
+	}
+	textSpec.Display.Description = desc
+	return b
+}
+
+func (b *TextVariableBuilder) Hidden(isHidden bool) *TextVariableBuilder {
+	textSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
+	if !ok {
+		textSpec = &dashboard.TextVariableSpec{}
+		b.Variable.Spec.Spec = textSpec
+	}
+	if textSpec.Display == nil {
+		textSpec.Display = &variable.Display{}
+	}
+	textSpec.Display.Hidden = isHidden
+	return b
+}
+
+func (b *TextVariableBuilder) Constant(isConstant bool) *TextVariableBuilder {
+	textSpec, ok := b.Variable.Spec.Spec.(*dashboard.TextVariableSpec)
+	if !ok {
+		textSpec = &dashboard.TextVariableSpec{}
+		b.Variable.Spec.Spec = textSpec
+	}
+	textSpec.Constant = isConstant
+	return b
+}
+
+func NewListVariable(name string) *ListVariableBuilder {
+	return &ListVariableBuilder{
+		VariableBuilder{
+			v1.Variable{
+				Kind: v1.KindVariable,
+				Metadata: v1.ProjectMetadata{
+					Metadata: v1.Metadata{
+						Name: name,
+					},
+				},
+				Spec: v1.VariableSpec{
+					Kind: "ListVariable",
+					Spec: dashboard.ListVariableSpec{
+						ListSpec: variable.ListSpec{},
+						Name:     name,
+					},
+				},
+			},
+		},
+	}
 }
 
 type ListVariableBuilder struct {
@@ -102,8 +166,8 @@ type ListVariableBuilder struct {
 func (b *ListVariableBuilder) WithDefaultValue(value string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set default value: %q", value))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.DefaultValue = &variable.DefaultValue{
 		SingleValue: value,
@@ -114,8 +178,8 @@ func (b *ListVariableBuilder) WithDefaultValue(value string) *ListVariableBuilde
 func (b *ListVariableBuilder) WithMultipleValues(enabled bool) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to enable multiple values: %t", enabled))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.AllowMultiple = enabled
 	return b
@@ -124,8 +188,8 @@ func (b *ListVariableBuilder) WithMultipleValues(enabled bool) *ListVariableBuil
 func (b *ListVariableBuilder) WithAllValue(enabled bool) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to enable all values: %t", enabled))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.AllowAllValue = enabled
 	return b
@@ -134,8 +198,8 @@ func (b *ListVariableBuilder) WithAllValue(enabled bool) *ListVariableBuilder {
 func (b *ListVariableBuilder) WithCustomAllValue(value string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set custom all value: %q", value))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.CustomAllValue = value
 	return b
@@ -144,8 +208,8 @@ func (b *ListVariableBuilder) WithCustomAllValue(value string) *ListVariableBuil
 func (b *ListVariableBuilder) WithCapturingRegex(regex string) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set capturing regex: %q", regex))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.CapturingRegexp = regex
 	return b
@@ -154,8 +218,8 @@ func (b *ListVariableBuilder) WithCapturingRegex(regex string) *ListVariableBuil
 func (b *ListVariableBuilder) SortingBy(sort variable.Sort) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set sort: %q", sort))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.Sort = &sort
 	return b
@@ -164,9 +228,48 @@ func (b *ListVariableBuilder) SortingBy(sort variable.Sort) *ListVariableBuilder
 func (b *ListVariableBuilder) WithPlugin(plugin common.Plugin) *ListVariableBuilder {
 	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
 	if !ok {
-		logrus.Error(fmt.Sprintf("failed to set plugin: %q", plugin))
-		return b
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
 	}
 	listSpec.Plugin = plugin
+	return b
+}
+
+func (b *ListVariableBuilder) WithDisplayName(name string) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
+	}
+	if listSpec.Display == nil {
+		listSpec.Display = &variable.Display{}
+	}
+	listSpec.Display.Name = name
+	return b
+}
+
+func (b *ListVariableBuilder) WithDisplayDescription(desc string) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
+	}
+	if listSpec.Display == nil {
+		listSpec.Display = &variable.Display{}
+	}
+	listSpec.Display.Description = desc
+	return b
+}
+
+func (b *ListVariableBuilder) Hidden(isHidden bool) *ListVariableBuilder {
+	listSpec, ok := b.Variable.Spec.Spec.(*dashboard.ListVariableSpec)
+	if !ok {
+		listSpec = &dashboard.ListVariableSpec{}
+		b.Variable.Spec.Spec = listSpec
+	}
+	if listSpec.Display == nil {
+		listSpec.Display = &variable.Display{}
+	}
+	listSpec.Display.Hidden = isHidden
 	return b
 }

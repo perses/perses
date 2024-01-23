@@ -18,6 +18,19 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
+func NewPanel(name string) *PanelBuilder {
+	return &PanelBuilder{
+		Panel: v1.Panel{
+			Kind: "Panel",
+			Spec: v1.PanelSpec{
+				Display: v1.PanelDisplay{
+					Name: name,
+				},
+			},
+		},
+	}
+}
+
 type PanelBuilder struct {
 	v1.Panel
 }
