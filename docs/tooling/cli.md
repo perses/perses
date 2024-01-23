@@ -23,6 +23,7 @@ Usage:
 Available Commands:
   apply       Create or update resources through a file. JSON or YAML format supported
   completion  Generate the autocompletion script for the specified shell
+  dac         Commands related to Dashboard-as-Code
   delete      Delete resources
   describe    Show details of a specific resource
   get         Retrieve any kind of resource from the API.
@@ -31,6 +32,7 @@ Available Commands:
   login       Log in to the Perses API
   migrate     migrate a Grafana dashboard to the Perses format
   project     Select the project used by default.
+  refresh     refresh the access token when it expires
   version     Display client version.
 
 Flags:
@@ -323,3 +325,7 @@ spec:
           matchers: []
 [...]
 ```
+
+### Dashboard-as-Code
+
+The CLI also comes in handy when you want to create & manage dashboards as code. For this topic please refer to [DaC user guide](../user-guides/dashboard-as-code.md).
