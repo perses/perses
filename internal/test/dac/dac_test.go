@@ -73,8 +73,8 @@ func TestDashboardAsCodeUtilities(t *testing.T) {
 			if err != nil {
 				logrus.WithError(err).Fatal("Error marshalling actual dashboard from CUE value to JSON")
 			}
-			// this json unmarshall is done to ensure the dashboard passes the additional checks performed by
-			// the Go code (e.g naming restrictions)
+			// this json unmarshall is done to ensure the dashboard passes the additional checks that may be
+			// performed by the Go code
 			var actualDashboard v1.Dashboard
 			err = json.Unmarshal(actualDashboardBytes, &actualDashboard)
 			if err != nil {
