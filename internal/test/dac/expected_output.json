@@ -12,7 +12,11 @@
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "PaaS",
+          "name": "stack",
+          "display": {
+            "name": "PaaS",
+            "hidden": false
+          },
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -42,6 +46,10 @@
         "kind": "TextVariable",
         "spec": {
           "name": "prometheus_namespace",
+          "display": {
+            "description": "constant to reduce the query scope thus improve performances",
+            "hidden": false
+          },
           "value": "observability",
           "constant": true
         }
@@ -127,6 +135,10 @@
         "kind": "ListVariable",
         "spec": {
           "name": "containerLabels",
+          "display": {
+            "description": "simply the list of labels for the considered metric",
+            "hidden": true
+          },
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {

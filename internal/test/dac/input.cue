@@ -24,7 +24,8 @@ import (
 
 #myVarsBuilder: varsBuilder & {
 	input: [{
-		name:           "PaaS"
+		name: "stack"
+		display: name: "PaaS"
 		pluginKind:     "PrometheusLabelValuesVariable"
 		metric:         "thanos_build_info"
 		label:          "stack"
@@ -35,7 +36,8 @@ import (
 		value:    "platform"
 		constant: true
 	}, {
-		name:     "prometheus_namespace"
+		name: "prometheus_namespace"
+		display: description: "constant to reduce the query scope thus improve performances"
 		kind:     "TextVariable"
 		value:    "observability"
 		constant: true
@@ -65,7 +67,11 @@ import (
 		allowMultiple:  true
 		datasourceName: "promDemo"
 	}, {
-		name:           "containerLabels"
+		name: "containerLabels"
+		display: {
+			description: "simply the list of labels for the considered metric"
+			hidden:      true
+		}
 		pluginKind:     "PrometheusLabelNamesVariable"
 		metric:         "kube_pod_container_info"
 		datasourceName: "promDemo"
