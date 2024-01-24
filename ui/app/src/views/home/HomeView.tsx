@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,16 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Grid, Stack } from '@mui/material';
+import { Box, Grid, MenuItem, Stack } from '@mui/material';
 import { useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
 import { useProjectList } from '../../model/project-client';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
 import { StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
+import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
+import { MigrateRoute } from '../../model/route';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -70,13 +72,19 @@ function HomeView() {
             <CRUDButton action="create" scope="Project" variant="contained" onClick={handleAddProjectDialogOpen}>
               Add Project
             </CRUDButton>
-            <CRUDButton
-              variant="contained"
-              onClick={handleAddDashboardDialogOpen}
-              disabled={projectOptions.length === 0}
-            >
-              Add Dashboard
-            </CRUDButton>
+
+            <ButtonMenu>
+              <CRUDButton
+                variant="contained"
+                onClick={handleAddDashboardDialogOpen}
+                disabled={projectOptions.length === 0}
+              >
+                Add Dashboard
+              </CRUDButton>
+              <MenuItem component={RouterLink} to={MigrateRoute}>
+                <CRUDButton style={{ backgroundColor: 'transparent' }}>Migrate Dashboard</CRUDButton>
+              </MenuItem>
+            </ButtonMenu>
             <CreateProjectDialog
               open={isAddProjectDialogOpen}
               onClose={handleAddProjectDialogClose}
