@@ -14,12 +14,11 @@
 package http
 
 import (
-	"net/url"
-
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
-func NewHTTPProxy(proxyURL url.URL) *ProxyBuilder {
+func NewHTTPProxy(proxyURL common.URL) *ProxyBuilder {
 	return &ProxyBuilder{
 		http.Proxy{
 			Kind: "HTTPProxy",
@@ -31,7 +30,7 @@ func NewHTTPProxy(proxyURL url.URL) *ProxyBuilder {
 }
 
 func NewHTTPProxyStr(proxyURL string) (*ProxyBuilder, error) {
-	u, err := url.Parse(proxyURL)
+	u, err := common.ParseURL(proxyURL)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +53,7 @@ func (b *ProxyBuilder) Build() http.Proxy {
 	return b.Proxy
 }
 
-func (b *ProxyBuilder) WithURL(proxyURL url.URL) *ProxyBuilder {
+func (b *ProxyBuilder) WithURL(proxyURL common.URL) *ProxyBuilder {
 	b.Spec.URL = &proxyURL
 	return b
 }

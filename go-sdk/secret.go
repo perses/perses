@@ -27,7 +27,6 @@ func NewSecret(name string) *SecretBuilder {
 				Metadata: v1.Metadata{
 					Name: name,
 				},
-				Project: "",
 			},
 			Spec: v1.SecretSpec{
 				BasicAuth:     nil,

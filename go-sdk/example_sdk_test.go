@@ -27,6 +27,7 @@ import (
 	prometheus_label_values "github.com/perses/perses/go-sdk/variables/prometheus-label-values"
 	prometheus_promql "github.com/perses/perses/go-sdk/variables/prometheus-promql"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func Example_dashboardAsCode() {
@@ -80,9 +81,11 @@ func Example_dashboardAsCode() {
 	panel := sdk.NewPanel("test").WithPlugin(markdown.NewPanelPlugin("Hello world!").Build()).Build()
 	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
 
-	datasourceURL := url.URL{
-		Scheme: "https",
-		Host:   "prometheus.demo.do.prometheus.io",
+	datasourceURL := common.URL{
+		&url.URL{
+			Scheme: "https",
+			Host:   "prometheus.demo.do.prometheus.io",
+		},
 	}
 	datasource := sdk.NewDatasource("PrometheusDemo").
 		WithPlugin(prometheus.NewDatasourcePlugin().
