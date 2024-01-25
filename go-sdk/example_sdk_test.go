@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"github.com/perses/perses/go-sdk"
-	"github.com/perses/perses/go-sdk/datasources/prometheus"
 	"github.com/perses/perses/go-sdk/http"
 	"github.com/perses/perses/go-sdk/panels/markdown"
-	prometheus_label_names "github.com/perses/perses/go-sdk/variables/prometheus-label-names"
-	prometheus_label_values "github.com/perses/perses/go-sdk/variables/prometheus-label-values"
-	prometheus_promql "github.com/perses/perses/go-sdk/variables/prometheus-promql"
+	prometheus_datasources "github.com/perses/perses/go-sdk/prometheus/datasources/prometheus"
+	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-label-names"
+	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-label-values"
+	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-promql"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -88,7 +88,7 @@ func Example_dashboardAsCode() {
 		},
 	}
 	datasource := sdk.NewDatasource("PrometheusDemo").
-		WithPlugin(prometheus.NewDatasourcePlugin().
+		WithPlugin(prometheus_datasources.NewDatasourcePlugin().
 			WithScrapeInterval(30 * time.Second).
 			WithProxy(http.NewHTTPProxy(datasourceURL).AddHeader("Authorization", "mytoken").Build()).
 			Build())
@@ -99,7 +99,7 @@ func Example_dashboardAsCode() {
 		fmt.Println(err)
 		return
 	}
-	client, err = client.AuthWithUserPassword("a", "a")
+	client, err = client.AuthWithUserPassword("admin", "password")
 	if err != nil {
 		fmt.Println(err)
 		return

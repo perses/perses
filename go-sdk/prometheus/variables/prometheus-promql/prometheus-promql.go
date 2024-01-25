@@ -13,17 +13,15 @@
 
 package prometheus_promql
 
-import "github.com/perses/perses/pkg/model/api/v1/common"
-
-type datasourceSelector struct {
-	Kind string `json:"kind" yaml:"kind"`
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-}
+import (
+	"github.com/perses/perses/go-sdk/prometheus/variables"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
 
 type PluginSpec struct {
-	Datasource *datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Expr       string              `json:"expr" yaml:"expr"`
-	LabelName  string              `json:"labelName,omitempty" yaml:"labelName,omitempty"`
+	Datasource *variables.DatasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Expr       string                        `json:"expr" yaml:"expr"`
+	LabelName  string                        `json:"labelName,omitempty" yaml:"labelName,omitempty"`
 }
 
 func NewPromQLVariablePlugin(expr string) *ListVariablePluginBuilder {
@@ -54,7 +52,7 @@ func (b *ListVariablePluginBuilder) WithLabelName(label string) *ListVariablePlu
 }
 
 func (b *ListVariablePluginBuilder) WithDatasource(name string) *ListVariablePluginBuilder {
-	b.Datasource = &datasourceSelector{
+	b.Datasource = &variables.DatasourceSelector{
 		Kind: "PrometheusDatasource",
 		Name: name,
 	}

@@ -11,23 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus_label_names
+package prometheus_label_values
 
-import "github.com/perses/perses/pkg/model/api/v1/common"
-
-type datasourceSelector struct {
-	Kind string `json:"kind" yaml:"kind"`
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-}
+import (
+	"github.com/perses/perses/go-sdk/prometheus/variables"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
 
 type PluginSpec struct {
-	Datasource *datasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Matchers   []string            `json:"matchers,omitempty" yaml:"matchers,omitempty"`
+	Datasource *variables.DatasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	LabelName  string                        `json:"labelName" yaml:"labelName"`
+	Matchers   []string                      `json:"matchers,omitempty" yaml:"matchers,omitempty"`
 }
 
-func NewLabelNamesVariablePlugin() *ListVariablePluginBuilder {
+func NewLabelValuesVariablePlugin(labelName string) *ListVariablePluginBuilder {
 	return &ListVariablePluginBuilder{
-		PluginSpec: PluginSpec{},
+		PluginSpec: PluginSpec{LabelName: labelName},
 	}
 }
 
@@ -37,9 +36,14 @@ type ListVariablePluginBuilder struct {
 
 func (b *ListVariablePluginBuilder) Build() common.Plugin {
 	return common.Plugin{
-		Kind: "PrometheusLabelNamesVariable",
+		Kind: "PrometheusLabelValuesVariable",
 		Spec: b.PluginSpec,
 	}
+}
+
+func (b *ListVariablePluginBuilder) WithLabelName(label string) *ListVariablePluginBuilder {
+	b.LabelName = label
+	return b
 }
 
 func (b *ListVariablePluginBuilder) WithMatchers(matchers []string) *ListVariablePluginBuilder {
@@ -53,7 +57,7 @@ func (b *ListVariablePluginBuilder) AddMatcher(matcher string) *ListVariablePlug
 }
 
 func (b *ListVariablePluginBuilder) WithDatasource(name string) *ListVariablePluginBuilder {
-	b.Datasource = &datasourceSelector{
+	b.Datasource = &variables.DatasourceSelector{
 		Kind: "PrometheusDatasource",
 		Name: name,
 	}
