@@ -11,39 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package bar
+package gauge
 
 import (
 	commonSdk "github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-type Sort string
-
-const (
-	AscSort  Sort = "asc"
-	DescSort Sort = "desc"
-)
-
-type Mode string
-
-const (
-	ValueMode      Mode = "value"
-	PercentageMode Mode = "percentage"
-)
-
 type PluginSpec struct {
 	Calculation commonSdk.Calculation `json:"calculation" yaml:"calculation"`
-	Format      commonSdk.Format      `json:"format,omitempty" yaml:"format,omitempty"`
-	Sort        Sort                  `json:"sort,omitempty" yaml:"sort,omitempty"`
-	Mode        Mode                  `json:"mode,omitempty" yaml:"mode,omitempty"`
+	Format      *commonSdk.Format     `json:"format,omitempty" yaml:"format,omitempty"`
+	Thresholds  *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
+	Max         int                   `json:"max,omitempty" yaml:"max,omitempty"`
 }
 
 func NewPanelPlugin() *PanelPluginBuilder {
 	return &PanelPluginBuilder{
 		PluginSpec{
 			Calculation: commonSdk.LastCalculation, // default in cue
-			Format: commonSdk.Format{
+			Format: &commonSdk.Format{
 				Unit: commonSdk.DecimalUnit,
 			},
 		},
@@ -56,7 +42,7 @@ type PanelPluginBuilder struct {
 
 func (b *PanelPluginBuilder) Build() common.Plugin {
 	return common.Plugin{
-		Kind: "BarChart",
+		Kind: "GaugeChart",
 		Spec: b.PluginSpec,
 	}
 }
@@ -101,12 +87,12 @@ func (b *PanelPluginBuilder) WithShortValues(enabled bool) *PanelPluginBuilder {
 	return b
 }
 
-func (b *PanelPluginBuilder) SortingBy(sort Sort) *PanelPluginBuilder {
-	b.Sort = sort
+func (b *PanelPluginBuilder) WithThresholds(thresholds commonSdk.Thresholds) *PanelPluginBuilder {
+	b.Thresholds = &thresholds
 	return b
 }
 
-func (b *PanelPluginBuilder) UsingMode(mode Mode) *PanelPluginBuilder {
-	b.Mode = mode
+func (b *PanelPluginBuilder) WithMax(max int) *PanelPluginBuilder {
+	b.Max = max
 	return b
 }

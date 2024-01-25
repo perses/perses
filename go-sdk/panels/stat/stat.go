@@ -18,32 +18,24 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-type Sort string
-
-const (
-	AscSort  Sort = "asc"
-	DescSort Sort = "desc"
-)
-
-type Mode string
-
-const (
-	ValueMode      Mode = "value"
-	PercentageMode Mode = "percentage"
-)
+type Sparkline struct {
+	Color string `json:"color,omitempty" yaml:"color,omitempty"`
+	Width int    `json:"width,omitempty" yaml:"width,omitempty"`
+}
 
 type PluginSpec struct {
-	Calculation commonSdk.Calculation `json:"calculation" yaml:"calculation"`
-	Format      commonSdk.Format      `json:"format,omitempty" yaml:"format,omitempty"`
-	Sort        Sort                  `json:"sort,omitempty" yaml:"sort,omitempty"`
-	Mode        Mode                  `json:"mode,omitempty" yaml:"mode,omitempty"`
+	Calculation   commonSdk.Calculation `json:"calculation" yaml:"calculation"`
+	Format        *commonSdk.Format     `json:"format,omitempty" yaml:"format,omitempty"`
+	Thresholds    *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
+	Sparkline     *Sparkline            `json:"sparkline,omitempty" yaml:"sparkline,omitempty"`
+	ValueFontSize int                   `json:"valueFontSize,omitempty" yaml:"valueFontSize,omitempty"`
 }
 
 func NewPanelPlugin() *PanelPluginBuilder {
 	return &PanelPluginBuilder{
 		PluginSpec{
 			Calculation: commonSdk.LastCalculation, // default in cue
-			Format: commonSdk.Format{
+			Format: &commonSdk.Format{
 				Unit: commonSdk.DecimalUnit,
 			},
 		},
@@ -56,7 +48,7 @@ type PanelPluginBuilder struct {
 
 func (b *PanelPluginBuilder) Build() common.Plugin {
 	return common.Plugin{
-		Kind: "BarChart",
+		Kind: "StatChart",
 		Spec: b.PluginSpec,
 	}
 }
@@ -101,12 +93,17 @@ func (b *PanelPluginBuilder) WithShortValues(enabled bool) *PanelPluginBuilder {
 	return b
 }
 
-func (b *PanelPluginBuilder) SortingBy(sort Sort) *PanelPluginBuilder {
-	b.Sort = sort
+func (b *PanelPluginBuilder) WithThresholds(thresholds commonSdk.Thresholds) *PanelPluginBuilder {
+	b.Thresholds = &thresholds
 	return b
 }
 
-func (b *PanelPluginBuilder) UsingMode(mode Mode) *PanelPluginBuilder {
-	b.Mode = mode
+func (b *PanelPluginBuilder) WithSparkline(sparkline Sparkline) *PanelPluginBuilder {
+	b.Sparkline = &sparkline
+	return b
+}
+
+func (b *PanelPluginBuilder) WithValueFontSize(size int) *PanelPluginBuilder {
+	b.ValueFontSize = size
 	return b
 }
