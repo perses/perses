@@ -40,6 +40,7 @@
     "react-hook-form": "^7.46.1",
     "react-jwt": "^1.2.0",
     "react-router-dom": "^6.11.0",
+    "react-social-login-buttons": "^3.9.1",
     "use-immer": "^0.7.0",
     "use-query-params": "^2.1.1",
     "use-resize-observer": "^9.0.0",
