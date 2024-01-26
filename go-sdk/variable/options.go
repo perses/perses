@@ -11,35 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package variable
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
-}
-
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
-	}
-
-	defaults := []Option{
-		WithURL(url),
-	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
+func WithName(name string) Option {
+	return func(builder *Builder) error {
+		if err := common.ValidateID(name); err != nil {
+			return err // TODO: error ctx
 		}
+		builder.Metadata.Name = name
+		return nil
 	}
-
-	return *builder, nil
 }

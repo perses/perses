@@ -16,83 +16,46 @@ package sdk_test
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
-	"time"
 
 	"github.com/perses/perses/go-sdk"
+	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/http"
-	"github.com/perses/perses/go-sdk/panels/markdown"
-	prometheus_datasources "github.com/perses/perses/go-sdk/prometheus/datasources/prometheus"
-	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-label-names"
-	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-label-values"
-	"github.com/perses/perses/go-sdk/prometheus/variables/prometheus-promql"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/go-sdk/panel/bar"
+	"github.com/perses/perses/go-sdk/panel/gauge"
+	"github.com/perses/perses/go-sdk/panel/markdown"
+	"github.com/perses/perses/go-sdk/panel/stat"
+	"github.com/perses/perses/go-sdk/prometheus/datasource/prometheus"
+	time_series "github.com/perses/perses/go-sdk/prometheus/panel/time-series"
+	"github.com/perses/perses/go-sdk/row"
 )
 
 func Example_dashboardAsCode() {
-	dash := sdk.NewDashboard("mysuperdashboard").WithDescription("example of a super dashboard as code")
 
-	stackVar := sdk.NewListVariable("stack").
-		WithPlugin(prometheus_label_values.NewLabelValuesVariablePlugin("stack").
-			AddMatcher("thanos_build_info{}").Build()).
-		Build()
-
-	prometheusVar := sdk.NewTextVariable("prometheus").
-		WithValue("platform").Constant(true).
-		Build()
-
-	prometheusNamespaceVar := sdk.NewTextVariable("prometheusNamespace").
-		WithValue("observability").Constant(true).
-		Build()
-
-	namespaceVar := sdk.NewListVariable("namespace").
-		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_namespace_labels").Build()). // TODO: filter labels
-		WithMultipleValues(true).
-		Build()
-
-	namespaceLabelsVar := sdk.NewListVariable("namespaceLabels").
-		WithPlugin(prometheus_label_names.NewLabelNamesVariablePlugin().AddMatcher("kube_namespace_labels{}").Build()). // TODO: filter labels
-		WithMultipleValues(true).
-		Build()
-
-	podVar := sdk.NewListVariable("pod").
-		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_pod_info").Build()). // TODO: filter labels
-		WithAllValue(true).
-		WithMultipleValues(true).
-		Build()
-
-	containerVar := sdk.NewListVariable("container").
-		WithPlugin(prometheus_promql.NewPromQLVariablePlugin("kube_pod_container_info").Build()). // TODO: filter labels
-		WithAllValue(true).
-		WithMultipleValues(true).
-		Build()
-
-	containerLabelsVar := sdk.NewListVariable("containerLabels").
-		WithDisplayDescription("zedzed").
-		WithPlugin(prometheus_label_names.NewLabelNamesVariablePlugin().AddMatcher("kube_pod_container_info{}").Build()). // TODO: filter labels
-		WithMultipleValues(true).
-		Hidden(true).
-		Build()
-
-	dash.AddVariables(stackVar, prometheusVar, prometheusNamespaceVar, namespaceVar, namespaceLabelsVar, podVar, containerVar, containerLabelsVar)
-
-	row := sdk.NewRow("system").Build()
-	panel := sdk.NewPanel("test").WithPlugin(markdown.NewPanelPlugin("Hello world!").Build()).Build()
-	dash.AddRow(row, []v1.Panel{panel, panel, panel, panel})
-
-	datasourceURL := common.URL{
-		&url.URL{
-			Scheme: "https",
-			Host:   "prometheus.demo.do.prometheus.io",
-		},
-	}
-	datasource := sdk.NewDatasource("PrometheusDemo").
-		WithPlugin(prometheus_datasources.NewDatasourcePlugin().
-			WithScrapeInterval(30 * time.Second).
-			WithProxy(http.NewHTTPProxy(datasourceURL).AddHeader("Authorization", "mytoken").Build()).
-			Build())
-	dash.AddDatasource(datasource.Build())
+	dash, err := dashboard.New("mysuperdashboard",
+		dashboard.WithProjectName("testa"),
+		dashboard.AddRow("section 1",
+			row.WithPanel("test", markdown.Markdown("test")),
+			row.WithPanel("test", markdown.Markdown("test")),
+			row.WithPanel("test", markdown.Markdown("test")),
+			row.WithPanel("test", markdown.Markdown("test")),
+		),
+		dashboard.AddDatasource("PrometheusDemo",
+			prometheus.Prometheus(
+				prometheus.DirectUrl("http://demo.prometheus.com"),
+			),
+		),
+		dashboard.AddDatasource("PrometheusDemoWithProxy",
+			prometheus.Prometheus(
+				prometheus.HTTPProxy("http://demo.prometheus.com", http.AddHeader("Authorization", "Basic acide")),
+			),
+		),
+		dashboard.AddRow("section 2",
+			row.WithPanel("test", bar.BarChart()),
+			row.WithPanel("test", gauge.GaugeChart()),
+			row.WithPanel("test", stat.StatChart()),
+			row.WithPanel("test", time_series.TimeSeries()),
+		),
+	)
 
 	client, err := sdk.NewClient("http://localhost:8080")
 	if err != nil {
@@ -105,7 +68,7 @@ func Example_dashboardAsCode() {
 		return
 	}
 
-	err = client.UpsertToProject(dash, "testa")
+	err = client.UpsertToProject(&dash.Dashboard, "testa")
 	if err != nil {
 		fmt.Println(err)
 		return

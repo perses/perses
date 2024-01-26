@@ -11,35 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package prometheus
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
+import "github.com/perses/perses/go-sdk/http"
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+func DirectUrl(url string) Option {
+	return func(builder *Builder) error {
+		builder.DirectURL = url
+		return nil
+	}
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
-	}
-
-	defaults := []Option{
-		WithURL(url),
-	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
+func HTTPProxy(url string, options ...http.Option) Option {
+	return func(builder *Builder) error {
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
 		}
+		builder.Proxy = &p.Proxy
+		return nil
 	}
-
-	return *builder, nil
 }

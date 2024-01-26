@@ -11,28 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package list_variable
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/go-sdk/variable"
+	static_list "github.com/perses/perses/go-sdk/variable/plugin/static-list"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	variable2 "github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
-type Option func(proxy *Builder) error
+type Option func(listVariableSpec *Builder) error
 
 type Builder struct {
-	http.Proxy
+	dashboard.ListVariableSpec
 }
 
-func New(url string, options ...Option) (Builder, error) {
+func New(options ...Option) (Builder, error) {
 	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
+		ListVariableSpec: dashboard.ListVariableSpec{
+			ListSpec: variable2.ListSpec{},
+			//Name: "", TODO: handle conversion
 		},
 	}
-
 	defaults := []Option{
-		WithURL(url),
+		static_list.StaticList(),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -42,4 +44,16 @@ func New(url string, options ...Option) (Builder, error) {
 	}
 
 	return *builder, nil
+}
+
+func List(options ...Option) variable.Option {
+	return func(builder *variable.Builder) error {
+		t, err := New(options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Kind = "TextVariable"
+		builder.Spec.Spec = t
+		return nil
+	}
 }

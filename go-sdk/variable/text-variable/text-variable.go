@@ -11,28 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package text_variable
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/go-sdk/variable"
+	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 )
 
-type Option func(proxy *Builder) error
+type Option func(textVariableSpec *Builder) error
 
 type Builder struct {
-	http.Proxy
+	dashboard.TextVariableSpec
 }
 
-func New(url string, options ...Option) (Builder, error) {
+func New(value string, options ...Option) (Builder, error) {
 	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
+		TextVariableSpec: dashboard.TextVariableSpec{
+			//Name:     "", // TODO: handle conversion
 		},
 	}
-
 	defaults := []Option{
-		WithURL(url),
+		WithValue(value),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -42,4 +41,16 @@ func New(url string, options ...Option) (Builder, error) {
 	}
 
 	return *builder, nil
+}
+
+func Text(value string, options ...Option) variable.Option {
+	return func(builder *variable.Builder) error {
+		t, err := New(value, options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Kind = "TextVariable"
+		builder.Spec.Spec = t
+		return nil
+	}
 }

@@ -11,28 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package variable
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	text_variable "github.com/perses/perses/go-sdk/variable/text-variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type Option func(proxy *Builder) error
+type Option func(variable *Builder) error
 
 type Builder struct {
-	http.Proxy
+	v1.Variable
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
+func New(name string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		Variable: v1.Variable{
+			Kind: v1.KindVariable,
 		},
 	}
 
 	defaults := []Option{
-		WithURL(url),
+		WithName(name),
+		text_variable.Text(""),
 	}
 
 	for _, opt := range append(defaults, options...) {

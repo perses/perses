@@ -11,28 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package row
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
+import v1 "github.com/perses/perses/pkg/model/api/v1"
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+type Row struct {
+	Title        string
+	PanelsWidth  int
+	PanelsHeight int
+	IsCollapsed  bool
+	Panels       []v1.Panel
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	Row
+}
+
+func New(title string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		Row: Row{},
 	}
 
 	defaults := []Option{
-		WithURL(url),
+		WithTitle(title),
+		WithPanelWidth(12),
+		WithPanelHeight(6),
+		Collapsed(false),
 	}
 
 	for _, opt := range append(defaults, options...) {

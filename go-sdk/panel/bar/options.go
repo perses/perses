@@ -11,35 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package bar
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/go-sdk/common"
 )
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+func WithCalculation(calculation common.Calculation) Option {
+	return func(builder *Builder) error {
+		builder.Calculation = calculation
+		return nil
+	}
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+func WithFormat(format common.Format) Option {
+	return func(builder *Builder) error {
+		builder.Format = &format
+		return nil
 	}
+}
 
-	defaults := []Option{
-		WithURL(url),
+func SortingBy(sort Sort) Option {
+	return func(builder *Builder) error {
+		builder.Sort = sort
+		return nil
 	}
+}
 
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
+func WithMode(mode Mode) Option {
+	return func(builder *Builder) error {
+		builder.Mode = mode
+		return nil
 	}
-
-	return *builder, nil
 }

@@ -11,29 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package static_list
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/go-sdk/prometheus/variable"
+	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
 )
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+type PluginSpec struct {
+	Datasource *variable.DatasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Matchers   []string                     `json:"matchers,omitempty" yaml:"matchers,omitempty"`
 }
 
-func New(url string, options ...Option) (Builder, error) {
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	PluginSpec
+}
+
+func New(options ...Option) (Builder, error) {
 	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{
-		WithURL(url),
-	}
+	defaults := []Option{}
 
 	for _, opt := range append(defaults, options...) {
 		if err := opt(builder); err != nil {
@@ -42,4 +43,16 @@ func New(url string, options ...Option) (Builder, error) {
 	}
 
 	return *builder, nil
+}
+
+func PrometheusLabelNames(options ...Option) list_variable.Option {
+	return func(builder *list_variable.Builder) error {
+		t, err := New(options...)
+		if err != nil {
+			return err
+		}
+		builder.Plugin.Kind = "PrometheusLabelNamesVariable"
+		builder.Plugin.Spec = t
+		return nil
+	}
 }

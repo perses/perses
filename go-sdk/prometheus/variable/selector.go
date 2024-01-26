@@ -11,35 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package variable
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
-
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
-}
-
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
-	}
-
-	defaults := []Option{
-		WithURL(url),
-	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
+type DatasourceSelector struct {
+	Kind string `json:"kind" yaml:"kind"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }

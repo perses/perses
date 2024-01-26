@@ -11,28 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package markdown
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
+import "github.com/perses/perses/go-sdk/panel"
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+type PluginSpec struct {
+	Text string `json:"text" yaml:"text"`
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+type Option func(plugin *Builder) error
+
+type Builder struct {
+	PluginSpec
+}
+
+func New(text string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
 	}
 
 	defaults := []Option{
-		WithURL(url),
+		WithText(text),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -42,4 +41,16 @@ func New(url string, options ...Option) (Builder, error) {
 	}
 
 	return *builder, nil
+}
+
+func Markdown(text string, options ...Option) panel.Option {
+	return func(builder *panel.Builder) error {
+		r, err := New(text, options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Plugin.Kind = "Markdown"
+		builder.Spec.Plugin.Spec = r.PluginSpec
+		return nil
+	}
 }

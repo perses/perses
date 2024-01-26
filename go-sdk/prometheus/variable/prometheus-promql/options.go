@@ -11,35 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package static_list
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
+	"github.com/perses/perses/go-sdk/prometheus/variable"
 )
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+func WithExpr(expr string) Option {
+	return func(builder *Builder) error {
+		builder.Expr = expr
+		return nil
+	}
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+func WithLabelName(labelName string) Option {
+	return func(builder *Builder) error {
+		builder.LabelName = labelName
+		return nil
 	}
+}
 
-	defaults := []Option{
-		WithURL(url),
+func WithDatasource(datasource variable.DatasourceSelector) Option {
+	return func(builder *Builder) error {
+		builder.Datasource = &datasource
+		return nil
 	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
 }

@@ -11,35 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package text_variable
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
-
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+func WithValue(value string) Option {
+	return func(builder *Builder) error {
+		builder.Value = value
+		return nil
+	}
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+func WithConstant(value string) Option {
+	return func(builder *Builder) error {
+		builder.Value = value
+		return nil
 	}
-
-	defaults := []Option{
-		WithURL(url),
-	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
 }

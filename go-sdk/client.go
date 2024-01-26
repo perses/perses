@@ -22,7 +22,10 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	modelApi "github.com/perses/perses/pkg/model/api"
 )
+
+// WILL BE REMOVED, DO NOT REVIEW
 
 func NewClient(persesURL string) (*Client, error) {
 	u, err := url.Parse(persesURL)
@@ -65,17 +68,17 @@ func (c *Client) AuthWithAccessToken(accessToken string) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) Upsert(builder EntityBuilder) error {
-	project := resource.GetProject(builder.GetEntity().GetMetadata(), "")
-	if err := apply.SaveEntity(builder.GetEntity(), project, c.client); err != nil {
+func (c *Client) Upsert(builder modelApi.Entity) error {
+	project := resource.GetProject(builder.GetMetadata(), "")
+	if err := apply.SaveEntity(builder, project, c.client); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *Client) UpsertToProject(builder EntityBuilder, projectName string) error {
-	project := resource.GetProject(builder.GetEntity().GetMetadata(), projectName)
-	if err := apply.SaveEntity(builder.GetEntity(), project, c.client); err != nil {
+func (c *Client) UpsertToProject(builder modelApi.Entity, projectName string) error {
+	project := resource.GetProject(builder.GetMetadata(), projectName)
+	if err := apply.SaveEntity(builder, project, c.client); err != nil {
 		return err
 	}
 	return nil

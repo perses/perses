@@ -11,35 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package http
+package markdown
 
-import (
-	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-)
+import "fmt"
 
-type Option func(proxy *Builder) error
-
-type Builder struct {
-	http.Proxy
+func WithText(text string) Option {
+	return func(builder *Builder) error {
+		builder.Text = text
+		return nil
+	}
 }
 
-func New(url string, options ...Option) (Builder, error) {
-	var builder = &Builder{
-		Proxy: http.Proxy{
-			Kind: "HTTPProxy",
-			Spec: http.Config{},
-		},
+func NewLine(text string) Option {
+	return func(builder *Builder) error {
+		builder.Text += fmt.Sprintf("\r\n%s", text)
+		return nil
 	}
+}
 
-	defaults := []Option{
-		WithURL(url),
+func NewImage(text string) Option {
+	return func(builder *Builder) error {
+		builder.Text += fmt.Sprintf("\r\n%s", text)
+		return nil
 	}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
 }
