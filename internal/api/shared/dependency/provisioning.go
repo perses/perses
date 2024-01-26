@@ -76,7 +76,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		// retrieve if exists the entity from the Perses API
 		_, apiError := svc.Get(apiInterface.EmptyCtx, param)
 		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
-			logrus.WithError(apiError).Errorf("unable to retrieve the %q from the database", kind)
+			logrus.WithError(apiError).Errorf("unable to retrieve the %q %s from the database", kind, param.Name)
 			continue
 		}
 
@@ -100,6 +100,8 @@ func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, erro
 		return p.serviceManager.GetDashboard(), nil
 	case modelV1.KindDatasource:
 		return p.serviceManager.GetDatasource(), nil
+	case modelV1.KindEphemeralDashboard:
+		return p.serviceManager.GetEphemeralDashboard(), nil
 	case modelV1.KindFolder:
 		return p.serviceManager.GetFolder(), nil
 	case modelV1.KindGlobalDatasource:

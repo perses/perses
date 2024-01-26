@@ -26,7 +26,7 @@ import (
 
 const testDataFolder = "testdata"
 
-func TestDashboard(t *testing.T) {
+func TestDashboardSpec(t *testing.T) {
 
 	testSuite := []struct {
 		title            string
@@ -59,7 +59,7 @@ func TestDashboard(t *testing.T) {
 			var persesDashboard modelV1.Dashboard
 			testUtils.JSONUnmarshal(persesDashboardRaw, &persesDashboard)
 
-			err := Dashboard(&persesDashboard, schemasService)
+			err := DashboardSpec(persesDashboard.Spec, schemasService)
 
 			actualErrorStr := ""
 			if err != nil {

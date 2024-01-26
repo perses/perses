@@ -77,7 +77,7 @@ func validateAllDashboards(sch schemas.Schemas) {
 		logrus.Fatal(jsonErr)
 	}
 	for _, dashboard := range dashboardList {
-		if vErr := validate.Dashboard(dashboard, sch); vErr != nil {
+		if vErr := validate.DashboardSpec(dashboard.Spec, sch); vErr != nil {
 			logrus.Fatal(vErr)
 		}
 	}

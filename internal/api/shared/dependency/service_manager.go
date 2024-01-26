@@ -19,6 +19,7 @@ import (
 	"github.com/perses/common/async"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
+	ephemeralDashboardImpl "github.com/perses/perses/internal/api/impl/v1/ephemeraldashboard"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
 	globalDatasourceImpl "github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	globalRoleImpl "github.com/perses/perses/internal/api/impl/v1/globalrole"
@@ -34,6 +35,7 @@ import (
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -58,6 +60,7 @@ type ServiceManager interface {
 	GetCrypto() crypto.Crypto
 	GetDashboard() dashboard.Service
 	GetDatasource() datasource.Service
+	GetEphemeralDashboard() ephemeraldashboard.Service
 	GetFolder() folder.Service
 	GetGlobalDatasource() globaldatasource.Service
 	GetGlobalRole() globalrole.Service
@@ -80,27 +83,28 @@ type ServiceManager interface {
 
 type service struct {
 	ServiceManager
-	crypto            crypto.Crypto
-	dashboard         dashboard.Service
-	datasource        datasource.Service
-	folder            folder.Service
-	globalDatasource  globaldatasource.Service
-	globalRole        globalrole.Service
-	globalRoleBinding globalrolebinding.Service
-	globalSecret      globalsecret.Service
-	globalVariable    globalvariable.Service
-	health            health.Service
-	jwt               crypto.JWT
-	migrate           migrate.Migration
-	project           project.Service
-	provisioning      async.SimpleTask
-	schemas           schemas.Schemas
-	rbac              rbac.RBAC
-	role              role.Service
-	roleBinding       rolebinding.Service
-	secret            secret.Service
-	user              user.Service
-	variable          variable.Service
+	crypto             crypto.Crypto
+	dashboard          dashboard.Service
+	datasource         datasource.Service
+	ephemeralDashboard ephemeraldashboard.Service
+	folder             folder.Service
+	globalDatasource   globaldatasource.Service
+	globalRole         globalrole.Service
+	globalRoleBinding  globalrolebinding.Service
+	globalSecret       globalsecret.Service
+	globalVariable     globalvariable.Service
+	health             health.Service
+	jwt                crypto.JWT
+	migrate            migrate.Migration
+	project            project.Service
+	provisioning       async.SimpleTask
+	schemas            schemas.Schemas
+	rbac               rbac.RBAC
+	role               role.Service
+	roleBinding        rolebinding.Service
+	secret             secret.Service
+	user               user.Service
+	variable           variable.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
@@ -122,6 +126,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	}
 	dashboardService := dashboardImpl.NewService(dao.GetDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemasService)
 	datasourceService := datasourceImpl.NewService(dao.GetDatasource(), schemasService)
+	ephemeralDashboardService := ephemeralDashboardImpl.NewService(dao.GetEphemeralDashboard(), dao.GetGlobalVariable(), dao.GetVariable(), schemasService)
 	folderService := folderImpl.NewService(dao.GetFolder())
 	variableService := variableImpl.NewService(dao.GetVariable(), schemasService)
 	globalDatasourceService := globalDatasourceImpl.NewService(dao.GetGlobalDatasource(), schemasService)
@@ -137,26 +142,27 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	userService := userImpl.NewService(dao.GetUser())
 
 	svc := &service{
-		crypto:            cryptoService,
-		dashboard:         dashboardService,
-		datasource:        datasourceService,
-		folder:            folderService,
-		globalDatasource:  globalDatasourceService,
-		globalRole:        globalRole,
-		globalRoleBinding: globalRoleBinding,
-		globalSecret:      globalSecret,
-		globalVariable:    globalVariableService,
-		health:            healthService,
-		jwt:               jwtService,
-		migrate:           migrateService,
-		project:           projectService,
-		rbac:              rbacService,
-		role:              roleService,
-		roleBinding:       roleBindingService,
-		schemas:           schemasService,
-		secret:            secretService,
-		user:              userService,
-		variable:          variableService,
+		crypto:             cryptoService,
+		dashboard:          dashboardService,
+		datasource:         datasourceService,
+		ephemeralDashboard: ephemeralDashboardService,
+		folder:             folderService,
+		globalDatasource:   globalDatasourceService,
+		globalRole:         globalRole,
+		globalRoleBinding:  globalRoleBinding,
+		globalSecret:       globalSecret,
+		globalVariable:     globalVariableService,
+		health:             healthService,
+		jwt:                jwtService,
+		migrate:            migrateService,
+		project:            projectService,
+		rbac:               rbacService,
+		role:               roleService,
+		roleBinding:        roleBindingService,
+		schemas:            schemasService,
+		secret:             secretService,
+		user:               userService,
+		variable:           variableService,
 	}
 	provisioningService := &provisioning{
 		serviceManager: svc,
@@ -176,6 +182,10 @@ func (s *service) GetDashboard() dashboard.Service {
 
 func (s *service) GetDatasource() datasource.Service {
 	return s.datasource
+}
+
+func (s *service) GetEphemeralDashboard() ephemeraldashboard.Service {
+	return s.ephemeralDashboard
 }
 
 func (s *service) GetFolder() folder.Service {

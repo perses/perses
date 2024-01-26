@@ -52,6 +52,10 @@ func New(kind modelV1.Kind, projectName string, apiClient api.ClientInterface) (
 		return &datasource{
 			apiClient: apiClient.V1().Datasource(projectName),
 		}, nil
+	case modelV1.KindEphemeralDashboard:
+		return &ephemeralDashboard{
+			apiClient: apiClient.V1().EphemeralDashboard(projectName),
+		}, nil
 	case modelV1.KindFolder:
 		return &folder{
 			apiClient: apiClient.V1().Folder(projectName),
