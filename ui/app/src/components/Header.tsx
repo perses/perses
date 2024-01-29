@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,7 +28,6 @@ import {
   Typography,
 } from '@mui/material';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
-import AutoFix from 'mdi-material-ui/AutoFix';
 import Cog from 'mdi-material-ui/Cog';
 import Archive from 'mdi-material-ui/Archive';
 import ShieldStar from 'mdi-material-ui/ShieldStar';
@@ -43,7 +42,7 @@ import { useSnackbar } from '@perses-dev/components';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
-import { AdminRoute, ConfigRoute, ExploreRoute, MigrateRoute } from '../model/route';
+import { AdminRoute, ConfigRoute, ExploreRoute } from '../model/route';
 import { useIsAuthEnable } from '../context/Config';
 import { useAuthToken } from '../model/auth-client';
 import WhitePersesLogo from './logo/WhitePersesLogo';
@@ -181,12 +180,6 @@ function ToolMenu() {
             <Compass />
           </ListItemIcon>
           <Typography>Explore</Typography>
-        </MenuItem>
-        <MenuItem component={RouterLink} to={MigrateRoute}>
-          <ListItemIcon>
-            <AutoFix />
-          </ListItemIcon>
-          <Typography>Migration</Typography>
         </MenuItem>
       </MUIMenu>
     </Box>
@@ -363,19 +356,6 @@ export default function Header(): JSX.Element {
           <ProjectMenu />
         </Box>
         <Stack direction={'row'} alignItems={'center'}>
-          {!isMobileSize && (
-            <Tooltip title="Migration tool">
-              <IconButton
-                sx={(theme) => ({
-                  color: theme.palette.common.white,
-                })}
-                component={RouterLink}
-                to={MigrateRoute}
-              >
-                <AutoFix />
-              </IconButton>
-            </Tooltip>
-          )}
           {isAuthEnable ? <AccountMenu /> : <ThemeSwitch isAuthEnable={false} />}
         </Stack>
       </Toolbar>
