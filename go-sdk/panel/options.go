@@ -13,16 +13,31 @@
 
 package panel
 
-func WithTitle(title string) Option {
+import (
+	"github.com/perses/perses/go-sdk/query"
+)
+
+func Title(title string) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Display.Name = title
 		return nil
 	}
 }
 
-func WithDescription(description string) Option {
+func Description(description string) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Display.Description = description
+		return nil
+	}
+}
+
+func AddQuery(options ...query.Option) Option {
+	return func(builder *Builder) error {
+		q, err := query.New(options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
 		return nil
 	}
 }

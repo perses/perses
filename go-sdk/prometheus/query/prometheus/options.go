@@ -11,18 +11,46 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_variable
+package prometheus
 
-func Value(value string) Option {
+import (
+	"time"
+
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/prometheus/common/model"
+)
+
+func Expr(expr string) Option {
 	return func(builder *Builder) error {
-		builder.Value = value
+		builder.Query = expr
 		return nil
 	}
 }
 
-func Constant(value string) Option {
+func Datasource(datasource datasource.Selector) Option {
 	return func(builder *Builder) error {
-		builder.Value = value
+		builder.Datasource = &datasource
+		return nil
+	}
+}
+
+func SeriesNameFormat(format string) Option {
+	return func(builder *Builder) error {
+		builder.SeriesNameFormat = format
+		return nil
+	}
+}
+
+func MinStep(step time.Duration) Option {
+	return func(builder *Builder) error {
+		builder.MinStep = model.Duration(step)
+		return nil
+	}
+}
+
+func Resolution(resolution int) Option {
+	return func(builder *Builder) error {
+		builder.Resolution = resolution
 		return nil
 	}
 }

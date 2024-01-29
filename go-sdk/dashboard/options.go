@@ -26,7 +26,7 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-func WithName(name string) Option {
+func Name(name string) Option {
 	return func(builder *Builder) error {
 		if err := common.ValidateID(name); err != nil {
 			if builder.Spec.Display == nil {
@@ -40,21 +40,21 @@ func WithName(name string) Option {
 	}
 }
 
-func WithProjectName(name string) Option {
+func ProjectName(name string) Option {
 	return func(builder *Builder) error {
 		builder.Metadata.Project = name
 		return nil
 	}
 }
 
-func WithRefreshInterval(seconds time.Duration) Option {
+func RefreshInterval(seconds time.Duration) Option {
 	return func(builder *Builder) error {
 		builder.Spec.RefreshInterval = model.Duration(seconds)
 		return nil
 	}
 }
 
-func WithDuration(seconds time.Duration) Option {
+func Duration(seconds time.Duration) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Duration = model.Duration(seconds)
 		return nil

@@ -11,9 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package variable
+package query
 
-type DatasourceSelector struct {
-	Kind string `json:"kind" yaml:"kind"`
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
+import v1 "github.com/perses/perses/pkg/model/api/v1"
+
+type Option func(panel *Builder) error
+
+func New(options ...Option) (Builder, error) {
+	builder := &Builder{
+		Query: v1.Query{
+			Kind: "TimeSeriesQuery",
+		},
+	}
+
+	defaults := []Option{}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
+}
+
+type Builder struct {
+	v1.Query
 }

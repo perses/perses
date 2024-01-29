@@ -107,7 +107,7 @@ func Prometheus(options ...Option) datasource.Option {
 //	}
 //}
 //
-//func (b *DatasourcePlugin) WithDirectUrl(url string) *DatasourcePlugin {
+//func (b *DatasourcePlugin) DirectUrl(url string) *DatasourcePlugin {
 //	b.PluginSpec = PluginSpec{
 //		DirectURL:      url,
 //		Proxy:          nil,

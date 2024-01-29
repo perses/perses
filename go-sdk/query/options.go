@@ -11,18 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_variable
+package query
 
-func Value(value string) Option {
-	return func(builder *Builder) error {
-		builder.Value = value
-		return nil
-	}
-}
+import (
+	"github.com/perses/perses/pkg/model/api/v1/common"
+)
 
-func Constant(value string) Option {
+func Plugin(plugin common.Plugin) Option {
 	return func(builder *Builder) error {
-		builder.Value = value
+		builder.Spec.Plugin = plugin
 		return nil
 	}
 }

@@ -36,7 +36,7 @@ func WithYAxis(axis YAxis) Option {
 	}
 }
 
-func WithThresholds(thresholds common.Thresholds) Option {
+func Thresholds(thresholds common.Thresholds) Option {
 	return func(builder *Builder) error {
 		builder.Thresholds = &thresholds
 		return nil

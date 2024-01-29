@@ -35,9 +35,9 @@ func New(title string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithTitle(title),
-		WithPanelWidth(12),
-		WithPanelHeight(6),
+		Title(title),
+		PanelWidth(12),
+		PanelHeight(6),
 		Collapsed(false),
 	}
 

@@ -49,8 +49,8 @@ const (
 
 type Format struct {
 	Unit          string `json:"unit" yaml:"unit"`
-	DecimalPlaces *int   `json:"decimalPlaces" yaml:"decimalPlaces"`
-	ShortValues   *bool  `json:"shortValues" yaml:"shortValues"`
+	DecimalPlaces int    `json:"decimalPlaces,omitempty" yaml:"decimalPlaces,omitempty"`
+	ShortValues   bool   `json:"shortValues,omitempty" yaml:"shortValues,omitempty"`
 }
 
 func (f *Format) UnmarshalJSON(data []byte) error {

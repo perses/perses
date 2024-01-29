@@ -20,14 +20,14 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
-func WithTitle(title string) Option {
+func Title(title string) Option {
 	return func(builder *Builder) error {
 		builder.Title = title
 		return nil
 	}
 }
 
-func WithPanelWidth(width int) Option {
+func PanelWidth(width int) Option {
 	return func(builder *Builder) error {
 		if width < 1 || width > 24 {
 			return fmt.Errorf("panel width is contained to 1 and 24")
@@ -37,7 +37,7 @@ func WithPanelWidth(width int) Option {
 	}
 }
 
-func WithPanelHeight(height int) Option {
+func PanelHeight(height int) Option {
 	return func(builder *Builder) error {
 		if height < 1 || height > 24 {
 			return fmt.Errorf("panel height can't be negative or zero")
@@ -54,7 +54,7 @@ func Collapsed(isCollapsed bool) Option {
 	}
 }
 
-func WithPanelsPerLine(panelsPerLine int) Option {
+func PanelsPerLine(panelsPerLine int) Option {
 	return func(builder *Builder) error {
 		if panelsPerLine < 1 || panelsPerLine > 24 {
 			return fmt.Errorf("row: at least 1 panel and 24 panels max per row line")
@@ -64,7 +64,7 @@ func WithPanelsPerLine(panelsPerLine int) Option {
 	}
 }
 
-func WithPanel(title string, options ...panel.Option) Option {
+func Panel(title string, options ...panel.Option) Option {
 	return func(builder *Builder) error {
 		p, err := panel.New(title, options...)
 		if err != nil {

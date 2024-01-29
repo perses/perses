@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package static_list
+package label_names
 
 import (
-	"github.com/perses/perses/go-sdk/prometheus/variable"
+	"github.com/perses/perses/go-sdk/datasource"
 	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
 )
 
 type PluginSpec struct {
-	Datasource *variable.DatasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Matchers   []string                     `json:"matchers,omitempty" yaml:"matchers,omitempty"`
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Matchers   []string             `json:"matchers,omitempty" yaml:"matchers,omitempty"`
 }
 
 type Option func(plugin *Builder) error

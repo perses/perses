@@ -27,7 +27,7 @@ func New(name string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithName(name),
+		Name(name),
 	}
 
 	for _, opt := range append(defaults, options...) {

@@ -17,7 +17,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-func WithName(name string) Option {
+func Name(name string) Option {
 	return func(builder *Builder) error {
 		if err := common.ValidateID(name); err != nil {
 			return err // TODO: error ctx

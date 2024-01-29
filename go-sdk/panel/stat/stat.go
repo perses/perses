@@ -43,7 +43,7 @@ func New(options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithCalculation(commonSdk.LastCalculation),
+		Calculation(commonSdk.LastCalculation),
 	}
 
 	for _, opt := range append(defaults, options...) {

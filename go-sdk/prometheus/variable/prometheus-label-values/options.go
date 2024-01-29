@@ -11,27 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package static_list
+package label_values
 
 import (
-	"github.com/perses/perses/go-sdk/prometheus/variable"
+	"github.com/perses/perses/go-sdk/datasource"
 )
 
-func WithLabelName(labelName string) Option {
+func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
 		builder.LabelName = labelName
 		return nil
 	}
 }
 
-func WithDatasource(datasource variable.DatasourceSelector) Option {
+func Datasource(datasource datasource.Selector) Option {
 	return func(builder *Builder) error {
 		builder.Datasource = &datasource
 		return nil
 	}
 }
 
-func WithMatchers(matchers ...string) Option {
+func Matchers(matchers ...string) Option {
 	return func(builder *Builder) error {
 		builder.Matchers = matchers
 		return nil

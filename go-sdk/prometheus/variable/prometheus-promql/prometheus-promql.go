@@ -11,17 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package static_list
+package promql
 
 import (
-	"github.com/perses/perses/go-sdk/prometheus/variable"
+	"github.com/perses/perses/go-sdk/datasource"
 	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
 )
 
 type PluginSpec struct {
-	Datasource *variable.DatasourceSelector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	Expr       string                       `json:"expr" yaml:"expr"`
-	LabelName  string                       `json:"labelName,omitempty" yaml:"labelName,omitempty"`
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Expr       string               `json:"expr" yaml:"expr"`
+	LabelName  string               `json:"labelName,omitempty" yaml:"labelName,omitempty"`
 }
 
 type Option func(plugin *Builder) error
@@ -36,7 +36,7 @@ func New(expr string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithExpr(expr),
+		Expr(expr),
 	}
 
 	for _, opt := range append(defaults, options...) {

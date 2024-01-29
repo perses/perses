@@ -32,7 +32,7 @@ func New(url string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithURL(url),
+		URL(url),
 	}
 
 	for _, opt := range append(defaults, options...) {

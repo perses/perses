@@ -17,14 +17,14 @@ import (
 	"github.com/perses/perses/go-sdk/common"
 )
 
-func WithCalculation(calculation common.Calculation) Option {
+func Calculation(calculation common.Calculation) Option {
 	return func(builder *Builder) error {
 		builder.Calculation = calculation
 		return nil
 	}
 }
 
-func WithFormat(format common.Format) Option {
+func Format(format common.Format) Option {
 	return func(builder *Builder) error {
 		builder.Format = &format
 		return nil

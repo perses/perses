@@ -31,7 +31,7 @@ func New(text string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithText(text),
+		Text(text),
 	}
 
 	for _, opt := range append(defaults, options...) {

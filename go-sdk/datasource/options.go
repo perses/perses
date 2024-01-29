@@ -15,14 +15,14 @@ package datasource
 
 import "github.com/perses/perses/pkg/model/api/v1/common"
 
-func WithName(name string) Option {
+func Name(name string) Option {
 	return func(datasource *Builder) error {
 		datasource.Metadata.Name = name
 		return nil
 	}
 }
 
-func WithProjectName(name string) Option {
+func ProjectName(name string) Option {
 	return func(datasource *Builder) error {
 		datasource.Metadata.Project = name
 		return nil
@@ -36,7 +36,7 @@ func Default(isDefault bool) Option {
 	}
 }
 
-func WithPlugin(plugin common.Plugin) Option {
+func Plugin(plugin common.Plugin) Option {
 	return func(datasource *Builder) error {
 		datasource.Spec.Plugin = plugin
 		return nil

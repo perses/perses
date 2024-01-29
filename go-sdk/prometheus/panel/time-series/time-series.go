@@ -21,8 +21,8 @@ import (
 type LegendPosition string
 
 const (
-	BottomPosition LegendPosition = "auto"
-	RightPosition  LegendPosition = "categorical"
+	BottomPosition LegendPosition = "bottom"
+	RightPosition  LegendPosition = "right"
 )
 
 type LegendMode string

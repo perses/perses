@@ -14,7 +14,6 @@
 package variable
 
 import (
-	text_variable "github.com/perses/perses/go-sdk/variable/text-variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -32,8 +31,7 @@ func New(name string, options ...Option) (Builder, error) {
 	}
 
 	defaults := []Option{
-		WithName(name),
-		text_variable.Text(""),
+		Name(name),
 	}
 
 	for _, opt := range append(defaults, options...) {

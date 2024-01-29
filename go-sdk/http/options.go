@@ -18,7 +18,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 )
 
-func WithURL(url string) Option {
+func URL(url string) Option {
 	return func(builder *Builder) error {
 		u, err := common.ParseURL(url)
 		if err != nil {
@@ -29,7 +29,7 @@ func WithURL(url string) Option {
 	}
 }
 
-func WithAllowedEndpoints(endpoints ...http.AllowedEndpoint) Option {
+func AllowedEndpoints(endpoints ...http.AllowedEndpoint) Option {
 	return func(builder *Builder) error {
 		builder.Spec.AllowedEndpoints = endpoints
 		return nil
@@ -51,7 +51,7 @@ func AddAllowedEndpoint(method string, endpointPattern string) Option {
 	}
 }
 
-func WithHeaders(headers map[string]string) Option {
+func Headers(headers map[string]string) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Headers = headers
 		return nil
@@ -69,7 +69,7 @@ func AddHeader(key string, value string) Option {
 	}
 }
 
-func WithSecret(name string) Option {
+func Secret(name string) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Secret = name
 		return nil

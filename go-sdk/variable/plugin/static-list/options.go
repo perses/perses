@@ -13,7 +13,7 @@
 
 package static_list
 
-func WithValues(values ...string) Option {
+func Values(values ...string) Option {
 	return func(builder *Builder) error {
 		builder.Values = values
 		return nil

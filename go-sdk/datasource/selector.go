@@ -11,18 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package text_variable
+package datasource
 
-func Value(value string) Option {
-	return func(builder *Builder) error {
-		builder.Value = value
-		return nil
-	}
-}
-
-func Constant(value string) Option {
-	return func(builder *Builder) error {
-		builder.Value = value
-		return nil
-	}
+type Selector struct {
+	Kind string `json:"kind" yaml:"kind"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 }

@@ -11,32 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package label_values
+package prometheus
 
 import (
 	"github.com/perses/perses/go-sdk/datasource"
-	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
+	"github.com/perses/perses/go-sdk/query"
+	"github.com/prometheus/common/model"
 )
 
 type PluginSpec struct {
-	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
-	LabelName  string               `json:"labelName" yaml:"labelName"`
-	Matchers   []string             `json:"matchers,omitempty" yaml:"matchers,omitempty"`
+	Datasource       *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query            string               `json:"query" yaml:"query"`
+	SeriesNameFormat string               `json:"seriesNameFormat,omitempty" yaml:"seriesNameFormat,omitempty"`
+	MinStep          model.Duration       `json:"minStep,omitempty" yaml:"minStep,omitempty"`
+	Resolution       int                  `json:"resolution,omitempty" yaml:"resolution,omitempty"`
 }
 
 type Option func(plugin *Builder) error
 
-type Builder struct {
-	PluginSpec
-}
-
-func New(labelName string, options ...Option) (Builder, error) {
-	var builder = &Builder{
+func NewPlugin(query string, options ...Option) (Builder, error) {
+	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
 
 	defaults := []Option{
-		LabelName(labelName),
+		Expr(query),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -48,14 +47,19 @@ func New(labelName string, options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
-func PrometheusLabelValues(labelName string, options ...Option) list_variable.Option {
-	return func(builder *list_variable.Builder) error {
-		t, err := New(labelName, options...)
+type Builder struct {
+	PluginSpec
+}
+
+func PromQL(expr string, options ...Option) query.Option {
+	return func(builder *query.Builder) error {
+		plugin, err := NewPlugin(expr, options...)
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "PrometheusLabelValuesVariable"
-		builder.Plugin.Spec = t
+
+		builder.Spec.Plugin.Kind = "PrometheusTimeSeriesQuery"
+		builder.Spec.Plugin.Spec = plugin
 		return nil
 	}
 }

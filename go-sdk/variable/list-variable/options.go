@@ -18,7 +18,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
-func WithDefaultValue(value string) Option {
+func DefaultValue(value string) Option {
 	return func(builder *Builder) error {
 		builder.DefaultValue = &variable.DefaultValue{
 			SingleValue: value,
@@ -27,7 +27,7 @@ func WithDefaultValue(value string) Option {
 	}
 }
 
-func WithDefaultValues(values ...string) Option {
+func DefaultValues(values ...string) Option {
 	return func(builder *Builder) error {
 		builder.DefaultValue = &variable.DefaultValue{
 			SliceValues: values,
@@ -50,14 +50,14 @@ func AllowMultiple(isMultipleValuesAllowed bool) Option {
 	}
 }
 
-func WithCustomAllValue(value string) Option {
+func CustomAllValue(value string) Option {
 	return func(builder *Builder) error {
 		builder.CustomAllValue = value
 		return nil
 	}
 }
 
-func WithCapturingRegexp(regexp string) Option {
+func CapturingRegexp(regexp string) Option {
 	return func(builder *Builder) error {
 		builder.CapturingRegexp = regexp
 		return nil
@@ -71,7 +71,7 @@ func SortingBy(sort variable.Sort) Option {
 	}
 }
 
-func WithPlugin(plugin common.Plugin) Option {
+func Plugin(plugin common.Plugin) Option {
 	return func(builder *Builder) error {
 		builder.Plugin = plugin
 		return nil

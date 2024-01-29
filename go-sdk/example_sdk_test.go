@@ -18,26 +18,29 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk"
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/http"
+	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/panel/bar"
 	"github.com/perses/perses/go-sdk/panel/gauge"
 	"github.com/perses/perses/go-sdk/panel/markdown"
 	"github.com/perses/perses/go-sdk/panel/stat"
 	"github.com/perses/perses/go-sdk/prometheus/datasource/prometheus"
-	time_series "github.com/perses/perses/go-sdk/prometheus/panel/time-series"
+	promTimeSeries "github.com/perses/perses/go-sdk/prometheus/panel/time-series"
+	promQuery "github.com/perses/perses/go-sdk/prometheus/query/prometheus"
 	"github.com/perses/perses/go-sdk/row"
 )
 
 func Example_dashboardAsCode() {
 
 	dash, err := dashboard.New("mysuperdashboard",
-		dashboard.WithProjectName("testa"),
+		dashboard.ProjectName("testa"),
 		dashboard.AddRow("section 1",
-			row.WithPanel("test", markdown.Markdown("test")),
-			row.WithPanel("test", markdown.Markdown("test")),
-			row.WithPanel("test", markdown.Markdown("test")),
-			row.WithPanel("test", markdown.Markdown("test")),
+			row.Panel("test", markdown.Markdown("test")),
+			row.Panel("test", markdown.Markdown("test")),
+			row.Panel("test", markdown.Markdown("test")),
+			row.Panel("test", markdown.Markdown("test")),
 		),
 		dashboard.AddDatasource("PrometheusDemo",
 			prometheus.Prometheus(
@@ -50,10 +53,38 @@ func Example_dashboardAsCode() {
 			),
 		),
 		dashboard.AddRow("section 2",
-			row.WithPanel("test", bar.BarChart()),
-			row.WithPanel("test", gauge.GaugeChart()),
-			row.WithPanel("test", stat.StatChart()),
-			row.WithPanel("test", time_series.TimeSeries()),
+			row.Panel("test", bar.BarChart()),
+			row.Panel("test", gauge.GaugeChart()),
+			row.Panel("test", stat.StatChart()),
+			row.Panel("test",
+				promTimeSeries.TimeSeries(
+					promTimeSeries.WithLegend(promTimeSeries.Legend{
+						Position: promTimeSeries.BottomPosition,
+						Mode:     promTimeSeries.ListMode,
+					}),
+					promTimeSeries.Thresholds(common.Thresholds{
+						Mode: common.PercentMode,
+						Steps: []common.StepOption{
+							{
+								Value: 0,
+								Color: "green",
+							},
+							{
+								Value: 80,
+								Color: "red",
+							},
+						},
+					}),
+					promTimeSeries.WithYAxis(promTimeSeries.YAxis{
+						Format: &common.Format{
+							Unit: string(common.PercentDecimalUnit),
+						},
+					}),
+				),
+				panel.AddQuery(
+					promQuery.PromQL("sum by(instance) (irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\", mode=\"system\"}[$interval])) / on(instance) group_left sum by (instance)((irate(node_cpu_seconds_total{instance=\"$node\",job=\"$job\"}[$interval])))"),
+				),
+			),
 		),
 	)
 

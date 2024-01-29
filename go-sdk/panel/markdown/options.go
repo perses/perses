@@ -15,7 +15,7 @@ package markdown
 
 import "fmt"
 
-func WithText(text string) Option {
+func Text(text string) Option {
 	return func(builder *Builder) error {
 		builder.Text = text
 		return nil
