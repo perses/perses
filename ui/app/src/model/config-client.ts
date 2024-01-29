@@ -89,6 +89,7 @@ export interface AuthorizationConfig {
 export interface OIDCProvider {
   slug_id: string;
   name: string;
+  issuer: string;
   redirect_uri: string;
   scopes: string[];
   url_params: Record<string, string>;
