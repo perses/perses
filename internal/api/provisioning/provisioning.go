@@ -135,6 +135,7 @@ func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, erro
 		return p.serviceManager.GetUser(), nil
 	case modelV1.KindVariable:
 		return p.serviceManager.GetVariable(), nil
+	// We don't support the provisioning of the following resources: EphemeralDashboard
 	default:
 		return nil, fmt.Errorf("resource %q not supported by the provisioning service", kind)
 	}

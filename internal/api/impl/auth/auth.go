@@ -27,12 +27,32 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
 
 const (
 	xForwardedProto = "X-Forwarded-Proto"
 	xForwardedHost  = "X-Forwarded-Host"
 )
+
+// grantType is a subset of the OAuth 2.0 grant types.
+// In our case, we will explicitly need them only in the /token endpoint, that we are using
+// only in the context of device code flow and client credentials flow.
+type grantType oidc.GrantType
+
+const (
+	GrantTypeDeviceCode        = grantType(oidc.GrantTypeDeviceCode)
+	GrantTypeClientCredentials = grantType(oidc.GrantTypeClientCredentials)
+)
+
+// tokenRequestBody represents the body of a /token endpoint request.
+// DeviceCode or ClientID, ClientSecret will be necessary based on the grant type.
+type tokenRequestBody struct {
+	GrantType    grantType `json:"grant_type"`
+	DeviceCode   string    `json:"device_code"`
+	ClientID     string    `json:"client_id"`
+	ClientSecret string    `json:"client_secret"`
+}
 
 func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 	rd := url.URL{}
@@ -52,7 +72,7 @@ func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 		}
 	}
 
-	rd.Path = fmt.Sprintf("%s/%s/%s/%s/callback", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID)
+	rd.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, authKind, slugID, utils.PathCallback)
 	return rd.String()
 }
 

@@ -18,12 +18,16 @@ import (
 
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
+	"golang.org/x/oauth2"
 )
 
 const authResource = "auth"
 
 // AuthInterface has methods to work with Auth resource
 type AuthInterface interface {
+	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
+	DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error)
 	Login(user, password string) (*api.AuthResponse, error)
 	Refresh(refreshToken string) (*api.AuthResponse, error)
 }
@@ -63,4 +67,31 @@ func (c *auth) Refresh(refreshToken string) (*api.AuthResponse, error) {
 		Body(body).
 		Do().
 		Object(result)
+}
+
+func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, error) {
+	result := &oauth2.DeviceAuthResponse{}
+
+	err := c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/device/code", authResource, authKind, slugID)).
+		Do().
+		Object(result)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *auth) DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error) {
+	result := &api.AuthResponse{}
+	err := c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
+		Body(map[string]string{"grant_type": string(oidc.GrantTypeDeviceCode), "device_code": deviceCode}).
+		Do().
+		Object(result)
+	return result, err
 }
