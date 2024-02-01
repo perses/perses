@@ -15,7 +15,6 @@ package list_variable
 
 import (
 	"github.com/perses/perses/go-sdk/variable"
-	static_list "github.com/perses/perses/go-sdk/variable/plugin/static-list"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	variable2 "github.com/perses/perses/pkg/model/api/v1/variable"
 )
@@ -34,7 +33,7 @@ func New(options ...Option) (Builder, error) {
 		},
 	}
 	defaults := []Option{
-		static_list.StaticList(),
+		//static_list.StaticList(),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -52,8 +51,8 @@ func List(options ...Option) variable.Option {
 		if err != nil {
 			return err
 		}
-		builder.Spec.Kind = "TextVariable"
-		builder.Spec.Spec = t
+		builder.Spec.Kind = "ListVariable"
+		builder.Spec.Spec = t.ListVariableSpec
 		return nil
 	}
 }

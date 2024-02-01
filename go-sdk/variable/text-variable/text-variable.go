@@ -50,7 +50,7 @@ func Text(value string, options ...Option) variable.Option {
 			return err
 		}
 		builder.Spec.Kind = "TextVariable"
-		builder.Spec.Spec = t
+		builder.Spec.Spec = t.TextVariableSpec
 		return nil
 	}
 }

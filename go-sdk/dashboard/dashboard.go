@@ -14,6 +14,8 @@
 package dashboard
 
 import (
+	"time"
+
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -28,6 +30,7 @@ func New(name string, options ...Option) (Builder, error) {
 
 	defaults := []Option{
 		Name(name),
+		Duration(time.Hour),
 	}
 
 	for _, opt := range append(defaults, options...) {

@@ -29,9 +29,16 @@ func URL(url string) Option {
 	}
 }
 
-func AllowedEndpoints(endpoints ...http.AllowedEndpoint) Option {
+func AllowedEndpoints(endpoints []http.AllowedEndpoint) Option {
 	return func(builder *Builder) error {
 		builder.Spec.AllowedEndpoints = endpoints
+		return nil
+	}
+}
+
+func AddAllowedEndpoints(endpoints ...http.AllowedEndpoint) Option {
+	return func(builder *Builder) error {
+		builder.Spec.AllowedEndpoints = append(builder.Spec.AllowedEndpoints, endpoints...)
 		return nil
 	}
 }

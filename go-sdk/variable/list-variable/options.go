@@ -77,3 +77,33 @@ func Plugin(plugin common.Plugin) Option {
 		return nil
 	}
 }
+
+func Description(description string) Option {
+	return func(builder *Builder) error {
+		if builder.Display == nil {
+			builder.Display = &variable.Display{}
+		}
+		builder.Display.Description = description
+		return nil
+	}
+}
+
+func DisplayName(displayName string) Option {
+	return func(builder *Builder) error {
+		if builder.Display == nil {
+			builder.Display = &variable.Display{}
+		}
+		builder.Display.Name = displayName
+		return nil
+	}
+}
+
+func Hidden(isHidden bool) Option {
+	return func(builder *Builder) error {
+		if builder.Display == nil {
+			builder.Display = &variable.Display{}
+		}
+		builder.Display.Hidden = isHidden
+		return nil
+	}
+}

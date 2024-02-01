@@ -13,9 +13,7 @@
 
 package promql
 
-import (
-	"github.com/perses/perses/go-sdk/datasource"
-)
+import "github.com/perses/perses/go-sdk/datasource"
 
 func Expr(expr string) Option {
 	return func(builder *Builder) error {
@@ -31,9 +29,12 @@ func LabelName(labelName string) Option {
 	}
 }
 
-func Datasource(datasource datasource.Selector) Option {
+func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = &datasource
+		builder.Datasource = &datasource.Selector{
+			Kind: "PrometheusDatasource",
+			Name: datasourceName,
+		}
 		return nil
 	}
 }

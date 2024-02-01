@@ -19,6 +19,7 @@ import (
 
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/row"
+	"github.com/perses/perses/go-sdk/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -78,10 +79,13 @@ func AddRow(title string, options ...row.Option) Option {
 
 		gridLayoutSpec := v1Dashboard.GridLayoutSpec{
 			Display: &dashboard.GridLayoutDisplay{
-				Title:    r.Title,
-				Collapse: &dashboard.GridLayoutCollapse{Open: !r.IsCollapsed},
+				Title: r.Title,
 			},
 			Items: []dashboard.GridItem{},
+		}
+
+		if !r.IsCollapsed {
+			gridLayoutSpec.Display.Collapse = &dashboard.GridLayoutCollapse{Open: true}
 		}
 
 		for i := range r.Panels {
@@ -123,4 +127,30 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 	}
 }
 
-// TODO: variable + secret
+func AddVariable(name string, options ...variable.Option) Option {
+	return func(builder *Builder) error {
+		v, err := variable.New(name, options...)
+		if err != nil {
+			return err
+		}
+
+		if spec, ok := v.Variable.Spec.Spec.(dashboard.ListVariableSpec); ok {
+			spec.Name = v.Variable.Metadata.Name
+			builder.Dashboard.Spec.Variables = append(builder.Dashboard.Spec.Variables, dashboard.Variable{
+				Kind: v.Variable.Spec.Kind,
+				Spec: &spec,
+			})
+			return nil
+		}
+
+		if spec, ok := v.Variable.Spec.Spec.(dashboard.TextVariableSpec); ok {
+			spec.Name = v.Variable.Metadata.Name
+			builder.Dashboard.Spec.Variables = append(builder.Dashboard.Spec.Variables, dashboard.Variable{
+				Kind: v.Variable.Spec.Kind,
+				Spec: &spec,
+			})
+			return nil
+		}
+		return fmt.Errorf("unknown variable spec %+v", v.Spec.Spec)
+	}
+}

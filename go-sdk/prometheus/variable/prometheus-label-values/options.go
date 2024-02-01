@@ -24,9 +24,12 @@ func LabelName(labelName string) Option {
 	}
 }
 
-func Datasource(datasource datasource.Selector) Option {
+func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = &datasource
+		builder.Datasource = &datasource.Selector{
+			Kind: "PrometheusDatasource",
+			Name: datasourceName,
+		}
 		return nil
 	}
 }

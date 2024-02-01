@@ -38,7 +38,7 @@ func New(title string, options ...Option) (Builder, error) {
 		Title(title),
 		PanelWidth(12),
 		PanelHeight(6),
-		Collapsed(false),
+		Collapsed(true),
 	}
 
 	for _, opt := range append(defaults, options...) {

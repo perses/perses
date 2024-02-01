@@ -32,6 +32,7 @@ func New(name string, options ...Option) (Builder, error) {
 
 	defaults := []Option{
 		Name(name),
+		// TODO: text_variable.Text(""),
 	}
 
 	for _, opt := range append(defaults, options...) {

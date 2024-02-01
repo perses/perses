@@ -30,13 +30,14 @@ type Builder struct {
 	PluginSpec
 }
 
-func New(expr string, options ...Option) (Builder, error) {
+func New(expr string, labelName string, options ...Option) (Builder, error) {
 	var builder = &Builder{
 		PluginSpec: PluginSpec{},
 	}
 
 	defaults := []Option{
 		Expr(expr),
+		LabelName(labelName),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -48,13 +49,13 @@ func New(expr string, options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
-func PrometheusPromQL(expr string, options ...Option) list_variable.Option {
+func PrometheusPromQL(expr string, labelName string, options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
-		t, err := New(expr, options...)
+		t, err := New(expr, labelName, options...)
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "PrometheusLabelValuesVariable"
+		builder.Plugin.Kind = "PrometheusPromQLVariable"
 		builder.Plugin.Spec = t
 		return nil
 	}
