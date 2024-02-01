@@ -20,7 +20,7 @@ import (
 	"github.com/perses/perses/pkg/model/api"
 )
 
-const authResource = "auth/providers/native/login"
+const authResource = "auth"
 
 // AuthInterface has methods to work with Auth resource
 type AuthInterface interface {
@@ -47,7 +47,7 @@ func (c *auth) Login(user string, password string) (*api.AuthResponse, error) {
 
 	return result, c.client.Post().
 		APIVersion("").
-		Resource(authResource).
+		Resource(fmt.Sprintf("%s/%s", authResource, "providers/native/login")).
 		Body(body).
 		Do().
 		Object(result)
