@@ -14,6 +14,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/perses/perses/internal/cli/output"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -48,11 +50,12 @@ func (e *ephemeralDashboard) DeleteResource(name string) error {
 func (e *ephemeralDashboard) BuildMatrix(hits []modelAPI.Entity) [][]string {
 	var data [][]string
 	for _, hit := range hits {
-		entity := hit.(*modelV1.Dashboard)
+		entity := hit.(*modelV1.EphemeralDashboard)
 		line := []string{
 			entity.Metadata.Name,
 			entity.Metadata.Project,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
+			output.FormatDuration(time.Until(entity.Metadata.UpdatedAt.Add(time.Duration(entity.Spec.TTL)))),
 		}
 		data = append(data, line)
 	}
@@ -64,5 +67,6 @@ func (e *ephemeralDashboard) GetColumHeader() []string {
 		"NAME",
 		"PROJECT",
 		"AGE",
+		"REMAINING TTL",
 	}
 }

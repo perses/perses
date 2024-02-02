@@ -51,7 +51,7 @@ func (p *project) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		entity := hit.(*modelV1.Project)
 		line := []string{
 			entity.Metadata.Name,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
 	}
