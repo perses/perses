@@ -50,7 +50,7 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 	if object, ok := entity.(*v1.EphemeralDashboard); ok {
 		return s.create(object)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting ephemeral dashboard format, received '%T'", entity))
 }
 
 func (s *service) create(entity *v1.EphemeralDashboard) (*v1.EphemeralDashboard, error) {
@@ -71,18 +71,18 @@ func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parame
 	if object, ok := entity.(*v1.EphemeralDashboard); ok {
 		return s.update(object, parameters)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting dashboard format, received '%T'", entity))
+	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting ephemeral dashboard format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.EphemeralDashboard, parameters apiInterface.Parameters) (*v1.EphemeralDashboard, error) {
 	if entity.Metadata.Name != parameters.Name {
-		logrus.Debugf("name in dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
+		logrus.Debugf("name in ephemeral dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 	if len(entity.Metadata.Project) == 0 {
 		entity.Metadata.Project = parameters.Project
 	} else if entity.Metadata.Project != parameters.Project {
-		logrus.Debugf("project in dashboard %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
+		logrus.Debugf("project in ephemeral dashboard %q and project from the http request %q don't match", entity.Metadata.Project, parameters.Project)
 		return nil, shared.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
 	}
 
@@ -98,7 +98,7 @@ func (s *service) update(entity *v1.EphemeralDashboard, parameters apiInterface.
 	}
 	entity.Metadata.Update(oldEntity.Metadata)
 	if updateErr := s.dao.Update(entity); updateErr != nil {
-		logrus.WithError(updateErr).Errorf("unable to perform the update of the dashboard %q, something wrong with the database", entity.Metadata.Name)
+		logrus.WithError(updateErr).Errorf("unable to perform the update of the ephemeral dashboard %q, something wrong with the database", entity.Metadata.Name)
 		return nil, updateErr
 	}
 	return entity, nil
