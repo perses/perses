@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus
+package datasource
 
 import (
 	"encoding/json"
@@ -20,6 +20,10 @@ import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/prometheus/common/model"
+)
+
+const (
+	Kind = "PrometheusDatasource"
 )
 
 type PluginSpec struct {
@@ -71,7 +75,7 @@ func NewPlugin(options ...Option) (Builder, error) {
 		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{}
+	var defaults []Option
 
 	for _, opt := range append(defaults, options...) {
 		if err := opt(builder); err != nil {
@@ -93,8 +97,15 @@ func Prometheus(options ...Option) datasource.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = "PrometheusDatasource"
+		builder.Spec.Plugin.Kind = Kind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
+	}
+}
+
+func Selector(datasourceName string) *datasource.Selector {
+	return &datasource.Selector{
+		Kind: Kind,
+		Name: datasourceName,
 	}
 }

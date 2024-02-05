@@ -11,30 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package promql
+package datasource
 
-import "github.com/perses/perses/go-sdk/datasource"
+import "github.com/perses/perses/go-sdk/http"
 
-func Expr(expr string) Option {
+func DirectURL(url string) Option {
 	return func(builder *Builder) error {
-		builder.Expr = expr
+		builder.DirectURL = url
 		return nil
 	}
 }
 
-func LabelName(labelName string) Option {
+func HTTPProxy(url string, options ...http.Option) Option {
 	return func(builder *Builder) error {
-		builder.LabelName = labelName
-		return nil
-	}
-}
-
-func Datasource(datasourceName string) Option {
-	return func(builder *Builder) error {
-		builder.Datasource = &datasource.Selector{
-			Kind: "PrometheusDatasource",
-			Name: datasourceName,
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
 		}
+		builder.Proxy = &p.Proxy
 		return nil
 	}
 }

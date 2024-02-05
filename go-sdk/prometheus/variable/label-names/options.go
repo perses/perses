@@ -14,15 +14,12 @@
 package labelnames
 
 import (
-	"github.com/perses/perses/go-sdk/datasource"
+	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
 )
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = &datasource.Selector{
-			Kind: "PrometheusDatasource",
-			Name: datasourceName,
-		}
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }

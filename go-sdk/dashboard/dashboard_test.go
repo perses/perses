@@ -21,11 +21,11 @@ import (
 	"testing"
 
 	"github.com/perses/perses/go-sdk/panel"
-	timeSeriesPanel "github.com/perses/perses/go-sdk/prometheus/panel/time-series"
-	"github.com/perses/perses/go-sdk/prometheus/query/prometheus"
-	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/prometheus-label-names"
-	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/prometheus-label-values"
-	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/prometheus-promql"
+	"github.com/perses/perses/go-sdk/panel/time-series"
+	"github.com/perses/perses/go-sdk/prometheus/query"
+	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
+	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	"github.com/perses/perses/go-sdk/row"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
@@ -91,15 +91,15 @@ func TestDashboardBuilder(t *testing.T) {
 
 			// PANELS
 			row.Panel("Container memory",
-				timeSeriesPanel.TimeSeries(),
+				timeseries.Chart(),
 				panel.AddQuery(
-					prometheus.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
 			row.Panel("Container CPU",
-				timeSeriesPanel.TimeSeries(),
+				timeseries.Chart(),
 				panel.AddQuery(
-					prometheus.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
 		),

@@ -11,24 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus
+package promql
 
-import "github.com/perses/perses/go-sdk/http"
+import (
+	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
+)
 
-func DirectURL(url string) Option {
+func Expr(expr string) Option {
 	return func(builder *Builder) error {
-		builder.DirectURL = url
+		builder.Expr = expr
 		return nil
 	}
 }
 
-func HTTPProxy(url string, options ...http.Option) Option {
+func LabelName(labelName string) Option {
 	return func(builder *Builder) error {
-		p, err := http.New(url, options...)
-		if err != nil {
-			return err
-		}
-		builder.Proxy = &p.Proxy
+		builder.LabelName = labelName
+		return nil
+	}
+}
+
+func Datasource(datasourceName string) Option {
+	return func(builder *Builder) error {
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }

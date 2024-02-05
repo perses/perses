@@ -111,14 +111,12 @@ type PluginSpec struct {
 
 type Option func(plugin *Builder) error
 
-func NewPlugin(options ...Option) (Builder, error) {
+func New(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{}
-
-	for _, opt := range append(defaults, options...) {
+	for _, opt := range options {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
@@ -131,9 +129,9 @@ type Builder struct {
 	PluginSpec
 }
 
-func TimeSeries(options ...Option) panel.Option {
+func Chart(options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
-		plugin, err := NewPlugin(options...)
+		plugin, err := New(options...)
 		if err != nil {
 			return err
 		}
