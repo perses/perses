@@ -98,35 +98,3 @@ func Prometheus(options ...Option) datasource.Option {
 		return nil
 	}
 }
-
-// TODO
-//func (b *DatasourcePlugin) Build() common.Plugin {
-//	return common.Plugin{
-//		Kind: "PrometheusDatasource",
-//		Spec: b.PluginSpec,
-//	}
-//}
-//
-//func (b *DatasourcePlugin) DirectUrl(url string) *DatasourcePlugin {
-//	b.PluginSpec = PluginSpec{
-//		DirectURL:      url,
-//		Proxy:          nil,
-//		ScrapeInterval: b.PluginSpec.ScrapeInterval,
-//	}
-//	return b
-//}
-//
-//func (b *DatasourcePlugin) WithProxy(proxy http.Proxy) *DatasourcePlugin {
-//	b.PluginSpec =
-//		PluginSpec{
-//			Proxy:          &proxy,
-//			DirectURL:      "",
-//			ScrapeInterval: b.PluginSpec.ScrapeInterval,
-//		}
-//	return b
-//}
-//
-//func (b *DatasourcePlugin) WithScrapeInterval(duration time.Duration) *DatasourcePlugin {
-//	b.PluginSpec.ScrapeInterval = model.Duration(duration)
-//	return b
-//}

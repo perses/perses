@@ -15,7 +15,7 @@ package prometheus
 
 import "github.com/perses/perses/go-sdk/http"
 
-func DirectUrl(url string) Option {
+func DirectURL(url string) Option {
 	return func(builder *Builder) error {
 		builder.DirectURL = url
 		return nil

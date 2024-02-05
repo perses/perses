@@ -63,7 +63,7 @@ func New(options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
-func BarChart(options ...Option) panel.Option {
+func Chart(options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
 		r, err := New(options...)
 		if err != nil {

@@ -41,7 +41,7 @@ func TestDashboardBuilder(t *testing.T) {
 		AddVariable("stack",
 			listVar.List(
 				labelValuesVar.PrometheusLabelValues("stack",
-					labelValuesVar.Matchers("thanos_build_info"),
+					labelValuesVar.Matchers("thanos_build_info{}"),
 					labelValuesVar.Datasource("promDemo"),
 				),
 				listVar.DisplayName("PaaS"),
@@ -57,23 +57,22 @@ func TestDashboardBuilder(t *testing.T) {
 			),
 		),
 		AddVariable("namespace", listVar.List(
-			promqlVar.PrometheusPromQL("kube_namespace_labels", "namespace", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", "namespace", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 		)),
 		AddVariable("namespaceLabels", listVar.List(
 			labelNamesVar.PrometheusLabelNames(
-				labelNamesVar.Matchers("kube_namespace_labels"),
+				labelNamesVar.Matchers("kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
-			listVar.AllowMultiple(true),
 		)),
 		AddVariable("pod", listVar.List(
-			promqlVar.PrometheusPromQL("kube_pod_info", "pod", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValues(true),
 		)),
 		AddVariable("container", listVar.List(
-			promqlVar.PrometheusPromQL("kube_pod_container_info", "container", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValues(true),
 		)),
@@ -81,10 +80,9 @@ func TestDashboardBuilder(t *testing.T) {
 			listVar.Description("simply the list of labels for the considered metric"),
 			listVar.Hidden(true),
 			labelNamesVar.PrometheusLabelNames(
-				labelNamesVar.Matchers("kube_pod_container_info"),
+				labelNamesVar.Matchers("kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
-			listVar.AllowMultiple(true),
 		)),
 
 		// ROWS
@@ -95,13 +93,13 @@ func TestDashboardBuilder(t *testing.T) {
 			row.Panel("Container memory",
 				timeSeriesPanel.TimeSeries(),
 				panel.AddQuery(
-					prometheus.PromQL("max (this.#aggr) (container_memory_rss{(this.#filter)})"), // TODO: fix
+					prometheus.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
 			row.Panel("Container CPU",
 				timeSeriesPanel.TimeSeries(),
 				panel.AddQuery(
-					prometheus.PromQL("sum (this.#aggr) (container_cpu_usage_seconds{(this.#filter)})"), // TODO: fix
+					prometheus.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
 		),
@@ -109,7 +107,7 @@ func TestDashboardBuilder(t *testing.T) {
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
 
-	outputJSONFilePath := filepath.Join("../", "../", "internal", "test", "dac", "expected_output.json")
+	outputJSONFilePath := filepath.Join("./", "test", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 
 	testSuites := []struct {
@@ -127,8 +125,8 @@ func TestDashboardBuilder(t *testing.T) {
 	for i := range testSuites {
 		test := testSuites[i]
 		t.Run(test.title, func(t *testing.T) {
-			fmt.Println(fmt.Sprintf("%s", expectedOutput))
-			fmt.Println(fmt.Sprintf("%s", builderOutput))
+			fmt.Println(string(expectedOutput))
+			fmt.Println(string(builderOutput))
 
 			if test.expectedError {
 				assert.NotNil(t, buildErr)

@@ -15,7 +15,6 @@ package row
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/perses/perses/go-sdk/panel"
 )
@@ -59,7 +58,7 @@ func PanelsPerLine(panelsPerLine int) Option {
 		if panelsPerLine < 1 || panelsPerLine > 24 {
 			return fmt.Errorf("row: at least 1 panel and 24 panels max per row line")
 		}
-		builder.PanelsWidth = int(math.Floor(float64(24 / panelsPerLine)))
+		builder.PanelsWidth = 24 / panelsPerLine
 		return nil
 	}
 }
