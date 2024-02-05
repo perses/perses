@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package prometheus
+package query
 
 import (
 	"time"
 
-	"github.com/perses/perses/go-sdk/datasource"
+	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
 	"github.com/prometheus/common/model"
 )
 
@@ -27,9 +27,9 @@ func Expr(expr string) Option {
 	}
 }
 
-func Datasource(datasource datasource.Selector) Option {
+func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = &datasource
+		builder.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }
