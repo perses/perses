@@ -1,0 +1,245 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "createdAt": "0001-01-01T00:00:00Z",
+    "name": "ContainersMonitoring",
+    "project": "MyProject",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0
+  },
+  "spec": {
+    "duration": "1h",
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Resource usage"
+          },
+          "items": [
+            {
+              "content": {
+                "$ref": "#/spec/panels/0_0"
+              },
+              "height": 6,
+              "width": 8,
+              "x": 0,
+              "y": 0
+            },
+            {
+              "content": {
+                "$ref": "#/spec/panels/0_1"
+              },
+              "height": 6,
+              "width": 8,
+              "x": 8,
+              "y": 0
+            }
+          ]
+        }
+      }
+    ],
+    "panels": {
+      "0_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Container memory"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "0_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Container CPU"
+          },
+          "plugin": {
+            "kind": "TimeSeriesChart",
+            "spec": {
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "variables": [
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "display": {
+            "hidden": false,
+            "name": "PaaS"
+          },
+          "name": "stack",
+          "plugin": {
+            "kind": "PrometheusLabelValuesVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "labelName": "stack",
+              "matchers": [
+                "thanos_build_info{}"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "constant": true,
+          "name": "prometheus",
+          "value": "platform"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "constant": true,
+          "display": {
+            "description": "constant to reduce the query scope thus improve performances",
+            "hidden": false
+          },
+          "name": "prometheus_namespace",
+          "value": "observability"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": false,
+          "allowMultiple": true,
+          "name": "namespace",
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "expr": "group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})",
+              "labelName": "namespace"
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "name": "namespaceLabels",
+          "plugin": {
+            "kind": "PrometheusLabelNamesVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "matchers": [
+                "kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"}"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": true,
+          "allowMultiple": true,
+          "name": "pod",
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "expr": "group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})",
+              "labelName": "pod"
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": true,
+          "allowMultiple": true,
+          "name": "container",
+          "plugin": {
+            "kind": "PrometheusPromQLVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "expr": "group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})",
+              "labelName": "container"
+            }
+          }
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "display": {
+            "description": "simply the list of labels for the considered metric",
+            "hidden": true
+          },
+          "name": "containerLabels",
+          "plugin": {
+            "kind": "PrometheusLabelNamesVariable",
+            "spec": {
+              "datasource": {
+                "kind": "PrometheusDatasource",
+                "name": "promDemo"
+              },
+              "matchers": [
+                "kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"
+              ]
+            }
+          }
+        }
+      }
+    ]
+  }
+}
