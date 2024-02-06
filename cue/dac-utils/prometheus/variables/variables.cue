@@ -53,9 +53,9 @@ input: #input
 // - `filters` is a list of filters, in a "russian dolls" manner.
 //   Its main purpose is to help build the list of expressions below, but it's also made available for external use.
 //   NB: the term filter here means a list of label matchers (= the part between curly braces in a promQL expression, used to filter the timeseries).
-filters: [ for i, _ in input {
+filters: [for i, _ in input {
 	strings.Join(
-	[ for i2, var in input if i2 < i if var.pluginKind != labelNamesVar.kind {
+	[for i2, var in input if i2 < i if var.pluginKind != labelNamesVar.kind {
 		"\(var.label)=\"$\(var.label)\""
 	}],
 	",",
@@ -65,7 +65,7 @@ filters: [ for i, _ in input {
 // - `fullFilter` is a filter that contains all the labels available
 fullFilter:
 	strings.Join(
-	[ for var in input if var.pluginKind != labelNamesVar.kind {
+	[for var in input if var.pluginKind != labelNamesVar.kind {
 		"\(var.label)=\"$\(var.label)\""
 	}],
 	",",
@@ -73,8 +73,8 @@ fullFilter:
 
 // - `exprs` is a list of promQL expressions.
 //   Its main purpose is to help build the list of variables below, but it's also made available for external use.
-exprs: [ for i, var in input {
-	[ // switch
+exprs: [for i, var in input {
+	[// switch
 		if var.pluginKind == promQLVar.kind {
 			"group by (" + var.label + ") (" + var.metric + "{" + filters[i] + "})"
 		},
@@ -84,8 +84,8 @@ exprs: [ for i, var in input {
 
 // - `variables` is the final list of variables, in the format expected by the Perses dashboard.
 let alias = input
-variables: {varsBuilder & {input: alias}}.variables & [ for i, var in input {
-	spec: [ // switch
+variables: {varsBuilder & {input: alias}}.variables & [for i, var in input {
+	spec: [// switch
 		if var.kind == "ListVariable" if var.pluginKind == promQLVar.kind {
 			plugin: promQLVar & {
 				spec: {

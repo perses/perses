@@ -14,42 +14,43 @@
 package test
 
 import (
-	"github.com/perses/perses/cue/model/api/v1"
+	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panel-group:panelGroup"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )
 
-#myPanels: {
-	"memory": this=panelBuilder & {
-		#clause: "by"
-		#clauseLabels: ["container"]
+#memoryPanel: this=panelBuilder & {
+	#clause: "by"
+	#clauseLabels: ["container"]
 
-		spec: {
-			display: name: "Container Memory"
-			plugin: timeseriesChart
-			queries: [
-				{
-					kind: "TimeSeriesQuery"
-					spec: plugin: promQuery & {
-						spec: query: "max \(this.#aggr) (container_memory_rss{job=\"node-exporter\"})"
-					}
-				},
-			]
-		}
+	spec: {
+		display: name: "Container memory"
+		plugin: timeseriesChart
+		queries: [
+			{
+				kind: "TimeSeriesQuery"
+				spec: plugin: promQuery & {
+					spec: query: "max \(this.#aggr) (container_memory_rss{job=\"node-exporter\"})"
+				}
+			},
+		]
 	}
 }
 
-v1.#Dashboard & {
-	metadata: {
-		name:    "ContainersMonitoring"
-		project: "MyProject"
-	}
-	spec: {
-		panels: #myPanels
-		layouts: [
-			panelGroupBuilder & {#panels: #myPanels, #title: "Resource usage", #cols: 3},
+dashboardBuilder & {
+	#name:    "ContainersMonitoring"
+	#project: "MyProject"
+	#panelGroups: panelGroupsBuilder & {
+		#input: [
+			{
+				#title: "Resource usage"
+				#cols:  3
+				#panels: [
+					#memoryPanel,
+				]
+			},
 		]
 	}
 }

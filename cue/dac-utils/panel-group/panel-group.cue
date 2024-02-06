@@ -11,9 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This package offers an utility to build a simple, standard layout easily,
-// without having to manipulate directly the {x,y,w,h} coordinates of each
-// and every panel.
+// This package offers an utility to build panel groups easily, without
+// having to manipulate directly the {x,y,w,h} coordinates of each and
+// every panel.
+// /!\ It's recommended to not use this package directly but rather go
+// through the `panelGroupsBuilder` package, that takes care of auto-feeding
+// the `#groupIndex` parameter.
 
 package panelGroup
 
@@ -24,34 +27,38 @@ import (
 )
 
 // expected user inputs
-#panels: [string]: v1.#Panel
-#title:  string
-#cols:   >0 & <=#gridCols
-#height: number | *6
+#panels: [...v1.#Panel]
+#title:      string
+#groupIndex: number
+#cols:       >0 & <=#gridCols
+#height:     number | *6
 
 // intermediary compute
 #gridCols: 24
-#panelsAsList: [ for k, p in #panels {p, name: k}]
-#width: math.Trunc(#gridCols / #cols)
-#panelsX: [ for i, _ in #panelsAsList {
+#width:    math.Trunc(#gridCols / #cols)
+#panelsX: [for i, _ in #panels {
 	#width * math.Round(math.Mod(i, #cols))
 }]
-#panelsY: [ for i, _ in #panelsAsList {
+#panelsY: [for i, _ in #panels {
 	#height * math.Trunc(i/#cols)
 }]
 
-// output: the final layout, in the format expected by the Perses dashboard.
-v1Dashboard.#Layout & {
+// output: the final layout & panels as map.
+layout: v1Dashboard.#Layout & {
 	spec: v1Dashboard.#GridLayoutSpec & {
 		display: title: #title
-		items: [ for i, panel in #panelsAsList {
+		items: [for i, panel in #panels {
 			x:      #panelsX[i]
 			y:      #panelsY[i]
 			width:  #width
 			height: #height
 			content: {
-				"$ref": "#/spec/panels/\(panel.name)"
+				"$ref": "#/spec/panels/\(#groupIndex)_\(i)"
 			}
 		}]
 	}
 }
+
+panels: {for i, panel in #panels {
+	"\(#groupIndex)_\(i)": panel
+}}

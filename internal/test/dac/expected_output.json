@@ -2,10 +2,10 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "ContainersMonitoring",
-    "createdAt": "1970-01-01T00:00:00.000000000Z",
-    "updatedAt": "1970-01-01T00:00:00.000000000Z",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
     "project": "MyProject",
-    "version": 1
+    "version": 0
   },
   "spec": {
     "variables": [
@@ -157,11 +157,11 @@
       }
     ],
     "panels": {
-      "memory": {
+      "0_0": {
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Container Memory"
+            "name": "Container memory"
           },
           "plugin": {
             "kind": "TimeSeriesChart",
@@ -182,7 +182,7 @@
           ]
         }
       },
-      "cpu": {
+      "0_1": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -222,7 +222,7 @@
               "width": 8,
               "height": 6,
               "content": {
-                "$ref": "#/spec/panels/memory"
+                "$ref": "#/spec/panels/0_0"
               }
             },
             {
@@ -231,7 +231,7 @@
               "width": 8,
               "height": 6,
               "content": {
-                "$ref": "#/spec/panels/cpu"
+                "$ref": "#/spec/panels/0_1"
               }
             }
           ]

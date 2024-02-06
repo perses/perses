@@ -21,7 +21,7 @@ import (
 )
 
 _commonFields: {
-	name:     string
+	name: string
 	display?: v1Variable.#Display & {
 		hidden: bool | *false
 	}
@@ -56,9 +56,9 @@ _remapCommonFields: {
 }
 
 // output: `variables` as the final list of variables, in the format expected by the Perses dashboard.
-variables: [...v1Dashboard.#Variable] & [ for id, var in input {
+variables: [...v1Dashboard.#Variable] & [for id, var in input {
 	kind: var.kind
-	spec: [ // switch
+	spec: [// switch
 		if var.kind == "ListVariable" {
 			v1Dashboard.#ListVariableSpec & {
 				_remapCommonFields & {_var: var}

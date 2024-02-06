@@ -65,7 +65,7 @@ func TestDacBuildCMD(t *testing.T) {
 			Title:           "invalid CUE definition",
 			Args:            []string{"-f", "testdata/invalid_dac.cue"},
 			IsErrorExpected: true,
-			ExpectedMessage: strings.Replace("failed to build testdata/invalid_dac.cue: spec.layouts: reference \"panelGroupBuilder\" not found:\n    .%stestdata%sinvalid_dac.cue:48:4\n", "%s", separator, -1),
+			ExpectedMessage: strings.Replace("failed to build testdata/invalid_dac.cue: success: reference \"fals\" not found:\n    .%stestdata%sinvalid_dac.cue:16:10\n", "%s", separator, -1),
 		},
 		{
 			Title:           "file not found",

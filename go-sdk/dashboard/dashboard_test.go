@@ -107,7 +107,7 @@ func TestDashboardBuilder(t *testing.T) {
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
 
-	outputJSONFilePath := filepath.Join("./", "test", "expected_output.json")
+	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 
 	testSuites := []struct {
