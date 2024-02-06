@@ -85,6 +85,18 @@ func TestDacBuildCMD(t *testing.T) {
 			IsErrorExpected: true,
 			ExpectedMessage: "if any flags in the group [file directory] are set none of the others can be; [directory file] were all set",
 		},
+		{
+			Title:           "nominal case with a single go file",
+			Args:            []string{"-f", "testdata_go/main.go"},
+			IsErrorExpected: false,
+			ExpectedMessage: strings.Replace("Succesfully built testdata_go/main.go at built%stestdata_go%smain_output.yaml\n", "%s", separator, -1),
+		},
+		{
+			Title:           "nominal case with a go project",
+			Args:            []string{"-d", "testdata_go"},
+			IsErrorExpected: false,
+			ExpectedMessage: strings.Replace("Succesfully built testdata_go/main.go at built%stestdata_go%smain_output.yaml\n", "%s", separator, -1),
+		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)
 
