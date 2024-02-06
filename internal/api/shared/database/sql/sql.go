@@ -95,8 +95,9 @@ func generateID(metadata modelAPI.Metadata) (string, error) {
 
 type DAO struct {
 	databaseModel.DAO
-	DB         *sql.DB
-	SchemaName string
+	DB            *sql.DB
+	SchemaName    string
+	CaseSensitive bool
 }
 
 func (d *DAO) Init() error {
@@ -188,6 +189,11 @@ func (d *DAO) Close() error {
 }
 
 func (d *DAO) Create(entity modelAPI.Entity) error {
+	// Flatten the metadata in case the config is activated.
+	// We are modifying the metadata to be sure the user will acknowledge this config.
+	// Also, it will avoid an issue with the permission when activated.
+	// See https://github.com/perses/perses/issues/1721 for more details.
+	entity.GetMetadata().Flatten(d.CaseSensitive)
 	id, isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if err != nil {
 		return err
@@ -209,6 +215,7 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 }
 
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
+	entity.GetMetadata().Flatten(d.CaseSensitive)
 	_, isExist, err := d.exists(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if err != nil {
 		return err
@@ -232,6 +239,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 }
 
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
+	entity.GetMetadata().Flatten(d.CaseSensitive)
 	id, query, queryErr := d.get(kind, metadata)
 	if queryErr != nil {
 		return queryErr

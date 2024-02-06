@@ -16,6 +16,7 @@ package databasesql
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -89,15 +90,21 @@ func (d *DAO) generateUpdateQuery(entity modelAPI.Entity) (string, []interface{}
 	return sql, args, nil
 }
 
-func generateSelectQuery(tableName string, project string, name string) (string, []interface{}) {
+func (d *DAO) generateSelectQuery(tableName string, project string, name string) (string, []interface{}) {
+	p := project
+	n := name
+	if !d.CaseSensitive {
+		p = strings.ToLower(p)
+		n = strings.ToLower(n)
+	}
 	queryBuilder := sqlbuilder.NewSelectBuilder().
 		Select(colDoc).
 		From(tableName)
-	if len(name) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", name)))
+	if len(n) > 0 {
+		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", n)))
 	}
-	if len(project) > 0 {
-		queryBuilder.Where(queryBuilder.Equal(colProject, project))
+	if len(p) > 0 {
+		queryBuilder.Where(queryBuilder.Equal(colProject, p))
 	}
 	return queryBuilder.Build()
 }
@@ -107,47 +114,54 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 	var args []interface{}
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
 	case *folder.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
 	case *globalrole.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
 	case *globalrolebinding.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
 	case *globalsecret.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
 	case *globalvariable.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	case *role.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
 	case *rolebinding.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
 	case *secret.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
 	case *user.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
 	case *variable.Query:
-		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateSelectQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
 	return sqlQuery, args, nil
 }
 
-func generateDeleteQuery(tableName string, project string, name string) (string, []interface{}) {
+func (d *DAO) generateDeleteQuery(tableName string, project string, name string) (string, []interface{}) {
+	p := project
+	n := name
+	if !d.CaseSensitive {
+		p = strings.ToLower(p)
+		n = strings.ToLower(n)
+	}
+
 	queryBuilder := sqlbuilder.NewDeleteBuilder().
 		DeleteFrom(tableName)
-	if len(name) > 0 {
-		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", name)))
+	if len(n) > 0 {
+		queryBuilder.Where(queryBuilder.Like(colName, fmt.Sprintf("%s%%", n)))
 	}
-	if len(project) > 0 {
-		queryBuilder.Where(queryBuilder.Equal(colProject, project))
+	if len(p) > 0 {
+		queryBuilder.Where(queryBuilder.Equal(colProject, p))
 	}
 	return queryBuilder.Build()
 }
@@ -157,33 +171,33 @@ func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}
 	var args []interface{}
 	switch qt := query.(type) {
 	case *dashboard.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
 	case *folder.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableGlobalDatasource), "", qt.NamePrefix)
 	case *globalrole.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableGlobalRole), "", qt.NamePrefix)
 	case *globalrolebinding.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableGlobalRoleBinding), "", qt.NamePrefix)
 	case *globalsecret.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableGlobalSecret), "", qt.NamePrefix)
 	case *globalvariable.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableGlobalVariable), "", qt.NamePrefix)
 	case *project.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableProject), "", qt.NamePrefix)
 	case *role.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableRole), qt.Project, qt.NamePrefix)
 	case *rolebinding.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableRoleBinding), qt.Project, qt.NamePrefix)
 	case *secret.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableSecret), qt.Project, qt.NamePrefix)
 	case *user.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableUser), "", qt.NamePrefix)
 	case *variable.Query:
-		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
+		sqlQuery, args = d.generateDeleteQuery(d.generateCompleteTableName(tableVariable), qt.Project, qt.NamePrefix)
 	default:
 		return "", nil, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}

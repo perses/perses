@@ -14,6 +14,7 @@
 package v1
 
 import (
+	"strings"
 	"time"
 )
 
@@ -49,6 +50,12 @@ func (m *Metadata) GetName() string {
 	return m.Name
 }
 
+func (m *Metadata) Flatten(sensitive bool) {
+	if !sensitive {
+		m.Name = strings.ToLower(m.Name)
+	}
+}
+
 func NewProjectMetadata(project string, name string) *ProjectMetadata {
 	return &ProjectMetadata{
 		Metadata: Metadata{
@@ -66,6 +73,13 @@ type ProjectMetadata struct {
 
 func (m *ProjectMetadata) GetName() string {
 	return m.Name
+}
+
+func (m *ProjectMetadata) Flatten(sensitive bool) {
+	if !sensitive {
+		m.Name = strings.ToLower(m.Name)
+		m.Project = strings.ToLower(m.Project)
+	}
 }
 
 func (m *ProjectMetadata) Update(previous ProjectMetadata) {

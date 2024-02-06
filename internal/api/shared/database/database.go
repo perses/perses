@@ -30,8 +30,9 @@ import (
 func New(conf config.Database) (databaseModel.DAO, error) {
 	if conf.File != nil {
 		return &databaseFile.DAO{
-			Folder:    conf.File.Folder,
-			Extension: conf.File.Extension,
+			Folder:        conf.File.Folder,
+			Extension:     conf.File.Extension,
+			CaseSensitive: conf.File.CaseSensitive,
 		}, nil
 	} else if conf.SQL != nil {
 		c := conf.SQL
@@ -82,8 +83,9 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 			return nil, err
 		}
 		return &databaseSQL.DAO{
-			DB:         db,
-			SchemaName: c.DBName,
+			DB:            db,
+			SchemaName:    c.DBName,
+			CaseSensitive: c.CaseSensitive,
 		}, nil
 	}
 	return nil, fmt.Errorf("no dao defined")

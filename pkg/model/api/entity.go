@@ -15,6 +15,7 @@ package api
 
 type Metadata interface {
 	GetName() string
+	Flatten(sensitive bool)
 }
 
 type Entity interface {
