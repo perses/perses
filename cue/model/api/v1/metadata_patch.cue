@@ -30,9 +30,9 @@ import (
 	// Placeholder values required to pass the CUE evaluation, as those
 	// attributes are flagged as mandatory in the (Go) datamodel but
 	// populated by the server in the end.
-	createdAt: "1970-01-01T00:00:00.000000000Z"
-	updatedAt: "1970-01-01T00:00:00.000000000Z"
-	version:   1
+	createdAt: "0001-01-01T00:00:00Z"
+	updatedAt: "0001-01-01T00:00:00Z"
+	version:   0
 }
 
 #ProjectMetadataWrapper: {

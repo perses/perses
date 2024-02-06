@@ -13,39 +13,4 @@
 
 package test
 
-import (
-	"github.com/perses/perses/cue/model/api/v1"
-	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
-	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
-)
-
-#myPanels: {
-	"cpu": panelBuilder & {
-		spec: {
-			display: name: "Container CPU"
-			plugin: timeseriesChart
-			queries: [
-				{
-					kind: "TimeSeriesQuery"
-					spec: plugin: promQuery & {
-						spec: query: "container_cpu_usage_seconds{job=\"node-exporter\"}"
-					}
-				},
-			]
-		}
-	}
-}
-
-v1.#Dashboard & {
-	metadata: {
-		name:    "ContainersMonitoring"
-		project: "MyProject"
-	}
-	spec: {
-		panels: #myPanels
-		layouts: [
-			panelGroupBuilder & {#panels: #myPanels, #title: "Resource usage", #cols: 1},
-		]
-	}
-}
+success: fals

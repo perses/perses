@@ -14,9 +14,9 @@
 package test
 
 import (
-	"github.com/perses/perses/cue/model/api/v1"
+	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panel-group:panelGroup"
 	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
@@ -78,52 +78,55 @@ import (
 	}]
 }
 
-#myPanels: {
-	"memory": this=panelBuilder & {
-		#filter: #myVarsBuilder.fullFilter
-		#clause: "by"
-		#clauseLabels: ["container"]
-
-		spec: {
-			display: name: "Container Memory"
-			plugin: timeseriesChart
-			queries: [
-				{
-					kind: "TimeSeriesQuery"
-					spec: plugin: promQuery & {
-						spec: query: "max \(this.#aggr) (container_memory_rss{\(this.#filter)})"
-					}
-				},
-			]
-		}
-	}
-	"cpu": this=panelBuilder & {
-		#filter: #myVarsBuilder.fullFilter
-		spec: {
-			display: name: "Container CPU"
-			plugin: timeseriesChart
-			queries: [
-				{
-					kind: "TimeSeriesQuery"
-					spec: plugin: promQuery & {
-						spec: query: "sum \(this.#aggr) (container_cpu_usage_seconds{\(this.#filter)})"
-					}
-				},
-			]
-		}
+#cpuPanel: this=panelBuilder & {
+	#filter: #myVarsBuilder.fullFilter
+	spec: {
+		display: name: "Container CPU"
+		plugin: timeseriesChart
+		queries: [
+			{
+				kind: "TimeSeriesQuery"
+				spec: plugin: promQuery & {
+					spec: query: "sum \(this.#aggr) (container_cpu_usage_seconds{\(this.#filter)})"
+				}
+			},
+		]
 	}
 }
 
-v1.#Dashboard & {
-	metadata: {
-		name:    "ContainersMonitoring"
-		project: "MyProject"
-	}
+#memoryPanel: this=panelBuilder & {
+	#filter: #myVarsBuilder.fullFilter
+	#clause: "by"
+	#clauseLabels: ["container"]
+
 	spec: {
-		panels:    #myPanels
-		variables: #myVarsBuilder.variables
-		layouts: [
-			panelGroupBuilder & {#panels: #myPanels, #title: "Resource usage", #cols: 3},
+		display: name: "Container memory"
+		plugin: timeseriesChart
+		queries: [
+			{
+				kind: "TimeSeriesQuery"
+				spec: plugin: promQuery & {
+					spec: query: "max \(this.#aggr) (container_memory_rss{\(this.#filter)})"
+				}
+			},
+		]
+	}
+}
+
+dashboardBuilder & {
+	#name:      "ContainersMonitoring"
+	#project:   "MyProject"
+	#variables: #myVarsBuilder.variables
+	#panelGroups: panelGroupsBuilder & {
+		#input: [
+			{
+				#title: "Resource usage"
+				#cols:  3
+				#panels: [
+					#memoryPanel,
+					#cpuPanel,
+				]
+			},
 		]
 	}
 }
