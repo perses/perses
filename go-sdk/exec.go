@@ -11,26 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+package sdk
 
 import (
-	"github.com/perses/perses/go-sdk/http"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/perses/perses/go-sdk/dashboard"
 )
 
-func DirectURL(url string) Option {
-	return func(builder *Builder) error {
-		builder.DirectURL = url
-		return nil
+func executeDashboardBuilder(builder dashboard.Builder, writer io.Writer, errWriter io.Writer) {
+	output, err := json.Marshal(builder.Dashboard)
+	if err != nil {
+		fmt.Fprint(errWriter, err)
+		os.Exit(-1)
 	}
+	fmt.Fprint(writer, string(output))
 }
 
-func HTTPProxy(url string, options ...http.Option) Option {
-	return func(builder *Builder) error {
-		p, err := http.New(url, options...)
-		if err != nil {
-			return err
-		}
-		builder.Proxy = &p.Proxy
-		return nil
+func ExecuteDashboard(builder dashboard.Builder, err error) {
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(-1)
 	}
+	executeDashboardBuilder(builder, os.Stdout, os.Stderr)
 }
