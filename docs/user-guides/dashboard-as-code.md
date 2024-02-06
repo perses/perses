@@ -17,7 +17,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 - automated deployments
 - and more..
 
-## Getting started
+## Getting started with Cue
 
 ### Prerequisites
 
@@ -37,13 +37,13 @@ See the [CUE documentation](https://cuelang.org/docs/concepts/packages/) for mor
 
 #### 2. Retrieve the CUE sources from Perses
 
-Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentionned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
+Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentioned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
 
 ```
 percli dac setup --version 0.42.1
 ```
 
-You can omit the version flag if your are connected to a Perses server (it will retrieve its version). Ottherwise, unless you have a specific case, better to pass the latest version available.
+You can omit the version flag if you are connected to a Perses server (it will retrieve its version). Otherwise, unless you have a specific case, better to pass the latest version available.
 
 ## Develop dashboards
 
@@ -59,6 +59,108 @@ Anytime you want to build the final dashboard definition (i.e Perses dashboard i
 
 ```
 percli dac build my_dashboard.cue -ojson
+```
+
+If the build is successful, the result can be found in the generated `built` folder.
+
+> [!NOTE]
+> the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
+
+## Getting started with Go SDK
+
+### Prerequisites
+
+- `percli`, the [CLI of Perses](../tooling/cli.md).
+- `go`, the [programming language](https://go.dev/).
+
+### Repository setup
+
+Create a new folder that will become your DaC repository, then follow the steps below:
+
+#### 1. Initialize the Go module
+
+```
+go mod init <module name>
+```
+See the [Go documentation](https://go.dev/doc/tutorial/create-module) for more information about this step.
+
+#### 2.Install the Perses SDK
+
+```
+go get github.com/perses/perses
+```
+
+If you need a specific version, you can specify it as follows:
+
+```
+go get github.com/perses/perses v0.43.0
+```
+
+## Develop dashboards
+
+You are now fully ready to start developing dashboards as code!
+
+It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
+- The [official website](https://go.dev/) of Go.
+
+Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata_go/main.go). This example is heavily relying on the SDK utilities we provide. 
+To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
+All the SDK utilities are located in the `github.com/perses/perses/go-sdk` package.
+Do not log / print on the standard stdout, it will broke the output of the `dac build` command.
+
+Quick start example:
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk"
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/panel"
+	"github.com/perses/perses/go-sdk/prometheus/query"
+	"github.com/perses/perses/go-sdk/row"
+
+	timeSeriesPanel "github.com/perses/perses/go-sdk/panel/time-series"
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
+)
+
+func main() {
+	builder, buildErr := dashboard.New("ContainersMonitoring",
+		dashboard.ProjectName("MyProject"),
+
+		dashboard.AddVariable("stack",
+			listVar.List(
+				labelValuesVar.PrometheusLabelValues("paas",
+					labelValuesVar.Matchers("thanos_build_info{}"),
+					labelValuesVar.Datasource("promDemo"),
+				),
+				listVar.DisplayName("My Super PaaS"),
+			),
+		),
+
+		dashboard.AddRow("Resource usage",
+			row.PanelsPerLine(3),
+			row.Panel("Container memory",
+				timeSeriesPanel.Chart(),
+				panel.AddQuery(
+					query.PromQL("max by (container) (container_memory_rss{paas=\"$paas\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+				),
+			),
+		),
+
+		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("https://demo.prometheus.com"))),
+	)
+	sdk.ExecuteDashboard(builder, buildErr)
+}
+```
+
+
+Anytime you want to build the final dashboard definition (i.e: Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
+
+```
+percli dac build main.go -ojson
 ```
 
 If the build is successful, the result can be found in the generated `built` folder.
