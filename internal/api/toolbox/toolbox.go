@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package toolbox
 
 import (
 	"fmt"
@@ -19,11 +19,11 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -54,7 +54,7 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func NewToolBox(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind, caseSensitive bool) Toolbox {
+func New(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind, caseSensitive bool) Toolbox {
 	return &toolbox{
 		service:       service,
 		rbac:          rbac,
@@ -84,7 +84,7 @@ func (t *toolbox) checkPermission(ctx echo.Context, entity api.Entity, parameter
 	}
 	if role.IsGlobalScope(*scope) {
 		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
-			return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
 	}
@@ -94,7 +94,7 @@ func (t *toolbox) checkPermission(ctx echo.Context, entity api.Entity, parameter
 		// Create is still a "Global" only permission
 		if action == role.CreateAction {
 			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
-				return HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+				return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 			}
 			return nil
 		}
@@ -106,7 +106,7 @@ func (t *toolbox) checkPermission(ctx echo.Context, entity api.Entity, parameter
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
-		return HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
+		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 
 	}
 	return nil
@@ -167,7 +167,7 @@ func (t *toolbox) Get(ctx echo.Context) error {
 
 func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
-		return HandleBadRequestError(err.Error())
+		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
@@ -182,11 +182,11 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 
 func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
-		return HandleBadRequestError(err.Error())
+		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	entity.GetMetadata().Flatten(t.caseSensitive)
 	if err := t.validateMetadata(ctx, entity.GetMetadata()); err != nil {
-		return HandleBadRequestError(err.Error())
+		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil
 }

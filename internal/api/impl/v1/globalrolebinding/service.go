@@ -16,14 +16,13 @@ package globalrolebinding
 import (
 	"fmt"
 
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -52,7 +51,7 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 	if object, ok := entity.(*v1.GlobalRoleBinding); ok {
 		return s.create(object)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalroleBinding format, received '%T'", entity))
+	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalroleBinding format, received '%T'", entity))
 }
 
 func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
@@ -75,13 +74,13 @@ func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parame
 	if object, ok := entity.(*v1.GlobalRoleBinding); ok {
 		return s.update(object, parameters)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalroleBinding format, received '%T'", entity))
+	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalroleBinding format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.Parameters) (*v1.GlobalRoleBinding, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
-		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
+		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 
 	// find the previous version of the GlobalRoleBinding
@@ -97,7 +96,7 @@ func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.P
 	// If you do want to change the role for a binding, you need to remove the binding object and create a replacement.
 	// More info at: https://github.com/perses/perses/blob/main/docs/authorization.md#rolebinding-and-globalrolebinding-update-restriction
 	if entity.Spec.Role != oldEntity.Spec.Role {
-		return nil, shared.HandleBadRequestError("spec.role can't be updated")
+		return nil, apiInterface.HandleBadRequestError("spec.role can't be updated")
 	}
 
 	entity.Metadata.Update(oldEntity.Metadata)
@@ -135,14 +134,14 @@ func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ ap
 // Validating role and subjects are existing
 func (s *service) validateGlobalRoleBinding(globalRoleBinding *v1.GlobalRoleBinding) error {
 	if _, err := s.globalRoleDAO.Get(globalRoleBinding.Spec.Role); err != nil {
-		return shared.HandleBadRequestError(fmt.Sprintf("global role %q doesn't exist", globalRoleBinding.Spec.Role))
+		return apiInterface.HandleBadRequestError(fmt.Sprintf("global role %q doesn't exist", globalRoleBinding.Spec.Role))
 	}
 
 	for _, subject := range globalRoleBinding.Spec.Subjects {
 		if subject.Kind == v1.KindUser {
 			if _, err := s.userDAO.Get(subject.Name); err != nil {
 				if databaseModel.IsKeyNotFound(err) {
-					return shared.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
+					return apiInterface.HandleBadRequestError(fmt.Sprintf("user subject name %q doesn't exist", subject.Name))
 				}
 				logrus.WithError(err).Errorf("unable to find the user with the name %q", subject.Name)
 				return err

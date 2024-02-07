@@ -22,7 +22,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/sirupsen/logrus"
 )
 

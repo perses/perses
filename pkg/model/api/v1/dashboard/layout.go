@@ -99,6 +99,8 @@ type tmpDashboardLayout struct {
 
 type Layout struct {
 	Kind LayoutKind `json:"kind" yaml:"kind"`
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
 	Spec LayoutSpec `json:"spec" yaml:"spec"`
 }
 

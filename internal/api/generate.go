@@ -54,21 +54,21 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/toolbox"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Endpoint struct {
-	toolbox  shared.Toolbox
+	toolbox  toolbox.Toolbox
 	readonly bool
 }
 
 func NewEndpoint(service {{ $package }}.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) *Endpoint {
 	return &Endpoint{
-		toolbox: shared.NewToolBox(service, rbacService, v1.Kind{{ $kind }}, caseSensitive),
+		toolbox: toolbox.New(service, rbacService, v1.Kind{{ $kind }}, caseSensitive),
 		readonly: readonly,
 	}
 }
@@ -146,7 +146,7 @@ package {{ $package }}
 
 import (
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -201,7 +201,7 @@ package {{ $package }}
 
 import (
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 

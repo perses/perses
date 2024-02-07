@@ -19,9 +19,9 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	databaseFile "github.com/perses/perses/internal/api/shared/database/file"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	databaseSQL "github.com/perses/perses/internal/api/shared/database/sql"
+	databaseFile "github.com/perses/perses/internal/api/database/file"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	databaseSQL "github.com/perses/perses/internal/api/database/sql"
 	"github.com/perses/perses/pkg/model/api/config"
 	promConfig "github.com/prometheus/common/config"
 	"github.com/sirupsen/logrus"

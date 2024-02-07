@@ -16,7 +16,7 @@
 package dependency
 
 import (
-	"github.com/perses/common/async"
+	"github.com/perses/perses/internal/api/crypto"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
@@ -47,10 +47,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/migrate"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
@@ -68,7 +67,6 @@ type ServiceManager interface {
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
 	GetProject() project.Service
-	GetProvisioning() async.SimpleTask
 	GetSchemas() schemas.Schemas
 	GetRBAC() rbac.RBAC
 	GetRole() role.Service
@@ -93,7 +91,6 @@ type service struct {
 	jwt               crypto.JWT
 	migrate           migrate.Migration
 	project           project.Service
-	provisioning      async.SimpleTask
 	schemas           schemas.Schemas
 	rbac              rbac.RBAC
 	role              role.Service
@@ -158,12 +155,6 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		user:              userService,
 		variable:          variableService,
 	}
-	provisioningService := &provisioning{
-		serviceManager: svc,
-		folders:        conf.Provisioning.Folders,
-		caseSensitive:  dao.GetPersesDAO().IsCaseSensitive(),
-	}
-	svc.provisioning = provisioningService
 	return svc, nil
 }
 
@@ -217,10 +208,6 @@ func (s *service) GetMigration() migrate.Migration {
 
 func (s *service) GetProject() project.Service {
 	return s.project
-}
-
-func (s *service) GetProvisioning() async.SimpleTask {
-	return s.provisioning
 }
 
 func (s *service) GetSchemas() schemas.Schemas {

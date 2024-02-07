@@ -15,8 +15,8 @@ package apiinterface
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/pkg/model/api"
 )
 
