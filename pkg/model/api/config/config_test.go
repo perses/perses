@@ -92,7 +92,8 @@ func TestJSONMarshallConfig(t *testing.T) {
   },
   "provisioning": {
     "interval": "1h"
-  }
+  },
+  "ephemeral_dashboards_cleanup_interval": "1w"
 }`,
 		},
 	}
@@ -302,6 +303,8 @@ important_dashboards:
 information: |-
   # Hello World
   ## File Database setup
+
+ephemeral_dashboards_cleanup_interval: "1h"
 `,
 			result: Config{
 				Security: Security{
@@ -372,6 +375,7 @@ information: |-
 					},
 					Interval: model.Duration(defaultInterval),
 				},
+				EphemeralDashboardsCleanupInterval: model.Duration(1 * time.Hour),
 			},
 		},
 	}
