@@ -32,9 +32,9 @@ type endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service globalsecret.Service, rbacService rbac.RBAC, readonly bool) route.Endpoint {
+func NewEndpoint(service globalsecret.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  shared.NewToolBox(service, rbacService, v1.KindGlobalSecret),
+		toolbox:  shared.NewToolBox(service, rbacService, v1.KindGlobalSecret, caseSensitive),
 		readonly: readonly,
 	}
 }

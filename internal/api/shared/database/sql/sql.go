@@ -127,6 +127,10 @@ func (d *DAO) Init() error {
 	return nil
 }
 
+func (d *DAO) IsCaseSensitive() bool {
+	return d.CaseSensitive
+}
+
 func (d *DAO) createResourceTable(tableName string) string {
 	return sqlbuilder.CreateTable(d.generateCompleteTableName(tableName)).IfNotExists().
 		Define(colID, "VARCHAR(128)", "NOT NULL", "PRIMARY KEY").
@@ -239,7 +243,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 }
 
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	entity.GetMetadata().Flatten(d.CaseSensitive)
+	metadata.Flatten(d.CaseSensitive)
 	id, query, queryErr := d.get(kind, metadata)
 	if queryErr != nil {
 		return queryErr

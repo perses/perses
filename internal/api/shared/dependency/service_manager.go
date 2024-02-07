@@ -161,6 +161,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	provisioningService := &provisioning{
 		serviceManager: svc,
 		folders:        conf.Provisioning.Folders,
+		caseSensitive:  dao.GetPersesDAO().IsCaseSensitive(),
 	}
 	svc.provisioning = provisioningService
 	return svc, nil

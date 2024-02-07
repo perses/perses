@@ -34,14 +34,16 @@ type endpoint struct {
 	rbac          rbac.RBAC
 	readonly      bool
 	disableSignUp bool
+	caseSensitive bool
 }
 
-func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool) route.Endpoint {
+func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser),
+		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser, caseSensitive),
 		rbac:          rbacService,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
+		caseSensitive: caseSensitive,
 	}
 }
 
@@ -84,7 +86,7 @@ func (e *endpoint) List(ctx echo.Context) error {
 }
 
 func (e *endpoint) GetPermissions(ctx echo.Context) error {
-	parameters := shared.ExtractParameters(ctx)
+	parameters := shared.ExtractParameters(ctx, e.caseSensitive)
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {
 		return shared.HandleUnauthorizedError("you need to be connected to retrieve your permissions")

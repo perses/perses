@@ -31,6 +31,7 @@ type provisioning struct {
 	async.SimpleTask
 	serviceManager ServiceManager
 	folders        []string
+	caseSensitive  bool
 }
 
 func (p *provisioning) Execute(_ context.Context, _ context.CancelFunc) error {
@@ -59,6 +60,7 @@ func (p *provisioning) String() string {
 
 func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 	for _, entity := range entities {
+		entity.GetMetadata().Flatten(p.caseSensitive)
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), "")

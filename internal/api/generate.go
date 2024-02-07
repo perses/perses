@@ -55,6 +55,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
 	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/shared/rbac"
+	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/shared/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -63,35 +66,35 @@ type Endpoint struct {
 	readonly bool
 }
 
-func NewEndpoint(service {{ $package }}.Service, readonly bool) *Endpoint {
+func NewEndpoint(service {{ $package }}.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) *Endpoint {
 	return &Endpoint{
-		toolbox: shared.NewToolBox(service),
+		toolbox: shared.NewToolBox(service, rbacService, v1.Kind{{ $kind }}, caseSensitive),
 		readonly: readonly,
 	}
 }
 
-func (e *Endpoint) CollectRoutes(g *shared.Group) {
-	group := g.Group(fmt.Sprintf("/%s", shared.Path{{ $kind }}))
+func (e *Endpoint) CollectRoutes(g *route.Group) {
+	group := g.Group(fmt.Sprintf("/%s", utils.Path{{ $kind }}))
 {{ if $endpoint.IsProjectResource -}}
-	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", shared.PathProject, shared.ParamProject, shared.Path{{ $kind }}))
+	subGroup := g.Group(fmt.Sprintf("/%s/:%s/%s", utils.PathProject, utils.ParamProject, utils.Path{{ $kind }}))
 {{- end }}
 	if !e.readonly {
 		group.POST("", e.Create, false)
 {{ if $endpoint.IsProjectResource -}}
 		subGroup.POST("", e.Create, false)
-		subGroup.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
-		subGroup.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
+		subGroup.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
+		subGroup.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
 {{- else -}}
-		group.PUT(fmt.Sprintf("/:%s", shared.ParamName), e.Update, false)
-		group.DELETE(fmt.Sprintf("/:%s", shared.ParamName), e.Delete, false)
+		group.PUT(fmt.Sprintf("/:%s", utils.ParamName), e.Update, false)
+		group.DELETE(fmt.Sprintf("/:%s", utils.ParamName), e.Delete, false)
 {{- end }}
 	}
 	group.GET("", e.List, false)
 {{ if $endpoint.IsProjectResource -}}
 	subGroup.GET("", e.List, false)
-	subGroup.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
+	subGroup.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
 {{- else -}}
-	group.GET(fmt.Sprintf("/:%s", shared.ParamName), e.Get, false)
+	group.GET(fmt.Sprintf("/:%s", utils.ParamName), e.Get, false)
 {{- end }}
 }
 

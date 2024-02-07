@@ -51,6 +51,10 @@ func (d *DAO) Init() error {
 	return nil
 }
 
+func (d *DAO) IsCaseSensitive() bool {
+	return d.CaseSensitive
+}
+
 func (d *DAO) Close() error {
 	return nil
 }
@@ -81,7 +85,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 	return d.upsert(key, entity)
 }
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
-	entity.GetMetadata().Flatten(d.CaseSensitive)
+	metadata.Flatten(d.CaseSensitive)
 	key, generateIDErr := generateID(kind, metadata)
 	if generateIDErr != nil {
 		return generateIDErr
