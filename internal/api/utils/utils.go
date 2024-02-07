@@ -108,14 +108,3 @@ func GetMetadataProject(metadata api.Metadata) string {
 	}
 	return ""
 }
-
-// AppendIfMissing will append the value in the slice, only if not already present.
-// Will return a boolean saying if the value has been appended or not.
-func AppendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
-	for _, e := range slice {
-		if e == value {
-			return slice, false
-		}
-	}
-	return append(slice, value), true
-}

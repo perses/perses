@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/model"
@@ -28,6 +27,17 @@ const (
 	DefaultAccessTokenTTL  = time.Minute * 15
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
+
+// appendIfMissing will append the value in the slice, only if not already present.
+// Will return a boolean saying if the value has been appended or not.
+func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
+	for _, e := range slice {
+		if e == value {
+			return slice, false
+		}
+	}
+	return append(slice, value), true
+}
 
 type Provider struct {
 	SlugID       string        `json:"slug_id" yaml:"slug_id"`
@@ -100,7 +110,7 @@ func (p *AuthProviders) Verify() error {
 	var tmpOIDCSlugIDs []string
 	for _, prov := range p.OIDC {
 		var ok bool
-		tmpOIDCSlugIDs, ok = utils.AppendIfMissing(tmpOIDCSlugIDs, prov.SlugID)
+		tmpOIDCSlugIDs, ok = appendIfMissing(tmpOIDCSlugIDs, prov.SlugID)
 		if !ok {
 			return fmt.Errorf("several OIDC providers exist with the same slug_id %q", prov.SlugID)
 		}
@@ -108,7 +118,7 @@ func (p *AuthProviders) Verify() error {
 	var tmpOAuthSlugIDs []string
 	for _, prov := range p.OAuth {
 		var ok bool
-		tmpOAuthSlugIDs, ok = utils.AppendIfMissing(tmpOAuthSlugIDs, prov.SlugID)
+		tmpOAuthSlugIDs, ok = appendIfMissing(tmpOAuthSlugIDs, prov.SlugID)
 		if !ok {
 			return fmt.Errorf("several OAuth providers exist with the same slug_id %q", prov.SlugID)
 		}
