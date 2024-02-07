@@ -143,5 +143,5 @@ func (e *EphemeralDashboard) validate() error {
 	if reflect.DeepEqual(e.Spec, EphemeralDashboardSpec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
-	return e.Spec.verifyAndSetJSONReferences()
+	return verifyAndSetJSONReferences(e.Spec.Layouts, e.Spec.Panels)
 }
