@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dependency
+package provisioning
 
 import (
 	"context"
@@ -20,6 +20,7 @@ import (
 	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/resource"
 	modelAPI "github.com/perses/perses/pkg/model/api"
@@ -27,9 +28,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func New(serviceManager dependency.ServiceManager, folders []string) async.SimpleTask {
+	return &provisioning{
+		serviceManager: serviceManager,
+		folders:        folders,
+	}
+}
+
 type provisioning struct {
 	async.SimpleTask
-	serviceManager ServiceManager
+	serviceManager dependency.ServiceManager
 	folders        []string
 }
 
