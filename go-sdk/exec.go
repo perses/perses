@@ -31,6 +31,7 @@ func executeDashboardBuilder(builder dashboard.Builder, writer io.Writer, errWri
 	fmt.Fprint(writer, string(output))
 }
 
+// ExecuteDashboard is a helper to print the result of a dashboard builder in stdout and errors to stderr
 func ExecuteDashboard(builder dashboard.Builder, err error) {
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)

@@ -17,7 +17,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 - automated deployments
 - and more..
 
-## Getting started with Cue
+## Getting Started With Cue
 
 ### Prerequisites
 
@@ -45,7 +45,7 @@ percli dac setup --version 0.42.1
 
 You can omit the version flag if you are connected to a Perses server (it will retrieve its version). Otherwise, unless you have a specific case, better to pass the latest version available.
 
-## Develop dashboards
+### Develop dashboards
 
 You are now fully ready to start developping dashboards as code!
 
@@ -53,7 +53,7 @@ It's first strongly recommended to ramp up on CUE if you are not familiar with t
 - The [official website](https://cuelang.org/) of Cuelang.
 - [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
-Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
+Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of the Go SDK and how to use it, the best thing to do for now is to check directly its source code.
 
 Anytime you want to build the final dashboard definition (i.e Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
 
@@ -84,7 +84,7 @@ go mod init <module name>
 ```
 See the [Go documentation](https://go.dev/doc/tutorial/create-module) for more information about this step.
 
-#### 2.Install the Perses SDK
+#### 2. Install the Perses SDK
 
 ```
 go get github.com/perses/perses
@@ -96,18 +96,20 @@ If you need a specific version, you can specify it as follows:
 go get github.com/perses/perses v0.43.0
 ```
 
-## Develop dashboards
+### Develop dashboards
 
 You are now fully ready to start developing dashboards as code!
 
 It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
 - The [official website](https://go.dev/) of Go.
 
-Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata_go/main.go). This example is heavily relying on the SDK utilities we provide. 
+Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata_go/main.go).
 To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
 All the SDK utilities are located in the `github.com/perses/perses/go-sdk` package.
-Do not log / print on the standard stdout, it will broke the output of the `dac build` command.
 
+> [!WARNING]  
+> Do not log / print on the standard stdout! It would break the output of the `dac build` command.
+ 
 Quick start example:
 
 ```golang

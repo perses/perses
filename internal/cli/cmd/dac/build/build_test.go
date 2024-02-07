@@ -44,13 +44,13 @@ func TestDacBuildCMD(t *testing.T) {
 
 	testSuite := []cmdTest.Suite{
 		{
-			Title:           "nominal case with a single file",
+			Title:           "nominal case with a single cue file",
 			Args:            []string{"-f", "testdata/working_dac.cue"},
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata/working_dac.cue at built%stestdata%sworking_dac_output.yaml\n", "%s", separator, -1),
 		},
 		{
-			Title:           "nominal case with a directory",
+			Title:           "nominal case with a cue directory",
 			Args:            []string{"-d", "testdata"},
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata%sworking_dac.cue at built%stestdata%sworking_dac_output.yaml\nSuccesfully built testdata%sworking_dac_2.cue at built%stestdata%sworking_dac_2_output.yaml\n", "%s", separator, -1),
@@ -86,13 +86,13 @@ func TestDacBuildCMD(t *testing.T) {
 			ExpectedMessage: "if any flags in the group [file directory] are set none of the others can be; [directory file] were all set",
 		},
 		{
-			Title:           "nominal case with a single go file",
+			Title:           "nominal case with a single Go file",
 			Args:            []string{"-f", "testdata_go/main.go"},
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata_go/main.go at built%stestdata_go%smain_output.yaml\n", "%s", separator, -1),
 		},
 		{
-			Title:           "nominal case with a go project",
+			Title:           "nominal case with a Go project",
 			Args:            []string{"-d", "testdata_go"},
 			IsErrorExpected: false,
 			ExpectedMessage: strings.Replace("Succesfully built testdata_go/main.go at built%stestdata_go%smain_output.yaml\n", "%s", separator, -1),

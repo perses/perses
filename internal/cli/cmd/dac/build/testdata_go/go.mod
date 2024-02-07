@@ -15,6 +15,6 @@ module dac
 
 go 1.21.6
 
-replace github.com/perses/perses => ../../../../../../ // TODO: remove when released
+replace github.com/perses/perses => ../../../../../../ // Use current version
 
 require github.com/perses/perses v0.43.0
