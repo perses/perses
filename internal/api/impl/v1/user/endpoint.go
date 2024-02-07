@@ -20,12 +20,13 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/toolbox"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -38,7 +39,7 @@ type endpoint struct {
 
 func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool) route.Endpoint {
 	return &endpoint{
-		toolbox:       shared.NewToolBox(service, rbacService, v1.KindUser),
+		toolbox:       shared.New(service, rbacService, v1.KindUser),
 		rbac:          rbacService,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,
@@ -87,10 +88,10 @@ func (e *endpoint) GetPermissions(ctx echo.Context) error {
 	parameters := shared.ExtractParameters(ctx)
 	claims := crypto.ExtractJWTClaims(ctx)
 	if claims == nil {
-		return shared.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
+		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
 	}
 	if claims.Subject != parameters.Name {
-		return shared.HandleUnauthorizedError("you can only retrieve your permissions")
+		return apiinterface.HandleUnauthorizedError("you can only retrieve your permissions")
 	}
 	permissions := e.rbac.GetPermissions(claims.Subject)
 	return ctx.JSON(http.StatusOK, permissions)

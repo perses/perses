@@ -19,7 +19,7 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/schemas"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"

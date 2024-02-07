@@ -16,6 +16,7 @@
 package dependency
 
 import (
+	"github.com/perses/perses/internal/api/crypto"
 	dashboardImpl "github.com/perses/perses/internal/api/impl/v1/dashboard"
 	datasourceImpl "github.com/perses/perses/internal/api/impl/v1/datasource"
 	folderImpl "github.com/perses/perses/internal/api/impl/v1/folder"
@@ -46,10 +47,9 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/migrate"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 

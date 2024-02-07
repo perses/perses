@@ -16,12 +16,12 @@ package databasefile
 import (
 	"testing"
 
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/stretchr/testify/assert"
 )
 

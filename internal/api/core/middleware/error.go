@@ -15,13 +15,13 @@ package middleware
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/interface"
 )
 
 func HandleError() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			return shared.HandleError(next(c))
+			return apiinterface.HandleError(next(c))
 		}
 	}
 }

@@ -18,7 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/health"
-	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/route"
 )
 
 // Endpoint is the struct that define all endpoint delivered by the path /health

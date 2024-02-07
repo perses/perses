@@ -17,9 +17,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/migrate"
-	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api"
 )
 
@@ -46,7 +46,7 @@ func (e *endpoint) CollectRoutes(g *route.Group) {
 func (e *endpoint) Migrate(ctx echo.Context) error {
 	body := &api.Migrate{}
 	if err := ctx.Bind(body); err != nil {
-		return shared.HandleBadRequestError(err.Error())
+		return apiinterface.HandleBadRequestError(err.Error())
 	}
 	grafanaDashboard := migrate.ReplaceInputValue(body.Input, string(body.GrafanaDashboard))
 	persesDashboard, err := e.migrationService.Migrate([]byte(grafanaDashboard))

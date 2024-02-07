@@ -17,8 +17,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/perses/perses/internal/api/shared/schemas"
-	"github.com/perses/perses/internal/api/shared/validate"
+	"github.com/perses/perses/internal/api/schemas"
+	"github.com/perses/perses/internal/api/validate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"

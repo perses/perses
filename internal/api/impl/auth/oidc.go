@@ -22,11 +22,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -162,7 +162,7 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 		if err != nil {
 			e.logWithError(err).Error("Failed to sync user in database.")
 			w.WriteHeader(http.StatusInternalServerError)
-			writeResponse(w, []byte(shared.InternalError.Error()))
+			writeResponse(w, []byte(apiinterface.InternalError.Error()))
 			return
 		}
 
@@ -173,13 +173,13 @@ func (e *oIDCEndpoint) buildCodeExchangeHandler() echo.HandlerFunc {
 		if _, err := e.tokenManagement.accessToken(username, setCookie); err != nil {
 			e.logWithError(err).Error("Failed to generate and save access token.")
 			w.WriteHeader(http.StatusInternalServerError)
-			writeResponse(w, []byte(shared.InternalError.Error()))
+			writeResponse(w, []byte(apiinterface.InternalError.Error()))
 			return
 		}
 		if _, err := e.tokenManagement.refreshToken(username, setCookie); err != nil {
 			e.logWithError(err).Error("Failed to generate and save refresh token.")
 			w.WriteHeader(http.StatusInternalServerError)
-			writeResponse(w, []byte(shared.InternalError.Error()))
+			writeResponse(w, []byte(apiinterface.InternalError.Error()))
 			return
 		}
 
