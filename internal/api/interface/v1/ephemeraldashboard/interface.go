@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package dashboard
+package ephemeraldashboard
 
 import (
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -21,8 +21,8 @@ import (
 
 type Query struct {
 	databaseModel.Query
-	// NamePrefix is a prefix of the Dashboard.metadata.name that is used to filter the Dashboard list.
-	// It can be empty in case you want to return the full list of dashboards available.
+	// NamePrefix is a prefix of the EphemeralDashboard.metadata.name that is used to filter the EphemeralDashboard list.
+	// It can be empty in case you want to return the full list of ephemeral dashboards available.
 	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
@@ -30,15 +30,15 @@ type Query struct {
 }
 
 type DAO interface {
-	Create(entity *v1.Dashboard) error
-	Update(entity *v1.Dashboard) error
+	Create(entity *v1.EphemeralDashboard) error
+	Update(entity *v1.EphemeralDashboard) error
 	Delete(project string, name string) error
 	DeleteAll(project string) error
-	Get(project string, name string) (*v1.Dashboard, error)
-	List(q databaseModel.Query) ([]*v1.Dashboard, error)
+	Get(project string, name string) (*v1.EphemeralDashboard, error)
+	List(q databaseModel.Query) ([]*v1.EphemeralDashboard, error)
 }
 
 type Service interface {
 	apiInterface.Service
-	Validate(entity *v1.Dashboard) error
+	Validate(entity *v1.EphemeralDashboard) error
 }

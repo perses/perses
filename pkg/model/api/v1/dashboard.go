@@ -29,7 +29,7 @@ type PanelDisplay struct {
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
-func (d *PanelDisplay) UnmarshalJSON(data []byte) error {
+func (p *PanelDisplay) UnmarshalJSON(data []byte) error {
 	var tmp PanelDisplay
 	type plain PanelDisplay
 	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
@@ -38,11 +38,11 @@ func (d *PanelDisplay) UnmarshalJSON(data []byte) error {
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
-	*d = tmp
+	*p = tmp
 	return nil
 }
 
-func (d *PanelDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (p *PanelDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var tmp PanelDisplay
 	type plain PanelDisplay
 	if err := unmarshal((*plain)(&tmp)); err != nil {
@@ -51,12 +51,12 @@ func (d *PanelDisplay) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	if err := (&tmp).validate(); err != nil {
 		return err
 	}
-	*d = tmp
+	*p = tmp
 	return nil
 }
 
-func (d *PanelDisplay) validate() error {
-	if len(d.Name) == 0 {
+func (p *PanelDisplay) validate() error {
+	if len(p.Name) == 0 {
 		return fmt.Errorf("display.name cannot be empty")
 	}
 	return nil
@@ -123,7 +123,7 @@ func (d *DashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (d *DashboardSpec) validate() error {
 	if len(d.Panels) == 0 {
-		return fmt.Errorf("dashboard.spec.panels cannot be empty")
+		return fmt.Errorf("spec.panels cannot be empty")
 	}
 	variables := make(map[string]bool, len(d.Variables))
 	for i, variable := range d.Variables {
@@ -193,16 +193,16 @@ func (d *Dashboard) validate() error {
 	if reflect.DeepEqual(d.Spec, DashboardSpec{}) {
 		return fmt.Errorf("spec cannot be empty")
 	}
-	return d.verifyAndSetJSONReferences()
+	return verifyAndSetJSONReferences(d.Spec.Layouts, d.Spec.Panels)
 }
 
 // verifyAndSetJSONRef will check that each JSON Reference are pointing to an existing object and will set the related pointer in the JSONRef.Object
-func (d *Dashboard) verifyAndSetJSONReferences() error {
-	for _, layout := range d.Spec.Layouts {
+func verifyAndSetJSONReferences(layouts []dashboard.Layout, panels map[string]*Panel) error {
+	for _, layout := range layouts {
 		switch spec := layout.Spec.(type) {
 		case *dashboard.GridLayoutSpec:
 			for _, item := range spec.Items {
-				if err := d.checkAndSetRef(item.Content); err != nil {
+				if err := checkAndSetRef(item.Content, panels); err != nil {
 					return err
 				}
 			}
@@ -212,24 +212,23 @@ func (d *Dashboard) verifyAndSetJSONReferences() error {
 	return nil
 }
 
-func (d *Dashboard) checkAndSetRef(ref *common.JSONRef) error {
-	// ref.Path should like that [ "spec", "panels", <name> ].
-	// So if the array is not equal to three then the reference is wrong.
-	if len(ref.Path) != 3 {
+func checkAndSetRef(ref *common.JSONRef, panels map[string]*Panel) error {
+	// ref.Path should be like [ "spec", "panels", <name> ]
+	var panelsRefPath = []string{"spec", "panels"}
+
+	if len(ref.Path) != len(panelsRefPath)+1 {
 		return fmt.Errorf("reference %q is pointing to the void", ref.Ref)
 	}
-	if ref.Path[0] != "spec" {
-		return fmt.Errorf("reference %q doesn't start by 'spec'", ref.Ref)
-	}
-	switch ref.Path[1] {
-	case "panels":
-		obj, ok := d.Spec.Panels[ref.Path[2]]
-		if !ok {
-			return fmt.Errorf("there is no existing panel called %q in the current dashboard", ref.Path[2])
+	for i := range panelsRefPath {
+		if ref.Path[i] != panelsRefPath[i] {
+			return fmt.Errorf("reference %q at position %d doesn't have the expected element \"%s\"", ref.Ref, i, panelsRefPath[i])
 		}
-		ref.Object = obj
-	default:
-		return fmt.Errorf("%q is not a known object", ref.Path[1])
 	}
+	obj, ok := panels[ref.Path[len(panelsRefPath)]]
+	if !ok {
+		return fmt.Errorf("no panel found for ref %q", ref.Path[2])
+	}
+	ref.Object = obj
+
 	return nil
 }

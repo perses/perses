@@ -20,6 +20,7 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -110,6 +111,8 @@ func (d *DAO) buildQuery(query databaseModel.Query) (string, []interface{}, erro
 		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
 		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+	case *ephemeraldashboard.Query:
+		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableEphemeralDashboard), qt.Project, qt.NamePrefix)
 	case *folder.Query:
 		sqlQuery, args = generateSelectQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:
@@ -160,6 +163,8 @@ func (d *DAO) buildDeleteQuery(query databaseModel.Query) (string, []interface{}
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDashboard), qt.Project, qt.NamePrefix)
 	case *datasource.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableDatasource), qt.Project, qt.NamePrefix)
+	case *ephemeraldashboard.Query:
+		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableEphemeralDashboard), qt.Project, qt.NamePrefix)
 	case *folder.Query:
 		sqlQuery, args = generateDeleteQuery(d.generateCompleteTableName(tableFolder), qt.Project, qt.NamePrefix)
 	case *globaldatasource.Query:

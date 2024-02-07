@@ -32,20 +32,20 @@ import (
 // For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
 var variableTemplateNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
-func Dashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
-	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, nil, nil); err != nil {
+func DashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
+	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
 		return err
 	}
-	return validateDashboard(entity, sch)
+	return validateDashboardSpec(spec, sch)
 
 }
 
-func DashboardWithVars(entity *modelV1.Dashboard, sch schemas.Schemas, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
-	if _, err := utils.BuildVariableOrder(entity.Spec.Variables, projectVariables, globalVariables); err != nil {
+func DashboardSpecWithVars(spec modelV1.DashboardSpec, sch schemas.Schemas, projectVariables []*modelV1.Variable, globalVariables []*modelV1.GlobalVariable) error {
+	if _, err := utils.BuildVariableOrder(spec.Variables, projectVariables, globalVariables); err != nil {
 		return err
 	}
 
-	return validateDashboard(entity, sch)
+	return validateDashboardSpec(spec, sch)
 }
 
 func Datasource[T modelV1.DatasourceInterface](entity T, list []T, sch schemas.Schemas) error {
@@ -116,30 +116,30 @@ func validateDatasourcePlugin(plugin common.Plugin, name string, sch schemas.Sch
 	return sch.ValidateDatasource(plugin, name)
 }
 
-func validateDashboard(entity *modelV1.Dashboard, sch schemas.Schemas) error {
-	if err := validateVariableNames(entity.Spec.Variables); err != nil {
+func validateDashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
+	if err := validateVariableNames(spec.Variables); err != nil {
 		return err
 	}
 
 	if sch != nil {
-		if err := sch.ValidateDashboardVariables(entity.Spec.Variables); err != nil {
+		if err := sch.ValidateDashboardVariables(spec.Variables); err != nil {
 			return err
 		}
-		if err := sch.ValidatePanels(entity.Spec.Panels); err != nil {
+		if err := sch.ValidatePanels(spec.Panels); err != nil {
 			return err
 		}
 	}
-	if len(entity.Spec.Datasources) > 0 {
+	if len(spec.Datasources) > 0 {
 		defaultDts := make(map[string]bool)
-		for dtsName, spec := range entity.Spec.Datasources {
-			if err := validateDatasourcePlugin(spec.Plugin, dtsName, sch); err != nil {
+		for dtsName, dtsSpec := range spec.Datasources {
+			if err := validateDatasourcePlugin(dtsSpec.Plugin, dtsName, sch); err != nil {
 				return err
 			}
-			if spec.Default {
-				if defaultDts[spec.Plugin.Kind] {
-					return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, spec.Plugin.Kind)
+			if dtsSpec.Default {
+				if defaultDts[dtsSpec.Plugin.Kind] {
+					return fmt.Errorf("%s can not be defined as default datasource: there is already a default defined for kind %q", dtsName, dtsSpec.Plugin.Kind)
 				}
-				defaultDts[spec.Plugin.Kind] = true
+				defaultDts[dtsSpec.Plugin.Kind] = true
 			}
 		}
 	}

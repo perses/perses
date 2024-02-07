@@ -15,12 +15,14 @@ package databasefile
 
 import (
 	"fmt"
+	"os"
+	"path"
+
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
-	"os"
-	"path"
 
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -68,6 +70,9 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 		prefix = qt.NamePrefix
 	case *datasource.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
+		prefix = qt.NamePrefix
+	case *ephemeraldashboard.Query:
+		pathFolder = d.generateProjectResourceQuery(v1.KindEphemeralDashboard, qt.Project)
 		prefix = qt.NamePrefix
 	case *folder.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)

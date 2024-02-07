@@ -47,6 +47,14 @@ var resources = []resource{
 		},
 	},
 	{
+		kind:      modelV1.KindEphemeralDashboard,
+		shortTerm: "edash",
+		aliases: []string{
+			"ephemeralDashboards",
+			"edashs",
+		},
+	},
+	{
 		kind:      modelV1.KindFolder,
 		shortTerm: "fld",
 		aliases: []string{

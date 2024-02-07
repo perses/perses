@@ -22,21 +22,22 @@ import (
 type Scope string
 
 const (
-	DashboardScope         Scope = "Dashboard"
-	DatasourceScope        Scope = "Datasource"
-	FolderScope            Scope = "Folder"
-	GlobalDatasourceScope  Scope = "GlobalDatasource"
-	GlobalRoleScope        Scope = "GlobalRole"
-	GlobalRoleBindingScope Scope = "GlobalRoleBinding"
-	GlobalSecretScope      Scope = "GlobalSecret"
-	GlobalVariableScope    Scope = "GlobalVariable"
-	ProjectScope           Scope = "Project"
-	RoleScope              Scope = "Role"
-	RoleBindingScope       Scope = "RoleBinding"
-	SecretScope            Scope = "Secret"
-	UserScope              Scope = "User"
-	VariableScope          Scope = "Variable"
-	WildcardScope          Scope = "*"
+	DashboardScope          Scope = "Dashboard"
+	DatasourceScope         Scope = "Datasource"
+	EphemeralDashboardScope Scope = "EphemeralDashboard"
+	FolderScope             Scope = "Folder"
+	GlobalDatasourceScope   Scope = "GlobalDatasource"
+	GlobalRoleScope         Scope = "GlobalRole"
+	GlobalRoleBindingScope  Scope = "GlobalRoleBinding"
+	GlobalSecretScope       Scope = "GlobalSecret"
+	GlobalVariableScope     Scope = "GlobalVariable"
+	ProjectScope            Scope = "Project"
+	RoleScope               Scope = "Role"
+	RoleBindingScope        Scope = "RoleBinding"
+	SecretScope             Scope = "Secret"
+	UserScope               Scope = "User"
+	VariableScope           Scope = "Variable"
+	WildcardScope           Scope = "*"
 )
 
 func (k *Scope) UnmarshalJSON(data []byte) error {
@@ -83,6 +84,9 @@ func GetScope(scope string) (*Scope, error) {
 		return &result, nil
 	case strings.ToLower(string(DatasourceScope)):
 		result := DatasourceScope
+		return &result, nil
+	case strings.ToLower(string(EphemeralDashboardScope)):
+		result := EphemeralDashboardScope
 		return &result, nil
 	case strings.ToLower(string(FolderScope)):
 		result := FolderScope

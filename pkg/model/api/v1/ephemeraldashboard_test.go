@@ -26,72 +26,71 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TimeSeriesSpec struct {
-	// TODO: showLegend needs to be removed in favor of new spec
-	ShowLegend bool     `json:"showLegend" yaml:"showLegend"`
-	Lines      []string `json:"lines" yaml:"lines"`
-}
-
-func TestMarshalDashboard(t *testing.T) {
+func TestMarshalEphemeralDashboard(t *testing.T) {
 	testSuite := []struct {
-		title     string
-		dashboard *Dashboard
-		result    string
+		title              string
+		ephemeralDashboard *EphemeralDashboard
+		result             string
 	}{
 		{
-			title: "simple dashboard",
-			dashboard: &Dashboard{
-				Kind: KindDashboard,
+			title: "simple ephemeral dashboard",
+			ephemeralDashboard: &EphemeralDashboard{
+				Kind: KindEphemeralDashboard,
 				Metadata: ProjectMetadata{
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
 					Project: "perses",
 				},
-				Spec: DashboardSpec{
-					Variables: nil,
-					Panels: map[string]*Panel{
-						"MyPanel": {
-							Kind: "Panel",
-							Spec: PanelSpec{
-								Display: PanelDisplay{
-									Name: "simple line chart",
-								},
-								Plugin: common.Plugin{
-									Kind: "TimeSeriesChart",
-									Spec: TimeSeriesSpec{
-										ShowLegend: false,
-										Lines:      []string{"up"},
-									},
-								},
-							},
-						},
+				Spec: EphemeralDashboardSpec{
+					EphemeralDashboardSpecBase{
+						TTL: model.Duration(24 * time.Hour),
 					},
-					Layouts: []dashboard.Layout{
-						{
-							Kind: dashboard.KindGridLayout,
-							Spec: &dashboard.GridLayoutSpec{
-								Items: []dashboard.GridItem{
-									{
-										X:      0,
-										Y:      0,
-										Width:  3,
-										Height: 4,
-										Content: &common.JSONRef{
-											Ref:  "#/spec/panels/MyPanel",
-											Path: []string{"spec", "panels", "MyPanel"},
+					DashboardSpec{
+						Variables: nil,
+						Panels: map[string]*Panel{
+							"MyPanel": {
+								Kind: "Panel",
+								Spec: PanelSpec{
+									Display: PanelDisplay{
+										Name: "simple line chart",
+									},
+									Plugin: common.Plugin{
+										Kind: "TimeSeriesChart",
+										Spec: TimeSeriesSpec{
+											ShowLegend: false,
+											Lines:      []string{"up"},
 										},
 									},
 								},
 							},
 						},
+						Layouts: []dashboard.Layout{
+							{
+								Kind: dashboard.KindGridLayout,
+								Spec: &dashboard.GridLayoutSpec{
+									Items: []dashboard.GridItem{
+										{
+											X:      0,
+											Y:      0,
+											Width:  3,
+											Height: 4,
+											Content: &common.JSONRef{
+												Ref:  "#/spec/panels/MyPanel",
+												Path: []string{"spec", "panels", "MyPanel"},
+											},
+										},
+									},
+								},
+							},
+						},
+						Duration:        model.Duration(6 * time.Hour),
+						RefreshInterval: model.Duration(20 * time.Second),
 					},
-					Duration:        model.Duration(6 * time.Hour),
-					RefreshInterval: model.Duration(20 * time.Second),
 				},
 			},
 			result: `{
-  "kind": "Dashboard",
+  "kind": "EphemeralDashboard",
   "metadata": {
     "name": "SimpleDashboard",
     "createdAt": "0001-01-01T00:00:00Z",
@@ -100,6 +99,7 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
+    "ttl": "1d",
     "panels": {
       "MyPanel": {
         "kind": "Panel",
@@ -144,92 +144,97 @@ func TestMarshalDashboard(t *testing.T) {
 		},
 		{
 			title: "simple dashboard with variable",
-			dashboard: &Dashboard{
-				Kind: KindDashboard,
+			ephemeralDashboard: &EphemeralDashboard{
+				Kind: KindEphemeralDashboard,
 				Metadata: ProjectMetadata{
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
 					Project: "perses",
 				},
-				Spec: DashboardSpec{
-					Variables: []dashboard.Variable{
-						{
-							Kind: variable.KindList,
-							Spec: &dashboard.ListVariableSpec{
-								ListSpec: variable.ListSpec{
+				Spec: EphemeralDashboardSpec{
+					EphemeralDashboardSpecBase{
+						TTL: model.Duration(24 * time.Hour),
+					},
+					DashboardSpec{
+						Variables: []dashboard.Variable{
+							{
+								Kind: variable.KindList,
+								Spec: &dashboard.ListVariableSpec{
+									ListSpec: variable.ListSpec{
+										Plugin: common.Plugin{
+											Kind: "PrometheusLabelNamesVariable",
+											Spec: map[string]interface{}{
+												"matchers": []string{
+													"up",
+												},
+											},
+										},
+									},
+									Name: "labelName",
+								},
+							},
+							{
+								Kind: variable.KindList,
+								Spec: &dashboard.ListVariableSpec{
+									ListSpec: variable.ListSpec{
+										Plugin: common.Plugin{
+											Kind: "PrometheusLabelValuesVariable",
+											Spec: map[string]interface{}{
+												"labelName": "$labelName",
+												"matchers": []string{
+													"up",
+												},
+											},
+										},
+									},
+									Name: "labelValue",
+								},
+							},
+						},
+						Panels: map[string]*Panel{
+							"MyPanel": {
+								Kind: "Panel",
+								Spec: PanelSpec{
+									Display: PanelDisplay{
+										Name: "simple line chart",
+									},
 									Plugin: common.Plugin{
-										Kind: "PrometheusLabelNamesVariable",
-										Spec: map[string]interface{}{
-											"matchers": []string{
-												"up",
+										Kind: "TimeSeriesChart",
+										Spec: TimeSeriesSpec{
+											ShowLegend: false,
+											Lines:      []string{"up"},
+										},
+									},
+								},
+							},
+						},
+						Layouts: []dashboard.Layout{
+							{
+								Kind: dashboard.KindGridLayout,
+								Spec: &dashboard.GridLayoutSpec{
+									Items: []dashboard.GridItem{
+										{
+											X:      0,
+											Y:      0,
+											Width:  3,
+											Height: 4,
+											Content: &common.JSONRef{
+												Ref:  "#/spec/panels/MyPanel",
+												Path: []string{"spec", "panels", "MyPanel"},
 											},
 										},
 									},
 								},
-								Name: "labelName",
 							},
 						},
-						{
-							Kind: variable.KindList,
-							Spec: &dashboard.ListVariableSpec{
-								ListSpec: variable.ListSpec{
-									Plugin: common.Plugin{
-										Kind: "PrometheusLabelValuesVariable",
-										Spec: map[string]interface{}{
-											"labelName": "$labelName",
-											"matchers": []string{
-												"up",
-											},
-										},
-									},
-								},
-								Name: "labelValue",
-							},
-						},
+						Duration:        model.Duration(6 * time.Hour),
+						RefreshInterval: model.Duration(15 * time.Second),
 					},
-					Panels: map[string]*Panel{
-						"MyPanel": {
-							Kind: "Panel",
-							Spec: PanelSpec{
-								Display: PanelDisplay{
-									Name: "simple line chart",
-								},
-								Plugin: common.Plugin{
-									Kind: "TimeSeriesChart",
-									Spec: TimeSeriesSpec{
-										ShowLegend: false,
-										Lines:      []string{"up"},
-									},
-								},
-							},
-						},
-					},
-					Layouts: []dashboard.Layout{
-						{
-							Kind: dashboard.KindGridLayout,
-							Spec: &dashboard.GridLayoutSpec{
-								Items: []dashboard.GridItem{
-									{
-										X:      0,
-										Y:      0,
-										Width:  3,
-										Height: 4,
-										Content: &common.JSONRef{
-											Ref:  "#/spec/panels/MyPanel",
-											Path: []string{"spec", "panels", "MyPanel"},
-										},
-									},
-								},
-							},
-						},
-					},
-					Duration:        model.Duration(6 * time.Hour),
-					RefreshInterval: model.Duration(15 * time.Second),
 				},
 			},
 			result: `{
-  "kind": "Dashboard",
+  "kind": "EphemeralDashboard",
   "metadata": {
     "name": "SimpleDashboard",
     "createdAt": "0001-01-01T00:00:00Z",
@@ -238,6 +243,7 @@ func TestMarshalDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
+    "ttl": "1d",
     "variables": [
       {
         "kind": "ListVariable",
@@ -318,16 +324,16 @@ func TestMarshalDashboard(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			data, err := json.MarshalIndent(test.dashboard, "", "  ")
+			data, err := json.MarshalIndent(test.ephemeralDashboard, "", "  ")
 			assert.NoError(t, err)
 			assert.Equal(t, test.result, string(data))
 		})
 	}
 }
 
-func TestUnmarshallDashboard(t *testing.T) {
-	jsonDashboard := `{
-  "kind": "Dashboard",
+func TestUnmarshallEphemeralDashboard(t *testing.T) {
+	jsonEphemeralDashboard := `{
+  "kind": "EphemeralDashboard",
   "metadata": {
     "name": "SimpleDashboard",
     "createdAt": "0001-01-01T00:00:00Z",
@@ -335,6 +341,7 @@ func TestUnmarshallDashboard(t *testing.T) {
     "project": "perses"
   },
   "spec": {
+    "ttl": "1d",
     "variables": [
       {
         "kind": "ListVariable",
@@ -424,82 +431,87 @@ func TestUnmarshallDashboard(t *testing.T) {
 			},
 		},
 	}
-	expected := &Dashboard{
-		Kind: KindDashboard,
+	expected := &EphemeralDashboard{
+		Kind: KindEphemeralDashboard,
 		Metadata: ProjectMetadata{
 			Metadata: Metadata{
 				Name: "SimpleDashboard",
 			},
 			Project: "perses",
 		},
-		Spec: DashboardSpec{
-			Variables: []dashboard.Variable{
-				{
-					Kind: variable.KindList,
-					Spec: &dashboard.ListVariableSpec{
-						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
-								Kind: "PrometheusLabelNamesVariable",
-								Spec: map[string]interface{}{
-									"matchers": []interface{}{
-										"up",
+		Spec: EphemeralDashboardSpec{
+			EphemeralDashboardSpecBase{
+				TTL: model.Duration(24 * time.Hour),
+			},
+			DashboardSpec{
+				Variables: []dashboard.Variable{
+					{
+						Kind: variable.KindList,
+						Spec: &dashboard.ListVariableSpec{
+							ListSpec: variable.ListSpec{
+								Plugin: common.Plugin{
+									Kind: "PrometheusLabelNamesVariable",
+									Spec: map[string]interface{}{
+										"matchers": []interface{}{
+											"up",
+										},
+									},
+								},
+							},
+							Name: "labelName",
+						},
+					},
+					{
+						Kind: variable.KindList,
+						Spec: &dashboard.ListVariableSpec{
+							ListSpec: variable.ListSpec{
+								Plugin: common.Plugin{
+									Kind: "PrometheusLabelValuesVariable",
+									Spec: map[string]interface{}{
+										"labelName": "$labelName",
+										"matchers": []interface{}{
+											"up",
+										},
+									},
+								},
+							},
+							Name: "labelValue",
+						},
+					},
+				},
+				Panels: map[string]*Panel{"MyPanel": panel},
+				Layouts: []dashboard.Layout{
+					{
+						Kind: dashboard.KindGridLayout,
+						Spec: &dashboard.GridLayoutSpec{
+							Items: []dashboard.GridItem{
+								{
+									X:      0,
+									Y:      0,
+									Width:  3,
+									Height: 4,
+									Content: &common.JSONRef{
+										Ref:    "#/spec/panels/MyPanel",
+										Path:   []string{"spec", "panels", "MyPanel"},
+										Object: panel,
 									},
 								},
 							},
 						},
-						Name: "labelName",
 					},
 				},
-				{
-					Kind: variable.KindList,
-					Spec: &dashboard.ListVariableSpec{
-						ListSpec: variable.ListSpec{
-							Plugin: common.Plugin{
-								Kind: "PrometheusLabelValuesVariable",
-								Spec: map[string]interface{}{
-									"labelName": "$labelName",
-									"matchers": []interface{}{
-										"up",
-									},
-								},
-							},
-						},
-						Name: "labelValue",
-					},
-				},
+				Duration:        model.Duration(6 * time.Hour),
+				RefreshInterval: model.Duration(30 * time.Second),
 			},
-			Panels: map[string]*Panel{"MyPanel": panel},
-			Layouts: []dashboard.Layout{
-				{
-					Kind: dashboard.KindGridLayout,
-					Spec: &dashboard.GridLayoutSpec{
-						Items: []dashboard.GridItem{
-							{
-								X:      0,
-								Y:      0,
-								Width:  3,
-								Height: 4,
-								Content: &common.JSONRef{
-									Ref:    "#/spec/panels/MyPanel",
-									Path:   []string{"spec", "panels", "MyPanel"},
-									Object: panel,
-								},
-							},
-						},
-					},
-				},
-			},
-			Duration:        model.Duration(6 * time.Hour),
-			RefreshInterval: model.Duration(30 * time.Second),
 		},
 	}
-	result := &Dashboard{}
-	err := json.Unmarshal([]byte(jsonDashboard), result)
+	result := &EphemeralDashboard{}
+	err := json.Unmarshal([]byte(jsonEphemeralDashboard), result)
 	assert.NoError(t, err)
 	assert.Equal(t, expected, result)
 }
 
-func TestUnmarshalDashboardError(t *testing.T) {
+func TestUnmarshalEphemeralDashboardError(t *testing.T) {
 	testSuite := []struct {
 		title string
 		jason string
@@ -509,7 +521,7 @@ func TestUnmarshalDashboardError(t *testing.T) {
 			title: "spec cannot be empty",
 			jason: `
 {
-  "kind": "Dashboard",
+  "kind": "EphemeralDashboard",
   "metadata": {
     "name": "test",
     "project": "perses"
@@ -522,7 +534,7 @@ func TestUnmarshalDashboardError(t *testing.T) {
 			title: "panel list cannot be empty",
 			jason: `
 {
-  "kind": "Dashboard",
+  "kind": "EphemeralDashboard",
   "metadata": {
     "name": "test",
     "project": "perses"
@@ -535,7 +547,7 @@ func TestUnmarshalDashboardError(t *testing.T) {
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
-			result := Dashboard{}
+			result := EphemeralDashboard{}
 			assert.Equal(t, test.err, json.Unmarshal([]byte(test.jason), &result))
 		})
 	}

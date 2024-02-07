@@ -80,20 +80,23 @@ func FormatArrayMessage(message string, list []string) string {
 	return builder.String()
 }
 
-// FormatTime formats a time with human-readable format
-func FormatTime(t time.Time) string {
-	var age string
+// FormatAge returns a formatted age string corresponding to the date provided
+func FormatAge(t time.Time) string {
+	return FormatDuration(time.Since(t))
+}
 
-	delay := time.Since(t)
+// FormatDuration formats a duration in a human-readable way
+func FormatDuration(d time.Duration) string {
+	var durationStr string
 
-	if day := int(delay.Hours() / 24); day > 1 {
-		age = strconv.Itoa(day) + "d"
-	} else if hours := int(delay.Hours()); hours > 0 {
-		age = strconv.Itoa(hours) + "h"
-	} else if minutes := int(delay.Minutes()); minutes > 0 {
-		age = strconv.Itoa(minutes) + "m"
+	if day := int(d.Hours() / 24); day > 1 {
+		durationStr = strconv.Itoa(day) + "d"
+	} else if hours := int(d.Hours()); hours > 0 {
+		durationStr = strconv.Itoa(hours) + "h"
+	} else if minutes := int(d.Minutes()); minutes > 0 {
+		durationStr = strconv.Itoa(minutes) + "m"
 	} else {
-		age = strconv.Itoa(int(delay.Seconds())) + "s"
+		durationStr = strconv.Itoa(int(d.Seconds())) + "s"
 	}
-	return age
+	return durationStr
 }

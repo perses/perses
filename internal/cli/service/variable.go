@@ -53,7 +53,7 @@ func (d *variable) BuildMatrix(hits []modelAPI.Entity) [][]string {
 			entity.Metadata.Name,
 			entity.Metadata.Project,
 			string(entity.Spec.Kind),
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
 	}
