@@ -132,7 +132,7 @@ func (o *option) processFile(file string, extension string) error {
 		// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
 		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
 	} else {
-		return fmt.Errorf("invalid extension provided: must be either `cue` or `go`")
+		return output.HandleString(o.writer, fmt.Sprintf("skipping %q because it is neither a `cue` or `go` file", file))
 	}
 
 	// Capture the output of the command
