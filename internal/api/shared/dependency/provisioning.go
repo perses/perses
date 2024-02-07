@@ -100,8 +100,6 @@ func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, erro
 		return p.serviceManager.GetDashboard(), nil
 	case modelV1.KindDatasource:
 		return p.serviceManager.GetDatasource(), nil
-	case modelV1.KindEphemeralDashboard:
-		return p.serviceManager.GetEphemeralDashboard(), nil
 	case modelV1.KindFolder:
 		return p.serviceManager.GetFolder(), nil
 	case modelV1.KindGlobalDatasource:

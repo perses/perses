@@ -47,8 +47,8 @@ func (edsb *EphemeralDashboardSpecBase) UnmarshalYAML(unmarshal func(interface{}
 }
 
 type EphemeralDashboardSpec struct {
-	EphemeralDashboardSpecBase
-	DashboardSpec
+	EphemeralDashboardSpecBase `json:",inline" yaml:",inline"`
+	DashboardSpec              `json:",inline" yaml:",inline"`
 }
 
 // NB custom unmarshalling is required, otherwise by default the TTL field
