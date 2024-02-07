@@ -16,6 +16,7 @@ package project
 import (
 	"fmt"
 
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -25,9 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
-	"github.com/perses/perses/internal/api/shared"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/rbac"
+	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
@@ -65,7 +64,7 @@ func (s *service) Create(ctx apiInterface.PersesContext, entity api.Entity) (int
 	if object, ok := entity.(*v1.Project); ok {
 		return s.create(object, ctx)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
+	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 // Create default roles and role bindings for the project
@@ -112,13 +111,13 @@ func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parame
 	if object, ok := entity.(*v1.Project); ok {
 		return s.update(object, parameters)
 	}
-	return nil, shared.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
+	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
 }
 
 func (s *service) update(entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in project %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
-		return nil, shared.HandleBadRequestError("metadata.name and the name in the http path request don't match")
+		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
 	// find the previous version of the project
 	oldEntity, err := s.dao.Get(parameters.Name)

@@ -23,8 +23,8 @@ import (
 	"time"
 
 	"github.com/gavv/httpexpect/v2"
-	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"

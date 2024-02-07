@@ -16,6 +16,7 @@ package core
 import (
 	"github.com/labstack/echo/v4"
 	echoUtils "github.com/perses/common/echo"
+	"github.com/perses/perses/internal/api/dependency"
 	authendpoint "github.com/perses/perses/internal/api/impl/auth"
 	configendpoint "github.com/perses/perses/internal/api/impl/config"
 	migrateendpoint "github.com/perses/perses/internal/api/impl/migrate"
@@ -36,9 +37,8 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
-	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 )

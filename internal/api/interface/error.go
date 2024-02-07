@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package apiinterface
 
 import (
 	"errors"
@@ -19,7 +19,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/sirupsen/logrus"
 )
 

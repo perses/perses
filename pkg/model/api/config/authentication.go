@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/model"

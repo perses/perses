@@ -18,9 +18,9 @@ import (
 	"fmt"
 
 	"github.com/perses/common/async"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/dependency"
 	apiInterface "github.com/perses/perses/internal/api/interface"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/resource"
 	modelAPI "github.com/perses/perses/pkg/model/api"

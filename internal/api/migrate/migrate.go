@@ -23,8 +23,8 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -148,7 +148,7 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 	)
 	if err := grafanaDashboardVal.Validate(cue.Final()); err != nil {
 		logrus.WithError(err).Trace("Unable to wrap the received json into a CUE definition")
-		return nil, shared.HandleBadRequestError(err.Error())
+		return nil, apiinterface.HandleBadRequestError(err.Error())
 	}
 
 	// Compile the migration schema using the grafana def to resolve the paths
@@ -156,14 +156,14 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 	err := mappingVal.Err()
 	if err != nil {
 		logrus.WithError(err).Trace("Unable to compile the migration schema using the received dashboard to resolve the paths")
-		return nil, shared.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses dashboard: %s", err))
+		return nil, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses dashboard: %s", err))
 	}
 	logrus.Tracef("final migration schema: %#v", mappingVal)
 
 	// marshall to JSON then unmarshall in v1.Dashboard struct to pass the final checks & build the final dashboard to return
 	persesDashboardJSON, err := json.Marshal(mappingVal)
 	if err != nil {
-		return nil, fmt.Errorf("%w: Unable to marshall CUE Value to json: %s", shared.InternalError, err)
+		return nil, fmt.Errorf("%w: Unable to marshall CUE Value to json: %s", apiinterface.InternalError, err)
 	}
 	logrus.Tracef("perses dashboard as JSON: %s", string(persesDashboardJSON))
 
@@ -171,7 +171,7 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 	err = json.Unmarshal(persesDashboardJSON, &persesDashboard)
 	if err != nil {
 		logrus.WithError(err).Trace("Unable to unmarshall JSON bytes to Dashboard struct")
-		return nil, shared.HandleBadRequestError(fmt.Sprintf("the Perses dashboard constraints are not met: %s", err))
+		return nil, apiinterface.HandleBadRequestError(fmt.Sprintf("the Perses dashboard constraints are not met: %s", err))
 	}
 
 	return &persesDashboard, nil

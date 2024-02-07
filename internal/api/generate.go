@@ -54,18 +54,18 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/{{ $package }}"
-	"github.com/perses/perses/internal/api/shared"
+	"github.com/perses/perses/internal/api/toolbox"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type Endpoint struct {
-	toolbox  shared.Toolbox
+	toolbox  toolbox.Toolbox
 	readonly bool
 }
 
 func NewEndpoint(service {{ $package }}.Service, readonly bool) *Endpoint {
 	return &Endpoint{
-		toolbox: shared.NewToolBox(service),
+		toolbox: toolbox.New(service),
 		readonly: readonly,
 	}
 }

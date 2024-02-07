@@ -25,17 +25,17 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/perses/pkg/model/api/v1/role"
@@ -133,13 +133,13 @@ func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope r
 
 	if role.IsGlobalScope(scope) {
 		if ok := e.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, scope); !ok {
-			return shared.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
+			return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, scope))
 		}
 		return nil
 	}
 
 	if ok := e.rbac.HasPermission(claims.Subject, action, projectName, scope); !ok {
-		return shared.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
+		return apiinterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, scope))
 	}
 
 	return nil
@@ -277,10 +277,10 @@ func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, shared.InternalError
+		return v1.DatasourceSpec{}, apiinterface.InternalError
 	}
 	return dts.Spec, nil
 }
@@ -290,10 +290,10 @@ func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.Dat
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q in project %q", name, projectName)
-			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, shared.InternalError
+		return v1.DatasourceSpec{}, apiinterface.InternalError
 	}
 	return dts.Spec, nil
 }
@@ -303,15 +303,15 @@ func (e *endpoint) getDashboardDatasource(projectName string, dashboardName stri
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Dashboard %q in project %q", dashboardName, projectName)
-			return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, shared.InternalError
+		return v1.DatasourceSpec{}, apiinterface.InternalError
 	}
 	dtsSpec, ok := db.Spec.Datasources[name]
 	if !ok {
 		logrus.Debugf("unable to find the Datasource %q from Dashboard %q in project %q", name, dashboardName, projectName)
-		return v1.DatasourceSpec{}, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+		return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 	}
 	return *dtsSpec, nil
 }
@@ -321,10 +321,10 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return nil, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
+			return nil, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
 		}
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
-		return nil, shared.InternalError
+		return nil, apiinterface.InternalError
 	}
 	return &scrt.Spec, nil
 }
@@ -334,10 +334,10 @@ func (e *endpoint) getProjectSecret(projectName string, dtsName string, name str
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return nil, shared.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
+			return nil, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
 		}
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)
-		return nil, shared.InternalError
+		return nil, apiinterface.InternalError
 	}
 	return &scrt.Spec, nil
 }
@@ -360,7 +360,7 @@ func newProxy(spec v1.DatasourceSpec, path string, crypto crypto.Crypto, retriev
 		}
 		if decryptErr := crypto.Decrypt(scrt); decryptErr != nil {
 			logrus.WithError(err).Errorf("unable to decrypt the secret")
-			return nil, shared.InternalError
+			return nil, apiinterface.InternalError
 		}
 	}
 	if !strings.HasPrefix(path, "/") {
@@ -396,12 +396,12 @@ func (h *httpProxy) serve(c echo.Context) error {
 	}
 
 	if len(h.config.AllowedEndpoints) > 0 && !isAllowed {
-		return shared.HandleForbiddenError(fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
+		return apiinterface.HandleForbiddenError(fmt.Sprintf("you are not allowed to use this endpoint %q with the HTTP method %s", h.path, req.Method))
 	}
 
 	if err := h.prepareRequest(c); err != nil {
 		logrus.WithError(err).Errorf("unable to prepare the request")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	// redirect the request to the datasource
