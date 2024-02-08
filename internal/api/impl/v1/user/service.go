@@ -18,10 +18,9 @@ import (
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
 
+	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -42,7 +41,7 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 	if object, ok := entity.(*v1.User); ok {
 		return s.create(object)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", shared.BadRequestError, entity)
+	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", apiInterface.BadRequestError, entity)
 }
 
 func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
@@ -50,12 +49,12 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	entity.Metadata.CreateNow()
 	// check that the password is correctly filled
 	if len(entity.Spec.NativeProvider.Password) == 0 {
-		return nil, fmt.Errorf("%w: password cannot be empty", shared.BadRequestError)
+		return nil, fmt.Errorf("%w: password cannot be empty", apiInterface.BadRequestError)
 	}
 	hash, err := crypto.HashAndSalt([]byte(entity.Spec.NativeProvider.Password))
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %s", entity.Metadata.Name)
-		return nil, shared.InternalError
+		return nil, apiInterface.InternalError
 	}
 	// save the hash in the password field
 	entity.Spec.NativeProvider.Password = string(hash)
@@ -69,13 +68,13 @@ func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parame
 	if userObject, ok := entity.(*v1.User); ok {
 		return s.update(userObject, parameters)
 	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", shared.BadRequestError, entity)
+	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", apiInterface.BadRequestError, entity)
 }
 
 func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in user '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
-		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", shared.BadRequestError)
+		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", apiInterface.BadRequestError)
 	}
 	// find the previous version of the project
 	oldEntity, err := s.dao.Get(parameters.Name)

@@ -19,7 +19,7 @@ import (
 	"io"
 	"regexp"
 
-	"github.com/perses/perses/internal/api/shared/migrate"
+	"github.com/perses/perses/internal/api/migrate"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"

@@ -16,8 +16,8 @@ package auth
 import (
 	"net/http"
 
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/sirupsen/logrus"
 )
 
@@ -29,7 +29,7 @@ func (tm *tokenManagement) accessToken(login string, setCookie func(cookie *http
 	accessToken, err := tm.jwt.SignedAccessToken(login)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the access token")
-		return "", shared.InternalError
+		return "", apiinterface.InternalError
 	}
 	jwtHeaderPayloadCookie, signatureCookie := tm.jwt.CreateAccessTokenCookie(accessToken)
 	setCookie(jwtHeaderPayloadCookie)
@@ -41,7 +41,7 @@ func (tm *tokenManagement) refreshToken(login string, setCookie func(cookie *htt
 	refreshToken, err := tm.jwt.SignedRefreshToken(login)
 	if err != nil {
 		logrus.WithError(err).Errorf("unable to generate the refresh token")
-		return "", shared.InternalError
+		return "", apiinterface.InternalError
 	}
 	setCookie(tm.jwt.CreateRefreshTokenCookie(refreshToken))
 	return refreshToken, nil

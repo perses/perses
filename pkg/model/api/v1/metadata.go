@@ -15,6 +15,7 @@ package v1
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -50,6 +51,12 @@ func (m *Metadata) Update(previous Metadata) {
 
 func (m *Metadata) GetName() string {
 	return m.Name
+}
+
+func (m *Metadata) Flatten(sensitive bool) {
+	if !sensitive {
+		m.Name = strings.ToLower(m.Name)
+	}
 }
 
 func NewProjectMetadata(project string, name string) *ProjectMetadata {
@@ -166,6 +173,13 @@ func (pm *ProjectMetadata) UnmarshalYAML(unmarshal func(interface{}) error) erro
 
 func (pm *ProjectMetadata) GetName() string {
 	return pm.Name
+}
+
+func (pm *ProjectMetadata) Flatten(sensitive bool) {
+	if !sensitive {
+		pm.Name = strings.ToLower(pm.Name)
+		pm.Project = strings.ToLower(pm.Project)
+	}
 }
 
 func (pm *ProjectMetadata) Update(previous ProjectMetadata) {

@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/perses/perses/internal/api/shared/dependency"
+	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"

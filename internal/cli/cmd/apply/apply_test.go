@@ -14,6 +14,8 @@
 package apply
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	cmdTest "github.com/perses/perses/internal/cli/test"
@@ -21,6 +23,16 @@ import (
 )
 
 func TestApplyCMD(t *testing.T) {
+	// NB: some tests are checking error messages containing file paths. In such case
+	// the message may contain os-specific path separators that we have to deal with.
+	var separator string
+	if os.PathSeparator == '\\' {
+		// For some reason we need to double the separator on windows..
+		separator = string(os.PathSeparator) + string(os.PathSeparator)
+	} else {
+		separator = string(os.PathSeparator)
+	}
+
 	testSuite := []cmdTest.Suite{
 		{
 			Title:           "empty args",
@@ -64,7 +76,7 @@ object "Project" "perses" has been applied
 			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
+			ExpectedMessage: strings.Replace(`resource "game" from file "..%s..%stest%ssample_resources%sunknown_resource.json" not supported by the command`, "%s", separator, -1),
 		},
 	}
 	cmdTest.ExecuteSuiteTest(t, NewCMD, testSuite)

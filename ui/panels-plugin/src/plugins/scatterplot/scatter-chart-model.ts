@@ -18,25 +18,16 @@ export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'Tr
 /**
  * The Options object type supported by the ScatterChart panel plugin.
  */
-export interface ScatterChartOptions {
-  query: TraceQueryDefinition;
-}
+// TODO: Add support for scatter chart formatting options.
+// Some scaffolding has been done to support formatting options.
+// This includes the interface below which still needs implementation.
+// Note: The interface attributes must match schemas/panels/scatter/scatter.cue
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ScatterChartOptions {}
 
 /**
  * Creates the initial/empty options for a ScatterChart panel.
  */
-export function createInitialScatterChartOptions(): ScatterChartOptions {
-  return {
-    query: {
-      kind: 'TraceQuery',
-      spec: {
-        plugin: {
-          kind: 'TempoTraceQuery',
-          spec: {
-            query: '{}',
-          },
-        },
-      },
-    },
-  };
+export function createInitialScatterChartOptions() {
+  return {};
 }

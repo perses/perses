@@ -14,8 +14,8 @@
 package health
 
 import (
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/health"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
 )
 
 type dao struct {

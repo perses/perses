@@ -19,8 +19,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/perses/perses/internal/api/dependency"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
-	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
