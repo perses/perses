@@ -13,6 +13,7 @@
 
 import {
   DatasourceSpec,
+  DurationString,
   formatDuration,
   msToPrometheusDuration,
   Notice,
@@ -49,7 +50,12 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
 
-  const minStep = getDurationStringSeconds(spec.minStep) ?? datasourceScrapeInterval;
+  const minStep =
+    getDurationStringSeconds(
+      // resolve any variable that may have been provided
+      // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
+      replaceTemplateVariables(spec.minStep as string, context.variableState) as DurationString
+    ) ?? datasourceScrapeInterval;
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
 

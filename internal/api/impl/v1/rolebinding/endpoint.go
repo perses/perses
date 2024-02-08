@@ -20,21 +20,21 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/toolbox"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type endpoint struct {
-	toolbox  shared.Toolbox
+	toolbox  toolbox.Toolbox
 	readonly bool
 }
 
-func NewEndpoint(service rolebinding.Service, rbacService rbac.RBAC, readonly bool) route.Endpoint {
+func NewEndpoint(service rolebinding.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  shared.NewToolBox(service, rbacService, v1.KindRoleBinding),
+		toolbox:  toolbox.New(service, rbacService, v1.KindRoleBinding, caseSensitive),
 		readonly: readonly,
 	}
 }

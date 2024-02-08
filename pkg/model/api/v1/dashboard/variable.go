@@ -29,6 +29,8 @@ type variableSpec interface {
 }
 
 type TextVariableSpec struct {
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
 	variableSpec      `json:"-" yaml:"-"`
 	variable.TextSpec `json:",inline" yaml:",inline"`
 	Name              string `json:"name" yaml:"name"`
@@ -75,6 +77,8 @@ func (v *TextVariableSpec) validate() error {
 }
 
 type ListVariableSpec struct {
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
 	variableSpec      `json:"-" yaml:"-"`
 	variable.ListSpec `json:",inline" yaml:",inline"`
 	Name              string `json:"name" yaml:"name"`
@@ -120,7 +124,9 @@ func (v *ListVariableSpec) validate() error {
 type Variable struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind variable.Kind `json:"kind" yaml:"kind"`
-	Spec variableSpec  `json:"spec" yaml:"spec"`
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	Spec variableSpec `json:"spec" yaml:"spec"`
 }
 
 type tmpVariable struct {

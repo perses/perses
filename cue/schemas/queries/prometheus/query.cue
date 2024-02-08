@@ -24,6 +24,6 @@ spec: close({
 	}
 	query:             string
 	seriesNameFormat?: string
-	minStep?:          =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?$"
+	minStep?:          =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?(?:\\$\\w+)?$"
 	resolution?:       number
 })

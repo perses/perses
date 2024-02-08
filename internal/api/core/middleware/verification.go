@@ -24,10 +24,9 @@ import (
 	apiInterface "github.com/perses/perses/internal/api/interface"
 
 	"github.com/labstack/echo/v4"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/project"
-	"github.com/perses/perses/internal/api/shared"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/utils"
 )
 
 type partialMetadata struct {
@@ -66,17 +65,17 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 						// So we read the body, and then we re-inject it in the request.
 						bodyBytes, err := io.ReadAll(c.Request().Body)
 						if err != nil {
-							return shared.HandleBadRequestError(err.Error())
+							return apiInterface.HandleBadRequestError(err.Error())
 						}
 						// write back to request body
 						c.Request().Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 						// now we can safely partially decode the body
 						o := &partialObject{}
 						if unmarshalErr := json.Unmarshal(bodyBytes, o); unmarshalErr != nil {
-							return shared.HandleBadRequestError(unmarshalErr.Error())
+							return apiInterface.HandleBadRequestError(unmarshalErr.Error())
 						}
 						if len(o.Metadata.Project) == 0 {
-							return shared.HandleBadRequestError("metadata.project cannot be empty")
+							return apiInterface.HandleBadRequestError("metadata.project cannot be empty")
 						}
 						projectName = o.Metadata.Project
 						break
@@ -86,7 +85,7 @@ func CheckProject(svc project.Service) echo.MiddlewareFunc {
 			if len(projectName) > 0 {
 				if _, err := svc.Get(apiInterface.EmptyCtx, apiInterface.Parameters{Name: projectName}); err != nil {
 					if databaseModel.IsKeyNotFound(err) {
-						return shared.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
+						return apiInterface.HandleBadRequestError(fmt.Sprintf("metadata.project %q doesn't exist", projectName))
 					}
 					return err
 				}

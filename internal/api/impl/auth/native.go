@@ -18,12 +18,12 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 )
 
@@ -48,18 +48,18 @@ func (e *nativeEndpoint) CollectRoutes(g *route.Group) {
 func (e *nativeEndpoint) auth(ctx echo.Context) error {
 	body := &api.Auth{}
 	if err := ctx.Bind(body); err != nil {
-		return shared.HandleBadRequestError(err.Error())
+		return apiinterface.HandleBadRequestError(err.Error())
 	}
 	usr, err := e.dao.Get(body.Login)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
-			return shared.HandleBadRequestError("wrong login or password ")
+			return apiinterface.HandleBadRequestError("wrong login or password ")
 		}
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	if !crypto.ComparePasswords(usr.Spec.NativeProvider.Password, body.Password) {
-		return shared.HandleBadRequestError("wrong login or password ")
+		return apiinterface.HandleBadRequestError("wrong login or password ")
 	}
 	login := body.Login
 	accessToken, err := e.tokenManagement.accessToken(login, ctx.SetCookie)

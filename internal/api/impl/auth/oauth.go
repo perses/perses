@@ -24,11 +24,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -225,14 +225,14 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 	state := uuid.NewString()
 	if err := e.saveStateCookie(ctx, state); err != nil {
 		e.logWithError(err).Error("Failed to save state in a cookie.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	// Save the PKCE code verifier cookie, will be verified in the codeExchangeHandler
 	verifier := oauth2.GenerateVerifier()
 	if err := e.saveCodeVerifierCookie(ctx, verifier); err != nil {
 		e.logWithError(err).Error("Failed to save code verifier in a cookie.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 	opts := []oauth2.AuthCodeOption{oauth2.S256ChallengeOption(verifier)}
 
@@ -258,14 +258,14 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// Verify that the state in the query match the saved one
 	if _, err := e.readStateCookie(ctx); err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	opts := []oauth2.AuthCodeOption{oauth2.VerifierOption(verifier)}
@@ -279,7 +279,7 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	token, err := e.conf.Exchange(ctx.Request().Context(), code, opts...)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while exchanging code with token")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	uInfoBody, err := e.requestUserInfo(ctx, token)
@@ -291,26 +291,26 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	uInfo, err := e.buildUserInfo(uInfoBody)
 	if err != nil {
 		e.logWithError(err).Error("Failed to collect user infos.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	// Save the user in database
 	entity, err := e.svc.syncUser(uInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	username := entity.GetMetadata().GetName()
 	_, err = e.tokenManagement.accessToken(username, ctx.SetCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save access token.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 	_, err = e.tokenManagement.refreshToken(username, ctx.SetCookie)
 	if err != nil {
 		e.logWithError(err).Error("Failed to generate and save refresh token.")
-		return shared.InternalError
+		return apiinterface.InternalError
 	}
 
 	return ctx.Redirect(302, "/")
