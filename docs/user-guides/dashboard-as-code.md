@@ -9,13 +9,22 @@ DaC benefits can be summarized as follows:
 - **Implementation cost reduction**, by leveraging on existing components when creating new dashboards.
 - **Maintenance cost reduction**, by making it easier to: cascade the same update on multiple dashboards, keep multiple components aligned with each other, etc..
 
-Most of these benefits comes from not dealing with the Perses JSON format directly: instead, we work with [CUE](https://cuelang.org/), a powerful templating language with a strong emphasis on data validation, that also brings the factorization & dependency management capabilities (well, [not yet!](https://github.com/cue-lang/cue/discussions/2330)) we need here.
+Most of these benefits comes from not dealing with the Perses JSON format directly: instead, we provide SDKs in languages that enable factorization, code imports and more, namely:
+* [CUE](https://cuelang.org/), a powerful templating language with a strong emphasis on data validation.
+* [Go](https://go.dev/), an opensource programming language, that probably doesn't need to be introduced...
+
+Just pick your favorite to start with DaC. If you don't have one, give a try to both!
+
+> [!NOTE]
+> CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK. 
+> However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case. 
+> This statement applies also to any other language we might have a SDK for in the future.
 
 Also, as-code means it's GitOps-friendly, meaning that you can also benefit from:
 - versions history
 - peer-review of changes before rollout
 - automated deployments
-- and more..
+- and more...
 
 ## Getting Started With Cue
 
@@ -53,18 +62,8 @@ It's first strongly recommended to ramp up on CUE if you are not familiar with t
 - The [official website](https://cuelang.org/) of Cuelang.
 - [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
-Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of the Go SDK and how to use it, the best thing to do for now is to check directly its source code.
+Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
 
-Anytime you want to build the final dashboard definition (i.e Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
-
-```
-percli dac build my_dashboard.cue -ojson
-```
-
-If the build is successful, the result can be found in the generated `built` folder.
-
-> [!NOTE]
-> the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
 ## Getting started with Go SDK
 
@@ -104,7 +103,7 @@ It's first strongly recommended to ramp up on Go if you are not familiar with th
 - The [official website](https://go.dev/) of Go.
 
 Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata_go/main.go).
-To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
+To get a deeper understanding of the Go SDK and how to use it, the best thing to do for now is to check directly its source code.
 All the SDK utilities are located in the `github.com/perses/perses/go-sdk` package.
 
 > [!WARNING]  
@@ -159,10 +158,13 @@ func main() {
 ```
 
 
+## Build dashboards
+
 Anytime you want to build the final dashboard definition (i.e: Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
 
 ```
 percli dac build main.go -ojson
+percli dac build my_dashboard.cue -ojson
 ```
 
 If the build is successful, the result can be found in the generated `built` folder.
@@ -170,9 +172,11 @@ If the build is successful, the result can be found in the generated `built` fol
 > [!NOTE]
 > the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
+
 ## Deploy dashboards
 
 Once you are satisfied with the result of your DaC definition for a given dashboard, you can finally deploy it to Perses with the `apply` command:
+
 ```
 percli apply -f built/my_dashboard.json
 ```
