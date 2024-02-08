@@ -84,7 +84,7 @@ Generic placeholders are defined as follows:
   [ provisioning: <provisioning_spec> ]
 
   # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-  [ ephemeral_dashboards_cleanup_interval: <provisioning_spec> ]
+  [ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
 ```
 
 ### `<security_config>`
