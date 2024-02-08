@@ -151,11 +151,11 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             // when chart undef, do not clear highlight series
             return;
           }
-          clearHighlightedSeries(chartRef.current, totalSeries);
+          clearHighlightedSeries(chartRef.current);
         },
       };
     },
-    [totalSeries]
+    []
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -398,7 +398,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, totalSeries);
+          clearHighlightedSeries(chartRef.current);
         }
       }}
       onMouseEnter={() => {
