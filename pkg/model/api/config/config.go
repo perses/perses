@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	defaultEphemeralDashboardsCleanupInterval = 168 * time.Hour // 1 week
+	defaultEphemeralDashboardsCleanupInterval = 24 * time.Hour
 )
 
 type dashboardSelector struct {
