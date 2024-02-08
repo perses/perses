@@ -1,4 +1,4 @@
-// Copyright 2024 The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,26 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package datasource
+module dac
 
-import (
-	"github.com/perses/perses/go-sdk/http"
-)
+go 1.21.6
 
-func DirectURL(url string) Option {
-	return func(builder *Builder) error {
-		builder.DirectURL = url
-		return nil
-	}
-}
+replace github.com/perses/perses => ../../../../../../ // Use current version
 
-func HTTPProxy(url string, options ...http.Option) Option {
-	return func(builder *Builder) error {
-		p, err := http.New(url, options...)
-		if err != nil {
-			return err
-		}
-		builder.Proxy = &p.Proxy
-		return nil
-	}
-}
+require github.com/perses/perses v0.43.0

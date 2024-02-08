@@ -31,6 +31,8 @@ const (
 	outputFolderName = "built"
 	modeFile         = "file"
 	modeStdout       = "stdout"
+	goExtension      = ".go"
+	cueExtension     = ".cue"
 )
 
 // writeToFile writes data to a file
@@ -56,7 +58,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'setup'")
+		return fmt.Errorf("no args are supported by the command 'build'")
 	}
 
 	// Complete the output only if it has been set by the user
@@ -69,14 +71,14 @@ func (o *option) Complete(args []string) error {
 		o.Output = output.YAMLOutput
 	}
 
-	if o.Mode != modeFile && o.Mode != modeStdout {
-		return fmt.Errorf("invalid mode provided: must be either `file` or `stdout`")
-	}
-
 	return nil
 }
 
 func (o *option) Validate() error {
+	if o.Mode != modeFile && o.Mode != modeStdout {
+		return fmt.Errorf("invalid mode provided: must be either `file` or `stdout`")
+	}
+
 	if o.File != "" {
 		return o.FileOption.Validate()
 	}
@@ -85,7 +87,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	if o.File != "" {
-		return o.processFile(o.File)
+		return o.processFile(o.File, filepath.Ext(o.File))
 	}
 	// Else it's a directory, thus walk it and process each file
 	err := filepath.Walk(o.Directory, func(path string, info os.FileInfo, err error) error {
@@ -98,10 +100,13 @@ func (o *option) Execute() error {
 			return nil
 		}
 
-		err = o.processFile(path)
-		if err != nil {
-			// Tell the user about the error but don't stop the processing
-			fmt.Printf("error processing file %s: %v\n", path, err)
+		extension := filepath.Ext(path)
+		if extension == goExtension || extension == cueExtension {
+			err = o.processFile(path, extension)
+			if err != nil {
+				// Tell the user about the error but don't stop the processing
+				fmt.Printf("error processing file %s: %v\n", path, err)
+			}
 		}
 
 		return nil
@@ -114,13 +119,21 @@ func (o *option) Execute() error {
 	return nil
 }
 
-func (o *option) processFile(file string) error {
-	// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
-	// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
-	//      However the cue code is (for now at least) not well packaged for such external reuse.
-	//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
-	// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
-	cmd := exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
+func (o *option) processFile(file string, extension string) error {
+	var cmd *exec.Cmd
+
+	if extension == goExtension {
+		cmd = exec.Command("go", "run", file) // #nosec
+	} else if extension == cueExtension {
+		// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
+		// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
+		//      However the cue code is (for now at least) not well packaged for such external reuse.
+		//      See https://github.com/cue-lang/cue/blob/master/cmd/cue/cmd/eval.go#L87
+		// NB3: #nosec is needed here even if the user-fed parts of the command are sanitized upstream
+		cmd = exec.Command("cue", "eval", file, "--out", o.Output, "--concrete") // #nosec
+	} else {
+		return output.HandleString(o.writer, fmt.Sprintf("skipping %q because it is neither a `cue` or `go` file", file))
+	}
 
 	// Capture the output of the command
 	cmdOutput, err := cmd.Output()
@@ -174,10 +187,15 @@ func NewCMD() *cobra.Command {
 		Short: "Build the given DaC file, or directory containing DaC files",
 		Long: `
 Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
-Only CUE files are supported for now.
+The supported languages for a DaC are:
+- CUE
+- Go
+
 The result(s) is/are by default stored in a/multiple file(s) under the 'built' folder, but can also be printed on the standard output instead.
+For Go, file must comply with "go run": the file package must be main and contain a main function that call 'sdk.ExecuteDashboard(...)'
 
 NB: "percli dac build -f my_dashboard.cue -m stdout" is basically doing the same as "cue eval my_dashboard.cue", however be aware that "percli dac build -d mydir -m stdout" is not equivalent to "cue eval mydir": in the case of percli each CUE file encountered in the directory is evaluated independently.
+And "percli dac build -f main.go -m stdout" is basically doing the same as "go run main.go"
 `,
 		Example: `
 # build a given file
