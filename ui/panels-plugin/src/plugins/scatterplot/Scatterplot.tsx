@@ -60,7 +60,9 @@ export function Scatterplot(props: ScatterplotProps) {
       axisPointer: {
         type: 'cross',
       },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: function (params: any) {
+        // TODO: import type from ECharts instead of using any
         params = params[0];
         return [
           '<b>time</b>: ' + params.data.startTime + '<br/>',

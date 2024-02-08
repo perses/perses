@@ -115,7 +115,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const { timeZone } = useTimeZone();
-  const totalSeries = data?.length ?? 0;
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
