@@ -14,7 +14,14 @@
 package config
 
 import (
+	"time"
+
 	"github.com/perses/common/config"
+	"github.com/prometheus/common/model"
+)
+
+const (
+	defaultEphemeralDashboardsCleanupInterval = 24 * time.Hour
 )
 
 type dashboardSelector struct {
@@ -35,9 +42,14 @@ type Config struct {
 	// Information contains markdown content to be display on the home page
 	Information  string             `json:"information,omitempty" yaml:"information,omitempty"`
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
+	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
+	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 }
 
 func (c *Config) Verify() error {
+	if c.EphemeralDashboardsCleanupInterval <= 0 {
+		c.EphemeralDashboardsCleanupInterval = model.Duration(defaultEphemeralDashboardsCleanupInterval)
+	}
 	return nil
 }
 

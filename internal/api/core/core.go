@@ -21,6 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
+	"github.com/perses/perses/internal/api/shared/dashboard"
 	"github.com/perses/perses/internal/api/shared/dependency"
 	"github.com/perses/perses/internal/api/shared/migrate"
 	"github.com/perses/perses/internal/api/shared/rbac"
@@ -59,6 +60,12 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
 	}
+	// enable cleanup of the ephemeral dashboards once their ttl is reached
+	ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
+	}
+
 	runner.WithTasks(watcher, migrateWatcher)
 	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
@@ -68,6 +75,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
 		runner.WithCronTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
+	runner.WithCronTasks(time.Duration(conf.EphemeralDashboardsCleanupInterval), ephemeralDashboardsCleaner)
 
 	// register the API
 	runner.HTTPServerBuilder().
