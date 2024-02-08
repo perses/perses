@@ -26,6 +26,7 @@ type Query interface {
 type DAO interface {
 	io.Closer
 	Init() error
+	IsCaseSensitive() bool
 	Create(entity modelAPI.Entity) error
 	Upsert(entity modelAPI.Entity) error
 	// Get will find a unique object. It will depend on the implementation to generate the key based on the kind and the metadata.

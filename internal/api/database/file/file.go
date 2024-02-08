@@ -42,12 +42,17 @@ func generateID(kind modelV1.Kind, metadata modelAPI.Metadata) (string, error) {
 
 type DAO struct {
 	databaseModel.DAO
-	Folder    string
-	Extension config.FileExtension
+	Folder        string
+	Extension     config.FileExtension
+	CaseSensitive bool
 }
 
 func (d *DAO) Init() error {
 	return nil
+}
+
+func (d *DAO) IsCaseSensitive() bool {
+	return d.CaseSensitive
 }
 
 func (d *DAO) Close() error {
@@ -55,6 +60,11 @@ func (d *DAO) Close() error {
 }
 
 func (d *DAO) Create(entity modelAPI.Entity) error {
+	// Flatten the metadata in case the config is activated.
+	// We are modifying the metadata to be sure the user will acknowledge this config.
+	// Also, it will avoid an issue with the permission when activated.
+	// See https://github.com/perses/perses/issues/1721 for more details.
+	entity.GetMetadata().Flatten(d.CaseSensitive)
 	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if generateIDErr != nil {
 		return generateIDErr
@@ -67,6 +77,7 @@ func (d *DAO) Create(entity modelAPI.Entity) error {
 	return d.upsert(key, entity)
 }
 func (d *DAO) Upsert(entity modelAPI.Entity) error {
+	entity.GetMetadata().Flatten(d.CaseSensitive)
 	key, generateIDErr := generateID(modelV1.Kind(entity.GetKind()), entity.GetMetadata())
 	if generateIDErr != nil {
 		return generateIDErr
@@ -74,6 +85,7 @@ func (d *DAO) Upsert(entity modelAPI.Entity) error {
 	return d.upsert(key, entity)
 }
 func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
+	metadata.Flatten(d.CaseSensitive)
 	key, generateIDErr := generateID(kind, metadata)
 	if generateIDErr != nil {
 		return generateIDErr

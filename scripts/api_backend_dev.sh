@@ -13,6 +13,9 @@ if [[ $1 == "--e2e" ]]; then
   config_file="./dev/config.yaml"
   cp ${config_file} ${previous_file}
   sed 's/enable_auth: true/enable_auth: false/g' ${previous_file} >${config_file}
+  # make the system case sensitive, somehow the e2e tests are broken when it's insensitive
+  cp ${config_file} ${previous_file}
+  sed 's/case_sensitive: false/case_sensitive: true/g' ${previous_file} >${config_file}
   rm ${previous_file}
 fi
 

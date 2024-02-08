@@ -63,7 +63,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	runner.WithTasks(watcher, migrateWatcher)
 	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
-		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders)
+		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
 	if conf.Security.EnableAuth {

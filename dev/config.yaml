@@ -20,6 +20,7 @@ database:
   file:
     folder: "dev/local_db"
     extension: "json"
+    case_sensitive: false
 
 provisioning:
   folders:

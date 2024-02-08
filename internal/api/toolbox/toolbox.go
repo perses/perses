@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package shared
+package toolbox
 
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -25,13 +26,21 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/sirupsen/logrus"
 )
 
-func ExtractParameters(ctx echo.Context) apiInterface.Parameters {
+func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parameters {
+	project := utils.GetProjectParameter(ctx)
+	name := utils.GetNameParameter(ctx)
+	if !caseSensitive {
+		project = strings.ToLower(project)
+		name = strings.ToLower(name)
+	}
 	return apiInterface.Parameters{
-		Project: utils.GetProjectParameter(ctx),
-		Name:    utils.GetNameParameter(ctx),
+		Project: project,
+		Name:    name,
 	}
 }
 
@@ -45,19 +54,21 @@ type Toolbox interface {
 	List(ctx echo.Context, q databaseModel.Query) error
 }
 
-func New(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind) Toolbox {
+func New(service apiInterface.Service, rbac rbac.RBAC, kind v1.Kind, caseSensitive bool) Toolbox {
 	return &toolbox{
-		service: service,
-		rbac:    rbac,
-		kind:    kind,
+		service:       service,
+		rbac:          rbac,
+		kind:          kind,
+		caseSensitive: caseSensitive,
 	}
 }
 
 type toolbox struct {
 	Toolbox
-	service apiInterface.Service
-	rbac    rbac.RBAC
-	kind    v1.Kind
+	service       apiInterface.Service
+	rbac          rbac.RBAC
+	kind          v1.Kind
+	caseSensitive bool
 }
 
 func (t *toolbox) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
@@ -105,7 +116,7 @@ func (t *toolbox) Create(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, entity, parameters, role.CreateAction); err != nil {
 		return err
 	}
@@ -120,7 +131,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 	if err := t.bind(ctx, entity); err != nil {
 		return err
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, entity, parameters, role.UpdateAction); err != nil {
 		return err
 	}
@@ -132,7 +143,7 @@ func (t *toolbox) Update(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) Delete(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
+	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.DeleteAction); err != nil {
 		return err
 	}
@@ -143,7 +154,7 @@ func (t *toolbox) Delete(ctx echo.Context) error {
 }
 
 func (t *toolbox) Get(ctx echo.Context) error {
-	parameters := ExtractParameters(ctx)
+	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
@@ -158,7 +169,7 @@ func (t *toolbox) List(ctx echo.Context, q databaseModel.Query) error {
 	if err := ctx.Bind(q); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
-	parameters := ExtractParameters(ctx)
+	parameters := ExtractParameters(ctx, t.caseSensitive)
 	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
 		return err
 	}
@@ -173,8 +184,50 @@ func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 	if err := ctx.Bind(entity); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
-	if err := utils.ValidateMetadata(ctx, entity.GetMetadata()); err != nil {
+	entity.GetMetadata().Flatten(t.caseSensitive)
+	if err := t.validateMetadata(ctx, entity.GetMetadata()); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
+	}
+	return nil
+}
+
+func (t *toolbox) validateMetadata(ctx echo.Context, metadata api.Metadata) error {
+	if err := common.ValidateID(metadata.GetName()); err != nil {
+		return err
+	}
+	switch met := metadata.(type) {
+	case *v1.Metadata:
+		return t.validateMetadataVersusParameter(ctx, utils.ParamName, &met.Name)
+	case *v1.ProjectMetadata:
+		if err := t.validateMetadataVersusParameter(ctx, utils.ParamProject, &met.Project); err != nil {
+			return err
+		}
+		return t.validateMetadataVersusParameter(ctx, utils.ParamName, &met.Name)
+	}
+	return nil
+}
+
+// validateMetadataVersusParameter is the generic method used to validate provided metadata against the parameters in the context
+//   - If the parameter in the context is empty, no checks are performed => OK
+//   - Else
+//   - If metadata value is empty, it is overridden with the context value => OK
+//   - Else
+//   - If the values are not matching return an error => KO
+//   - Else => OK
+func (t *toolbox) validateMetadataVersusParameter(ctx echo.Context, paramName string, metadataValue *string) error {
+	paramValue := ctx.Param(paramName)
+	if !t.caseSensitive {
+		paramValue = strings.ToLower(paramValue)
+	}
+	if len(paramValue) > 0 {
+		if len(*metadataValue) <= 0 {
+			logrus.Debugf("overridden empty metadata value with %s parameter value '%s'", paramName, paramValue)
+			*metadataValue = paramValue
+		} else {
+			if *metadataValue != paramValue {
+				return fmt.Errorf("%s parameter value '%s' does not match provided metadata value '%s'", paramName, paramValue, *metadataValue)
+			}
+		}
 	}
 	return nil
 }

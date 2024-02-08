@@ -80,7 +80,8 @@ func TestJSONMarshallConfig(t *testing.T) {
   "database": {
     "file": {
       "folder": "./local_db",
-      "extension": "yaml"
+      "extension": "yaml",
+      "case_sensitive": false
     }
   },
   "schemas": {

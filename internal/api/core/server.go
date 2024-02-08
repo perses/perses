@@ -53,22 +53,23 @@ type api struct {
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
 	readonly := cfg.Security.Readonly
+	caseSensitive := persistenceManager.GetPersesDAO().IsCaseSensitive()
 	apiV1Endpoints := []route.Endpoint{
-		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly),
-		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly),
-		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly),
-		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly),
-		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly),
-		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetRBAC(), readonly),
-		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly),
-		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly),
+		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalrolebinding.NewEndpoint(serviceManager.GetGlobalRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalsecret.NewEndpoint(serviceManager.GetGlobalSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		globalvariable.NewEndpoint(serviceManager.GetGlobalVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		health.NewEndpoint(serviceManager.GetHealth()),
-		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly),
-		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly),
-		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly),
-		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly),
-		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly),
-		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly),
+		project.NewEndpoint(serviceManager.GetProject(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		role.NewEndpoint(serviceManager.GetRole(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		rolebinding.NewEndpoint(serviceManager.GetRoleBinding(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
+		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
 	}
 
 	authEndpoint, err := authendpoint.New(

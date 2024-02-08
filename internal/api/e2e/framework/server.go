@@ -72,8 +72,9 @@ func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Enti
 
 func defaultFileConfig() *apiConfig.File {
 	return &apiConfig.File{
-		Folder:    "./test",
-		Extension: apiConfig.JSONExtension,
+		Folder:        "./test",
+		Extension:     apiConfig.JSONExtension,
+		CaseSensitive: true,
 	}
 }
 
@@ -87,6 +88,7 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 				Addr:                 "localhost:3306",
 				DBName:               "perses",
 				AllowNativePasswords: true,
+				CaseSensitive:        true,
 			},
 		}
 	} else {

@@ -15,12 +15,14 @@ package databasefile
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"strings"
+
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/internal/api/interface/v1/role"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
-	"os"
-	"path"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
@@ -108,6 +110,11 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 	default:
 		return "", "", false, fmt.Errorf("this type of query '%T' is not managed", qt)
 	}
+	if !d.CaseSensitive {
+		pathFolder = strings.ToLower(pathFolder)
+		prefix = strings.ToLower(prefix)
+	}
+
 	isExist, err = isFolderExist(pathFolder)
 	return
 }
