@@ -14,8 +14,12 @@
 package labelnames
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/perses/perses/go-sdk/datasource"
 	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type PluginSpec struct {
@@ -24,10 +28,6 @@ type PluginSpec struct {
 }
 
 type Option func(plugin *Builder) error
-
-type Builder struct {
-	PluginSpec
-}
 
 func New(options ...Option) (Builder, error) {
 	var builder = &Builder{
@@ -40,17 +40,43 @@ func New(options ...Option) (Builder, error) {
 		}
 	}
 
+	if err := builder.ApplyFilters(); err != nil {
+		return *builder, err
+	}
+
 	return *builder, nil
 }
 
 func PrometheusLabelNames(options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
+		options = append([]Option{Filter(builder.Filters...)}, options...)
+		//options = append(options, Filter(builder.Filters...))
 		t, err := New(options...)
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "PrometheusLabelNamesVariable"
-		builder.Plugin.Spec = t
+		builder.ListVariableSpec.Plugin.Kind = "PrometheusLabelNamesVariable"
+		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}
+}
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+	Filters    []v1.Variable `json:"-" yaml:"-"`
+}
+
+func (b *Builder) ApplyFilters() error {
+	var filters []string
+	for _, variables := range b.Filters {
+		filters = append(filters, fmt.Sprintf("%s=\"$%s\"", variables.Metadata.Name, variables.Metadata.Name))
+	}
+
+	for index, matcher := range b.PluginSpec.Matchers {
+		// Add filter if matcher do not already have metric filter
+		if !strings.Contains(matcher, "{") {
+			b.PluginSpec.Matchers[index] = fmt.Sprintf("%s{%s}", matcher, strings.Join(filters, ","))
+		}
+	}
+	return nil
 }

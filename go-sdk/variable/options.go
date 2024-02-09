@@ -14,6 +14,7 @@
 package variable
 
 import (
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
@@ -22,7 +23,14 @@ func Name(name string) Option {
 		if err := common.ValidateID(name); err != nil {
 			return err // TODO: error ctx
 		}
-		builder.Metadata.Name = name
+		builder.Variable.Metadata.Name = name
+		return nil
+	}
+}
+
+func Filter(variables ...v1.Variable) Option {
+	return func(builder *Builder) error {
+		builder.Filters = variables
 		return nil
 	}
 }

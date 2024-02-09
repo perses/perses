@@ -110,32 +110,13 @@ func TestDashboardBuilder(t *testing.T) {
 	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 
-	testSuites := []struct {
-		title          string
-		sdkResult      string
-		expectedResult string
-		expectedError  bool
-	}{
-		{
-			title:          "full dashboard",
-			sdkResult:      string(builderOutput),
-			expectedResult: string(expectedOutput),
-		},
-	}
-	for i := range testSuites {
-		test := testSuites[i]
-		t.Run(test.title, func(t *testing.T) {
-			fmt.Println(string(expectedOutput))
-			fmt.Println(string(builderOutput))
+	t.Run("classic dashboard", func(t *testing.T) {
+		fmt.Println(string(expectedOutput))
+		fmt.Println(string(builderOutput))
 
-			if test.expectedError {
-				assert.NotNil(t, buildErr)
-			} else {
-				assert.NoError(t, buildErr)
-				assert.NoError(t, marshErr)
-				assert.NoError(t, readErr)
-				require.JSONEq(t, test.expectedResult, test.sdkResult)
-			}
-		})
-	}
+		assert.NoError(t, buildErr)
+		assert.NoError(t, marshErr)
+		assert.NoError(t, readErr)
+		require.JSONEq(t, string(expectedOutput), string(builderOutput))
+	})
 }

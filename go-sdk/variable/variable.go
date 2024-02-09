@@ -20,7 +20,8 @@ import (
 type Option func(variable *Builder) error
 
 type Builder struct {
-	v1.Variable
+	Variable v1.Variable   `json:",inline" yaml:",inline"`
+	Filters  []v1.Variable `json:"-" yaml:"-"`
 }
 
 func New(name string, options ...Option) (Builder, error) {

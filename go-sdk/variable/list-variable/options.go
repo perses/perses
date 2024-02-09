@@ -14,13 +14,13 @@
 package listvariable
 
 import (
-	"github.com/perses/perses/pkg/model/api/v1/common"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
 func DefaultValue(value string) Option {
 	return func(builder *Builder) error {
-		builder.DefaultValue = &variable.DefaultValue{
+		builder.ListVariableSpec.DefaultValue = &variable.DefaultValue{
 			SingleValue: value,
 		}
 		return nil
@@ -29,7 +29,7 @@ func DefaultValue(value string) Option {
 
 func DefaultValues(values ...string) Option {
 	return func(builder *Builder) error {
-		builder.DefaultValue = &variable.DefaultValue{
+		builder.ListVariableSpec.DefaultValue = &variable.DefaultValue{
 			SliceValues: values,
 		}
 		return nil
@@ -38,72 +38,72 @@ func DefaultValues(values ...string) Option {
 
 func AllowAllValues(isAllValueAllowed bool) Option {
 	return func(builder *Builder) error {
-		builder.AllowAllValue = isAllValueAllowed
+		builder.ListVariableSpec.AllowAllValue = isAllValueAllowed
 		return nil
 	}
 }
 
 func AllowMultiple(isMultipleValuesAllowed bool) Option {
 	return func(builder *Builder) error {
-		builder.AllowMultiple = isMultipleValuesAllowed
+		builder.ListVariableSpec.AllowMultiple = isMultipleValuesAllowed
 		return nil
 	}
 }
 
 func CustomAllValue(value string) Option {
 	return func(builder *Builder) error {
-		builder.CustomAllValue = value
+		builder.ListVariableSpec.CustomAllValue = value
 		return nil
 	}
 }
 
 func CapturingRegexp(regexp string) Option {
 	return func(builder *Builder) error {
-		builder.CapturingRegexp = regexp
+		builder.ListVariableSpec.CapturingRegexp = regexp
 		return nil
 	}
 }
 
 func SortingBy(sort variable.Sort) Option {
 	return func(builder *Builder) error {
-		builder.Sort = &sort
-		return nil
-	}
-}
-
-func Plugin(plugin common.Plugin) Option {
-	return func(builder *Builder) error {
-		builder.Plugin = plugin
+		builder.ListVariableSpec.Sort = &sort
 		return nil
 	}
 }
 
 func Description(description string) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.ListVariableSpec.Display == nil {
+			builder.ListVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Description = description
+		builder.ListVariableSpec.Display.Description = description
 		return nil
 	}
 }
 
 func DisplayName(displayName string) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.ListVariableSpec.Display == nil {
+			builder.ListVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Name = displayName
+		builder.ListVariableSpec.Display.Name = displayName
 		return nil
 	}
 }
 
 func Hidden(isHidden bool) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.ListVariableSpec.Display == nil {
+			builder.ListVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Hidden = isHidden
+		builder.ListVariableSpec.Display.Hidden = isHidden
+		return nil
+	}
+}
+
+func Filter(variables ...v1.Variable) Option {
+	return func(builder *Builder) error {
+		builder.Filters = variables
 		return nil
 	}
 }

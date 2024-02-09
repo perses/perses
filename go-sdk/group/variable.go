@@ -11,29 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package promql
+package group
 
 import (
-	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-func Expr(expr string) Option {
-	return func(builder *Builder) error {
-		builder.PluginSpec.Expr = expr
-		return nil
-	}
+type Option func(group *Builder) error
+
+type Builder struct {
+	Variables          []v1.Variable
+	FilteringVariables []v1.Variable
 }
 
-func LabelName(labelName string) Option {
-	return func(builder *Builder) error {
-		builder.PluginSpec.LabelName = labelName
-		return nil
-	}
-}
+func New(options ...Option) (Builder, error) {
+	builder := &Builder{}
 
-func Datasource(datasourceName string) Option {
-	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
-		return nil
+	var defaults []Option
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
 	}
+
+	return *builder, nil
 }

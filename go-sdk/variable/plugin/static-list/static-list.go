@@ -32,7 +32,7 @@ func New(options ...Option) (Builder, error) {
 		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{}
+	var defaults []Option
 
 	for _, opt := range append(defaults, options...) {
 		if err := opt(builder); err != nil {
@@ -49,8 +49,8 @@ func StaticList(options ...Option) list_variable.Option {
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "StaticListVariable"
-		builder.Plugin.Spec = t
+		builder.ListVariableSpec.Plugin.Kind = "StaticListVariable"
+		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}
 }

@@ -18,6 +18,7 @@ import (
 	"time"
 
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/group"
 	"github.com/perses/perses/go-sdk/row"
 	"github.com/perses/perses/go-sdk/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -30,12 +31,12 @@ import (
 func Name(name string) Option {
 	return func(builder *Builder) error {
 		if err := common.ValidateID(name); err != nil {
-			if builder.Spec.Display == nil {
-				builder.Spec.Display = &common.Display{}
+			if builder.Dashboard.Spec.Display == nil {
+				builder.Dashboard.Spec.Display = &common.Display{}
 			}
-			builder.Spec.Display.Name = name
+			builder.Dashboard.Spec.Display.Name = name
 		} else {
-			builder.Metadata.Name = name
+			builder.Dashboard.Metadata.Name = name
 		}
 		return nil
 	}
@@ -43,21 +44,21 @@ func Name(name string) Option {
 
 func ProjectName(name string) Option {
 	return func(builder *Builder) error {
-		builder.Metadata.Project = name
+		builder.Dashboard.Metadata.Project = name
 		return nil
 	}
 }
 
 func RefreshInterval(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Spec.RefreshInterval = model.Duration(seconds)
+		builder.Dashboard.Spec.RefreshInterval = model.Duration(seconds)
 		return nil
 	}
 }
 
 func Duration(seconds time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.Spec.Duration = model.Duration(seconds)
+		builder.Dashboard.Spec.Duration = model.Duration(seconds)
 		return nil
 	}
 }
@@ -122,7 +123,7 @@ func AddDatasource(name string, options ...datasource.Option) Option {
 		if builder.Dashboard.Spec.Datasources == nil {
 			builder.Dashboard.Spec.Datasources = make(map[string]*v1.DatasourceSpec)
 		}
-		builder.Spec.Datasources[name] = &ds.Datasource.Spec
+		builder.Dashboard.Spec.Datasources[name] = &ds.Datasource.Spec
 		return nil
 	}
 }
@@ -151,6 +152,35 @@ func AddVariable(name string, options ...variable.Option) Option {
 			})
 			return nil
 		}
-		return fmt.Errorf("unknown variable spec %+v", v.Spec.Spec)
+		return fmt.Errorf("unknown variable spec %+v", v.Variable.Spec.Spec)
+	}
+}
+
+func AddVariableGroup(options ...group.Option) Option {
+	return func(builder *Builder) error {
+
+		g, err := group.New(options...)
+		if err != nil {
+			return err
+		}
+
+		for _, v := range g.Variables {
+			if spec, ok := v.Spec.Spec.(dashboard.ListVariableSpec); ok {
+				spec.Name = v.Metadata.Name
+				builder.Dashboard.Spec.Variables = append(builder.Dashboard.Spec.Variables, dashboard.Variable{
+					Kind: v.Spec.Kind,
+					Spec: &spec,
+				})
+			} else if spec, ok := v.Spec.Spec.(dashboard.TextVariableSpec); ok {
+				spec.Name = v.Metadata.Name
+				builder.Dashboard.Spec.Variables = append(builder.Dashboard.Spec.Variables, dashboard.Variable{
+					Kind: v.Spec.Kind,
+					Spec: &spec,
+				})
+			} else {
+				return fmt.Errorf("unknown variable spec %+v", v.Spec.Spec)
+			}
+		}
+		return nil
 	}
 }

@@ -15,25 +15,33 @@ package labelnames
 
 import (
 	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
-		builder.Datasource = promDatasource.Selector(datasourceName)
+		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)
 		return nil
 	}
 }
 
 func Matchers(matchers ...string) Option {
 	return func(builder *Builder) error {
-		builder.Matchers = matchers
+		builder.PluginSpec.Matchers = matchers
 		return nil
 	}
 }
 
 func AddMatchers(matcher string) Option {
 	return func(builder *Builder) error {
-		builder.Matchers = append(builder.Matchers, matcher)
+		builder.PluginSpec.Matchers = append(builder.PluginSpec.Matchers, matcher)
+		return nil
+	}
+}
+
+func Filter(variables ...v1.Variable) Option {
+	return func(builder *Builder) error {
+		builder.Filters = variables
 		return nil
 	}
 }

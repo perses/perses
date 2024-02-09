@@ -43,5 +43,5 @@ func New(name string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Dashboard
+	Dashboard v1.Dashboard `json:"-" yaml:"-"`
 }
