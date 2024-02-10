@@ -56,14 +56,17 @@ export function restoreChart(chart: EChartsInstance) {
  * Clear all highlighted series when cursor exits canvas
  * https://echarts.apache.org/en/api.html#action.downplay
  */
-export function clearHighlightedSeries(chart: EChartsInstance, totalSeries: number) {
+export function clearHighlightedSeries(chart: EChartsInstance) {
   if (chart.dispatchAction !== undefined) {
-    for (let i = 0; i < totalSeries; i++) {
-      chart.dispatchAction({
-        type: 'downplay',
-        seriesIndex: i,
-      });
-    }
+    // Clear any selected data points
+    chart.dispatchAction({
+      type: 'unselect',
+    });
+
+    // Clear any highlighted series
+    chart.dispatchAction({
+      type: 'downplay',
+    });
   }
 }
 

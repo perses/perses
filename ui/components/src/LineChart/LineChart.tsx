@@ -123,11 +123,11 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
             // when chart undef, do not clear highlight series
             return;
           }
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current);
         },
       };
     },
-    [data.timeSeries.length]
+    []
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -276,7 +276,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, data.timeSeries.length);
+          clearHighlightedSeries(chartRef.current);
         }
       }}
       onMouseEnter={() => {

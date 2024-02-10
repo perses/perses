@@ -59,7 +59,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
-  const transform = useRef('');
+  const transform = useRef<string | undefined>();
 
   const isTooltipPinned = pinnedPos !== null && enablePinning;
 
@@ -121,6 +121,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
         })}
         style={{
           transform: transform.current,
+          display: transform.current ? 'block' : 'none',
         }}
       >
         <Stack spacing={0.5}>

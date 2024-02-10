@@ -51,7 +51,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   pinnedPos,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const transform = useRef('');
+  const transform = useRef<string | undefined>();
 
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();
