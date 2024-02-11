@@ -18,6 +18,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/perses/perses/internal/cli/config"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 )
@@ -49,14 +50,14 @@ func TestApplyCMD(t *testing.T) {
 		{
 			Title:           "apply unknown document",
 			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 		{
 			Title:           "apply a single resource",
 			Args:            []string{"-f", "../../test/sample_resources/single_resource.json", "--project", "perses"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
 `,
@@ -64,7 +65,7 @@ func TestApplyCMD(t *testing.T) {
 		{
 			Title:           "apply multiples different resources",
 			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "perses"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been applied in the project "perses"
 object "Folder" "aoe4" has been applied in the project "game"
@@ -74,7 +75,7 @@ object "Project" "perses" has been applied
 		{
 			Title:           "apply resources from a folder",
 			Args:            []string{"-d", "../../test/sample_resources", "--project", "perses"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: true,
 			ExpectedMessage: strings.Replace(`resource "game" from file "..%s..%stest%ssample_resources%sunknown_resource.json" not supported by the command`, "%s", separator, -1),
 		},

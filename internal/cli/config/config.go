@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	pathConfig     = ".perses"
-	configFileName = "config.json"
+	pathConfig          = ".perses"
+	configFileName      = "config.json"
+	defaultOutputFolder = "built"
 )
 
 var Global *Config
@@ -48,12 +49,19 @@ func Init(configPath string) {
 	Global.filePath = configPath
 }
 
+type Dac struct {
+	// outputFolder is the folder where the dac-generated files are stored
+	OutputFolder string `json:"output_folder,omitempty" yaml:"output_folder,omitempty"`
+}
+
 type Config struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
 	Project          string                      `json:"project,omitempty"`
 	RefreshToken     string                      `json:"refresh_token,omitempty"`
 	filePath         string
-	apiClient        api.ClientInterface
+	APIClient        api.ClientInterface
+	// Dac wraps the configuration related to Dashboard-as-Code
+	Dac Dac `json:"dac,omitempty" yaml:"dac,omitempty"`
 }
 
 func (c *Config) init() error {
@@ -61,23 +69,26 @@ func (c *Config) init() error {
 	if err != nil {
 		return err
 	}
-	c.apiClient = api.NewWithClient(restClient)
+	c.APIClient = api.NewWithClient(restClient)
 	return nil
 }
 
 func (c *Config) GetAPIClient() (api.ClientInterface, error) {
-	if c.apiClient != nil {
-		return c.apiClient, nil
+	if c.APIClient != nil {
+		return c.APIClient, nil
 	}
 	return nil, fmt.Errorf("you are not connected to any API")
 }
 
-func (c *Config) SetAPIClient(apiClient api.ClientInterface) {
-	c.apiClient = apiClient
-}
-
 func (c *Config) SetFilePath(filePath string) {
 	c.filePath = filePath
+}
+
+func (c *Config) GetDacOutputFolder() string {
+	if len(c.Dac.OutputFolder) > 0 {
+		return c.Dac.OutputFolder
+	}
+	return defaultOutputFolder
 }
 
 func GetDefaultPath() string {

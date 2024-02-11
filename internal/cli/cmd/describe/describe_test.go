@@ -16,6 +16,7 @@ package describe
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	test "github.com/perses/perses/internal/test"
@@ -58,7 +59,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe project in json format",
 			Args:            []string{"project", "perses", "-ojson"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(
 				&modelV1.Project{
@@ -71,7 +72,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe project in yaml format",
 			Args:            []string{"project", "perses", "-oyaml"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.YAMLMarshalStrict(
 				&modelV1.Project{
@@ -84,7 +85,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe folder in a specific project in json format",
 			Args:            []string{"folder", "myFolder", "-ojson", "-p", "perses"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,
@@ -101,8 +102,7 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe folder with default project in json format",
 			Args:            []string{"folder", "myFolder", "-ojson"},
-			Project:         "perses",
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses", APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,

@@ -22,17 +22,17 @@ import (
 	"strings"
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/spf13/cobra"
 )
 
 const (
-	outputFolderName = "built"
-	modeFile         = "file"
-	modeStdout       = "stdout"
-	goExtension      = ".go"
-	cueExtension     = ".cue"
+	modeFile     = "file"
+	modeStdout   = "stdout"
+	goExtension  = ".go"
+	cueExtension = ".cue"
 )
 
 // writeToFile writes data to a file
@@ -151,7 +151,7 @@ func (o *option) processFile(file string, extension string) error {
 	// Otherwise, create an output file under the "built" directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
-	err = os.MkdirAll(filepath.Join(outputFolderName, filepath.Dir(file)), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(config.Global.GetDacOutputFolder(), filepath.Dir(file)), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating the output folder: %v", err)
 	}
@@ -173,7 +173,7 @@ func (o *option) buildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
-	return filepath.Join(outputFolderName, fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
+	return filepath.Join(config.Global.GetDacOutputFolder(), fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -202,7 +202,7 @@ And "percli dac build -f main.go -m stdout" is basically doing the same as "go r
 percli dac build -f my_dashboard.cue
 
 # build a given file as JSON
-percli dac build -f my_dashboard.cue -ojson
+percli dac build -f main.go -ojson
 
 # build a given file & deploy the resulting resource right away
 percli dac build -f my_dashboard.cue -m stdout | percli apply -f -

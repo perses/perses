@@ -19,7 +19,6 @@ import (
 	"testing"
 
 	"github.com/perses/perses/internal/cli/config"
-	"github.com/perses/perses/pkg/client/api"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,8 +26,7 @@ import (
 type Suite struct {
 	Title           string
 	Args            []string
-	APIClient       api.ClientInterface
-	Project         string
+	Config          config.Config
 	ExpectedMessage string
 	IsErrorExpected bool
 }
@@ -42,10 +40,7 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			cmd.SetOut(buffer)
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.Args)
-			config.Global = &config.Config{
-				Project: test.Project,
-			}
-			config.Global.SetAPIClient(test.APIClient)
+			config.Global = &(test.Config)
 			config.Global.SetFilePath(configFilePath)
 
 			err := cmd.Execute()

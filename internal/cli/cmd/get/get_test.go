@@ -16,6 +16,7 @@ package get
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	test "github.com/perses/perses/internal/test"
@@ -46,43 +47,42 @@ func TestGetCMD(t *testing.T) {
 		{
 			Title:           "get project in json format",
 			Args:            []string{"project", "-ojson"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.ProjectList(""))) + "\n",
 		},
 		{
 			Title:           "get project with prefix in json format",
 			Args:            []string{"project", "per", "-ojson"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.ProjectList("per"))) + "\n",
 		},
 		{
 			Title:           "get globaldatasource in json format",
 			Args:            []string{"gdts", "-ojson"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.GlobalDatasourceList(""))) + "\n",
 		},
 		{
 			Title:           "get all folder in json format",
 			Args:            []string{"folder", "-ojson", "--all"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.FolderList("", ""))) + "\n",
 		},
 		{
 			Title:           "get folder in a specific project in json format",
 			Args:            []string{"folder", "-ojson", "-p", "perses"},
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.FolderList("perses", ""))) + "\n",
 		},
 		{
 			Title:           "get folder with default project in json format",
 			Args:            []string{"folder", "-ojson"},
-			Project:         "perses",
-			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses", APIClient: fakeapi.New()},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.FolderList("perses", ""))) + "\n",
 		},
