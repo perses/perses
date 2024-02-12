@@ -14,49 +14,57 @@
 package textvariable
 
 import (
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 )
 
 func Value(value string) Option {
 	return func(builder *Builder) error {
-		builder.Value = value
+		builder.TextVariableSpec.Value = value
 		return nil
 	}
 }
 
 func Constant(isConstant bool) Option {
 	return func(builder *Builder) error {
-		builder.Constant = isConstant
+		builder.TextVariableSpec.Constant = isConstant
 		return nil
 	}
 }
 
 func Description(description string) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.TextVariableSpec.Display == nil {
+			builder.TextVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Description = description
+		builder.TextVariableSpec.Display.Description = description
 		return nil
 	}
 }
 
 func DisplayName(displayName string) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.TextVariableSpec.Display == nil {
+			builder.TextVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Name = displayName
+		builder.TextVariableSpec.Display.Name = displayName
 		return nil
 	}
 }
 
 func Hidden(isHidden bool) Option {
 	return func(builder *Builder) error {
-		if builder.Display == nil {
-			builder.Display = &variable.Display{}
+		if builder.TextVariableSpec.Display == nil {
+			builder.TextVariableSpec.Display = &variable.Display{}
 		}
-		builder.Display.Hidden = isHidden
+		builder.TextVariableSpec.Display.Hidden = isHidden
+		return nil
+	}
+}
+
+func Filter(variables ...v1.Variable) Option {
+	return func(builder *Builder) error {
+		builder.Filters = variables
 		return nil
 	}
 }

@@ -15,13 +15,15 @@ package textvariable
 
 import (
 	"github.com/perses/perses/go-sdk/variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 )
 
 type Option func(textVariableSpec *Builder) error
 
 type Builder struct {
-	dashboard.TextVariableSpec
+	TextVariableSpec dashboard.TextVariableSpec `json:",inline" yaml:",inline"`
+	Filters          []v1.Variable              `json:"-" yaml:"-"`
 }
 
 func New(value string, options ...Option) (Builder, error) {
@@ -45,12 +47,13 @@ func New(value string, options ...Option) (Builder, error) {
 
 func Text(value string, options ...Option) variable.Option {
 	return func(builder *variable.Builder) error {
+		options = append([]Option{Filter(builder.Filters...)}, options...)
 		t, err := New(value, options...)
 		if err != nil {
 			return err
 		}
-		builder.Spec.Kind = "TextVariable"
-		builder.Spec.Spec = t.TextVariableSpec
+		builder.Variable.Spec.Kind = "TextVariable"
+		builder.Variable.Spec.Spec = t.TextVariableSpec
 		return nil
 	}
 }

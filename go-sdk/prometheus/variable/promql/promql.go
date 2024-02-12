@@ -26,10 +26,6 @@ type PluginSpec struct {
 
 type Option func(plugin *Builder) error
 
-type Builder struct {
-	PluginSpec
-}
-
 func New(expr string, labelName string, options ...Option) (Builder, error) {
 	var builder = &Builder{
 		PluginSpec: PluginSpec{},
@@ -55,8 +51,12 @@ func PrometheusPromQL(expr string, labelName string, options ...Option) list_var
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "PrometheusPromQLVariable"
-		builder.Plugin.Spec = t
+		builder.ListVariableSpec.Plugin.Kind = "PrometheusPromQLVariable"
+		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}
+}
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
 }

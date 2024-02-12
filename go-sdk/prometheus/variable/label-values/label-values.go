@@ -14,8 +14,12 @@
 package labelvalues
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/perses/perses/go-sdk/datasource"
 	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
 type PluginSpec struct {
@@ -25,10 +29,6 @@ type PluginSpec struct {
 }
 
 type Option func(plugin *Builder) error
-
-type Builder struct {
-	PluginSpec
-}
 
 func New(labelName string, options ...Option) (Builder, error) {
 	var builder = &Builder{
@@ -45,6 +45,10 @@ func New(labelName string, options ...Option) (Builder, error) {
 		}
 	}
 
+	if err := builder.ApplyFilters(); err != nil {
+		return *builder, err
+	}
+
 	return *builder, nil
 }
 
@@ -54,8 +58,28 @@ func PrometheusLabelValues(labelName string, options ...Option) list_variable.Op
 		if err != nil {
 			return err
 		}
-		builder.Plugin.Kind = "PrometheusLabelValuesVariable"
-		builder.Plugin.Spec = t
+		builder.ListVariableSpec.Plugin.Kind = "PrometheusLabelValuesVariable"
+		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}
+}
+
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+	Filters    []v1.Variable `json:"-" yaml:"-"`
+}
+
+func (b *Builder) ApplyFilters() error {
+	var filters []string
+	for _, variables := range b.Filters {
+		filters = append(filters, fmt.Sprintf("%s=\"$%s\"", variables.Metadata.Name, variables.Metadata.Name))
+	}
+
+	for index, matcher := range b.PluginSpec.Matchers {
+		// Add filter if matcher do not already have metric filter
+		if !strings.Contains(matcher, "{") {
+			b.PluginSpec.Matchers[index] = fmt.Sprintf("%s{%s}", matcher, strings.Join(filters, ","))
+		}
+	}
+	return nil
 }

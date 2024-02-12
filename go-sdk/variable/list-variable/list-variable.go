@@ -15,6 +15,7 @@ package listvariable
 
 import (
 	"github.com/perses/perses/go-sdk/variable"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	variable2 "github.com/perses/perses/pkg/model/api/v1/variable"
 )
@@ -22,7 +23,8 @@ import (
 type Option func(listVariableSpec *Builder) error
 
 type Builder struct {
-	dashboard.ListVariableSpec
+	ListVariableSpec dashboard.ListVariableSpec `json:",inline" yaml:",inline"`
+	Filters          []v1.Variable              `json:"-" yaml:"-"`
 }
 
 func New(options ...Option) (Builder, error) {
@@ -47,12 +49,13 @@ func New(options ...Option) (Builder, error) {
 
 func List(options ...Option) variable.Option {
 	return func(builder *variable.Builder) error {
+		options = append([]Option{Filter(builder.Filters...)}, options...)
 		t, err := New(options...)
 		if err != nil {
 			return err
 		}
-		builder.Spec.Kind = "ListVariable"
-		builder.Spec.Spec = t.ListVariableSpec
+		builder.Variable.Spec.Kind = "ListVariable"
+		builder.Variable.Spec.Spec = t.ListVariableSpec
 		return nil
 	}
 }
