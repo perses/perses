@@ -50,7 +50,6 @@ func New(options ...Option) (Builder, error) {
 func PrometheusLabelNames(options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
 		options = append([]Option{Filter(builder.Filters...)}, options...)
-		//options = append(options, Filter(builder.Filters...))
 		t, err := New(options...)
 		if err != nil {
 			return err

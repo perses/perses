@@ -15,11 +15,11 @@ package dashboard
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/perses/perses/go-sdk/group"
 	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/panel/time-series"
 	"github.com/perses/perses/go-sdk/prometheus/query"
@@ -111,9 +111,93 @@ func TestDashboardBuilder(t *testing.T) {
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 
 	t.Run("classic dashboard", func(t *testing.T) {
-		fmt.Println(string(expectedOutput))
-		fmt.Println(string(builderOutput))
+		assert.NoError(t, buildErr)
+		assert.NoError(t, marshErr)
+		assert.NoError(t, readErr)
+		require.JSONEq(t, string(expectedOutput), string(builderOutput))
+	})
+}
 
+func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
+	builder, buildErr := New("ContainersMonitoring",
+		ProjectName("MyProject"),
+
+		// VARIABLES
+		AddVariableGroup(
+			group.AddVariable("stack",
+				listVar.List(
+					labelValuesVar.PrometheusLabelValues("stack",
+						labelValuesVar.Matchers("thanos_build_info"),
+						labelValuesVar.Datasource("promDemo"),
+					),
+					listVar.DisplayName("PaaS"),
+				),
+			),
+			group.AddVariable("prometheus",
+				txtVar.Text("platform", txtVar.Constant(true)),
+			),
+			group.AddVariable("prometheus_namespace",
+				txtVar.Text("observability",
+					txtVar.Constant(true),
+					txtVar.Description("constant to reduce the query scope thus improve performances"),
+				),
+			),
+			group.AddVariable("namespace", listVar.List(
+				promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", "namespace", promqlVar.Datasource("promDemo")),
+				listVar.AllowMultiple(true),
+			)),
+			group.AddIgnoredVariable("namespaceLabels", listVar.List(
+				labelNamesVar.PrometheusLabelNames(
+					labelNamesVar.Matchers("kube_namespace_labels"),
+					labelNamesVar.Datasource("promDemo"),
+				),
+			)),
+			group.AddVariable("pod", listVar.List(
+				promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
+				listVar.AllowMultiple(true),
+				listVar.AllowAllValues(true),
+			)),
+			group.AddVariable("container", listVar.List(
+				promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
+				listVar.AllowMultiple(true),
+				listVar.AllowAllValues(true),
+			)),
+			group.AddIgnoredVariable("containerLabels", listVar.List(
+				listVar.Description("simply the list of labels for the considered metric"),
+				listVar.Hidden(true),
+				labelNamesVar.PrometheusLabelNames(
+					labelNamesVar.Matchers("kube_pod_container_info"),
+					labelNamesVar.Datasource("promDemo"),
+				),
+			)),
+		),
+
+		// ROWS
+		AddRow("Resource usage",
+			row.PanelsPerLine(3),
+
+			// PANELS
+			row.Panel("Container memory",
+				timeseries.Chart(),
+				panel.AddQuery(
+					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+				),
+			),
+			row.Panel("Container CPU",
+				timeseries.Chart(),
+				panel.AddQuery(
+					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+				),
+			),
+		),
+	)
+
+	builderOutput, marshErr := json.Marshal(builder.Dashboard)
+
+	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
+	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
+
+	t.Run("dashboard with grouped variables", func(t *testing.T) {
 		assert.NoError(t, buildErr)
 		assert.NoError(t, marshErr)
 		assert.NoError(t, readErr)
