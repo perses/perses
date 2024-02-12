@@ -21,12 +21,12 @@ import (
 
 	"github.com/perses/perses/go-sdk/group"
 	"github.com/perses/perses/go-sdk/panel"
+	"github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/panel/time-series"
 	"github.com/perses/perses/go-sdk/prometheus/query"
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
-	"github.com/perses/perses/go-sdk/row"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	"github.com/stretchr/testify/assert"
@@ -86,17 +86,17 @@ func TestDashboardBuilder(t *testing.T) {
 		)),
 
 		// ROWS
-		AddRow("Resource usage",
-			row.PanelsPerLine(3),
+		AddPanelGroup("Resource usage",
+			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			row.Panel("Container memory",
+			panelgroup.Panel("Container memory",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			row.Panel("Container CPU",
+			panelgroup.Panel("Container CPU",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
@@ -173,17 +173,17 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 		),
 
 		// ROWS
-		AddRow("Resource usage",
-			row.PanelsPerLine(3),
+		AddPanelGroup("Resource usage",
+			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			row.Panel("Container memory",
+			panelgroup.Panel("Container memory",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			row.Panel("Container CPU",
+			panelgroup.Panel("Container CPU",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),

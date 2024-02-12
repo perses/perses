@@ -29,6 +29,10 @@ const (
 	YAMLOutput = "yaml"
 )
 
+func init() {
+	flag.String("output", YAMLOutput, "output format of the exec")
+}
+
 func executeDashboardBuilder(builder dashboard.Builder, outputFormat string, writer io.Writer, errWriter io.Writer) {
 	var err error
 	var output []byte
@@ -49,8 +53,6 @@ func executeDashboardBuilder(builder dashboard.Builder, outputFormat string, wri
 
 func NewExec() Exec {
 	outputFormat := flag.String("output", YAMLOutput, "output format of the exec")
-	flag.Parse()
-
 	return Exec{
 		outputFormat: *outputFormat,
 	}
@@ -60,8 +62,8 @@ type Exec struct {
 	outputFormat string
 }
 
-// ExecuteDashboard is a helper to print the result of a dashboard builder in stdout and errors to stderr
-func (b *Exec) ExecuteDashboard(builder dashboard.Builder, err error) {
+// BuildDashboard is a helper to print the result of a dashboard builder in stdout and errors to stderr
+func (b *Exec) BuildDashboard(builder dashboard.Builder, err error) {
 	if err != nil {
 		fmt.Fprint(os.Stderr, err)
 		os.Exit(-1)

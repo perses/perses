@@ -19,7 +19,7 @@ import (
 
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/group"
-	"github.com/perses/perses/go-sdk/row"
+	"github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -63,9 +63,9 @@ func Duration(seconds time.Duration) Option {
 	}
 }
 
-func AddRow(title string, options ...row.Option) Option {
+func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 	return func(builder *Builder) error {
-		r, err := row.New(title, options...)
+		r, err := panelgroup.New(title, options...)
 		if err != nil {
 			return err
 		}

@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package row
+package panelgroup
 
 import v1 "github.com/perses/perses/pkg/model/api/v1"
 
-type Row struct {
+type PanelGroup struct {
 	Title        string
 	PanelsWidth  int
 	PanelsHeight int
@@ -26,12 +26,12 @@ type Row struct {
 type Option func(plugin *Builder) error
 
 type Builder struct {
-	Row
+	PanelGroup
 }
 
 func New(title string, options ...Option) (Builder, error) {
 	builder := &Builder{
-		Row: Row{},
+		PanelGroup: PanelGroup{},
 	}
 
 	defaults := []Option{
