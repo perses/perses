@@ -317,9 +317,9 @@ func NewGlobalVariable(name string) *v1.GlobalVariable {
 
 func NewDashboard(t *testing.T, projectName string, name string) *v1.Dashboard {
 	// Creating a full dashboard is quite long and to ensure the changes are still matching the dev environment,
-	// it's better to use the dashboard written in the dev/data/dashboard.json
+	// it's better to use the dashboard written in the dev/data/9-dashboard.json
 	persesRepositoryPath := test.GetRepositoryPath()
-	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "dashboard.json")
+	dashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "9-dashboard.json")
 	var list []*v1.Dashboard
 	data := test.ReadFile(dashboardJSONFilePath)
 	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
