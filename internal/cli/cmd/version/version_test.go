@@ -16,7 +16,6 @@ package version
 import (
 	"testing"
 
-	"github.com/perses/perses/internal/cli/config"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 	"github.com/prometheus/common/version"
@@ -57,7 +56,7 @@ func TestVersionCMD(t *testing.T) {
 		{
 			Title:           "print client and server version",
 			Args:            []string{},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `client:
     buildTime: "2022-03-24"

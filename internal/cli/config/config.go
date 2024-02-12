@@ -59,7 +59,7 @@ type Config struct {
 	Project          string                      `json:"project,omitempty"`
 	RefreshToken     string                      `json:"refresh_token,omitempty"`
 	filePath         string
-	APIClient        api.ClientInterface
+	apiClient        api.ClientInterface
 	// Dac wraps the configuration related to Dashboard-as-Code
 	Dac Dac `json:"dac,omitempty" yaml:"dac,omitempty"`
 }
@@ -69,15 +69,19 @@ func (c *Config) init() error {
 	if err != nil {
 		return err
 	}
-	c.APIClient = api.NewWithClient(restClient)
+	c.apiClient = api.NewWithClient(restClient)
 	return nil
 }
 
 func (c *Config) GetAPIClient() (api.ClientInterface, error) {
-	if c.APIClient != nil {
-		return c.APIClient, nil
+	if c.apiClient != nil {
+		return c.apiClient, nil
 	}
 	return nil, fmt.Errorf("you are not connected to any API")
+}
+
+func (c *Config) SetAPIClient(apiClient api.ClientInterface) {
+	c.apiClient = apiClient
 }
 
 func (c *Config) SetFilePath(filePath string) {

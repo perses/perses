@@ -16,7 +16,6 @@ package remove
 import (
 	"testing"
 
-	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	fakeapi "github.com/perses/perses/pkg/client/fake/api"
@@ -45,7 +44,7 @@ func TestDeleteCMD(t *testing.T) {
 		{
 			Title:           "delete all projects",
 			Args:            []string{"project", "--all"},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Project" "Amadeus" has been deleted
 object "Project" "Chronosphere" has been deleted
@@ -55,7 +54,7 @@ object "Project" "perses" has been deleted
 		{
 			Title:           "delete a single resource",
 			Args:            []string{"folders", "ff15", "--project", "perses"},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
 `,
@@ -63,14 +62,14 @@ object "Project" "perses" has been deleted
 		{
 			Title:           "delete unknown document from a file",
 			Args:            []string{"-f", "../../test/sample_resources/unknown_resource.json"},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
 			ExpectedMessage: `resource "game" from file "../../test/sample_resources/unknown_resource.json" not supported by the command`,
 		},
 		{
 			Title:           "delete a single resource from a file",
 			Args:            []string{"-f", "../../test/sample_resources/single_resource.json", "--project", "perses"},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "ff15" has been deleted in the project "perses"
 `,
@@ -78,7 +77,7 @@ object "Project" "perses" has been deleted
 		{
 			Title:           "delete multiples resources from a file",
 			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "perses"},
-			Config:          config.Config{APIClient: fakeapi.New()},
+			APIClient:       fakeapi.New(),
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "aoe4" has been deleted in the project "game"
 object "Folder" "ff15" has been deleted in the project "perses"
