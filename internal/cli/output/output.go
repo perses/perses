@@ -36,7 +36,7 @@ func ValidateAndSet(o *string) error {
 		*o = YAMLOutput
 		return nil
 	} else if *o != YAMLOutput && *o != JSONOutput {
-		return fmt.Errorf("--ouput must be %q or %q", JSONOutput, YAMLOutput)
+		return fmt.Errorf("--output must be %q or %q", JSONOutput, YAMLOutput)
 	}
 
 	return nil
