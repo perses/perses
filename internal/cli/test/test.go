@@ -46,6 +46,9 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			config.Global = &(test.Config)
 			config.Global.SetAPIClient(test.APIClient)
 			config.Global.SetFilePath(configFilePath)
+			if len(config.Global.Dac.OutputFolder) == 0 {
+				config.Global.Dac.OutputFolder = config.DefaultOutputFolder
+			}
 
 			err := cmd.Execute()
 			if test.IsErrorExpected {

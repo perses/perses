@@ -151,7 +151,7 @@ func (o *option) processFile(file string, extension string) error {
 	// Otherwise, create an output file under the "built" directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
-	err = os.MkdirAll(filepath.Join(config.Global.GetDacOutputFolder(), filepath.Dir(file)), os.ModePerm)
+	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("error creating the output folder: %v", err)
 	}
@@ -173,7 +173,7 @@ func (o *option) buildOutputFilePath(inputFilePath string) string {
 	// Extract the file name without extension
 	baseName := strings.TrimSuffix(inputFilePath, filepath.Ext(inputFilePath))
 	// Build the output file path in the "built" folder with the same name as the input file
-	return filepath.Join(config.Global.GetDacOutputFolder(), fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
+	return filepath.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s_output.%s", baseName, o.Output)) // Change the extension as needed
 }
 
 func (o *option) SetWriter(writer io.Writer) {

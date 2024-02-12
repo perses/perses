@@ -29,7 +29,7 @@ import (
 const (
 	pathConfig          = ".perses"
 	configFileName      = "config.json"
-	defaultOutputFolder = "built"
+	DefaultOutputFolder = "built"
 )
 
 var Global *Config
@@ -47,6 +47,9 @@ func Init(configPath string) {
 		}
 	}
 	Global.filePath = configPath
+	if len(Global.Dac.OutputFolder) == 0 {
+		Global.Dac.OutputFolder = DefaultOutputFolder
+	}
 }
 
 type Dac struct {
@@ -86,13 +89,6 @@ func (c *Config) SetAPIClient(apiClient api.ClientInterface) {
 
 func (c *Config) SetFilePath(filePath string) {
 	c.filePath = filePath
-}
-
-func (c *Config) GetDacOutputFolder() string {
-	if len(c.Dac.OutputFolder) > 0 {
-		return c.Dac.OutputFolder
-	}
-	return defaultOutputFolder
 }
 
 func GetDefaultPath() string {
