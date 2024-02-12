@@ -128,6 +128,7 @@ import (
 )
 
 func main() {
+	exec := sdk.NewExec()
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.ProjectName("MyProject"),
 
@@ -153,7 +154,7 @@ func main() {
 
 		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("https://demo.prometheus.com"))),
 	)
-	sdk.ExecuteDashboard(builder, buildErr)
+	exec.ExecuteDashboard(builder, buildErr)
 }
 ```
 

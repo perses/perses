@@ -123,7 +123,7 @@ func (o *option) processFile(file string, extension string) error {
 	var cmd *exec.Cmd
 
 	if extension == goExtension {
-		cmd = exec.Command("go", "run", file) // #nosec
+		cmd = exec.Command("go", "run", file, "--output", o.Output) // #nosec
 	} else if extension == cueExtension {
 		// NB: most of the work of the `build` command is actually made by the `eval` command of the cue CLI.
 		// NB2: Since cue is written in Go, we could consider relying on its code instead of going the exec way.
@@ -192,7 +192,7 @@ The supported languages for a DaC are:
 - Go
 
 The result(s) is/are by default stored in a/multiple file(s) under the 'built' folder, but can also be printed on the standard output instead.
-For Go, file must comply with "go run": the file package must be main and contain a main function that call 'sdk.ExecuteDashboard(...)'
+For Go, file must comply with "go run": the file package must be main and a main function, starting with 'exec := sdk.NewExec()' and finishing with 'exec.ExecuteDashboard(...)'
 
 NB: "percli dac build -f my_dashboard.cue -m stdout" is basically doing the same as "cue eval my_dashboard.cue", however be aware that "percli dac build -d mydir -m stdout" is not equivalent to "cue eval mydir": in the case of percli each CUE file encountered in the directory is evaluated independently.
 And "percli dac build -f main.go -m stdout" is basically doing the same as "go run main.go"
