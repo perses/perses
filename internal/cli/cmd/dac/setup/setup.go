@@ -15,6 +15,7 @@ package setup
 
 import (
 	"archive/tar"
+	"bufio"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -126,6 +127,43 @@ func removeFirstFolder(filePath string) string {
 	return resultPath
 }
 
+func addOutputDirToGitignore() error {
+	gitignorePath := ".gitignore"
+	comment := "# folder used to store the results of the `percli dac build` command"
+
+	// Skip if .gitignore doesn't exist
+	if _, err := os.Stat(gitignorePath); os.IsNotExist(err) {
+		logrus.Debugf("%s is not present", gitignorePath)
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	// Open the .gitignore file
+	file, err := os.OpenFile(gitignorePath, os.O_RDWR|os.O_APPEND, os.ModeAppend)
+	if err != nil {
+		return fmt.Errorf("error opening %s: %v", gitignorePath, err)
+	}
+	defer file.Close()
+
+	// Check & skip if the output dir is already listed
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		if strings.TrimSpace(scanner.Text()) == config.Global.Dac.OutputFolder {
+			logrus.Debugf("%s dir is already ignored", config.Global.Dac.OutputFolder)
+			return nil
+		}
+	}
+
+	// Append the output folder to the list
+	if _, err := file.WriteString(fmt.Sprintf("\n%s\n%s\n", comment, config.Global.Dac.OutputFolder)); err != nil {
+		return fmt.Errorf("error appending to %s: %v", gitignorePath, err)
+	}
+
+	logrus.Debugf("%s dir appended to %s", config.Global.Dac.OutputFolder, gitignorePath)
+	return nil
+}
+
 type option struct {
 	persesCMD.Option
 	writer  io.Writer
@@ -181,29 +219,30 @@ func (o *option) Validate() error {
 func (o *option) Execute() error {
 	logrus.Debugf("Starting DaC setup with Perses %s", o.version)
 
-	// Create the destination folder
-	err := os.MkdirAll(depsRootDstPath, os.ModePerm)
-	if err != nil {
+	// Add the DaC output folder to .gitignore, if applicable
+	if err := addOutputDirToGitignore(); err != nil {
+		logrus.WithError(err).Warningf("unable to add the '%s' folder to .gitignore", config.Global.Dac.OutputFolder)
+	}
+
+	// Create the destination folder for the dependencies
+	if err := os.MkdirAll(depsRootDstPath, os.ModePerm); err != nil {
 		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
 	}
 
 	// Download the source code from the provided Perses version
-	err = o.downloadSources()
-	if err != nil {
+	if err := o.downloadSources(); err != nil {
 		return fmt.Errorf("error retrieving the Perses sources: %v", err)
 	}
 
 	defer func() {
 		// Cleanup
-		err = os.Remove(archiveName)
-		if err != nil {
+		if err := os.Remove(archiveName); err != nil {
 			fmt.Printf("error removing the temp archive: %v\n", err)
 		}
 	}()
 
 	// Extract the CUE deps from the archive to the destination folder
-	err = extractCUEDepsToDst()
-	if err != nil {
+	if err := extractCUEDepsToDst(); err != nil {
 		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
 	}
 
@@ -251,8 +290,10 @@ func NewCMD() *cobra.Command {
 		Use:   "setup",
 		Short: "Sets up a local development environment to do Dashboard-as-Code",
 		Long: `
-takes care of adding the CUE sources from Perses as external dependencies to your DaC repo.
-/!\ It must be executed at the root of your repo.
+This command takes care of setting up a ready-to-use development environment to do Dashboard-as-Code.
+It mainly consists in adding the CUE sources from Perses as external dependencies to your DaC repo.
+
+/!\ This command must be executed at the root of your repo.
 `,
 		Example: `
 # DaC setup when you are connected to a server
