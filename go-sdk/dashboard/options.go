@@ -18,9 +18,9 @@ import (
 	"time"
 
 	"github.com/perses/perses/go-sdk/datasource"
-	"github.com/perses/perses/go-sdk/group"
 	"github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
+	"github.com/perses/perses/go-sdk/variable-group"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -156,10 +156,10 @@ func AddVariable(name string, options ...variable.Option) Option {
 	}
 }
 
-func AddVariableGroup(options ...group.Option) Option {
+func AddVariableGroup(options ...variablegroup.Option) Option {
 	return func(builder *Builder) error {
 
-		g, err := group.New(options...)
+		g, err := variablegroup.New(options...)
 		if err != nil {
 			return err
 		}

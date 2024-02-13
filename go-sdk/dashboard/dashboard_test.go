@@ -19,7 +19,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/perses/perses/go-sdk/group"
 	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/panel/time-series"
@@ -27,6 +26,7 @@ import (
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
+	"github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	"github.com/stretchr/testify/assert"
@@ -69,12 +69,12 @@ func TestDashboardBuilder(t *testing.T) {
 		AddVariable("pod", listVar.List(
 			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		AddVariable("container", listVar.List(
 			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		AddVariable("containerLabels", listVar.List(
 			listVar.Description("simply the list of labels for the considered metric"),
@@ -124,7 +124,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 
 		// VARIABLES
 		AddVariableGroup(
-			group.AddVariable("stack",
+			variablegroup.AddVariable("stack",
 				listVar.List(
 					labelValuesVar.PrometheusLabelValues("stack",
 						labelValuesVar.Matchers("thanos_build_info"),
@@ -133,36 +133,36 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 					listVar.DisplayName("PaaS"),
 				),
 			),
-			group.AddVariable("prometheus",
+			variablegroup.AddVariable("prometheus",
 				txtVar.Text("platform", txtVar.Constant(true)),
 			),
-			group.AddVariable("prometheus_namespace",
+			variablegroup.AddVariable("prometheus_namespace",
 				txtVar.Text("observability",
 					txtVar.Constant(true),
 					txtVar.Description("constant to reduce the query scope thus improve performances"),
 				),
 			),
-			group.AddVariable("namespace", listVar.List(
+			variablegroup.AddVariable("namespace", listVar.List(
 				promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", "namespace", promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
 			)),
-			group.AddIgnoredVariable("namespaceLabels", listVar.List(
+			variablegroup.AddIgnoredVariable("namespaceLabels", listVar.List(
 				labelNamesVar.PrometheusLabelNames(
 					labelNamesVar.Matchers("kube_namespace_labels"),
 					labelNamesVar.Datasource("promDemo"),
 				),
 			)),
-			group.AddVariable("pod", listVar.List(
+			variablegroup.AddVariable("pod", listVar.List(
 				promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
-				listVar.AllowAllValues(true),
+				listVar.AllowAllValue(true),
 			)),
-			group.AddVariable("container", listVar.List(
+			variablegroup.AddVariable("container", listVar.List(
 				promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
-				listVar.AllowAllValues(true),
+				listVar.AllowAllValue(true),
 			)),
-			group.AddIgnoredVariable("containerLabels", listVar.List(
+			variablegroup.AddIgnoredVariable("containerLabels", listVar.List(
 				listVar.Description("simply the list of labels for the considered metric"),
 				listVar.Hidden(true),
 				labelNamesVar.PrometheusLabelNames(

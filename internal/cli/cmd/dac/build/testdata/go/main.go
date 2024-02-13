@@ -72,12 +72,12 @@ func main() {
 		dashboard.AddVariable("pod", listVar.List(
 			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		dashboard.AddVariable("container", listVar.List(
 			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		dashboard.AddVariable("containerLabels", listVar.List(
 			listVar.Description("simply the list of labels for the considered metric"),
