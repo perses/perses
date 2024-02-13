@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module dac
+package setup
 
-go 1.21.6
+import (
+	"fmt"
+	"os"
+	"os/exec"
+)
 
-replace github.com/perses/perses => ../../../../../../../ // Use current version
+func (o *option) setupGo() error {
+	if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
+		return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
+	} else if err != nil {
+		return err
+	}
 
-require github.com/perses/perses v0.43.0
+	if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
+		return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
+	}
+	return nil
+}
