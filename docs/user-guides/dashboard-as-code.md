@@ -102,7 +102,7 @@ You are now fully ready to start developing dashboards as code!
 It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
 - The [official website](https://go.dev/) of Go.
 
-Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata_go/main.go).
+Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata/go/main.go).
 To get a deeper understanding of the Go SDK and how to use it, the best thing to do for now is to check directly its source code.
 All the SDK utilities are located in the `github.com/perses/perses/go-sdk` package.
 

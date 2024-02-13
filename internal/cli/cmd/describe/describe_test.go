@@ -16,6 +16,7 @@ package describe
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	test "github.com/perses/perses/internal/test"
@@ -101,8 +102,8 @@ func TestDescribeCMD(t *testing.T) {
 		{
 			Title:           "describe folder with default project in json format",
 			Args:            []string{"folder", "myFolder", "-ojson"},
-			Project:         "perses",
 			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses"},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(&modelV1.Folder{
 				Kind: modelV1.KindFolder,

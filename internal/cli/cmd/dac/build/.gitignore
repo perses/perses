@@ -1,0 +1,3 @@
+# Ignore outputs from unit tests
+built/
+test_output/

@@ -27,8 +27,9 @@ import (
 )
 
 const (
-	pathConfig     = ".perses"
-	configFileName = "config.json"
+	pathConfig          = ".perses"
+	configFileName      = "config.json"
+	DefaultOutputFolder = "built"
 )
 
 var Global *Config
@@ -46,12 +47,22 @@ func Init(configPath string) {
 		}
 	}
 	Global.filePath = configPath
+	if len(Global.Dac.OutputFolder) == 0 {
+		Global.Dac.OutputFolder = DefaultOutputFolder
+	}
+}
+
+// Dac wraps the configuration related to Dashboard-as-Code
+type Dac struct {
+	// outputFolder is the folder where the dac-generated files are stored
+	OutputFolder string `json:"output_folder,omitempty" yaml:"output_folder,omitempty"`
 }
 
 type Config struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
 	Project          string                      `json:"project,omitempty"`
 	RefreshToken     string                      `json:"refresh_token,omitempty"`
+	Dac              Dac                         `json:"dac,omitempty"`
 	filePath         string
 	apiClient        api.ClientInterface
 }

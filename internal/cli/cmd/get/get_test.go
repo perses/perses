@@ -16,6 +16,7 @@ package get
 import (
 	"testing"
 
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
 	test "github.com/perses/perses/internal/test"
@@ -81,8 +82,8 @@ func TestGetCMD(t *testing.T) {
 		{
 			Title:           "get folder with default project in json format",
 			Args:            []string{"folder", "-ojson"},
-			Project:         "perses",
 			APIClient:       fakeapi.New(),
+			Config:          config.Config{Project: "perses"},
 			IsErrorExpected: false,
 			ExpectedMessage: string(test.JSONMarshalStrict(fakev1.FolderList("perses", ""))) + "\n",
 		},

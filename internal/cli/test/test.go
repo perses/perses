@@ -28,7 +28,7 @@ type Suite struct {
 	Title           string
 	Args            []string
 	APIClient       api.ClientInterface
-	Project         string
+	Config          config.Config
 	ExpectedMessage string
 	IsErrorExpected bool
 }
@@ -42,11 +42,13 @@ func ExecuteSuiteTest(t *testing.T, newCMD func() *cobra.Command, suites []Suite
 			cmd.SetOut(buffer)
 			cmd.SetErr(buffer)
 			cmd.SetArgs(test.Args)
-			config.Global = &config.Config{
-				Project: test.Project,
-			}
+
+			config.Global = &(test.Config)
 			config.Global.SetAPIClient(test.APIClient)
 			config.Global.SetFilePath(configFilePath)
+			if len(config.Global.Dac.OutputFolder) == 0 {
+				config.Global.Dac.OutputFolder = config.DefaultOutputFolder
+			}
 
 			err := cmd.Execute()
 			if test.IsErrorExpected {
