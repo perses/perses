@@ -14,12 +14,9 @@
 package setup
 
 import (
-	"archive/tar"
 	"bufio"
-	"compress/gzip"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -33,99 +30,10 @@ import (
 )
 
 const (
-	archiveName     = "sources.tar.gz"
-	depsFolderName  = "cue/"
-	depsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
-	maxFileSize     = 10240                                  // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
-	minVersion      = "v0.43.0"                              // TODO upgrade this number once DaC CUE SDK is released
+	minVersion  = "v0.44.0" // TODO upgrade this number once DaC CUE SDK is released
+	cueLanguage = "cue"
+	goLanguage  = "go"
 )
-
-func extractCUEDepsToDst() error {
-	file, err := os.Open(archiveName)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	// Open the tar reader
-	gzipReader, err := gzip.NewReader(file)
-	if err != nil {
-		return err
-	}
-	defer gzipReader.Close()
-	tarReader := tar.NewReader(gzipReader)
-
-	// Extract each CUE dep to the destination path
-	// TODO simplify the code with https://github.com/mholt/archiver? Wait for stable release of v4 maybe
-	depsFolderFound := false
-	for {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		// Remove the wrapping folder for following evaluations
-		currentDepPath := removeFirstFolder(header.Name)
-
-		if currentDepPath == depsFolderName {
-			depsFolderFound = true
-		}
-		if !strings.HasPrefix(currentDepPath, depsFolderName) {
-			continue
-		}
-
-		newDepPath := fmt.Sprintf("%s/%s", depsRootDstPath, currentDepPath)
-
-		switch header.Typeflag {
-		case tar.TypeDir:
-			if err := os.Mkdir(newDepPath, 0666); err != nil {
-				return fmt.Errorf("can't create dir %s: %v", newDepPath, err)
-			}
-			logrus.Debugf("dir %s created succesfully", newDepPath)
-		case tar.TypeReg:
-			outFile, err := os.Create(newDepPath)
-			if err != nil {
-				return fmt.Errorf("can't create file %s: %v", newDepPath, err)
-			}
-			defer outFile.Close()
-			if _, err := io.CopyN(outFile, tarReader, maxFileSize); err != nil {
-				if err == io.EOF {
-					continue
-				}
-				return fmt.Errorf("can't copy content from %s: %v", header.Name, err)
-			}
-			logrus.Debugf("file %s extracted succesfully", newDepPath)
-		default:
-			return fmt.Errorf("unknown type: %b in %s", header.Typeflag, header.Name)
-		}
-	}
-
-	if !depsFolderFound {
-		return fmt.Errorf("CUE dependencies not found in archive")
-	}
-
-	return nil
-}
-
-func removeFirstFolder(filePath string) string {
-	separatorChar := "/" // force the usage of forward slash for strings comparison
-
-	// Split the path into individual components
-	components := strings.Split(filePath, separatorChar)
-
-	// Remove the top folder if there is at least one folder in the path
-	if len(components) > 1 {
-		components = components[1:]
-	}
-
-	// Join the components back into a path
-	resultPath := strings.Join(components, separatorChar)
-
-	return resultPath
-}
 
 func addOutputDirToGitignore() error {
 	gitignorePath := ".gitignore"
@@ -156,8 +64,8 @@ func addOutputDirToGitignore() error {
 	}
 
 	// Append the output folder to the list
-	if _, err := file.WriteString(fmt.Sprintf("\n%s\n%s\n", comment, config.Global.Dac.OutputFolder)); err != nil {
-		return fmt.Errorf("error appending to %s: %v", gitignorePath, err)
+	if _, writeErr := file.WriteString(fmt.Sprintf("\n%s\n%s\n", comment, config.Global.Dac.OutputFolder)); writeErr != nil {
+		return fmt.Errorf("error appending to %s: %v", gitignorePath, writeErr)
 	}
 
 	logrus.Debugf("%s dir appended to %s", config.Global.Dac.OutputFolder, gitignorePath)
@@ -166,8 +74,9 @@ func addOutputDirToGitignore() error {
 
 type option struct {
 	persesCMD.Option
-	writer  io.Writer
-	version string
+	writer   io.Writer
+	version  string
+	language string
 }
 
 func (o *option) Complete(args []string) error {
@@ -175,7 +84,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'setup'")
 	}
 
-	// If no version provided, it should default to the version of the Perses server
+	// If no version provided, let's try to get the version from the Perses server
 	if o.version == "" {
 		logrus.Debug("version flag not provided, retrieving version from Perses server..")
 		apiClient, err := config.Global.GetAPIClient()
@@ -196,6 +105,8 @@ func (o *option) Complete(args []string) error {
 		o.version = fmt.Sprintf("v%s", o.version)
 	}
 
+	o.language = strings.ToLower(o.language)
+
 	return nil
 }
 
@@ -210,8 +121,18 @@ func (o *option) Validate() error {
 		return fmt.Errorf("version should be at least %s or higher", minVersion)
 	}
 
-	if err := exec.Command("cue", "version").Run(); err != nil {
-		return fmt.Errorf("unable to use the cue binary: %w", err)
+	if o.language != cueLanguage && o.language != goLanguage {
+		return fmt.Errorf("language %q is not supported", o.language)
+	}
+
+	if o.language == cueLanguage {
+		if err := exec.Command("cue", "version").Run(); err != nil {
+			return fmt.Errorf("unable to use the cue binary: %w", err)
+		}
+	}
+
+	if err := exec.Command("go", "version").Run(); err != nil {
+		return fmt.Errorf("unable to use the go binary: %w", err)
 	}
 	return nil
 }
@@ -224,60 +145,15 @@ func (o *option) Execute() error {
 		logrus.WithError(err).Warningf("unable to add the '%s' folder to .gitignore", config.Global.Dac.OutputFolder)
 	}
 
-	// Create the destination folder for the dependencies
-	if err := os.MkdirAll(depsRootDstPath, os.ModePerm); err != nil {
-		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
-	}
-
-	// Download the source code from the provided Perses version
-	if err := o.downloadSources(); err != nil {
-		return fmt.Errorf("error retrieving the Perses sources: %v", err)
-	}
-
-	defer func() {
-		// Cleanup
-		if err := os.Remove(archiveName); err != nil {
-			fmt.Printf("error removing the temp archive: %v\n", err)
+	if o.language == cueLanguage {
+		if err := o.setupCue(); err != nil {
+			return err
 		}
-	}()
-
-	// Extract the CUE deps from the archive to the destination folder
-	if err := extractCUEDepsToDst(); err != nil {
-		return fmt.Errorf("error extracting the CUE dependencies: %v", err)
+	} else if err := o.setupGo(); err != nil {
+		return err
 	}
 
 	return output.HandleString(o.writer, "DaC setup finished")
-}
-
-func (o *option) downloadSources() error {
-	// Download the sources
-	url := fmt.Sprintf("https://github.com/perses/perses/archive/refs/tags/%s.tar.gz", o.version)
-	// NB: wrongly spotted as unsecure by gosec; we are validating/sanitizing the string interpolated upfront thus no risk here
-	response, err := http.Get(url) // nolint: gosec
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("error: Unable to fetch release. Status code: %d", response.StatusCode)
-	}
-
-	// Save the content to a local file
-	outFile, err := os.Create(archiveName)
-	if err != nil {
-		return fmt.Errorf("error creating file: %v", err)
-	}
-	defer outFile.Close()
-
-	_, err = io.Copy(outFile, response.Body)
-	if err != nil {
-		return fmt.Errorf("error copying content to file: %v", err)
-	}
-
-	logrus.Debug("Perses release archive downloaded successfully")
-
-	return nil
 }
 
 func (o *option) SetWriter(writer io.Writer) {
@@ -306,6 +182,7 @@ percli dac setup --version 0.42.1
 			return persesCMD.Run(o, cmd, args)
 		},
 	}
+	cmd.Flags().StringVar(&o.language, "language", "cue", "language choosen for the setup. Possible value: cue, go.")
 	cmd.Flags().StringVar(&o.version, "version", "", "Version of Perses from which to retrieve the CUE dependencies.")
 
 	return cmd
