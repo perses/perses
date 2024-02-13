@@ -16,7 +16,7 @@ import { LineSeriesOption } from 'echarts/charts';
 import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@perses-dev/core';
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
-import { CursorCoordinates, CursorData } from './tooltip-model';
+import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
 export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
@@ -73,7 +73,7 @@ export function checkforNearbyTimeSeries(
   const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
 
   if (closestTimestamp === null) {
-    return [];
+    return EMPTY_TOOLTIP_DATA;
   }
 
   // find the timestamp with data that is closest to cursorX
@@ -305,7 +305,7 @@ export function getNearbySeriesData({
   format?: FormatOptions;
   showAllSeries?: boolean;
 }) {
-  if (chart === undefined || mousePos === null) return [];
+  if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
   let cursorTargetMatchesChart = false;
@@ -328,9 +328,10 @@ export function getNearbySeriesData({
     cursorTargetMatchesChart = true;
   }
 
-  if (cursorTargetMatchesChart === false) return [];
+  if (cursorTargetMatchesChart === false || data === null || chart['_model'] === undefined) return EMPTY_TOOLTIP_DATA;
 
-  if (chart['_model'] === undefined || data === null) return [];
+  // mousemove position undefined when not hovering over chart canvas
+  if (mousePos.plotCanvas.x === undefined || mousePos.plotCanvas.y === undefined) return EMPTY_TOOLTIP_DATA;
 
   const pointInGrid = getPointInGrid(mousePos.plotCanvas.x, mousePos.plotCanvas.y, chart);
   if (pointInGrid !== null) {
@@ -341,7 +342,8 @@ export function getNearbySeriesData({
     return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, format);
   }
 
-  return [];
+  // no nearby series found
+  return EMPTY_TOOLTIP_DATA;
 }
 
 /**

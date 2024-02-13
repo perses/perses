@@ -73,7 +73,7 @@ func validateAllSchemas(sch schemas.Schemas) {
 
 func validateAllDashboards(sch schemas.Schemas) {
 	logrus.Info("validate all dashboards in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "dashboard.json"))
+	data, err := os.ReadFile(path.Join("dev", "data", "9-dashboard.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -90,7 +90,7 @@ func validateAllDashboards(sch schemas.Schemas) {
 
 func validateAllDatasources(sch schemas.Schemas) {
 	logrus.Info("validate all datasources in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "projectdatasource.json"))
+	data, err := os.ReadFile(path.Join("dev", "data", "8-projectdatasource.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func validateAllDatasources(sch schemas.Schemas) {
 
 func validateAllGlobalDatasources(sch schemas.Schemas) {
 	logrus.Info("validate all globalDatasources in dev/data")
-	data, err := os.ReadFile(path.Join("dev", "data", "globaldatasource.json"))
+	data, err := os.ReadFile(path.Join("dev", "data", "4-globaldatasource.json"))
 	if err != nil {
 		logrus.Fatal(err)
 	}

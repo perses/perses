@@ -53,10 +53,15 @@ export const defaultCursorData = {
   chartWidth: 0,
 };
 
-export const emptyTooltipData = {
-  cursor: defaultCursorData,
-  focusedSeries: null,
-};
+export const EMPTY_TOOLTIP_DATA: NearbySeriesArray = [];
+
+/**
+ * ECharts is built with zrender, zrX and zrY are undefined when not hovering over a chart canvas
+ */
+export interface ZRCoordinate {
+  x?: number;
+  y?: number;
+}
 
 export interface Coordinate {
   x: number;
@@ -66,11 +71,7 @@ export interface Coordinate {
 export interface CursorCoordinates {
   page: Coordinate;
   client: Coordinate;
-  plotCanvas: Coordinate;
-  zrender?: {
-    x?: number;
-    y?: number;
-  };
+  plotCanvas: ZRCoordinate;
   target: EventTarget | null;
 }
 
@@ -109,12 +110,9 @@ export const useMousePosition = (): CursorData['coords'] => {
           y: e.clientY,
         },
         plotCanvas: {
-          x: e.offsetX,
-          y: e.offsetY,
-        },
-        zrender: {
-          // echarts canvas coordinates added automatically by zrender
-          // zrX and zrY are similar to offsetX and offsetY but they return undefined when not hovering over a chart canvas
+          // Always use zrender mousemove coords since they handle browser inconsistencies for us
+          // ex: Firefox and Chrome have slightly different implementations of offsetX and offsetY
+          // more info: https://github.com/ecomfe/zrender/blob/5.5.0/src/core/event.ts#L46-L120
           x: e.zrX,
           y: e.zrY,
         },

@@ -35,7 +35,7 @@ export function assembleTransform(
   containerElement?: Element | null
 ) {
   if (mousePos === null) {
-    return 'translate3d(0, 0)';
+    return undefined;
   }
 
   const cursorPaddingX = 32;
@@ -44,6 +44,8 @@ export function assembleTransform(
   if (pinnedPos !== null) {
     mousePos = pinnedPos;
   }
+
+  if (mousePos.plotCanvas.x === undefined) return undefined;
 
   // By default, tooltip is located in a Portal attached to the body.
   // Using page coordinates instead of viewport ensures the tooltip is

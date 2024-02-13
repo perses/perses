@@ -115,7 +115,6 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const { timeZone } = useTimeZone();
-  const totalSeries = data?.length ?? 0;
   let timeScale: TimeScale;
   if (timeScaleProp === undefined) {
     const commonTimeScale = getCommonTimeScale(data);
@@ -151,11 +150,11 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
             // when chart undef, do not clear highlight series
             return;
           }
-          clearHighlightedSeries(chartRef.current, totalSeries);
+          clearHighlightedSeries(chartRef.current);
         },
       };
     },
-    [totalSeries]
+    []
   );
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
@@ -398,7 +397,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           setShowTooltip(false);
         }
         if (chartRef.current !== undefined) {
-          clearHighlightedSeries(chartRef.current, totalSeries);
+          clearHighlightedSeries(chartRef.current);
         }
       }}
       onMouseEnter={() => {
