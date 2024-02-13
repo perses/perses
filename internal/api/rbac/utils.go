@@ -80,36 +80,36 @@ func addEntry(usersPermissions usersPermissions, user string, project string, pe
 }
 
 // buildUsersPermissions is building an array mapping of user and their global and project permissions
-func buildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO rolebinding.DAO, globalRoleDAO globalrole.DAO, globalRoleBindingDAO globalrolebinding.DAO) (usersPermissions, error) {
-	users, err := userDAO.List(&user.Query{})
+func (r *cacheImpl) buildUsersPermissions() (usersPermissions, error) {
+	users, err := r.userDAO.List(&user.Query{})
 	if err != nil {
 		return nil, err
 	}
-	roles, err := roleDAO.List(&role.Query{})
+	roles, err := r.roleDAO.List(&role.Query{})
 	if err != nil {
 		return nil, err
 	}
-	globalRoles, err := globalRoleDAO.List(&globalrole.Query{})
+	globalRoles, err := r.globalRoleDAO.List(&globalrole.Query{})
 	if err != nil {
 		return nil, err
 	}
-	roleBindings, err := roleBindingDAO.List(&rolebinding.Query{})
+	roleBindings, err := r.roleBindingDAO.List(&rolebinding.Query{})
 	if err != nil {
 		return nil, err
 	}
-	globalRoleBindings, err := globalRoleBindingDAO.List(&globalrolebinding.Query{})
+	globalRoleBindings, err := r.globalRoleBindingDAO.List(&globalrolebinding.Query{})
 	if err != nil {
 		return nil, err
 	}
 
 	// Build cache
-	usersPermissions := make(usersPermissions)
+	permissionBuild := make(usersPermissions)
 	for _, usr := range users {
 		for _, globalRoleBinding := range globalRoleBindings {
 			if globalRoleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
 				globalRolePermissions := findGlobalRole(globalRoles, globalRoleBinding.Spec.Role).Spec.Permissions
 				for i := range globalRolePermissions {
-					addEntry(usersPermissions, usr.Metadata.Name, GlobalProject, &globalRolePermissions[i])
+					addEntry(permissionBuild, usr.Metadata.Name, GlobalProject, &globalRolePermissions[i])
 				}
 			}
 		}
@@ -120,10 +120,10 @@ func buildUsersPermissions(userDAO user.DAO, roleDAO role.DAO, roleBindingDAO ro
 			if roleBinding.Spec.Has(v1.KindUser, usr.Metadata.Name) {
 				rolePermissions := findRole(roles, roleBinding.Metadata.Project, roleBinding.Spec.Role).Spec.Permissions
 				for i := range rolePermissions {
-					addEntry(usersPermissions, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
+					addEntry(permissionBuild, usr.Metadata.Name, roleBinding.Metadata.Project, &rolePermissions[i])
 				}
 			}
 		}
 	}
-	return usersPermissions, nil
+	return permissionBuild, nil
 }
