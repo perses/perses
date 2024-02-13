@@ -18,18 +18,10 @@ Need to provide a list of options.
 
 ## Available options
 
-### Plugin
-
-```golang
-import "github.com/perses/perses/go-sdk/query" 
-
-var common.Plugin plugin
-query.Plugin(plugin)
-```
-Define the query plugin, or you can use [plugin builders](#plugins-options) available.
+None
 
 
-## Plugins Options
+## Query Plugin Options
 
 ### Prometheus Query
 

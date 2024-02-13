@@ -90,13 +90,13 @@ func TestDashboardBuilder(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			panelgroup.Panel("Container memory",
+			panelgroup.AddPanel("Container memory",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			panelgroup.Panel("Container CPU",
+			panelgroup.AddPanel("Container CPU",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
@@ -177,13 +177,13 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			panelgroup.Panel("Container memory",
+			panelgroup.AddPanel("Container memory",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			panelgroup.Panel("Container CPU",
+			panelgroup.AddPanel("Container CPU",
 				timeseries.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),

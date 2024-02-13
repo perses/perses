@@ -46,7 +46,7 @@ The filter implementation is defined by the variable plugin builder.
 #### Text Variable Constructor
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 var txtVarOptions []txtVar.Option
 txtVar.Text("example-value", txtVarOptions...)
@@ -58,7 +58,7 @@ txtVar.Text("example-value", txtVarOptions...)
 ##### Value
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 txtVar.Value("example-value")
 ```
@@ -68,7 +68,7 @@ Define the value of the text variable.
 ##### Constant
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 txtVar.Constant(true)
 ```
@@ -78,7 +78,7 @@ Define if the text variable is a constant. A constant variable is a variable tha
 ##### Description
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 txtVar.Description("This is a super description")
 ```
@@ -88,7 +88,7 @@ Set the description of the text variable.
 ##### DisplayName
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 txtVar.DisplayName("This is a super description")
 ```
@@ -98,7 +98,7 @@ Set the display name of the text variable.
 ##### Hidden
 
 ```golang
-txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 txtVar.Hidden(true)
 ```
@@ -110,7 +110,7 @@ Define if the text variable is hidden. A hidden variable is a variable that is n
 #### List Variable Constructor
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 var listVarOptions []listVar.Option
 listVar.List(listVarOptions...)
@@ -122,7 +122,7 @@ listVar.List(listVarOptions...)
 ##### DefaultValue
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.DefaultValue("example-value")
 ```
@@ -132,7 +132,7 @@ Define a single default value for the list variable.
 ##### AllowAllValue
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.AllowAllValue(true)
 ```
@@ -142,7 +142,7 @@ Define if the "all" value is allowed. If set to true, the list variable will hav
 ##### AllowMultiple
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.AllowMultiple("This is a super description")
 ```
@@ -152,7 +152,7 @@ Define if the list variable allows multiple values to be selected. If set to tru
 ##### CustomAllValue
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.CustomAllValue("MySuperAllValueCustom")
 ```
@@ -162,7 +162,7 @@ Define a custom value for the "all" option.
 ##### CapturingRegexp
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.CapturingRegexp("^mysuperregexp.*")
 ```
@@ -171,7 +171,7 @@ Define a capturing regexp for the list variable. It will only list the values th
 ##### SortingBy
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.SortingBy(listVar.SortingAlphabeticalAsc)
 ```
@@ -182,7 +182,7 @@ The available options are: "none", "alphabetical-asc", "alphabetical-desc", "num
 ##### Description
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.Description("This is a super description")
 ```
@@ -192,7 +192,7 @@ Set the description of the list variable.
 ##### DisplayName
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.DisplayName("This is a super description")
 ```
@@ -202,7 +202,7 @@ Set the display name of the list variable.
 ##### Hidden
 
 ```golang
-listVar "github.com/perses/perses/go-sdk/variable/text-variable"
+import listVar "github.com/perses/perses/go-sdk/variable/text-variable"
 
 listVar.Hidden(true)
 ```
@@ -214,7 +214,7 @@ Define if the list variable is hidden. A hidden variable is a variable that is n
 ##### Prometheus (List Variable)
 
 ```golang
-promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
+import promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 
 var promqlVarOptions []promqlVar.Option
 promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{})", promqlVarOptions...)
@@ -225,7 +225,7 @@ Use a Prometheus query to populate the list variable. More info at [PromQL Varia
 ##### Prometheus Label Name (List Variable)
 
 ```golang
-labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
+import labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 
 var labelNamesVarOptions []labelNamesVar.Option
 labelNamesVar.PrometheusLabelNames(labelNamesVarOptions...)
@@ -236,7 +236,7 @@ Use label names from a Prometheus datasource to populate the list variable. More
 ##### Prometheus Label Values (List Variable)
 
 ```golang
-labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+import labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 
 var labelValuesVarOptions []labelValuesVar.Option
 labelValuesVar.PrometheusLabelValues("labelNames", labelNamesVarOptions...)

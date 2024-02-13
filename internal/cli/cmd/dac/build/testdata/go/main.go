@@ -60,7 +60,7 @@ func main() {
 			),
 		),
 		dashboard.AddVariable("namespace", listVar.List(
-			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", "namespace", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 		)),
 		dashboard.AddVariable("namespaceLabels", listVar.List(
@@ -70,12 +70,12 @@ func main() {
 			),
 		)),
 		dashboard.AddVariable("pod", listVar.List(
-			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 		)),
 		dashboard.AddVariable("container", listVar.List(
-			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 		)),
@@ -93,13 +93,13 @@ func main() {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			panelgroup.Panel("Container memory",
+			panelgroup.AddPanel("Container memory",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			panelgroup.Panel("Container CPU",
+			panelgroup.AddPanel("Container CPU",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),

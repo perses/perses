@@ -63,7 +63,7 @@ func PanelsPerLine(panelsPerLine int) Option {
 	}
 }
 
-func Panel(title string, options ...panel.Option) Option {
+func AddPanel(title string, options ...panel.Option) Option {
 	return func(builder *Builder) error {
 		p, err := panel.New(title, options...)
 		if err != nil {

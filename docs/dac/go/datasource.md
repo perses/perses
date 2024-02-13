@@ -48,23 +48,12 @@ datasource.Default(true)
 Set if datasource is a default datasource.
 
 
-### Plugin
-
-```golang
-import "github.com/perses/perses/go-sdk/query" 
-
-var common.Plugin plugin
-query.Plugin(plugin)
-```
-Define the datasource plugin, or you can use [plugin builders](#plugins-options) available.
-
-
-## Plugins Options
+## Datasource Plugin Options
 
 ### Prometheus Datasource
 
 ```golang
-promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+import promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
 
 promDs.Prometheus(promDsOptions...)
 ```
