@@ -120,6 +120,11 @@ func removeFirstFolder(filePath string) string {
 }
 
 func (o *option) setupCue() error {
+	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
+		return fmt.Errorf("unable to find the folder 'cue.mod'. Please run 'cue mod init'")
+	} else if err != nil {
+		return err
+	}
 	// Create the destination folder for the dependencies
 	if err := os.MkdirAll(cueDepsRootDstPath, os.ModePerm); err != nil {
 		return fmt.Errorf("error creating the dependencies folder structure: %v", err)
