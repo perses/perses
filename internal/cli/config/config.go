@@ -52,6 +52,7 @@ func Init(configPath string) {
 	}
 }
 
+// Dac wraps the configuration related to Dashboard-as-Code
 type Dac struct {
 	// outputFolder is the folder where the dac-generated files are stored
 	OutputFolder string `json:"output_folder,omitempty" yaml:"output_folder,omitempty"`
@@ -61,10 +62,9 @@ type Config struct {
 	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
 	Project          string                      `json:"project,omitempty"`
 	RefreshToken     string                      `json:"refresh_token,omitempty"`
+	Dac              Dac                         `json:"dac,omitempty"`
 	filePath         string
 	apiClient        api.ClientInterface
-	// Dac wraps the configuration related to Dashboard-as-Code
-	Dac Dac `json:"dac,omitempty" yaml:"dac,omitempty"`
 }
 
 func (c *Config) init() error {
