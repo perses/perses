@@ -32,7 +32,7 @@ func Matchers(matchers ...string) Option {
 	}
 }
 
-func AddMatchers(matcher string) Option {
+func AddMatcher(matcher string) Option {
 	return func(builder *Builder) error {
 		builder.PluginSpec.Matchers = append(builder.PluginSpec.Matchers, matcher)
 		return nil

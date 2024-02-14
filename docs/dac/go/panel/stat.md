@@ -8,13 +8,12 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 var options []stat.Option
 stat.Chart(options...)
 ```
-Need a list of options.
 
+Need a list of options.
 
 ## Default options
 
 - Calculation(): last
-
 
 ## Available options
 
@@ -26,8 +25,8 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 
 stat.Calculation(common.Last)
 ```
-Define the chart calculation.
 
+Define the chart calculation.
 
 ### Format
 
@@ -37,8 +36,8 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 
 stat.Format(common.Format{...})
 ```
-Define the chart format.
 
+Define the chart format.
 
 ### Thresholds
 
@@ -48,6 +47,7 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 
 stat.Thresholds(common.Thresholds{...})
 ```
+
 Define chart thresholds.
 
 ### WithSparkline
@@ -57,6 +57,7 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 
 stat.WithSparkline(stat.Sparkline{...})
 ```
+
 Define the sparkline of the chart.
 
 ### ValueFontSize
@@ -66,4 +67,5 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 
 stat.ValueFontSize(12)
 ```
+
 Define the font size of the value.

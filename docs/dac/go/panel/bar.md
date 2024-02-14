@@ -8,13 +8,12 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 var options []bar.Option
 bar.Chart(options...)
 ```
-Need a list of options.
 
+Need a list of options.
 
 ## Default options
 
 - Calculation(): last
-
 
 ## Available options
 
@@ -26,8 +25,8 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 
 bar.Calculation(common.Last)
 ```
-Define the chart calculation.
 
+Define the chart calculation.
 
 ### Format
 
@@ -37,8 +36,8 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 
 bar.Format(common.Format{...})
 ```
-Define the chart format.
 
+Define the chart format.
 
 ### SortingBy
 
@@ -47,9 +46,8 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 
 bar.SortingBy(bar.AscSort)
 ```
+
 Define the chart sorting.
-
-
 
 ### WithMode
 
@@ -58,4 +56,5 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 
 bar.WithMode(bar.PercentageMode)
 ```
+
 Define the chart mode.

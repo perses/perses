@@ -8,13 +8,12 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 var options []gauge.Option
 gauge.Chart(options...)
 ```
-Need a list of options.
 
+Need a list of options.
 
 ## Default options
 
 - Calculation(): last
-
 
 ## Available options
 
@@ -26,8 +25,8 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 
 gauge.Calculation(common.Last)
 ```
-Define the chart calculation.
 
+Define the chart calculation.
 
 ### Format
 
@@ -37,8 +36,8 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 
 gauge.Format(common.Format{...})
 ```
-Define the chart format.
 
+Define the chart format.
 
 ### Thresholds
 
@@ -48,8 +47,8 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 
 gauge.Thresholds(common.Thresholds{...})
 ```
-Define chart thresholds.
 
+Define chart thresholds.
 
 ### Max
 
@@ -58,4 +57,5 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 
 gauge.Max(20)
 ```
+
 Define the chart max value.

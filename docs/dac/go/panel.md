@@ -8,13 +8,12 @@ import "github.com/perses/perses/go-sdk/panel"
 var options []panel.Option
 panel.New("My Super Panel", options...)
 ```
-Need to provide the name of the panel and a list of options.
 
+Need to provide the name of the panel and a list of options.
 
 ## Default options
 
 - [Title()](#title): with the title provided in the constructor.
-
 
 ## Available options
 
@@ -25,8 +24,8 @@ import "github.com/perses/perses/go-sdk/panel"
 
 panel.Name("My Super Panel")
 ```
-Define the panel title.
 
+Define the panel title.
 
 ### Description
 
@@ -35,8 +34,8 @@ import "github.com/perses/perses/go-sdk/panel"
 
 panel.Description("My Super Panel")
 ```
-Define the panel description.
 
+Define the panel description.
 
 ### AddQuery
 
@@ -46,8 +45,8 @@ import "github.com/perses/perses/go-sdk/panel"
 var queryOptions []query.Option
 panel.AddQuery(queryOptions...)
 ```
-Define the panel query. More info at [Query](./query.md).
 
+Define the panel query. More info at [Query](./query.md).
 
 ## Panel Plugin Options
 
@@ -59,8 +58,8 @@ import "github.com/perses/perses/go-sdk/panel/bar"
 var barOptions []bar.Option
 bar.Chart(barOptions...)
 ```
-Define the panel chart. More info at [Bar Panel](./panel/bar.md).
 
+Define the panel chart. More info at [Bar Panel](./panel/bar.md).
 
 ### Gauge Panel
 
@@ -70,8 +69,8 @@ import "github.com/perses/perses/go-sdk/panel/gauge"
 var gaugeOptions []gauge.Option
 gauge.Chart(gaugeOptions...)
 ```
-Define the panel chart. More info at [Gauge Panel](./panel/gauge.md).
 
+Define the panel chart. More info at [Gauge Panel](./panel/gauge.md).
 
 ### Markdown Panel
 
@@ -81,8 +80,8 @@ import "github.com/perses/perses/go-sdk/panel/markdown"
 var markdownOptions []markdown.Option
 markdown.Chart(markdownOptions...)
 ```
-Define the panel chart. More info at [Markdown Panel](./panel/markdown.md).
 
+Define the panel chart. More info at [Markdown Panel](./panel/markdown.md).
 
 ### Stat Panel
 
@@ -92,8 +91,8 @@ import "github.com/perses/perses/go-sdk/panel/stat"
 var statOptions []stat.Option
 stat.Chart(statOptions...)
 ```
-Define the panel chart. More info at [Stat Panel](./panel/stat.md).
 
+Define the panel chart. More info at [Stat Panel](./panel/stat.md).
 
 ### Time Series Panel
 
@@ -103,4 +102,5 @@ import "github.com/perses/perses/go-sdk/panel/time-series"
 var timeSeriesOptions []timeseries.Option
 timeseries.Chart(timeSeriesOptions...)
 ```
+
 Define the panel chart. More info at [Time Series Panel](./panel/time-series.md).

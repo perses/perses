@@ -25,13 +25,6 @@ func LabelName(labelName string) Option {
 	}
 }
 
-func DefaultDatasource() Option {
-	return func(builder *Builder) error {
-		builder.PluginSpec.Datasource = promDatasource.Selector("")
-		return nil
-	}
-}
-
 func Datasource(datasourceName string) Option {
 	return func(builder *Builder) error {
 		builder.PluginSpec.Datasource = promDatasource.Selector(datasourceName)

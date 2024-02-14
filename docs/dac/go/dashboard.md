@@ -8,14 +8,13 @@ import "github.com/perses/perses/go-sdk/dashboard"
 var options []dashboard.Option
 dashboard.New("my Super Dashboard", options...)
 ```
-Need to provide the name of the dashboard and a list of options.
 
+Need to provide the name of the dashboard and a list of options.
 
 ## Default options
 
 - [Name()](#name): with the name provided in the constructor
 - [Duration()](#duration): one hour
-
 
 ## Available options
 
@@ -26,8 +25,8 @@ import "github.com/perses/perses/go-sdk/dashboard"
 
 dashboard.Name("My Super Dashboard")
 ```
-Define the dashboard metadata name and display name.
 
+Define the dashboard metadata name and display name.
 
 ### ProjectName
 
@@ -36,8 +35,8 @@ import "github.com/perses/perses/go-sdk/dashboard"
 
 dashboard.ProjectName("MySuperProject")
 ```
-Define the dashboard project name in metadata.
 
+Define the dashboard project name in metadata.
 
 ### Duration
 
@@ -47,8 +46,8 @@ import "github.com/perses/perses/go-sdk/dashboard"
 
 dashboard.Duration(2*time.Hour)
 ```
-Define the dashboard duration.
 
+Define the dashboard duration.
 
 ### RefreshInterval
 
@@ -58,8 +57,8 @@ import "github.com/perses/perses/go-sdk/dashboard"
 
 dashboard.RefreshInterval(15*time.minutes)
 ```
-Define the dashboard refresh interval.
 
+Define the dashboard refresh interval.
 
 ### AddPanelGroup
 
@@ -70,8 +69,8 @@ import "github.com/perses/perses/go-sdk/panel-group"
 var panelGroupOptions []panelgroup.Option
 dashboard.AddPanelGroup("My Super Panel Group", panelGroupOptions...)
 ```
-Add a panel group to the dashboard. More info at [Panel Group](./panel-group.md).
 
+Add a panel group to the dashboard. More info at [Panel Group](./panel-group.md).
 
 ### AddDatasource
 
@@ -82,8 +81,8 @@ import "github.com/perses/perses/go-sdk/datasource"
 var datasourceOptions []datasource.Option
 dashboard.AddDatasource("MySuperDatasourceName", datasourceOptions...)
 ```
-Add a local datasource to the dashboard. More info at [Datasource](./datasource.md).
 
+Add a local datasource to the dashboard. More info at [Datasource](./datasource.md).
 
 ### AddVariable
 
@@ -94,8 +93,8 @@ import "github.com/perses/perses/go-sdk/variable"
 var variableOptions []variable.Option
 dashboard.AddVariable("MySuperVariableName", variableOptions...)
 ```
-Add a local variable to the dashboard. More info at [Variable](./variable.md).
 
+Add a local variable to the dashboard. More info at [Variable](./variable.md).
 
 ### AddVariableGroup
 
@@ -106,8 +105,8 @@ import "github.com/perses/perses/go-sdk/variable-group"
 var variableGroupOptions []variablegroup.Option
 dashboard.AddVariableGroup(variableGroupOptions...)
 ```
-Add a group of variables to the dashboard. More info at [Variable Group](./variable-group.md).
 
+Add a group of variables to the dashboard. More info at [Variable Group](./variable-group.md).
 
 ## Example
 
