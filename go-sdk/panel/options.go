@@ -15,6 +15,7 @@ package panel
 
 import (
 	"github.com/perses/perses/go-sdk/query"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func Title(title string) Option {
@@ -27,6 +28,13 @@ func Title(title string) Option {
 func Description(description string) Option {
 	return func(builder *Builder) error {
 		builder.Spec.Display.Description = description
+		return nil
+	}
+}
+
+func Plugin(plugin common.Plugin) Option {
+	return func(builder *Builder) error {
+		builder.Spec.Plugin = plugin
 		return nil
 	}
 }

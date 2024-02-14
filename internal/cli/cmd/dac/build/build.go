@@ -192,7 +192,7 @@ The supported languages for a DaC are:
 - Go
 
 The result(s) is/are by default stored in a/multiple file(s) under the 'built' folder, but can also be printed on the standard output instead.
-For Go, file must comply with "go run": the file package must be main and a main function, starting with 'exec := sdk.NewExec()' and finishing with 'exec.ExecuteDashboard(...)'
+For Go, file must comply with "go run": the file package must be main and a main function, starting with 'exec := sdk.NewExec()' and finishing with 'exec.BuildDashboard(...)'
 
 NB: "percli dac build -f my_dashboard.cue -m stdout" is basically doing the same as "cue eval my_dashboard.cue", however be aware that "percli dac build -d mydir -m stdout" is not equivalent to "cue eval mydir": in the case of percli each CUE file encountered in the directory is evaluated independently.
 And "percli dac build -f main.go -m stdout" is basically doing the same as "go run main.go"

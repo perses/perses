@@ -14,11 +14,14 @@
 package main
 
 import (
+	"flag"
+	"time"
+
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
+	"github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/prometheus/query"
-	"github.com/perses/perses/go-sdk/row"
 
 	timeSeriesPanel "github.com/perses/perses/go-sdk/panel/time-series"
 	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
@@ -30,10 +33,12 @@ import (
 )
 
 func main() {
+	flag.Parse()
 	exec := sdk.NewExec()
 
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.ProjectName("MyProject"),
+		dashboard.RefreshInterval(1*time.Minute),
 
 		// VARIABLES
 		dashboard.AddVariable("stack",
@@ -55,7 +60,7 @@ func main() {
 			),
 		),
 		dashboard.AddVariable("namespace", listVar.List(
-			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", "namespace", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 		)),
 		dashboard.AddVariable("namespaceLabels", listVar.List(
@@ -65,14 +70,14 @@ func main() {
 			),
 		)),
 		dashboard.AddVariable("pod", listVar.List(
-			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", "pod", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		dashboard.AddVariable("container", listVar.List(
-			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", "container", promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
-			listVar.AllowAllValues(true),
+			listVar.AllowAllValue(true),
 		)),
 		dashboard.AddVariable("containerLabels", listVar.List(
 			listVar.Description("simply the list of labels for the considered metric"),
@@ -84,17 +89,17 @@ func main() {
 		)),
 
 		// ROWS
-		dashboard.AddRow("Resource usage",
-			row.PanelsPerLine(3),
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			row.Panel("Container memory",
+			panelgroup.AddPanel("Container memory",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
 				),
 			),
-			row.Panel("Container CPU",
+			panelgroup.AddPanel("Container CPU",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
@@ -104,5 +109,5 @@ func main() {
 
 		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("#####"))),
 	)
-	exec.ExecuteDashboard(builder, buildErr)
+	exec.BuildDashboard(builder, buildErr)
 }

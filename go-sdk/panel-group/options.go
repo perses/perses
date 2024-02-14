@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package row
+package panelgroup
 
 import (
 	"fmt"
@@ -63,7 +63,7 @@ func PanelsPerLine(panelsPerLine int) Option {
 	}
 }
 
-func Panel(title string, options ...panel.Option) Option {
+func AddPanel(title string, options ...panel.Option) Option {
 	return func(builder *Builder) error {
 		p, err := panel.New(title, options...)
 		if err != nil {

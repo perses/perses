@@ -28,10 +28,3 @@ func NewLine(text string) Option {
 		return nil
 	}
 }
-
-func NewImage(text string) Option {
-	return func(builder *Builder) error {
-		builder.Text += fmt.Sprintf("\r\n%s", text)
-		return nil
-	}
-}

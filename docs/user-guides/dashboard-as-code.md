@@ -115,11 +115,13 @@ Quick start example:
 package main
 
 import (
+	"flag"
+
 	"github.com/perses/perses/go-sdk"
 	"github.com/perses/perses/go-sdk/dashboard"
 	"github.com/perses/perses/go-sdk/panel"
 	"github.com/perses/perses/go-sdk/prometheus/query"
-	"github.com/perses/perses/go-sdk/row"
+	"github.com/perses/perses/go-sdk/panel-group"
 
 	timeSeriesPanel "github.com/perses/perses/go-sdk/panel/time-series"
 	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
@@ -128,6 +130,7 @@ import (
 )
 
 func main() {
+	flag.Parse()
 	exec := sdk.NewExec()
 	builder, buildErr := dashboard.New("ContainersMonitoring",
 		dashboard.ProjectName("MyProject"),
@@ -142,9 +145,9 @@ func main() {
 			),
 		),
 
-		dashboard.AddRow("Resource usage",
-			row.PanelsPerLine(3),
-			row.Panel("Container memory",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.PanelsPerLine(3),
+			panelgroup.AddPanel("Container memory",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{paas=\"$paas\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
@@ -154,7 +157,7 @@ func main() {
 
 		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("https://demo.prometheus.com"))),
 	)
-	exec.ExecuteDashboard(builder, buildErr)
+	exec.BuildDashboard(builder, buildErr)
 }
 ```
 

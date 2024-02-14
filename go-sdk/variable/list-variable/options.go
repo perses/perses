@@ -36,7 +36,7 @@ func DefaultValues(values ...string) Option {
 	}
 }
 
-func AllowAllValues(isAllValueAllowed bool) Option {
+func AllowAllValue(isAllValueAllowed bool) Option {
 	return func(builder *Builder) error {
 		builder.ListVariableSpec.AllowAllValue = isAllValueAllowed
 		return nil
