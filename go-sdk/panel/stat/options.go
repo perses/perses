@@ -47,7 +47,6 @@ func WithSparkline(sparkline Sparkline) Option {
 
 func ValueFontSize(size int) Option {
 	return func(builder *Builder) error {
-		// TODO: validation
 		builder.ValueFontSize = size
 		return nil
 	}

@@ -1,4 +1,4 @@
-# Prometheus Datasource
+# Prometheus Datasource Builder
 
 ## Constructor
 

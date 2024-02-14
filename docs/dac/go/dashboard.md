@@ -1,4 +1,4 @@
-# Dashboard
+# Dashboard Builder
 
 ## Constructor
 
@@ -107,3 +107,53 @@ var variableGroupOptions []variablegroup.Option
 dashboard.AddVariableGroup(variableGroupOptions...)
 ```
 Add a group of variables to the dashboard. More info at [Variable Group](./variable-group.md).
+
+
+## Example
+
+```golang
+package main
+
+import (
+	"time"
+
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/panel-group"
+	"github.com/perses/perses/go-sdk/panel/markdown"
+
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
+)
+
+func main() {
+	dashboard.New("ContainersMonitoring",
+		dashboard.ProjectName("MyProject"),
+		dashboard.RefreshInterval(1*time.Minute),
+
+		// VARIABLES
+		dashboard.AddVariable("stack",
+			listVar.List(
+				labelValuesVar.PrometheusLabelValues("stack",
+					labelValuesVar.Matchers("thanos_build_info{}"),
+					labelValuesVar.Datasource("promDemo"),
+				),
+				listVar.DisplayName("PaaS"),
+			),
+		),
+		
+		// ROWS
+		dashboard.AddPanelGroup("Info",
+			panelgroup.PanelsPerLine(3),
+
+			// PANELS
+			panelgroup.AddPanel("Contact",
+				markdown.Markdown("Dashboard owner: [John Doe](mailto:zzz)"),
+			),
+		),
+
+		// DATASOURCES
+		dashboard.AddDatasource("promDemo", promDs.Prometheus(promDs.HTTPProxy("#####"))),
+	)
+}
+```

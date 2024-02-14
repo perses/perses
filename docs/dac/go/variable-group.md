@@ -1,4 +1,4 @@
-# Variable Group
+# Variable Group Builder
 
 Variable group is a helper for adding variables to a dashboard. 
 It will automatically filter the variables added to the group. 

@@ -1,4 +1,4 @@
-# Panel
+# Panel Builder
 
 ## Constructor
 

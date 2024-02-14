@@ -1,4 +1,4 @@
-# Query
+# Query Builder
 
 ## Constructor
 
