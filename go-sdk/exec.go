@@ -52,9 +52,10 @@ func executeDashboardBuilder(builder dashboard.Builder, outputFormat string, wri
 }
 
 func NewExec() Exec {
-	outputFormat := flag.String("output", YAMLOutput, "output format of the exec")
+	output := flag.Lookup("output").Value.String()
+
 	return Exec{
-		outputFormat: *outputFormat,
+		outputFormat: output,
 	}
 }
 

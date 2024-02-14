@@ -147,7 +147,7 @@ func main() {
 
 		dashboard.AddPanelGroup("Resource usage",
 			panelgroup.PanelsPerLine(3),
-			panelgroup.Panel("Container memory",
+			panelgroup.AddPanel("Container memory",
 				timeSeriesPanel.Chart(),
 				panel.AddQuery(
 					query.PromQL("max by (container) (container_memory_rss{paas=\"$paas\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
