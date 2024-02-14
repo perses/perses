@@ -70,7 +70,7 @@ import "github.com/perses/perses/go-sdk/panel-group"
 var panelGroupOptions []panelgroup.Option
 dashboard.AddPanelGroup("My Super Panel Group", panelGroupOptions...)
 ```
-Add a panel group to the dashboard. More info at [Panel Group](../panel-group.md).
+Add a panel group to the dashboard. More info at [Panel Group](./panel-group.md).
 
 
 ### AddDatasource

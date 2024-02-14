@@ -85,3 +85,4 @@ var panelOptions []panel.Option
 panelgroup.AddPanel("MySuperPanelName", panelOptions...)
 ```
 Add a panel to the group, the panel will be placed depending on the ordering of in the group.
+More info about the panel can be found [here](panel.md).
