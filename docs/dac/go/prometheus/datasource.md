@@ -36,3 +36,21 @@ datasource.HTTPProxy("https://current-domain-name.io", httpProxyOptions...)
 ```
 
 Set Prometheus plugin for the datasource with a proxy URL, useful for bypassing. More info at [HTTP Proxy](../helper/http-proxy.md).
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddDatasource("prometheusDemo", promDs.Prometheus(promDs.DirectURL("https://prometheus.demo.do.prometheus.io/"))),
+	)
+}
+```

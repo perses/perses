@@ -46,3 +46,27 @@ promql.Datasource("datasourceName")
 ```
 
 Define the datasource where the expression will be executed.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/prometheus/variable/promql"
+	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddVariable("namespace", listvariable.List(
+			promql.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", 
+				promql.LabelName("namespace"), 
+				promql.Datasource("promDemo"), 
+            ),
+			listvariable.AllowMultiple(true),
+		)),
+	)
+}
+```

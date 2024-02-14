@@ -78,3 +78,24 @@ http.Secret("secretName")
 ```
 
 Define the secret name to use for the http proxy.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/http"
+	
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddDatasource("prometheusDemo", promDs.Prometheus(
+			promDs.HTTPProxy("https://prometheus.demo.do.prometheus.io/", http.AddHeader("Authorization", "Bearer test")), 
+        )),
+	)
+}
+```

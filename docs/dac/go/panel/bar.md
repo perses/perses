@@ -58,3 +58,33 @@ bar.WithMode(bar.PercentageMode)
 ```
 
 Define the chart mode.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/common"
+	"github.com/perses/perses/go-sdk/dashboard"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	"github.com/perses/perses/go-sdk/panel/bar"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.AddPanel("Container memory",
+				bar.Chart(
+					bar.Calculation(common.LastCalculation),
+					bar.Format(common.Format{
+						Unit: common.BytesUnit,
+					}),
+					bar.SortingBy(bar.AscSort),
+					bar.WithMode(bar.PercentageMode),
+				),
+			),
+		),
+	)
+}
+```

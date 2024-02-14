@@ -58,3 +58,21 @@ promDs.Prometheus(promDsOptions...)
 ```
 
 Set Prometheus plugin for the datasource. More info at [Prometheus Datasource](./prometheus/datasource.md).
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
+)
+
+func main() {
+	dashboard.New("ExampleDashboard",
+		dashboard.AddDatasource("prometheusDemo", promDs.Prometheus(promDs.DirectURL("https://prometheus.demo.do.prometheus.io/"))),
+	)
+}
+```

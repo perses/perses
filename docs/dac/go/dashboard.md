@@ -126,9 +126,10 @@ import (
 )
 
 func main() {
-	dashboard.New("ContainersMonitoring",
+	dashboard.New("Example Dashboard",
 		dashboard.ProjectName("MyProject"),
 		dashboard.RefreshInterval(1*time.Minute),
+		dashboard.Duration(24*time.Hour),
 
 		// VARIABLES
 		dashboard.AddVariable("stack",

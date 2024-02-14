@@ -58,3 +58,26 @@ variable.Filter(variables...)
 
 Mainly used by Mainly used by [variable group](../../variable-group.md).. It will filter the current variable with the provided variables.
 The filter will be applied only if matchers don't have curly brackets.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	labelnames "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
+	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddVariable("namespaceLabels", listvariable.List(
+			labelnames.PrometheusLabelNames(
+				labelnames.Matchers("kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"}"),
+				labelnames.Datasource("prometheusDemo"),
+			),
+		)),
+	)
+}
+```

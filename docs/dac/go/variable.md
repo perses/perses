@@ -241,3 +241,29 @@ labelValuesVar.PrometheusLabelValues("labelNames", labelNamesVarOptions...)
 ```
 
 Use label values from a Prometheus datasource to populate the list variable. More info at [Label Values Variable](./prometheus/variable/label-values.md).
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	labelvalues "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
+	listvariable "github.com/perses/perses/go-sdk/variable/list-variable"
+)
+
+func main() {
+	dashboard.New("ExampleDashboard",
+		dashboard.AddVariable("stack",
+			listvariable.List(
+				labelvalues.PrometheusLabelValues("stack",
+					labelvalues.Matchers("thanos_build_info{}"),
+					labelvalues.Datasource("prometheusDemo"),
+				),
+				listvariable.DisplayName("PaaS"),
+			),
+		),
+	)
+}
+```

@@ -59,3 +59,32 @@ gauge.Max(20)
 ```
 
 Define the chart max value.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/common"
+	"github.com/perses/perses/go-sdk/dashboard"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	"github.com/perses/perses/go-sdk/panel/gauge"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.AddPanel("Container memory",
+				gauge.Chart(
+					gauge.Calculation(common.LastCalculation),
+					gauge.Format(common.Format{
+						Unit: common.BytesUnit,
+					}),
+					gauge.Max(20),
+				),
+			),
+		),
+	)
+}
+```

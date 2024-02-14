@@ -50,9 +50,10 @@ Define query series name format.
 #### MinStep
 
 ```golang
+import "time"
 import "github.com/perses/perses/go-sdk/prometheus/query"
 
-query.MinStep("1w7d24h60m60s")
+query.MinStep(5*time.Minute)
 ```
 
 Define query min step.
@@ -66,3 +67,34 @@ query.Resolution(3600)
 ```
 
 Define query resolution.
+
+## Example
+
+```golang
+package main
+
+import (
+	"time"
+
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/panel"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
+	"github.com/perses/perses/go-sdk/prometheus/query"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.AddPanel("Container memory",
+				timeseries.Chart(),
+				panel.AddQuery(
+					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})",
+						query.MinStep(time.Minute),
+					),
+				),
+			),
+		),
+	)
+}
+```

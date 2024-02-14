@@ -70,3 +70,34 @@ timeseries.WithVisual(timeseries.Visual{...})
 ```
 
 Define visual properties of the chart.
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.AddPanel("Container memory",
+				timeseries.Chart(
+					timeseries.WithLegend(timeseries.Legend{
+						Position: timeseries.BottomPosition,
+						Mode:     timeseries.ListMode,
+						Size:     timeseries.SmallSize,
+					}),
+					timeseries.WithTooltip(timeseries.Tooltip{
+						EnablePinning: false,
+					}),
+				),
+			),
+		),
+	)
+}
+```

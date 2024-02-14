@@ -86,3 +86,32 @@ panelgroup.AddPanel("MySuperPanelName", panelOptions...)
 
 Add a panel to the group, the panel will be placed depending on the ordering of in the group.
 More info about the panel can be found [here](panel.md).
+
+## Example
+
+```golang
+package main
+
+import (
+	"github.com/perses/perses/go-sdk/dashboard"
+	"github.com/perses/perses/go-sdk/panel"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
+	"github.com/perses/perses/go-sdk/prometheus/query"
+)
+
+func main() {
+	dashboard.New("Example Dashboard",
+		dashboard.AddPanelGroup("Resource usage",
+			panelgroup.Collapsed(false),
+			panelgroup.PanelsPerLine(1),
+			panelgroup.AddPanel("Container memory",
+				timeseries.Chart(),
+				panel.AddQuery(
+					query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
+				),
+			),
+		),
+	)
+}
+```
