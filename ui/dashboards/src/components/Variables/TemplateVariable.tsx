@@ -74,8 +74,8 @@ export function useListVariableState(
   const allowMultiple = spec?.allowMultiple === true;
   const allowAllValue = spec?.allowAllValue === true;
   const sort = spec?.sort;
-  const loading = useMemo(() => variablesOptionsQuery.isFetching || false, [variablesOptionsQuery]);
-  const options = variablesOptionsQuery.data;
+  const loading = useMemo(() => variablesOptionsQuery.isFetching ?? false, [variablesOptionsQuery.isFetching]);
+  const options = useMemo(() => variablesOptionsQuery.data ?? [], [variablesOptionsQuery.data]);
 
   let value = state?.value;
 
