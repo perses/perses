@@ -67,6 +67,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
     return data.map(
       (datasource) =>
         ({
+          default: datasource.spec.default,
           project: getMetadataProject(datasource.metadata),
           name: datasource.metadata.name,
           displayName: getDatasourceDisplayName(datasource),
@@ -121,6 +122,12 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
+      {
+        field: 'default',
+        headerName: 'Default',
+        type: 'boolean',
+        minWidth: 100,
+      },
       { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
       { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
       {
