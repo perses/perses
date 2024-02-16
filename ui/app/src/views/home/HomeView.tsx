@@ -82,7 +82,7 @@ function HomeView() {
                 Add Dashboard
               </CRUDButton>
               <MenuItem component={RouterLink} to={MigrateRoute}>
-                <CRUDButton style={{ backgroundColor: 'transparent' }}>Migrate Dashboard</CRUDButton>
+                <CRUDButton style={{ backgroundColor: 'transparent' }}>Import Dashboard</CRUDButton>
               </MenuItem>
             </ButtonMenu>
             <CreateProjectDialog
