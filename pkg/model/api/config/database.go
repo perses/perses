@@ -34,9 +34,11 @@ const (
 )
 
 type File struct {
-	Folder        string        `json:"folder" yaml:"folder"`
-	Extension     FileExtension `json:"extension" yaml:"extension"`
-	CaseSensitive bool          `json:"case_sensitive" yaml:"case_sensitive"`
+	Folder string `json:"folder" yaml:"folder"`
+	// +kubebuilder:validation:Optional
+	Extension FileExtension `json:"extension" yaml:"extension"`
+	// +kubebuilder:validation:Optional
+	CaseSensitive bool `json:"case_sensitive" yaml:"case_sensitive"`
 }
 
 func (f *File) Verify() error {
