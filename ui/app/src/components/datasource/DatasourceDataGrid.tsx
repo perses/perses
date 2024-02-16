@@ -42,9 +42,12 @@ const MemoizedRow = memo(GridRow);
 const MemoizedColumnHeaders = memo(GridColumnHeaders);
 
 export interface Row {
+  default: boolean;
   project?: string;
   name: string;
   displayName: string;
+  description: string;
+  type: string;
   version: number;
   createdAt: string;
   updatedAt: string;
