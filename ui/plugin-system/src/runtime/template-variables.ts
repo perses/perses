@@ -163,7 +163,9 @@ export function useVariableValues(names?: string[]): VariableStateMap {
   const templateVariableValues = useTemplateVariableValues(names);
   const builtinVariableValues = useBuiltinVariableValues(names);
 
-  return Object.assign(templateVariableValues, builtinVariableValues);
+  return useMemo(() => {
+    return { ...templateVariableValues, ...builtinVariableValues } as VariableStateMap;
+  }, [templateVariableValues, builtinVariableValues]);
 }
 
 // Convenience hook for replacing template variables in a string

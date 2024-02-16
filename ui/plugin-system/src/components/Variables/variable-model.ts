@@ -73,13 +73,13 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
   const variablesValueKey = getVariableValuesKey(variables);
 
   return useQuery(
-    [name, definition, variablesValueKey, timeRange, refreshKey],
+    [definition, variablesValueKey, timeRange, refreshKey],
     async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       if (resp === undefined) {
         return [];
       }
-      if (capturingRegexp === undefined) {
+      if (!capturingRegexp) {
         return resp.data;
       }
       return filterVariableList(resp.data, capturingRegexp);
