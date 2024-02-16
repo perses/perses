@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
-import { PrometheusDatasourceSelector, TemplateString } from '../../model';
+import { PrometheusDatasourceSelector } from '../../model';
 
 /**
  * The spec/options for the PrometheusTimeSeriesQuery plugin.
  */
 export interface PrometheusTimeSeriesQuerySpec {
-  query: TemplateString;
+  query: string;
   seriesNameFormat?: string;
   minStep?: DurationString;
   resolution?: number;

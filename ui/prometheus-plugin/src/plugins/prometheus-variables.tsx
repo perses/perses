@@ -19,6 +19,7 @@ import {
   VariablePlugin,
   parseTemplateVariables,
   replaceTemplateVariables,
+  GetVariableOptionsContext,
 } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
 import { produce } from 'immer';
@@ -229,7 +230,7 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
 };
 
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
-  getVariableOptions: async (spec, ctx) => {
+  getVariableOptions: async (spec: PrometheusLabelNamesVariableOptions, ctx: GetVariableOptionsContext) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     const match = spec.matchers ? spec.matchers.map((m) => replaceTemplateVariables(m, ctx.variables)) : undefined;
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
@@ -239,7 +240,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: (spec) => {
+  dependsOn: (spec: PrometheusLabelNamesVariableOptions) => {
     return { variables: spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [] };
   },
   OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
@@ -247,7 +248,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
 };
 
 export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValuesVariableOptions> = {
-  getVariableOptions: async (spec, ctx) => {
+  getVariableOptions: async (spec: PrometheusLabelValuesVariableOptions, ctx: GetVariableOptionsContext) => {
     const pluginDef = spec;
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     const match = pluginDef.matchers
@@ -265,7 +266,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
       data: stringArrayToVariableOptions(options),
     };
   },
-  dependsOn: (spec) => {
+  dependsOn: (spec: PrometheusLabelValuesVariableOptions) => {
     return {
       variables:
         spec.matchers
@@ -279,7 +280,7 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
 };
 
 export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOptions> = {
-  getVariableOptions: async (spec, ctx) => {
+  getVariableOptions: async (spec: PrometheusPromQLVariableOptions, ctx: GetVariableOptionsContext) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     // TODO we may want to manage a range query as well.
     const { data: options } = await client.instantQuery({
@@ -297,7 +298,7 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
       data: stringArrayToVariableOptions(values),
     };
   },
-  dependsOn: (spec) => {
+  dependsOn: (spec: PrometheusPromQLVariableOptions) => {
     return { variables: parseTemplateVariables(spec.expr).concat(parseTemplateVariables(spec.labelName)) };
   },
   OptionsEditorComponent: PrometheusPromQLVariableEditor,
