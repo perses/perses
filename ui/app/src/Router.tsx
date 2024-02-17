@@ -30,7 +30,7 @@ import {
 import { useIsAuthEnable, useIsSignUpDisable } from './context/Config';
 
 // Other routes are lazy-loaded for code-splitting
-const MigrateView = lazy(() => import('./views/MigrateView'));
+const MigrateView = lazy(() => import('./views/migrate/MigrateView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
 const ConfigView = lazy(() => import('./views/config/ConfigView'));
 const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
