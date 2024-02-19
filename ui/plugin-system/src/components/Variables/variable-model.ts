@@ -14,13 +14,7 @@
 import { ListVariableDefinition } from '@perses-dev/core';
 import { useQuery } from '@tanstack/react-query';
 import { VariableOption } from '../../model';
-import {
-  useDatasourceStore,
-  usePlugin,
-  useTemplateVariableValues,
-  useTimeRange,
-  VariableStateMap,
-} from '../../runtime';
+import { useDatasourceStore, usePlugin, useTimeRange, useVariableValues, VariableStateMap } from '../../runtime';
 
 export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
   const result: VariableOption[] = [];
@@ -48,7 +42,7 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
 export function useListVariablePluginValues(definition: ListVariableDefinition) {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const datasourceStore = useDatasourceStore();
-  const allVariables = useTemplateVariableValues();
+  const allVariables = useVariableValues();
   const { absoluteTimeRange: timeRange, refreshKey } = useTimeRange();
 
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
@@ -63,7 +57,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
     dependsOnVariables = dependencies.variables;
   }
 
-  const variables = useTemplateVariableValues(dependsOnVariables);
+  const variables = useVariableValues(dependsOnVariables);
 
   let waitToLoad = false;
   if (dependsOnVariables) {
