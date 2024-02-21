@@ -45,6 +45,7 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@testing-library/dom": "8.20.1",
     "@types/jest": "^29.5.1",
     "@types/node": "^18.16.16",
     "@types/node-fetch": "^2.6.2",
