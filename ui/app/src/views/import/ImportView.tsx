@@ -35,7 +35,7 @@ interface PersesDashboard {
   data: DashboardResource;
 }
 
-function MigrateView() {
+function ImportView() {
   const [dashboard, setDashboard] = useState<Dashboard>();
   const isMobileSize = useIsMobileSize();
 
@@ -103,4 +103,4 @@ function MigrateView() {
   );
 }
 
-export default MigrateView;
+export default ImportView;

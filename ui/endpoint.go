@@ -21,7 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -33,7 +33,7 @@ var (
 		"/sign-in",
 		"/sign-up",
 		"/projects",
-		"/migrate",
+		"/import",
 		"/config",
 		"/explore",
 	}
