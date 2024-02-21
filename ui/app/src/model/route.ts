@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,6 +15,6 @@ export const AdminRoute = '/admin';
 export const SignInRoute = '/sign-in';
 export const SignUpRoute = '/sign-up';
 export const ConfigRoute = '/config';
-export const MigrateRoute = '/migrate';
+export const ImportRoute = '/import';
 export const ProjectRoute = '/projects';
 export const ExploreRoute = '/explore';
