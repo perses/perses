@@ -22,7 +22,7 @@ import { StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs
 import { useIsMobileSize } from '../../utils/browser-size';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
-import { MigrateRoute } from '../../model/route';
+import { ImportRoute } from '../../model/route';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -81,8 +81,8 @@ function HomeView() {
               >
                 Add Dashboard
               </CRUDButton>
-              <MenuItem component={RouterLink} to={MigrateRoute}>
-                <CRUDButton style={{ backgroundColor: 'transparent' }}>Migrate Dashboard</CRUDButton>
+              <MenuItem component={RouterLink} to={ImportRoute}>
+                <CRUDButton style={{ backgroundColor: 'transparent' }}>Import Dashboard</CRUDButton>
               </MenuItem>
             </ButtonMenu>
             <CreateProjectDialog

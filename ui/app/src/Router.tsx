@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import {
   AdminRoute,
   ConfigRoute,
   ProjectRoute,
-  MigrateRoute,
+  ImportRoute,
   SignInRoute,
   SignUpRoute,
   ExploreRoute,
@@ -30,7 +30,7 @@ import {
 import { useIsAuthEnable, useIsSignUpDisable } from './context/Config';
 
 // Other routes are lazy-loaded for code-splitting
-const MigrateView = lazy(() => import('./views/MigrateView'));
+const ImportView = lazy(() => import('./views/import/ImportView'));
 const AdminView = lazy(() => import('./views/admin/AdminView'));
 const ConfigView = lazy(() => import('./views/config/ConfigView'));
 const GuardedProjectRoute = lazy(() => import('./guard/GuardedProjectRoute'));
@@ -52,7 +52,7 @@ function Router() {
           <Route path={AdminRoute} element={<AdminView />} />
           <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
           <Route path={ConfigRoute} element={<ConfigView />} />
-          <Route path={MigrateRoute} element={<MigrateView />} />
+          <Route path={ImportRoute} element={<ImportView />} />
           <Route path={ProjectRoute} element={<HomeView />} />
           <Route path={ExploreRoute} element={<ExploreView />} />
           <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
