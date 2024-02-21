@@ -227,7 +227,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
         setSavedDatasources,
         getSavedDatasources,
         listDatasourceSelectItems,
-      } as DatasourceStore),
+      }) as DatasourceStore,
     [
       getDatasource,
       getDatasourceClient,

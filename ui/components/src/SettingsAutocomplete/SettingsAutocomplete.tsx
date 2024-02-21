@@ -51,7 +51,7 @@ export interface SettingsAutocompleteOption {
 export interface SettingsAutocompleteProps<
   OptionType extends SettingsAutocompleteOption,
   Multiple extends boolean | undefined,
-  DisableClearable extends boolean | undefined
+  DisableClearable extends boolean | undefined,
   // Note that the last `false` in the generic arguments sets the `freeSolo` option to `false`.
   // This component is intended to be used with a discrete list of options, so `freeSolo` never
   // needs to be `true`.
@@ -70,7 +70,7 @@ export interface SettingsAutocompleteProps<
 export function SettingsAutocomplete<
   OptionType extends SettingsAutocompleteOption,
   Multiple extends boolean | undefined = false,
-  DisableClearable extends boolean | undefined = false
+  DisableClearable extends boolean | undefined = false,
 >({
   options,
   renderInput = (params) => <TextField {...params} />,
