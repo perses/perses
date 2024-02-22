@@ -88,7 +88,7 @@ func (r *cacheImpl) GetPermissions(user string) map[string][]*v1Role.Permission 
 }
 
 func (r *cacheImpl) Refresh() error {
-	permissions, err := buildUsersPermissions(r.userDAO, r.roleDAO, r.roleBindingDAO, r.globalRoleDAO, r.globalRoleBindingDAO)
+	permissions, err := r.buildUsersPermissions()
 	if err != nil {
 		return err
 	}

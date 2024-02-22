@@ -180,7 +180,7 @@ percli lint -f ./resources.json --online
 	}
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
-	opt.MarkFileFlagAsMandatory(cmd)
+	opt.MarkFileAndDirFlagsAsXOR(cmd)
 	cmd.Flags().StringVar(&o.chartsSchemas, "schemas.charts", "", "Path to the CUE schemas for dasbhoard charts.")
 	cmd.Flags().StringVar(&o.queriesSchemas, "schemas.queries", "", "Path to the CUE schemas for chart queries.")
 	cmd.Flags().StringVar(&o.datasourcesSchemas, "schemas.datasources", "", "Path to the CUE schemas for the datasources")

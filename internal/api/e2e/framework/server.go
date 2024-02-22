@@ -52,10 +52,10 @@ func DefaultConfig() apiConfig.Config {
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: apiConfig.Schemas{
-			PanelsPath:      filepath.Join(projectPath, apiConfig.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, apiConfig.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, apiConfig.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, apiConfig.DefaultVariablesPath),
+			PanelsPath:      filepath.Join(projectPath, "cue", apiConfig.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, "cue", apiConfig.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath),
+			VariablesPath:   filepath.Join(projectPath, "cue", apiConfig.DefaultVariablesPath),
 			Interval:        0,
 		},
 	}

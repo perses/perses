@@ -17,6 +17,7 @@ Thumbs.db
 
 
 /bin
+/built
 /dist
 
 coverage.txt
@@ -27,8 +28,7 @@ coverage.txt
 
 EXTRACTED_CHANGELOG.md
 
-cue.mod/pkg
-cue.mod/usr
+cue.mod/gen
 
 dev/local_db
 

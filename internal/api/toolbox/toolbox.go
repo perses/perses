@@ -26,7 +26,6 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/sirupsen/logrus"
 )
@@ -192,9 +191,6 @@ func (t *toolbox) bind(ctx echo.Context, entity api.Entity) error {
 }
 
 func (t *toolbox) validateMetadata(ctx echo.Context, metadata api.Metadata) error {
-	if err := common.ValidateID(metadata.GetName()); err != nil {
-		return err
-	}
 	switch met := metadata.(type) {
 	case *v1.Metadata:
 		return t.validateMetadataVersusParameter(ctx, utils.ParamName, &met.Name)
