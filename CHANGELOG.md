@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.44.0-rc0 / 2024-02-22
+
+- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760)
+- [FEATURE] Allow importing Perses dashboards (#1769)
+- [FEATURE] Initial ScatterChart Panel Plugin (#1672)
+- [ENHANCEMENT] add kubebuilder annotations to dashboard types (#1764)
+- [ENHANCEMENT] Make default datasources more visible (#1767)
+- [ENHANCEMENT] add kubebuilder annotations to runtime types (#1745)
+- [ENHANCEMENT] Allow dynamic selection of authentication provider in percli (#1735)
+- [ENHANCEMENT] Sign in with branded button for external auth provider (#1728)
+- [ENHANCEMENT] Support referencing variables in 'Min step' field (#1725)
+- [ENHANCEMENT] Run ID validation on Metadata.Name in all cases to avoid discrepancies (#1712)
+- [BUGFIX] Builtin variables are rendered in prometheus variables (#1768)
+- [BUGFIX] Fixing variable loading indefinitely #1552 (#1763)
+- [BUGFIX] Fix dev provisioning (#1756)
+- [BUGFIX] Tooltip positioning broken in Firefox (#1750)
+- [BUGFIX] Fix the refresh token client in the CLI (#1737)
+- [BUGFIX] Fix initialScatterChartOptions to match schema scatter.cue file. (#1718)
+- [BREAKINGCHANGE] Make the database case-insensitive by config (#1744)
+- [BREAKINGCHANGE] Move Migrate Button into "Add Dashboard" (#1726
+- [DOC] Design Device code authentication flow (#1734)
+- [DOC] Reference DaC doc in CLI doc (#1723)
+
 ## 0.43.0 / 2024-01-17
 
 - [FEATURE] Add Secret Form Editor (#1671)
