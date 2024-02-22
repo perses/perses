@@ -28,8 +28,16 @@ func NewMetadata(name string) *Metadata {
 }
 
 type Metadata struct {
-	Name      string    `json:"name" yaml:"name"`
+	Name string `json:"name" yaml:"name"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
 	CreatedAt time.Time `json:"createdAt" yaml:"createdAt"`
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=date-time
+	// +kubebuilder:validation:Optional
 	UpdatedAt time.Time `json:"updatedAt" yaml:"updatedAt"`
 	Version   uint64    `json:"version" yaml:"version"`
 }

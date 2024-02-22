@@ -5,3 +5,6 @@ validators:
   # randomly it returns the error: status code 403: Forbidden
   - regex: 'groups\.google\.com'
     type: 'ignore'
+  # somehow stackoverflow is returning also a status code 403
+  - regex: 'stackoverflow\.com'
+    type: 'ignore'

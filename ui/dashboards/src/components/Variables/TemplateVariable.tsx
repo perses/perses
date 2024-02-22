@@ -74,8 +74,8 @@ export function useListVariableState(
   const allowMultiple = spec?.allowMultiple === true;
   const allowAllValue = spec?.allowAllValue === true;
   const sort = spec?.sort;
-  const loading = useMemo(() => variablesOptionsQuery.isFetching || false, [variablesOptionsQuery]);
-  const options = variablesOptionsQuery.data;
+  const loading = useMemo(() => variablesOptionsQuery.isFetching ?? false, [variablesOptionsQuery.isFetching]);
+  const options = useMemo(() => variablesOptionsQuery.data ?? [], [variablesOptionsQuery.data]);
 
   let value = state?.value;
 
@@ -164,7 +164,7 @@ export function useListVariableState(
 }
 
 const StyledPopper = (props: PopperProps) => (
-  <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
+  <Popper placeholder={undefined} {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
 const LETTER_HSIZE = 8; // approximation

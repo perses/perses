@@ -286,30 +286,33 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
 
     // Iterating the predefined list of possible values to retain a specific
     // intended order of values.
-    return legendValues.reduce((columns, legendValue) => {
-      const legendConfig = LEGEND_VALUE_CONFIG[legendValue];
+    return legendValues.reduce(
+      (columns, legendValue) => {
+        const legendConfig = LEGEND_VALUE_CONFIG[legendValue];
 
-      if (legendConfig && legend?.values?.includes(legendValue)) {
-        columns.push({
-          accessorKey: `data.${legendValue}`,
-          header: legendConfig.label,
-          headerDescription: legendConfig.description,
-          // Intentionally hardcoding a column width to start based on discussions
-          // with design around keeping this simple to start. This may need
-          // revisiting in the future to handle edge cases with very large values.
-          width: 72,
-          align: 'right',
-          cell: ({ getValue }) => {
-            const cellValue = getValue();
-            return typeof cellValue === 'number' && format ? formatValue(cellValue, format) : cellValue;
-          },
-          cellDescription: true,
-          enableSorting: true,
-        });
-      }
+        if (legendConfig && legend?.values?.includes(legendValue)) {
+          columns.push({
+            accessorKey: `data.${legendValue}`,
+            header: legendConfig.label,
+            headerDescription: legendConfig.description,
+            // Intentionally hardcoding a column width to start based on discussions
+            // with design around keeping this simple to start. This may need
+            // revisiting in the future to handle edge cases with very large values.
+            width: 72,
+            align: 'right',
+            cell: ({ getValue }) => {
+              const cellValue = getValue();
+              return typeof cellValue === 'number' && format ? formatValue(cellValue, format) : cellValue;
+            },
+            cellDescription: true,
+            enableSorting: true,
+          });
+        }
 
-      return columns;
-    }, [] as Array<TableColumnConfig<LegendItem>>);
+        return columns;
+      },
+      [] as Array<TableColumnConfig<LegendItem>>
+    );
   }, [legend?.values, format]);
 
   if (adjustedContentDimensions === undefined) {

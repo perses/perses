@@ -82,7 +82,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
             }}
             gap={1}
           >
-            <TemplateVariableList></TemplateVariableList>
+            <TemplateVariableList />
             {props.initialVariableIsSticky && (
               <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => setIsPin(!isPin)}>
                 {isPin ? <PinOutline /> : <PinOffOutline />}
