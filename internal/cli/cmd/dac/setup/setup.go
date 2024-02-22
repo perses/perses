@@ -30,7 +30,7 @@ import (
 )
 
 const (
-	minVersion  = "v0.44.0" // TODO upgrade this number once DaC CUE SDK is released
+	minVersion  = "v0.44.0-rc0" // TODO upgrade this number once DaC CUE SDK is released
 	cueLanguage = "cue"
 	goLanguage  = "go"
 )
