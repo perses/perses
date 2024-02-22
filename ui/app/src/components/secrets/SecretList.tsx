@@ -76,7 +76,7 @@ export function SecretList<T extends Secret>({
           version: secret.metadata.version,
           createdAt: secret.metadata.createdAt,
           updatedAt: secret.metadata.updatedAt,
-        } as Row)
+        }) as Row
     );
   }, [data]);
 

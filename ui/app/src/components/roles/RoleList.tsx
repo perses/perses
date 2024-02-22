@@ -64,7 +64,7 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
           version: role.metadata.version,
           createdAt: role.metadata.createdAt,
           updatedAt: role.metadata.updatedAt,
-        } as Row)
+        }) as Row
     );
   }, [data]);
 

@@ -70,11 +70,14 @@ export const LEGEND_SIZE_CONFIG: Readonly<Record<LegendSize, LegendSingleSelectC
   medium: { label: 'Medium' },
 };
 
-export const LEGEND_VALUE_CONFIG = legendValues.reduce((config, value) => {
-  config[value] = CALCULATIONS_CONFIG[value];
+export const LEGEND_VALUE_CONFIG = legendValues.reduce(
+  (config, value) => {
+    config[value] = CALCULATIONS_CONFIG[value];
 
-  return config;
-}, {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>);
+    return config;
+  },
+  {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>
+);
 
 export function validateLegendSpec(legend?: LegendOptionsBase) {
   if (legend === undefined) {

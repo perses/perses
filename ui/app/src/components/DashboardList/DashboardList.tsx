@@ -59,7 +59,7 @@ export function DashboardList(props: DashboardListProperties) {
           version: dashboard.metadata.version,
           createdAt: dashboard.metadata.createdAt,
           updatedAt: dashboard.metadata.updatedAt,
-        } as Row)
+        }) as Row
     );
   }, [dashboardList]);
 

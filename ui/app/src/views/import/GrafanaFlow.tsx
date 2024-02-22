@@ -64,21 +64,19 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
 
   return (
     <>
-      {
-        // When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
-        // The code below provide the possibility to the user to provide the list of the input value.
-        // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
-        dashboard?.__inputs?.map((input, index) => {
-          return (
-            <TextField
-              key={`input-${index}`}
-              label={input.name}
-              variant={'outlined'}
-              onBlur={(e) => setInput(input.name, e.target.value)}
-            />
-          );
-        })
-      }
+      {// When you are getting a dashboard from the Grafana marketplace, it can happen there is a list of input that shall be used in a later stage to replace some variables.
+      // The code below provide the possibility to the user to provide the list of the input value.
+      // These values will be provided to the backend that will take care to replace the variables called with the input name with the values provided.
+      dashboard?.__inputs?.map((input, index) => {
+        return (
+          <TextField
+            key={`input-${index}`}
+            label={input.name}
+            variant={'outlined'}
+            onBlur={(e) => setInput(input.name, e.target.value)}
+          />
+        );
+      })}
 
       <Alert variant="outlined" severity="warning">
         <Typography>

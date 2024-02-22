@@ -50,11 +50,14 @@ export function EditDatasourcesButton() {
 
         return isDirect || isSavedProxy;
       })
-      .reduce((obj, key) => {
-        obj[key] = datasources[key] as DatasourceSpec;
+      .reduce(
+        (obj, key) => {
+          obj[key] = datasources[key] as DatasourceSpec;
 
-        return obj;
-      }, {} as Record<string, DatasourceSpec>);
+          return obj;
+        },
+        {} as Record<string, DatasourceSpec>
+      );
 
     setDashboard({
       ...dashboard,

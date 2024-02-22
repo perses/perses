@@ -67,10 +67,12 @@ const devConfig: Configuration = {
     server: getServerConfig(),
     historyApiFallback: true,
     allowedHosts: 'all',
-    proxy: {
-      '/api': 'http://localhost:8080',
-      '/proxy': 'http://localhost:8080',
-    },
+    proxy: [
+      {
+        context: ['/api', '/proxy'],
+        target: 'http://localhost:8080',
+      }
+    ],
     client: {
       // By default, the error overlay is not shown because it can get in the
       // way of e2e tests and can be annoying for some developer workflows.
