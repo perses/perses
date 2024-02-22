@@ -18,9 +18,9 @@ import (
 	"time"
 
 	"github.com/perses/perses/go-sdk/datasource"
-	"github.com/perses/perses/go-sdk/panel-group"
+	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	"github.com/perses/perses/go-sdk/variable"
-	"github.com/perses/perses/go-sdk/variable-group"
+	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
@@ -92,7 +92,7 @@ func AddPanelGroup(title string, options ...panelgroup.Option) Option {
 		for i := range r.Panels {
 			panelRef := fmt.Sprintf("%d_%d", len(builder.Dashboard.Spec.Layouts), i)
 			x := (len(gridLayoutSpec.Items) * r.PanelsWidth) % 24
-			y := (len(gridLayoutSpec.Items) * r.PanelsWidth) / 24
+			y := (len(gridLayoutSpec.Items) * r.PanelsWidth) / 24 * r.PanelsHeight
 			gridLayoutSpec.Items = append(gridLayoutSpec.Items, v1Dashboard.GridItem{
 				X:      x,
 				Y:      y,

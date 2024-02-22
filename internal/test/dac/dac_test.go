@@ -26,7 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDashboardAsCodeUtilities(t *testing.T) {
+func TestDashboardAsCodeCUESDK(t *testing.T) {
 
 	testSuite := []struct {
 		title                  string
@@ -34,7 +34,7 @@ func TestDashboardAsCodeUtilities(t *testing.T) {
 		expectedOutputJSONFile string
 	}{
 		{
-			title:                  "Nominal case - DaC def that relies on all the DaC utils provided",
+			title:                  "Nominal case - DaC def that relies on all the DaC utils provided by the SDK",
 			inputCUEFile:           "input.cue",
 			expectedOutputJSONFile: "expected_output.json",
 		},

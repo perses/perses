@@ -127,6 +127,15 @@ dashboardBuilder & {
 					#cpuPanel,
 				]
 			},
+			{
+				#title:  "Resource usage bis"
+				#cols:   1
+				#height: 4
+				#panels: [
+					#cpuPanel,
+					#memoryPanel,
+				]
+			},
 		]
 	}
 }
