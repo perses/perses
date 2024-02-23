@@ -64,16 +64,16 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
   const { timeRange, refreshInterval, children, setTimeRange, setRefreshInterval } = props;
 
   const [localTimeRange, setLocalTimeRange] = useState<TimeRangeValue>(timeRange);
-  const [localRefreshInterval, setLocalefreshInterval] = useState<DurationString | undefined>(refreshInterval);
+  const [localRefreshInterval, setLocalRefreshInterval] = useState<DurationString | undefined>(refreshInterval);
 
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
     setLocalTimeRange(timeRange);
-  }, [timeRange]);
+  }, [timeRange, refreshCounter]);
 
   useEffect(() => {
-    setLocalefreshInterval(refreshInterval);
+    setLocalRefreshInterval(refreshInterval);
   }, [refreshInterval]);
 
   const refresh = useCallback(() => {
@@ -92,7 +92,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
       refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${localRefreshInterval}:${refreshCounter}`,
       refreshInterval: localRefreshInterval,
       refreshIntervalInMs: getRefreshIntervalInMs(localRefreshInterval),
-      setRefreshInterval: setRefreshInterval ?? setLocalefreshInterval,
+      setRefreshInterval: setRefreshInterval ?? setLocalRefreshInterval,
     };
   }, [localTimeRange, setTimeRange, refresh, refreshCounter, localRefreshInterval, setRefreshInterval]);
 
