@@ -19,6 +19,7 @@ import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteRoleBindingDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
@@ -30,6 +31,7 @@ import { RoleBindingDrawer } from './RoleBindingDrawer';
 export interface RoleBindingListProperties<T extends RoleBinding> {
   data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -46,7 +48,7 @@ export interface RoleBindingListProperties<T extends RoleBinding> {
  * @param props.isLoading Display a loading circle if enabled
  */
 export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListProperties<T>) {
-  const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
+  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
   const findRoleBinding = useCallback(
@@ -77,18 +79,32 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState<boolean>(false);
   const [isDeleteRoleBindingDialogOpened, setDeleteRoleBindingDialogOpened] = useState<boolean>(false);
 
-  const handleRoleBindingUpdate = useCallback(
+  const handleRoleBindingSave = useCallback(
     async (roleBinding: T) => {
-      await onUpdate(roleBinding);
+      if (action === 'create') {
+        await onCreate(roleBinding);
+      } else if (action === 'update') {
+        await onUpdate(roleBinding);
+      }
       setRoleBindingDrawerOpened(false);
     },
-    [onUpdate]
+    [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedRoleBinding(findRoleBinding(name, project));
       setAction('read');
+      setRoleBindingDrawerOpened(true);
+    },
+    [findRoleBinding]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const roleBinding = findRoleBinding(name, project);
+      setTargetedRoleBinding(roleBinding);
+      setAction('create');
       setRoleBindingDrawerOpened(true);
     },
     [findRoleBinding]
@@ -157,7 +173,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -167,6 +183,15 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
             scope={params.row.project ? 'RoleBinding' : 'GlobalRoleBinding'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'RoleBinding' : 'GlobalRoleBinding'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -180,7 +205,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
         ],
       },
     ],
-    [handleEditButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -200,8 +225,8 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
             isOpen={isRoleBindingDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => handleRoleBindingUpdate(v).then(() => setRoleBindingDrawerOpened(false))}
-            onDelete={onDelete}
+            onSave={handleRoleBindingSave}
+            onDelete={(v) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
             onClose={() => setRoleBindingDrawerOpened(false)}
           />
           <DeleteRoleBindingDialog

@@ -18,6 +18,7 @@ import { getVariableExtendedDisplayName, GlobalVariableResource, Variable } from
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { VariableList } from '../../../components/variable/VariableList';
 import {
+  useCreateGlobalVariableMutation,
   useDeleteGlobalVariableMutation,
   useGlobalVariableList,
   useUpdateGlobalVariableMutation,
@@ -38,8 +39,29 @@ export function GlobalVariables(props: GlobalVariablesProps) {
   const { data, isLoading } = useGlobalVariableList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createVariableMutation = useCreateGlobalVariableMutation();
   const updateVariableMutation = useUpdateGlobalVariableMutation();
   const deleteVariableMutation = useDeleteGlobalVariableMutation();
+
+  const handleVariableCreate = useCallback(
+    (variable: GlobalVariableResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createVariableMutation.mutate(variable, {
+          onSuccess: (createdVariable: Variable) => {
+            successSnackbar(
+              `Global Variable ${getVariableExtendedDisplayName(createdVariable)} has been successfully created`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createVariableMutation]
+  );
 
   const handleVariableUpdate = useCallback(
     (variable: GlobalVariableResource): Promise<void> =>
@@ -86,6 +108,7 @@ export function GlobalVariables(props: GlobalVariablesProps) {
       <VariableList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}
         initialState={{

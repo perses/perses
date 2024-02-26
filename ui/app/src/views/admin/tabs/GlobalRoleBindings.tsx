@@ -17,6 +17,7 @@ import { GlobalRoleBindingResource, RoleBinding } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleBindingList } from '../../../components/rolebindings/RoleBindingList';
 import {
+  useCreateGlobalRoleBindingMutation,
   useDeleteGlobalRoleBindingMutation,
   useGlobalRoleBindingList,
   useUpdateGlobalRoleBindingMutation,
@@ -32,8 +33,27 @@ export function GlobalRoleBindings(props: GlobalRoleBindingsProps) {
   const { data, isLoading } = useGlobalRoleBindingList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createRoleBindingMutation = useCreateGlobalRoleBindingMutation();
   const updateRoleBindingMutation = useUpdateGlobalRoleBindingMutation();
   const deleteRoleBindingMutation = useDeleteGlobalRoleBindingMutation();
+
+  const handleGlobalRoleBindingCreate = useCallback(
+    (roleBinding: GlobalRoleBindingResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createRoleBindingMutation.mutate(roleBinding, {
+          onSuccess: (createdRoleBinding: RoleBinding) => {
+            successSnackbar(`GlobalRoleBinding ${createdRoleBinding.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+  );
 
   const handleGlobalRoleBindingUpdate = useCallback(
     (roleBinding: GlobalRoleBindingResource): Promise<void> =>
@@ -76,6 +96,7 @@ export function GlobalRoleBindings(props: GlobalRoleBindingsProps) {
       <RoleBindingList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleGlobalRoleBindingCreate}
         onUpdate={handleGlobalRoleBindingUpdate}
         onDelete={handleGlobalRoleBindingDelete}
         initialState={{

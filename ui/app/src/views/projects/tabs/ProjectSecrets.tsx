@@ -16,7 +16,12 @@ import { useCallback } from 'react';
 import { Secret, SecretResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { SecretList } from '../../../components/secrets/SecretList';
-import { useDeleteSecretMutation, useUpdateSecretMutation, useSecretList } from '../../../model/secret-client';
+import {
+  useDeleteSecretMutation,
+  useUpdateSecretMutation,
+  useSecretList,
+  useCreateSecretMutation,
+} from '../../../model/secret-client';
 
 interface ProjectSecretsProps {
   projectName: string;
@@ -29,8 +34,27 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
   const { data, isLoading } = useSecretList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createSecretMutation = useCreateSecretMutation(projectName);
   const updateSecretMutation = useUpdateSecretMutation(projectName);
   const deleteSecretMutation = useDeleteSecretMutation(projectName);
+
+  const handleSecretCreate = useCallback(
+    (secret: SecretResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createSecretMutation.mutate(secret, {
+          onSuccess: (createdSecret: Secret) => {
+            successSnackbar(`Secret ${createdSecret.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createSecretMutation]
+  );
 
   const handleSecretUpdate = useCallback(
     (secret: SecretResource): Promise<void> =>
@@ -73,6 +97,7 @@ export function ProjectSecrets(props: ProjectSecretsProps) {
       <SecretList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}
         initialState={{

@@ -21,6 +21,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useIsReadonly } from '../../context/Config';
 import { DeleteVariableDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
@@ -31,6 +32,7 @@ import { VariableDrawer } from './VariableDrawer';
 export interface VariableListProperties<T extends Variable> {
   data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -47,7 +49,7 @@ export interface VariableListProperties<T extends Variable> {
  * @param props.isLoading Display a loading circle if enabled
  */
 export function VariableList<T extends Variable>(props: VariableListProperties<T>) {
-  const { data, hideToolbar, isLoading, initialState, onUpdate, onDelete } = props;
+  const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
 
@@ -79,6 +81,18 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
   const [isVariableDrawerOpened, setVariableDrawerOpened] = useState<boolean>(false);
   const [isDeleteVariableDialogOpened, setDeleteVariableDialogOpened] = useState<boolean>(false);
 
+  const handleVariableSave = useCallback(
+    async (variable: T) => {
+      if (action === 'create') {
+        await onCreate(variable);
+      } else if (action === 'update') {
+        await onUpdate(variable);
+      }
+      setVariableDrawerOpened(false);
+    },
+    [action, onCreate, onUpdate]
+  );
+
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedVariable(findVariable(name, project));
@@ -101,6 +115,16 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
       const variable = findVariable(name, project);
       setTargetedVariable(variable);
       setAction('update');
+      setVariableDrawerOpened(true);
+    },
+    [findVariable]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const variable = findVariable(name, project);
+      setTargetedVariable(variable);
+      setAction('create');
       setVariableDrawerOpened(true);
     },
     [findVariable]
@@ -185,7 +209,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -195,6 +219,15 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
             scope={params.row.project ? 'Variable' : 'GlobalVariable'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'Variable' : 'GlobalVariable'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -208,7 +241,7 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
         ],
       },
     ],
-    [handleEditButtonClick, handleDeleteButtonClick, handleCopyVarNameButtonClick]
+    [handleCopyVarNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -230,8 +263,8 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
             isOpen={isVariableDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => onUpdate(v).then(() => setVariableDrawerOpened(false))}
-            onDelete={onDelete}
+            onSave={handleVariableSave}
+            onDelete={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
             onClose={() => setVariableDrawerOpened(false)}
           />
           <DeleteVariableDialog
