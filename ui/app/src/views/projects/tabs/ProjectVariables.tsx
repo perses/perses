@@ -17,7 +17,12 @@ import { getVariableExtendedDisplayName, Variable, VariableResource } from '@per
 import { useSnackbar } from '@perses-dev/components';
 import { VariableList } from '../../../components/variable/VariableList';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
-import { useDeleteVariableMutation, useUpdateVariableMutation, useVariableList } from '../../../model/variable-client';
+import {
+  useCreateVariableMutation,
+  useDeleteVariableMutation,
+  useUpdateVariableMutation,
+  useVariableList,
+} from '../../../model/variable-client';
 
 interface ProjectVariablesProps {
   projectName: string;
@@ -36,8 +41,29 @@ export function ProjectVariables(props: ProjectVariablesProps) {
   const { data, isLoading } = useVariableList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createVariableMutation = useCreateVariableMutation(projectName);
   const updateVariableMutation = useUpdateVariableMutation(projectName);
   const deleteVariableMutation = useDeleteVariableMutation(projectName);
+
+  const handleVariableCreate = useCallback(
+    (variable: VariableResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createVariableMutation.mutate(variable, {
+          onSuccess: (createdVariable: Variable) => {
+            successSnackbar(
+              `Variable ${getVariableExtendedDisplayName(createdVariable)} has been successfully created`
+            );
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createVariableMutation]
+  );
 
   const handleVariableUpdate = useCallback(
     (variable: VariableResource): Promise<void> =>
@@ -84,6 +110,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
       <VariableList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleVariableCreate}
         onUpdate={handleVariableUpdate}
         onDelete={handleVariableDelete}
         initialState={{

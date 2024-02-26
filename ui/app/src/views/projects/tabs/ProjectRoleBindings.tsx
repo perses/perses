@@ -20,6 +20,7 @@ import {
   useDeleteRoleBindingMutation,
   useUpdateRoleBindingMutation,
   useRoleBindingList,
+  useCreateRoleBindingMutation,
 } from '../../../model/rolebinding-client';
 
 interface ProjectRoleBindingsProps {
@@ -33,8 +34,27 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps) {
   const { data, isLoading } = useRoleBindingList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createRoleBindingMutation = useCreateRoleBindingMutation(projectName);
   const updateRoleBindingMutation = useUpdateRoleBindingMutation(projectName);
   const deleteRoleBindingMutation = useDeleteRoleBindingMutation(projectName);
+
+  const handleRoleBindingCreate = useCallback(
+    (roleBinding: RoleBindingResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createRoleBindingMutation.mutate(roleBinding, {
+          onSuccess: (createdRoleBinding: RoleBinding) => {
+            successSnackbar(`RoleBinding ${createdRoleBinding.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createRoleBindingMutation]
+  );
 
   const handleRoleBindingUpdate = useCallback(
     (roleBinding: RoleBindingResource): Promise<void> =>
@@ -77,6 +97,7 @@ export function ProjectRoleBindings(props: ProjectRoleBindingsProps) {
       <RoleBindingList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleRoleBindingCreate}
         onUpdate={handleRoleBindingUpdate}
         onDelete={handleRoleBindingDelete}
         initialState={{

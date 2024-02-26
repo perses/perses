@@ -16,6 +16,7 @@ import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
 import { getDatasourceDisplayName, ProjectDatasource } from '@perses-dev/core';
 import {
+  useCreateDatasourceMutation,
   useDatasourceList,
   useDeleteDatasourceMutation,
   useUpdateDatasourceMutation,
@@ -34,8 +35,28 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
+  const createDatasourceMutation = useCreateDatasourceMutation(projectName);
   const deleteDatasourceMutation = useDeleteDatasourceMutation(projectName);
   const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
+
+  const handleDatasourceCreate = useCallback(
+    (datasource: ProjectDatasource): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        createDatasourceMutation.mutate(datasource, {
+          onSuccess: (createdDatasource: ProjectDatasource) => {
+            successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      });
+    },
+    [exceptionSnackbar, successSnackbar, createDatasourceMutation]
+  );
 
   const handleDatasourceUpdate = useCallback(
     (datasource: ProjectDatasource): Promise<void> => {
@@ -80,6 +101,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       <DatasourceList
         data={data || []}
         hideToolbar={hideToolbar}
+        onCreate={handleDatasourceCreate}
         onUpdate={handleDatasourceUpdate}
         onDelete={handleDatasourceDelete}
         isLoading={isLoading}

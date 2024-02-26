@@ -18,11 +18,17 @@ import {
   getDashboardExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
+  DashboardSpec,
 } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
+
+export interface CreateDashboardState {
+  name: string;
+  spec?: DashboardSpec;
+}
 
 /**
  * The View for creating a new Dashboard.
@@ -30,7 +36,8 @@ import { HelperDashboardView } from './HelperDashboardView';
 function CreateDashboardView() {
   const { projectName } = useParams();
   const location = useLocation();
-  const dashboardName = location.state;
+  const state: CreateDashboardState = location.state;
+  const dashboardName = state.name;
 
   if (!projectName || !dashboardName) {
     throw new Error('Unable to get the dashboard or project name');
@@ -47,7 +54,7 @@ function CreateDashboardView() {
       project: projectName,
       version: 0,
     },
-    spec: {
+    spec: state.spec ?? {
       display: {
         name: dashboardName,
       },

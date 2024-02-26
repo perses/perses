@@ -23,6 +23,7 @@ interface CreateDashboardProps {
   open: boolean;
   projectOptions: string[];
   hideProjectSelect?: boolean;
+  title?: string;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector>;
 }
@@ -36,7 +37,7 @@ interface CreateDashboardProps {
  * @param props.onSuccess Action to perform when user confirmed.
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
-  const { open, projectOptions, hideProjectSelect, onClose, onSuccess } = props;
+  const { open, projectOptions, hideProjectSelect, title, onClose, onSuccess } = props;
 
   const schemaValidation = useDashboardValidationSchema();
 
@@ -59,7 +60,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   };
   return (
     <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog" fullWidth={true}>
-      <Dialog.Header>Create Dashboard</Dialog.Header>
+      <Dialog.Header>{title ? title : 'Create Dashboard'}</Dialog.Header>
       <FormProvider {...form}>
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
