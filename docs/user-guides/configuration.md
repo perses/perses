@@ -260,6 +260,10 @@ Generic placeholders are defined as follows:
 
   # The file extension and so the file format used when storing and reading data from/to the database
   [ extension: <string> | default = yaml ]
+
+  # Whether the database is case-sensitive.
+  # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
+  [ case_sensitive: <string> | default = false ]
 ```
 
 #### `<database_sql_config>`
@@ -337,6 +341,10 @@ Generic placeholders are defined as follows:
 
   # Reject read-only connections
   [ reject_read_only: <boolean> | default = false ]
+
+  # Whether the database is case-sensitive.
+  # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
+  [ case_sensitive: <string> | default = false ]
 ```
 
 ### `<schemas_config>`

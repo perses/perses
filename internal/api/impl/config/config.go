@@ -17,7 +17,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/perses/perses/internal/api/shared/route"
+	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 

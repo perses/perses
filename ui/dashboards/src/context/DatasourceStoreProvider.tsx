@@ -218,15 +218,16 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   );
 
   const ctxValue: DatasourceStore = useMemo(
-    () => ({
-      getDatasource,
-      getDatasourceClient,
-      getLocalDatasources,
-      setLocalDatasources,
-      setSavedDatasources,
-      getSavedDatasources,
-      listDatasourceSelectItems,
-    }),
+    () =>
+      ({
+        getDatasource,
+        getDatasourceClient,
+        getLocalDatasources,
+        setLocalDatasources,
+        setSavedDatasources,
+        getSavedDatasources,
+        listDatasourceSelectItems,
+      }) as DatasourceStore,
     [
       getDatasource,
       getDatasourceClient,

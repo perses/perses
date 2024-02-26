@@ -217,10 +217,13 @@ export const CheckboxSelection: Story = {
     },
   },
   render: (args) => {
-    const initSelection = args.data.reduce((result, item) => {
-      result[item.id] = true;
-      return result;
-    }, {} as NonNullable<TableProps<MockTableData>['rowSelection']>);
+    const initSelection = args.data.reduce(
+      (result, item) => {
+        result[item.id] = true;
+        return result;
+      },
+      {} as NonNullable<TableProps<MockTableData>['rowSelection']>
+    );
 
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const [standardRowSelection, setStandardRowSelection] = useState<TableProps<MockTableData>['rowSelection']>({

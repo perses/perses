@@ -44,7 +44,7 @@ progress. The current pieces that are in place are:
 - The Plugin architecture has finally reached a stable point.
   - The plugins concern the Variables, Panels, Queries and Datasources definitions.
   - To provide a good static validation, the backend is using multiple CUE schemas and the CLI got a `lint` command.
-    All schemas are available in the [schemas](./schemas) folder.
+    All schemas are available in the [cue/schemas](./cue/schemas) folder.
 - A backend REST API provides R/W access to dashboard and datasource definitions.
 - A CLI that can be used to interact with the REST API. A short doc is available [here](./docs/tooling/cli.md)
 - While the UI is still in progress, we already have:

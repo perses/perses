@@ -85,10 +85,13 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
   Extract<CalculationType, IncludeCalcs[number]>,
   CalculationValue
 > {
-  const calculations = includeCalculations.reduce((initResult, calculation) => {
-    initResult[calculation] = undefined;
-    return initResult;
-  }, {} as Record<string, CalculationValue>);
+  const calculations = includeCalculations.reduce(
+    (initResult, calculation) => {
+      initResult[calculation] = undefined;
+      return initResult;
+    },
+    {} as Record<string, CalculationValue>
+  );
 
   // We save these values as separate values instead of directly setting them
   // in the calculations because they are needed by multiple calculations.

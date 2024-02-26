@@ -46,7 +46,9 @@ func TestMarshalDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					Project: "perses",
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
+						Project: "perses",
+					},
 				},
 				Spec: DashboardSpec{
 					Variables: nil,
@@ -150,7 +152,9 @@ func TestMarshalDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					Project: "perses",
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
+						Project: "perses",
+					},
 				},
 				Spec: DashboardSpec{
 					Variables: []dashboard.Variable{
@@ -430,7 +434,9 @@ func TestUnmarshallDashboard(t *testing.T) {
 			Metadata: Metadata{
 				Name: "SimpleDashboard",
 			},
-			Project: "perses",
+			ProjectMetadataWrapper: ProjectMetadataWrapper{
+				Project: "perses",
+			},
 		},
 		Spec: DashboardSpec{
 			Variables: []dashboard.Variable{

@@ -69,31 +69,37 @@ export function hydrateTemplateVariableStates(
 
   // Collect the names used by local definitions
   let overridingNames: Record<string, boolean> = {};
-  localDefinitions.forEach((v) => {
-    overridingNames[v.spec.name] = true;
-  }, {} as Record<string, boolean>);
+  localDefinitions.forEach(
+    (v) => {
+      overridingNames[v.spec.name] = true;
+    },
+    {} as Record<string, boolean>
+  );
 
   // Then populate the external variables state,
   // taking care of well flagging each name as used, so the overridden state can be filled accordingly.
   const overriddenNames: Record<string, boolean> = {};
-  externalDefinitions.forEach((externalDef) => {
-    const source = externalDef.source;
-    externalDef.definitions.forEach((v) => {
-      const name = v.spec.name;
-      const param = initialValues[name];
-      const initialValue = param ? param : null;
-      state.set(
-        { source, name },
-        {
-          ...hydrateTemplateVariableState(v, initialValue),
-          overridden: !!overridingNames[name],
-        }
-      );
+  externalDefinitions.forEach(
+    (externalDef) => {
+      const source = externalDef.source;
+      externalDef.definitions.forEach((v) => {
+        const name = v.spec.name;
+        const param = initialValues[name];
+        const initialValue = param ? param : null;
+        state.set(
+          { source, name },
+          {
+            ...hydrateTemplateVariableState(v, initialValue),
+            overridden: !!overridingNames[name],
+          }
+        );
 
-      overridingNames[name] = true;
-      overriddenNames[v.spec.name] = true;
-    });
-  }, {} as Record<string, boolean>);
+        overridingNames[name] = true;
+        overriddenNames[v.spec.name] = true;
+      });
+    },
+    {} as Record<string, boolean>
+  );
 
   // Then populate the local variables state,
   // taking care the overriding state is filled according to the names used in external variables.

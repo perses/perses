@@ -21,11 +21,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
-	"github.com/perses/perses/internal/api/shared/dashboard"
-	"github.com/perses/perses/internal/api/shared/dependency"
-	"github.com/perses/perses/internal/api/shared/migrate"
-	"github.com/perses/perses/internal/api/shared/rbac"
-	"github.com/perses/perses/internal/api/shared/schemas"
+	"github.com/perses/perses/internal/api/dashboard"
+	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/provisioning"
+	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/ui"
 	"github.com/sirupsen/logrus"
@@ -69,7 +70,8 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	runner.WithTasks(watcher, migrateWatcher)
 	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
-		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), serviceManager.GetProvisioning())
+		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
+		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
 	if conf.Security.EnableAuth {
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)

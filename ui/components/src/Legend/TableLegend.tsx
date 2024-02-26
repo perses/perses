@@ -65,10 +65,13 @@ export function TableLegend({
       : // Turn "ALL" state into a table component friendly map of all of the selected
         // items for checkboxes.
         // TODO: clean this up if we switch to also using checkboxes in list legend.
-        items.reduce((allRowSelection, item, index) => {
-          allRowSelection[getRowId(item, index)] = true;
-          return allRowSelection;
-        }, {} as Record<string, boolean>);
+        items.reduce(
+          (allRowSelection, item, index) => {
+            allRowSelection[getRowId(item, index)] = true;
+            return allRowSelection;
+          },
+          {} as Record<string, boolean>
+        );
   }, [initRowSelection, items]);
 
   const columns = useMemo(() => {

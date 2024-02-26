@@ -34,8 +34,11 @@ const (
 )
 
 type File struct {
-	Folder    string        `json:"folder" yaml:"folder"`
+	Folder string `json:"folder" yaml:"folder"`
+	// +kubebuilder:validation:Optional
 	Extension FileExtension `json:"extension" yaml:"extension"`
+	// +kubebuilder:validation:Optional
+	CaseSensitive bool `json:"case_sensitive" yaml:"case_sensitive"`
 }
 
 func (f *File) Verify() error {
@@ -101,6 +104,7 @@ type SQL struct {
 	ParseTime bool `json:"parse_time" yaml:"parse_time"`
 	// Reject read-only connections
 	RejectReadOnly bool `json:"reject_read_only" yaml:"reject_read_only"`
+	CaseSensitive  bool `json:"case_sensitive" yaml:"case_sensitive"`
 }
 
 func (s *SQL) Verify() error {

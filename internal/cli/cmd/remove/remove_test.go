@@ -18,7 +18,7 @@ import (
 
 	"github.com/perses/perses/internal/cli/resource"
 	cmdTest "github.com/perses/perses/internal/cli/test"
-	"github.com/perses/perses/pkg/client/fake/api"
+	fakeapi "github.com/perses/perses/pkg/client/fake/api"
 )
 
 func TestDeleteCMD(t *testing.T) {

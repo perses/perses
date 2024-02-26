@@ -16,6 +16,7 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
+	"path"
 	"testing"
 	"time"
 
@@ -80,7 +81,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   "database": {
     "file": {
       "folder": "./local_db",
-      "extension": "yaml"
+      "extension": "yaml",
+      "case_sensitive": false
     }
   },
   "schemas": {
@@ -149,10 +151,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     }
   },
   "schemas": {
-    "panels_path": "schemas/panels",
-    "queries_path": "schemas/queries",
-    "datasources_path": "schemas/datasources",
-    "variables_path": "schemas/variables",
+    "panels_path": "cue/schemas/panels",
+    "queries_path": "cue/schemas/queries",
+    "datasources_path": "cue/schemas/datasources",
+    "variables_path": "cue/schemas/variables",
     "interval": "5m"
   },
   "important_dashboards": [
@@ -211,10 +213,10 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					},
 				},
 				Schemas: Schemas{
-					PanelsPath:      DefaultPanelsPath,
-					QueriesPath:     DefaultQueriesPath,
-					DatasourcesPath: DefaultDatasourcesPath,
-					VariablesPath:   DefaultVariablesPath,
+					PanelsPath:      path.Join("cue", DefaultPanelsPath),
+					QueriesPath:     path.Join("cue", DefaultQueriesPath),
+					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
+					VariablesPath:   path.Join("cue", DefaultVariablesPath),
 					Interval:        model.Duration(5 * time.Minute),
 				},
 				ImportantDashboards: []dashboardSelector{
@@ -288,10 +290,10 @@ provisioning:
   - "dev/data"
 
 schemas:
-  panels_path: "schemas/panels"
-  queries_path: "schemas/queries"
-  datasources_path: "schemas/datasources"
-  variables_path: "schemas/variables"
+  panels_path: "cue/schemas/panels"
+  queries_path: "cue/schemas/queries"
+  datasources_path: "cue/schemas/datasources"
+  variables_path: "cue/schemas/variables"
   interval: "5m"
 
 important_dashboards:
@@ -350,10 +352,10 @@ ephemeral_dashboards_cleanup_interval: "2h"
 					},
 				},
 				Schemas: Schemas{
-					PanelsPath:      DefaultPanelsPath,
-					QueriesPath:     DefaultQueriesPath,
-					DatasourcesPath: DefaultDatasourcesPath,
-					VariablesPath:   DefaultVariablesPath,
+					PanelsPath:      path.Join("cue", DefaultPanelsPath),
+					QueriesPath:     path.Join("cue", DefaultQueriesPath),
+					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
+					VariablesPath:   path.Join("cue", DefaultVariablesPath),
 					Interval:        model.Duration(5 * time.Minute),
 				},
 				ImportantDashboards: []dashboardSelector{

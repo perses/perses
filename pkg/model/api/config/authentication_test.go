@@ -87,3 +87,16 @@ client_secret: "secretthing"
 	assert.Equal(t, "http://localhost:8080", c.RedirectURI.String())
 	assert.Equal(t, "http://localhost:8181", c.Issuer.String())
 }
+
+func TestAppendIfMissing(t *testing.T) {
+	slice := []string{"test1", "test2"}
+	slice, ok1 := appendIfMissing(slice, "test1")
+	assert.Len(t, slice, 2)
+	assert.False(t, ok1)
+	slice, ok2 := appendIfMissing(slice, "test3")
+	assert.Len(t, slice, 3)
+	assert.True(t, ok2)
+	slice, ok3 := appendIfMissing(slice, "test3")
+	assert.Len(t, slice, 3)
+	assert.False(t, ok3)
+}

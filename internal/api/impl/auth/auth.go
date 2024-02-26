@@ -20,11 +20,11 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
+	"github.com/perses/perses/internal/api/crypto"
+	"github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/internal/api/shared"
-	"github.com/perses/perses/internal/api/shared/crypto"
-	"github.com/perses/perses/internal/api/shared/route"
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/route"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 )
@@ -111,18 +111,18 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 		// In that case, let's decode the body if exists
 		body := &api.RefreshRequest{}
 		if bindErr := ctx.Bind(body); bindErr != nil {
-			return shared.HandleBadRequestError(bindErr.Error())
+			return apiinterface.HandleBadRequestError(bindErr.Error())
 		}
 		refreshToken = body.RefreshToken
 	} else {
 		refreshToken = refreshTokenCookie.Value
 	}
 	if len(refreshToken) == 0 {
-		return shared.HandleBadRequestError("no refresh token has been found")
+		return apiinterface.HandleBadRequestError("no refresh token has been found")
 	}
 	claims, err := e.jwt.ValidateRefreshToken(refreshToken)
 	if err != nil {
-		return shared.HandleBadRequestError(err.Error())
+		return apiinterface.HandleBadRequestError(err.Error())
 	}
 	accessToken, err := e.tokenManagement.accessToken(claims.Subject, ctx.SetCookie)
 	if err != nil {

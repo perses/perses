@@ -25,7 +25,7 @@ func TestLintCMD(t *testing.T) {
 			Title:           "empty args",
 			Args:            []string{},
 			IsErrorExpected: true,
-			ExpectedMessage: `required flag(s) "file" not set`,
+			ExpectedMessage: `at least one of the flags in the group [file directory] is required`,
 		},
 		{
 			Title:           "use args",

@@ -291,9 +291,10 @@ export function VariableEditor(props: {
               {externalVariableDefinitions &&
                 !externalVariableDefinitions.every((v) => v.definitions.length === 0) &&
                 externalVariableDefinitions.map(
-                  (extVar) =>
+                  (extVar, key) =>
                     extVar.definitions.length > 0 && (
                       <Accordion
+                        key={key}
                         sx={(theme) => ({
                           '.MuiAccordionSummary-root': {
                             backgroundColor: theme.palette.background.lighter,

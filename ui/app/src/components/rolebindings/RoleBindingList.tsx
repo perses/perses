@@ -68,7 +68,7 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
           version: roleBinding.metadata.version,
           createdAt: roleBinding.metadata.createdAt,
           updatedAt: roleBinding.metadata.updatedAt,
-        } as Row)
+        }) as Row
     );
   }, [data]);
 

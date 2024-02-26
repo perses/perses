@@ -24,8 +24,8 @@ import (
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/perses/perses/internal/api/core"
-	databaseModel "github.com/perses/perses/internal/api/shared/database/model"
-	"github.com/perses/perses/internal/api/shared/dependency"
+	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/test"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
@@ -52,10 +52,10 @@ func DefaultConfig() apiConfig.Config {
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		Schemas: apiConfig.Schemas{
-			PanelsPath:      filepath.Join(projectPath, apiConfig.DefaultPanelsPath),
-			QueriesPath:     filepath.Join(projectPath, apiConfig.DefaultQueriesPath),
-			DatasourcesPath: filepath.Join(projectPath, apiConfig.DefaultDatasourcesPath),
-			VariablesPath:   filepath.Join(projectPath, apiConfig.DefaultVariablesPath),
+			PanelsPath:      filepath.Join(projectPath, "cue", apiConfig.DefaultPanelsPath),
+			QueriesPath:     filepath.Join(projectPath, "cue", apiConfig.DefaultQueriesPath),
+			DatasourcesPath: filepath.Join(projectPath, "cue", apiConfig.DefaultDatasourcesPath),
+			VariablesPath:   filepath.Join(projectPath, "cue", apiConfig.DefaultVariablesPath),
 			Interval:        0,
 		},
 	}
@@ -72,8 +72,9 @@ func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Enti
 
 func defaultFileConfig() *apiConfig.File {
 	return &apiConfig.File{
-		Folder:    "./test",
-		Extension: apiConfig.JSONExtension,
+		Folder:        "./test",
+		Extension:     apiConfig.JSONExtension,
+		CaseSensitive: true,
 	}
 }
 
@@ -87,6 +88,7 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 				Addr:                 "localhost:3306",
 				DBName:               "perses",
 				AllowNativePasswords: true,
+				CaseSensitive:        true,
 			},
 		}
 	} else {

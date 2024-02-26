@@ -18,7 +18,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/perses/perses/internal/api/shared/utils"
+	"github.com/perses/perses/internal/api/utils"
 	"github.com/stretchr/testify/assert"
 )
 

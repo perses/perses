@@ -19,7 +19,9 @@ import (
 )
 
 type Plugin struct {
-	Kind string      `json:"kind" yaml:"kind"`
+	Kind string `json:"kind" yaml:"kind"`
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
 	Spec interface{} `json:"spec" yaml:"spec"`
 }
 

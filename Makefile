@@ -1,4 +1,4 @@
-# Copyright 2021 The Perses Authors
+# Copyright 2024 The Perses Authors
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -48,7 +48,7 @@ tag:
 checkformat:
 	@echo ">> checking go code format"
 	! $(GOFMT) -d $$(find . -name '*.go' -not -path "./ui/*" -print) | grep '^'
-	@echo ">> running check for cue file format"
+	@echo ">> running check for CUE file format"
 	./scripts/cue.sh --checkformat
 
 .PHONY: checkdocs
@@ -91,12 +91,19 @@ fmt-docs:
 
 .PHONY: cue-eval
 cue-eval:
-	@echo ">> eval cue schemas"
-	$(CUE) eval ./schemas/...
+	@echo ">> eval CUE files"
+	$(CUE) eval ./cue/...
+
+.PHONY: cue-gen
+cue-gen:
+	@echo ">> generate CUE definitions from golang datamodel"
+	$(CUE) get go github.com/perses/perses/pkg/model/api/v1
+	cp -r cue.mod/gen/github.com/perses/perses/pkg/model/* cue/model/ && rm -r cue.mod/gen
+	find cue/model -name "*.cue" -exec sed -i 's/\"github.com\/perses\/perses\/pkg/\"github.com\/perses\/perses\/cue/g' {} \;
 
 .PHONY: cue-test
 cue-test:
-	@echo ">> test cue schemas with json data"
+	@echo ">> test CUE schemas with json data"
 	$(GO) run ./scripts/cue-test/cue-test.go
 
 .PHONY: test

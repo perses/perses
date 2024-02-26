@@ -180,74 +180,77 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
     return contextValues;
   }, [originalValues, definitions, externalDefinitions]);
 
-  const allBuiltinVariables: BuiltinVariableDefinition[] = [
-    {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__from',
-        value: () => absoluteTimeRange.start.valueOf().toString(),
-        source: 'Dashboard',
-        display: {
+  const allBuiltinVariables: BuiltinVariableDefinition[] = useMemo(() => {
+    const result: BuiltinVariableDefinition[] = [
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__from',
-          description: 'Start time of the current time range in unix millisecond epoch',
-          hidden: true,
+          value: () => absoluteTimeRange.start.valueOf().toString(),
+          source: 'Dashboard',
+          display: {
+            name: '__from',
+            description: 'Start time of the current time range in unix millisecond epoch',
+            hidden: true,
+          },
         },
       },
-    },
-    {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__to',
-        value: () => absoluteTimeRange.end.valueOf().toString(),
-        source: 'Dashboard',
-        display: {
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__to',
-          description: 'End time of the current time range in unix millisecond epoch',
-          hidden: true,
+          value: () => absoluteTimeRange.end.valueOf().toString(),
+          source: 'Dashboard',
+          display: {
+            name: '__to',
+            description: 'End time of the current time range in unix millisecond epoch',
+            hidden: true,
+          },
         },
       },
-    },
-    {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__range',
-        value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
-        source: 'Dashboard',
-        display: {
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__range',
-          description: 'The range for the current dashboard in human readable format',
-          hidden: true,
+          value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
+          source: 'Dashboard',
+          display: {
+            name: '__range',
+            description: 'The range for the current dashboard in human readable format',
+            hidden: true,
+          },
         },
       },
-    },
-    {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__range_s',
-        value: () => ((absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()) / 1000).toString(),
-        source: 'Dashboard',
-        display: {
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__range_s',
-          description: 'The range for the current dashboard in second',
-          hidden: true,
+          value: () => ((absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()) / 1000).toString(),
+          source: 'Dashboard',
+          display: {
+            name: '__range_s',
+            description: 'The range for the current dashboard in second',
+            hidden: true,
+          },
         },
       },
-    },
-    {
-      kind: 'BuiltinVariable',
-      spec: {
-        name: '__range_ms',
-        value: () => (absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()).toString(),
-        source: 'Dashboard',
-        display: {
+      {
+        kind: 'BuiltinVariable',
+        spec: {
           name: '__range_ms',
-          description: 'The range for the current dashboard in millisecond',
-          hidden: true,
+          value: () => (absoluteTimeRange.end.valueOf() - absoluteTimeRange.start.valueOf()).toString(),
+          source: 'Dashboard',
+          display: {
+            name: '__range_ms',
+            description: 'The range for the current dashboard in millisecond',
+            hidden: true,
+          },
         },
       },
-    },
-  ];
-  builtinVariables?.forEach((def) => allBuiltinVariables.push(def));
+    ];
+    builtinVariables?.forEach((def) => result.push(def));
+    return result;
+  }, [absoluteTimeRange, builtinVariables]);
 
   return (
     <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>

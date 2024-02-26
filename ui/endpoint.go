@@ -21,7 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
-	"github.com/perses/perses/internal/api/shared"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -33,7 +33,7 @@ var (
 		"/sign-in",
 		"/sign-up",
 		"/projects",
-		"/migrate",
+		"/import",
 		"/config",
 		"/explore",
 	}
@@ -88,15 +88,15 @@ func routerMiddleware() echo.MiddlewareFunc {
 				f, err := asts.Open("/app/dist/index.html")
 				if err != nil {
 					logrus.WithError(err).Error("Unable to open the React index.html")
-					return shared.HandleError(err)
+					return apiinterface.HandleError(err)
 				}
 				idx, err := io.ReadAll(f)
 				if err != nil {
 					logrus.WithError(err).Error("Error reading React index.html")
-					return shared.HandleError(err)
+					return apiinterface.HandleError(err)
 				}
 				_, err = c.Response().Write(idx)
-				return shared.HandleError(err)
+				return apiinterface.HandleError(err)
 			}
 			return next(c)
 		}

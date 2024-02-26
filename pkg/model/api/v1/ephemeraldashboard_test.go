@@ -40,7 +40,9 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					Project: "perses",
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
+						Project: "perses",
+					},
 				},
 				Spec: EphemeralDashboardSpec{
 					EphemeralDashboardSpecBase{
@@ -150,7 +152,9 @@ func TestMarshalEphemeralDashboard(t *testing.T) {
 					Metadata: Metadata{
 						Name: "SimpleDashboard",
 					},
-					Project: "perses",
+					ProjectMetadataWrapper: ProjectMetadataWrapper{
+						Project: "perses",
+					},
 				},
 				Spec: EphemeralDashboardSpec{
 					EphemeralDashboardSpecBase{
@@ -437,7 +441,9 @@ func TestUnmarshallEphemeralDashboard(t *testing.T) {
 			Metadata: Metadata{
 				Name: "SimpleDashboard",
 			},
-			Project: "perses",
+			ProjectMetadataWrapper: ProjectMetadataWrapper{
+				Project: "perses",
+			},
 		},
 		Spec: EphemeralDashboardSpec{
 			EphemeralDashboardSpecBase{
