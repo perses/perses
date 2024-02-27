@@ -9,6 +9,7 @@ package v1
 #enumKind:
 	#KindDashboard |
 	#KindDatasource |
+	#KindEphemeralDashboard |
 	#KindFolder |
 	#KindGlobalDatasource |
 	#KindGlobalRole |
@@ -22,17 +23,18 @@ package v1
 	#KindUser |
 	#KindVariable
 
-#KindDashboard:         #Kind & "Dashboard"
-#KindDatasource:        #Kind & "Datasource"
-#KindFolder:            #Kind & "Folder"
-#KindGlobalDatasource:  #Kind & "GlobalDatasource"
-#KindGlobalRole:        #Kind & "GlobalRole"
-#KindGlobalRoleBinding: #Kind & "GlobalRoleBinding"
-#KindGlobalVariable:    #Kind & "GlobalVariable"
-#KindGlobalSecret:      #Kind & "GlobalSecret"
-#KindProject:           #Kind & "Project"
-#KindRole:              #Kind & "Role"
-#KindRoleBinding:       #Kind & "RoleBinding"
-#KindSecret:            #Kind & "Secret"
-#KindUser:              #Kind & "User"
-#KindVariable:          #Kind & "Variable"
+#KindDashboard:          #Kind & "Dashboard"
+#KindDatasource:         #Kind & "Datasource"
+#KindEphemeralDashboard: #Kind & "EphemeralDashboard"
+#KindFolder:             #Kind & "Folder"
+#KindGlobalDatasource:   #Kind & "GlobalDatasource"
+#KindGlobalRole:         #Kind & "GlobalRole"
+#KindGlobalRoleBinding:  #Kind & "GlobalRoleBinding"
+#KindGlobalVariable:     #Kind & "GlobalVariable"
+#KindGlobalSecret:       #Kind & "GlobalSecret"
+#KindProject:            #Kind & "Project"
+#KindRole:               #Kind & "Role"
+#KindRoleBinding:        #Kind & "RoleBinding"
+#KindSecret:             #Kind & "Secret"
+#KindUser:               #Kind & "User"
+#KindVariable:           #Kind & "Variable"
