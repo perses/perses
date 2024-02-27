@@ -164,7 +164,9 @@ export function SignWrapper(props: { children: ReactNode }) {
               key={provider.path}
               fullWidth={true}
               style={{ fontSize: '1em' }}
-              href={`/api/auth/providers/${provider.path}/login`}
+              onClick={() => {
+                window.location.href = `/api/auth/providers/${provider.path}/login`;
+              }}
             >
               Sign in with {provider.name}
             </SocialButton>
