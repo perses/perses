@@ -236,10 +236,18 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 		return err
 	}
 	// compile the JSON plugin into a CUE Value
-	value := cueDefs.context.Load().CompileBytes(pluginData)
+	cueContext := cueDefs.context.Load()
+	if cueContext == nil {
+		return fmt.Errorf("unable to validate the plugin %q %q, associated cue context not created", modelKind, modelName)
+	}
+	value := cueContext.CompileBytes(pluginData)
 
 	// retrieve the corresponding schema
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *cueDefs.schemas.Load())
+	schemas := cueDefs.schemas.Load()
+	if schemas == nil {
+		return fmt.Errorf("unable to validate the plugin %q %q, associated cue definition not loaded", modelKind, modelName)
+	}
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *schemas)
 	if err != nil {
 		return err
 	}
