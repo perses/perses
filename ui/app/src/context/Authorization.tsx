@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import React, { createContext, ReactNode, useContext, useMemo } from 'react';
-import { Action, Permission, Scope } from '@perses-dev/core';
+import { Action, Permission, ProjectResource, Scope } from '@perses-dev/core';
 import { useAuthToken } from '../model/auth-client';
 import { useUserPermissions } from '../model/user-client';
+import { useProjectList } from '../model/project-client';
 import { useIsAuthEnable } from './Config';
 
 // Used as placeholder for checking Global permissions
@@ -54,6 +55,20 @@ export function useAuthorizationContext(): AuthorizationContext {
     throw new Error('No AuthorizationContext found. Did you forget a Provider?');
   }
   return ctx;
+}
+
+export function useDashboardCreateAllowedProjects(): ProjectResource[] {
+  const { enabled, userPermissions } = useAuthorizationContext();
+  const { data } = useProjectList();
+  if (!enabled) {
+    return data ?? [];
+  }
+
+  return (data ?? []).filter(
+    (project) =>
+      permissionListHasPermission(userPermissions[GlobalProject] ?? [], 'create', 'Dashboard') ||
+      permissionListHasPermission(userPermissions[project.metadata.name] ?? [], 'create', 'Dashboard')
+  );
 }
 
 /*
