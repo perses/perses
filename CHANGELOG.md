@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.44.0-rc1 / 2024-02-27
+
+- [BUGFIX] Update relative timerange value when refreshing (#1780)
+- [BUGFIX] Fix plugin validation that was crashing when no cue file was loaded (#1785)
+- [BUGFIX] Fix schemas path in the docker images (#1785)
+
 ## 0.44.0-rc0 / 2024-02-22
 
 - [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760)
