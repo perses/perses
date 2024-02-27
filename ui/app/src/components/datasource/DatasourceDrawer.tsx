@@ -49,14 +49,7 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          // TODO this required field is useless here
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
           {isOpen && (
             <DatasourceEditorForm
               initialName={datasource.metadata.name}
