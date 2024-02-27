@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec, useEvent } from '@perses-dev/core';
-import { useRef, useCallback, useMemo } from 'react';
+import { useRef, useCallback, useMemo, ReactNode } from 'react';
 import {
   PluginModuleResource,
   PluginType,
@@ -26,8 +26,8 @@ import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {
   pluginLoader: PluginLoader;
-  defaultPluginKinds: DefaultPluginKinds;
-  children?: React.ReactNode;
+  defaultPluginKinds?: DefaultPluginKinds;
+  children?: ReactNode;
 }
 
 /**
