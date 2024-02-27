@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,31 +13,29 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
-import { useDashboardList } from '../model/dashboard-client';
+import { durationValidationSchema, resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { generateMetadataName } from '../utils/metadata';
+import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
+import { dashboardNameValidationSchema } from './dashboard';
 
-export const dashboardNameValidationSchema = z
-  .string()
-  .nonempty('Required')
-  .max(75, 'Must be 75 or fewer characters long');
-
-export const createDashboardDialogValidationSchema = z.object({
+export const createEphemeralDashboardDialogValidationSchema = z.object({
   projectName: resourceIdValidationSchema,
   dashboardName: dashboardNameValidationSchema,
+  ttl: durationValidationSchema,
 });
-export type CreateDashboardValidationType = z.infer<typeof createDashboardDialogValidationSchema>;
+export type CreateEphemeralDashboardValidationType = z.infer<typeof createEphemeralDashboardDialogValidationSchema>;
 
-export const renameDashboardDialogValidationSchema = z.object({
+export const updateEphemeralDashboardDialogValidationSchema = z.object({
   dashboardName: dashboardNameValidationSchema,
+  ttl: durationValidationSchema,
 });
-export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialogValidationSchema>;
+export type UpdateEphemeralDashboardValidationType = z.infer<typeof updateEphemeralDashboardDialogValidationSchema>;
 
-export function useDashboardValidationSchema(projectName?: string) {
-  const dashboards = useDashboardList(projectName);
+export function useEphemeralDashboardValidationSchema(projectName?: string) {
+  const dashboards = useEphemeralDashboardList(projectName);
 
   return useMemo(() => {
-    return createDashboardDialogValidationSchema.refine(
+    return createEphemeralDashboardDialogValidationSchema.refine(
       (schema) => {
         return (
           (dashboards.data ?? []).filter(
@@ -48,7 +46,7 @@ export function useDashboardValidationSchema(projectName?: string) {
         );
       },
       (schema) => ({
-        message: `Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
+        message: `Ephemeral dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
         path: ['dashboardName'],
       })
     );

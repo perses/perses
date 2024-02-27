@@ -1,0 +1,211 @@
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import {
+  getDashboardDisplayName,
+  EphemeralDashboardResource,
+  DashboardResource,
+  parseDurationString,
+} from '@perses-dev/core';
+import { Box, Stack, Tooltip } from '@mui/material';
+import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import { useCallback, useMemo, useState } from 'react';
+import { intlFormatDistance, add } from 'date-fns';
+import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { DeleteEphemeralDashboardDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
+import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import { EphemeralDashboardDataGrid, Row } from './EphemeralDashboardDataGrid';
+
+export interface EphemeralDashboardListProperties {
+  ephemeralDashboardList: EphemeralDashboardResource[];
+  hideToolbar?: boolean;
+  initialState?: GridInitialStateCommunity;
+  isLoading?: boolean;
+}
+
+/**
+ * Display ephemeral dashboards in a table style.
+ * @param props.ephemeralDashboardList Contains all ephemeral dashboards to display
+ * @param props.hideToolbar Hide toolbar if enabled
+ * @param props.initialState Provide a way to override default initialState
+ * @param props.isLoading Display a loading circle if enabled
+ */
+export function EphemeralDashboardList(props: EphemeralDashboardListProperties) {
+  const { ephemeralDashboardList, hideToolbar, isLoading, initialState } = props;
+
+  const getDashboard = useCallback(
+    (project: string, name: string) => {
+      return ephemeralDashboardList.find(
+        (ephemeralDashboard) =>
+          ephemeralDashboard.metadata.project === project && ephemeralDashboard.metadata.name === name
+      );
+    },
+    [ephemeralDashboardList]
+  );
+
+  const getExpirationDate = useCallback((ephemeralDashboard: EphemeralDashboardResource): Date => {
+    return add(
+      ephemeralDashboard.metadata.updatedAt ? new Date(ephemeralDashboard.metadata.updatedAt) : new Date(),
+      parseDurationString(ephemeralDashboard.spec.ttl)
+    );
+  }, []);
+
+  const rows = useMemo(() => {
+    return ephemeralDashboardList.map(
+      (ephemeralDashboard) =>
+        ({
+          project: ephemeralDashboard.metadata.project,
+          name: ephemeralDashboard.metadata.name,
+          displayName: getDashboardDisplayName(ephemeralDashboard as unknown as DashboardResource),
+          expireAt: getExpirationDate(ephemeralDashboard),
+          version: ephemeralDashboard.metadata.version,
+          createdAt: ephemeralDashboard.metadata.createdAt,
+          updatedAt: ephemeralDashboard.metadata.updatedAt,
+        }) as Row
+    );
+  }, [ephemeralDashboardList, getExpirationDate]);
+
+  const [targetedEphemeralDashboard, setTargetedDashboard] = useState<EphemeralDashboardResource>();
+  const [isRenameEphemeralDashboardDialogStateOpened, setRenameEphemeralDashboardDialogStateOpened] =
+    useState<boolean>(false);
+  const [isDeleteEphemeralDashboardDialogStateOpened, setDeleteEphemeralDashboardDialogStateOpened] =
+    useState<boolean>(false);
+
+  const onRenameButtonClick = useCallback(
+    (project: string, name: string) => () => {
+      setTargetedDashboard(getDashboard(project, name));
+      setRenameEphemeralDashboardDialogStateOpened(true);
+    },
+    [getDashboard]
+  );
+
+  const onDeleteButtonClick = useCallback(
+    (project: string, name: string) => () => {
+      setTargetedDashboard(getDashboard(project, name));
+      setDeleteEphemeralDashboardDialogStateOpened(true);
+    },
+    [getDashboard]
+  );
+
+  const columns = useMemo<Array<GridColDef<Row>>>(
+    () => [
+      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
+      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
+      {
+        field: 'version',
+        headerName: 'Version',
+        type: 'number',
+        align: 'right',
+        headerAlign: 'right',
+        flex: 1,
+        minWidth: 80,
+      },
+      {
+        field: 'expireAt',
+        headerName: 'Expiration Date',
+        type: 'dateTime',
+        flex: 3,
+        minWidth: 150,
+        renderCell: (params) => (
+          <Tooltip title={params.value.toUTCString()} placement="top">
+            <span>{intlFormatDistance(params.value, new Date())}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        field: 'createdAt',
+        headerName: 'Creation Date',
+        type: 'dateTime',
+        flex: 1,
+        minWidth: 125,
+        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
+        renderCell: (params) => (
+          <Tooltip title={params.value.toUTCString()} placement="top">
+            <span>{intlFormatDistance(params.value, new Date())}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        field: 'updatedAt',
+        headerName: 'Last Update',
+        type: 'dateTime',
+        flex: 1,
+        minWidth: 125,
+        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
+        renderCell: (params) => (
+          <Tooltip title={params.value.toUTCString()} placement="top">
+            <span>{intlFormatDistance(params.value, new Date())}</span>
+          </Tooltip>
+        ),
+      },
+      {
+        field: 'actions',
+        headerName: 'Actions',
+        type: 'actions',
+        flex: 0.5,
+        minWidth: 100,
+        getActions: (params: GridRowParams<Row>) => [
+          <CRUDGridActionsCellItem
+            key={params.id + '-edit'}
+            icon={<PencilIcon />}
+            label="Rename"
+            action="update"
+            scope="Dashboard"
+            project={params.row.project}
+            onClick={onRenameButtonClick(params.row.project, params.row.name)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-delete'}
+            icon={<DeleteIcon />}
+            label="Delete"
+            action="delete"
+            scope="Dashboard"
+            project={params.row.project}
+            onClick={onDeleteButtonClick(params.row.project, params.row.name)}
+          />,
+        ],
+      },
+    ],
+    [onRenameButtonClick, onDeleteButtonClick]
+  );
+
+  return (
+    <Stack width="100%">
+      <EphemeralDashboardDataGrid
+        rows={rows}
+        columns={columns}
+        initialState={initialState}
+        hideToolbar={hideToolbar}
+        isLoading={isLoading}
+      />
+      <Box>
+        {targetedEphemeralDashboard && (
+          <>
+            <UpdateEphemeralDashboardDialog
+              open={isRenameEphemeralDashboardDialogStateOpened}
+              onClose={() => setRenameEphemeralDashboardDialogStateOpened(false)}
+              ephemeralDashboard={targetedEphemeralDashboard}
+            />
+            <DeleteEphemeralDashboardDialog
+              open={isDeleteEphemeralDashboardDialogStateOpened}
+              onClose={() => setDeleteEphemeralDashboardDialogStateOpened(false)}
+              ephemeralDashboard={targetedEphemeralDashboard}
+            />
+          </>
+        )}
+      </Box>
+    </Stack>
+  );
+}

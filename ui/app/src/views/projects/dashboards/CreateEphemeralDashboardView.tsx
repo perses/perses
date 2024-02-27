@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,43 +14,44 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import {
-  DashboardResource,
+  EphemeralDashboardResource,
   getDashboardExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
-  EphemeralDashboardResource,
+  DashboardResource,
 } from '@perses-dev/core';
 import { useCallback } from 'react';
-import { useCreateDashboardMutation } from '../../../model/dashboard-client';
+import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
 
 /**
- * The View for creating a new Dashboard.
+ * The View for creating a new EphemeralDashboard.
  */
-function CreateDashboardView() {
+function CreateEphemeralDashboardView() {
   const { projectName } = useParams();
   const location = useLocation();
-  const dashboardName = location.state;
+  const { name, ttl } = location.state;
 
-  if (!projectName || !dashboardName) {
-    throw new Error('Unable to get the dashboard or project name');
+  if (!projectName || !name) {
+    throw new Error('Unable to get the ephemeralDashboard or project name');
   }
 
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const createDashboardMutation = useCreateDashboardMutation();
+  const createEphemeralDashboardMutation = useCreateEphemeralDashboardMutation();
 
-  const data: DashboardResource = {
-    kind: 'Dashboard',
+  const data: EphemeralDashboardResource = {
+    kind: 'EphemeralDashboard',
     metadata: {
-      name: generateMetadataName(dashboardName),
+      name: generateMetadataName(name),
       project: projectName,
       version: 0,
     },
     spec: {
+      ttl: ttl,
       display: {
-        name: dashboardName,
+        name: name,
       },
       duration: DEFAULT_DASHBOARD_DURATION,
       refreshInterval: DEFAULT_REFRESH_INTERVAL,
@@ -60,18 +61,22 @@ function CreateDashboardView() {
     },
   };
 
-  const handleDashboardSave = useCallback(
+  const handleEphemeralDashboardSave = useCallback(
     (data: DashboardResource | EphemeralDashboardResource) => {
-      if (data.kind !== 'Dashboard') {
+      if (data.kind !== 'EphemeralDashboard') {
         throw new Error('Invalid kind');
       }
-      return createDashboardMutation.mutateAsync(data, {
-        onSuccess: (createdDashboard: DashboardResource) => {
+      return createEphemeralDashboardMutation.mutateAsync(data, {
+        onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
-            `Dashboard ${getDashboardExtendedDisplayName(createdDashboard)} has been successfully created`
+            `EphemeralDashboard ${getDashboardExtendedDisplayName(
+              createdEphemeralDashboard as unknown as DashboardResource
+            )} has been successfully created`
           );
-          navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
-          return createdDashboard;
+          navigate(
+            `/projects/${createdEphemeralDashboard.metadata.project}/ephemeralDashboards/${createdEphemeralDashboard.metadata.name}`
+          );
+          return createdEphemeralDashboard;
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -79,10 +84,10 @@ function CreateDashboardView() {
         },
       });
     },
-    [createDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
+    [createEphemeralDashboardMutation, exceptionSnackbar, navigate, successSnackbar]
   );
 
-  const handleDashboardDiscard = useCallback(() => {
+  const handleEphemeralDashboardDiscard = useCallback(() => {
     navigate(`/projects/${projectName}`);
   }, [navigate, projectName]);
 
@@ -90,9 +95,9 @@ function CreateDashboardView() {
 
   return (
     <HelperDashboardView
-      dashboardResource={data}
-      onSave={handleDashboardSave}
-      onDiscard={handleDashboardDiscard}
+      dashboardResource={data as unknown as DashboardResource}
+      onSave={handleEphemeralDashboardSave}
+      onDiscard={handleEphemeralDashboardDiscard}
       isReadonly={false}
       isEditing={true}
       isCreating={true}
@@ -100,4 +105,4 @@ function CreateDashboardView() {
   );
 }
 
-export default CreateDashboardView;
+export default CreateEphemeralDashboardView;

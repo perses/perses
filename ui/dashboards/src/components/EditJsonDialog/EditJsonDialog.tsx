@@ -71,6 +71,11 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
             Metadata cannot be modified or saved.
           </Alert>
         )}
+        {draftDashboard.kind === 'EphemeralDashboard' && (
+          <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
+            Time-to-live cannot be modified or saved from here. Go to the project view to modify it.
+          </Alert>
+        )}
         <FormControl fullWidth>
           <JSONEditor
             minHeight="300px"

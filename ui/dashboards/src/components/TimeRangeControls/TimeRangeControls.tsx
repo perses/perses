@@ -15,7 +15,7 @@ import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
 import { DateTimeRangePicker, RefreshIntervalPicker, InfoTooltip, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { isDurationString, DurationString } from '@perses-dev/core';
+import { isDurationString, DurationString, DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboardDuration } from '../../context';
@@ -82,13 +82,23 @@ export function TimeRangeControls({
   // set the new refresh interval both in the dashboard context & as query param
   const handleRefreshIntervalChange = useCallback(
     (duration: DurationString) => {
-      setDashboard({
-        ...dashboard,
-        spec: {
-          ...dashboard.spec,
-          refreshInterval: duration,
-        },
-      });
+      setDashboard(
+        dashboard.kind === 'Dashboard'
+          ? ({
+              ...dashboard,
+              spec: {
+                ...dashboard.spec,
+                refreshInterval: duration,
+              },
+            } as DashboardResource)
+          : ({
+              ...dashboard,
+              spec: {
+                ...dashboard.spec,
+                refreshInterval: duration,
+              },
+            } as EphemeralDashboardResource)
+      );
       setRefreshInterval(duration);
     },
     [dashboard, setDashboard, setRefreshInterval]

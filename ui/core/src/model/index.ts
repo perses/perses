@@ -16,6 +16,7 @@ export * from './dashboard';
 export * from './datasource';
 export * from './definitions';
 export * from './display';
+export * from './ephemeraldashboard';
 export * from './http';
 export * from './http-proxy';
 export * from './kind';
