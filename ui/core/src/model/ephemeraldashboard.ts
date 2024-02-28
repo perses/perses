@@ -25,6 +25,6 @@ export interface EphemeralDashboardSpec extends DashboardSpec {
   ttl: DurationString;
 }
 
-export interface EphemeralDashboardSelector extends DashboardSelector {
+export interface EphemeralDashboardInfo extends DashboardSelector {
   ttl: DurationString;
 }

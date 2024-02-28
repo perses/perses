@@ -69,8 +69,8 @@ function CreateEphemeralDashboardView() {
       return createEphemeralDashboardMutation.mutateAsync(data, {
         onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
-            `EphemeralDashboard ${getDashboardExtendedDisplayName(
-              createdEphemeralDashboard as unknown as DashboardResource
+            `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+              createdEphemeralDashboard
             )} has been successfully created`
           );
           navigate(

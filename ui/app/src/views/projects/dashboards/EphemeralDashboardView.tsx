@@ -55,8 +55,8 @@ function EphemeralDashboardView() {
       return updateEphemeralDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
-            `EphemeralDashboard ${getDashboardExtendedDisplayName(
-              updatedEphemeralDashboard as unknown as DashboardResource
+            `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+              updatedEphemeralDashboard
             )} has been successfully updated`
           );
           return updatedEphemeralDashboard;

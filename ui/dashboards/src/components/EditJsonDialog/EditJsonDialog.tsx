@@ -72,7 +72,7 @@ const EditJsonDialogForm = (props: EditJsonDialogProps) => {
           </Alert>
         )}
         {draftDashboard.kind === 'EphemeralDashboard' && (
-          <Alert sx={{ marginBottom: (theme) => theme.spacing(1) }} severity="warning">
+          <Alert sx={{ marginBottom: 1 }} severity="warning">
             Time-to-live cannot be modified or saved from here. Go to the project view to modify it.
           </Alert>
         )}

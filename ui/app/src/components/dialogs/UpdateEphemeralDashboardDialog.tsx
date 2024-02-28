@@ -15,7 +15,6 @@ import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import {
-  DashboardResource,
   DurationString,
   EphemeralDashboardResource,
   getDashboardDisplayName,
@@ -49,7 +48,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
     resolver: zodResolver(updateEphemeralDashboardDialogValidationSchema),
     mode: 'onBlur',
     defaultValues: {
-      dashboardName: getDashboardDisplayName(ephemeralDashboard as unknown as DashboardResource),
+      dashboardName: getDashboardDisplayName(ephemeralDashboard),
       ttl: ephemeralDashboard.spec.ttl,
     },
   });
@@ -67,8 +66,8 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
     updateEphemeralDashboardMutation.mutate(ephemeralDashboard, {
       onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
         successSnackbar(
-          `Ephemeral dashboard ${getDashboardExtendedDisplayName(
-            updatedEphemeralDashboard as unknown as DashboardResource
+          `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+            updatedEphemeralDashboard
           )} has been successfully updated`
         );
         onClose();

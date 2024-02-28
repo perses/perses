@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, Variable, Datasource } from '../model';
+import { DashboardResource, Variable, Datasource, EphemeralDashboardResource } from '../model';
 
 /**
  * If the dashboard has a display name, return the dashboard display name
  * Else, only return the dashboard name
  * @param dashboard
  */
-export function getDashboardDisplayName(dashboard: DashboardResource) {
+export function getDashboardDisplayName(dashboard: DashboardResource | EphemeralDashboardResource) {
   return dashboard.spec.display?.name ?? dashboard.metadata.name;
 }
 
@@ -45,7 +45,7 @@ export function getDatasourceDisplayName(datasource: Datasource) {
  * Else, only return the dashboard name
  * @param dashboard
  */
-export function getDashboardExtendedDisplayName(dashboard: DashboardResource) {
+export function getDashboardExtendedDisplayName(dashboard: DashboardResource | EphemeralDashboardResource) {
   if (dashboard.spec.display?.name) {
     return `${dashboard.spec.display.name} (Name: ${dashboard.metadata.name})`;
   }

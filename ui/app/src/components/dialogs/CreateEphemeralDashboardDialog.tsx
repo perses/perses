@@ -16,14 +16,14 @@ import { Button, Stack, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { EphemeralDashboardSelector } from '@perses-dev/core';
+import { EphemeralDashboardInfo } from '@perses-dev/core';
 import { CreateEphemeralDashboardValidationType, useEphemeralDashboardValidationSchema } from '../../validation';
 
 interface CreateEphemeralDashboardProps {
   open: boolean;
   projectOptions: string[];
   onClose: DispatchWithoutAction;
-  onSuccess?: Dispatch<EphemeralDashboardSelector>;
+  onSuccess?: Dispatch<EphemeralDashboardInfo>;
 }
 
 /**
@@ -52,7 +52,7 @@ export const CreateEphemeralDashboardDialog = (props: CreateEphemeralDashboardPr
         project: data.projectName,
         dashboard: data.dashboardName,
         ttl: data.ttl,
-      } as EphemeralDashboardSelector);
+      } as EphemeralDashboardInfo);
     }
   };
 

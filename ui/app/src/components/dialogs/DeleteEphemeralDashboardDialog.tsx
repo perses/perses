@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction, useCallback } from 'react';
 import { Button } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
+import { EphemeralDashboardResource } from '@perses-dev/core';
 import { getDashboardExtendedDisplayName } from '@perses-dev/core/dist/utils/text';
 import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 
@@ -41,9 +41,7 @@ export const DeleteEphemeralDashboardDialog = (props: DeleteEphemeralDashboardDi
     return deleteEphemeralDashboardMutation.mutate(ephemeralDashboard, {
       onSuccess: (deletedEphemeralDashboard: EphemeralDashboardResource) => {
         successSnackbar(
-          `Ephemeral dashboard ${getDashboardExtendedDisplayName(
-            deletedEphemeralDashboard as unknown as DashboardResource
-          )} was successfully deleted`
+          `Ephemeral Dashboard ${getDashboardExtendedDisplayName(deletedEphemeralDashboard)} was successfully deleted`
         );
         onClose();
         if (onSuccess) {
@@ -61,9 +59,8 @@ export const DeleteEphemeralDashboardDialog = (props: DeleteEphemeralDashboardDi
     <Dialog open={open} onClose={onClose}>
       <Dialog.Header>Delete Ephemeral Dashboard</Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the ephemeral dashboard{' '}
-        {getDashboardExtendedDisplayName(ephemeralDashboard as unknown as DashboardResource)}? This action cannot be be
-        be undone.
+        Are you sure you want to delete the ephemeral dashboard {getDashboardExtendedDisplayName(ephemeralDashboard)}?
+        This action cannot be be be undone.
       </Dialog.Content>
       <Dialog.Actions>
         <Button variant="contained" type="submit" onClick={handleSubmit}>

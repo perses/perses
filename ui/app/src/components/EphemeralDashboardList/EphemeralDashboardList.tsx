@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  getDashboardDisplayName,
-  EphemeralDashboardResource,
-  DashboardResource,
-  parseDurationString,
-} from '@perses-dev/core';
+import { getDashboardDisplayName, EphemeralDashboardResource, parseDurationString } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -55,11 +50,11 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
     [ephemeralDashboardList]
   );
 
-  const getExpirationDate = useCallback((ephemeralDashboard: EphemeralDashboardResource): Date => {
+  const getExpirationDate = useCallback((ephemeralDashboard: EphemeralDashboardResource): string => {
     return add(
       ephemeralDashboard.metadata.updatedAt ? new Date(ephemeralDashboard.metadata.updatedAt) : new Date(),
       parseDurationString(ephemeralDashboard.spec.ttl)
-    );
+    ).toLocaleString();
   }, []);
 
   const rows = useMemo(() => {
@@ -68,7 +63,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
         ({
           project: ephemeralDashboard.metadata.project,
           name: ephemeralDashboard.metadata.name,
-          displayName: getDashboardDisplayName(ephemeralDashboard as unknown as DashboardResource),
+          displayName: getDashboardDisplayName(ephemeralDashboard),
           expireAt: getExpirationDate(ephemeralDashboard),
           version: ephemeralDashboard.metadata.version,
           createdAt: ephemeralDashboard.metadata.createdAt,
@@ -118,6 +113,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
         type: 'dateTime',
         flex: 3,
         minWidth: 150,
+        valueGetter: (params: GridValueGetterParams) => new Date(params.row.expireAt),
         renderCell: (params) => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>

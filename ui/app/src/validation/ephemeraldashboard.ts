@@ -46,7 +46,7 @@ export function useEphemeralDashboardValidationSchema(projectName?: string) {
         );
       },
       (schema) => ({
-        message: `Ephemeral dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
+        message: `Ephemeral Dashboard name '${schema.dashboardName}' already exists in '${schema.projectName}' project!`,
         path: ['dashboardName'],
       })
     );

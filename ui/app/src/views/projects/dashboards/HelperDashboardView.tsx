@@ -82,7 +82,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
               externalVariableDefinitions={externalVariableDefinitions}
               dashboardTitleComponent={
                 <ProjectBreadcrumbs
-                  dashboardName={getDashboardDisplayName(dashboardResource as unknown as DashboardResource)}
+                  dashboardName={getDashboardDisplayName(dashboardResource)}
                   projectName={dashboardResource.metadata.project}
                 />
               }

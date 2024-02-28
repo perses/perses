@@ -28,7 +28,7 @@ import {
   RoleResource,
   RoleBindingResource,
   SecretResource,
-  EphemeralDashboardSelector,
+  EphemeralDashboardInfo,
 } from '@perses-dev/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
@@ -93,9 +93,9 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
   };
 
-  const handleEphemeralDashboardCreation = (dashboardSelector: EphemeralDashboardSelector) => {
-    navigate(`/projects/${dashboardSelector.project}/ephemeraldashboard/new`, {
-      state: { name: dashboardSelector.dashboard, ttl: dashboardSelector.ttl },
+  const handleEphemeralDashboardCreation = (dashboardInfo: EphemeralDashboardInfo) => {
+    navigate(`/projects/${dashboardInfo.project}/ephemeraldashboard/new`, {
+      state: { name: dashboardInfo.dashboard, ttl: dashboardInfo.ttl },
     });
   };
 
@@ -446,7 +446,8 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
-  const hasEphemeralDashboards = (useEphemeralDashboardList(projectName).data ?? []).length > 0;
+  const { data } = useEphemeralDashboardList(projectName);
+  const hasEphemeralDashboards = (data ?? []).length > 0;
 
   const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
@@ -478,7 +479,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             {...a11yProps(dashboardsTabIndex)}
             value={dashboardsTabIndex}
           />
-          {(hasEphemeralDashboards || tab == 'ephemeraldashboards') && (
+          {(hasEphemeralDashboards || tab == ephemeralDashboardsTabIndex) && (
             <MenuTab
               label="Ephemeral Dashboards"
               icon={<ViewDashboardIcon />}

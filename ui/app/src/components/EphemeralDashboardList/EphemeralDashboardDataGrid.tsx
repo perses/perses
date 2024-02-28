@@ -41,7 +41,7 @@ export interface Row {
   version: number;
   createdAt: string;
   updatedAt: string;
-  expireAt: Date;
+  expireAt: string;
 }
 
 function NoEphemeralDashboardRowOverlay() {
