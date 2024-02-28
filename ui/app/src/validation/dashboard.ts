@@ -17,7 +17,10 @@ import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 
-const dashboardNameValidationSchema = z.string().nonempty('Required').max(75, 'Must be 75 or fewer characters long');
+export const dashboardNameValidationSchema = z
+  .string()
+  .nonempty('Required')
+  .max(75, 'Must be 75 or fewer characters long');
 
 export const createDashboardDialogValidationSchema = z.object({
   projectName: resourceIdValidationSchema,

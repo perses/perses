@@ -92,7 +92,7 @@ func (g *globalRole) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		entity := hit.(*modelV1.GlobalRole)
 		line := []string{
 			entity.Metadata.Name,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 		}
 
 		data = buildPermissionMatrix(entity.Spec.Permissions, []string{"", ""}, line, data)

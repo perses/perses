@@ -24,37 +24,39 @@ import (
 type Kind string
 
 const (
-	KindDashboard         Kind = "Dashboard"
-	KindDatasource        Kind = "Datasource"
-	KindFolder            Kind = "Folder"
-	KindGlobalDatasource  Kind = "GlobalDatasource"
-	KindGlobalRole        Kind = "GlobalRole"
-	KindGlobalRoleBinding Kind = "GlobalRoleBinding"
-	KindGlobalVariable    Kind = "GlobalVariable"
-	KindGlobalSecret      Kind = "GlobalSecret"
-	KindProject           Kind = "Project"
-	KindRole              Kind = "Role"
-	KindRoleBinding       Kind = "RoleBinding"
-	KindSecret            Kind = "Secret"
-	KindUser              Kind = "User"
-	KindVariable          Kind = "Variable"
+	KindDashboard          Kind = "Dashboard"
+	KindDatasource         Kind = "Datasource"
+	KindEphemeralDashboard Kind = "EphemeralDashboard"
+	KindFolder             Kind = "Folder"
+	KindGlobalDatasource   Kind = "GlobalDatasource"
+	KindGlobalRole         Kind = "GlobalRole"
+	KindGlobalRoleBinding  Kind = "GlobalRoleBinding"
+	KindGlobalVariable     Kind = "GlobalVariable"
+	KindGlobalSecret       Kind = "GlobalSecret"
+	KindProject            Kind = "Project"
+	KindRole               Kind = "Role"
+	KindRoleBinding        Kind = "RoleBinding"
+	KindSecret             Kind = "Secret"
+	KindUser               Kind = "User"
+	KindVariable           Kind = "Variable"
 )
 
 var PluralKindMap = map[Kind]string{
-	KindDashboard:         "dashboards",
-	KindDatasource:        "datasources",
-	KindFolder:            "folders",
-	KindGlobalDatasource:  "globaldatasources",
-	KindGlobalRole:        "globalroles",
-	KindGlobalRoleBinding: "globalrolebindings",
-	KindGlobalSecret:      "globalsecrets",
-	KindGlobalVariable:    "globalvariables",
-	KindProject:           "projects",
-	KindRole:              "roles",
-	KindRoleBinding:       "rolebindings",
-	KindSecret:            "secrets",
-	KindUser:              "users",
-	KindVariable:          "variables",
+	KindDashboard:          "dashboards",
+	KindDatasource:         "datasources",
+	KindEphemeralDashboard: "ephemeraldashboards",
+	KindFolder:             "folders",
+	KindGlobalDatasource:   "globaldatasources",
+	KindGlobalRole:         "globalroles",
+	KindGlobalRoleBinding:  "globalrolebindings",
+	KindGlobalSecret:       "globalsecrets",
+	KindGlobalVariable:     "globalvariables",
+	KindProject:            "projects",
+	KindRole:               "roles",
+	KindRoleBinding:        "rolebindings",
+	KindSecret:             "secrets",
+	KindUser:               "users",
+	KindVariable:           "variables",
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {
@@ -102,6 +104,8 @@ func GetStruct(kind Kind) (modelAPI.Entity, error) {
 		return &Dashboard{}, nil
 	case KindDatasource:
 		return &Datasource{}, nil
+	case KindEphemeralDashboard:
+		return &EphemeralDashboard{}, nil
 	case KindFolder:
 		return &Folder{}, nil
 	case KindGlobalDatasource:
@@ -148,6 +152,9 @@ func GetKind(kind string) (*Kind, error) {
 		return &result, nil
 	case strings.ToLower(string(KindDatasource)):
 		result := KindDatasource
+		return &result, nil
+	case strings.ToLower(string(KindEphemeralDashboard)):
+		result := KindEphemeralDashboard
 		return &result, nil
 	case strings.ToLower(string(KindFolder)):
 		result := KindFolder

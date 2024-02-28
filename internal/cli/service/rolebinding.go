@@ -53,7 +53,7 @@ func (r *roleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 			entity.Metadata.Name,
 			entity.Metadata.Project,
 			entity.Spec.Role,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 		}
 
 		if len(entity.Spec.Subjects) == 0 {

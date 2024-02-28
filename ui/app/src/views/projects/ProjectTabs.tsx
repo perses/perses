@@ -28,11 +28,12 @@ import {
   RoleResource,
   RoleBindingResource,
   SecretResource,
+  EphemeralDashboardInfo,
 } from '@perses-dev/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
-import { CreateDashboardDialog } from '../../components/dialogs';
+import { CreateDashboardDialog, CreateEphemeralDashboardDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
@@ -46,7 +47,9 @@ import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDraw
 import { useIsMobileSize } from '../../utils/browser-size';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
 import { useCreateSecretMutation } from '../../model/secret-client';
+import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
+import { ProjectEphemeralDashboards } from './tabs/ProjectEphemeralDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
 import { ProjectDatasources } from './tabs/ProjectDatasources';
 import { ProjectSecrets } from './tabs/ProjectSecrets';
@@ -54,6 +57,7 @@ import { ProjectRoles } from './tabs/ProjectRoles';
 import { ProjectRoleBindings } from './tabs/ProjectRoleBindings';
 
 const dashboardsTabIndex = 'dashboards';
+const ephemeralDashboardsTabIndex = 'ephemeraldashboards';
 const datasourcesTabIndex = 'datasources';
 const rolesTabIndex = 'roles';
 const roleBindingsTabIndex = 'rolesbindings';
@@ -76,6 +80,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
   const createVariableMutation = useCreateVariableMutation(projectName);
 
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
+  const [isCreateEphemeralDashboardDialogOpened, setCreateEphemeralDashboardDialogOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
@@ -86,6 +91,12 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
+  };
+
+  const handleEphemeralDashboardCreation = (dashboardInfo: EphemeralDashboardInfo) => {
+    navigate(`/projects/${dashboardInfo.project}/ephemeraldashboard/new`, {
+      state: { name: dashboardInfo.dashboard, ttl: dashboardInfo.ttl },
+    });
   };
 
   const { data } = useRoleList(projectName);
@@ -193,6 +204,27 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
+          />
+        </>
+      );
+    case ephemeralDashboardsTabIndex:
+      return (
+        <>
+          <CRUDButton
+            action="create"
+            scope="EphemeralDashboard"
+            project={projectName}
+            variant="contained"
+            onClick={() => setCreateEphemeralDashboardDialogOpened(true)}
+            {...props}
+          >
+            Add Dashboard
+          </CRUDButton>
+          <CreateEphemeralDashboardDialog
+            open={isCreateEphemeralDashboardDialogOpened}
+            projectOptions={[projectName]}
+            onClose={() => setCreateEphemeralDashboardDialogOpened(false)}
+            onSuccess={handleEphemeralDashboardCreation}
           />
         </>
       );
@@ -409,10 +441,13 @@ interface DashboardVariableTabsProps {
 
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
+  const { tab } = useParams();
   const isAuthEnable = useIsAuthEnable();
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
+  const { data } = useEphemeralDashboardList(projectName);
+  const hasEphemeralDashboards = (data ?? []).length > 0;
 
   const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
 
@@ -444,6 +479,15 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             {...a11yProps(dashboardsTabIndex)}
             value={dashboardsTabIndex}
           />
+          {(hasEphemeralDashboards || tab == ephemeralDashboardsTabIndex) && (
+            <MenuTab
+              label="Ephemeral Dashboards"
+              icon={<ViewDashboardIcon />}
+              iconPosition="start"
+              {...a11yProps(ephemeralDashboardsTabIndex)}
+              value={ephemeralDashboardsTabIndex}
+            />
+          )}
           <MenuTab
             label="Variables"
             icon={<CodeJsonIcon />}
@@ -488,6 +532,11 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
+      {hasEphemeralDashboards && (
+        <TabPanel value={value} index={ephemeralDashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+          <ProjectEphemeralDashboards projectName={projectName} id="project-ephemeral-dashboard-list" />
+        </TabPanel>
+      )}
       <TabPanel value={value} index={variablesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectVariables projectName={projectName} id="project-variable-list" />
       </TabPanel>

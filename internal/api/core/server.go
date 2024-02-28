@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/proxy"
 	"github.com/perses/perses/internal/api/impl/v1/dashboard"
 	"github.com/perses/perses/internal/api/impl/v1/datasource"
+	"github.com/perses/perses/internal/api/impl/v1/ephemeraldashboard"
 	"github.com/perses/perses/internal/api/impl/v1/folder"
 	"github.com/perses/perses/internal/api/impl/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/impl/v1/globalrole"
@@ -57,6 +58,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly, caseSensitive),

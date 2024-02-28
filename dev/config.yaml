@@ -44,3 +44,5 @@ important_dashboards:
 information: |-
   # Hello World
   ## File Database setup
+
+ephemeral_dashboards_cleanup_interval: "1h"

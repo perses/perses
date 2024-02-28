@@ -23,6 +23,7 @@ const permissionValidationSchema = z.object({
         '*',
         'Dashboard',
         'Datasource',
+        'EphemeralDashboard',
         'Folder',
         'GlobalDatasource',
         'GlobalRole',

@@ -27,20 +27,21 @@ import (
 )
 
 const (
-	tableGlobalDatasource  = "globaldatasource"
-	tableGlobalRole        = "globalrole"
-	tableGlobalRoleBinding = "globalrolebinding"
-	tableGlobalSecret      = "globalsecret"
-	tableGlobalVariable    = "globalvariable"
-	tableProject           = "project"
-	tableDashboard         = "dashboard"
-	tableFolder            = "folder"
-	tableDatasource        = "datasource"
-	tableRole              = "role"
-	tableRoleBinding       = "rolebinding"
-	tableSecret            = "secret"
-	tableUser              = "user"
-	tableVariable          = "variable"
+	tableDashboard          = "dashboard"
+	tableDatasource         = "datasource"
+	tableEphemeralDashboard = "ephemeraldashboard"
+	tableFolder             = "folder"
+	tableGlobalDatasource   = "globaldatasource"
+	tableGlobalRole         = "globalrole"
+	tableGlobalRoleBinding  = "globalrolebinding"
+	tableGlobalSecret       = "globalsecret"
+	tableGlobalVariable     = "globalvariable"
+	tableProject            = "project"
+	tableRole               = "role"
+	tableRoleBinding        = "rolebinding"
+	tableSecret             = "secret"
+	tableUser               = "user"
+	tableVariable           = "variable"
 
 	colID      = "id"
 	colDoc     = "doc"
@@ -54,6 +55,8 @@ func getTableName(kind modelV1.Kind) (string, error) {
 		return tableDashboard, nil
 	case modelV1.KindDatasource:
 		return tableDatasource, nil
+	case modelV1.KindEphemeralDashboard:
+		return tableEphemeralDashboard, nil
 	case modelV1.KindFolder:
 		return tableFolder, nil
 	case modelV1.KindGlobalDatasource:
@@ -111,8 +114,9 @@ func (d *DAO) Init() error {
 		d.createResourceTable(tableUser),
 
 		d.createProjectResourceTable(tableDashboard),
-		d.createProjectResourceTable(tableFolder),
 		d.createProjectResourceTable(tableDatasource),
+		d.createProjectResourceTable(tableEphemeralDashboard),
+		d.createProjectResourceTable(tableFolder),
 		d.createProjectResourceTable(tableRole),
 		d.createProjectResourceTable(tableRoleBinding),
 		d.createProjectResourceTable(tableSecret),

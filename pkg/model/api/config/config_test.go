@@ -32,7 +32,7 @@ func defaultConfig() Config {
 	return cfg
 }
 
-func TestJSONMarshallConfig(t *testing.T) {
+func TestJSONMarshalConfig(t *testing.T) {
 	testSuite := []struct {
 		title string
 		cfg   Config
@@ -96,7 +96,8 @@ func TestJSONMarshallConfig(t *testing.T) {
   "provisioning": {
     "interval": "1h"
   },
-  "deactivate_front": false
+  "deactivate_front": false,
+  "ephemeral_dashboards_cleanup_interval": "1d"
 }`,
 		},
 	}
@@ -110,7 +111,7 @@ func TestJSONMarshallConfig(t *testing.T) {
 	}
 }
 
-func TestUnMarshallJSONConfig(t *testing.T) {
+func TestUnmarshalJSONConfig(t *testing.T) {
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -178,7 +179,8 @@ func TestUnMarshallJSONConfig(t *testing.T) {
       "dev/data"
     ],
     "interval": "1h"
-  }
+  },
+  "ephemeral_dashboards_cleanup_interval": "2h"
 }`,
 			result: Config{
 				Security: Security{
@@ -240,6 +242,7 @@ func TestUnMarshallJSONConfig(t *testing.T) {
 					},
 					Interval: model.Duration(defaultInterval),
 				},
+				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
 			},
 		},
 	}
@@ -306,6 +309,8 @@ important_dashboards:
 information: |-
   # Hello World
   ## File Database setup
+
+ephemeral_dashboards_cleanup_interval: "2h"
 `,
 			result: Config{
 				Security: Security{
@@ -376,6 +381,7 @@ information: |-
 					},
 					Interval: model.Duration(defaultInterval),
 				},
+				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
 			},
 		},
 	}

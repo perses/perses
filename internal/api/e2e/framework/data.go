@@ -56,6 +56,13 @@ func CreateGetFunc(t *testing.T, persistenceManager dependency.PersistenceManage
 		upsertFunc = func() error {
 			return persistenceManager.GetDatasource().Update(entity)
 		}
+	case *v1.EphemeralDashboard:
+		getFunc = func() (api.Entity, error) {
+			return persistenceManager.GetEphemeralDashboard().Get(entity.Metadata.Project, entity.Metadata.Name)
+		}
+		upsertFunc = func() error {
+			return persistenceManager.GetEphemeralDashboard().Update(entity)
+		}
 	case *v1.GlobalDatasource:
 		getFunc = func() (api.Entity, error) {
 			return persistenceManager.GetGlobalDatasource().Get(entity.Metadata.Name)
@@ -483,4 +490,23 @@ func NewPublicUser(name string) *v1.PublicUser {
 	}
 	entity.Metadata.CreateNow()
 	return entity
+}
+
+func NewEphemeralDashboard(t *testing.T, projectName string, name string) *v1.EphemeralDashboard {
+	// Creating a full ephemeral dashboard is quite long and to ensure the changes are still matching the dev environment,
+	// it's better to use the ephemeral dashboard written in the dev/data/ephemeraldashboard.json
+	persesRepositoryPath := test.GetRepositoryPath()
+	ephemeralDashboardJSONFilePath := filepath.Join(persesRepositoryPath, "dev", "data", "ephemeraldashboard.json")
+	var list []*v1.EphemeralDashboard
+	data := test.ReadFile(ephemeralDashboardJSONFilePath)
+	if unmarshallErr := json.Unmarshal(data, &list); unmarshallErr != nil {
+		t.Fatal(unmarshallErr)
+	}
+	if len(list) == 0 {
+		t.Fatal("dashboard list is empty")
+	}
+	ephemeralDashboard := list[0]
+	ephemeralDashboard.Metadata.Name = name
+	ephemeralDashboard.Metadata.Project = projectName
+	return ephemeralDashboard
 }

@@ -52,7 +52,7 @@ func (d *secret) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		line := []string{
 			entity.Metadata.Name,
 			entity.Metadata.Project,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 		}
 		data = append(data, line)
 	}

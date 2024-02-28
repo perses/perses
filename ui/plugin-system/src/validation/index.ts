@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './datasource';
+export * from './duration';
 export * from './resource';
 export * from './secret';
 export * from './variable';

@@ -17,6 +17,9 @@ import (
 	"fmt"
 	"os"
 	"path"
+
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
+
 	"strings"
 
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -70,6 +73,9 @@ func (d *DAO) buildQuery(query databaseModel.Query) (pathFolder string, prefix s
 		prefix = qt.NamePrefix
 	case *datasource.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindDatasource, qt.Project)
+		prefix = qt.NamePrefix
+	case *ephemeraldashboard.Query:
+		pathFolder = d.generateProjectResourceQuery(v1.KindEphemeralDashboard, qt.Project)
 		prefix = qt.NamePrefix
 	case *folder.Query:
 		pathFolder = d.generateProjectResourceQuery(v1.KindFolder, qt.Project)

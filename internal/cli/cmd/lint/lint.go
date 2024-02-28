@@ -112,7 +112,7 @@ func (o *option) validate(objects []modelAPI.Entity) error {
 				if err := o.apiClient.Validate().Dashboard(entity); err != nil {
 					return err
 				}
-			} else if err := validate.Dashboard(entity, o.sch); err != nil {
+			} else if err := validate.DashboardSpec(entity.Spec, o.sch); err != nil {
 				return fmt.Errorf("unexpected error in dashboard %q: %w", entity.Metadata.Name, err)
 			}
 

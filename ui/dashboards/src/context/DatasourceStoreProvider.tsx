@@ -20,6 +20,7 @@ import {
   DatasourceSpec,
   GlobalDatasource,
   useEvent,
+  EphemeralDashboardResource,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -31,7 +32,7 @@ import {
 } from '@perses-dev/plugin-system';
 
 export interface DatasourceStoreProviderProps {
-  dashboardResource?: DashboardResource;
+  dashboardResource?: DashboardResource | EphemeralDashboardResource;
   projectName?: string;
   datasourceApi: DatasourceApi;
   children?: ReactNode;
@@ -205,13 +206,23 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const setLocalDatasources = useCallback(
     (datasources: Record<string, DatasourceSpec>) => {
       if (dashboardResource) {
-        setDashboardResource({
-          ...dashboardResource,
-          spec: {
-            ...dashboardResource.spec,
-            datasources: datasources,
-          },
-        });
+        setDashboardResource(
+          dashboardResource.kind === 'Dashboard'
+            ? ({
+                ...dashboardResource,
+                spec: {
+                  ...dashboardResource.spec,
+                  datasources: datasources,
+                },
+              } as DashboardResource)
+            : ({
+                ...dashboardResource,
+                spec: {
+                  ...dashboardResource.spec,
+                  datasources: datasources,
+                },
+              } as EphemeralDashboardResource)
+        );
       }
     },
     [dashboardResource]

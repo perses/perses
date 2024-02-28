@@ -19,6 +19,7 @@ import {
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
   DashboardSpec,
+  EphemeralDashboardResource,
 } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { useCreateDashboardMutation } from '../../../model/dashboard-client';
@@ -67,7 +68,10 @@ function CreateDashboardView() {
   };
 
   const handleDashboardSave = useCallback(
-    (data: DashboardResource) => {
+    (data: DashboardResource | EphemeralDashboardResource) => {
+      if (data.kind !== 'Dashboard') {
+        throw new Error('Invalid kind');
+      }
       return createDashboardMutation.mutateAsync(data, {
         onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(

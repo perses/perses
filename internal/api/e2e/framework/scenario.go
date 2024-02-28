@@ -251,17 +251,17 @@ func NotFoundTestScenarioWithProject(t *testing.T, path string, creator func(pro
 	// "404 - Not found" tests
 	t.Run(fmt.Sprintf("\"404 - Not found\" tests (%s)", path), func(t *testing.T) {
 		WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-			parent, entity := creator("myParentResource", "not-exisiting")
+			parent, entity := creator("myParentResource", "not-existing")
 			CreateAndWaitUntilEntityExists(t, manager, parent)
 
-			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.GET(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.PUT(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusNotFound)
-			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-exisiting", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
+			expect.DELETE(fmt.Sprintf("%s/%s/%s/%s/not-existing", utils.APIV1Prefix, utils.PathProject, parent.GetMetadata().GetName(), path)).
 				WithJSON(entity).
 				Expect().
 				Status(http.StatusNotFound)

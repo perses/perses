@@ -126,7 +126,7 @@ func (s *service) Validate(entity *v1.Dashboard) error {
 		return apiInterface.HandleError(globalVarsErr)
 	}
 
-	if err := validate.DashboardWithVars(entity, s.sch, projectVars, globalVars); err != nil {
+	if err := validate.DashboardSpecWithVars(entity.Spec, s.sch, projectVars, globalVars); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	return nil
