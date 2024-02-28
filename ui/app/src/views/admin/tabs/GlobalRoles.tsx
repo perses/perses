@@ -17,6 +17,7 @@ import { GlobalRoleResource, Role } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleList } from '../../../components/roles/RoleList';
 import {
+  useCreateGlobalRoleMutation,
   useDeleteGlobalRoleMutation,
   useGlobalRoleList,
   useUpdateGlobalRoleMutation,
@@ -32,8 +33,27 @@ export function GlobalRoles(props: GlobalRolesProps) {
   const { data, isLoading } = useGlobalRoleList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createRoleMutation = useCreateGlobalRoleMutation();
   const updateRoleMutation = useUpdateGlobalRoleMutation();
   const deleteRoleMutation = useDeleteGlobalRoleMutation();
+
+  const handleGlobalRoleCreate = useCallback(
+    (role: GlobalRoleResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createRoleMutation.mutate(role, {
+          onSuccess: (createdRole: Role) => {
+            successSnackbar(`GlobalRole ${createdRole.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createRoleMutation]
+  );
 
   const handleGlobalRoleUpdate = useCallback(
     (role: GlobalRoleResource): Promise<void> =>
@@ -76,6 +96,7 @@ export function GlobalRoles(props: GlobalRolesProps) {
       <RoleList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleGlobalRoleCreate}
         onUpdate={handleGlobalRoleUpdate}
         onDelete={handleGlobalRoleDelete}
         initialState={{

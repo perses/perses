@@ -19,6 +19,7 @@ import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteRoleDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject } from '../../context/Authorization';
@@ -29,6 +30,7 @@ import { RoleDrawer } from './RoleDrawer';
 export interface RoleListProperties<T extends Role> {
   data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -45,7 +47,7 @@ export interface RoleListProperties<T extends Role> {
  * @param props.isLoading Display a loading circle if enabled
  */
 export function RoleList<T extends Role>(props: RoleListProperties<T>) {
-  const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
+  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
   const findRole = useCallback(
@@ -73,18 +75,32 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState<boolean>(false);
   const [isDeleteRoleDialogOpened, setDeleteRoleDialogOpened] = useState<boolean>(false);
 
-  const handleRoleUpdate = useCallback(
+  const handleRoleSave = useCallback(
     async (role: T) => {
-      await onUpdate(role);
+      if (action === 'create') {
+        await onCreate(role);
+      } else if (action === 'update') {
+        await onUpdate(role);
+      }
       setRoleDrawerOpened(false);
     },
-    [onUpdate]
+    [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedRole(findRole(name, project));
       setAction('read');
+      setRoleDrawerOpened(true);
+    },
+    [findRole]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const role = findRole(name, project);
+      setTargetedRole(role);
+      setAction('create');
       setRoleDrawerOpened(true);
     },
     [findRole]
@@ -152,7 +168,7 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -162,6 +178,15 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
             scope={params.row.project ? 'Role' : 'GlobalRole'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'Role' : 'GlobalRole'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -175,7 +200,7 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
         ],
       },
     ],
-    [handleEditButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -195,8 +220,8 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
             isOpen={isRoleDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => handleRoleUpdate(v).then(() => setRoleDrawerOpened(false))}
-            onDelete={onDelete}
+            onSave={handleRoleSave}
+            onDelete={(v) => onDelete(v).then(() => setRoleDrawerOpened(false))}
             onClose={() => setRoleDrawerOpened(false)}
           />
           <DeleteRoleDialog

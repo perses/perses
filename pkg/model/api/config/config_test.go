@@ -55,7 +55,8 @@ func TestJSONMarshalConfig(t *testing.T) {
   },
   "database": {},
   "schemas": {},
-  "provisioning": {}
+  "provisioning": {},
+  "deactivate_front": false
 }`,
 		},
 		{
@@ -95,6 +96,7 @@ func TestJSONMarshalConfig(t *testing.T) {
   "provisioning": {
     "interval": "1h"
   },
+  "deactivate_front": false,
   "ephemeral_dashboards_cleanup_interval": "1d"
 }`,
 		},

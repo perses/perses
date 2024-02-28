@@ -21,6 +21,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteSecretDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
@@ -31,6 +32,7 @@ import { SecretDrawer } from './SecretDrawer';
 export interface SecretListProperties<T extends Secret> {
   data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -48,10 +50,11 @@ export interface SecretListProperties<T extends Secret> {
  */
 export function SecretList<T extends Secret>({
   data,
-  hideToolbar,
-  onUpdate,
-  isLoading,
   initialState,
+  hideToolbar,
+  isLoading,
+  onCreate,
+  onUpdate,
   onDelete,
 }: SecretListProperties<T>) {
   const { infoSnackbar } = useSnackbar();
@@ -93,18 +96,32 @@ export function SecretList<T extends Secret>({
     [infoSnackbar]
   );
 
-  const handleSecretUpdate = useCallback(
+  const handleSecretSave = useCallback(
     async (secret: T) => {
-      await onUpdate(secret);
+      if (action === 'create') {
+        await onCreate(secret);
+      } else if (action === 'update') {
+        await onUpdate(secret);
+      }
       setSecretDrawerOpened(false);
     },
-    [onUpdate]
+    [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedSecret(findSecret(name, project));
       setAction('read');
+      setSecretDrawerOpened(true);
+    },
+    [findSecret]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const secret = findSecret(name, project);
+      setTargetedSecret(secret);
+      setAction('create');
       setSecretDrawerOpened(true);
     },
     [findSecret]
@@ -205,7 +222,7 @@ export function SecretList<T extends Secret>({
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -215,6 +232,15 @@ export function SecretList<T extends Secret>({
             scope={params.row.project ? 'Secret' : 'GlobalSecret'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'Secret' : 'GlobalSecret'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -228,7 +254,7 @@ export function SecretList<T extends Secret>({
         ],
       },
     ],
-    [handleCopyNameButtonClick, handleEditButtonClick, handleDeleteButtonClick]
+    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -250,8 +276,8 @@ export function SecretList<T extends Secret>({
             isOpen={isSecretDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => handleSecretUpdate(v).then(() => setSecretDrawerOpened(false))}
-            onDelete={onDelete}
+            onSave={handleSecretSave}
+            onDelete={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
             onClose={() => setSecretDrawerOpened(false)}
           />
           <DeleteSecretDialog

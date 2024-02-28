@@ -83,6 +83,9 @@ Generic placeholders are defined as follows:
   # The data coming from the provisioning folder will totally override what exists in the database.
   [ provisioning: <provisioning_spec> ]
 
+  # When it is true, Perses won't serve the frontend anymore.
+  [ deactivate_front: <bool> | default = false ]
+
   # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
   [ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
 ```
@@ -106,8 +109,7 @@ Generic placeholders are defined as follows:
 
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
   # Note that if it is not provided, it will use a default value.
-  # When Perses is used in a multi instance mode, you should provide the key.
-  # Otherwise, each instance will have a different key and therefore won't be able to decrypt what the other is encrypting.
+  # On a production instance, you should set this key.
   # Also note the key must be at least 32 bytes long.
   [ encryption_key: <secret> ]
 

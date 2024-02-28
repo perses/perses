@@ -90,7 +90,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
   const isReadonly = useIsReadonly();
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
-    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: dashboardSelector.dashboard });
+    navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
   };
 
   const handleEphemeralDashboardCreation = (dashboardInfo: EphemeralDashboardInfo) => {
