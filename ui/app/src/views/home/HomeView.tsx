@@ -16,13 +16,13 @@ import { useMemo, useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
-import { useProjectList } from '../../model/project-client';
 import { CreateProjectDialog, CreateDashboardDialog } from '../../components/dialogs';
 import { StackCrumb, TitleCrumb } from '../../components/breadcrumbs/breadcrumbs';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { CRUDButton } from '../../components/CRUDButton/CRUDButton';
 import ButtonMenu from '../../components/ButtonMenu/ButtonMenu';
 import { ImportRoute } from '../../model/route';
+import { useDashboardCreateAllowedProjects } from '../../context/Authorization';
 import { InformationSection } from './InformationSection';
 import { RecentDashboards } from './RecentDashboards';
 import { ProjectsAndDashboards } from './ProjectsAndDashboards';
@@ -32,12 +32,11 @@ function HomeView() {
   // Navigate to the project page if the project has been successfully added
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
-
-  const { data } = useProjectList();
+  const userProjects = useDashboardCreateAllowedProjects();
 
   const projectOptions = useMemo(() => {
-    return (data || []).map((project) => project.metadata.name); // TODO: remove projects without create dashboard perm
-  }, [data]);
+    return userProjects.map((project) => project.metadata.name);
+  }, [userProjects]);
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
@@ -81,7 +80,7 @@ function HomeView() {
               >
                 Add Dashboard
               </CRUDButton>
-              <MenuItem component={RouterLink} to={ImportRoute}>
+              <MenuItem component={RouterLink} to={ImportRoute} disabled={projectOptions.length === 0}>
                 <CRUDButton style={{ backgroundColor: 'transparent' }}>Import Dashboard</CRUDButton>
               </MenuItem>
             </ButtonMenu>
