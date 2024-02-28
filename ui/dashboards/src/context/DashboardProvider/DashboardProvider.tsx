@@ -174,7 +174,7 @@ function initStore(props: DashboardProviderProps) {
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
               state.datasources = datasources;
-              // TODO: support ttl in setDashboard but probably requires quite some refactoring
+              // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
           },
         };
