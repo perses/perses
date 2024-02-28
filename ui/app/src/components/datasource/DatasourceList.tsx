@@ -24,6 +24,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { useIsReadonly } from '../../context/Config';
 import { DeleteDatasourceDialog } from '../dialogs';
@@ -35,6 +36,7 @@ import { DatasourceDrawer } from './DatasourceDrawer';
 export interface DatasourceListProperties<T extends Datasource> {
   data: T[];
   hideToolbar?: boolean;
+  onCreate: DispatchWithPromise<T>;
   onUpdate: DispatchWithPromise<T>;
   onDelete: DispatchWithPromise<T>;
   initialState?: GridInitialStateCommunity;
@@ -51,7 +53,7 @@ export interface DatasourceListProperties<T extends Datasource> {
  * @param props.isLoading Display a loading circle if enabled
  */
 export function DatasourceList<T extends Datasource>(props: DatasourceListProperties<T>) {
-  const { data, hideToolbar, onUpdate, onDelete, initialState, isLoading } = props;
+  const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
   const findDatasource = useCallback(
@@ -85,12 +87,17 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState<boolean>(false);
   const [isDeleteDatasourceDialogOpened, setDeleteDatasourceDialogOpened] = useState<boolean>(false);
 
-  const handleDatasourceUpdate = useCallback(
+  const handleDatasourceSave = useCallback(
     async (datasource: T) => {
-      await onUpdate(datasource);
+      if (action === 'create') {
+        await onCreate(datasource);
+      } else if (action === 'update') {
+        await onUpdate(datasource);
+      }
+
       setDatasourceDrawerOpened(false);
     },
-    [onUpdate]
+    [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
@@ -107,6 +114,16 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
       const datasource = findDatasource(name, project);
       setTargetedDatasource(datasource);
       setAction('update');
+      setDatasourceDrawerOpened(true);
+    },
+    [findDatasource]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const datasource = findDatasource(name, project);
+      setTargetedDatasource(datasource);
+      setAction('create');
       setDatasourceDrawerOpened(true);
     },
     [findDatasource]
@@ -179,7 +196,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -189,6 +206,15 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
             scope={params.row.project ? 'Datasource' : 'GlobalDatasource'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'Datasource' : 'GlobalDatasource'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -202,7 +228,7 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
         ],
       },
     ],
-    [handleEditButtonClick, handleDeleteButtonClick]
+    [handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -222,8 +248,8 @@ export function DatasourceList<T extends Datasource>(props: DatasourceListProper
             isOpen={isDatasourceDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={handleDatasourceUpdate}
-            onDelete={onDelete}
+            onSave={handleDatasourceSave}
+            onDelete={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
             onClose={() => setDatasourceDrawerOpened(false)}
           />
           <DeleteDatasourceDialog

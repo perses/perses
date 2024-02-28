@@ -66,5 +66,11 @@ export function CRUDGridActionsCellItem({
     );
   }
 
-  return <GridActionsCellItem icon={icon} label={label} onClick={onClick} />;
+  return (
+    <Tooltip title={label} placement="top">
+      <span>
+        <GridActionsCellItem icon={icon} label={label} onClick={onClick} />
+      </span>
+    </Tooltip>
+  );
 }

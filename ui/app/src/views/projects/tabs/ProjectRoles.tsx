@@ -16,7 +16,12 @@ import { useCallback } from 'react';
 import { Role, RoleResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { RoleList } from '../../../components/roles/RoleList';
-import { useDeleteRoleMutation, useUpdateRoleMutation, useRoleList } from '../../../model/role-client';
+import {
+  useDeleteRoleMutation,
+  useUpdateRoleMutation,
+  useRoleList,
+  useCreateRoleMutation,
+} from '../../../model/role-client';
 
 interface ProjectRolesProps {
   projectName: string;
@@ -29,8 +34,27 @@ export function ProjectRoles(props: ProjectRolesProps) {
   const { data, isLoading } = useRoleList(projectName);
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createRoleMutation = useCreateRoleMutation(projectName);
   const updateRoleMutation = useUpdateRoleMutation(projectName);
   const deleteRoleMutation = useDeleteRoleMutation(projectName);
+
+  const handleRoleCreate = useCallback(
+    (role: RoleResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createRoleMutation.mutate(role, {
+          onSuccess: (createdRole: Role) => {
+            successSnackbar(`Role ${createdRole.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createRoleMutation]
+  );
 
   const handleRoleUpdate = useCallback(
     (role: RoleResource): Promise<void> =>
@@ -73,6 +97,7 @@ export function ProjectRoles(props: ProjectRolesProps) {
       <RoleList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleRoleCreate}
         onUpdate={handleRoleUpdate}
         onDelete={handleRoleDelete}
         initialState={{

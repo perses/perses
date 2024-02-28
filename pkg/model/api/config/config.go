@@ -40,8 +40,11 @@ type Config struct {
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// Information contains markdown content to be display on the home page
-	Information  string             `json:"information,omitempty" yaml:"information,omitempty"`
+	Information string `json:"information,omitempty" yaml:"information,omitempty"`
+	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
+	// When it is true, Perses won't serve the frontend anymore.
+	DeactivateFront bool `json:"deactivate_front" yaml:"deactivate_front"`
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 }

@@ -72,13 +72,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
             <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
               <TemplateVariableProviderWithQueryParams initialVariableDefinitions={[]}>

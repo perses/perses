@@ -77,13 +77,7 @@ function HelperExploreView(props: ProjectExploreViewProps) {
 
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
-      <PluginRegistry
-        pluginLoader={bundledPluginLoader}
-        defaultPluginKinds={{
-          Panel: 'TimeSeriesChart',
-          TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-        }}
-      >
+      <PluginRegistry pluginLoader={bundledPluginLoader}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}
