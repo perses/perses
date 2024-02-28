@@ -38,6 +38,8 @@ const ProjectView = lazy(() => import('./views/projects/ProjectView'));
 const CreateDashboardView = lazy(() => import('./views/projects/dashboards/CreateDashboardView'));
 const DashboardView = lazy(() => import('./views/projects/dashboards/DashboardView'));
 const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
+const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboards/CreateEphemeralDashboardView'));
+const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
 
 function Router() {
   const isAuthEnable = useIsAuthEnable();
@@ -60,6 +62,8 @@ function Router() {
             <Route path=":tab" element={<ProjectView />} />
             <Route path="dashboard/new" element={<CreateDashboardView />} />
             <Route path="dashboards/:dashboardName" element={<DashboardView />} />
+            <Route path="ephemeraldashboard/new" element={<CreateEphemeralDashboardView />} />
+            <Route path="ephemeraldashboards/:ephemeralDashboardName" element={<EphemeralDashboardView />} />
           </Route>
           <Route path="/" element={<HomeView />} />
           <Route path="*" element={<Navigate replace to="/" />} />

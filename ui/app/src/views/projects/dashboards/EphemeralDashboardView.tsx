@@ -16,44 +16,50 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource, getDashboardExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect } from 'react';
-import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
+import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
 import { HelperDashboardView } from './HelperDashboardView';
 
 /**
- * The View for displaying an existing Dashboard.
+ * The View for displaying an existing EphemeralDashboard.
  */
-function DashboardView() {
-  const { projectName, dashboardName } = useParams();
+function EphemeralDashboardView() {
+  const { projectName, ephemeralDashboardName } = useParams();
 
-  if (projectName === undefined || dashboardName === undefined) {
-    throw new Error('Unable to get the dashboard or project name');
+  if (projectName === undefined || ephemeralDashboardName === undefined) {
+    throw new Error('Unable to get the ephemeralDashboard or project name');
   }
 
   const navigate = useNavigate();
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const { data, isLoading, error: dashboardNotFoundError } = useDashboard(projectName, dashboardName);
+  const {
+    data,
+    isLoading,
+    error: ephemeralDashboardNotFoundError,
+  } = useEphemeralDashboard(projectName, ephemeralDashboardName);
   const isReadonly = useIsReadonly();
-  const updateDashboardMutation = useUpdateDashboardMutation();
+  const updateEphemeralDashboardMutation = useUpdateEphemeralDashboardMutation();
 
   const navHistoryDispatch = useNavHistoryDispatch();
   useEffect(
-    () => navHistoryDispatch({ project: projectName, name: dashboardName }),
-    [navHistoryDispatch, projectName, dashboardName]
+    () => navHistoryDispatch({ project: projectName, name: ephemeralDashboardName }),
+    [navHistoryDispatch, projectName, ephemeralDashboardName]
   );
 
-  const handleDashboardSave = useCallback(
+  const handleEphemeralDashboardSave = useCallback(
     (data: DashboardResource | EphemeralDashboardResource) => {
-      if (data.kind !== 'Dashboard') {
+      if (data.kind !== 'EphemeralDashboard') {
         throw new Error('Invalid kind');
       }
-      return updateDashboardMutation.mutateAsync(data, {
-        onSuccess: (updatedDashboard: DashboardResource) => {
+      return updateEphemeralDashboardMutation.mutateAsync(data, {
+        onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
-            `Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`
+            `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+              updatedEphemeralDashboard
+            )} has been successfully updated`
           );
-          return updatedDashboard;
+          return updatedEphemeralDashboard;
         },
         onError: (err) => {
           exceptionSnackbar(err);
@@ -61,7 +67,7 @@ function DashboardView() {
         },
       });
     },
-    [exceptionSnackbar, successSnackbar, updateDashboardMutation]
+    [exceptionSnackbar, successSnackbar, updateEphemeralDashboardMutation]
   );
 
   if (isLoading) {
@@ -71,8 +77,8 @@ function DashboardView() {
       </Stack>
     );
   }
-  if (dashboardNotFoundError !== null) {
-    exceptionSnackbar(dashboardNotFoundError);
+  if (ephemeralDashboardNotFoundError !== null) {
+    exceptionSnackbar(ephemeralDashboardNotFoundError);
     navigate(`/projects/${projectName}`);
   }
   if (!data || data.spec === undefined || isReadonly === undefined) return null;
@@ -80,11 +86,11 @@ function DashboardView() {
   return (
     <HelperDashboardView
       dashboardResource={data}
-      onSave={handleDashboardSave}
+      onSave={handleEphemeralDashboardSave}
       isReadonly={isReadonly}
       isEditing={false}
     />
   );
 }
 
-export default DashboardView;
+export default EphemeralDashboardView;

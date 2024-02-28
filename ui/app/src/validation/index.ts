@@ -12,4 +12,5 @@
 // limitations under the License.
 
 export * from './dashboard';
+export * from './ephemeraldashboard';
 export * from './project';

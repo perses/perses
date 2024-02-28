@@ -12,18 +12,10 @@
 // limitations under the License.
 
 import { Stack, Typography } from '@mui/material';
-import {
-  DataGrid,
-  GridColDef,
-  GridToolbarContainer,
-  GridToolbarColumnsButton,
-  GridToolbarFilterButton,
-  GridToolbarQuickFilter,
-  GridRow,
-  GridColumnHeaders,
-} from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import { memo, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { GridToolbar } from '../GridToolbar';
 
 const DATA_GRID_INITIAL_STATE = {
   columns: {
@@ -52,22 +44,6 @@ export interface Row {
   updatedAt: string;
 }
 
-function VariablesGridToolbar() {
-  return (
-    <GridToolbarContainer>
-      <Stack direction="row" width="100%" gap={4} m={2}>
-        <Stack sx={{ flexShrink: 1 }} width="100%">
-          <GridToolbarQuickFilter sx={{ width: '100%' }} />
-        </Stack>
-        <Stack direction="row" sx={{ flexShrink: 3 }} width="100%">
-          <GridToolbarColumnsButton sx={{ width: '100%' }} />
-          <GridToolbarFilterButton sx={{ width: '100%' }} />
-        </Stack>
-      </Stack>
-    </GridToolbarContainer>
-  );
-}
-
 function NoVariableRowOverlay() {
   return (
     <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -79,10 +55,10 @@ function NoVariableRowOverlay() {
 export interface VariableDataGridProperties {
   columns: Array<GridColDef<Row>>;
   rows: Row[];
-  onRowClick: (name: string, project?: string) => void;
   initialState?: GridInitialStateCommunity;
   hideToolbar?: boolean;
   isLoading?: boolean;
+  onRowClick: (name: string, project?: string) => void;
 }
 
 export function VariableDataGrid(props: VariableDataGridProperties) {
@@ -108,7 +84,7 @@ export function VariableDataGrid(props: VariableDataGridProperties) {
         hideToolbar
           ? { noRowsOverlay: NoVariableRowOverlay }
           : {
-              toolbar: VariablesGridToolbar,
+              toolbar: GridToolbar,
               row: MemoizedRow,
               columnHeaders: MemoizedColumnHeaders,
               noRowsOverlay: NoVariableRowOverlay,

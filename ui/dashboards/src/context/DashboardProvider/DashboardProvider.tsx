@@ -24,6 +24,7 @@ import {
   DurationString,
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
+  EphemeralDashboardResource,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -51,16 +52,18 @@ export interface DashboardStoreState
     SaveChangesConfirmationDialogSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
-  setDashboard: (dashboard: DashboardResource) => void;
+  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+  kind: DashboardResource['kind'] | EphemeralDashboardResource['kind'];
   metadata: ProjectMetadata;
   duration: DurationString;
   refreshInterval: DurationString;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
+  ttl?: DurationString;
 }
 
 export interface DashboardStoreProps {
-  dashboardResource: DashboardResource;
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
 }
 
@@ -113,9 +116,12 @@ function initStore(props: DashboardProviderProps) {
   } = props;
 
   const {
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
+    kind,
     metadata,
+    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources },
   } = dashboardResource;
+
+  const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
 
   let {
     spec: { layouts, panels },
@@ -143,18 +149,22 @@ function initStore(props: DashboardProviderProps) {
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),
           ...createSaveChangesDialogSlice(...args),
+          kind,
           metadata,
           display,
           duration,
           refreshInterval,
           datasources,
+          ttl,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean) => set({ isEditMode }),
           setDashboard: ({
+            kind,
             metadata,
             spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
           }) => {
             set((state) => {
+              state.kind = kind;
               state.metadata = metadata;
               state.display = display;
               state.panels = panels;
@@ -164,6 +174,7 @@ function initStore(props: DashboardProviderProps) {
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
               state.datasources = datasources;
+              // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
           },
         };

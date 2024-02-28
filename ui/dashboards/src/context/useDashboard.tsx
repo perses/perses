@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardResource, GridDefinition } from '@perses-dev/core';
+import { createPanelRef, DashboardResource, EphemeralDashboardResource, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
 import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
 
@@ -21,53 +21,75 @@ export function useDashboard() {
     panelGroups,
     panelGroupOrder,
     setDashboard: setDashboardResource,
+    kind,
     metadata,
     display,
     duration,
     refreshInterval,
     datasources,
+    ttl,
   } = useDashboardStore(
     ({
       panels,
       panelGroups,
       panelGroupOrder,
       setDashboard,
+      kind,
       metadata,
       display,
       duration,
       refreshInterval,
       datasources,
+      ttl,
     }) => ({
       panels,
       panelGroups,
       panelGroupOrder,
       setDashboard,
+      kind,
       metadata,
       display,
       duration,
       refreshInterval,
       datasources,
+      ttl,
     })
   );
   const { setVariableDefinitions } = useTemplateVariableActions();
   const variables = useTemplateVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const dashboard: DashboardResource = {
-    kind: 'Dashboard',
-    metadata,
-    spec: {
-      display,
-      panels,
-      layouts,
-      variables,
-      duration,
-      refreshInterval,
-      datasources,
-    },
-  };
+  const dashboard =
+    kind === 'Dashboard'
+      ? ({
+          kind,
+          metadata,
+          spec: {
+            display,
+            panels,
+            layouts,
+            variables,
+            duration,
+            refreshInterval,
+            datasources,
+          },
+        } as DashboardResource)
+      : ({
+          kind,
+          metadata,
+          spec: {
+            display,
+            panels,
+            layouts,
+            variables,
+            duration,
+            refreshInterval,
+            datasources,
+            ttl,
+          },
+        } as EphemeralDashboardResource);
 
-  const setDashboard = (dashboardResource: DashboardResource) => {
+  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource) => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };
