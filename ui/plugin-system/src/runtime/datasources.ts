@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec, UnsavedDatasourceSelector } from '@perses-dev/core';
 import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
@@ -22,7 +22,7 @@ export interface DatasourceStore {
   /**
    * Given a DatasourceSelector, gets a `Client` object from the corresponding Datasource plugin.
    */
-  getDatasourceClient<Client>(selector: DatasourceSelector): Promise<Client>;
+  getDatasourceClient<Client>(selector: DatasourceSelector | UnsavedDatasourceSelector): Promise<Client>;
 
   /**
    * Gets a list of datasource selection items for a plugin kind.

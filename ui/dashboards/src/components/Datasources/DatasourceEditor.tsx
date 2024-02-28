@@ -31,7 +31,7 @@ import { Action, DatasourceSpec } from '@perses-dev/core';
 import { DatasourceEditorForm } from '@perses-dev/plugin-system';
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
-import { useDiscardChangesConfirmationDialog } from '../../context';
+import { useDiscardChangesConfirmationDialog, useDashboard } from '../../context';
 
 export function DatasourceEditor(props: {
   datasources: Record<string, DatasourceSpec>;
@@ -41,6 +41,7 @@ export function DatasourceEditor(props: {
   const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
   const [datasourceEdit, setDatasourceEdit] = useState<{ name: string; spec: DatasourceSpec } | null>(null);
+  const { dashboard } = useDashboard();
   const defaultSpec: DatasourceSpec = {
     default: false,
     plugin: {
@@ -100,6 +101,8 @@ export function DatasourceEditor(props: {
           initialName={datasourceEdit.name}
           initialSpec={datasourceEdit.spec}
           initialAction={datasourceFormAction}
+          project={dashboard.metadata.project}
+          dashboard={dashboard.metadata.name}
           isDraft={true}
           onSave={(name: string, spec: DatasourceSpec) => {
             setDatasources((draft) => {
