@@ -74,12 +74,14 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	// register the API
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
-		APIRegistration(persesFrontend).
 		GzipSkipper(func(c echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
+	if !conf.DeactivateFront {
+		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
+	}
 	return runner, persistenceManager, nil
 }

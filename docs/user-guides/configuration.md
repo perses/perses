@@ -82,6 +82,9 @@ Generic placeholders are defined as follows:
   # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
   # The data coming from the provisioning folder will totally override what exists in the database.
   [ provisioning: <provisioning_spec> ]
+  
+  # When it is true, Perses won't serve the frontend anymore.
+  [ deactivate_front: <bool> | default = false ]
 ```
 
 ### `<security_config>`
