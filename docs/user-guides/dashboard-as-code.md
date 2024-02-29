@@ -62,8 +62,9 @@ It's first strongly recommended to ramp up on CUE if you are not familiar with t
 - The [official website](https://cuelang.org/) of Cuelang.
 - [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
-Then, you can check an example of DaC usage [here](../../internal/test/dac/input.cue). This example is heavily relying on the DaC utilities we provide. To get a deeper understanding of these libs and how to use them, the best thing to do for now is to check directly their source code.
+You should then have a look at the [CUE SDK documentation](../dac/cue/) to better understand how to use the framework.
 
+You can also check an example of DaC usage [here](../../internal/test/dac/input.cue).
 
 ## Getting started with Go SDK
 
@@ -102,9 +103,9 @@ You are now fully ready to start developing dashboards as code!
 It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
 - The [official website](https://go.dev/) of Go.
 
-Then, you can check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata/go/main.go).
-To get a deeper understanding of the Go SDK and how to use it, the best thing to do for now is to check directly its source code.
-All the SDK utilities are located in the `github.com/perses/perses/go-sdk` package.
+You should then have a look at the [Go SDK documentation](../dac/go/) to better understand how to use the framework.
+
+You can also check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata/go/main.go).
 
 > [!WARNING]  
 > Do not log / print on the standard stdout! It would break the output of the `dac build` command.
@@ -176,6 +177,12 @@ If the build is successful, the result can be found in the generated `built` fol
 > [!NOTE]
 > the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
+### Build multiple dashboards at once
+
+If you want to develop multiple dashboards as code, you should have **1 dashboard per file** and then call the build command with the directory option:
+```
+percli dac build -d my_dashboards
+```
 
 ## Deploy dashboards
 
