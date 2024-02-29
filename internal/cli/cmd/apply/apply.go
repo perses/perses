@@ -14,7 +14,6 @@
 package apply
 
 import (
-	"errors"
 	"fmt"
 	"io"
 
@@ -25,7 +24,6 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
@@ -38,6 +36,7 @@ type option struct {
 	opt.DirectoryOption
 	writer    io.Writer
 	apiClient api.ClientInterface
+	entities  []modelAPI.Entity
 }
 
 func (o *option) Complete(args []string) error {
@@ -62,7 +61,7 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
-	return nil
+	return o.setEntities()
 }
 
 func (o *option) Validate() error {
@@ -70,25 +69,31 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
-	var entities []modelAPI.Entity
+	return o.applyEntity()
+}
+
+func (o *option) setEntities() error {
 	if len(o.File) > 0 {
 		var err error
-		entities, err = file.UnmarshalEntitiesFromFile(o.File)
+		o.entities, err = file.UnmarshalEntitiesFromFile(o.File)
 		if err != nil {
 			return err
 		}
 	} else if len(o.Directory) > 0 {
 		var errorList []error
-		entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
+		o.entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
 		if len(errorList) > 0 {
 			return errorList[0]
 		}
 	}
-	return o.applyEntity(entities)
+	if len(o.entities) == 0 {
+		return fmt.Errorf("no resources supported found")
+	}
+	return nil
 }
 
-func (o *option) applyEntity(entities []modelAPI.Entity) error {
-	for _, entity := range entities {
+func (o *option) applyEntity() error {
+	for _, entity := range o.entities {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
@@ -97,22 +102,8 @@ func (o *option) applyEntity(entities []modelAPI.Entity) error {
 			return svcErr
 		}
 
-		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.GetResource(name)
-		if apiError != nil && !errors.Is(apiError, perseshttp.RequestNotFoundError) {
-			return fmt.Errorf("unable to retrieve the %q from the Perses API. %w", kind, apiError)
-		}
-
-		if errors.Is(apiError, perseshttp.RequestNotFoundError) {
-			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.CreateResource(entity); createError != nil {
-				return createError
-			}
-		} else {
-			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.UpdateResource(entity); updateError != nil {
-				return updateError
-			}
+		if upsertError := service.Upsert(svc, name, entity); upsertError != nil {
+			return upsertError
 		}
 
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been applied", kind, name)); outputError != nil {

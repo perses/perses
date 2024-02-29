@@ -188,7 +188,7 @@ percli lint -f ./resources.json --online
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to make additional validation")
 
 	cmd.MarkFlagsRequiredTogether("schemas.charts", "schemas.queries")
-	// when online flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
+	// When "online" flag is used, the CLI will call the endpoint /validate that will then use the schema from the server.
 	// So no need to use / load the schemas with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
 	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
