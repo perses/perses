@@ -11,56 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Typography } from '@mui/material';
-import { DataGrid, GridColDef, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
+import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { GridToolbar } from '../GridToolbar';
-
-const DATA_GRID_INITIAL_STATE = {
-  columns: {
-    columnVisibilityModel: {},
-  },
-  sorting: {
-    sortModel: [{ field: 'displayName', sort: 'asc' }],
-  },
-  pagination: {
-    paginationModel: { pageSize: 10, page: 0 },
-  },
-};
+import {
+  DataGridProperties,
+  CommonRow,
+  DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME,
+  GridToolbar,
+  NoContentRowOverlay,
+  PAGE_SIZE_OPTIONS,
+  DATA_GRID_STYLES,
+} from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
 const MemoizedRow = memo(GridRow);
 const MemoizedColumnHeaders = memo(GridColumnHeaders);
 
-export interface Row {
+export interface Row extends CommonRow {
   project: string;
-  name: string;
   displayName: string;
-  version: number;
-  createdAt: string;
-  updatedAt: string;
   viewedAt?: string;
 }
 
 function NoDashboardRowOverlay() {
-  return (
-    <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <Typography>No dashboards</Typography>
-    </Stack>
-  );
+  return <NoContentRowOverlay resource="dashboards" />;
 }
 
-export interface DashboardDataGridProperties {
-  columns: Array<GridColDef<Row>>;
-  rows: Row[];
-  initialState?: GridInitialStateCommunity;
-  hideToolbar?: boolean;
-  isLoading?: boolean;
-}
-
-export function DashboardDataGrid(props: DashboardDataGridProperties) {
+export function DashboardDataGrid(props: DataGridProperties<Row>) {
   const { columns, rows, initialState, hideToolbar, isLoading } = props;
 
   const navigate = useNavigate();
@@ -68,7 +47,7 @@ export function DashboardDataGrid(props: DashboardDataGridProperties) {
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
   const mergedInitialState = useMemo(() => {
     return {
-      ...DATA_GRID_INITIAL_STATE,
+      ...DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME,
       ...(initialState || {}),
     } as GridInitialStateCommunity;
   }, [initialState]);
@@ -91,22 +70,9 @@ export function DashboardDataGrid(props: DashboardDataGridProperties) {
               noRowsOverlay: NoDashboardRowOverlay,
             }
       }
-      pageSizeOptions={[10, 25, 50, 100]}
+      pageSizeOptions={PAGE_SIZE_OPTIONS}
       initialState={mergedInitialState}
-      sx={{
-        // disable cell selection style
-        '.MuiDataGrid-columnHeader:focus': {
-          outline: 'none',
-        },
-        // disable cell selection style
-        '.MuiDataGrid-cell:focus': {
-          outline: 'none',
-        },
-        // pointer cursor on ALL rows
-        '& .MuiDataGrid-row:hover': {
-          cursor: 'pointer',
-        },
-      }}
+      sx={DATA_GRID_STYLES}
     ></DataGrid>
   );
 }
