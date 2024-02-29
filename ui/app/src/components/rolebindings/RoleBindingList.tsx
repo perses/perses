@@ -11,32 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getMetadataProject, RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
-import { Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { getMetadataProject, RoleBinding, Action } from '@perses-dev/core';
+import { Stack } from '@mui/material';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
-import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteRoleBindingDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { GlobalProject } from '../../context/Authorization';
+import {
+  CREATED_AT_COL_DEF,
+  ListPropertiesWithCallbacks,
+  NAME_COL_DEF,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
-
-export interface RoleBindingListProperties<T extends RoleBinding> {
-  data: T[];
-  hideToolbar?: boolean;
-  onCreate: DispatchWithPromise<T>;
-  onUpdate: DispatchWithPromise<T>;
-  onDelete: DispatchWithPromise<T>;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
 
 /**
  * Display role bindings in a table style.
@@ -47,7 +43,7 @@ export interface RoleBindingListProperties<T extends RoleBinding> {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListProperties<T>) {
+export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWithCallbacks<T>) {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -130,44 +126,12 @@ export function RoleBindingList<T extends RoleBinding>(props: RoleBindingListPro
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
+      PROJECT_COL_DEF,
+      NAME_COL_DEF,
       { field: 'subjects', headerName: 'Subjects', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',

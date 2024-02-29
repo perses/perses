@@ -11,31 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getMetadataProject, Role, DispatchWithPromise, Action } from '@perses-dev/core';
-import { Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { getMetadataProject, Role, Action } from '@perses-dev/core';
+import { Stack } from '@mui/material';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
-import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteRoleDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import {
+  CREATED_AT_COL_DEF,
+  ListPropertiesWithCallbacks,
+  NAME_COL_DEF,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { RoleDataGrid, Row } from './RoleDataGrid';
 import { RoleDrawer } from './RoleDrawer';
-
-export interface RoleListProperties<T extends Role> {
-  data: T[];
-  hideToolbar?: boolean;
-  onCreate: DispatchWithPromise<T>;
-  onUpdate: DispatchWithPromise<T>;
-  onDelete: DispatchWithPromise<T>;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
 
 /**
  * Display roles in a table style.
@@ -46,7 +42,7 @@ export interface RoleListProperties<T extends Role> {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function RoleList<T extends Role>(props: RoleListProperties<T>) {
+export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -126,43 +122,11 @@ export function RoleList<T extends Role>(props: RoleListProperties<T>) {
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      PROJECT_COL_DEF,
+      NAME_COL_DEF,
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',
