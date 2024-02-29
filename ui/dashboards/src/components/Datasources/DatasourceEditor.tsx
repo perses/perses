@@ -27,7 +27,7 @@ import {
 import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import { Action, DatasourceSpec } from '@perses-dev/core';
+import { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
 import { DatasourceEditorForm } from '@perses-dev/plugin-system';
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
@@ -40,7 +40,7 @@ export function DatasourceEditor(props: {
 }) {
   const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
-  const [datasourceEdit, setDatasourceEdit] = useState<{ name: string; spec: DatasourceSpec } | null>(null);
+  const [datasourceEdit, setDatasourceEdit] = useState<DatasourceDefinition | null>(null);
   const defaultSpec: DatasourceSpec = {
     default: false,
     plugin: {
@@ -97,8 +97,7 @@ export function DatasourceEditor(props: {
     <>
       {datasourceEdit ? (
         <DatasourceEditorForm
-          initialName={datasourceEdit.name}
-          initialSpec={datasourceEdit.spec}
+          initialDatasourceDefinition={datasourceEdit}
           initialAction={datasourceFormAction}
           isDraft={true}
           onSave={(name: string, spec: DatasourceSpec) => {

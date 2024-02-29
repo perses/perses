@@ -11,20 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Secret, DispatchWithPromise, Action } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { Secret } from '@perses-dev/core';
+import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DeleteSecretDialog } from '../dialogs';
+import { DrawerProps } from '../drawer';
 import { SecretEditorForm } from './SecretEditorForm';
 
-interface SecretDrawerProps<T extends Secret> {
+interface SecretDrawerProps<T extends Secret> extends DrawerProps<T> {
   secret: T;
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
 }
 
 export function SecretDrawer<T extends Secret>(props: SecretDrawerProps<T>) {

@@ -11,21 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RoleBinding, DispatchWithPromise, Action } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { RoleBinding } from '@perses-dev/core';
+import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DeleteRoleBindingDialog } from '../dialogs';
+import { DrawerProps } from '../drawer';
 import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
-interface RoleBindingDrawerProps<T extends RoleBinding> {
+interface RoleBindingDrawerProps<T extends RoleBinding> extends DrawerProps<T> {
   roleBinding: T;
   roleSuggestions?: string[];
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
 }
 
 export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawerProps<T>) {
