@@ -14,9 +14,11 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 )
@@ -30,6 +32,27 @@ func convertToEntityIfNoError[T modelAPI.Entity](entities []T, err error) ([]mod
 		result = append(result, object)
 	}
 	return result, nil
+}
+
+func Upsert(svc Service, name string, entity modelAPI.Entity) error {
+	// retrieve if exists the entity from the Perses API
+	_, apiError := svc.GetResource(name)
+	if apiError != nil && !errors.Is(apiError, perseshttp.RequestNotFoundError) {
+		return fmt.Errorf("unable to retrieve the %q from the Perses API. %w", modelV1.Kind(entity.GetKind()), apiError)
+	}
+
+	if errors.Is(apiError, perseshttp.RequestNotFoundError) {
+		// the document doesn't exist, so we have to create it.
+		if _, createError := svc.CreateResource(entity); createError != nil {
+			return createError
+		}
+	} else {
+		// the document exists, so we have to update it.
+		if _, updateError := svc.UpdateResource(entity); updateError != nil {
+			return updateError
+		}
+	}
+	return nil
 }
 
 type Service interface {

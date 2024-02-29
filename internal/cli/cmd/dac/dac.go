@@ -15,6 +15,7 @@ package dac
 
 import (
 	"github.com/perses/perses/internal/cli/cmd/dac/build"
+	"github.com/perses/perses/internal/cli/cmd/dac/preview"
 	"github.com/perses/perses/internal/cli/cmd/dac/setup"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +26,7 @@ func NewCMD() *cobra.Command {
 		Short: "Commands related to Dashboard-as-Code",
 	}
 	cmd.AddCommand(build.NewCMD())
+	cmd.AddCommand(preview.NewCMD())
 	cmd.AddCommand(setup.NewCMD())
 
 	return cmd
