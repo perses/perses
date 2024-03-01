@@ -5,7 +5,7 @@ The Panel Groups builder helps creating panel groups easily.
 ## Usage
 
 ```cue
-package myPackage
+package myDaC
 
 import (
     panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
@@ -32,7 +32,7 @@ panelGroupsBuilder & {} // input parameter expected
 ## Example
 
 ```cue
-package myPackage
+package myDaC
 
 import (
     panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
