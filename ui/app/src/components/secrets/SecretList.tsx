@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DispatchWithPromise, getMetadataProject, Secret } from '@perses-dev/core';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { Action, getMetadataProject, Secret } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import { intlFormatDistance } from 'date-fns';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
@@ -26,18 +24,16 @@ import { DeleteSecretDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';
+import {
+  CREATED_AT_COL_DEF,
+  ListPropertiesWithCallbacks,
+  NAME_COL_DEF,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
-
-export interface SecretListProperties<T extends Secret> {
-  data: T[];
-  hideToolbar?: boolean;
-  onCreate: DispatchWithPromise<T>;
-  onUpdate: DispatchWithPromise<T>;
-  onDelete: DispatchWithPromise<T>;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
 
 /**
  * Display secrets in a table style.
@@ -56,7 +52,7 @@ export function SecretList<T extends Secret>({
   onCreate,
   onUpdate,
   onDelete,
-}: SecretListProperties<T>) {
+}: ListPropertiesWithCallbacks<T>) {
   const { infoSnackbar } = useSnackbar();
   const isReadonly = useIsReadonly();
 
@@ -147,8 +143,8 @@ export function SecretList<T extends Secret>({
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
+      PROJECT_COL_DEF,
+      NAME_COL_DEF,
       {
         field: 'secret',
         headerName: 'Secret',
@@ -182,41 +178,9 @@ export function SecretList<T extends Secret>({
       },
       { field: 'authorization', headerName: 'Authorization', type: 'boolean', flex: 3, minWidth: 150 },
       { field: 'tlsConfig', headerName: 'TLS Config', type: 'boolean', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',

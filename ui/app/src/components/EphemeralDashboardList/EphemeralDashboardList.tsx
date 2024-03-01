@@ -18,16 +18,20 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance, add } from 'date-fns';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DeleteEphemeralDashboardDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import {
+  CREATED_AT_COL_DEF,
+  DISPLAY_NAME_COL_DEF,
+  ListProperties,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { EphemeralDashboardDataGrid, Row } from './EphemeralDashboardDataGrid';
 
-export interface EphemeralDashboardListProperties {
+export interface EphemeralDashboardListProperties extends ListProperties {
   ephemeralDashboardList: EphemeralDashboardResource[];
-  hideToolbar?: boolean;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
 }
 
 /**
@@ -96,17 +100,9 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
+      PROJECT_COL_DEF,
+      DISPLAY_NAME_COL_DEF,
+      VERSION_COL_DEF,
       {
         field: 'expireAt',
         headerName: 'Expiration Date',
@@ -120,32 +116,8 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
           </Tooltip>
         ),
       },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',

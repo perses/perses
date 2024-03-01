@@ -12,24 +12,27 @@
 // limitations under the License.
 
 import { getDashboardDisplayName, DashboardResource, DashboardSelector } from '@perses-dev/core';
-import { Box, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { Box, Stack } from '@mui/material';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
-import { intlFormatDistance } from 'date-fns';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { useNavigate } from 'react-router-dom';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { CreateDashboardDialog, DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import {
+  CREATED_AT_COL_DEF,
+  DISPLAY_NAME_COL_DEF,
+  ListProperties,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
-export interface DashboardListProperties {
+export interface DashboardListProperties extends ListProperties {
   dashboardList: DashboardResource[];
-  hideToolbar?: boolean;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
 }
 
 /**
@@ -118,43 +121,11 @@ export function DashboardList(props: DashboardListProperties) {
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      PROJECT_COL_DEF,
+      DISPLAY_NAME_COL_DEF,
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',

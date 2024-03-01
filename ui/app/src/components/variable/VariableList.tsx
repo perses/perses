@@ -11,12 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DispatchWithPromise, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { Action, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import { intlFormatDistance } from 'date-fns';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { useSnackbar } from '@perses-dev/components';
@@ -26,18 +24,18 @@ import { useIsReadonly } from '../../context/Config';
 import { DeleteVariableDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
+import {
+  CREATED_AT_COL_DEF,
+  DESCRIPTION_COL_DEF,
+  DISPLAY_NAME_COL_DEF,
+  ListPropertiesWithCallbacks,
+  NAME_COL_DEF,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';
-
-export interface VariableListProperties<T extends Variable> {
-  data: T[];
-  hideToolbar?: boolean;
-  onCreate: DispatchWithPromise<T>;
-  onUpdate: DispatchWithPromise<T>;
-  onDelete: DispatchWithPromise<T>;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
 
 /**
  * Display variables in a table style.
@@ -48,7 +46,7 @@ export interface VariableListProperties<T extends Variable> {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function VariableList<T extends Variable>(props: VariableListProperties<T>) {
+export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>) {
   const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();
@@ -140,9 +138,9 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
-      { field: 'displayName', headerName: 'Display Name', type: 'string', flex: 3, minWidth: 150 },
+      PROJECT_COL_DEF,
+      NAME_COL_DEF,
+      DISPLAY_NAME_COL_DEF,
       {
         field: 'variable',
         headerName: 'Variable',
@@ -167,43 +165,11 @@ export function VariableList<T extends Variable>(props: VariableListProperties<T
           </>
         ),
       },
-      { field: 'description', headerName: 'Description', type: 'string', flex: 3, minWidth: 300 },
+      DESCRIPTION_COL_DEF,
       { field: 'type', headerName: 'Type', type: 'string', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',
