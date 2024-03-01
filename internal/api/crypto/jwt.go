@@ -166,7 +166,7 @@ func (j *jwtImpl) DeleteRefreshTokenCookie() *http.Cookie {
 }
 
 func (j *jwtImpl) ValidateRefreshToken(token string) (*JWTCustomClaims, error) {
-	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.ParseWithClaims(token, new(JWTCustomClaims), func(_ *jwt.Token) (interface{}, error) {
 		return j.refreshKey, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS512.Name}))
 	if err != nil {
@@ -193,7 +193,7 @@ func (j *jwtImpl) Middleware(skipper middleware.Skipper) echo.MiddlewareFunc {
 			}
 			c.Request().Header.Set("Authorization", fmt.Sprintf("Bearer %s.%s", payloadCookie.Value, signatureCookie.Value))
 		},
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+		NewClaimsFunc: func(_ echo.Context) jwt.Claims {
 			return new(JWTCustomClaims)
 		},
 		SigningMethod: jwt.SigningMethodHS512.Name,
