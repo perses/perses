@@ -73,18 +73,10 @@ func (o *option) Execute() error {
 }
 
 func (o *option) setEntities() error {
-	if len(o.File) > 0 {
-		var err error
-		o.entities, err = file.UnmarshalEntitiesFromFile(o.File)
-		if err != nil {
-			return err
-		}
-	} else if len(o.Directory) > 0 {
-		var errorList []error
-		o.entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
-		if len(errorList) > 0 {
-			return errorList[0]
-		}
+	var err error
+	o.entities, err = file.UnmarshalEntities(o.File, o.Directory)
+	if err != nil {
+		return err
 	}
 	if len(o.entities) == 0 {
 		return fmt.Errorf("no resources supported found")

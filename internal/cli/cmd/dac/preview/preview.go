@@ -28,7 +28,6 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
-	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
@@ -118,19 +117,9 @@ func (o *option) Execute() error {
 }
 
 func (o *option) setDashboards() error {
-	var entities []modelAPI.Entity
-	if len(o.File) > 0 {
-		var err error
-		entities, err = file.UnmarshalEntitiesFromFile(o.File)
-		if err != nil {
-			return err
-		}
-	} else if len(o.Directory) > 0 {
-		var errorList []error
-		entities, errorList = file.UnmarshalEntitiesFromDirectory(o.Directory)
-		if len(errorList) > 0 {
-			return errorList[0]
-		}
+	entities, err := file.UnmarshalEntities(o.File, o.Directory)
+	if err != nil {
+		return err
 	}
 	for _, e := range entities {
 		if e.GetKind() == string(modelV1.KindDashboard) {
