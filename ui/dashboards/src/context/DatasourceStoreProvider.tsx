@@ -21,6 +21,7 @@ import {
   GlobalDatasource,
   useEvent,
   EphemeralDashboardResource,
+  DatasourceDefinition,
 } from '@perses-dev/core';
 import {
   DatasourceStoreContext,
@@ -261,7 +262,7 @@ function buildDatasourceProxyUrl(api: DatasourceApi, params: BuildDatasourceProx
 function findDashboardDatasource(
   dashboardDatasources: DashboardSpec['datasources'],
   selector: DatasourceSelector
-): { name: string; spec: DatasourceSpec } | undefined {
+): DatasourceDefinition | undefined {
   if (dashboardDatasources === undefined) return undefined;
 
   // If using a name in the selector...

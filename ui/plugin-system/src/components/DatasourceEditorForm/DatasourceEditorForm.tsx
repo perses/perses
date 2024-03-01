@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useImmer } from 'use-immer';
-import { Action, DatasourceSpec } from '@perses-dev/core';
+import { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import { DispatchWithoutAction, useCallback, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
@@ -26,24 +26,23 @@ import { datasourceEditValidationSchema, DatasourceEditValidationType } from '..
  * This preprocessing ensures that we always have a defined object for the `display` property
  * @param datasource
  */
-function getInitialState(name: string, spec: DatasourceSpec) {
+function getInitialState(datasourceDefinition: DatasourceDefinition) {
   const patchedDisplay = {
-    name: spec.display?.name ?? '',
-    description: spec.display?.description ?? '',
+    name: datasourceDefinition.spec.display?.name ?? '',
+    description: datasourceDefinition.spec.display?.description ?? '',
   };
 
   return {
-    name: name,
+    name: datasourceDefinition.name,
     spec: {
-      ...spec,
+      ...datasourceDefinition.spec,
       display: patchedDisplay,
     },
   };
 }
 
 interface DatasourceEditorFormProps {
-  initialName: string;
-  initialSpec: DatasourceSpec;
+  initialDatasourceDefinition: DatasourceDefinition;
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
@@ -53,9 +52,9 @@ interface DatasourceEditorFormProps {
 }
 
 export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
-  const { initialName, initialSpec, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
+  const { initialDatasourceDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
-  const initialState = getInitialState(initialName, initialSpec);
+  const initialState = getInitialState(initialDatasourceDefinition);
   const [state, setState] = useImmer(initialState);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
