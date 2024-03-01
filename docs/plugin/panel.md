@@ -7,8 +7,8 @@ This is the list of every panel plugin we are supporting.
 ```yaml
 kind: "BarChart"
 spec:
-  calculation: <calculation_spec>
-  [ format: <format_spec> ]
+  calculation: <Calculation specification>
+  [ format: <Format specification> ]
   [ sort: <enum = "asc" | "desc"> ]
   [ mode: <enum = "value" | "percentage"> ]
 ```
@@ -18,9 +18,9 @@ spec:
 ```yaml
 kind: "GaugeChart"
 spec:
-  calculation: <calculation_spec>
-  [ format: <format_spec> ]
-  [ thresholds: <thresholds_spec> ]
+  calculation: <Calculation specification>
+  [ format: <Format specification> ]
+  [ thresholds: <Thresholds specification> ]
   [ max: <int> ]
 ```
 
@@ -37,14 +37,14 @@ spec:
 ```yaml
 kind: "StatChart"
 spec:
-  calculation: <calculation_spec>
-  [ format: <format_spec> ]
-  [ thresholds: <thresholds_spec> ]
-  [ sparkline: <sparkline_spec> ]
+  calculation: <Calculation specification>
+  [ format: <Format specification> ]
+  [ thresholds: <Thresholds specification> ]
+  [ sparkline: <Sparkline specification> ]
   [ valueFontSize: <int> ]
 ```
 
-### `<sparkline_spec>`
+### Sparkline specification
 
 ```yaml
   [ color: <string> ]
@@ -64,14 +64,14 @@ spec:
 ```yaml
 kind: "TimeSeriesChart"
 spec:
-  [ legend: <legend_spec> ]
-    [ tooltip: <tooltip_spec> ]
-    [ yAxis: <yAxis_spec> ]
-    [ thresholds: <thresholds_spec> ]
-    [ visual: <visual_spec> ]
+  [ legend: <Legend specification> ]
+    [ tooltip: <Tooltip specification> ]
+    [ yAxis: <YAxis specification> ]
+    [ thresholds: <Thresholds specification> ]
+    [ visual: <Visual specification> ]
 ```
 
-### `<legend_spec>`
+### Legend specification
 
 ```yaml
 position: <enum = "bottom" | "right">
@@ -81,13 +81,13 @@ values:
   - [ <calculation> ]
 ```
 
-### `<tooltip_spec>`
+### Tooltip specification
 
 ```yaml
 [ enablePinning: <boolean | default = false> ]
 ```
 
-### `<yAxis_spec>`
+### YAxis specification
 
 ```yaml
   [ show: <boolean> ]
@@ -97,7 +97,7 @@ values:
   [ max: <int> ]
 ```
 
-### `<visual_spec>`
+### Visual specification
 
 ```yaml
   [ display: <enum = "line" | "bar"> ]
@@ -106,14 +106,14 @@ values:
   # Must be between 0 and 1
   [ areaOpacity: <int> ]
   [ showPoints: <enum = "auto" | "always"> ]
-  [ palette: <palette_spec> ]
+  [ palette: <Palette specification> ]
   # Must be between 0 and 6
   [ pointRadius: <number> ]
   [ stack: <enum = "all" | "percent"> ]
   [ connectNulls: boolean | default = false ]
 ```
 
-#### `<palette_spec>`
+#### Palette specification
 
 ```yaml
   mode: <enum = "auto" | "categorical">
@@ -121,7 +121,7 @@ values:
 
 ## Common definitions
 
-### `<calculation_spec>`
+### Calculation specification
 
 It's an enum. Possible values are:
 
@@ -134,7 +134,7 @@ It's an enum. Possible values are:
 - `min`
 - `max`
 
-### `<format_spec>`
+### Format specification
 
 The format spec is one of the following:
 
@@ -176,16 +176,16 @@ The format spec is one of the following:
   [ shortValues: <boolean> | default = false ]
 ```
 
-### `<thresholds_spec>`
+### Thresholds specification
 
 ```yaml
   [ mode: <enum = "percent" | "absolute"> ]
   [ defaultColor: string ]
   steps:
-    - [ <step_spec> ]
+    - [ <Step specification> ]
 ```
 
-#### `<step_spec>`
+#### Step specification
 
 ```yaml
   value: <int>

@@ -33,17 +33,17 @@ See the next section to get details about the `<secret_specification>`
 ## Secret specification
 
 ```yaml
-  [ basicAuth: <basic_auth_spec> ]
+  [ basicAuth: <Basic Auth specification> ]
 
   # The HTTP authorization credentials for the targets.
   # Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
-  [ authorization: <authorization_spec> ]
+  [ authorization: <Authorization specification> ]
 
   # Config used to connect to the targets.
-  [ tlsConfig: <tls_config_spec> ]
+  [ tlsConfig: <TLS Config specification> ]
 ```
 
-### `<basic_auth_spec>`
+### Basic Auth specification
 
 ```yaml
   username: <string>
@@ -51,7 +51,7 @@ See the next section to get details about the `<secret_specification>`
   [ passwordFile: <filename> ]
 ```
 
-### `<authorization_spec>`
+### Authorization specification
 
 ```yaml
   [ type: <string> | default = "Bearer" ]
@@ -61,7 +61,7 @@ See the next section to get details about the `<secret_specification>`
   [ credentialsFile: <filename> ]
 ```
 
-### `<tls_config_spec>`
+### TLS Config specification
 
 ```yaml
   # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.

@@ -21,23 +21,23 @@ See the next section to get details about the `<dashboard_specification>`.
 ```yaml
   # Metadata.name has some restrictions. For example, you can't use space there.
   # `display` allows to provide a rich name and a description for your dashboard.
-  [ display: <display_spec> ]
+  [ display: <Display specification> ]
 
   datasources:
-    [ <string>: <datasource_spec> ]
+    [ <string>: <Datasource specification> ]
 
   # `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
-  [ variables: <variable_spec> ]
+  [ variables: <Variable specification> ]
 
   # `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
   # the kind of chart this panel is using. A panel can only hold one chart.
   panels:
-    [ <string>: <panel_spec> ]
+    [ <string>: <Panel specification> ]
 
   # `layouts` is the list of layouts. A layout describes how to display the list of panels. 
   # Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
   layouts:
-    - <layout_spec>
+    - <Layout specification>
 
   # `duration` is the default time range to use on the initial load of the dashboard.
   [ duration: <duration> ]
@@ -48,7 +48,7 @@ See the next section to get details about the `<dashboard_specification>`.
 
 A dashboard in its minimal definition only requires a panel and a layout.
 
-### `<display_spec>`
+### Display specification
 
 This is the way to provide a rich name and a description for your dashboard. There is no restriction about the type of
 characters you can use there.
@@ -63,83 +63,72 @@ characters you can use there.
   [ description: <string> ]
 ```
 
-### `<datasource_spec>`
+### Datasource specification
 
 See the [datasource](./datasource.md) documentation.
 
-### `<variable_spec>`
+### Variable specification
 
 See the [variable](./variable.md) documentation.
 
-### `<panel_spec>`
+### Panel specification
 
 ```yaml
 kind: "Panel"
 spec:
-  display: <display_spec>
+  display: <Display specification>
 
   # `plugin` is where you define the chart type to use.
   # The chart type chosen should match one of the chart plugins known to the Perses instance.
-  plugin: <panel_plugin_spec>
+  plugin: <Panel Plugin specification>
 
   # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of chart & the type of datasource used.
   queries:
-    - [ <query_spec> ]
+    - [ <Query specification> ]
 ```
 
-#### `<panel_plugin_spec>`
+#### Panel Plugin specification
 
 ```yaml
   # `kind` is the plugin type of the panel. For example, `TimeSeriesChart`.
   kind: <string>
 
   # `spec` is the actual definition of the panel plugin. Each `kind` comes with its own `spec`.
-  spec: <plugin_spec>
+  spec: <Plugin specification>
 ```
 
 See the [panel](../plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
 
-#### `<query_spec>`
+#### Query specification
 
 ```yaml
 # kind` is the type of the query. For the moment we only support `TimeSeriesQuery`.
 kind: <string>
 spec:
-  plugin: <query_plugin_spec>
+  plugin: <Query Plugin specification>
 ```
 
-##### `<query_plugin_spec>`
+##### Query Plugin specification
 
 ```yaml
   # `kind` is the plugin type matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`.
   kind: <string>
 
   # `spec` is the actual definition of the query. Each `kind` comes with its own `spec`.
-  spec: <plugin_spec>
+  spec: <Plugin specification>
 ```
 
 We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
 Please look at the [Prometheus plugin documentation](../plugin/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
 
-### `<layout_spec>`
+### Layout specification
 
 ```yaml
 kind: "Grid"
 spec:
-  [ display: <grid_display_spec> ]
+  [ display: <Grid Display specification> ]
   items:
-    [ - <grid_item_spec> ]
-```
-
-### `<grid_item_spec>`
-
-```yaml
-x: <int>
-y: <int>
-width: <int>
-height: <int>
-content:
-  "$ref": <json_panel_ref>
+    [ - <Grid Item specification> ]
 ```
 
 Example:
@@ -164,6 +153,25 @@ spec:
       height: 3
       content:
         $ref": "#/spec/panels/statTotalRAM"
+```
+
+### Grid Display specification
+
+```yaml
+title: <string>
+collapse:
+  open: <boolean>
+```
+
+### Grid Item specification
+
+```yaml
+x: <int>
+y: <int>
+width: <int>
+height: <int>
+content:
+  "$ref": <json_panel_ref>
 ```
 
 ## API definition

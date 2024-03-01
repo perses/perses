@@ -32,7 +32,7 @@ varsBuilder & {} // input parameter expected
 | `pluginKind`     | `"PrometheusPromQLVariable"`                     | Mandatory          |                     | The kind of plugin for this variable.                                            |
 | `metric`         | string                                           | Mandatory          |                     | The name of the source metric to be used.                                        |
 | `label`          | string                                           | Mandatory          | to `name` parameter | The label from which to retrieve the list of values.                             |
-| `display`        | [Display](../../../api/variable.md#displayspec) | Optional           |                     | Display object to tune the display name, description and visibility (show/hide). |
+| `display`        | [Display](../../../api/variable.md#display-specification) | Optional           |                     | Display object to tune the display name, description and visibility (show/hide). |
 | `allowAllValue`  | bool                                             | Mandatory          | false               | Whether to append the "All" value to the list.                                   |
 | `allowMultiple`  | bool                                             | Mandatory          | false               | Whether to allow multi-selection of values.                                      |
 | `datasourceName` | string                                           | Mandatory          |                     | The name of the datasource to query.                                             |
@@ -45,7 +45,7 @@ varsBuilder & {} // input parameter expected
 | `pluginKind`     | `"PrometheusLabelValuesVariable"`                | Mandatory          |                     | The kind of plugin for this variable.                                            |
 | `metric`         | string                                           | Mandatory          |                     | The name of the source metric to be used.                                        |
 | `label`          | string                                           | Mandatory          | to `name` parameter | The label from which to retrieve the list of values.                             |
-| `display`        | [Display](../../../api/variable.md#displayspec) | Optional           |                     | Display object to tune the display name, description and visibility (show/hide). |
+| `display`        | [Display](../../../api/variable.md#display-specification) | Optional           |                     | Display object to tune the display name, description and visibility (show/hide). |
 | `allowAllValue`  | bool                                             | Mandatory          | false               | Whether to append the "All" value to the list.                                   |
 | `allowMultiple`  | bool                                             | Mandatory          | false               | Whether to allow multi-selection of values.                                      |
 | `datasourceName` | string                                           | Mandatory          |                     | The name of the datasource to query.                                             |
@@ -57,7 +57,7 @@ varsBuilder & {} // input parameter expected
 | `name`           | string                                           | Mandatory          |         | The name of this variable.                                                       |
 | `pluginKind`     | `"PrometheusLabelNamesVariable"`                 | Mandatory          |         | The kind of plugin for this variable.                                            |
 | `metric`         | string                                           | Mandatory          |         | The name of the source metric to be used.                                        |
-| `display`        | [Display](../../../api/variable.md#displayspec) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
+| `display`        | [Display](../../../api/variable.md#display-specification) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
 | `allowAllValue`  | bool                                             | Mandatory          | false   | Whether to append the "All" value to the list.                                   |
 | `allowMultiple`  | bool                                             | Mandatory          | false   | Whether to allow multi-selection of values.                                      |
 | `datasourceName` | string                                           | Mandatory          |         | The name of the datasource to query.                                             |
@@ -68,7 +68,7 @@ varsBuilder & {} // input parameter expected
 |------------|--------------------------------------------------|--------------------|---------|----------------------------------------------------------------------------------|
 | `name`     | string                                           | Mandatory          |         | The name of this variable.                                                       |
 | `kind`     | `"TextVariable"`                                 | Mandatory          |         | The kind of this variable                                                        |
-| `display`  | [Display](../../../api/variable.md#displayspec) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
+| `display`  | [Display](../../../api/variable.md#display-specification) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
 | `value`    | string                                           | Mandatory          |         | The value of this variable.                                                      |
 | `constant` | bool                                             | Mandatory          | false   | Whether this variable is a constant.                                             |
 

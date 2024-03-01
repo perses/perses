@@ -19,7 +19,7 @@ In case you would like to set permissions at Project level, you will need to cre
   metadata:
     name: <string>
     project: <string>
-  spec: <role_spec>
+  spec: <Role specification>
 ```
 
 ### Global level
@@ -30,7 +30,7 @@ In case you would like to set permissions at Global level , you will need to cre
   kind: "GlobalRole"
   metadata:
     name: <string>
-  spec: <role_spec>
+  spec: <Role specification>
 ```
 
 ## Role specification
@@ -38,10 +38,10 @@ In case you would like to set permissions at Global level , you will need to cre
 ```yaml
   # List of permissions owned by the role
   permissions:
-    - <permission_spec>
+    - <Permission specification>
 ```
 
-### `<permission_spec>`
+### Permission specification
 
 ```yaml
   # Types of actions the permission grant access
