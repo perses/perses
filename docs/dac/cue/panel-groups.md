@@ -24,7 +24,7 @@ panelGroupsBuilder & {} // input parameter expected
 
 | Parameter | Type                                            | Default | Description                                           |
 |-----------|-------------------------------------------------|---------|-------------------------------------------------------|
-| `#panels` | [...[Panel](../../api/dashboard.md#panelspec)] |         | An array of panels to be included in the panel group. |
+| `#panels` | [...[Panel](../../api/dashboard.md#panel_spec)] |         | An array of panels to be included in the panel group. |
 | `#title`  | string                                          |         | The title of the panel group.                         |
 | `#cols`   | >0 & <=24                                       |         | The number of columns in the grid layout.             |
 | `#height` | number                                          | 6       | The height for all panels in the grid                 |

@@ -8,3 +8,6 @@ validators:
   # somehow stackoverflow is returning also a status code 403
   - regex: 'stackoverflow\.com'
     type: 'ignore'
+  # ignore anchor links containing underscores that can trigger false positive errors
+  - regex: '.*#.+_.+'
+    type: 'ignore'
