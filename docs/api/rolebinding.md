@@ -21,7 +21,7 @@ In case you would like to set a role binding for a Role, you will need to create
   metadata:
     name: <string>
     project: <string>
-  spec: <rolebinding_spec>
+  spec: <RoleBinding specification>
 ```
 
 ### Global level
@@ -32,7 +32,7 @@ In case you would like to set a role binding for a GlobalRole , you will need to
   kind: "GlobalRoleBinding"
   metadata:
     name: <string>
-  spec: <rolebinding_spec>
+  spec: <RoleBinding specification>
 ```
 
 ## RoleBinding specification
@@ -42,10 +42,10 @@ In case you would like to set a role binding for a GlobalRole , you will need to
   role: <string>
   # Subjects that will inherit permissions from the role
   subjects: 
-    - <subject_spec>
+    - <Subject specification>
 ```
 
-### `<subject_spec>`
+### Subject specification
 
 ```yaml
   # The type of the subject. For example: `User`

@@ -22,10 +22,10 @@ spec:
   # Save the context of the oauth provider used if the user has been created from an external OIDC or OAuth
   # authentication provider.
   oauthProviders:  
-  - [ <oauthProvider> ]
+  - [ <OAuth Provider specification> ]
 ```
 
-### `<oauthProvider>`
+### OAuth Provider specification
 
 ```yaml
   # Identifying the provider

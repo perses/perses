@@ -31,7 +31,7 @@ create a `Datasource`.
   metadata:
     name: <string>
     project: <string>
-  spec: <datasource_spec>
+  spec: <Datasource specification>
 ```
 
 ### Global level
@@ -46,13 +46,13 @@ That’s why we have another resource called `GlobalDatasource`
   kind: "GlobalDatasource"
   metadata:
     name: <string>
-  spec: <datasource_spec>
+  spec: <Datasource specification>
 ```
 
 ## Datasource specification
 
 ```yaml
-  [ display: <display_spec> ]
+  [ display: <Display specification> ]
 
   # If true, then it's the default datasource for the type defined in the plugin.
   [ default: <boolean> | default = false ]
@@ -68,7 +68,7 @@ That’s why we have another resource called `GlobalDatasource`
   kind: <string>
 
   # The actual definition of the datasource. It will depend on the type defined in the previous field `kind`
-  spec: <plugin_spec>
+  spec: <Plugin specification>
 ```
 
 We are supporting only prometheus as a datasource for the moment.

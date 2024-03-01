@@ -64,24 +64,24 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
-  [ security: <security_config> ]
+  [ security: <Security config> ]
 
   # Database configuration 
-  [ database: <database_config> ]
+  [ database: <Database config> ]
 
   # The configuration to access the CUE schemas
-  [ schemas: <schemas_config> ]
+  [ schemas: <Schemas config> ]
 
   # A list of dashboards you would like to display in the UI home page
   important_dashboards:
-    - [ <dashboard_selector_config> ]
+    - [ <Dashboard Selector config> ]
 
   # The markdown content to be displayed on the UI home page
   [ information: <string> ]
 
   # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
   # The data coming from the provisioning folder will totally override what exists in the database.
-  [ provisioning: <provisioning_spec> ]
+  [ provisioning: <Provisioning specification> ]
 
   # When it is true, Perses won't serve the frontend anymore.
   [ deactivate_front: <bool> | default = false ]
@@ -90,7 +90,7 @@ Generic placeholders are defined as follows:
   [ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
 ```
 
-### `<security_config>`
+### Security config
 
 ```yaml
   # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
@@ -98,10 +98,10 @@ Generic placeholders are defined as follows:
   [ readonly: <boolean> | default = false ]
     
   # It contains the config regarding the time to live of the refresh/access token.
-  [ authentication: <authentication_config> ]
+  [ authentication: <Authentication config> ]
 
   # It contains any configuration that changes authorization behavior like default permissions
-  [ authorization: <authorization_config> ]
+  [ authorization: <Authorization config> ]
 
   # When it is true, the authentication and authorization config are considered.
   # And you will need a valid JWT token to contact most of the endpoints exposed by the API
@@ -117,7 +117,7 @@ Generic placeholders are defined as follows:
   [ encryption_key_file: <filename> ]
 ```
 
-#### `<authentication_config>`
+#### Authentication config
 
 ```yaml
   # It is the time to live of the access token. By default, it is 15 minutes.
@@ -131,10 +131,10 @@ Generic placeholders are defined as follows:
   [ disable_sign_up: <boolean> | default = false ]
 
   # Authentication providers
-  [ providers: <authentication_providers> ]
+  [ providers: <Authentication providers> ]
 ```
 
-##### `<authentication_providers>`
+##### Authentication providers
 
 ```yaml
   # Enable the native authentication providers
@@ -142,13 +142,13 @@ Generic placeholders are defined as follows:
   
   # List of the OIDC authentication providers
   oidc:
-    - [ <oidc_provider> ]
+    - [ <OIDC provider> ]
   # List of the OIDC authentication providers
   oauth:
-    - [ <oauth_provider> ]
+    - [ <OAuth provider> ]
 ```
 
-##### `<oidc_provider>`
+##### OIDC provider
 
 ```yaml
   # The id of the provider that will be used in the URLs (must be unique for all providers)
@@ -185,7 +185,7 @@ Generic placeholders are defined as follows:
     [ <string>: [<string>, ...] ] ]]
 ```
 
-##### `<oauth_provider>`
+##### OAuth provider
 
 ```yaml
   # The id of the provider that will be used in the URLs (must be unique for all providers)
@@ -221,7 +221,7 @@ Generic placeholders are defined as follows:
   [ custom_login_property: <string>]
 ```
 
-#### `<authorization_config>`
+#### Authorization config
 
 ```yaml
   # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
@@ -229,10 +229,10 @@ Generic placeholders are defined as follows:
 
   # Default permissions for guest users (logged-in users)
   guest_permissions:
-    - [ <permissions> ]
+    - [ <Permissions> ]
 ```
 
-##### `<permissions>`
+##### Permissions
 
 ```yaml
   # Actions authorized by the permission
@@ -243,18 +243,18 @@ Generic placeholders are defined as follows:
     - <enum= kind | "*">
 ```
 
-### `<database_config>`
+### Database config
 
 ```yaml
   # Config in case you want to use a file DB.
   # Prefer the SQL config in case you are running multiple Perses instances.
-  [ file: <database_file_config> ]
+  [ file: <Database file config> ]
   
   # The SQL config
-  [ sql: <database_sql_config> ]
+  [ sql: <Database SQL config> ]
 ```
 
-#### `<database_file_config>`
+#### Database_file config
 
 ```yaml
   # The path to the folder containing the database
@@ -268,11 +268,11 @@ Generic placeholders are defined as follows:
   [ case_sensitive: <string> | default = false ]
 ```
 
-#### `<database_sql_config>`
+#### Database SQL config
 
 ```yaml
   # TLS configuration.
-  [ tls_config: <tls_config> ]
+  [ tls_config: <TLS config> ]
 
   # Username used for the connection
   [ user: <secret> ]
@@ -349,7 +349,7 @@ Generic placeholders are defined as follows:
   [ case_sensitive: <string> | default = false ]
 ```
 
-### `<schemas_config>`
+### Schemas config
 
 ```yaml
     # Path to the Cue schemas of the panels
@@ -368,9 +368,9 @@ Generic placeholders are defined as follows:
   [ interval: <duration> | default = 1h ]
 ```
 
-### `<tls_config>`
+### TLS config
 
-A `tls_config` allows configuring TLS connections.
+A TLS config allows configuring TLS connections.
 
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
@@ -404,7 +404,7 @@ A `tls_config` allows configuring TLS connections.
 [ max_version: <string> ]
 ```
 
-### `<dashboard_selector_config>`
+### Dashboard Selector config
 
 ```yaml
   # The project name (dashboard.metadata.project)
@@ -414,7 +414,7 @@ A `tls_config` allows configuring TLS connections.
   dashboard: <string>
 ```
 
-### `<provisioning_spec>`
+### Provisioning specification
 
 ```yaml
   [ interval: <duration> | default = 1h ]

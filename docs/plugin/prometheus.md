@@ -20,12 +20,12 @@ Prometheus as a datasource is basically an HTTP server. So we need to define an 
   [ directUrl: <url> ]
 
   # It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
-  [ proxy: <http_proxy_spec> ]
+  [ proxy: <HTTP Proxy specification> ]
   
   [ scrapeInterval: <duration> ]
 ```
 
-#### `<http_proxy_spec>`
+#### HTTP Proxy specification
 
 ```yaml
 kind: "HTTPProxy"
@@ -36,7 +36,7 @@ spec:
   # It is a tuple list of http methods and http endpoints that will be accessible.
   # Leave it empty if you don't want to restrict the access to the datasource.
   allowedEndpoints:
-    - [ <allowedEndpoints_spec> ]
+    - [ <Allowed Endpoints specification> ]
 
   # It can be used to provide additional headers that need to be forwarded when requesting the datasource
   headers:
@@ -47,7 +47,7 @@ spec:
   [ secret: <string> ]
 ```
 
-##### `<allowedEndpoints_spec>`
+##### Allowed Endpoints specification
 
 ```yaml
 endpointPattern: <RegExp>
@@ -109,10 +109,10 @@ We are only supporting one kind of query for Prometheus: `PrometheusTimeSeriesQu
 
 ```yaml
 kind: "PrometheusTimeSeriesQuery"
-spec: <timeseries_query_spec>
+spec: <Timeseries Query specification>
 ```
 
-### `<timeseries_query_spec>`
+### Timeseries Query specification
 
 ```yaml
   #`query` is the promQL expression.
@@ -120,7 +120,7 @@ spec: <timeseries_query_spec>
 
   # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <datasource_selector> ]
+  [ datasource: <Datasource selector> ]
   [ seriesNameFormat: <string> ]
 
   # `minStep` is the minimum time interval you want between each data points.
@@ -147,10 +147,10 @@ spec:
 
 ```yaml
 kind: "PrometheusLabelNamesVariable"
-spec: <prometheus_label_names_spec>
+spec: <Prometheus Label Names specification>
 ```
 
-#### `<prometheus_label_names_spec>`
+#### Prometheus Label Names specification
 
 ```yaml
   # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
@@ -202,15 +202,15 @@ spec:
 
 ```yaml
 kind: "PrometheusLabelValuesVariable"
-spec: <prometheus_label_values_spec>
+spec: <Prometheus Label Values specification>
 ```
 
-#### `<prometheus_label_values_spec>`
+#### Prometheus Label Values specification
 
 ```yaml
   # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <datasource_selector> ]
+  [ datasource: <Datasource selector> ]
   labelName: <string>
   matchers:
    [ - <string> ]
@@ -263,22 +263,22 @@ spec:
 
 ```yaml
 kind: "PrometheusPromQLVariable"
-spec: <prometheus_promql_spec>
+spec: <Prometheus PromQL specification>
 ```
 
-#### `<prometheus_promql_spec>`
+#### Prometheus PromQL specification
 
 ```yaml
   # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
   # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <datasource_selector> ]
+  [ datasource: <Datasource selector> ]
 
   # The promql expression
   expr: <string>
   [ labelName: <string> ]
 ```
 
-### `<datasource_selector>`
+### Datasource selector
 
 ```yaml
   kind: "PrometheusDatasource"
