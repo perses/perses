@@ -42,6 +42,25 @@ func Unmarshal(file string, obj interface{}) error {
 	return nil
 }
 
+// UnmarshalEntities will read the file if provided or the directory and will extract any Perses resources.
+func UnmarshalEntities(file string, dir string) ([]modelAPI.Entity, error) {
+	var entities []modelAPI.Entity
+	if len(file) > 0 {
+		var err error
+		entities, err = UnmarshalEntitiesFromFile(file)
+		if err != nil {
+			return nil, err
+		}
+	} else if len(dir) > 0 {
+		var errorList []error
+		entities, errorList = UnmarshalEntitiesFromDirectory(dir)
+		if len(errorList) > 0 {
+			return nil, errorList[0]
+		}
+	}
+	return entities, nil
+}
+
 func UnmarshalEntitiesFromDirectory(dir string) ([]modelAPI.Entity, []error) {
 	files, err := visit(dir)
 	if err != nil {
