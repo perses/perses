@@ -21,7 +21,7 @@ require (
 	github.com/nexucis/lamenv v0.5.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.22.0
-	github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.48.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.15.0
