@@ -6,10 +6,18 @@ Besides, you can always manipulate directly the base datamodel of the Perses das
 
 See the dedicated pages for each builder:
 - [Dashboard builder](./dashboard.md)
-- [Panel Groups builder](./panel-groups.md)
-- Prometheus-specific builders:
+- [Panel Groups builder](./panelgroups.md)
+- Variable-related builders:
+  - [Variable Group builder](./variable/group.md)
+  - [Static List Variable builder](./variable/staticlist.md)
+  - [Text Variable builder](./variable/text.md)
+- Prometheus-related builders:
+  - [Filter builder](./prometheus/filter.md)
   - [Panel builder](./prometheus/panel.md)
-  - [Variables builder](./prometheus/variables.md)
+  - Variable-related builders:
+    - [Label Names Variable builder](./prometheus/variable/labelnames.md)
+    - [Label Values Variable builder](./prometheus/variable/labelvalues.md)
+    - [PromQL Variable builder](./prometheus/variable/promql.md)
 
 See also some useful patterns for DaC with the CUE SDK in the below section.
 
@@ -28,32 +36,36 @@ package myDaC
 
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
+	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )
 
-#myVarsBuilder: varsBuilder & {
-	input: [{
-		name:           "namespace"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_namespace_labels"
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "pod"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_pod_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}]
+#myVarsBuilder: varGroupBuilder & {
+	#input: [
+		promQLVarBuilder & {
+			#name:           "namespace"
+			#metric:         "kube_namespace_labels"
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "pod"
+			#metric:         "kube_pod_info"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+	]
 }
 
-#cpuPanel: this=panelBuilder & {
-	#filter: #myVarsBuilder.fullFilter
+#filter: { promFilterBuilder & #myVarsBuilder }.filter
+
+#cpuPanel: panelBuilder & {
 	spec: {
 		display: name: "Container CPU"
 		plugin: timeseriesChart
@@ -61,7 +73,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum (container_cpu_usage_seconds{\(this.#filter)})"
+					spec: query: "sum (container_cpu_usage_seconds{\(#filter)})"
 				}
 			},
 		]
@@ -90,7 +102,7 @@ Once your code is organized this way, you can even split the different definitio
 
 ### Multiple variable groups
 
-If you want 2 independant "groups" of variables on the same dashboard like "C depends on B that depends on A" and "F depends on E that depends on D", use 2 times the variables builder independantly, then concat the lists.
+If you want 2 independant groups of variables on the same dashboard like "C depends on B that depends on A" and "F depends on E that depends on D", use 2 times the variable group builder independantly, then concat the lists.
 
 Example: 
 
@@ -100,49 +112,56 @@ package myDaC
 import (
 	"list"
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
+	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )
 
-#myCloudVarsBuilder: varsBuilder & {
-	input: [{
-		name:           "namespace"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_namespace_labels"
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "pod"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_pod_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}]
+#myCloudVarsBuilder: varGroupBuilder & {
+	#input: [
+		promQLVarBuilder & {
+			#name:           "namespace"
+			#metric:         "kube_namespace_labels"
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "pod"
+			#metric:         "kube_pod_info"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		}
+	]
 }
 
-#myVMVarsBuilder: varsBuilder & {
-	input: [{
-		name:           "datacenter"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "node_uname_info"
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "hostname"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "node_uname_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}]
+#cloudFilter: { promFilterBuilder & #myCloudVarsBuilder }.filter
+
+#myVMVarsBuilder: varGroupBuilder & {
+	#input: [
+		promQLVarBuilder & {
+			#name:           "datacenter"
+			#metric:         "node_uname_info"
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "hostname"
+			#metric:         "node_uname_info"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		}
+	]
 }
 
-#containerCPUPanel: this=panelBuilder & {
-	#filter: #myCloudVarsBuilder.fullFilter
+#vmFilter: { promFilterBuilder & #myVMVarsBuilder }.filter
+
+#containerCPUPanel: panelBuilder & {
 	spec: {
 		display: name: "Container CPU"
 		plugin: timeseriesChart
@@ -150,15 +169,14 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum (container_cpu_usage_seconds{\(this.#filter)})"
+					spec: query: "sum (container_cpu_usage_seconds{\(#cloudFilter)})"
 				}
 			},
 		]
 	}
 }
 
-#vmCPUPanel: this=panelBuilder & {
-	#filter: #myVMVarsBuilder.fullFilter
+#vmCPUPanel: panelBuilder & {
 	spec: {
 		display: name: "VM CPU"
 		plugin: timeseriesChart
@@ -166,7 +184,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum (node_memory_MemTotal_bytes{\(this.#filter)})"
+					spec: query: "sum (node_memory_MemTotal_bytes{\(#vmFilter)})"
 				}
 			},
 		]
@@ -204,31 +222,36 @@ package myDaC
 import (
 	"list"
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
+	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 	promQLVar "github.com/perses/perses/cue/schemas/variables/prometheus-promql:model"
 )
 
-#myCloudVarsBuilder: varsBuilder & {
-	input: [{
-		name:           "namespace"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_namespace_labels"
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "pod"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_pod_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}]
+#myCloudVarsBuilder: varGroupBuilder & {
+	#input: [
+		promQLVarBuilder & {
+			#name:           "namespace"
+			#metric:         "kube_namespace_labels"
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "pod"
+			#metric:         "kube_pod_info"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		}
+	]
 }
+
+#cloudFilter: { promFilterBuilder & #myCloudVarsBuilder }.filter
 
 #mySpecificVMVar: v1Dashboard.#Variable & {
 	kind: "ListVariable"
@@ -251,8 +274,7 @@ import (
 	}
 }
 
-#containerCPUPanel: this=panelBuilder & {
-	#filter: #myCloudVarsBuilder.fullFilter
+#containerCPUPanel: panelBuilder & {
 	spec: {
 		display: name: "Container CPU"
 		plugin: timeseriesChart
@@ -260,7 +282,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum (container_cpu_usage_seconds{\(this.#filter)})"
+					spec: query: "sum (container_cpu_usage_seconds{\(#cloudFilter)})"
 				}
 			},
 		]

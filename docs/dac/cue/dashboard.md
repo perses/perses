@@ -30,9 +30,11 @@ package myDaC
 
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
+	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )
@@ -40,15 +42,21 @@ import (
 dashboardBuilder & {
 	#name:    "ContainersMonitoring"
 	#project: "MyProject"
-	#variables: {varsBuilder & {
-		input: [{
-			name: "stack"
-			display: name: "PaaS"
-			pluginKind:     "PrometheusLabelValuesVariable"
-			metric:         "thanos_build_info"
-			label:          "stack"
-			datasourceName: "promDemo"
-		}]
+	#variables: {varGroupBuilder & {
+		#input: [
+			textVarBuilder & {
+				#name:     "prometheus"
+				#value:    "platform"
+				#constant: true
+			},
+			labelValuesVarBuilder & {
+				#name: "stack"
+				#display: name: "PaaS"
+				#metric:         "thanos_build_info"
+				#label:          "stack"
+				#datasourceName: "promDemo"
+			}
+		]
 	}}.variables
 	#panelGroups: panelGroupsBuilder & {
 		#input: [
@@ -78,7 +86,4 @@ dashboardBuilder & {
 ```
 
 As you can see, other builders are used in conjunction with the dashboard builder to facilitate further the coding.
-Please refer to their respective documentation for more information about each:
-- [Panel Groups builder](./panel-groups.md)
-- [Prometheus Panel builder](./prometheus/panel.md)
-- [Prometheus Variables builder](./prometheus/variables.md)
+Please refer to their respective documentation for more information about each.

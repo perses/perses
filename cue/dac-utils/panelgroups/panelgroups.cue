@@ -13,10 +13,10 @@
 
 // This package offers an utility to build a set of panel groups easily.
 
-package panelGroups
+package panelgroups
 
 import (
-	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panel-group:panelGroup"
+	panelGroupBuilder "github.com/perses/perses/cue/dac-utils/panelgroup"
 )
 
 // expected user input
