@@ -30,7 +30,7 @@ import (
 #myVarsBuilder: varGroupBuilder & {
 	#input: [
 		labelValuesVarBuilder & {
-			#name: "stack"
+			#name: "paas"
 			#display: name: "PaaS"
 			#metric:          "thanos_build_info"
 			#label:           "stack"
