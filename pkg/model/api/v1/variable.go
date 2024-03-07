@@ -57,6 +57,8 @@ func (v *VariableSpec) unmarshal(unmarshal func(interface{}) error, staticMarsha
 	}
 	var spec interface{}
 	switch tmp.Kind {
+	case variable.KindDatasource:
+		spec = &variable.DatasourceSpec{}
 	case variable.KindList:
 		spec = &variable.ListSpec{}
 	case variable.KindText:

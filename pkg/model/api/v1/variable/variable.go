@@ -21,13 +21,15 @@ import (
 type Kind string
 
 const (
-	KindText Kind = "TextVariable"
-	KindList Kind = "ListVariable"
+	KindDatasource Kind = "DatasourceVariable"
+	KindList       Kind = "ListVariable"
+	KindText       Kind = "TextVariable"
 )
 
 var KindMap = map[Kind]bool{
-	KindText: true,
-	KindList: true,
+	KindDatasource: true,
+	KindList:       true,
+	KindText:       true,
 }
 
 func (k *Kind) UnmarshalJSON(data []byte) error {

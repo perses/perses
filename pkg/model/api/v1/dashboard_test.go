@@ -191,6 +191,16 @@ func TestMarshalDashboard(t *testing.T) {
 								Name: "labelValue",
 							},
 						},
+						{
+							Kind: variable.KindDatasource,
+							Spec: &dashboard.DatasourceVariableSpec{
+								DatasourceSpec: variable.DatasourceSpec{
+									Type:            "PrometheusDatasource",
+									CapturingRegexp: "prod-.*",
+								},
+								Name: "datasource",
+							},
+						},
 					},
 					Panels: map[string]*Panel{
 						"MyPanel": {
@@ -274,6 +284,14 @@ func TestMarshalDashboard(t *testing.T) {
             }
           },
           "name": "labelValue"
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "capturingRegexp": "prod-.*",
+          "type": "PrometheusDatasource",
+          "name": "datasource"
         }
       }
     ],

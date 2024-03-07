@@ -25,6 +25,8 @@ import (
 )
 
 func TestUnmarshalJSONVariable(t *testing.T) {
+	var sortAlphabeticalCiDesc = variable.SortAlphabeticalCaseInsensitiveDesc
+
 	testSuite := []struct {
 		title  string
 		jason  string
@@ -38,7 +40,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
   "spec": {
     "name": "SimpleText",
     "value": "value",
-	"constant": true
+    "constant": true
   }
 }
 `,
@@ -50,6 +52,31 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 						Constant: true,
 					},
 					Name: "SimpleText",
+				},
+			},
+		},
+		{
+			title: "simple DatasourceVariable",
+			jason: `
+{
+  "kind": "DatasourceVariable",
+  "spec": {
+    "name": "datasourceVar",
+    "defaultValue": "prom-global",
+    "type": "PrometheusDatasource",
+    "sort": "alphabetical-ci-desc"
+  }
+}
+`,
+			result: &Variable{
+				Kind: variable.KindDatasource,
+				Spec: &DatasourceVariableSpec{
+					DatasourceSpec: variable.DatasourceSpec{
+						DefaultValue: &variable.DefaultValue{SingleValue: "prom-global"},
+						Type:         "PrometheusDatasource",
+						Sort:         &sortAlphabeticalCiDesc,
+					},
+					Name: "datasourceVar",
 				},
 			},
 		},
@@ -271,6 +298,8 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 }
 
 func TestUnmarshalYAMLVariable(t *testing.T) {
+	var sortAlphabeticalCiDesc = variable.SortAlphabeticalCaseInsensitiveDesc
+
 	testSuite := []struct {
 		title  string
 		yamele string
@@ -293,6 +322,28 @@ spec:
 						Constant: true,
 					},
 					Name: "SimpleText",
+				},
+			},
+		},
+		{
+			title: "simple DatasourceVariable",
+			yamele: `
+kind: "DatasourceVariable"
+spec:
+  name: "datasourceVar"
+  defaultValue: "prom-global"
+  type: "PrometheusDatasource"
+  sort: "alphabetical-ci-desc"
+`,
+			result: &Variable{
+				Kind: variable.KindDatasource,
+				Spec: &DatasourceVariableSpec{
+					DatasourceSpec: variable.DatasourceSpec{
+						DefaultValue: &variable.DefaultValue{SingleValue: "prom-global"},
+						Type:         "PrometheusDatasource",
+						Sort:         &sortAlphabeticalCiDesc,
+					},
+					Name: "datasourceVar",
 				},
 			},
 		},

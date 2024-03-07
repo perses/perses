@@ -121,6 +121,51 @@ func (v *ListVariableSpec) validate() error {
 	return v.ListSpec.Validate()
 }
 
+type DatasourceVariableSpec struct {
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	variableSpec            `json:"-" yaml:"-"`
+	variable.DatasourceSpec `json:",inline" yaml:",inline"`
+	Name                    string `json:"name" yaml:"name"`
+}
+
+func (v *DatasourceVariableSpec) GetName() string {
+	return v.Name
+}
+
+func (v *DatasourceVariableSpec) UnmarshalJSON(data []byte) error {
+	var tmp DatasourceVariableSpec
+	type plain DatasourceVariableSpec
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *DatasourceVariableSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp DatasourceVariableSpec
+	type plain DatasourceVariableSpec
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *DatasourceVariableSpec) validate() error {
+	if err := common.ValidateID(v.Name); err != nil {
+		return err
+	}
+	return v.DatasourceSpec.Validate()
+}
+
 type Variable struct {
 	// Kind is the type of the variable. Depending on the value of Kind, it will change the content of Spec.
 	Kind variable.Kind `json:"kind" yaml:"kind"`
@@ -156,6 +201,8 @@ func (v *Variable) unmarshal(unmarshal func(interface{}) error, staticMarshal fu
 	}
 	var spec variableSpec
 	switch tmp.Kind {
+	case variable.KindDatasource:
+		spec = &DatasourceVariableSpec{}
 	case variable.KindList:
 		spec = &ListVariableSpec{}
 	case variable.KindText:
