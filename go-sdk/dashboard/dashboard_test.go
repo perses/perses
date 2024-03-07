@@ -61,6 +61,7 @@ func TestDashboardBuilder(t *testing.T) {
 					labelValuesVar.Datasource("promDemo"),
 				),
 				listVar.DisplayName("PaaS"),
+				listVar.CapturingRegexp("(.+)"),
 			),
 		),
 		AddVariable("prometheus",
@@ -91,6 +92,7 @@ func TestDashboardBuilder(t *testing.T) {
 			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
+			listVar.CustomAllValue(".*"),
 		)),
 		AddVariable("containerLabels", listVar.List(
 			listVar.Description("simply the list of labels for the considered metric"),
@@ -99,6 +101,7 @@ func TestDashboardBuilder(t *testing.T) {
 				labelNamesVar.Matchers("kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
+			listVar.SortingBy("alphabetical-ci-desc"),
 		)),
 
 		// PANEL GROUPS
@@ -145,6 +148,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 						labelValuesVar.Datasource("promDemo"),
 					),
 					listVar.DisplayName("PaaS"),
+					listVar.CapturingRegexp("(.+)"),
 				),
 			),
 			variablegroup.AddVariable("prometheus",
@@ -175,6 +179,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
 				listVar.AllowAllValue(true),
+				listVar.CustomAllValue(".*"),
 			)),
 			variablegroup.AddIgnoredVariable("containerLabels", listVar.List(
 				listVar.Description("simply the list of labels for the considered metric"),
@@ -183,6 +188,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 					labelNamesVar.Matchers("kube_pod_container_info"),
 					labelNamesVar.Datasource("promDemo"),
 				),
+				listVar.SortingBy("alphabetical-ci-desc"),
 			)),
 		),
 

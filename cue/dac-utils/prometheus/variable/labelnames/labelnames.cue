@@ -25,13 +25,16 @@ _name=#name: listVarBuilder.#name
 _display=#display?: v1Variable.#Display & {
 	hidden: bool | *false
 }
+_allowAllValue=#allowAllValue:      listVarBuilder.#allowAllValue
+_allowMultiple=#allowMultiple:      listVarBuilder.#allowMultiple
+_customAllValue=#customAllValue?:   string
+_capturingRegexp=#capturingRegexp?: string
+_sort=#sort?:                       v1Variable.#Sort
+#datasourceName:                    listVarBuilder.#datasourceName
+#pluginKind:                        listVarBuilder.#pluginKind & labelNamesVar.kind
+#metric:                            string
+#query:                             string
 #dependencies: [...{...}]
-_allowAllValue=#allowAllValue: listVarBuilder.#allowAllValue
-_allowMultiple=#allowMultiple: listVarBuilder.#allowMultiple
-#datasourceName:               listVarBuilder.#datasourceName
-#pluginKind:                   listVarBuilder.#pluginKind & labelNamesVar.kind
-#metric:                       string
-#query:                        string
 
 // TODO support label arg if provided like ""\(d.label)=\"$\(d.name)\"""
 filter: strings.Join(
@@ -45,11 +48,11 @@ filter: strings.Join(
 	)
 
 queryExpr: [// switch
-	if #query != _|_ {#query},
-	{#metric + "{" + filter + "}"},
+		if #query != _|_ {#query},
+		{#metric + "{" + filter + "}"},
 ][0]
 
-variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple}}.variable & {
+variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple, #customAllValue: _customAllValue, #capturingRegexp: _capturingRegexp, #sort: _sort}}.variable & {
 	spec: {
 		plugin: labelNamesVar & {
 			spec: {
