@@ -24,10 +24,13 @@ import (
 #display?: v1Variable.#Display & {
 	hidden: bool | *false
 }
-#allowAllValue:  bool | *false
-#allowMultiple:  bool | *false
-#pluginKind:     string
-#datasourceName: string
+#allowAllValue:    bool | *false
+#allowMultiple:    bool | *false
+#customAllValue?:  string
+#capturingRegexp?: string
+#sort?:            v1Variable.#Sort
+#pluginKind:       string
+#datasourceName:   string
 
 variable: v1Dashboard.#Variable & {
 	kind: #kind
@@ -39,6 +42,15 @@ variable: v1Dashboard.#Variable & {
 			}
 			allowAllValue: #allowAllValue
 			allowMultiple: #allowMultiple
+			if #customAllValue != _|_ {
+				customAllValue: #customAllValue
+			}
+			if #capturingRegexp != _|_ {
+				capturingRegexp: #capturingRegexp
+			}
+			if #sort != _|_ {
+				sort: #sort
+			}
 			plugin: {
 				kind: #pluginKind
 			}

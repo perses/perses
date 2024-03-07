@@ -32,9 +32,10 @@ import (
 		labelValuesVarBuilder & {
 			#name: "stack"
 			#display: name: "PaaS"
-			#metric:         "thanos_build_info"
-			#label:          "stack"
-			#datasourceName: "promDemo"
+			#metric:          "thanos_build_info"
+			#label:           "stack"
+			#datasourceName:  "promDemo"
+			#capturingRegexp: "(.+)"
 		},
 		textVarBuilder & {
 			#name:     "prometheus"
@@ -70,6 +71,7 @@ import (
 			#metric:         "kube_pod_container_info"
 			#allowAllValue:  true
 			#allowMultiple:  true
+			#customAllValue: ".*"
 			#datasourceName: "promDemo"
 		},
 		labelNamesVarBuilder & {
@@ -80,6 +82,7 @@ import (
 			}
 			#query:          "kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"
 			#datasourceName: "promDemo"
+			#sort:           "alphabetical-ci-desc"
 		},
 	]
 }
