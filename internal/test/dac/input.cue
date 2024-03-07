@@ -60,7 +60,7 @@ import (
 		},
 		promQLVarBuilder & {
 			#name:           "pod"
-			#metric:         "kube_pod_info"
+			#query:          "group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})"
 			#allowAllValue:  true
 			#allowMultiple:  true
 			#datasourceName: "promDemo"
@@ -78,7 +78,7 @@ import (
 				description: "simply the list of labels for the considered metric"
 				hidden:      true
 			}
-			#metric:         "kube_pod_container_info"
+			#query:          "kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"
 			#datasourceName: "promDemo"
 		},
 	]

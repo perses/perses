@@ -33,6 +33,7 @@ _allowMultiple=#allowMultiple: listVarBuilder.#allowMultiple
 #pluginKind:                   listVarBuilder.#pluginKind & labelValuesVar.kind
 #metric:                       string
 #label:                        string | *#name
+#query:                        string
 
 // TODO support label arg if provided like ""\(d.label)=\"$\(d.name)\"""
 filter: strings.Join(
@@ -45,7 +46,10 @@ filter: strings.Join(
 	",",
 	)
 
-queryExpr: #metric + "{" + filter + "}"
+queryExpr: [// switch
+	if #query != _|_ {#query},
+	{#metric + "{" + filter + "}"},
+][0]
 
 variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple}}.variable & {
 	spec: {
