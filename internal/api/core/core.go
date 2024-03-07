@@ -68,16 +68,16 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 
 	runner.WithTasks(watcher, migrateWatcher)
-	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
-		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
+		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
 	if conf.Security.EnableAuth {
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
-		runner.WithCronTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
+		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
-	runner.WithCronTasks(time.Duration(conf.EphemeralDashboardsCleanupInterval), ephemeralDashboardsCleaner)
+	runner.WithTimerTasks(time.Duration(conf.EphemeralDashboardsCleanupInterval), ephemeralDashboardsCleaner)
 
 	// register the API
 	runner.HTTPServerBuilder().
