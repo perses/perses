@@ -8,7 +8,7 @@ The Panel Groups builder helps creating panel groups easily.
 package myDaC
 
 import (
-    panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+    panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 )
 
 panelGroupsBuilder & {} // input parameter expected
@@ -22,12 +22,12 @@ panelGroupsBuilder & {} // input parameter expected
 
 ### panelGroupBuilder parameters
 
-| Parameter | Type                                            | Default | Description                                           |
-|-----------|-------------------------------------------------|---------|-------------------------------------------------------|
+| Parameter | Type                                                     | Default | Description                                           |
+|-----------|----------------------------------------------------------|---------|-------------------------------------------------------|
 | `#panels` | [...[Panel](../../api/dashboard.md#panel-specification)] |         | An array of panels to be included in the panel group. |
-| `#title`  | string                                          |         | The title of the panel group.                         |
-| `#cols`   | >0 & <=24                                       |         | The number of columns in the grid layout.             |
-| `#height` | number                                          | 6       | The height for all panels in the grid                 |
+| `#title`  | string                                                   |         | The title of the panel group.                         |
+| `#cols`   | >0 & <=24                                                |         | The number of columns in the grid layout.             |
+| `#height` | number                                                   | 6       | The height for all panels in the grid                 |
 
 ## Example
 
@@ -35,7 +35,7 @@ panelGroupsBuilder & {} // input parameter expected
 package myDaC
 
 import (
-    panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+    panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 )
 
 #memoryPanel: {} // v1.#Panel object

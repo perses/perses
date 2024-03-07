@@ -15,7 +15,7 @@ package test
 
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"

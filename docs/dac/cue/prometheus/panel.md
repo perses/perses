@@ -16,10 +16,10 @@ panelBuilder & {} // input parameters expected
 
 ## Parameters
 
-| Parameter       | Type                                              | Mandatory/Optional | Default | Description                                                |
-|-----------------|---------------------------------------------------|--------------------|---------|------------------------------------------------------------|
-| `#clause`       | `"by"` \| `"without"` \| `""`                     | Optional           | `""`    | The aggregation clause for this panel's queries.           |
-| `#clauseLabels` | [...string]                                       | Optional           | []      | The labels on which to aggregate for this panel's queries. |
+| Parameter       | Type                                                       | Mandatory/Optional | Default | Description                                                |
+|-----------------|------------------------------------------------------------|--------------------|---------|------------------------------------------------------------|
+| `#clause`       | `"by"` \| `"without"` \| `""`                              | Optional           | `""`    | The aggregation clause for this panel's queries.           |
+| `#clauseLabels` | [...string]                                                | Optional           | []      | The labels on which to aggregate for this panel's queries. |
 | `spec`          | [PanelSpec](../../../api/dashboard.md#panel-specification) | Mandatory          |         | A PanelSpec object                                         |
 
 the panel spec object can use the following string fields provided by the builder, via interpolation:
