@@ -37,9 +37,5 @@ if #clause != "" {
     """
 }
 
-// - `#filter` is meant to be completed with a list of label matchers.
-//   It could then be used in your promQL expressions via string interpolation as follows: `sum by (instance) (up{\(#filter)})`. 
-#filter: string
-
 // - the Perses panel datamodel is appended at the root
 v1.#Panel
