@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getDashboardDisplayName, DashboardResource, DashboardSelector } from '@perses-dev/core';
+import {
+  getDashboardDisplayName,
+  DashboardResource,
+  DashboardSelector,
+  EphemeralDashboardInfo,
+} from '@perses-dev/core';
 import { Box, Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -83,21 +88,38 @@ export function DashboardList(props: DashboardListProperties) {
   );
 
   const handleDashboardDuplication = useCallback(
-    (dashboardSelector: DashboardSelector) => {
+    (dashboardInfo: DashboardSelector | EphemeralDashboardInfo) => {
       if (targetedDashboard) {
-        navigate(`/projects/${targetedDashboard.metadata.project}/dashboard/new`, {
-          state: {
-            name: dashboardSelector.dashboard,
-            spec: {
-              ...targetedDashboard.spec,
-              ...{
-                display: {
-                  name: dashboardSelector.dashboard,
+        if ('ttl' in dashboardInfo) {
+          navigate(`/projects/${targetedDashboard.metadata.project}/ephemeraldashboard/new`, {
+            state: {
+              name: dashboardInfo.dashboard,
+              spec: {
+                ...targetedDashboard.spec,
+                ttl: dashboardInfo.ttl,
+                ...{
+                  display: {
+                    name: dashboardInfo.dashboard,
+                  },
                 },
               },
             },
-          },
-        });
+          });
+        } else {
+          navigate(`/projects/${targetedDashboard.metadata.project}/dashboard/new`, {
+            state: {
+              name: dashboardInfo.dashboard,
+              spec: {
+                ...targetedDashboard.spec,
+                ...{
+                  display: {
+                    name: dashboardInfo.dashboard,
+                  },
+                },
+              },
+            },
+          });
+        }
       }
     },
     [navigate, targetedDashboard]
@@ -187,7 +209,8 @@ export function DashboardList(props: DashboardListProperties) {
               open={isDuplicateDashboardDialogStateOpened}
               projectOptions={[targetedDashboard.metadata.project]}
               hideProjectSelect={true}
-              title={`Duplicate Dashboard: ${getDashboardDisplayName(targetedDashboard)}`}
+              mode="duplicate"
+              name={getDashboardDisplayName(targetedDashboard)}
               onSuccess={handleDashboardDuplication}
               onClose={() => setDuplicateDashboardDialogStateOpened(false)}
             />

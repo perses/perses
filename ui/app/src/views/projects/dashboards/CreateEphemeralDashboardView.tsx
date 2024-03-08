@@ -19,11 +19,19 @@ import {
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
   DashboardResource,
+  EphemeralDashboardSpec,
+  DurationString,
 } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { useCreateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { generateMetadataName } from '../../../utils/metadata';
 import { HelperDashboardView } from './HelperDashboardView';
+
+export interface CreateEphemeralDashboardState {
+  name: string;
+  spec?: EphemeralDashboardSpec;
+  ttl: DurationString;
+}
 
 /**
  * The View for creating a new EphemeralDashboard.
@@ -31,9 +39,9 @@ import { HelperDashboardView } from './HelperDashboardView';
 function CreateEphemeralDashboardView() {
   const { projectName } = useParams();
   const location = useLocation();
-  const { name, ttl } = location.state;
+  const state: CreateEphemeralDashboardState = location.state;
 
-  if (!projectName || !name) {
+  if (!projectName || !state.name) {
     throw new Error('Unable to get the ephemeralDashboard or project name');
   }
 
@@ -44,14 +52,14 @@ function CreateEphemeralDashboardView() {
   const data: EphemeralDashboardResource = {
     kind: 'EphemeralDashboard',
     metadata: {
-      name: generateMetadataName(name),
+      name: generateMetadataName(state.name),
       project: projectName,
       version: 0,
     },
-    spec: {
-      ttl: ttl,
+    spec: state.spec ?? {
+      ttl: state.ttl,
       display: {
-        name: name,
+        name: state.name,
       },
       duration: DEFAULT_DASHBOARD_DURATION,
       refreshInterval: DEFAULT_REFRESH_INTERVAL,
