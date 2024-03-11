@@ -28,12 +28,11 @@ import {
   RoleResource,
   RoleBindingResource,
   SecretResource,
-  EphemeralDashboardInfo,
 } from '@perses-dev/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
-import { CreateDashboardDialog, CreateEphemeralDashboardDialog } from '../../components/dialogs';
+import { CreateDashboardDialog } from '../../components/dialogs';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
@@ -80,7 +79,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
   const createVariableMutation = useCreateVariableMutation(projectName);
 
   const [isCreateDashboardDialogOpened, setCreateDashboardDialogOpened] = useState(false);
-  const [isCreateEphemeralDashboardDialogOpened, setCreateEphemeralDashboardDialogOpened] = useState(false);
   const [isDatasourceDrawerOpened, setDatasourceDrawerOpened] = useState(false);
   const [isRoleDrawerOpened, setRoleDrawerOpened] = useState(false);
   const [isRoleBindingDrawerOpened, setRoleBindingDrawerOpened] = useState(false);
@@ -91,12 +89,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
 
   const handleDashboardCreation = (dashboardSelector: DashboardSelector) => {
     navigate(`/projects/${dashboardSelector.project}/dashboard/new`, { state: { name: dashboardSelector.dashboard } });
-  };
-
-  const handleEphemeralDashboardCreation = (dashboardInfo: EphemeralDashboardInfo) => {
-    navigate(`/projects/${dashboardInfo.project}/ephemeraldashboard/new`, {
-      state: { name: dashboardInfo.dashboard, ttl: dashboardInfo.ttl },
-    });
   };
 
   const { data } = useRoleList(projectName);
@@ -204,27 +196,6 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}
-          />
-        </>
-      );
-    case ephemeralDashboardsTabIndex:
-      return (
-        <>
-          <CRUDButton
-            action="create"
-            scope="EphemeralDashboard"
-            project={projectName}
-            variant="contained"
-            onClick={() => setCreateEphemeralDashboardDialogOpened(true)}
-            {...props}
-          >
-            Add Dashboard
-          </CRUDButton>
-          <CreateEphemeralDashboardDialog
-            open={isCreateEphemeralDashboardDialogOpened}
-            projectOptions={[projectName]}
-            onClose={() => setCreateEphemeralDashboardDialogOpened(false)}
-            onSuccess={handleEphemeralDashboardCreation}
           />
         </>
       );
