@@ -48,7 +48,50 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
   const action = mode == 'duplicate' ? 'Duplicate' : 'Create';
 
-  // Dashboard-related consts
+  // Disables closing on click out. This is a quick-win solution to make sure the currently-existing form
+  // will be reset by the related child DuplicationForm component before closing.
+  const handleClickOut = () => {
+    /* do nothing */
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClickOut} aria-labelledby="confirm-dialog" fullWidth={true}>
+      <Dialog.Header>
+        {action} Dashboard{name && ': ' + name}
+      </Dialog.Header>
+      {mode == 'duplicate' && (
+        <Dialog.Content sx={{ width: '100%' }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isTempCopyChecked}
+                onChange={(event) => {
+                  setTempCopyChecked(event.target.checked);
+                }}
+              />
+            }
+            label="Create as a temporary copy"
+          />
+        </Dialog.Content>
+      )}
+      {isTempCopyChecked ? (
+        <EphemeralDashboardDuplicationForm {...{ projectOptions, hideProjectSelect, onClose, onSuccess }} />
+      ) : (
+        <DashboardDuplicationForm {...{ projectOptions, hideProjectSelect, onClose, onSuccess }} />
+      )}
+    </Dialog>
+  );
+};
+
+interface DuplicationFormProps {
+  projectOptions: string[];
+  hideProjectSelect?: boolean;
+  onClose: DispatchWithoutAction;
+  onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
+}
+
+const DashboardDuplicationForm = (props: DuplicationFormProps) => {
+  const { projectOptions, hideProjectSelect, onClose, onSuccess } = props;
 
   const dashboardSchemaValidation = useDashboardValidationSchema();
 
@@ -65,7 +108,75 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
     }
   };
 
-  // Ephemeral Dashboard-related consts
+  const handleClose = () => {
+    onClose();
+    dashboardForm.reset();
+  };
+
+  return (
+    <FormProvider {...dashboardForm}>
+      <form onSubmit={dashboardForm.handleSubmit(processDashboardForm)}>
+        <Dialog.Content sx={{ width: '100%' }}>
+          <Stack gap={1}>
+            {!hideProjectSelect && (
+              <Controller
+                name="projectName"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    required
+                    id="project"
+                    label="Project name"
+                    type="text"
+                    fullWidth
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  >
+                    {projectOptions.map((option) => {
+                      return (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                )}
+              />
+            )}
+            <Controller
+              name="dashboardName"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  margin="dense"
+                  id="name"
+                  label="Dashboard Name"
+                  type="text"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+          </Stack>
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button variant="contained" disabled={!dashboardForm.formState.isValid} type="submit">
+            Add
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </form>
+    </FormProvider>
+  );
+};
+
+const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
+  const { projectOptions, hideProjectSelect, onClose, onSuccess } = props;
 
   const ephemeralDashboardSchemaValidation = useEphemeralDashboardValidationSchema();
 
@@ -88,167 +199,83 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
 
   const handleClose = () => {
     onClose();
-    dashboardForm.reset();
     ephemeralDashboardForm.reset();
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} aria-labelledby="confirm-dialog" fullWidth={true}>
-      <Dialog.Header>
-        {action} Dashboard{name && ': ' + name}
-      </Dialog.Header>
-      {mode == 'duplicate' && (
+    <FormProvider {...ephemeralDashboardForm}>
+      <form onSubmit={ephemeralDashboardForm.handleSubmit(processEphemeralDashboardForm)}>
         <Dialog.Content sx={{ width: '100%' }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isTempCopyChecked}
-                onChange={(event) => {
-                  setTempCopyChecked(event.target.checked);
-                }}
+          <Stack gap={1}>
+            {!hideProjectSelect && (
+              <Controller
+                name="projectName"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    required
+                    id="project"
+                    label="Project name"
+                    type="text"
+                    fullWidth
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  >
+                    {projectOptions.map((option) => {
+                      return (
+                        <MenuItem key={option} value={option}>
+                          {option}
+                        </MenuItem>
+                      );
+                    })}
+                  </TextField>
+                )}
               />
-            }
-            label="Create as a temporary copy"
-          />
+            )}
+            <Controller
+              name="dashboardName"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  margin="dense"
+                  id="name"
+                  label="Dashboard Name"
+                  type="text"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message}
+                />
+              )}
+            />
+            <Controller
+              name="ttl"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  required
+                  margin="dense"
+                  id="ttl"
+                  label="Time to live (TTL)"
+                  type="text"
+                  fullWidth
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message ? fieldState.error.message : 'Duration string like 1w, 3d12h..'}
+                />
+              )}
+            />
+          </Stack>
         </Dialog.Content>
-      )}
-      {isTempCopyChecked ? (
-        <FormProvider {...ephemeralDashboardForm}>
-          <form onSubmit={ephemeralDashboardForm.handleSubmit(processEphemeralDashboardForm)}>
-            <Dialog.Content sx={{ width: '100%' }}>
-              <Stack gap={1}>
-                {!hideProjectSelect && (
-                  <Controller
-                    name="projectName"
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        select
-                        {...field}
-                        required
-                        id="project"
-                        label="Project name"
-                        type="text"
-                        fullWidth
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                      >
-                        {projectOptions.map((option) => {
-                          return (
-                            <MenuItem key={option} value={option}>
-                              {option}
-                            </MenuItem>
-                          );
-                        })}
-                      </TextField>
-                    )}
-                  />
-                )}
-                <Controller
-                  name="dashboardName"
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      {...field}
-                      required
-                      margin="dense"
-                      id="name"
-                      label="Dashboard Name"
-                      type="text"
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  )}
-                />
-                <Controller
-                  name="ttl"
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      {...field}
-                      required
-                      margin="dense"
-                      id="ttl"
-                      label="Time to live (TTL)"
-                      type="text"
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={
-                        fieldState.error?.message ? fieldState.error.message : 'Duration string like 1w, 3d12h..'
-                      }
-                    />
-                  )}
-                />
-              </Stack>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button variant="contained" disabled={!ephemeralDashboardForm.formState.isValid} type="submit">
-                Add
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Dialog.Actions>
-          </form>
-        </FormProvider>
-      ) : (
-        <FormProvider {...dashboardForm}>
-          <form onSubmit={dashboardForm.handleSubmit(processDashboardForm)}>
-            <Dialog.Content sx={{ width: '100%' }}>
-              <Stack gap={1}>
-                {!hideProjectSelect && (
-                  <Controller
-                    name="projectName"
-                    render={({ field, fieldState }) => (
-                      <TextField
-                        select
-                        {...field}
-                        required
-                        id="project"
-                        label="Project name"
-                        type="text"
-                        fullWidth
-                        error={!!fieldState.error}
-                        helperText={fieldState.error?.message}
-                      >
-                        {projectOptions.map((option) => {
-                          return (
-                            <MenuItem key={option} value={option}>
-                              {option}
-                            </MenuItem>
-                          );
-                        })}
-                      </TextField>
-                    )}
-                  />
-                )}
-                <Controller
-                  name="dashboardName"
-                  render={({ field, fieldState }) => (
-                    <TextField
-                      {...field}
-                      required
-                      margin="dense"
-                      id="name"
-                      label="Dashboard Name"
-                      type="text"
-                      fullWidth
-                      error={!!fieldState.error}
-                      helperText={fieldState.error?.message}
-                    />
-                  )}
-                />
-              </Stack>
-            </Dialog.Content>
-            <Dialog.Actions>
-              <Button variant="contained" disabled={!dashboardForm.formState.isValid} type="submit">
-                Add
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={handleClose}>
-                Cancel
-              </Button>
-            </Dialog.Actions>
-          </form>
-        </FormProvider>
-      )}
-    </Dialog>
+        <Dialog.Actions>
+          <Button variant="contained" disabled={!ephemeralDashboardForm.formState.isValid} type="submit">
+            Add
+          </Button>
+          <Button variant="outlined" color="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+        </Dialog.Actions>
+      </form>
+    </FormProvider>
   );
 };
