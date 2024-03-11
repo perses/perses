@@ -128,8 +128,6 @@ sequenceDiagram
 
 ### => Login from external OIDC or OAuth2.0 provider through ``percli`` command line.
 
-> 🚧 This documentation is not necessarily the final design but describes the implemention plan
-> 
 ```mermaid    
 sequenceDiagram
     actor hu as John
