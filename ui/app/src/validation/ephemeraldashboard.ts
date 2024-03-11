@@ -41,7 +41,8 @@ export function useEphemeralDashboardValidationSchema(projectName?: string) {
           (dashboards.data ?? []).filter(
             (dashboard) =>
               dashboard.metadata.project === schema.projectName &&
-              dashboard.metadata.name === generateMetadataName(schema.dashboardName)
+              dashboard.metadata.name === generateMetadataName(schema.dashboardName) &&
+              dashboard.spec.ttl === schema.ttl
           ).length === 0
         );
       },
