@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './CreateDashboardDialog';
-export * from './CreateEphemeralDashboardDialog';
 export * from './CreateProjectDialog';
 export * from './DeleteDashboardDialog';
 export * from './DeleteEphemeralDashboardDialog';
