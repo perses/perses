@@ -14,12 +14,14 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/securecookie"
@@ -29,10 +31,12 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/clientcredentials"
 )
 
 const stateParam = "state"
@@ -81,15 +85,16 @@ func (u *oauthUserInfo) GetProviderContext() v1.OAuthProvider {
 }
 
 type oAuthEndpoint struct {
-	conf            *oauth2.Config
-	secureCookie    *securecookie.SecureCookie
-	jwt             crypto.JWT
-	tokenManagement tokenManagement
-	slugID          string
-	userInfoURL     string
-	authURL         url.URL
-	svc             service
-	loginProps      []string
+	conf             *oauth2.Config
+	deviceCodeConfig config.DeviceCode
+	secureCookie     *securecookie.SecureCookie
+	jwt              crypto.JWT
+	tokenManagement  tokenManagement
+	slugID           string
+	userInfoURL      string
+	authURL          url.URL
+	svc              service
+	loginProps       []string
 }
 
 func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT, dao user.DAO) route.Endpoint {
@@ -101,6 +106,10 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT, dao user.DAO)
 	if !params.RedirectURI.IsNilOrEmpty() {
 		redirectURI = params.RedirectURI.String()
 	}
+	deviceAuthURL := ""
+	if !params.DeviceAuthURL.IsNilOrEmpty() {
+		deviceAuthURL = params.DeviceAuthURL.String()
+	}
 
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
@@ -111,8 +120,9 @@ func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT, dao user.DAO)
 		ClientSecret: string(params.ClientSecret),
 		Scopes:       params.Scopes,
 		Endpoint: oauth2.Endpoint{
-			AuthURL:  authURL.String(),
-			TokenURL: tokenURL,
+			AuthURL:       authURL.String(),
+			DeviceAuthURL: deviceAuthURL,
+			TokenURL:      tokenURL,
 		},
 		RedirectURL: redirectURI,
 	}
@@ -213,11 +223,17 @@ func (e *oAuthEndpoint) readCodeVerifierCookie(ctx echo.Context) (state string, 
 }
 
 func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
+	// Add routes for the "Authorization Code" flow
 	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathLogin), e.authHandler, true)
 	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathCallback), e.codeExchangeHandler, true)
+
+	// Add routes for device code flow and token exchange
+	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathDeviceCode), e.deviceCodeHandler, true)
+	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathToken), e.tokenHandler, true)
 }
 
-// authHandler is the http handler on Perses side that will trigger the "Authorization Code" flow to the oauth 2.0 provider.
+// authHandler is the http handler on Perses side that triggers the "Authorization Code"
+// flow to the oauth 2.0 provider.
 // It will redirect the user to the provider's "auth" url.
 func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 
@@ -246,12 +262,15 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 	return ctx.Redirect(302, e.conf.AuthCodeURL(state, opts...))
 }
 
-// codeExchangeHandler is the http handler on Perses side that will be called back by the oauth 2.0 provider during "Authorization Code" flow.
+// codeExchangeHandler is the http handler on Perses side that will be called back by
+// the oauth 2.0 provider during "Authorization Code" flow.
 // This handler will then take in charge:
-// - the generation of the oauth 2.0 provider's access token from the code (calling provider's "token" url)
-// - the retrieval of the user information from the token and also possibly requesting the "user infos" url (if given)
-// - save the user in database if it's a new user, or update it with the collected information
-// - ultimately, generate a Perses user session with an access and refresh token
+//   - the generation of the oauth 2.0 provider's access token from the code
+//     (calling provider's "token" url)
+//   - the retrieval of the user information from the token and also possibly requesting the
+//     "user infos" url (if given)
+//   - save the user in database if it's a new user, or update it with the collected information
+//   - ultimately, generate a Perses user session with an access and refresh token
 func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	code := ctx.QueryParam("code")
 
@@ -282,71 +301,217 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		return apiinterface.InternalError
 	}
 
-	uInfoBody, err := e.requestUserInfo(ctx, token)
+	uInfo, err := e.requestUserInfo(ctx, token)
 	if err != nil {
-		e.logWithError(err).Warn("An error occurred while requesting user infos. User infos will be ignored.")
-		// We continue here on purpose, to give a chance to the token to be parsed
-	}
-
-	uInfo, err := e.buildUserInfo(uInfoBody)
-	if err != nil {
-		e.logWithError(err).Error("Failed to collect user infos.")
+		e.logWithError(err).Error("An error occurred while requesting user infos. User infos will be ignored.")
 		return apiinterface.InternalError
 	}
 
-	// Save the user in database
-	entity, err := e.svc.syncUser(uInfo)
+	_, err = e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
-		e.logWithError(err).Error("Failed to sync user in database.")
-		return apiinterface.InternalError
-	}
-
-	username := entity.GetMetadata().GetName()
-	_, err = e.tokenManagement.accessToken(username, ctx.SetCookie)
-	if err != nil {
-		e.logWithError(err).Error("Failed to generate and save access token.")
-		return apiinterface.InternalError
-	}
-	_, err = e.tokenManagement.refreshToken(username, ctx.SetCookie)
-	if err != nil {
-		e.logWithError(err).Error("Failed to generate and save refresh token.")
 		return apiinterface.InternalError
 	}
 
 	return ctx.Redirect(302, "/")
 }
 
+// deviceCodeHandler is the http handler on Perses side that will trigger the "Device Authorization"
+// flow to the oauth 2.0 provider.
+// It will return the provider's DeviceAuthResponse as is, containing some information for the
+// user to login in a browser.
+// Then the client will be responsible to poll the /{slug_id}/token Perses endpoint to generate
+// a proper Perses session.
+func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
+	conf := e.conf
+	if conf.Endpoint.DeviceAuthURL == "" {
+		e.logWithError(errors.New("device code flow is not supported by this provider"))
+		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
+	}
+	if e.deviceCodeConfig.ClientID != "" {
+		conf = &oauth2.Config{
+			ClientID:     string(e.deviceCodeConfig.ClientID),
+			ClientSecret: string(e.deviceCodeConfig.ClientSecret),
+			Endpoint:     conf.Endpoint,
+		}
+	}
+	resp, err := conf.DeviceAuth(ctx.Request().Context())
+	if err != nil {
+		return apiinterface.InternalError
+	}
+	return ctx.JSON(200, resp)
+}
+
+// tokenHandler is the http handler on Perses side that will generate a proper Perses session.
+// It is used only in case of device code flow and client credentials flow.
+func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
+	var reqBody tokenRequestBody
+	if err := ctx.Bind(&reqBody); err != nil {
+		e.logWithError(err).Error("Invalid request body")
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+	}
+
+	var accessToken *oauth2.Token
+	var err error
+	switch reqBody.GrantType {
+	case GrantTypeDeviceCode:
+		accessToken, err = e.retrieveDeviceAccessToken(ctx.Request().Context(), reqBody.DeviceCode)
+		if err != nil {
+			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
+			e.logWithError(err).Warn("Failed to exchange device code for token")
+			// Note that for sake of simplicity, it doesn't respect the Oauth 2.0 RFC: (https://www.rfc-editor.org/rfc/rfc8628#section-3.5)
+			// For example:
+			// - we should differentiate the errors that means "try again later" from the others. (error: "authorization_pending")
+			// - we should propagate the message possibly saying to slow down the request (error: "slow_down")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
+		}
+	case GrantTypeClientCredentials:
+		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
+		if err != nil {
+			e.logWithError(err).Error("Failed to exchange client credentials for token")
+			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange client credentials for token")
+		}
+	default:
+		return echo.NewHTTPError(http.StatusBadRequest, "Unsupported grant type")
+	}
+
+	uInfo, err := e.requestUserInfo(ctx, accessToken)
+	if err != nil {
+		e.logWithError(err).Error("An error occurred while requesting user infos.")
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to request user infos")
+	}
+
+	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to sync user in database")
+	}
+	return ctx.JSON(http.StatusOK, resp)
+}
+
+// performUserSync performs user synchronization and generates access and refresh tokens.
+func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*api.AuthResponse, error) {
+	usr, err := e.svc.syncUser(userInfo)
+	if err != nil {
+		e.logWithError(err).Error("Failed to sync user in database.")
+		return nil, err
+	}
+
+	// Generate and save access and refresh tokens
+	username := usr.GetMetadata().GetName()
+	accessToken, err := e.tokenManagement.accessToken(username, setCookie)
+	if err != nil {
+		e.logWithError(err).Error("Failed to generate and save access token.")
+		return nil, err
+	}
+	refreshToken, err := e.tokenManagement.refreshToken(username, setCookie)
+	if err != nil {
+		e.logWithError(err).Error("Failed to generate and save refresh token.")
+		return nil, err
+	}
+
+	return &api.AuthResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+// retrieveDeviceAccessToken exchanges the device code for an access token,
+// from the OAuth 2.0 provider.
+// We need to recreate it as the oauth2 package only exposes the poll mechanism in a whole.
+func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCode string) (*oauth2.Token, error) {
+	// Prepare the request body
+	values := url.Values{}
+	values.Set("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+	values.Set("device_code", deviceCode)
+
+	// Create a new request using http
+	req, newReqErr := http.NewRequest(http.MethodPost, e.conf.Endpoint.TokenURL, strings.NewReader(values.Encode()))
+	if newReqErr != nil {
+		return nil, newReqErr
+	}
+
+	// Add headers
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.SetBasicAuth(e.conf.ClientID, e.conf.ClientSecret)
+	req = req.WithContext(ctx)
+
+	// Send the request using the default HTTP Client
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	// Read the response body and decode it into an oauth2.Token
+	var token oauth2.Token
+	if decodeErr := json.NewDecoder(resp.Body).Decode(&token); decodeErr != nil {
+		return nil, decodeErr
+	}
+
+	if !token.Valid() {
+		// APIs like GitHub might return an invalid token without error
+		return &token, errors.New("invalid token received")
+	}
+	return &token, nil
+}
+
+// retrieveClientCredentialsToken exchanges the client credentials for an access token,
+// from the OAuth 2.0 provider.
+func (e *oAuthEndpoint) retrieveClientCredentialsToken(ctx context.Context, clientID, clientSecret string) (*oauth2.Token, error) {
+	// Create a new client credentials Config
+	conf := &clientcredentials.Config{
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		TokenURL:     e.conf.Endpoint.TokenURL,
+	}
+
+	// Use the Token method to retrieve the token
+	token, err := conf.Token(ctx)
+	if !token.Valid() {
+		// APIs like GitHub might return an invalid token without error
+		return token, errors.New("invalid token received")
+	}
+	return token, err
+}
+
 // requestUserInfo execute an HTTP request on the user infos url if provided.
-func (e *oAuthEndpoint) requestUserInfo(ctx echo.Context, token *oauth2.Token) ([]byte, error) {
+func (e *oAuthEndpoint) requestUserInfo(ctx echo.Context, token *oauth2.Token) (externalUserInfo, error) {
 	resp, err := e.conf.Client(ctx.Request().Context(), token).Get(e.userInfoURL)
+	if err != nil {
+		return nil, err
+	}
 	defer func() { _ = resp.Body.Close() }()
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	return io.ReadAll(resp.Body)
-}
-
-// buildUserInfo will collect all the information needed to create/update the user in database.
-func (e *oAuthEndpoint) buildUserInfo(body []byte) (externalUserInfo, error) {
 	userInfos := oauthUserInfo{
 		authURL:   e.authURL,
 		loginKeys: e.loginProps,
 	}
 
-	if err := json.Unmarshal(body, &userInfos); err != nil {
+	if err = json.Unmarshal(body, &userInfos); err != nil {
 		return nil, err
 	}
 
 	// Parse a second time into a more generic structure in order to possibly make some extra retrievals.
 	// Indeed, oauth providers are not constraint to respect any guidance and login/subject can come from any field.
-	if err := json.Unmarshal(body, &userInfos.RawProperties); err != nil {
+	if err = json.Unmarshal(body, &userInfos.RawProperties); err != nil {
 		return nil, err
 	}
 
 	return &userInfos, nil
 }
 
+// logWithError is a little logrus helper to log with given error and the provider slugID.
+// example usages:
+//
+//	logWithError(err).Error("Failed to sync user in database.")
+//	logWithError(err).Warn("A warning message")
 func (e *oAuthEndpoint) logWithError(err error) *logrus.Entry {
 	return logrus.WithError(err).WithField("provider", e.slugID)
 }

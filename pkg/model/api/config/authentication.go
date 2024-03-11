@@ -28,6 +28,11 @@ const (
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
 
+type DeviceCode struct {
+	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
+}
+
 // appendIfMissing will append the value in the slice, only if not already present.
 // Will return a boolean saying if the value has been appended or not.
 func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
@@ -44,6 +49,7 @@ type Provider struct {
 	Name         string        `json:"name" yaml:"name"`
 	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
 	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
+	DeviceCode   DeviceCode    `json:"device_code,omitempty" yaml:"device_code,omitempty"`
 	RedirectURI  common.URL    `json:"redirect_uri" yaml:"redirect_uri"`
 	Scopes       []string      `json:"scopes" yaml:"scopes"`
 	DisablePKCE  bool          `json:"disable_pkce" yaml:"disable_pkce"`
@@ -84,6 +90,7 @@ type OAuthProvider struct {
 	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
 	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
 	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
+	DeviceAuthURL       common.URL `json:"device_auth_url" yaml:"device_auth_url"`
 	CustomLoginProperty string     `json:"custom_login_property" yaml:"custom_login_property"`
 }
 

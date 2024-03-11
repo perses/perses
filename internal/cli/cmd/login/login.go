@@ -14,10 +14,12 @@
 package login
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"net/url"
+	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/perses/perses/internal/api/utils"
@@ -125,10 +127,47 @@ func (o *option) authAndSetToken() error {
 		return nil
 	}
 
-	// TODO: Use o.externalAuthKind and o.externalAuthProvider to start a device code flow
-	//   (e.g first calling the api/auth/providers/{oidc|oauth}/{externalAuthProvider}/device/code)
-	//   Design in Authentication.md design documentation
-	return errors.New("oidc and oauth 2.0 authentication are not yet supported through command line")
+	// Start the device code flow
+	deviceCodeResponse, err := o.apiClient.Auth().DeviceCode(string(o.externalAuthKind), o.externalAuthProvider)
+	if err != nil {
+		return err
+	}
+
+	// Display the user code and verification URL
+	if outErr := output.HandleString(o.writer, fmt.Sprintf("Go to %s and enter this user code: %s\nWaiting for user to authorize the application...", deviceCodeResponse.VerificationURI, deviceCodeResponse.UserCode)); err != nil {
+		return outErr
+	}
+
+	// Compute the expiry and interval from the response
+	ctx := context.Background()
+	if !deviceCodeResponse.Expiry.IsZero() {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithDeadline(ctx, deviceCodeResponse.Expiry)
+		defer cancel()
+	}
+	interval := deviceCodeResponse.Interval
+	if interval == 0 {
+		interval = 5
+	}
+
+	// Poll for an access token
+	ticker := time.NewTicker(time.Duration(interval) * time.Second)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			tokenResponse, tokenErr := o.apiClient.Auth().DeviceAccessToken(string(o.externalAuthKind), o.externalAuthProvider, deviceCodeResponse.DeviceCode)
+			if tokenErr != nil {
+				continue
+			}
+			// Handle the access token
+			o.accessToken = tokenResponse.AccessToken
+			o.refreshToken = tokenResponse.RefreshToken
+			return nil
+		}
+	}
 }
 
 func (o *option) readAndSetLoginInputNative() error {
@@ -231,7 +270,7 @@ func (o *option) readAndSetLoginInput(providers backendConfig.AuthProviders) err
 		optKey := fmt.Sprintf("OIDC (%s)", prov.Name)
 		optValue := prov.SlugID
 		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = o.setLoginInputExternal(externalAuthKindOAuth, prov.SlugID)
+		modifiers[optValue] = o.setLoginInputExternal(externalAuthKindOIDC, prov.SlugID)
 	}
 
 	// Saving OAuth 2.0 item(s) if supported
@@ -239,7 +278,6 @@ func (o *option) readAndSetLoginInput(providers backendConfig.AuthProviders) err
 		optKey := fmt.Sprintf("OAuth 2.0 (%s)", prov.Name)
 		optValue := prov.SlugID
 		options = append(options, huh.NewOption(optKey, optValue))
-		//nolint: unparam
 		modifiers[optValue] = o.setLoginInputExternal(externalAuthKindOAuth, prov.SlugID)
 	}
 
