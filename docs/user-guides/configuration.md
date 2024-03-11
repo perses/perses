@@ -162,6 +162,12 @@ Generic placeholders are defined as follows:
 
   # The Client Secret of the Perses application into the provider
   [ client_secret: <secret> ]
+  
+  device_code:
+    # Allow to use a different Client ID for the device code flow
+    [ client_id: <secret> ]
+    # Allow to use a different Client Secret for the device code flow
+    [ client_secret: <secret> ]
 
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
   # If not set it will get it from the request.
@@ -200,6 +206,12 @@ Generic placeholders are defined as follows:
   # The Client Secret of the Perses application into the provider
   [ client_secret: <secret> ]
 
+  device_code:
+    # Allow to use a different Client ID for the device code flow
+    [ client_id: <secret> ]
+    # Allow to use a different Client Secret for the device code flow
+    [ client_secret: <secret> ]
+
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
   [ redirect_uri: <string> ]
 
@@ -215,6 +227,9 @@ Generic placeholders are defined as follows:
 
   # The provider User Infos URL
   [ user_infos_url: <string> ]
+
+  # The provider Device Auth URL
+  [ device_auth_url: <string> ]
 
   # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
   # The login is mandatory to store in the database the name of the user.
