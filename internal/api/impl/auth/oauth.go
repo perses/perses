@@ -44,6 +44,46 @@ const codeVerifierParam = "code_verifier"
 
 var defaultLoginProps = []string{"login", "username"}
 
+func newOAuthConfig(provider config.OAuthProvider, override *config.OAuthOverride) oauth2.Config {
+	// Mandatory URLS. They are validated as non nil from the config (see config.OauthProvider.Verify)
+	authURL := provider.AuthURL.String()
+	tokenURL := provider.TokenURL.String()
+
+	// Optional URLS. They can be empty
+	redirectURI := ""
+	if !provider.RedirectURI.IsNilOrEmpty() {
+		redirectURI = provider.RedirectURI.String()
+	}
+	deviceAuthURL := ""
+	if !provider.DeviceAuthURL.IsNilOrEmpty() {
+		deviceAuthURL = provider.DeviceAuthURL.String()
+	}
+
+	conf := oauth2.Config{
+		ClientID:     string(provider.ClientID),
+		ClientSecret: string(provider.ClientSecret),
+		Scopes:       provider.Scopes,
+		Endpoint: oauth2.Endpoint{
+			AuthURL:       authURL,
+			DeviceAuthURL: deviceAuthURL,
+			TokenURL:      tokenURL,
+		},
+		RedirectURL: redirectURI,
+	}
+	if override != nil {
+		if override.ClientID != "" {
+			conf.ClientID = string(override.ClientID)
+		}
+		if override.ClientSecret != "" {
+			conf.ClientSecret = string(override.ClientSecret)
+		}
+		if override.Scopes != nil {
+			conf.Scopes = override.Scopes
+		}
+	}
+	return conf
+}
+
 type oauthUserInfo struct {
 	externalUserInfoProfile
 	RawProperties map[string]interface{}
@@ -85,61 +125,50 @@ func (u *oauthUserInfo) GetProviderContext() v1.OAuthProvider {
 }
 
 type oAuthEndpoint struct {
-	conf             *oauth2.Config
-	deviceCodeConfig config.DeviceCode
-	secureCookie     *securecookie.SecureCookie
-	jwt              crypto.JWT
-	tokenManagement  tokenManagement
-	slugID           string
-	userInfoURL      string
-	authURL          url.URL
-	svc              service
-	loginProps       []string
+	conf            oauth2.Config
+	deviceCodeConf  oauth2.Config
+	clientCredConf  oauth2.Config
+	secureCookie    *securecookie.SecureCookie
+	jwt             crypto.JWT
+	tokenManagement tokenManagement
+	slugID          string
+	userInfoURL     string
+	authURL         url.URL
+	svc             service
+	loginProps      []string
 }
 
-func newOAuthEndpoint(params config.OAuthProvider, jwt crypto.JWT, dao user.DAO) route.Endpoint {
-	// URLS are validated as non nil from the config (see config.OauthProvider.Verify)
-	authURL := *params.AuthURL.URL
-	tokenURL := params.TokenURL.String()
-	userInfosURL := params.UserInfosURL.String()
-	redirectURI := ""
-	if !params.RedirectURI.IsNilOrEmpty() {
-		redirectURI = params.RedirectURI.String()
-	}
-	deviceAuthURL := ""
-	if !params.DeviceAuthURL.IsNilOrEmpty() {
-		deviceAuthURL = params.DeviceAuthURL.String()
-	}
-
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO) route.Endpoint {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
 	secureCookie := securecookie.New(key, key)
-	conf := &oauth2.Config{
-		ClientID:     string(params.ClientID),
-		ClientSecret: string(params.ClientSecret),
-		Scopes:       params.Scopes,
-		Endpoint: oauth2.Endpoint{
-			AuthURL:       authURL.String(),
-			DeviceAuthURL: deviceAuthURL,
-			TokenURL:      tokenURL,
-		},
-		RedirectURL: redirectURI,
+
+	conf := newOAuthConfig(provider, nil)
+	deviceCodeConf := conf
+	if provider.DeviceCode != nil {
+		deviceCodeConf = newOAuthConfig(provider, provider.DeviceCode)
+	}
+	clientCredConf := conf
+	if provider.ClientCredentials != nil {
+		clientCredConf = newOAuthConfig(provider, provider.ClientCredentials)
 	}
 
 	loginProps := defaultLoginProps
-	if customProp := params.CustomLoginProperty; customProp != "" {
+	if customProp := provider.CustomLoginProperty; customProp != "" {
 		loginProps = []string{customProp}
 	}
 
 	return &oAuthEndpoint{
 		conf:            conf,
+		deviceCodeConf:  deviceCodeConf,
+		clientCredConf:  clientCredConf,
 		secureCookie:    secureCookie,
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
-		slugID:          params.SlugID,
-		userInfoURL:     userInfosURL,
-		authURL:         authURL,
+		slugID:          provider.SlugID,
+		userInfoURL:     provider.UserInfosURL.String(),
+		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao},
 		loginProps:      loginProps,
 	}
@@ -322,19 +351,11 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 // Then the client will be responsible to poll the /{slug_id}/token Perses endpoint to generate
 // a proper Perses session.
 func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
-	conf := e.conf
-	if conf.Endpoint.DeviceAuthURL == "" {
+	if e.deviceCodeConf.Endpoint.DeviceAuthURL == "" {
 		e.logWithError(errors.New("device code flow is not supported by this provider"))
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
 	}
-	if e.deviceCodeConfig.ClientID != "" {
-		conf = &oauth2.Config{
-			ClientID:     string(e.deviceCodeConfig.ClientID),
-			ClientSecret: string(e.deviceCodeConfig.ClientSecret),
-			Endpoint:     conf.Endpoint,
-		}
-	}
-	resp, err := conf.DeviceAuth(ctx.Request().Context())
+	resp, err := e.deviceCodeConf.DeviceAuth(ctx.Request().Context())
 	if err != nil {
 		return apiinterface.InternalError
 	}
@@ -344,7 +365,7 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 // tokenHandler is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
 func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
-	var reqBody tokenRequestBody
+	var reqBody api.TokenRequest
 	if err := ctx.Bind(&reqBody); err != nil {
 		e.logWithError(err).Error("Invalid request body")
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
@@ -353,7 +374,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	var accessToken *oauth2.Token
 	var err error
 	switch reqBody.GrantType {
-	case GrantTypeDeviceCode:
+	case api.GrantTypeDeviceCode:
 		accessToken, err = e.retrieveDeviceAccessToken(ctx.Request().Context(), reqBody.DeviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
@@ -364,7 +385,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 			// - we should propagate the message possibly saying to slow down the request (error: "slow_down")
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
 		}
-	case GrantTypeClientCredentials:
+	case api.GrantTypeClientCredentials:
 		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
@@ -424,7 +445,7 @@ func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCod
 	values.Set("device_code", deviceCode)
 
 	// Create a new request using http
-	req, newReqErr := http.NewRequest(http.MethodPost, e.conf.Endpoint.TokenURL, strings.NewReader(values.Encode()))
+	req, newReqErr := http.NewRequest(http.MethodPost, e.deviceCodeConf.Endpoint.TokenURL, strings.NewReader(values.Encode()))
 	if newReqErr != nil {
 		return nil, newReqErr
 	}
@@ -432,7 +453,7 @@ func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCod
 	// Add headers
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	req.SetBasicAuth(e.conf.ClientID, e.conf.ClientSecret)
+	req.SetBasicAuth(e.deviceCodeConf.ClientID, e.deviceCodeConf.ClientSecret)
 	req = req.WithContext(ctx)
 
 	// Send the request using the default HTTP Client
@@ -464,7 +485,8 @@ func (e *oAuthEndpoint) retrieveClientCredentialsToken(ctx context.Context, clie
 	conf := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		TokenURL:     e.conf.Endpoint.TokenURL,
+		TokenURL:     e.clientCredConf.Endpoint.TokenURL,
+		Scopes:       e.clientCredConf.Scopes,
 	}
 
 	// Use the Token method to retrieve the token

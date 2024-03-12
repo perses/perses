@@ -18,7 +18,6 @@ import (
 
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
-	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
 )
 
@@ -26,10 +25,11 @@ const authResource = "auth"
 
 // AuthInterface has methods to work with Auth resource
 type AuthInterface interface {
-	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
-	DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error)
 	Login(user, password string) (*api.AuthResponse, error)
 	Refresh(refreshToken string) (*api.AuthResponse, error)
+	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
+	DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error)
+	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error)
 }
 
 func newAuth(client *perseshttp.RESTClient) AuthInterface {
@@ -86,12 +86,31 @@ func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, 
 }
 
 func (c *auth) DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error) {
+	body := &api.TokenRequest{
+		GrantType:  api.GrantTypeDeviceCode,
+		DeviceCode: deviceCode,
+	}
 	result := &api.AuthResponse{}
 	err := c.client.Post().
 		APIVersion("").
 		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
-		Body(map[string]string{"grant_type": string(oidc.GrantTypeDeviceCode), "device_code": deviceCode}).
+		Body(body).
 		Do().
 		Object(result)
 	return result, err
+}
+
+func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error) {
+	body := &api.TokenRequest{
+		GrantType:    api.GrantTypeClientCredentials,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+	}
+	result := &api.AuthResponse{}
+	return result, c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
+		Body(body).
+		Do().
+		Object(result)
 }

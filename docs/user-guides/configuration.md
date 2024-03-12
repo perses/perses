@@ -211,6 +211,18 @@ Generic placeholders are defined as follows:
     [ client_id: <secret> ]
     # Allow to use a different Client Secret for the device code flow
     [ client_secret: <secret> ]
+    # Allow to use different Scopes for the device code flow
+    scopes:
+      - [ <string> ]
+
+  client_credentials:
+    # Allow to use a different Client ID for the client credentials flow
+    [ client_id: <secret> ]
+    # Allow to use a different Client Secret for the client credentials flow
+    [ client_secret: <secret> ]
+    # Allow to use different Scopes for the client credentials flow
+    scopes:
+      - [ <string> ]
 
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
   [ redirect_uri: <string> ]

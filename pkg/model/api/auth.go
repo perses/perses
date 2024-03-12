@@ -16,6 +16,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
 
 type Auth struct {
@@ -65,6 +67,55 @@ func (r *RefreshRequest) UnmarshalJSON(data []byte) error {
 func (r *RefreshRequest) validate() error {
 	if len(r.RefreshToken) == 0 {
 		return fmt.Errorf("refreshToken cannot be empty")
+	}
+	return nil
+}
+
+// GrantType is a subset of the OAuth 2.0 grant types.
+// In our case, we will explicitly need them only in the /token endpoint, that we are using
+// only in the context of device code flow and client credentials flow.
+type GrantType oidc.GrantType
+
+const (
+	GrantTypeDeviceCode        = GrantType(oidc.GrantTypeDeviceCode)
+	GrantTypeClientCredentials = GrantType(oidc.GrantTypeClientCredentials)
+)
+
+// TokenRequest represents the body of a /token endpoint request.
+// DeviceCode or ClientID, ClientSecret will be necessary based on the grant type.
+type TokenRequest struct {
+	GrantType    GrantType `json:"grant_type"`
+	DeviceCode   string    `json:"device_code"`
+	ClientID     string    `json:"client_id"`
+	ClientSecret string    `json:"client_secret"`
+}
+
+func (r *TokenRequest) UnmarshalJSON(data []byte) error {
+	var tmp TokenRequest
+	type plain TokenRequest
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+	if err := (&tmp).validate(); err != nil {
+		return err
+	}
+	*r = tmp
+	return nil
+}
+
+func (r *TokenRequest) validate() error {
+	switch r.GrantType {
+	case GrantTypeDeviceCode:
+		if len(r.DeviceCode) == 0 {
+			return fmt.Errorf("device_code cannot be empty when grant_type is %s", r.GrantType)
+		}
+	case GrantTypeClientCredentials:
+		if len(r.ClientID) == 0 {
+			return fmt.Errorf("client_id cannot be empty when grant_type is %s", r.GrantType)
+		}
+		if len(r.ClientSecret) == 0 {
+			return fmt.Errorf("client_secret cannot be empty when grant_type is %s", r.GrantType)
+		}
 	}
 	return nil
 }
