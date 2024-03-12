@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.44.0-rc2 / 2024-03-12
+
+- [FEATURE] Allow creating ephemeral copies of regular dashboards (#1818)
+- [FEATURE] Add dac diff command (#1803)
+- [FEATURE] Add dac preview command (#1798)
+- [FEATURE] Support Ephemeral dashboards on the UI (#1790)
+- [FEATURE] By config, Perses can stop to serve the UI (#1793)
+- [FEATURE] Add duplicate button for global and project resources (#1781)
+- [FEATURE] Ephemeral dashboards are automatically removed once expiration delay has passed (#1739)
+- [FEATURE] Backend support of a new resource `EphemeralDashboard` (#1730)
+- [ENHANCEMENT] DaC CUE SDK: Support all possible attributes in list vars builders (#1817)
+- [ENHANCEMENT] DaC CUE SDK: Allow providing a custom query to the prom variables builders (#1815)
+- [ENHANCEMENT] DaC CUE SDK: rework the variables part to support more use cases (#1807)
+- [ENHANCEMENT] Add persistent flag to set the output folder for dac (#1805)
+- [ENHANCEMENT] Improve project suggestion when creating dashboard (#1791)
+- [ENHANCEMENT] Make defaultPluginKinds of PluginRegistry provider optional (#1789)
+- [BUGFIX] Fix dashboard duplication not working (#1827)
+- [BUGFIX] Change some section titles in API doc to fix broken links in DaC CUE SDK doc (#1802)
+- [BUGFIX] Fix social button redirection (#1788)
+- [BUGFIX] Update relative timerange value when refreshing (#1780)
+- [DOC] Add some more tips & tricks to the CUE SDK doc (#1806)
+- [DOC] Add DaC CUE SDK documentation (#1797)
+
 ## 0.44.0-rc1 / 2024-02-27
 
 - [BUGFIX] Update relative timerange value when refreshing (#1780)
