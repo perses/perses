@@ -14,6 +14,7 @@
 export type Kind =
   | 'Dashboard'
   | 'Datasource'
+  | 'EphemeralDashboard'
   | 'Folder'
   | 'GlobalDatasource'
   | 'GlobalRole'
@@ -30,6 +31,7 @@ export type Kind =
 export const KINDS: Kind[] = [
   'Dashboard',
   'Datasource',
+  'EphemeralDashboard',
   'Folder',
   'GlobalDatasource',
   'GlobalRole',

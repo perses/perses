@@ -18,7 +18,7 @@
 // through the `panelGroupsBuilder` package, that takes care of auto-feeding
 // the `#groupIndex` parameter.
 
-package panelGroup
+package panelgroup
 
 import (
 	"math"

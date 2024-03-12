@@ -19,6 +19,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "capturingRegexp": "(.+)",
           "plugin": {
             "kind": "PrometheusLabelValuesVariable",
             "spec": {
@@ -118,6 +119,7 @@
           "name": "container",
           "allowAllValue": true,
           "allowMultiple": true,
+          "customAllValue": ".*",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
             "spec": {
@@ -141,6 +143,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "sort": "alphabetical-ci-desc",
           "plugin": {
             "kind": "PrometheusLabelNamesVariable",
             "spec": {

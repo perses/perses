@@ -51,7 +51,7 @@ func (g *globalRoleBinding) BuildMatrix(hits []modelAPI.Entity) [][]string {
 		entity := hit.(*modelV1.GlobalRoleBinding)
 		line := []string{
 			entity.Metadata.Name,
-			output.FormatTime(entity.Metadata.UpdatedAt),
+			output.FormatAge(entity.Metadata.UpdatedAt),
 			entity.Spec.Role,
 		}
 

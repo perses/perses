@@ -29,7 +29,7 @@ create a `Variable`.
   metadata:
     name: <string>
     project: <string>
-  spec: <variable_spec>
+  spec: <Variable specification>
 ```
 
 ### Global level
@@ -44,7 +44,7 @@ That’s why we have another resource called `GlobalVariable`
   kind: "GlobalVariable"
   metadata:
     name: <string>
-  spec: <variable_spec>
+  spec: <Variable specification>
 ```
 
 ## Variable specification
@@ -55,10 +55,10 @@ We are supporting two different types of variables: `TextVariable` and `ListVari
 
 ```yaml
 kind: "TextVariable"
-spec: <text_spec>
+spec: <Text Variable specification>
 ```
 
-#### `<text_spec>`
+#### Text Variable specification
 
 ```yaml
   # It is a mandatory attribute when you are defining a variable directly in a dashboard.
@@ -66,7 +66,7 @@ spec: <text_spec>
   # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
   [ name: <string> ]
 
-  [ display: <display_spec> ]
+  [ display: <Display specification> ]
   value: <string>
   [ constant: <boolean> | default = false ]
 ```
@@ -98,10 +98,10 @@ Or in case you are defining the variable in a dashboard
 
 ```yaml
 kind: "ListVariable"
-spec: <list_spec>
+spec: <List Variable specification>
 ```
 
-#### `<list_spec>`
+#### List Variable specification
 
 ```yaml
   # It is a mandatory attribute when you are defining a variable directly in a dashboard.
@@ -109,7 +109,7 @@ spec: <list_spec>
   # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
   [ name: <string> ]
 
-  [ display: <display_spec> ]
+  [ display: <Display specification> ]
 
   # It's a value from the list to be selected by default
   # It can be a single value or a list.
@@ -132,10 +132,10 @@ spec: <list_spec>
   [ sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" ]
 
   # The definition of the plugin variable
-  plugin: <plugin_spec>
+  plugin: <Plugin specification>
 ```
 
-#### `<display_spec>`
+#### Display specification
 
 ```yaml
   # The new name of the variable. If set, it will replace `metadata.name` in the variable title in the UI.
@@ -157,7 +157,7 @@ spec: <list_spec>
   kind: <string>
 
   # The actual definition of the variable. It will depend on the type defined in the previous field `kind`
-  spec: <plugin_spec>
+  spec: <Plugin specification>
 ```
 
 We are supporting only prometheus for the variables for the moment.

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithPromise, Variable, VariableDefinition, getVariableProject, Action } from '@perses-dev/core';
-import React, { Dispatch, DispatchWithoutAction, useEffect, useMemo, useState } from 'react';
+import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DatasourceStoreProvider, TemplateVariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
@@ -24,15 +24,10 @@ import {
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
 import { DeleteVariableDialog } from '../dialogs';
+import { DrawerProps } from '../drawer';
 
-interface VariableDrawerProps<T extends Variable> {
+interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
 }
 
 export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>) {
@@ -72,13 +67,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
             <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
               <TemplateVariableProviderWithQueryParams initialVariableDefinitions={[]}>

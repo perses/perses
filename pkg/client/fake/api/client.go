@@ -27,18 +27,24 @@ import (
 
 type client struct {
 	api.ClientInterface
+	restClient *perseshttp.RESTClient
 }
 
 func New() api.ClientInterface {
-	return &client{}
+	restClient, _ := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+		URL: "http://localhost:8080",
+	})
+	return &client{
+		restClient: restClient,
+	}
 }
 
 func (c *client) RESTClient() *perseshttp.RESTClient {
-	return nil
+	return c.restClient
 }
 
 func (c *client) V1() v1.ClientInterface {
-	return fakev1.New()
+	return fakev1.New(c.restClient)
 }
 
 func (c *client) Config() (*apiConfig.Config, error) {

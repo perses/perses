@@ -15,71 +15,81 @@ package test
 
 import (
 	dashboardBuilder "github.com/perses/perses/cue/dac-utils/dashboard"
-	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panel-groups:panelGroups"
+	panelGroupsBuilder "github.com/perses/perses/cue/dac-utils/panelgroups"
 	panelBuilder "github.com/perses/perses/cue/dac-utils/prometheus/panel"
-	varsBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variables"
+	varGroupBuilder "github.com/perses/perses/cue/dac-utils/variable/group"
+	promQLVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/promql"
+	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
+	labelNamesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelnames"
+	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
+	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 )
 
-#myVarsBuilder: varsBuilder & {
-	input: [{
-		name: "stack"
-		display: name: "PaaS"
-		pluginKind:     "PrometheusLabelValuesVariable"
-		metric:         "thanos_build_info"
-		label:          "stack"
-		datasourceName: "promDemo"
-	}, {
-		name:     "prometheus"
-		kind:     "TextVariable"
-		value:    "platform"
-		constant: true
-	}, {
-		name: "prometheus_namespace"
-		display: description: "constant to reduce the query scope thus improve performances"
-		kind:     "TextVariable"
-		value:    "observability"
-		constant: true
-	}, {
-		name:           "namespace"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_namespace_labels"
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "namespaceLabels"
-		pluginKind:     "PrometheusLabelNamesVariable"
-		metric:         "kube_namespace_labels"
-		datasourceName: "promDemo"
-	}, {
-		name:           "pod"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_pod_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name:           "container"
-		pluginKind:     "PrometheusPromQLVariable"
-		metric:         "kube_pod_container_info"
-		allowAllValue:  true
-		allowMultiple:  true
-		datasourceName: "promDemo"
-	}, {
-		name: "containerLabels"
-		display: {
-			description: "simply the list of labels for the considered metric"
-			hidden:      true
-		}
-		pluginKind:     "PrometheusLabelNamesVariable"
-		metric:         "kube_pod_container_info"
-		datasourceName: "promDemo"
-	}]
+#myVarsBuilder: varGroupBuilder & {
+	#input: [
+		labelValuesVarBuilder & {
+			#name: "stack"
+			#display: name: "PaaS"
+			#metric:          "thanos_build_info"
+			#label:           "stack"
+			#datasourceName:  "promDemo"
+			#capturingRegexp: "(.+)"
+		},
+		textVarBuilder & {
+			#name:     "prometheus"
+			#value:    "platform"
+			#constant: true
+		},
+		textVarBuilder & {
+			#name: "prometheus_namespace"
+			#display: description: "constant to reduce the query scope thus improve performances"
+			#value:    "observability"
+			#constant: true
+		},
+		promQLVarBuilder & {
+			#name:           "namespace"
+			#metric:         "kube_namespace_labels"
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		labelNamesVarBuilder & {
+			#name:           "namespaceLabels"
+			#metric:         "kube_namespace_labels"
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "pod"
+			#query:          "group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#datasourceName: "promDemo"
+		},
+		promQLVarBuilder & {
+			#name:           "container"
+			#metric:         "kube_pod_container_info"
+			#allowAllValue:  true
+			#allowMultiple:  true
+			#customAllValue: ".*"
+			#datasourceName: "promDemo"
+		},
+		labelNamesVarBuilder & {
+			#name: "containerLabels"
+			#display: {
+				description: "simply the list of labels for the considered metric"
+				hidden:      true
+			}
+			#query:          "kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"
+			#datasourceName: "promDemo"
+			#sort:           "alphabetical-ci-desc"
+		},
+	]
 }
 
+#filter: {promFilterBuilder & #myVarsBuilder}.filter
+
 #cpuPanel: this=panelBuilder & {
-	#filter: #myVarsBuilder.fullFilter
 	spec: {
 		display: name: "Container CPU"
 		plugin: timeseriesChart
@@ -87,7 +97,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum \(this.#aggr) (container_cpu_usage_seconds{\(this.#filter)})"
+					spec: query: "sum \(this.#aggr) (container_cpu_usage_seconds{\(#filter)})"
 				}
 			},
 		]
@@ -95,7 +105,6 @@ import (
 }
 
 #memoryPanel: this=panelBuilder & {
-	#filter: #myVarsBuilder.fullFilter
 	#clause: "by"
 	#clauseLabels: ["container"]
 
@@ -106,7 +115,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "max \(this.#aggr) (container_memory_rss{\(this.#filter)})"
+					spec: query: "max \(this.#aggr) (container_memory_rss{\(#filter)})"
 				}
 			},
 		]

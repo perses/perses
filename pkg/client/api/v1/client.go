@@ -23,6 +23,7 @@ type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	Dashboard(project string) DashboardInterface
 	Datasource(project string) DatasourceInterface
+	EphemeralDashboard(project string) EphemeralDashboardInterface
 	Folder(project string) FolderInterface
 	GlobalDatasource() GlobalDatasourceInterface
 	GlobalRole() GlobalRoleInterface
@@ -59,6 +60,10 @@ func (c *client) Dashboard(project string) DashboardInterface {
 
 func (c *client) Datasource(project string) DatasourceInterface {
 	return newDatasource(c.restClient, project)
+}
+
+func (c *client) EphemeralDashboard(project string) EphemeralDashboardInterface {
+	return newEphemeralDashboard(c.restClient, project)
 }
 
 func (c *client) Folder(project string) FolderInterface {

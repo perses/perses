@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource, getDashboardDisplayName } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource, getDashboardDisplayName } from '@perses-dev/core';
 import { useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
@@ -25,7 +25,7 @@ import { useGlobalVariableList } from '../../../model/global-variable-client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
 
 export interface GenericDashboardViewProps {
-  dashboardResource: DashboardResource;
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
   onSave?: OnSaveDashboard;
   onDiscard?: (entity: DashboardResource) => void;
   isReadonly: boolean;

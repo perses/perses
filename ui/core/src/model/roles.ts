@@ -21,6 +21,7 @@ export const PROJECT_SCOPES = [
   '*',
   'Dashboard',
   'Datasource',
+  'EphemeralDashboard',
   'Folder',
   'Project',
   'Role',

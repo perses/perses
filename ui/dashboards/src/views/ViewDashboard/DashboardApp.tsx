@@ -14,7 +14,7 @@
 import { useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
   PanelDrawer,
@@ -32,7 +32,7 @@ import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, use
 
 export interface DashboardAppProps {
   emptyDashboardProps?: Partial<EmptyDashboardProps>;
-  dashboardResource: DashboardResource;
+  dashboardResource: DashboardResource | EphemeralDashboardResource;
   dashboardTitleComponent?: JSX.Element;
   onSave?: OnSaveDashboard;
   onDiscard?: (entity: DashboardResource) => void;
@@ -57,7 +57,9 @@ export const DashboardApp = (props: DashboardAppProps) => {
 
   const { isEditMode, setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
-  const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
+  const [originalDashboard, setOriginalDashboard] = useState<
+    DashboardResource | EphemeralDashboardResource | undefined
+  >(undefined);
   const { setSavedDatasources } = useDatasourceStore();
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
@@ -71,7 +73,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
     setEditMode(false);
     closeDiscardChangesConfirmationDialog();
     if (onDiscard) {
-      onDiscard(dashboard);
+      onDiscard(dashboard as unknown as DashboardResource);
     }
   };
 

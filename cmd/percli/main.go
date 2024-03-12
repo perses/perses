@@ -87,7 +87,7 @@ func initializeCLI() {
 }
 
 func main() {
-	cobra.OnInitialize(initializeCLI)
+	cobra.OnInitialize(initializeCLI, dac.Initialize)
 	rootCmd := newRootCommand()
 
 	if err := rootCmd.Execute(); err != nil {

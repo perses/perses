@@ -87,7 +87,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		// retrieve if exists the entity from the Perses API
 		_, apiError := svc.Get(apiInterface.EmptyCtx, param)
 		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
-			logrus.WithError(apiError).Errorf("unable to retrieve the %q from the database", kind)
+			logrus.WithError(apiError).Errorf("unable to retrieve the %q %s from the database", kind, param.Name)
 			continue
 		}
 

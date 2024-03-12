@@ -56,3 +56,11 @@ export interface DatasourceSelector {
    */
   name?: string;
 }
+
+/**
+ * An intermediary type to regroup the name and the spec of a datasource.
+ */
+export interface DatasourceDefinition {
+  name: string;
+  spec: DatasourceSpec;
+}

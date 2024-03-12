@@ -21,6 +21,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/common/app"
 	"github.com/perses/perses/internal/api/core/middleware"
+	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/provisioning"
@@ -60,26 +61,35 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
 	}
+	// enable cleanup of the ephemeral dashboards once their ttl is reached
+	ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
+	}
+
 	runner.WithTasks(watcher, migrateWatcher)
-	runner.WithCronTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
-		runner.WithCronTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
+		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
 	}
 	if conf.Security.EnableAuth {
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
-		runner.WithCronTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
+		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
+	runner.WithTimerTasks(time.Duration(conf.EphemeralDashboardsCleanupInterval), ephemeralDashboardsCleaner)
 
 	// register the API
 	runner.HTTPServerBuilder().
 		APIRegistration(persesAPI).
-		APIRegistration(persesFrontend).
 		GzipSkipper(func(c echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.
 			return strings.HasPrefix(c.Request().URL.Path, "/proxy")
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
+	if !conf.DeactivateFront {
+		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
+	}
 	return runner, persistenceManager, nil
 }

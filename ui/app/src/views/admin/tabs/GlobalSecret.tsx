@@ -18,6 +18,7 @@ import { GlobalSecretResource, Secret } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { SecretList } from '../../../components/secrets/SecretList';
 import {
+  useCreateGlobalSecretMutation,
   useDeleteGlobalSecretMutation,
   useGlobalSecretList,
   useUpdateGlobalSecretMutation,
@@ -38,8 +39,27 @@ export function GlobalSecrets(props: GlobalSecretsProps) {
   const { data, isLoading } = useGlobalSecretList();
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const createSecretMutation = useCreateGlobalSecretMutation();
   const updateSecretMutation = useUpdateGlobalSecretMutation();
   const deleteSecretMutation = useDeleteGlobalSecretMutation();
+
+  const handleSecretCreate = useCallback(
+    (secret: GlobalSecretResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        createSecretMutation.mutate(secret, {
+          onSuccess: (createdSecret: Secret) => {
+            successSnackbar(`Global Secret ${createdSecret.metadata.name} has been successfully created`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, createSecretMutation]
+  );
 
   const handleSecretUpdate = useCallback(
     (secret: GlobalSecretResource): Promise<void> =>
@@ -82,6 +102,7 @@ export function GlobalSecrets(props: GlobalSecretsProps) {
       <SecretList
         data={data ?? []}
         isLoading={isLoading}
+        onCreate={handleSecretCreate}
         onUpdate={handleSecretUpdate}
         onDelete={handleSecretDelete}
         initialState={{

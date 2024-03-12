@@ -20,14 +20,19 @@ import (
 
 type client struct {
 	v1.ClientInterface
+	restClient *perseshttp.RESTClient
 }
 
-func New() v1.ClientInterface {
-	return &client{}
+func New(restClient *perseshttp.RESTClient) v1.ClientInterface {
+	return &client{restClient: restClient}
 }
 
 func (c *client) RESTClient() *perseshttp.RESTClient {
-	return nil
+	return c.restClient
+}
+
+func (c *client) EphemeralDashboard(_ string) v1.EphemeralDashboardInterface {
+	return &ephemeralDashboard{}
 }
 
 func (c *client) Folder(project string) v1.FolderInterface {

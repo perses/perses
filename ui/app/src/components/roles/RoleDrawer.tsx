@@ -11,20 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Role, DispatchWithPromise, Action } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { Role } from '@perses-dev/core';
+import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DeleteRoleDialog } from '../dialogs';
+import { DrawerProps } from '../drawer';
 import { RoleEditorForm } from './RoleEditorForm';
 
-interface RoleDrawerProps<T extends Role> {
+interface RoleDrawerProps<T extends Role> extends DrawerProps<T> {
   role: T;
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
 }
 
 export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {

@@ -21,8 +21,8 @@ import (
 
 type Query struct {
 	databaseModel.Query
-	// NamePrefix is a prefix of the Dashboard.metadata.name that is used to filter the list of the Dashboard.
-	// NamePrefix can be empty in case you want to return the full list of Dashboard available.
+	// NamePrefix is a prefix of the Dashboard.metadata.name that is used to filter the Dashboard list.
+	// It can be empty in case you want to return the full list of dashboards available.
 	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter

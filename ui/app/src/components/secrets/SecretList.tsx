@@ -11,31 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DispatchWithPromise, getMetadataProject, Secret } from '@perses-dev/core';
-import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { Action, getMetadataProject, Secret } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
-import { intlFormatDistance } from 'date-fns';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { DeleteSecretDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';
+import {
+  CREATED_AT_COL_DEF,
+  ListPropertiesWithCallbacks,
+  NAME_COL_DEF,
+  PROJECT_COL_DEF,
+  UPDATED_AT_COL_DEF,
+  VERSION_COL_DEF,
+} from '../list';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
-
-export interface SecretListProperties<T extends Secret> {
-  data: T[];
-  hideToolbar?: boolean;
-  onUpdate: DispatchWithPromise<T>;
-  onDelete: DispatchWithPromise<T>;
-  initialState?: GridInitialStateCommunity;
-  isLoading?: boolean;
-}
 
 /**
  * Display secrets in a table style.
@@ -48,12 +46,13 @@ export interface SecretListProperties<T extends Secret> {
  */
 export function SecretList<T extends Secret>({
   data,
-  hideToolbar,
-  onUpdate,
-  isLoading,
   initialState,
+  hideToolbar,
+  isLoading,
+  onCreate,
+  onUpdate,
   onDelete,
-}: SecretListProperties<T>) {
+}: ListPropertiesWithCallbacks<T>) {
   const { infoSnackbar } = useSnackbar();
   const isReadonly = useIsReadonly();
 
@@ -93,18 +92,32 @@ export function SecretList<T extends Secret>({
     [infoSnackbar]
   );
 
-  const handleSecretUpdate = useCallback(
+  const handleSecretSave = useCallback(
     async (secret: T) => {
-      await onUpdate(secret);
+      if (action === 'create') {
+        await onCreate(secret);
+      } else if (action === 'update') {
+        await onUpdate(secret);
+      }
       setSecretDrawerOpened(false);
     },
-    [onUpdate]
+    [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
     (name: string, project?: string) => {
       setTargetedSecret(findSecret(name, project));
       setAction('read');
+      setSecretDrawerOpened(true);
+    },
+    [findSecret]
+  );
+
+  const handleDuplicateButtonClick = useCallback(
+    (name: string, project?: string) => () => {
+      const secret = findSecret(name, project);
+      setTargetedSecret(secret);
+      setAction('create');
       setSecretDrawerOpened(true);
     },
     [findSecret]
@@ -130,8 +143,8 @@ export function SecretList<T extends Secret>({
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      { field: 'project', headerName: 'Project', type: 'string', flex: 2, minWidth: 150 },
-      { field: 'name', headerName: 'Name', type: 'string', flex: 3, minWidth: 150 },
+      PROJECT_COL_DEF,
+      NAME_COL_DEF,
       {
         field: 'secret',
         headerName: 'Secret',
@@ -165,47 +178,15 @@ export function SecretList<T extends Secret>({
       },
       { field: 'authorization', headerName: 'Authorization', type: 'boolean', flex: 3, minWidth: 150 },
       { field: 'tlsConfig', headerName: 'TLS Config', type: 'boolean', flex: 3, minWidth: 150 },
-      {
-        field: 'version',
-        headerName: 'Version',
-        type: 'number',
-        align: 'right',
-        headerAlign: 'right',
-        flex: 1,
-        minWidth: 80,
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Creation Date',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
-      {
-        field: 'updatedAt',
-        headerName: 'Last Update',
-        type: 'dateTime',
-        flex: 1,
-        minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
-        renderCell: (params) => (
-          <Tooltip title={params.value.toUTCString()} placement="top">
-            <span>{intlFormatDistance(params.value, new Date())}</span>
-          </Tooltip>
-        ),
-      },
+      VERSION_COL_DEF,
+      CREATED_AT_COL_DEF,
+      UPDATED_AT_COL_DEF,
       {
         field: 'actions',
         headerName: 'Actions',
         type: 'actions',
         flex: 0.5,
-        minWidth: 100,
+        minWidth: 150,
         getActions: (params: GridRowParams<Row>) => [
           <CRUDGridActionsCellItem
             key={params.id + '-edit'}
@@ -215,6 +196,15 @@ export function SecretList<T extends Secret>({
             scope={params.row.project ? 'Secret' : 'GlobalSecret'}
             project={params.row.project ? params.row.project : GlobalProject}
             onClick={handleEditButtonClick(params.row.name, params.row.project)}
+          />,
+          <CRUDGridActionsCellItem
+            key={params.id + '-duplicate'}
+            icon={<ContentCopyIcon />}
+            label="Duplicate"
+            action="create"
+            scope={params.row.project ? 'Secret' : 'GlobalSecret'}
+            project={params.row.project ? params.row.project : GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
@@ -228,7 +218,7 @@ export function SecretList<T extends Secret>({
         ],
       },
     ],
-    [handleCopyNameButtonClick, handleEditButtonClick, handleDeleteButtonClick]
+    [handleCopyNameButtonClick, handleEditButtonClick, handleDuplicateButtonClick, handleDeleteButtonClick]
   );
 
   return (
@@ -250,8 +240,8 @@ export function SecretList<T extends Secret>({
             isOpen={isSecretDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={(v: T) => handleSecretUpdate(v).then(() => setSecretDrawerOpened(false))}
-            onDelete={onDelete}
+            onSave={handleSecretSave}
+            onDelete={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
             onClose={() => setSecretDrawerOpened(false)}
           />
           <DeleteSecretDialog

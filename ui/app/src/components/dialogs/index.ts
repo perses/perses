@@ -14,6 +14,7 @@
 export * from './CreateDashboardDialog';
 export * from './CreateProjectDialog';
 export * from './DeleteDashboardDialog';
+export * from './DeleteEphemeralDashboardDialog';
 export * from './DeleteDatasourceDialog';
 export * from './DeleteProjectDialog';
 export * from './DeleteRoleDialog';
@@ -21,3 +22,4 @@ export * from './DeleteRoleBindingDialog';
 export * from './DeleteSecretDialog';
 export * from './DeleteVariableDialog';
 export * from './RenameDashboardDialog';
+export * from './UpdateEphemeralDashboardDialog';

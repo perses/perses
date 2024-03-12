@@ -14,6 +14,7 @@
 package build
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -138,7 +139,8 @@ func (o *option) processFile(file string, extension string) error {
 	// Capture the output of the command
 	cmdOutput, err := cmd.Output()
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			return fmt.Errorf("failed to build %s: %s", file, string(exitErr.Stderr))
 		}
 		return err

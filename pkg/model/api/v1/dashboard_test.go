@@ -411,7 +411,6 @@ func TestUnmarshallDashboard(t *testing.T) {
     "refreshInterval": "30s"
   }
 }`
-
 	panel := &Panel{
 		Kind: "Panel",
 		Spec: PanelSpec{
@@ -537,7 +536,7 @@ func TestUnmarshalDashboardError(t *testing.T) {
   "spec": {}
 }
 `,
-			err: fmt.Errorf("dashboard.spec.panels cannot be empty"),
+			err: fmt.Errorf("spec.panels cannot be empty"),
 		},
 	}
 	for _, test := range testSuite {

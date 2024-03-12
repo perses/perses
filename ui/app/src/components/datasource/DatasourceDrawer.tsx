@@ -11,21 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Datasource, DatasourceSpec, DispatchWithPromise } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { Datasource, DatasourceSpec } from '@perses-dev/core';
+import { useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
+import { DrawerProps } from '../drawer';
 
-interface DatasourceDrawerProps<T extends Datasource> {
+interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
 }
 
 export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
@@ -49,18 +44,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry
-          pluginLoader={bundledPluginLoader}
-          // TODO this required field is useless here
-          defaultPluginKinds={{
-            Panel: 'TimeSeriesChart',
-            TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
-          }}
-        >
+        <PluginRegistry pluginLoader={bundledPluginLoader}>
           {isOpen && (
             <DatasourceEditorForm
-              initialName={datasource.metadata.name}
-              initialSpec={datasource.spec}
+              initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
               initialAction={action}
               isDraft={false}
               isReadonly={isReadonly}
