@@ -75,7 +75,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		project := resource.GetProject(entity.GetMetadata(), "")
 		svc, svcErr := p.getService(kind)
 		if svcErr != nil {
-			logrus.WithError(svcErr).Errorf("unable to retrieve the service associated to %q", kind)
+			logrus.WithError(svcErr).Warningf("unable to retrieve the service associated to %q", kind)
 			continue
 		}
 
