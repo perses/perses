@@ -28,9 +28,10 @@ const (
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
 
-type DeviceCode struct {
+type OAuthOverride struct {
 	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
 	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
+	Scopes       []string      `json:"scopes" yaml:"scopes"`
 }
 
 // appendIfMissing will append the value in the slice, only if not already present.
@@ -45,14 +46,15 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 }
 
 type Provider struct {
-	SlugID       string        `json:"slug_id" yaml:"slug_id"`
-	Name         string        `json:"name" yaml:"name"`
-	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
-	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
-	DeviceCode   DeviceCode    `json:"device_code,omitempty" yaml:"device_code,omitempty"`
-	RedirectURI  common.URL    `json:"redirect_uri" yaml:"redirect_uri"`
-	Scopes       []string      `json:"scopes" yaml:"scopes"`
-	DisablePKCE  bool          `json:"disable_pkce" yaml:"disable_pkce"`
+	SlugID            string         `json:"slug_id" yaml:"slug_id"`
+	Name              string         `json:"name" yaml:"name"`
+	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
+	ClientSecret      secret.Hidden  `json:"client_secret" yaml:"client_secret"`
+	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
+	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
+	RedirectURI       common.URL     `json:"redirect_uri" yaml:"redirect_uri"`
+	Scopes            []string       `json:"scopes" yaml:"scopes"`
+	DisablePKCE       bool           `json:"disable_pkce" yaml:"disable_pkce"`
 }
 
 func (p *Provider) Verify() error {

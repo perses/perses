@@ -55,7 +55,11 @@ func (u *oidcUserInfo) GetSubject() string {
 // GetLogin implements [externalUserInfo]
 // It uses the first part of the email to create the username.
 func (u *oidcUserInfo) GetLogin() string {
-	return buildLoginFromEmail(u.Email)
+	login := buildLoginFromEmail(u.Email)
+	if len(login) > 0 {
+		return login
+	}
+	return u.Subject
 }
 
 // GetProfile implements [externalUserInfo]
@@ -80,18 +84,7 @@ func (r RelyingPartyWithTokenEndpoint) TokenEndpoint() string {
 	return r.OAuthConfig().Endpoint.TokenURL
 }
 
-type oIDCEndpoint struct {
-	relyingParty       RelyingPartyWithTokenEndpoint
-	deviceRelyingParty *RelyingPartyWithTokenEndpoint
-	jwt                crypto.JWT
-	tokenManagement    tokenManagement
-	slugID             string
-	urlParams          map[string]string
-	issuer             string
-	svc                service
-}
-
-func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
+func newRelyingParty(provider config.OIDCProvider, override *config.OAuthOverride) (*RelyingPartyWithTokenEndpoint, error) {
 	issuer := provider.Issuer.String()
 	redirectURI := ""
 	if !provider.RedirectURI.IsNilOrEmpty() {
@@ -119,36 +112,74 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO)
 	if !provider.DiscoveryURL.IsNilOrEmpty() {
 		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL.String()))
 	}
+
+	clientID := provider.ClientID
+	clientSecret := provider.ClientSecret
+	scopes := provider.Scopes
+	if override != nil {
+		if len(override.ClientID) > 0 {
+			clientID = override.ClientID
+		}
+		if len(override.ClientSecret) > 0 {
+			clientSecret = override.ClientSecret
+		}
+		if len(override.Scopes) > 0 {
+			scopes = override.Scopes
+		}
+	}
 	relyingParty, err := rp.NewRelyingPartyOIDC(
 		context.Background(),
-		issuer, string(provider.ClientID), string(provider.ClientSecret),
-		redirectURI, provider.Scopes, options...,
+		issuer, string(clientID), string(clientSecret),
+		redirectURI, scopes, options...,
 	)
 	if err != nil {
 		return nil, err
 	}
-	var deviceRelyingParty *RelyingPartyWithTokenEndpoint
-	if provider.DeviceCode.ClientID != "" {
-		tmp, err := rp.NewRelyingPartyOIDC(
-			context.Background(),
-			issuer, string(provider.DeviceCode.ClientID), string(provider.DeviceCode.ClientSecret),
-			redirectURI, provider.Scopes, options...,
-		)
+	return &RelyingPartyWithTokenEndpoint{relyingParty}, nil
+}
+
+type oIDCEndpoint struct {
+	relyingParty           *RelyingPartyWithTokenEndpoint
+	deviceCodeRelyingParty *RelyingPartyWithTokenEndpoint
+	clientCredRelyingParty *RelyingPartyWithTokenEndpoint
+	jwt                    crypto.JWT
+	tokenManagement        tokenManagement
+	slugID                 string
+	urlParams              map[string]string
+	issuer                 string
+	svc                    service
+}
+
+func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
+	relyingParty, err := newRelyingParty(provider, nil)
+	if err != nil {
+		return nil, err
+	}
+	deviceCodeRelyingParty := relyingParty
+	if provider.DeviceCode != nil {
+		deviceCodeRelyingParty, err = newRelyingParty(provider, provider.DeviceCode)
 		if err != nil {
 			return nil, err
 		}
-		deviceRelyingParty = &RelyingPartyWithTokenEndpoint{tmp}
+	}
+	clientCredRelyingParty := relyingParty
+	if provider.ClientCredentials != nil {
+		clientCredRelyingParty, err = newRelyingParty(provider, provider.ClientCredentials)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &oIDCEndpoint{
-		relyingParty:       RelyingPartyWithTokenEndpoint{relyingParty},
-		deviceRelyingParty: deviceRelyingParty,
-		jwt:                jwt,
-		tokenManagement:    tokenManagement{jwt: jwt},
-		slugID:             provider.SlugID,
-		urlParams:          provider.URLParams,
-		issuer:             issuer,
-		svc:                service{dao: dao},
+		relyingParty:           relyingParty,
+		deviceCodeRelyingParty: deviceCodeRelyingParty,
+		clientCredRelyingParty: clientCredRelyingParty,
+		jwt:                    jwt,
+		tokenManagement:        tokenManagement{jwt: jwt},
+		slugID:                 provider.SlugID,
+		urlParams:              provider.URLParams,
+		issuer:                 provider.Issuer.String(),
+		svc:                    service{dao: dao},
 	}, nil
 }
 
@@ -227,15 +258,14 @@ func (e *oIDCEndpoint) codeExchange(ctx echo.Context) error {
 // Then the client will be responsible to poll the /{slug_id}/token Perses endpoint to generate
 // a proper Perses session.
 func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
-	relyingParty := e.getDeviceRelyingParty()
-	if relyingParty.GetDeviceAuthorizationEndpoint() == "" {
+	if e.deviceCodeRelyingParty.GetDeviceAuthorizationEndpoint() == "" {
 		e.logWithError(errors.New("device code flow is not supported by this provider"))
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
 	}
 
 	// Send the device authorization request
-	conf := relyingParty.OAuthConfig()
-	resp, err := callDeviceAuthorizationEndpoint(ctx.Request().Context(), relyingParty, &oidc.ClientCredentialsRequest{
+	conf := e.deviceCodeRelyingParty.OAuthConfig()
+	resp, err := callDeviceAuthorizationEndpoint(ctx.Request().Context(), e.deviceCodeRelyingParty, &oidc.ClientCredentialsRequest{
 		Scope:        conf.Scopes,
 		ClientID:     conf.ClientID,
 		ClientSecret: conf.ClientSecret,
@@ -252,7 +282,7 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 // token is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
 func (e *oIDCEndpoint) token(ctx echo.Context) error {
-	var reqBody tokenRequestBody
+	var reqBody api.TokenRequest
 	if err := ctx.Bind(&reqBody); err != nil {
 		e.logWithError(err).Error("Invalid request body")
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
@@ -260,9 +290,8 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 
 	var uInfo *oidcUserInfo
 	switch reqBody.GrantType {
-	case GrantTypeDeviceCode:
-		relyingParty := e.getDeviceRelyingParty()
-		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), relyingParty, reqBody.DeviceCode)
+	case api.GrantTypeDeviceCode:
+		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), e.deviceCodeRelyingParty, reqBody.DeviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
@@ -272,17 +301,17 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			// - we should propagate the message possibly saying to slow down the request (error: "slow_down")
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
 		}
-		idClaims, err := rp.VerifyTokens[*oidc.IDTokenClaims](ctx.Request().Context(), resp.AccessToken, resp.IDToken, relyingParty.IDTokenVerifier())
+		idClaims, err := rp.VerifyTokens[*oidc.IDTokenClaims](ctx.Request().Context(), resp.AccessToken, resp.IDToken, e.deviceCodeRelyingParty.IDTokenVerifier())
 		if err != nil {
 			e.logWithError(err).Error("Failed to verify token")
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
 		}
-		uInfo, err = rp.Userinfo[*oidcUserInfo](ctx.Request().Context(), resp.AccessToken, resp.TokenType, idClaims.GetSubject(), relyingParty)
+		uInfo, err = rp.Userinfo[*oidcUserInfo](ctx.Request().Context(), resp.AccessToken, resp.TokenType, idClaims.GetSubject(), e.deviceCodeRelyingParty)
 		if err != nil {
 			e.logWithError(err).Error("Failed to request user info")
 			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
 		}
-	case GrantTypeClientCredentials:
+	case api.GrantTypeClientCredentials:
 		_, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
@@ -334,7 +363,7 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 // retrieveDeviceAccessToken exchanges the device code for an access token,
 // from the OAuth 2.0 provider.
 // It duplicates the original implementation of OIDC library to make only one query instead of polling.
-func retrieveDeviceAccessToken(ctx context.Context, relyingParty RelyingPartyWithTokenEndpoint, deviceCode string) (*oidc.AccessTokenResponse, error) {
+func retrieveDeviceAccessToken(ctx context.Context, relyingParty *RelyingPartyWithTokenEndpoint, deviceCode string) (*oidc.AccessTokenResponse, error) {
 	// Create a new device access token request
 	conf := relyingParty.OAuthConfig()
 	req := &client.DeviceAccessTokenRequest{
@@ -367,12 +396,14 @@ func retrieveDeviceAccessToken(ctx context.Context, relyingParty RelyingPartyWit
 func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clientID string, clientSecret string) (*oauth2.Token, error) {
 	// Create a new client credentials request
 	req := &oidc.ClientCredentialsRequest{
+		GrantType:    oidc.GrantTypeClientCredentials,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
+		Scope:        e.clientCredRelyingParty.OAuthConfig().Scopes,
 	}
 
 	// Call the token endpoint
-	return client.CallTokenEndpoint(ctx, req, e.relyingParty)
+	return client.CallTokenEndpoint(ctx, req, e.clientCredRelyingParty)
 }
 
 // callDeviceAuthorizationEndpoint calls the device authorization endpoint of the provider.
@@ -410,13 +441,6 @@ func callDeviceAuthorizationEndpoint(ctx context.Context, relyingParty rp.Relyin
 //	logWithError(err).Warn("A warning message")
 func (e *oIDCEndpoint) logWithError(err error) *logrus.Entry {
 	return logrus.WithError(err).WithField("provider", e.slugID)
-}
-
-func (e *oIDCEndpoint) getDeviceRelyingParty() RelyingPartyWithTokenEndpoint {
-	if e.deviceRelyingParty != nil {
-		return *e.deviceRelyingParty
-	}
-	return e.relyingParty
 }
 
 func writeResponse(w http.ResponseWriter, response []byte) {
