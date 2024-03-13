@@ -27,7 +27,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
@@ -35,6 +35,7 @@ import (
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -252,13 +253,15 @@ func (e *oAuthEndpoint) readCodeVerifierCookie(ctx echo.Context) (state string, 
 }
 
 func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
+	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOAuth, e.slugID), withOAuthErrorMdw)
+
 	// Add routes for the "Authorization Code" flow
-	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathLogin), e.authHandler, true)
-	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathCallback), e.codeExchangeHandler, true)
+	oauthGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.authHandler, true)
+	oauthGroup.GET(fmt.Sprintf("/%s", utils.PathCallback), e.codeExchangeHandler, true)
 
 	// Add routes for device code flow and token exchange
-	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathDeviceCode), e.deviceCodeHandler, true)
-	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOAuth, e.slugID, utils.PathToken), e.tokenHandler, true)
+	oauthGroup.POST(fmt.Sprintf("/%s", utils.PathDeviceCode), e.deviceCodeHandler, true)
+	oauthGroup.POST(fmt.Sprintf("/%s", utils.PathToken), e.tokenHandler, true)
 }
 
 // authHandler is the http handler on Perses side that triggers the "Authorization Code"
@@ -270,14 +273,14 @@ func (e *oAuthEndpoint) authHandler(ctx echo.Context) error {
 	state := uuid.NewString()
 	if err := e.saveStateCookie(ctx, state); err != nil {
 		e.logWithError(err).Error("Failed to save state in a cookie.")
-		return apiinterface.InternalError
+		return err
 	}
 
 	// Save the PKCE code verifier cookie, will be verified in the codeExchangeHandler
 	verifier := oauth2.GenerateVerifier()
 	if err := e.saveCodeVerifierCookie(ctx, verifier); err != nil {
 		e.logWithError(err).Error("Failed to save code verifier in a cookie.")
-		return apiinterface.InternalError
+		return err
 	}
 	opts := []oauth2.AuthCodeOption{oauth2.S256ChallengeOption(verifier)}
 
@@ -306,14 +309,14 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	// Verify that the state in the query match the saved one
 	if _, err := e.readStateCookie(ctx); err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return apiinterface.InternalError
+		return err
 	}
 
 	// Verify that the PKCE code verifier is present
 	verifier, err := e.readCodeVerifierCookie(ctx)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while verifying the state")
-		return apiinterface.InternalError
+		return err
 	}
 
 	opts := []oauth2.AuthCodeOption{oauth2.VerifierOption(verifier)}
@@ -327,18 +330,18 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 	token, err := e.conf.Exchange(ctx.Request().Context(), code, opts...)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while exchanging code with token")
-		return apiinterface.InternalError
+		return err
 	}
 
 	uInfo, err := e.requestUserInfo(ctx, token)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while requesting user infos. User infos will be ignored.")
-		return apiinterface.InternalError
+		return err
 	}
 
 	_, err = e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
-		return apiinterface.InternalError
+		return err
 	}
 
 	return ctx.Redirect(302, "/")
@@ -357,7 +360,7 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 	}
 	resp, err := e.deviceCodeConf.DeviceAuth(ctx.Request().Context())
 	if err != nil {
-		return apiinterface.InternalError
+		return err
 	}
 	return ctx.JSON(200, resp)
 }
@@ -368,7 +371,10 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	var reqBody api.TokenRequest
 	if err := ctx.Bind(&reqBody); err != nil {
 		e.logWithError(err).Error("Invalid request body")
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
+		return &oauth2.RetrieveError{
+			ErrorCode:        string(oidc.InvalidRequest), // Reuse oidc lib for convenience as they created an enum
+			ErrorDescription: err.Error(),
+		}
 	}
 
 	var accessToken *oauth2.Token
@@ -379,31 +385,29 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
-			// Note that for sake of simplicity, it doesn't respect the Oauth 2.0 RFC: (https://www.rfc-editor.org/rfc/rfc8628#section-3.5)
-			// For example:
-			// - we should differentiate the errors that means "try again later" from the others. (error: "authorization_pending")
-			// - we should propagate the message possibly saying to slow down the request (error: "slow_down")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
+			return err
 		}
 	case api.GrantTypeClientCredentials:
 		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange client credentials for token")
+			return err
 		}
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "Unsupported grant type")
+		return &oauth2.RetrieveError{
+			ErrorCode: string(oidc.UnsupportedGrantType), // Reuse oidc lib for convenience as they created an enum
+		}
 	}
 
 	uInfo, err := e.requestUserInfo(ctx, accessToken)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while requesting user infos.")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to request user infos")
+		return err
 	}
 
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to sync user in database")
+		return err
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }
@@ -441,7 +445,7 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCode string) (*oauth2.Token, error) {
 	// Prepare the request body
 	values := url.Values{}
-	values.Set("grant_type", "urn:ietf:params:oauth:grant-type:device_code")
+	values.Set("grant_type", string(oidc.GrantTypeDeviceCode))
 	values.Set("device_code", deviceCode)
 
 	// Create a new request using http
@@ -465,17 +469,32 @@ func (e *oAuthEndpoint) retrieveDeviceAccessToken(ctx context.Context, deviceCod
 		_ = resp.Body.Close()
 	}()
 
+	result, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	// Read the response body and decode it into an oauth2.Token
-	var token oauth2.Token
-	if decodeErr := json.NewDecoder(resp.Body).Decode(&token); decodeErr != nil {
+	var token *oauth2.Token
+	if decodeErr := json.Unmarshal(result, &token); decodeErr != nil {
 		return nil, decodeErr
 	}
 
 	if !token.Valid() {
-		// APIs like GitHub might return an invalid token without error
-		return &token, errors.New("invalid token received")
+		// APIs like GitHub might return the error with status code 200, then the token appears to be invalid, but it's
+		// because we are parsing an oauth error as a token here...
+		var oauthErr *api.OAuthError
+		if decodeErr := json.Unmarshal(result, &oauthErr); decodeErr != nil {
+			return nil, decodeErr
+		}
+		// This field will contain something if this a real oauth error
+		if len(oauthErr.ErrorCode) > 0 {
+			return nil, oauthErr
+		}
+		// Otherwise, we consider it as a token error
+		return nil, errors.New("invalid token received")
 	}
-	return &token, nil
+	return token, nil
 }
 
 // retrieveClientCredentialsToken exchanges the client credentials for an access token,
@@ -491,6 +510,15 @@ func (e *oAuthEndpoint) retrieveClientCredentialsToken(ctx context.Context, clie
 
 	// Use the Token method to retrieve the token
 	token, err := conf.Token(ctx)
+	if err != nil {
+		var retrieveErr *oauth2.RetrieveError
+		if errors.As(err, &retrieveErr) {
+			if retrieveErr.ErrorCode == "" {
+				return nil, apiinterface.InternalError
+			}
+		}
+		return nil, err
+	}
 	if !token.Valid() {
 		// APIs like GitHub might return an invalid token without error
 		return token, errors.New("invalid token received")

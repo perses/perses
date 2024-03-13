@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	backendConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +41,11 @@ const (
 )
 
 const (
-	nativeProvider = "native"
+	nativeProvider          = "native"
+	errAuthorizationPending = "authorization_pending"
+	errSlowDown             = "slow_down"
+	errAccessDenied         = "access_denied"
+	errExpiredToken         = "expired_token"
 )
 
 type option struct {
@@ -177,13 +182,34 @@ func (o *option) authAndSetToken() error {
 			return ctx.Err()
 		case <-ticker.C:
 			tokenResponse, tokenErr := o.apiClient.Auth().DeviceAccessToken(string(o.externalAuthKind), o.externalAuthProvider, deviceCodeResponse.DeviceCode)
-			if tokenErr != nil {
-				continue
+			if tokenErr == nil {
+				// Handle the access token
+				o.accessToken = tokenResponse.AccessToken
+				o.refreshToken = tokenResponse.RefreshToken
+				return nil
 			}
-			// Handle the access token
-			o.accessToken = tokenResponse.AccessToken
-			o.refreshToken = tokenResponse.RefreshToken
-			return nil
+
+			reqErr := &perseshttp.RequestError{}
+			if errors.As(tokenErr, &reqErr) && reqErr.Err != nil {
+				oauthErr := &modelAPI.OAuthError{}
+				if errors.As(reqErr.Err, &oauthErr) {
+					switch oauthErr.ErrorCode {
+					case errSlowDown:
+						// https://datatracker.ietf.org/doc/html/rfc8628#section-3.5
+						// "the interval MUST be increased by 5 seconds for this and all subsequent requests"
+						interval += 5
+						ticker.Reset(time.Duration(interval) * time.Second)
+						continue
+					case errAuthorizationPending:
+						// Do nothing.
+						continue
+					default:
+						return oauthErr
+					}
+				}
+				return reqErr.Err
+			}
+			return tokenErr
 		}
 	}
 }

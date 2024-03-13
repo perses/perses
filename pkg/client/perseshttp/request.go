@@ -23,6 +23,8 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/perses/perses/pkg/model/api"
 )
 
 const (
@@ -316,7 +318,8 @@ type Response struct {
 }
 
 type errorResponse struct {
-	Message string `json:"message"`
+	Message    string          `json:"message"`
+	OAuthError *api.OAuthError `json:"oauth_error,omitempty"`
 }
 
 // Error returns the error executing the request, nil if no error occurred.
@@ -339,6 +342,7 @@ func (r *Response) Error() error {
 				e.Err = fmt.Errorf("something horrible occured when the client tried to decode the error message: %w", err)
 			} else {
 				e.Message = response.Message
+				e.Err = response.OAuthError
 			}
 		}
 		e.StatusCode = r.statusCode

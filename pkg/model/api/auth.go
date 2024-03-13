@@ -119,3 +119,20 @@ func (r *TokenRequest) validate() error {
 	}
 	return nil
 }
+
+// OAuthError represents the error response of a possible oauth endpoint.
+// It is used to control the error type in the response of the backend request (client and server side)
+// It helps for example when polling device access token to know if the device code is still valid, or if we need to
+// slow down, etc ...
+// Refs:
+// https://www.rfc-editor.org/rfc/rfc8628#section-3.5
+// https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+type OAuthError struct {
+	ErrorCode        string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+}
+
+// Error makes it an error, which can be convenient.
+func (e *OAuthError) Error() string {
+	return fmt.Sprintf("oauth2: %q %q", e.ErrorCode, e.ErrorDescription)
+}

@@ -72,17 +72,11 @@ func (c *auth) Refresh(refreshToken string) (*api.AuthResponse, error) {
 func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, error) {
 	result := &oauth2.DeviceAuthResponse{}
 
-	err := c.client.Post().
+	return result, c.client.Post().
 		APIVersion("").
 		Resource(fmt.Sprintf("%s/providers/%s/%s/device/code", authResource, authKind, slugID)).
 		Do().
 		Object(result)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }
 
 func (c *auth) DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error) {
@@ -91,13 +85,13 @@ func (c *auth) DeviceAccessToken(authKind, slugID, deviceCode string) (*api.Auth
 		DeviceCode: deviceCode,
 	}
 	result := &api.AuthResponse{}
-	err := c.client.Post().
+
+	return result, c.client.Post().
 		APIVersion("").
 		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
 		Body(body).
 		Do().
 		Object(result)
-	return result, err
 }
 
 func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error) {
@@ -107,6 +101,7 @@ func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret s
 		ClientSecret: clientSecret,
 	}
 	result := &api.AuthResponse{}
+
 	return result, c.client.Post().
 		APIVersion("").
 		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
