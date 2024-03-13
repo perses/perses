@@ -26,13 +26,13 @@ type DatasourceSpec struct {
 	CapturingRegexp string `json:"capturingRegexp,omitempty" yaml:"capturingRegexp,omitempty"`
 	// Sort method to apply when rendering the list of datasources
 	Sort *Sort `json:"sort,omitempty" yaml:"sort,omitempty"`
-	// Type is the type (= kind) of datasources
-	Type string `json:"type" yaml:"type"`
+	// DatasourceKind is the kind of datasource to consider
+	DatasourceKind string `json:"datasourceKind" yaml:"datasourceKind"`
 }
 
 func (v *DatasourceSpec) Validate() error {
-	if len(v.Type) == 0 {
-		return fmt.Errorf("type for the datasource variable cannot be empty")
+	if len(v.DatasourceKind) == 0 {
+		return fmt.Errorf("datasourceKind cannot be empty")
 	}
 	return nil
 }

@@ -63,7 +63,7 @@ func TestUnmarshalJSONVariable(t *testing.T) {
   "spec": {
     "name": "datasourceVar",
     "defaultValue": "prom-global",
-    "type": "PrometheusDatasource",
+    "datasourceKind": "PrometheusDatasource",
     "sort": "alphabetical-ci-desc"
   }
 }
@@ -72,9 +72,9 @@ func TestUnmarshalJSONVariable(t *testing.T) {
 				Kind: variable.KindDatasource,
 				Spec: &DatasourceVariableSpec{
 					DatasourceSpec: variable.DatasourceSpec{
-						DefaultValue: &variable.DefaultValue{SingleValue: "prom-global"},
-						Type:         "PrometheusDatasource",
-						Sort:         &sortAlphabeticalCiDesc,
+						DefaultValue:   &variable.DefaultValue{SingleValue: "prom-global"},
+						DatasourceKind: "PrometheusDatasource",
+						Sort:           &sortAlphabeticalCiDesc,
 					},
 					Name: "datasourceVar",
 				},
@@ -332,16 +332,16 @@ kind: "DatasourceVariable"
 spec:
   name: "datasourceVar"
   defaultValue: "prom-global"
-  type: "PrometheusDatasource"
+  datasourceKind: "PrometheusDatasource"
   sort: "alphabetical-ci-desc"
 `,
 			result: &Variable{
 				Kind: variable.KindDatasource,
 				Spec: &DatasourceVariableSpec{
 					DatasourceSpec: variable.DatasourceSpec{
-						DefaultValue: &variable.DefaultValue{SingleValue: "prom-global"},
-						Type:         "PrometheusDatasource",
-						Sort:         &sortAlphabeticalCiDesc,
+						DefaultValue:   &variable.DefaultValue{SingleValue: "prom-global"},
+						DatasourceKind: "PrometheusDatasource",
+						Sort:           &sortAlphabeticalCiDesc,
 					},
 					Name: "datasourceVar",
 				},

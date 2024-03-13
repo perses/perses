@@ -195,7 +195,7 @@ func TestMarshalDashboard(t *testing.T) {
 							Kind: variable.KindDatasource,
 							Spec: &dashboard.DatasourceVariableSpec{
 								DatasourceSpec: variable.DatasourceSpec{
-									Type:            "PrometheusDatasource",
+									DatasourceKind:  "PrometheusDatasource",
 									CapturingRegexp: "prod-.*",
 								},
 								Name: "datasource",
@@ -290,7 +290,7 @@ func TestMarshalDashboard(t *testing.T) {
         "kind": "DatasourceVariable",
         "spec": {
           "capturingRegexp": "prod-.*",
-          "type": "PrometheusDatasource",
+          "datasourceKind": "PrometheusDatasource",
           "name": "datasource"
         }
       }
