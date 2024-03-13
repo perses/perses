@@ -9,8 +9,8 @@ require (
 	github.com/charmbracelet/huh v0.3.1-0.20240131202516-c79328e79fbd
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0
-	github.com/go-sql-driver/mysql v1.7.1
-	github.com/golang-jwt/jwt/v5 v5.2.0
+	github.com/go-sql-driver/mysql v1.8.0
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser v1.24.0
 	github.com/gorilla/securecookie v1.1.2
@@ -22,22 +22,23 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.23.1
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/common v0.49.0
+	github.com/prometheus/common v0.50.0
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.15.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
-	github.com/zitadel/oidc/v3 v3.13.0
+	github.com/zitadel/oidc/v3 v3.14.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.16.0
-	golang.org/x/oauth2 v0.17.0
+	golang.org/x/oauth2 v0.18.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	cuelabs.dev/go/oci/ociregistry v0.0.0-20231103182354-93e78c079a13 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 // indirect
 	github.com/ajg/form v1.5.1 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
@@ -123,14 +124,14 @@ require (
 	go.opentelemetry.io/otel/metric v1.24.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.24.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	moul.io/http2curl/v2 v2.3.0 // indirect
 )
