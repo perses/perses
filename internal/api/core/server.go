@@ -122,9 +122,9 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 		if el.parent != nil {
 			// The group can be created in a chain.
 			// That's why if there is a group parent, we need to use it to create the new current group
-			group = el.parent.Group(el.group.Path)
+			group = el.parent.Group(el.group.Path, el.group.Middlewares...)
 		} else {
-			group = e.Group(el.group.Path)
+			group = e.Group(el.group.Path, el.group.Middlewares...)
 		}
 		// Then let's collect every child group, so we can loop over them during a future iteration.
 		for _, g := range el.group.Groups {
@@ -137,6 +137,7 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 			if !rte.IsAnonymous {
 				mdws = append(mdws, a.jwtMiddleware)
 			}
+			mdws = append(mdws, rte.Middlewares...)
 			rte.Register(group, mdws...)
 		}
 	}
