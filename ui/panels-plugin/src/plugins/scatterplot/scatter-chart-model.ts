@@ -21,7 +21,7 @@ export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'Tr
 // TODO: Add support for scatter chart formatting options.
 // Some scaffolding has been done to support formatting options.
 // This includes the interface below which still needs implementation.
-// Note: The interface attributes must match schemas/panels/scatter/scatter.cue
+// Note: The interface attributes must match cue/schemas/panels/scatter/scatter.cue
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ScatterChartOptions {}
 
