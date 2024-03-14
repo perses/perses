@@ -17,6 +17,7 @@ import (
 	"fmt"
 
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/validate"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
@@ -47,11 +48,11 @@ func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (inter
 }
 
 func (s *service) create(entity *v1.GlobalVariable) (*v1.GlobalVariable, error) {
-	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+	if err := validate.Variable(entity, s.sch); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
 
-	// Update the time contains in the entity
+	// Update the time contained in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
@@ -71,9 +72,11 @@ func (s *service) update(entity *v1.GlobalVariable, parameters apiInterface.Para
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
-	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+
+	if err := s.sch.ValidateVariableSpec(entity.Spec); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
+
 	// find the previous version of the Datasource
 	oldEntity, err := s.dao.Get(parameters.Name)
 	if err != nil {

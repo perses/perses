@@ -67,9 +67,9 @@ type Schemas interface {
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
 	ValidatePanel(plugin common.Plugin, panelName string) error
-	ValidateGlobalVariable(v modelV1.VariableSpec) error
-	ValidateDashboardVariables([]dashboard.Variable) error
+	ValidateVariableSpec(v modelV1.VariableSpec) error
 	ValidateVariable(plugin common.Plugin, varName string) error
+	ValidateDashboardVariables([]dashboard.Variable) error
 	GetLoaders() []Loader
 }
 
@@ -178,15 +178,43 @@ func (s *sch) ValidateQuery(plugin common.Plugin, queryName string) error {
 	return s.validatePlugin(plugin, "query", queryName, s.queries)
 }
 
-func (s *sch) ValidateGlobalVariable(v modelV1.VariableSpec) error {
-	if v.Kind != variable.KindList {
-		return nil
+func (s *sch) ValidateVariableSpec(v modelV1.VariableSpec) error {
+	switch v.Kind {
+	case variable.KindDatasource:
+		return s.validateDatasourceVariable(v)
+	case variable.KindList:
+		return s.validateListVariable(v)
+	case variable.KindText:
+		return nil // no extra validation needed here
+	default:
+		return errors.New("unsupported variable kind")
+	}
+}
+
+func (s *sch) validateDatasourceVariable(v modelV1.VariableSpec) error {
+	datasourceVariableSpec, ok := v.Spec.(*variable.DatasourceSpec)
+	if !ok {
+		return errors.New("Error converting Variable to DatasourceVariable")
 	}
 
+	schemasMap := s.dts.schemas.Load()
+	if schemasMap == nil {
+		return errors.New("datasource schemas are not loaded")
+	}
+	for kind := range *schemasMap {
+		if kind == datasourceVariableSpec.DatasourceKind {
+			return nil
+		}
+	}
+	return fmt.Errorf("no plugin found for DatasourceKind %s", datasourceVariableSpec.DatasourceKind)
+}
+
+func (s *sch) validateListVariable(v modelV1.VariableSpec) error {
 	listVariableSpec, ok := v.Spec.(*variable.ListSpec)
 	if !ok {
 		return errors.New("Error converting Variable to ListVariable")
 	}
+
 	return s.ValidateVariable(listVariableSpec.Plugin, "")
 }
 

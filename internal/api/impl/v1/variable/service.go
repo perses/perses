@@ -51,7 +51,8 @@ func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
 	if err := validate.Variable(entity, s.sch); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
-	// Update the time contains in the entity
+
+	// Update the time contained in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
 		return nil, err
@@ -71,6 +72,7 @@ func (s *service) update(entity *v1.Variable, parameters apiInterface.Parameters
 		logrus.Debugf("name in Variable %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
 	}
+
 	if len(entity.Metadata.Project) == 0 {
 		entity.Metadata.Project = parameters.Project
 	} else if entity.Metadata.Project != parameters.Project {
@@ -78,7 +80,7 @@ func (s *service) update(entity *v1.Variable, parameters apiInterface.Parameters
 		return nil, apiInterface.HandleBadRequestError("metadata.project and the project name in the http path request don't match")
 	}
 
-	if err := s.sch.ValidateGlobalVariable(entity.Spec); err != nil {
+	if err := s.sch.ValidateVariableSpec(entity.Spec); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
 

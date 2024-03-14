@@ -62,7 +62,7 @@ func Variable(entity modelV1.VariableInterface, sch schemas.Schemas) error {
 	if err := validateVariableName(entity.GetMetadata().GetName()); err != nil {
 		return err
 	}
-	return sch.ValidateGlobalVariable(entity.GetVarSpec())
+	return sch.ValidateVariableSpec(entity.GetVarSpec())
 }
 
 func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list []T) error {
