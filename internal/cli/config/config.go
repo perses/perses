@@ -59,10 +59,10 @@ type Dac struct {
 }
 
 type Config struct {
-	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config"`
-	Project          string                      `json:"project,omitempty"`
-	RefreshToken     string                      `json:"refresh_token,omitempty"`
-	Dac              Dac                         `json:"dac,omitempty"`
+	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
+	Project          string                      `json:"project,omitempty" yaml:"project,omitempty"`
+	RefreshToken     string                      `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
+	Dac              Dac                         `json:"dac,omitempty" yaml:"dac,omitempty"`
 	filePath         string
 	apiClient        api.ClientInterface
 }
