@@ -37,7 +37,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsAuthEnable, useIsReadonly } from '../../context/Config';
+import { useIsAuthEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
@@ -47,6 +47,7 @@ import { useIsMobileSize } from '../../utils/browser-size';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
 import { useCreateSecretMutation } from '../../model/secret-client';
 import { useEphemeralDashboardList } from '../../model/ephemeral-dashboard-client';
+import { useHasPermission } from '../../context/Authorization';
 import { ProjectDashboards } from './tabs/ProjectDashboards';
 import { ProjectEphemeralDashboards } from './tabs/ProjectEphemeralDashboards';
 import { ProjectVariables } from './tabs/ProjectVariables';
@@ -413,7 +414,7 @@ interface DashboardVariableTabsProps {
 export function ProjectTabs(props: DashboardVariableTabsProps) {
   const { projectName, initialTab } = props;
   const { tab } = useParams();
-  const isAuthEnable = useIsAuthEnable();
+  const isAuthEnabled = useIsAuthEnabled();
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
@@ -421,6 +422,14 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
   const hasEphemeralDashboards = (data ?? []).length > 0;
 
   const [value, setValue] = useState((initialTab ?? dashboardsTabIndex).toLowerCase());
+
+  const hasDashboardReadPermission = useHasPermission('read', projectName, 'Dashboard');
+  const hasDatasourceReadPermission = useHasPermission('read', projectName, 'Datasource');
+  const hasEphemeralDashboardReadPermission = useHasPermission('read', projectName, 'EphemeralDashboard');
+  const hasRoleReadPermission = useHasPermission('read', projectName, 'Role');
+  const hasRoleBindingReadPermission = useHasPermission('read', projectName, 'RoleBinding');
+  const hasSecretReadPermission = useHasPermission('read', projectName, 'Secret');
+  const hasVariableReadPermission = useHasPermission('read', projectName, 'Variable');
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);
@@ -449,6 +458,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(dashboardsTabIndex)}
             value={dashboardsTabIndex}
+            disabled={!hasDashboardReadPermission}
           />
           {(hasEphemeralDashboards || tab == ephemeralDashboardsTabIndex) && (
             <MenuTab
@@ -457,6 +467,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
               iconPosition="start"
               {...a11yProps(ephemeralDashboardsTabIndex)}
               value={ephemeralDashboardsTabIndex}
+              disabled={!hasEphemeralDashboardReadPermission}
             />
           )}
           <MenuTab
@@ -465,6 +476,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}
+            disabled={!hasVariableReadPermission}
           />
           <MenuTab
             label="Datasources"
@@ -472,6 +484,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
+            disabled={!hasDatasourceReadPermission}
           />
           <MenuTab
             label="Secrets"
@@ -479,23 +492,28 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
+            disabled={!hasSecretReadPermission}
           />
-          <MenuTab
-            label="Roles"
-            icon={<ShieldIcon />}
-            iconPosition="start"
-            {...a11yProps(rolesTabIndex)}
-            value={rolesTabIndex}
-            disabled={!isAuthEnable}
-          />
-          <MenuTab
-            label="Role Bindings"
-            icon={<ShieldAccountIcon />}
-            iconPosition="start"
-            {...a11yProps(roleBindingsTabIndex)}
-            value={roleBindingsTabIndex}
-            disabled={!isAuthEnable}
-          />
+          {isAuthEnabled && (
+            <MenuTab
+              label="Roles"
+              icon={<ShieldIcon />}
+              iconPosition="start"
+              {...a11yProps(rolesTabIndex)}
+              value={rolesTabIndex}
+              disabled={!hasRoleReadPermission}
+            />
+          )}
+          {isAuthEnabled && (
+            <MenuTab
+              label="Role Bindings"
+              icon={<ShieldAccountIcon />}
+              iconPosition="start"
+              {...a11yProps(roleBindingsTabIndex)}
+              value={roleBindingsTabIndex}
+              disabled={!hasRoleBindingReadPermission}
+            />
+          )}
         </MenuTabs>
         {!isMobileSize && <TabButton index={value} projectName={projectName} />}
       </Stack>
@@ -517,7 +535,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectSecrets projectName={projectName} id="project-secret-list" />
       </TabPanel>
-      {isAuthEnable && (
+      {isAuthEnabled && (
         <>
           <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <ProjectRoles projectName={projectName} id="project-role-list" />
