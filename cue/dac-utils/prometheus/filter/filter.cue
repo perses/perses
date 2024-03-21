@@ -21,12 +21,11 @@ import (
 
 #input: [...varBuilder]
 
-// TODO support label arg if provided like ""\(d.label)=\"$\(d.name)\"""
 filter: strings.Join(
 	[for var in #input {
 		[// switch
-			if var.#pluginKind == _|_ {"\(var.#name)=\"$\(var.#name)\""},
-			if var.#pluginKind != _|_ if var.#pluginKind != labelNamesVar.kind {"\(var.#name)=\"$\(var.#name)\""},
+			if var.#kind == "TextVariable" {"\(var.#name)=\"$\(var.#name)\""},
+			if var.#kind == "ListVariable" if var.#pluginKind != labelNamesVar.kind {"\(var.#name)=\"$\(var.#name)\""},
 		][0]
 	}],
 	",",
