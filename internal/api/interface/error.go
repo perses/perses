@@ -40,7 +40,7 @@ var (
 	ForbiddenError    = &PersesError{message: "forbidden access"}
 )
 
-// HandleError is translating the given error to the echoHTTPError
+// HandleError is translating the given error to the echo.HTTPError
 func HandleError(err error) error {
 	if err == nil {
 		return nil

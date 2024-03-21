@@ -15,6 +15,7 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -184,13 +185,15 @@ func newOIDCEndpoint(provider config.OIDCProvider, jwt crypto.JWT, dao user.DAO)
 }
 
 func (e *oIDCEndpoint) CollectRoutes(g *route.Group) {
+	oidcGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOIDC, e.slugID), withOAuthErrorMdw)
+
 	// Add routes for the "Authorization Code" flow
-	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOIDC, e.slugID, utils.PathLogin), e.auth, true)
-	g.GET(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOIDC, e.slugID, utils.PathCallback), e.codeExchange, true)
+	oidcGroup.GET(fmt.Sprintf("/%s", utils.PathLogin), e.auth, true)
+	oidcGroup.GET(fmt.Sprintf("/%s", utils.PathCallback), e.codeExchange, true)
 
 	// Add routes for device code flow and token exchange
-	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOIDC, e.slugID, utils.PathDeviceCode), e.deviceCode, true)
-	g.POST(fmt.Sprintf("/%s/%s/%s", utils.AuthKindOIDC, e.slugID, utils.PathToken), e.token, true)
+	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathDeviceCode), e.deviceCode, true)
+	oidcGroup.POST(fmt.Sprintf("/%s", utils.PathToken), e.token, true)
 }
 
 // auth is the http handler on Perses side that triggers the "Authorization Code"
@@ -272,7 +275,7 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 	})
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send device authorization request")
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to send device authorization request")
+		return err
 	}
 
 	// Return the device authorization response
@@ -295,37 +298,33 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
-			// Note that for sake of simplicity, it doesn't respect the Oauth 2.0 RFC: (https://www.rfc-editor.org/rfc/rfc8628#section-3.5)
-			// For example:
-			// - we should differentiate the errors that means "try again later" from the others. (error: "authorization_pending")
-			// - we should propagate the message possibly saying to slow down the request (error: "slow_down")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
+			return err
 		}
 		idClaims, err := rp.VerifyTokens[*oidc.IDTokenClaims](ctx.Request().Context(), resp.AccessToken, resp.IDToken, e.deviceCodeRelyingParty.IDTokenVerifier())
 		if err != nil {
 			e.logWithError(err).Error("Failed to verify token")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
+			return err
 		}
 		uInfo, err = rp.Userinfo[*oidcUserInfo](ctx.Request().Context(), resp.AccessToken, resp.TokenType, idClaims.GetSubject(), e.deviceCodeRelyingParty)
 		if err != nil {
 			e.logWithError(err).Error("Failed to request user info")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange device code for token")
+			return err
 		}
 	case api.GrantTypeClientCredentials:
 		_, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
-			return echo.NewHTTPError(http.StatusInternalServerError, "Failed to exchange client credentials for token")
+			return err
 		}
 		//TODO: Probably not a good idea to use the client id as the subject, but what can we do with client credentials?
 		uInfo = &oidcUserInfo{Subject: reqBody.ClientID}
 	default:
-		return echo.NewHTTPError(http.StatusBadRequest, "Unsupported grant type")
+		return oidc.ErrUnsupportedGrantType()
 	}
 
 	resp, err := e.performUserSync(uInfo, ctx.SetCookie)
 	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to sync user in database")
+		return err
 	}
 	return ctx.JSON(http.StatusOK, resp)
 }
@@ -403,13 +402,14 @@ func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clien
 	}
 
 	// Call the token endpoint
-	return client.CallTokenEndpoint(ctx, req, e.clientCredRelyingParty)
+	return callTokenEndpoint(ctx, req, e.clientCredRelyingParty)
 }
 
 // callDeviceAuthorizationEndpoint calls the device authorization endpoint of the provider.
 // It duplicates the original implementation of OIDC library to have a more flexible response reading.
 // An issue has been opened to the oidc library to make the verification_url field also supported.
 // https://github.com/zitadel/oidc/issues/565
+// TODO: Follow up
 func callDeviceAuthorizationEndpoint(ctx context.Context, relyingParty rp.RelyingParty, request *oidc.ClientCredentialsRequest) (*oidc.DeviceAuthorizationResponse, error) {
 	req, err := httphelper.FormRequest(ctx, relyingParty.GetDeviceAuthorizationEndpoint(), request, client.Encoder, "")
 	if err != nil {
@@ -432,6 +432,51 @@ func callDeviceAuthorizationEndpoint(ctx context.Context, relyingParty rp.Relyin
 		resp.VerificationURI = resp.VerificationURL
 	}
 	return &resp.DeviceAuthorizationResponse, nil
+}
+
+// callTokenEndpoint calls the token endpoint of the provider.
+// It duplicates the original implementation of OIDC library to return the oidc.Error if fails.
+// A PR has been opened to the oidc library to modify it on their side
+// https://github.com/zitadel/oidc/pull/571
+// TODO: Follow up
+func callTokenEndpoint(ctx context.Context, request any, caller client.TokenEndpointCaller) (newToken *oauth2.Token, err error) {
+	req, err := httphelper.FormRequest(ctx, caller.TokenEndpoint(), request, client.Encoder, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	httpResp, err := caller.HttpClient().Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer httpResp.Body.Close()
+
+	resp := new(struct {
+		*oidc.AccessTokenResponse
+		*oidc.Error
+	})
+	if err = json.NewDecoder(httpResp.Body).Decode(resp); err != nil {
+		return nil, err
+	}
+
+	if httpResp.StatusCode < http.StatusOK || httpResp.StatusCode >= http.StatusBadRequest {
+		return nil, resp.Error
+	}
+
+	tokenRes := resp.AccessTokenResponse
+
+	token := &oauth2.Token{
+		AccessToken:  tokenRes.AccessToken,
+		TokenType:    tokenRes.TokenType,
+		RefreshToken: tokenRes.RefreshToken,
+		Expiry:       time.Now().UTC().Add(time.Duration(tokenRes.ExpiresIn) * time.Second),
+	}
+	if tokenRes.IDToken != "" {
+		token = token.WithExtra(map[string]any{
+			"id_token": tokenRes.IDToken,
+		})
+	}
+	return token, nil
 }
 
 // logWithError is a little logrus helper to log with the provider slugID.
