@@ -17,6 +17,7 @@
         "spec": {
           "allowAllValue": false,
           "allowMultiple": false,
+          "capturingRegexp": "argos-world",
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
@@ -40,6 +41,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": true,
+          "capturingRegexp": ".*stack=\"([^\"]*)\".*",
           "sort": "alphabetical-asc",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
