@@ -110,7 +110,7 @@ spec: {
                 }
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
-                if grafanaVar.allValue != _|_ {
+                if allowAllValue if grafanaVar.allValue != _|_ {
                     customAllValue: grafanaVar.allValue
                 }
                 if grafanaVar.regex != _|_ {
