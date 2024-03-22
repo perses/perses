@@ -24,8 +24,8 @@ type TextSpec struct {
 }
 
 func (v *TextSpec) Validate() error {
-	if len(v.Value) == 0 {
-		return fmt.Errorf("value for the text variable cannot be empty")
+	if len(v.Value) == 0 && v.Constant {
+		return fmt.Errorf("value for a constant text variable cannot be empty")
 	}
 	return nil
 }
