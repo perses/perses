@@ -16,8 +16,8 @@ import { useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
-import { DeleteDatasourceDialog } from '../dialogs/DeleteDatasourceDialog';
 import { DrawerProps } from '../drawer';
+import { DeleteResourceDialog } from '../dialogs';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
@@ -58,8 +58,9 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
           )}
         </PluginRegistry>
         {onDelete && (
-          <DeleteDatasourceDialog
+          <DeleteResourceDialog
             open={isDeleteDatasourceDialogStateOpened}
+            resource={datasource}
             onClose={() => setDeleteDatasourceDialogStateOpened(false)}
             onSubmit={(d) =>
               onDelete(d).then(() => {
@@ -67,7 +68,6 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
                 onClose();
               })
             }
-            datasource={datasource}
           />
         )}
       </ErrorBoundary>

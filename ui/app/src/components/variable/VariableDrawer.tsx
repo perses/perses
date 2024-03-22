@@ -23,8 +23,8 @@ import {
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
-import { DeleteVariableDialog } from '../dialogs';
 import { DrawerProps } from '../drawer';
+import { DeleteResourceDialog } from '../dialogs';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
@@ -85,8 +85,9 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
           </DatasourceStoreProvider>
         </PluginRegistry>
         {onDelete && (
-          <DeleteVariableDialog
+          <DeleteResourceDialog
             open={isDeleteVariableDialogStateOpened}
+            resource={variable}
             onClose={() => setDeleteVariableDialogStateOpened(false)}
             onSubmit={(v) =>
               onDelete(v).then(() => {
@@ -94,7 +95,6 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                 onClose();
               })
             }
-            variable={variable}
           />
         )}
       </ErrorBoundary>

@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, getDashboardDisplayName } from '@perses-dev/core';
+import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
-import { DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
-import { DatedDashboards } from '../../model/dashboard-client';
+import { useSnackbar } from '@perses-dev/components';
+import { DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
+import { DatedDashboards, useDeleteDashboardMutation } from '../../model/dashboard-client';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
@@ -31,6 +32,8 @@ export interface RecentDashboardListProperties {
 
 export function RecentDashboardList(props: RecentDashboardListProperties) {
   const { dashboardList, hideToolbar, isLoading } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const deleteDashboardMutation = useDeleteDashboardMutation();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -67,6 +70,24 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
       setRenameDashboardDialogStateOpened(true);
     },
     [getDashboard]
+  );
+
+  const handleDashboardDelete = useCallback(
+    (dashboard: DashboardResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        deleteDashboardMutation.mutate(dashboard, {
+          onSuccess: (deletedDashboard: DashboardResource) => {
+            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, deleteDashboardMutation]
   );
 
   const onDeleteButtonClick = useCallback(
@@ -191,10 +212,11 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
               onClose={() => setRenameDashboardDialogStateOpened(false)}
               dashboard={targetedDashboard}
             />
-            <DeleteDashboardDialog
+            <DeleteResourceDialog
               open={isDeleteDashboardDialogStateOpened}
+              resource={targetedDashboard}
+              onSubmit={() => handleDashboardDelete(targetedDashboard)}
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
-              dashboard={targetedDashboard}
             />
           </Box>
         )}

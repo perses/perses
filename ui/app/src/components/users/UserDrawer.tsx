@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Secret } from '@perses-dev/core';
 import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DrawerProps } from '../drawer';
 import { DeleteResourceDialog } from '../dialogs';
-import { SecretEditorForm } from './SecretEditorForm';
+import { DrawerProps } from '../drawer';
+import { UserResource } from '../../model/user-client';
+import { UserEditorForm } from './UserEditorForm';
 
-interface SecretDrawerProps<T extends Secret> extends DrawerProps<T> {
-  secret: T;
+interface UserDrawerProps extends DrawerProps<UserResource> {
+  user: UserResource;
 }
 
-export function SecretDrawer<T extends Secret>(props: SecretDrawerProps<T>) {
-  const { secret, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
-  const [isDeleteSecretDialogStateOpened, setDeleteSecretDialogStateOpened] = useState<boolean>(false);
+export function UserDrawer(props: UserDrawerProps) {
+  const { user, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+  const [isDeleteUserDialogStateOpened, setDeleteUserDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
@@ -33,27 +33,27 @@ export function SecretDrawer<T extends Secret>(props: SecretDrawerProps<T>) {
   };
 
   return (
-    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="secret-editor">
+    <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="user-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
-          <SecretEditorForm
-            initialSecret={secret}
+          <UserEditorForm
+            initialUser={user}
             initialAction={action}
             isDraft={false}
             isReadonly={isReadonly}
-            onSave={onSave as Dispatch<Secret>}
+            onSave={onSave as Dispatch<UserResource>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteSecretDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? () => setDeleteUserDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (
           <DeleteResourceDialog
-            open={isDeleteSecretDialogStateOpened}
-            resource={secret}
-            onClose={() => setDeleteSecretDialogStateOpened(false)}
-            onSubmit={(d: T) =>
+            open={isDeleteUserDialogStateOpened}
+            resource={user}
+            onClose={() => setDeleteUserDialogStateOpened(false)}
+            onSubmit={(d: UserResource) =>
               onDelete(d).then(() => {
-                setDeleteSecretDialogStateOpened(false);
+                setDeleteUserDialogStateOpened(false);
                 onClose();
               })
             }

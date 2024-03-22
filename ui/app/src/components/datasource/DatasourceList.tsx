@@ -19,7 +19,6 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useIsReadonly } from '../../context/Config';
-import { DeleteDatasourceDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {
@@ -31,6 +30,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { DeleteResourceDialog } from '../dialogs';
 import { DatasourceDataGrid, Row } from './DatasourceDataGrid';
 import { DatasourceDrawer } from './DatasourceDrawer';
 
@@ -211,11 +211,11 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
             onDelete={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
             onClose={() => setDatasourceDrawerOpened(false)}
           />
-          <DeleteDatasourceDialog
+          <DeleteResourceDialog
             open={isDeleteDatasourceDialogOpened}
+            resource={targetedDatasource}
             onClose={() => setDeleteDatasourceDialogOpened(false)}
             onSubmit={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
-            datasource={targetedDatasource}
           />
         </>
       )}

@@ -18,7 +18,6 @@ import { useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { DeleteRoleBindingDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { subjectsSummary } from '../../utils/role';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
@@ -31,6 +30,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { DeleteResourceDialog } from '../dialogs';
 import { RoleBindingDataGrid, Row } from './RoleBindingDataGrid';
 import { RoleBindingDrawer } from './RoleBindingDrawer';
 
@@ -193,11 +193,11 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
             onDelete={(v) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
             onClose={() => setRoleBindingDrawerOpened(false)}
           />
-          <DeleteRoleBindingDialog
+          <DeleteResourceDialog
             open={isDeleteRoleBindingDialogOpened}
+            resource={targetedRoleBinding}
             onClose={() => setDeleteRoleBindingDialogOpened(false)}
             onSubmit={(v: T) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
-            roleBinding={targetedRoleBinding}
           />
         </>
       )}

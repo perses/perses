@@ -21,7 +21,6 @@ import { useSnackbar } from '@perses-dev/components';
 import Clipboard from 'mdi-material-ui/ClipboardOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useIsReadonly } from '../../context/Config';
-import { DeleteVariableDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {
@@ -34,6 +33,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { DeleteResourceDialog } from '../dialogs';
 import { VariableDataGrid, Row } from './VariableDataGrid';
 import { VariableDrawer } from './VariableDrawer';
 
@@ -233,11 +233,11 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
             onDelete={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
             onClose={() => setVariableDrawerOpened(false)}
           />
-          <DeleteVariableDialog
+          <DeleteResourceDialog
             open={isDeleteVariableDialogOpened}
+            resource={targetedVariable}
             onClose={() => setDeleteVariableDialogOpened(false)}
             onSubmit={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
-            variable={targetedVariable}
           />
         </>
       )}

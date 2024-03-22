@@ -14,8 +14,8 @@
 import { Role } from '@perses-dev/core';
 import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DeleteRoleDialog } from '../dialogs';
 import { DrawerProps } from '../drawer';
+import { DeleteResourceDialog } from '../dialogs';
 import { RoleEditorForm } from './RoleEditorForm';
 
 interface RoleDrawerProps<T extends Role> extends DrawerProps<T> {
@@ -47,8 +47,9 @@ export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
           />
         )}
         {onDelete && (
-          <DeleteRoleDialog
+          <DeleteResourceDialog
             open={isDeleteRoleDialogStateOpened}
+            resource={role}
             onClose={() => setDeleteRoleDialogStateOpened(false)}
             onSubmit={(d: T) =>
               onDelete(d).then(() => {
@@ -56,7 +57,6 @@ export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
                 onClose();
               })
             }
-            role={role}
           />
         )}
       </ErrorBoundary>

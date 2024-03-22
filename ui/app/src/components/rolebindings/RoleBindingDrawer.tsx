@@ -14,8 +14,8 @@
 import { RoleBinding } from '@perses-dev/core';
 import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DeleteRoleBindingDialog } from '../dialogs';
 import { DrawerProps } from '../drawer';
+import { DeleteResourceDialog } from '../dialogs';
 import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
 interface RoleBindingDrawerProps<T extends RoleBinding> extends DrawerProps<T> {
@@ -49,8 +49,9 @@ export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawe
           />
         )}
         {onDelete && (
-          <DeleteRoleBindingDialog
+          <DeleteResourceDialog
             open={isDeleteRoleBindingDialogStateOpened}
+            resource={roleBinding}
             onClose={() => setDeleteRoleBindingDialogStateOpened(false)}
             onSubmit={(d: T) =>
               onDelete(d).then(() => {
@@ -58,7 +59,6 @@ export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawe
                 onClose();
               })
             }
-            roleBinding={roleBinding}
           />
         )}
       </ErrorBoundary>

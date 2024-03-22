@@ -16,6 +16,7 @@ import {
   DashboardResource,
   DashboardSelector,
   EphemeralDashboardInfo,
+  getDashboardExtendedDisplayName,
 } from '@perses-dev/core';
 import { Box, Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
@@ -24,7 +25,8 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { CreateDashboardDialog, DeleteDashboardDialog, RenameDashboardDialog } from '../dialogs';
+import { useSnackbar } from '@perses-dev/components';
+import { CreateDashboardDialog, DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {
   CREATED_AT_COL_DEF,
@@ -34,6 +36,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { useDeleteDashboardMutation } from '../../model/dashboard-client';
 import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface DashboardListProperties extends ListProperties {
@@ -50,6 +53,8 @@ export interface DashboardListProperties extends ListProperties {
 export function DashboardList(props: DashboardListProperties) {
   const navigate = useNavigate();
   const { dashboardList, hideToolbar, isLoading, initialState } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const deleteDashboardMutation = useDeleteDashboardMutation();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -133,6 +138,24 @@ export function DashboardList(props: DashboardListProperties) {
     [getDashboard]
   );
 
+  const handleDashboardDelete = useCallback(
+    (dashboard: DashboardResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        deleteDashboardMutation.mutate(dashboard, {
+          onSuccess: (deletedDashboard: DashboardResource) => {
+            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, deleteDashboardMutation]
+  );
+
   const handleDeleteButtonClick = useCallback(
     (project: string, name: string) => () => {
       setTargetedDashboard(getDashboard(project, name));
@@ -214,9 +237,10 @@ export function DashboardList(props: DashboardListProperties) {
               onSuccess={handleDashboardDuplication}
               onClose={() => setDuplicateDashboardDialogStateOpened(false)}
             />
-            <DeleteDashboardDialog
+            <DeleteResourceDialog
               open={isDeleteDashboardDialogStateOpened}
-              dashboard={targetedDashboard}
+              resource={targetedDashboard}
+              onSubmit={() => handleDashboardDelete(targetedDashboard)}
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
             />
           </>
