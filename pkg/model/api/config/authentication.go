@@ -28,6 +28,12 @@ const (
 	DefaultRefreshTokenTTL = time.Hour * 24
 )
 
+type OAuthOverride struct {
+	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
+	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
+	Scopes       []string      `json:"scopes" yaml:"scopes"`
+}
+
 // appendIfMissing will append the value in the slice, only if not already present.
 // Will return a boolean saying if the value has been appended or not.
 func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
@@ -40,13 +46,15 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 }
 
 type Provider struct {
-	SlugID       string        `json:"slug_id" yaml:"slug_id"`
-	Name         string        `json:"name" yaml:"name"`
-	ClientID     secret.Hidden `json:"client_id" yaml:"client_id"`
-	ClientSecret secret.Hidden `json:"client_secret" yaml:"client_secret"`
-	RedirectURI  common.URL    `json:"redirect_uri" yaml:"redirect_uri"`
-	Scopes       []string      `json:"scopes" yaml:"scopes"`
-	DisablePKCE  bool          `json:"disable_pkce" yaml:"disable_pkce"`
+	SlugID            string         `json:"slug_id" yaml:"slug_id"`
+	Name              string         `json:"name" yaml:"name"`
+	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
+	ClientSecret      secret.Hidden  `json:"client_secret" yaml:"client_secret"`
+	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
+	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
+	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
+	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
+	DisablePKCE       bool           `json:"disable_pkce" yaml:"disable_pkce"`
 }
 
 func (p *Provider) Verify() error {
@@ -68,8 +76,8 @@ func (p *Provider) Verify() error {
 type OIDCProvider struct {
 	Provider     `json:",inline" yaml:",inline"`
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
-	DiscoveryURL common.URL        `json:"discovery_url" yaml:"discovery_url"`
-	URLParams    map[string]string `json:"url_params" yaml:"url_params"`
+	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
+	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
 }
 
 func (p *OIDCProvider) Verify() error {
@@ -84,7 +92,8 @@ type OAuthProvider struct {
 	AuthURL             common.URL `json:"auth_url" yaml:"auth_url"`
 	TokenURL            common.URL `json:"token_url" yaml:"token_url"`
 	UserInfosURL        common.URL `json:"user_infos_url" yaml:"user_infos_url"`
-	CustomLoginProperty string     `json:"custom_login_property" yaml:"custom_login_property"`
+	DeviceAuthURL       common.URL `json:"device_auth_url" yaml:"device_auth_url"`
+	CustomLoginProperty string     `json:"custom_login_property,omitempty" yaml:"custom_login_property,omitempty"`
 }
 
 func (p *OAuthProvider) Verify() error {

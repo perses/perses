@@ -28,7 +28,7 @@ import (
 const (
 	archiveName        = "sources.tar.gz"
 	cueDepsFolderName  = "cue/"
-	cueDepsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concepts/packages/
+	cueDepsRootDstPath = "cue.mod/pkg/github.com/perses/perses" // for more info see https://cuelang.org/docs/concept/modules-packages-instances/
 	maxFileSize        = 10240                                  // = 10 KiB. Estimated max size for CUE files. Limit required by gosec.
 )
 

@@ -32,6 +32,7 @@ type Route struct {
 	Handler echo.HandlerFunc
 	// IsAnonymous is telling if the given route should be accessible without a JWT token.
 	IsAnonymous bool
+	Middlewares []echo.MiddlewareFunc
 }
 
 func (r *Route) Register(g *echo.Group, middleware ...echo.MiddlewareFunc) {
@@ -43,60 +44,67 @@ func (r *Route) Register(g *echo.Group, middleware ...echo.MiddlewareFunc) {
 }
 
 type Group struct {
-	Path   string
-	Groups []*Group
-	Routes []*Route
+	Path        string
+	Groups      []*Group
+	Routes      []*Route
+	Middlewares []echo.MiddlewareFunc
 }
 
-func (g *Group) Group(path string) *Group {
+func (g *Group) Group(path string, middleware ...echo.MiddlewareFunc) *Group {
 	newGroup := &Group{
-		Path: path,
+		Path:        path,
+		Middlewares: middleware,
 	}
 	g.Groups = append(g.Groups, newGroup)
 	return newGroup
 }
 
-func (g *Group) ANY(path string, h echo.HandlerFunc, isAnonymous bool) {
+func (g *Group) ANY(path string, h echo.HandlerFunc, isAnonymous bool, middleware ...echo.MiddlewareFunc) {
 	g.Routes = append(g.Routes, &Route{
 		Method:      methodAny,
 		Path:        path,
 		Handler:     h,
 		IsAnonymous: isAnonymous,
+		Middlewares: middleware,
 	})
 }
 
-func (g *Group) POST(path string, h echo.HandlerFunc, isAnonymous bool) {
+func (g *Group) POST(path string, h echo.HandlerFunc, isAnonymous bool, middleware ...echo.MiddlewareFunc) {
 	g.Routes = append(g.Routes, &Route{
 		Method:      http.MethodPost,
 		Path:        path,
 		Handler:     h,
 		IsAnonymous: isAnonymous,
+		Middlewares: middleware,
 	})
 }
 
-func (g *Group) PUT(path string, h echo.HandlerFunc, isAnonymous bool) {
+func (g *Group) PUT(path string, h echo.HandlerFunc, isAnonymous bool, middleware ...echo.MiddlewareFunc) {
 	g.Routes = append(g.Routes, &Route{
 		Method:      http.MethodPut,
 		Path:        path,
 		Handler:     h,
 		IsAnonymous: isAnonymous,
+		Middlewares: middleware,
 	})
 }
 
-func (g *Group) GET(path string, h echo.HandlerFunc, isAnonymous bool) {
+func (g *Group) GET(path string, h echo.HandlerFunc, isAnonymous bool, middleware ...echo.MiddlewareFunc) {
 	g.Routes = append(g.Routes, &Route{
 		Method:      http.MethodGet,
 		Path:        path,
 		Handler:     h,
 		IsAnonymous: isAnonymous,
+		Middlewares: middleware,
 	})
 }
 
-func (g *Group) DELETE(path string, h echo.HandlerFunc, isAnonymous bool) {
+func (g *Group) DELETE(path string, h echo.HandlerFunc, isAnonymous bool, middleware ...echo.MiddlewareFunc) {
 	g.Routes = append(g.Routes, &Route{
 		Method:      http.MethodDelete,
 		Path:        path,
 		Handler:     h,
 		IsAnonymous: isAnonymous,
+		Middlewares: middleware,
 	})
 }

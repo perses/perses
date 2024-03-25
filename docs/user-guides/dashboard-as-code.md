@@ -42,7 +42,7 @@ Create a new folder that will become your DaC repository, then follow the steps 
 ```
 cue mod init <module name>
 ```
-See the [CUE documentation](https://cuelang.org/docs/concepts/packages/) for more information about this step.
+See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-instances/) for more information about this step.
 
 #### 2. Retrieve the CUE sources from Perses
 

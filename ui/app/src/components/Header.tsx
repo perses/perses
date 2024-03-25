@@ -43,14 +43,15 @@ import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
 import { AdminRoute, ConfigRoute, ExploreRoute } from '../model/route';
-import { useIsAuthEnable } from '../context/Config';
+import { useIsAuthEnabled } from '../context/Config';
 import { useAuthToken } from '../model/auth-client';
+import { GlobalProject, useHasPartialPermission } from '../context/Authorization';
 import WhitePersesLogo from './logo/WhitePersesLogo';
 import PersesLogoCropped from './logo/PersesLogoCropped';
 
 const ITEM_HEIGHT = 48;
 
-function ThemeSwitch(props: { isAuthEnable: boolean }) {
+function ThemeSwitch(props: { isAuthEnabled: boolean }) {
   const { isDarkModeEnabled, setDarkMode } = useDarkMode();
   const { exceptionSnackbar } = useSnackbar();
   const handleDarkModeChange = () => {
@@ -63,7 +64,7 @@ function ThemeSwitch(props: { isAuthEnable: boolean }) {
   const swapIcon = () => {
     return isDarkModeEnabled ? <Brightness5 id="dark" /> : <Brightness4 id="light" />;
   };
-  if (props.isAuthEnable) {
+  if (props.isAuthEnabled) {
     return (
       <MenuItem onClick={handleDarkModeChange}>
         <ListItemIcon>{swapIcon()}</ListItemIcon>
@@ -119,7 +120,7 @@ function AccountMenu() {
           {token.decodedToken?.sub}
         </MenuItem>
         <Divider />
-        <ThemeSwitch isAuthEnable />
+        <ThemeSwitch isAuthEnabled />
         <MenuItem component="a" href={'/api/auth/logout'}>
           <ListItemIcon>
             <Logout />
@@ -133,6 +134,15 @@ function AccountMenu() {
 
 function ToolMenu() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const hasPartialPermission = useHasPartialPermission(['read'], GlobalProject, [
+    'GlobalDatasource',
+    'GlobalRole',
+    'GlobalRoleBinding',
+    'GlobalSecret',
+    'GlobalVariable',
+    'User',
+  ]);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -163,17 +173,19 @@ function ToolMenu() {
         onClose={handleCloseMenu}
         onClick={handleCloseMenu}
       >
-        <MenuItem component={RouterLink} to={AdminRoute}>
-          <ListItemIcon>
-            <ShieldStar />
-          </ListItemIcon>
-          <Typography>Admin</Typography>
-        </MenuItem>
+        {hasPartialPermission && (
+          <MenuItem component={RouterLink} to={AdminRoute}>
+            <ListItemIcon>
+              <ShieldStar />
+            </ListItemIcon>
+            <Typography>Admin</Typography>
+          </MenuItem>
+        )}
         <MenuItem component={RouterLink} to={ConfigRoute}>
           <ListItemIcon>
-            <Cog />{' '}
+            <Cog />
           </ListItemIcon>
-          <Typography>Config </Typography>
+          <Typography>Config</Typography>
         </MenuItem>
         <MenuItem component={RouterLink} to={ExploreRoute}>
           <ListItemIcon>
@@ -281,7 +293,16 @@ function ProjectMenu(): JSX.Element {
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();
   const isMobileSize = useIsMobileSize();
-  const isAuthEnable = useIsAuthEnable();
+  const isAuthEnabled = useIsAuthEnabled();
+
+  const hasPartialPermission = useHasPartialPermission(['read'], GlobalProject, [
+    'GlobalDatasource',
+    'GlobalRole',
+    'GlobalRoleBinding',
+    'GlobalSecret',
+    'GlobalVariable',
+    'User',
+  ]);
 
   return (
     <AppBar position="relative">
@@ -319,16 +340,18 @@ export default function Header(): JSX.Element {
           />
           {!isMobileSize ? (
             <>
-              <Button
-                aria-label="Administration"
-                aria-controls="menu-admin-appbar"
-                aria-haspopup="true"
-                color="inherit"
-                component={RouterLink}
-                to={AdminRoute}
-              >
-                <ShieldStar sx={{ marginRight: 0.5 }} /> Admin
-              </Button>
+              {hasPartialPermission && (
+                <Button
+                  aria-label="Administration"
+                  aria-controls="menu-admin-appbar"
+                  aria-haspopup="true"
+                  color="inherit"
+                  component={RouterLink}
+                  to={AdminRoute}
+                >
+                  <ShieldStar sx={{ marginRight: 0.5 }} /> Admin
+                </Button>
+              )}
               <Button
                 aria-label="Config"
                 aria-controls="menu-config-appbar"
@@ -356,7 +379,7 @@ export default function Header(): JSX.Element {
           <ProjectMenu />
         </Box>
         <Stack direction={'row'} alignItems={'center'}>
-          {isAuthEnable ? <AccountMenu /> : <ThemeSwitch isAuthEnable={false} />}
+          {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Stack>
       </Toolbar>
     </AppBar>

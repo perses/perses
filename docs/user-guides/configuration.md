@@ -152,27 +152,33 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # The id of the provider that will be used in the URLs (must be unique for all providers)
-  [ slug_id: <string> ]
+  slug_id: <string>
 
   # A verbose name for the provider. Will be used to visually identify it in the frontend.
-  [ name: <string> ]
+  name: <string>
 
   # The Client ID of the Perses application into the provider
-  [ client_id: <secret> ]
+  client_id: <secret>
 
   # The Client Secret of the Perses application into the provider
-  [ client_secret: <secret> ]
+  client_secret: <secret>
+  
+  device_code:
+    # Allow to use a different Client ID for the device code flow
+    [ client_id: <secret> ]
+    # Allow to use a different Client Secret for the device code flow
+    [ client_secret: <secret> ]
 
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
   # If not set it will get it from the request.
   [ redirect_uri: <string> ]
 
-  # scopes the needed scopes to authenticate a user in the provider
+  # The needed scopes to authenticate a user in the provider. It's not mandatory because it will depend on the provider
   scopes:
     - [ <string> ]
 
   # The provider issuer URL
-  [ issuer: <string> ]
+  issuer: <string>
 
   # A custom discovery URL if different from {issuer}/.well-known/openid-configuration
   [ discovery_url: <string> ]
@@ -189,32 +195,53 @@ Generic placeholders are defined as follows:
 
 ```yaml
   # The id of the provider that will be used in the URLs (must be unique for all providers)
-  [ slug_id: <string> ]
+  slug_id: <string>
 
   # A verbose name for the provider. Will be used to visually identify it in the frontend.
-  [ name: <string> ]
+  name: <string>
 
   # The Client ID of the Perses application into the provider
-  [ client_id: <secret> ]
+  client_id: <secret>
 
   # The Client Secret of the Perses application into the provider
-  [ client_secret: <secret> ]
+  client_secret: <secret>
+
+  device_code:
+    # Allow using a different Client ID for the device code flow
+    [ client_id: <secret> ]
+    # Allow using a different Client Secret for the device code flow
+    [ client_secret: <secret> ]
+    # Allow using different Scopes for the device code flow
+    scopes:
+      - [ <string> ]
+
+  client_credentials:
+    # Allow using a different Client ID for the client credentials flow
+    [ client_id: <secret> ]
+    # Allow using a different Client Secret for the client credentials flow
+    [ client_secret: <secret> ]
+    # Allow using different Scopes for the client credentials flow
+    scopes:
+      - [ <string> ]
 
   # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
   [ redirect_uri: <string> ]
 
-  # scopes the needed scopes to authenticate a user in the provider
+  # The needed scopes to authenticate a user in the provider
   scopes:
     - [ <string> ]
 
   # The provider Authorization URL
-  [ auth_url: <string> ]
+  auth_url: <string>
 
   # The provider Token URL
-  [ token_url: <string> ]
+  token_url: <string>
 
   # The provider User Infos URL
-  [ user_infos_url: <string> ]
+  user_infos_url: <string>
+
+  # The provider Device Auth URL
+  [ device_auth_url: <string> ]
 
   # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
   # The login is mandatory to store in the database the name of the user.

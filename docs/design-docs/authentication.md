@@ -66,7 +66,8 @@ authenticate this user in the subsequent requests.
         user_infos_url: "https://api.github.com/user"
 ```
 
-### => Login from external OIDC or OAuth2.0 provider through Web UI.
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (``authorization_code``)
+
 ```mermaid    
 sequenceDiagram
     actor hu as John
@@ -126,10 +127,8 @@ sequenceDiagram
     deactivate br
 ```
 
-### => Login from external OIDC or OAuth2.0 provider through ``percli`` command line.
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through ``percli`` command line. (``device_code``)
 
-> 🚧 This documentation is not necessarily the final design but describes the implemention plan
-> 
 ```mermaid    
 sequenceDiagram
     actor hu as John
@@ -206,5 +205,54 @@ sequenceDiagram
     rp->>pc: 200: Projects list
     deactivate rp
     pc->>hu: PRINT: Projects list
+    deactivate pc
+```
+
+### => Login from external OIDC or OAuth2.0 provider with non-interactive flow. (``client_credentials``)
+
+> Note: it can be done exactly the same way using directly the backend API.
+> Then one would have to manage the access_token and refresh_token by itself, and send access_token as an Authorization header 
+> in the subsequent requests.
+
+```mermaid    
+sequenceDiagram
+    participant ro as Robot
+    #actor ro as Robot
+    participant pc as percli Command Line
+    participant rp as Perses Backend
+    participant op as External Identity Provider
+    
+    ro->>pc: EXEC: percli login --provider <slug_id> --client-id <client_id> --client-secret <client_secret>
+    activate pc
+    pc->>rp: GET /api/config
+    activate rp
+    rp->>pc: 200: Config<br/> (containing Providers List)
+    deactivate rp
+    pc->>rp: GET /api/auth/providers/{oidc|oauth}/{slug_id}/token
+    activate rp
+    rp->>op: GET /oauth/token
+    activate op
+    op->>rp: 200: access_token
+    deactivate op
+    rp->>op: GET /api/userinfo<br/> (endpoint from Perses Config or .well-known URL)
+    activate op
+    op->>rp: 200: User Info
+    deactivate op
+    Note right of rp: Only User Info is<br/> used to sync user in database
+    rp->>rp: Create or Update user in DB
+    Note right of rp: A new session is created<br /> with a new signed acces_token+refresh_token
+    rp->>pc: 200: access_token + refresh_token
+    deactivate rp
+    pc->>pc: WRITE: session into config file
+    pc->>ro: PRINT: Successfully authenticated!
+    deactivate pc
+    ro->>pc: EXEC: percli get projects
+    activate pc
+    pc->>rp: GET /api/v1/projects
+    activate rp
+    rp->>rp: Verify token and permissions
+    rp->>pc: 200: Projects list
+    deactivate rp
+    pc->>ro: PRINT: Projects list
     deactivate pc
 ```

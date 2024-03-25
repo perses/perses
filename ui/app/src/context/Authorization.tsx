@@ -16,7 +16,7 @@ import { Action, Permission, ProjectResource, Scope } from '@perses-dev/core';
 import { useAuthToken } from '../model/auth-client';
 import { useUserPermissions } from '../model/user-client';
 import { useProjectList } from '../model/project-client';
-import { useIsAuthEnable } from './Config';
+import { useIsAuthEnabled } from './Config';
 
 // Used as placeholder for checking Global permissions
 export const GlobalProject = '*';
@@ -31,7 +31,7 @@ const AuthorizationContext = createContext<AuthorizationContext | undefined>(und
 
 // Provide RBAC helpers for checking current user permissions
 export function AuthorizationProvider(props: { children: ReactNode }) {
-  const enabled = useIsAuthEnable();
+  const enabled = useIsAuthEnabled();
   const { decodedToken } = useAuthToken();
   const username = decodedToken?.sub || '';
   const { data } = useUserPermissions(username);
@@ -74,7 +74,7 @@ export function useDashboardCreateAllowedProjects(): ProjectResource[] {
 /*
  * useHasPermission is a helper for knowing if a user has the permission to perform an action
  * It's only a check client-side, easily bypassable.
- * It will alwas return true if the authorization is disabled
+ * It will always return true if the authorization is disabled
  */
 export function useHasPermission(action: Action, project: string, scope: Scope): boolean {
   const { enabled, username, userPermissions } = useAuthorizationContext();
@@ -96,6 +96,7 @@ export function useHasPermission(action: Action, project: string, scope: Scope):
     }
   }
 
+  // Checking project perm
   return permissionListHasPermission(userPermissions[project] ?? [], action, scope);
 }
 
@@ -105,4 +106,40 @@ function permissionListHasPermission(permissions: Permission[], requestAction: A
       permission.actions.some((action) => action === requestAction || action === '*') &&
       permission.scopes.some((scope) => scope === requestScope || scope === '*')
   );
+}
+
+/*
+ * useHasPartialPermission is a helper for knowing if a user has the permission to perform at least one action
+ * It's only a check client-side, easily bypassable.
+ * It will always return true if the authorization is disabled
+ */
+export function useHasPartialPermission(actions: Action[], project: string, scopes: Scope[]): boolean {
+  const { enabled, username, userPermissions } = useAuthorizationContext();
+
+  // Authorization not enabled
+  if (!enabled) {
+    return true;
+  }
+
+  // User not logged in
+  if (!username) {
+    return false;
+  }
+
+  for (const action of actions) {
+    for (const scope of scopes) {
+      // Checking global perm first
+      if (project !== GlobalProject) {
+        if (permissionListHasPermission(userPermissions[GlobalProject] ?? [], action, scope)) {
+          return true;
+        }
+      }
+
+      // Checking project perm
+      if (permissionListHasPermission(userPermissions[project] ?? [], action, scope)) {
+        return true;
+      }
+    }
+  }
+  return false;
 }

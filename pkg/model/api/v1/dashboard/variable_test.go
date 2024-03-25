@@ -513,11 +513,13 @@ func TestUnmarshalVariableError(t *testing.T) {
 {
   "kind": "TextVariable",
   "spec": {
-    "name": "hogwarts"
+    "name": "hogwarts",
+    "value": "",
+    "constant": true
   }
 }
 `,
-			err: fmt.Errorf(`value for the text variable cannot be empty`),
+			err: fmt.Errorf(`value for a constant text variable cannot be empty`),
 		},
 		{
 			title: "ListVariable with no name",

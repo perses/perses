@@ -75,7 +75,7 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		project := resource.GetProject(entity.GetMetadata(), "")
 		svc, svcErr := p.getService(kind)
 		if svcErr != nil {
-			logrus.WithError(svcErr).Errorf("unable to retrieve the service associated to %q", kind)
+			logrus.WithError(svcErr).Warningf("unable to retrieve the service associated to %q", kind)
 			continue
 		}
 
@@ -135,6 +135,7 @@ func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, erro
 		return p.serviceManager.GetUser(), nil
 	case modelV1.KindVariable:
 		return p.serviceManager.GetVariable(), nil
+	// We don't support the provisioning of the following resources: EphemeralDashboard
 	default:
 		return nil, fmt.Errorf("resource %q not supported by the provisioning service", kind)
 	}

@@ -40,7 +40,7 @@ var (
 	ForbiddenError    = &PersesError{message: "forbidden access"}
 )
 
-// HandleError is translating the given error to the echoHTTPError
+// HandleError is translating the given error to the echo.HTTPError
 func HandleError(err error) error {
 	if err == nil {
 		return nil
@@ -72,7 +72,8 @@ func HandleError(err error) error {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
-	if _, ok := err.(*echo.HTTPError); ok {
+	var HTTPError *echo.HTTPError
+	if errors.As(err, &HTTPError) {
 		// The error is coming from the echo framework likely because the route doesn't exist.
 		// In this particular case, we shouldn't touch to the error and let it like that
 		return err

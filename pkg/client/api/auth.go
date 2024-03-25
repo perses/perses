@@ -18,6 +18,7 @@ import (
 
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
+	"golang.org/x/oauth2"
 )
 
 const authResource = "auth"
@@ -26,6 +27,9 @@ const authResource = "auth"
 type AuthInterface interface {
 	Login(user, password string) (*api.AuthResponse, error)
 	Refresh(refreshToken string) (*api.AuthResponse, error)
+	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
+	DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error)
+	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error)
 }
 
 func newAuth(client *perseshttp.RESTClient) AuthInterface {
@@ -60,6 +64,47 @@ func (c *auth) Refresh(refreshToken string) (*api.AuthResponse, error) {
 	return result, c.client.Post().
 		APIVersion("").
 		Resource(fmt.Sprintf("%s/refresh", authResource)).
+		Body(body).
+		Do().
+		Object(result)
+}
+
+func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, error) {
+	result := &oauth2.DeviceAuthResponse{}
+
+	return result, c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/device/code", authResource, authKind, slugID)).
+		Do().
+		Object(result)
+}
+
+func (c *auth) DeviceAccessToken(authKind, slugID, deviceCode string) (*api.AuthResponse, error) {
+	body := &api.TokenRequest{
+		GrantType:  api.GrantTypeDeviceCode,
+		DeviceCode: deviceCode,
+	}
+	result := &api.AuthResponse{}
+
+	return result, c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
+		Body(body).
+		Do().
+		Object(result)
+}
+
+func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error) {
+	body := &api.TokenRequest{
+		GrantType:    api.GrantTypeClientCredentials,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+	}
+	result := &api.AuthResponse{}
+
+	return result, c.client.Post().
+		APIVersion("").
+		Resource(fmt.Sprintf("%s/providers/%s/%s/token", authResource, authKind, slugID)).
 		Body(body).
 		Do().
 		Object(result)

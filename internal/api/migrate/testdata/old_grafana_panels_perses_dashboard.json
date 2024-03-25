@@ -21,6 +21,7 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
+          "capturingRegexp": "/^argos-.+/",
           "plugin": {
             "kind": "StaticListVariable",
             "spec": {
