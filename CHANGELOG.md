@@ -2,8 +2,9 @@
 
 ## 0.44.0 / 2024-03-25
 
-- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1723) (#1738) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760) (#1785) (#1788) (#1797) (#1798) (#1803) (#1805) (#1806) (#1807) (#1815) (#1817) (#1832) (#1837)
+- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1723) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760) (#1785) (#1788) (#1797) (#1798) (#1803) (#1805) (#1806) (#1807) (#1815) (#1817) (#1837)
 - [FEATURE] Support of a new resource `EphemeralDashboard` (#1730) (#1739) (#1790) (#1818)
+- [FEATURE] Client Credentials authentication flow (#1734) (#1738) (#1832) (#1828) (#1836)
 - [FEATURE] Allow importing Perses dashboards (#1769)
 - [FEATURE] Initial ScatterChart Panel Plugin (#1672)
 - [FEATURE] By config, Perses can stop to serve the UI (#1793)
@@ -34,9 +35,6 @@
 - [BUGFIX] Fix broken location of scatter panel plugin (#1839)
 - [BREAKINGCHANGE] Make the database case-insensitive by config (#1744)
 - [BREAKINGCHANGE] Move Migrate Button into "Add Dashboard" (#1726)
-- [DOC] Design Device code authentication flow (#1734)
-- [DOC] Client Credentials authentication flow (#1836)
-- [DOC] Device code authentication flow (#1828)
 
 ## 0.43.0 / 2024-01-17
 
