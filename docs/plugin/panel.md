@@ -52,6 +52,7 @@ spec:
 ```
 
 ## ScatterChart
+
 Note: Currently, ther are are no spec options avaiable for this panel
 
 ```yaml
