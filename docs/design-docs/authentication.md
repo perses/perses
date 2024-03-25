@@ -5,10 +5,11 @@ Perses has various authentication flows configurable. You can choose to authenti
 or else rely on an external [identity provider](./authentication.md#external-oidcoauth-providers).
 
 In both cases
-- each new user will be saved in the Perses database. 
+- each new user will be saved in the Perses database.
 - at login time, a Perses session (access_token/refresh_token) will be created
 
 Please note that the number of identity providers is not limited.
+
 ```yaml
 authentication:
   providers:
@@ -19,6 +20,7 @@ authentication:
     # Register one or several OAuth provider(s)
     oauth: []
 ```
+
 ## Native provider
 
 In case a native provider is used, the users and their password are stored in the Perses database.
@@ -42,6 +44,7 @@ authenticate this user in the subsequent requests.
 > permissions to an admin.
 
 ### => Configuration example
+
 ```yaml
   authentication:
     providers:
@@ -66,9 +69,9 @@ authenticate this user in the subsequent requests.
         user_infos_url: "https://api.github.com/user"
 ```
 
-### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (``authorization_code``)
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (`authorization_code`)
 
-```mermaid    
+```mermaid
 sequenceDiagram
     actor hu as John
     #actor ro as Robot
@@ -127,9 +130,9 @@ sequenceDiagram
     deactivate br
 ```
 
-### => Login from external OIDC or OAuth2.0 provider with interactive flow, through ``percli`` command line. (``device_code``)
+### => Login from external OIDC or OAuth2.0 provider with interactive flow, through `percli` command line. (`device_code`)
 
-```mermaid    
+```mermaid
 sequenceDiagram
     actor hu as John
     #actor ro as Robot
@@ -208,13 +211,13 @@ sequenceDiagram
     deactivate pc
 ```
 
-### => Login from external OIDC or OAuth2.0 provider with non-interactive flow. (``client_credentials``)
+### => Login from external OIDC or OAuth2.0 provider with non-interactive flow. (`client_credentials`)
 
 > Note: it can be done exactly the same way using directly the backend API.
-> Then one would have to manage the access_token and refresh_token by itself, and send access_token as an Authorization header 
+> Then one would have to manage the access_token and refresh_token by itself, and send access_token as an Authorization header
 > in the subsequent requests.
 
-```mermaid    
+```mermaid
 sequenceDiagram
     participant ro as Robot
     #actor ro as Robot

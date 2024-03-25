@@ -16,8 +16,8 @@ Most of these benefits comes from not dealing with the Perses JSON format direct
 Just pick your favorite to start with DaC. If you don't have one, give a try to both!
 
 > [!NOTE]
-> CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK. 
-> However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case. 
+> CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
+> However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
 > This statement applies also to any other language we might have a SDK for in the future.
 
 Also, as-code means it's GitOps-friendly, meaning that you can also benefit from:
@@ -42,6 +42,7 @@ Create a new folder that will become your DaC repository, then follow the steps 
 ```
 cue mod init <module name>
 ```
+
 See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-instances/) for more information about this step.
 
 #### 2. Retrieve the CUE sources from Perses
@@ -82,6 +83,7 @@ Create a new folder that will become your DaC repository, then follow the steps 
 ```
 go mod init <module name>
 ```
+
 See the [Go documentation](https://go.dev/doc/tutorial/create-module) for more information about this step.
 
 #### 2. Install the Perses SDK
@@ -107,9 +109,10 @@ You should then have a look at the [Go SDK documentation](../dac/go/) to better 
 
 You can also check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata/go/main.go).
 
-> [!WARNING]  
+> [!WARNING]
+>
 > Do not log / print on the standard stdout! It would break the output of the `dac build` command.
- 
+
 Quick start example:
 
 ```golang
@@ -162,7 +165,6 @@ func main() {
 }
 ```
 
-
 ## Build dashboards
 
 Anytime you want to build the final dashboard definition (i.e: Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
@@ -180,6 +182,7 @@ If the build is successful, the result can be found in the generated `built` fol
 ### Build multiple dashboards at once
 
 If you want to develop multiple dashboards as code, you should have **1 dashboard per file** and then call the build command with the directory option:
+
 ```
 percli dac build -d my_dashboards
 ```

@@ -29,7 +29,7 @@ This section provides additional tips & tricks to help you developping dashboard
 
 For code organization & to allow reuse/imports of definitions, it's often interesting to declare things like panels, variables etc. upfront and to pass them afterwards to the dashboard object.
 
-Example: 
+Example:
 
 ```cue
 package myDaC
@@ -104,7 +104,7 @@ Once your code is organized this way, you can even split the different definitio
 
 If you want 2 independant groups of variables on the same dashboard like "C depends on B that depends on A" and "F depends on E that depends on D", use 2 times the variable group builder independantly, then concat the lists.
 
-Example: 
+Example:
 
 ```cue
 package myDaC
