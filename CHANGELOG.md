@@ -1,39 +1,13 @@
 # Changelog
 
-## 0.44.0-rc2 / 2024-03-12
+## 0.44.0 / 2024-03-25
 
-- [FEATURE] Allow creating ephemeral copies of regular dashboards (#1818)
-- [FEATURE] Add dac diff command (#1803)
-- [FEATURE] Add dac preview command (#1798)
-- [FEATURE] Support Ephemeral dashboards on the UI (#1790)
-- [FEATURE] By config, Perses can stop to serve the UI (#1793)
-- [FEATURE] Add duplicate button for global and project resources (#1781)
-- [FEATURE] Ephemeral dashboards are automatically removed once expiration delay has passed (#1739)
-- [FEATURE] Backend support of a new resource `EphemeralDashboard` (#1730)
-- [ENHANCEMENT] DaC CUE SDK: Support all possible attributes in list vars builders (#1817)
-- [ENHANCEMENT] DaC CUE SDK: Allow providing a custom query to the prom variables builders (#1815)
-- [ENHANCEMENT] DaC CUE SDK: rework the variables part to support more use cases (#1807)
-- [ENHANCEMENT] Add persistent flag to set the output folder for dac (#1805)
-- [ENHANCEMENT] Improve project suggestion when creating dashboard (#1791)
-- [ENHANCEMENT] Make defaultPluginKinds of PluginRegistry provider optional (#1789)
-- [BUGFIX] Fix dashboard duplication not working (#1827)
-- [BUGFIX] Change some section titles in API doc to fix broken links in DaC CUE SDK doc (#1802)
-- [BUGFIX] Fix social button redirection (#1788)
-- [BUGFIX] Update relative timerange value when refreshing (#1780)
-- [DOC] Add some more tips & tricks to the CUE SDK doc (#1806)
-- [DOC] Add DaC CUE SDK documentation (#1797)
-
-## 0.44.0-rc1 / 2024-02-27
-
-- [BUGFIX] Update relative timerange value when refreshing (#1780)
-- [BUGFIX] Fix plugin validation that was crashing when no cue file was loaded (#1785)
-- [BUGFIX] Fix schemas path in the docker images (#1785)
-
-## 0.44.0-rc0 / 2024-02-22
-
-- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760)
+- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1738) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760) (#1785) (#1788) (#1798) (#1803) (#1832) (#1837) 
+- [FEATURE] Support of a new resource `EphemeralDashboard` (#1730) (#1739) (#1790) (#1818)
 - [FEATURE] Allow importing Perses dashboards (#1769)
 - [FEATURE] Initial ScatterChart Panel Plugin (#1672)
+- [FEATURE] By config, Perses can stop to serve the UI (#1793)
+- [FEATURE] Add duplicate button for global and project resources (#1781)
 - [ENHANCEMENT] add kubebuilder annotations to dashboard types (#1764)
 - [ENHANCEMENT] Make default datasources more visible (#1767)
 - [ENHANCEMENT] add kubebuilder annotations to runtime types (#1745)
@@ -41,16 +15,35 @@
 - [ENHANCEMENT] Sign in with branded button for external auth provider (#1728)
 - [ENHANCEMENT] Support referencing variables in 'Min step' field (#1725)
 - [ENHANCEMENT] Run ID validation on Metadata.Name in all cases to avoid discrepancies (#1712)
+- [ENHANCEMENT] DaC CUE SDK: Support all possible attributes in list vars builders (#1817)
+- [ENHANCEMENT] DaC CUE SDK: Allow providing a custom query to the prom variables builders (#1815)
+- [ENHANCEMENT] DaC CUE SDK: rework the variables part to support more use cases (#1807)
+- [ENHANCEMENT] Add persistent flag to set the output folder for dac (#1805)
+- [ENHANCEMENT] Improve project suggestion when creating dashboard (#1791)
+- [ENHANCEMENT] Make defaultPluginKinds of PluginRegistry provider optional (#1789)
+- [ENHANCEMENT] Grafana migrate: avoid error when variable defines a "ghost" All value (#1851)
+- [ENHANCEMENT] Allow empty value for non-constant TextVariables (= textbox use case) (#1850)
+- [ENHANCEMENT] Tab hidden if user do not have read permission (#1849)
+- [ENHANCEMENT] Grafana migrate: support capturing regexp in migration (#1848)
 - [BUGFIX] Builtin variables are rendered in prometheus variables (#1768)
 - [BUGFIX] Fixing variable loading indefinitely #1552 (#1763)
 - [BUGFIX] Fix dev provisioning (#1756)
 - [BUGFIX] Tooltip positioning broken in Firefox (#1750)
 - [BUGFIX] Fix the refresh token client in the CLI (#1737)
 - [BUGFIX] Fix initialScatterChartOptions to match schema scatter.cue file. (#1718)
+- [BUGFIX] Update relative timerange value when refreshing (#1780)
+- [BUGFIX] Fix plugin validation that was crashing when no cue file was loaded (#1785)
+- [BUGFIX] Fix dashboard duplication not working (#1827)
+- [BUGFIX] Change some section titles in API doc to fix broken links in DaC CUE SDK doc (#1802)
+- [BUGFIX] Fix broken location of scatter panel plugin (#1839)
 - [BREAKINGCHANGE] Make the database case-insensitive by config (#1744)
 - [BREAKINGCHANGE] Move Migrate Button into "Add Dashboard" (#1726
 - [DOC] Design Device code authentication flow (#1734)
 - [DOC] Reference DaC doc in CLI doc (#1723)
+- [DOC] Add some more tips & tricks to the CUE SDK doc (#1806)
+- [DOC] Add DaC CUE SDK documentation (#1797)
+- [DOC] Client Credentials authentication flow (#1836)
+- [DOC] Device code authentication flow (#1828)
 
 ## 0.43.0 / 2024-01-17
 
