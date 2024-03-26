@@ -128,55 +128,52 @@ spec: {
         }
     }]
     // go through the top-level panels 1st time, to fill the panels section of Perses
+    panels: { for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels {
+        // function-like pattern to factorize the panel conversion logic
+        _panelConversion: {
+            #panel: _
 
-    if #grafanaDashboard.panels != null {
-        panels: {for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels {
-            // function-like pattern to factorize the panel conversion logic
-            _panelConversion: {
-                #panel: _
-
-                kind: "Panel"
-                spec: {
-                    display: {
-                        name: [ // switch
-                            if #panel.title != _|_ if #panel.title != "" {
-                                #panel.title
-                            },
-                            "empty"
-                        ][0]
-                        description: *#panel.description | ""
-                    }
-                    plugin: [ // switch
-                        %(conditional_panels)
+            kind: "Panel"
+            spec: {
+                display: {
+                    name: [ // switch
+                        if #panel.title != _|_ if #panel.title != "" {
+                            #panel.title
+                        },
+                        "empty"
                     ][0]
-                    // in case of no targets, the resulting empty array will be removed via unmarshaling in Go (omitempty)
-                    queries: [ if #panel.targets != _|_ for _, target in #panel.targets {
-                        kind: "TimeSeriesQuery"
-                        spec: {
-                            #target: target
-                            plugin: [ // switch
-                                %(conditional_timeseries_queries)
-                            ][0]
-                        }
-                    }]
+                    description: *#panel.description | ""
                 }
-            }
-            // if the current panel is a row, go through its children panels
-            if grafanaPanel.panels != _|_ {
-                for innerPanelId, innerPanel in grafanaPanel.panels { 
-                    "\(grafanaPanelId)_\(innerPanelId)": {
-                        _panelConversion & {#panel: innerPanel}
+                plugin: [ // switch
+                    %(conditional_panels)
+                ][0]
+                // in case of no targets, the resulting empty array will be removed via unmarshaling in Go (omitempty)
+                queries: [ if #panel.targets != _|_ for _, target in #panel.targets {
+                    kind: "TimeSeriesQuery"
+                    spec: {
+                        #target: target
+                        plugin: [ // switch
+                            %(conditional_timeseries_queries)
+                        ][0]
                     }
+                }]
+            }
+        }
+        // if the current panel is a row, go through its children panels
+        if grafanaPanel.panels != _|_ {
+            for innerPanelId, innerPanel in grafanaPanel.panels { 
+                "\(grafanaPanelId)_\(innerPanelId)": {
+                    _panelConversion & {#panel: innerPanel}
                 }
             }
-            // else
-            if grafanaPanel.panels == _|_ { 
-                "\(grafanaPanelId)": {
-                    _panelConversion & {#panel: grafanaPanel}
-                }
+        }
+        // else
+        if grafanaPanel.panels == _|_ { 
+            "\(grafanaPanelId)": {
+                _panelConversion & {#panel: grafanaPanel}
             }
-        }}
-    }
+        }
+    }}
     // function-like pattern to factorize the position conversion logic
     _positionConversion: {
         #gridPos: _
@@ -190,37 +187,35 @@ spec: {
             "$ref": "#/spec/panels/\(#id)"
         }
     }
-    if #grafanaDashboard.panels != null {
     // we have to go through the panels again here, since in Grafana a panel embeds its position info while in Perses panels & layouts are split
-        layouts: [
+    layouts: [
         // create a first grid to gather standalone panels, if there are some (= only if first encountered panel is not a row)
-            if #grafanaDashboard.panels[0] != _|_ if #grafanaDashboard.panels[0].panels == _|_ {
-                {
-                    kind: "Grid"
-                    spec: {
-                        // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
-                        items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
-                            _positionConversion & {#gridPos: grafanaPanel.gridPos, #id: grafanaPanelId}
-                        }]
-                    }
-                }
-            },
-            // go through the top-level panels a 3rd time & match only the rows, to create the corresponding grids
-            for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels != _|_ { // if the panel is a row
+        if #grafanaDashboard.panels[0] != _|_ if #grafanaDashboard.panels[0].panels == _|_ {
+            {
                 kind: "Grid"
                 spec: {
-                    display: {
-                        title: grafanaPanel.title,
-                        collapse: {
-                            open: !grafanaPanel.collapsed
-                        }
-                    }
-                    // go through the children panels of the current row
-                    items: [ for innerPanelId, innnerPanel in grafanaPanel.panels {
-                        _positionConversion & {#gridPos: innnerPanel.gridPos, #id: "\(grafanaPanelId)_\(innerPanelId)"}
+                    // go through the top-level panels a 2nd time and append an item only for the ones that are not rows neither belong to a row
+                    items: [ for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels == _|_ {
+                        _positionConversion & {#gridPos: grafanaPanel.gridPos, #id: grafanaPanelId}
                     }]
                 }
             }
-        ]
-    }
+        },
+        // go through the top-level panels a 3rd time & match only the rows, to create the corresponding grids
+        for grafanaPanelId, grafanaPanel in #grafanaDashboard.panels if grafanaPanel.panels != _|_ { // if the panel is a row
+            kind: "Grid"
+            spec: {
+                display: {
+                    title: grafanaPanel.title,
+                    collapse: {
+                        open: !grafanaPanel.collapsed
+                    }
+                }
+                // go through the children panels of the current row
+                items: [ for innerPanelId, innnerPanel in grafanaPanel.panels {
+                    _positionConversion & {#gridPos: innnerPanel.gridPos, #id: "\(grafanaPanelId)_\(innerPanelId)"}
+                }]
+            }
+        }
+    ]
 }
