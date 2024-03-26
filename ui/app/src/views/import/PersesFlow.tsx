@@ -37,6 +37,7 @@ function PersesFlow({ dashboard }: PersesFlowProps) {
   });
 
   const importOnClick = () => {
+    dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };
 
