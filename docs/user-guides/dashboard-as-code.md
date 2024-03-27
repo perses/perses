@@ -59,9 +59,7 @@ You can omit the version flag if you are connected to a Perses server (it will r
 
 You are now fully ready to start developping dashboards as code!
 
-It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. For this have a look at:
-- The [official website](https://cuelang.org/) of Cuelang.
-- [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
+It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. Please take a look at their [official website](https://cuelang.org/)
 
 You should then have a look at the [CUE SDK documentation](../dac/cue/) to better understand how to use the framework.
 
