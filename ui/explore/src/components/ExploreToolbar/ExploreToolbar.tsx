@@ -13,9 +13,10 @@
 
 import { Stack, Box, useTheme, useMediaQuery } from '@mui/material';
 import { TimeRangeControls } from '@perses-dev/dashboards';
+import React from 'react';
 
 export interface ExploreToolbarProps {
-  exploreTitleComponent?: JSX.Element;
+  exploreTitleComponent?: React.ReactNode;
 }
 
 export const ExploreToolbar = (props: ExploreToolbarProps) => {

@@ -38,7 +38,6 @@ export interface OptionsEditorProps<Spec> {
   value: Spec;
   onChange: (next: Spec) => void;
   isReadonly?: boolean;
-  isExplore?: boolean;
 }
 
 /**

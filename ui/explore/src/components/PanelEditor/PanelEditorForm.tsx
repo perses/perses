@@ -12,28 +12,19 @@
 // limitations under the License.
 
 import { PanelEditorValues, PanelPreview } from '@perses-dev/dashboards';
-import { usePluginEditor } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryEditor, usePluginEditor } from '@perses-dev/plugin-system';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Button, Grid, Stack, Typography } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
+import { Grid, Stack, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { Action, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { SetStateAction } from 'react';
-import { TimeSeriesQueryEditor } from '../TimeSeriesQueryEditor';
+import { Action, Definition, UnknownSpec } from '@perses-dev/core';
+import React, { SetStateAction } from 'react';
 import { ExploreToolbar } from '../ExploreToolbar';
-import { useTimeSeriesQueryEditorActions } from '../../context/useTimeSeriesQueryEditorActions';
 import { usePanelEditor } from '../../context/usePanelEditor';
 
 export interface PanelEditorProps {
   initialValues: PanelEditorValues;
   initialAction: Action;
-  exploreTitleComponent?: JSX.Element;
-}
-
-export interface PanelSpecEditorProps {
-  panelDefinition: PanelDefinition;
-  onQueriesChange: (queries: QueryDefinition[]) => void;
-  onPluginSpecChange: (spec: UnknownSpec) => void;
+  exploreTitleComponent?: React.ReactNode;
 }
 
 export function PanelEditorForm(props: PanelEditorProps) {
@@ -58,17 +49,6 @@ export function PanelEditorForm(props: PanelEditorProps) {
     },
   });
 
-  const onChange = (queries: QueryDefinition[]) => setQueries(queries);
-
-  const {
-    handleQueryChange,
-    handleQueryAdd,
-    handleQueryCollapseExpand,
-    handleQueryDelete,
-    queriesCollapsed,
-    defaultTimeSeriesQueryKind,
-  } = useTimeSeriesQueryEditorActions({ onChange, queries });
-
   const form = useForm({
     mode: 'onBlur',
     defaultValues: {
@@ -84,17 +64,7 @@ export function PanelEditorForm(props: PanelEditorProps) {
           <Grid item xs={12}>
             <Stack gap={1}>
               {/* Maybe in the future we should have something like PanelSpecEditor as we have on the Dashboard System */}
-              <TimeSeriesQueryEditor
-                handleQueryChange={handleQueryChange}
-                handleQueryCollapseExpand={handleQueryCollapseExpand}
-                handleQueryDelete={handleQueryDelete}
-                queriesCollapsed={queriesCollapsed}
-                queries={queries}
-                defaultTimeSeriesQueryKind={defaultTimeSeriesQueryKind}
-              />
-              <Button variant="contained" startIcon={<AddIcon />} sx={{ marginRight: 'auto' }} onClick={handleQueryAdd}>
-                Add Query
-              </Button>
+              <TimeSeriesQueryEditor onChange={setQueries} queries={queries} />
             </Stack>
           </Grid>
           <Grid item xs={12}>
