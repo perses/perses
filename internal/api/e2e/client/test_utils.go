@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/pkg/client/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func withClient(t *testing.T, testFunc func(v1.ClientInterface, dependency.PersistenceManager) []api.Entity) {
@@ -37,7 +38,7 @@ func withClient(t *testing.T, testFunc func(v1.ClientInterface, dependency.Persi
 
 func createClient(t *testing.T, server *httptest.Server) v1.ClientInterface {
 	restClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-		URL: server.URL,
+		URL: common.MustParseURL(server.URL),
 	})
 	if err != nil {
 		t.Fatal(err)
