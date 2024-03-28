@@ -174,7 +174,6 @@ export function UserEditorForm(props: UserEditorFormProps) {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    required
                     fullWidth
                     label="First Name"
                     InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
@@ -194,7 +193,6 @@ export function UserEditorForm(props: UserEditorFormProps) {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    required
                     fullWidth
                     label="Last Name"
                     InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
@@ -237,7 +235,6 @@ export function UserEditorForm(props: UserEditorFormProps) {
                   render={({ field, fieldState }) => (
                     <TextField
                       {...field}
-                      required
                       fullWidth
                       label="Password"
                       InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
@@ -333,7 +330,6 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
           render={({ field, fieldState }) => (
             <TextField
               {...field}
-              required
               fullWidth
               label="Issuer"
               InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
@@ -359,7 +355,6 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
           render={({ field, fieldState }) => (
             <TextField
               {...field}
-              required
               fullWidth
               label="Email"
               InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
@@ -385,7 +380,6 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
           render={({ field, fieldState }) => (
             <TextField
               {...field}
-              required
               fullWidth
               label="Subject"
               InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
