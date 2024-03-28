@@ -12,50 +12,93 @@
 // limitations under the License.
 
 import { generatePath } from 'react-router';
-import { createMemoryHistory } from 'history';
+import { createMemoryHistory, MemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
-import { screen, act } from '@testing-library/react';
+import { screen, act, RenderOptions, render } from '@testing-library/react';
 import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
-import { renderWithContext } from '../../test';
-import testDashboard from '../../test/testDashboard';
-import { DashboardProvider, DashboardStoreProps, TemplateVariableProvider } from '../../context';
+import { DurationString } from '@perses-dev/core';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryParamProvider } from 'use-query-params';
+import React, { useLayoutEffect, useState } from 'react';
+import { Router } from 'react-router-dom';
+import { SnackbarProvider } from '@perses-dev/components';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { TimeRangeControls } from './TimeRangeControls';
 
 const history = createMemoryHistory({
   initialEntries: [generatePath('/home'), generatePath('/dashboards/:id', { id: 'test' })],
 });
 
-describe('TimeRangeControls', () => {
-  let initialState: DashboardStoreProps;
-  const testDefaultTimeRange = { pastDuration: testDashboard.spec.duration };
-  const testDefaultRefreshInterval = testDashboard.spec.refreshInterval;
+interface CustomRouterProps {
+  history: MemoryHistory;
+  children: React.ReactNode;
+}
 
-  beforeEach(() => {
-    initialState = {
-      dashboardResource: testDashboard,
-    };
+/*
+ * Workaround for React router upgrade type errors.
+ * More details: https://stackoverflow.com/a/69948457/17575201
+ */
+const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }) => {
+  const [state, setState] = useState({
+    action: history.action,
+    location: history.location,
   });
+
+  useLayoutEffect(() => history.listen(setState), [history]);
+
+  return (
+    <Router location={state.location} navigationType={state.action} navigator={history}>
+      {children}
+    </Router>
+  );
+};
+
+/**
+ * Test helper to render a React component with some common app-level providers wrapped around it.
+ */
+export function renderWithContext(
+  ui: React.ReactElement,
+  options?: Omit<RenderOptions, 'queries'>,
+  history?: MemoryHistory
+) {
+  // Create a new QueryClient for each test to avoid caching issues
+  const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
+
+  const customHistory = history ?? createMemoryHistory();
+
+  const BaseRender = () => (
+    <CustomRouter history={customHistory}>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>{ui}</SnackbarProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </CustomRouter>
+  );
+
+  return render(<BaseRender />, options);
+}
+
+describe('TimeRangeControls', () => {
+  const testDefaultTimeRange = { pastDuration: '30m' as DurationString };
+  const testDefaultRefreshInterval = '0s';
 
   const renderTimeRangeControls = (testURLParams: boolean) => {
     renderWithContext(
-      <DashboardProvider initialState={initialState}>
+      <>
         {testURLParams ? (
           <TimeRangeProviderWithQueryParams
             initialRefreshInterval={testDefaultRefreshInterval}
             initialTimeRange={testDefaultTimeRange}
           >
-            <TemplateVariableProvider>
-              <TimeRangeControls />
-            </TemplateVariableProvider>
+            <TimeRangeControls />
           </TimeRangeProviderWithQueryParams>
         ) : (
           <TimeRangeProvider refreshInterval={testDefaultRefreshInterval} timeRange={testDefaultTimeRange}>
-            <TemplateVariableProvider>
-              <TimeRangeControls />
-            </TemplateVariableProvider>
+            <TimeRangeControls />
           </TimeRangeProvider>
         )}
-      </DashboardProvider>,
+      </>,
       undefined,
       history
     );
