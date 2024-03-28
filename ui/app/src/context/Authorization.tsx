@@ -32,7 +32,7 @@ const AuthorizationContext = createContext<AuthorizationContext | undefined>(und
 // Provide RBAC helpers for checking current user permissions
 export function AuthorizationProvider(props: { children: ReactNode }) {
   const enabled = useIsAuthEnabled();
-  const { decodedToken } = useAuthToken();
+  const { data: decodedToken } = useAuthToken();
   const username = decodedToken?.sub || '';
   const { data } = useUserPermissions(username);
   const userPermissions = useMemo(() => {
