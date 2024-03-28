@@ -23,6 +23,7 @@ import (
 	"github.com/perses/perses/pkg/client/fake/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type client struct {
@@ -32,7 +33,7 @@ type client struct {
 
 func New() api.ClientInterface {
 	restClient, _ := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-		URL: "http://localhost:8080",
+		URL: common.MustParseURL("http://localhost:8080"),
 	})
 	return &client{
 		restClient: restClient,

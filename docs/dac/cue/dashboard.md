@@ -16,11 +16,11 @@ dashboardBuilder & {} // input parameters expected
 
 ## Parameters
 
-| Parameter      | Type                                                                                                                                   | Description                                                                                                         |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `#name`        | string                                                                                                                                 | The name of the dashboard.                                                                                          |
-| `#project`     | string                                                                                                                                 | The project to which the dashboard belongs.                                                                         |
-| `#variables`   | [...[VariableSpec](../../api/variable.md#dashboard-level)]                                                                             | An array of variables defined for the dashboard.                                                                    |
+| Parameter      | Type                                                                                                                                                     | Description                                                                                                         |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `#name`        | string                                                                                                                                                   | The name of the dashboard.                                                                                          |
+| `#project`     | string                                                                                                                                                   | The project to which the dashboard belongs.                                                                         |
+| `#variables`   | [...[VariableSpec](../../api/variable.md#dashboard-level)]                                                                                               | An array of variables defined for the dashboard.                                                                    |
 | `#panelGroups` | map[string]: { layout: [Layout](../../api/dashboard.md#layout-specification), panels: map[string]: [Panel](../../api/dashboard.md#panel-specification) } | A map where each key is a panel group name, and the value is an object containing layout and panels for that group. |
 
 ## Example

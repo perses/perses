@@ -26,6 +26,14 @@ func ParseURL(rawURL string) (*URL, error) {
 	return &URL{URL: u}, nil
 }
 
+func MustParseURL(rawURL string) *URL {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		panic(err)
+	}
+	return &URL{URL: u}
+}
+
 type URL struct {
 	*url.URL `json:"-" yaml:"-"`
 }

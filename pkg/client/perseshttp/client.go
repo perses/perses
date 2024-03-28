@@ -14,51 +14,34 @@
 package perseshttp
 
 import (
-	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
-	"os"
-	"sync"
 	"time"
+
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 )
 
 const connectionTimeout = 30 * time.Second
 
-type BasicAuth struct {
-	User     string `json:"user" yaml:"user"`
-	Password string `json:"password" yaml:"password,omitempty"`
-	// PasswordFile is a path to a file that contains a password
-	PasswordFile string `json:"password_file,omitempty" yaml:"password_file,omitempty"`
-}
-
-func (b *BasicAuth) Verify() error {
-	if len(b.User) == 0 || (len(b.Password) == 0 && len(b.PasswordFile) == 0) {
-		return fmt.Errorf("when using basicAuth, user or password cannot be empty")
-	}
-	if len(b.PasswordFile) > 0 {
-		// Read the file and load the password contained
-		data, err := os.ReadFile(b.PasswordFile)
-		if err != nil {
-			return err
-		}
-		b.Password = string(data)
-	}
-	return nil
-}
-
-// RestConfigClient defines all parameter that can be set to customize the RESTClient
+// RestConfigClient defines all parameters that can be set to customize the RESTClient
 type RestConfigClient struct {
-	URL         string            `json:"url" yaml:"url"`
-	InsecureTLS bool              `json:"insecure_tls,omitempty" yaml:"insecure_tls,omitempty"`
-	Token       string            `json:"token,omitempty" yaml:"token,omitempty"`
-	BasicAuth   *BasicAuth        `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
-	Headers     map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
+	URL       *common.URL       `json:"url" yaml:"url"`
+	BasicAuth *secret.BasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
+	// The HTTP authorization credentials for the targets.
+	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
+	// TLSConfig to use to connect to the targets.
+	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	Headers   map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 }
 
 // NewFromConfig create an instance of RESTClient using the config passed as parameter
 func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
+	tlsCfg, err := secret.BuildTLSConfig(config.TLSConfig)
+	if err != nil {
+		return nil, err
+	}
 	roundTripper := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -66,7 +49,7 @@ func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: config.InsecureTLS}, // nolint: gas, gosec
+		TLSClientConfig:     tlsCfg, // nolint: gas, gosec
 	}
 
 	httpClient := &http.Client{
@@ -74,49 +57,28 @@ func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
 		Timeout:   connectionTimeout,
 	}
 
-	u, err := url.Parse(config.URL)
-	if err != nil {
-		return nil, err
-	}
-
 	return &RESTClient{
-		token:     config.Token,
-		BaseURL:   u,
-		Client:    httpClient,
-		headers:   config.Headers,
-		basicAuth: config.BasicAuth,
+		authorization: config.Authorization,
+		BaseURL:       config.URL.URL,
+		Client:        httpClient,
+		headers:       config.Headers,
+		basicAuth:     config.BasicAuth,
 	}, nil
 }
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.
 type RESTClient struct {
-	tokenMutex sync.Mutex
-	// Default token used to be authenticated in all client requests.
-	// It can be overridden using the method SetToken
-	token string
+	// Usually it contains the bearer token required to contact the remote API.
+	authorization *secret.Authorization
 	// basicAuth to be used for each request (not editable)
 	// Using a basicAuth has the priority other the token
-	basicAuth *BasicAuth
+	basicAuth *secret.BasicAuth
 	// Default headers for all client requests (not editable)
 	headers map[string]string
 	// base is the root URL for all invocations of the client
 	BaseURL *url.URL
 	// Set specific behavior of the client.  If not set http.DefaultClient will be used.
 	Client *http.Client
-}
-
-// GetToken gets the token
-func (c *RESTClient) GetToken() string {
-	c.tokenMutex.Lock()
-	defer c.tokenMutex.Unlock()
-	return c.token
-}
-
-// SetToken set the token (thread safe)
-func (c *RESTClient) SetToken(token string) {
-	c.tokenMutex.Lock()
-	defer c.tokenMutex.Unlock()
-	c.token = token
 }
 
 // GetHeaders gets the headers
@@ -150,5 +112,5 @@ func (c *RESTClient) Delete() *Request {
 }
 
 func (c *RESTClient) newRequest(method string) *Request {
-	return NewRequest(c.Client, method, c.BaseURL, c.GetToken(), c.basicAuth, c.headers)
+	return NewRequest(c.Client, method, c.BaseURL, c.authorization, c.basicAuth, c.headers)
 }

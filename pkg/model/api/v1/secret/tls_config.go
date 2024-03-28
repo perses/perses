@@ -13,6 +13,12 @@
 
 package secret
 
+import (
+	"crypto/tls"
+
+	promConfig "github.com/prometheus/common/config"
+)
+
 // PublicTLSConfig is the public struct of TLSConfig.
 // It's used when the API returns a response to a request
 type PublicTLSConfig struct {
@@ -40,6 +46,25 @@ func NewPublicTLSConfig(t *TLSConfig) *PublicTLSConfig {
 		ServerName:         t.ServerName,
 		InsecureSkipVerify: t.InsecureSkipVerify,
 	}
+}
+
+func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
+	if cfg == nil {
+		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
+	}
+	preConfig := &promConfig.TLSConfig{
+		CA:                 cfg.CA,
+		Cert:               cfg.Cert,
+		Key:                promConfig.Secret(cfg.Key),
+		CAFile:             cfg.CAFile,
+		CertFile:           cfg.CertFile,
+		KeyFile:            cfg.KeyFile,
+		ServerName:         cfg.ServerName,
+		InsecureSkipVerify: cfg.InsecureSkipVerify,
+		MinVersion:         promConfig.TLSVersions["TLS12"],
+		MaxVersion:         promConfig.TLSVersions["TLS13"],
+	}
+	return promConfig.NewTLSConfig(preConfig)
 }
 
 type TLSConfig struct {

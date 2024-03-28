@@ -52,7 +52,8 @@ func (c *cueDefs) Load() error {
 	if err != nil {
 		return err
 	}
-	// the Cue context is keeping track of loaded instances. Which means this context must be recreated everytime Load is called to avoid a memory leak.
+	// The Cue context is keeping track of loaded instances.
+	// Which means this context must be recreated every time Load is called to avoid a memory leak.
 	cueContext := cuecontext.New()
 
 	// newSchemas is used for double buffering, to avoid any issue when there are panels to validate at the same time load() is triggered

@@ -6,7 +6,7 @@ application.
 > Disclaimer: We are working actively on reducing this amount of required dependencies/providers
 > working on some default values or opt-in/opt-out mechanisms.
 
-### Getting started (npm example)
+## Getting started (npm example)
 
 ```bash
 # For example you can use the create-react-app command line or reuse the code of your app
@@ -20,7 +20,7 @@ npm i --save @perses-dev/components \
   @emotion/styled @hookform/resolvers
 ```
 
-### Minimal code
+## Minimal code
 
 Here replacing your App.tsx
 
@@ -161,7 +161,7 @@ You should see a perses panel going to your browser
 
 <img src="../images/embedded-panel-screenshot.png">
 
-### Definitions by provider
+## Definitions by provider
 
 > Check each Provider's source code/jsdoc for more details.
 

@@ -48,7 +48,7 @@ export function useIsReadonly() {
   return config.security.readonly;
 }
 
-export function useIsAuthEnable() {
+export function useIsAuthEnabled() {
   const { config } = useConfigContext();
   return config.security.enable_auth;
 }

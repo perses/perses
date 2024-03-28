@@ -14,10 +14,10 @@
 package labelnames
 
 import (
-	"strings"
 	labelNamesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-names:model"
 	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
 	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	filterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 )
 
 _kind=#kind: listVarBuilder.#kind & "ListVariable"
@@ -36,16 +36,7 @@ _sort=#sort?:                       v1Variable.#Sort
 #query:                             string
 #dependencies: [...{...}]
 
-// TODO support label arg if provided like ""\(d.label)=\"$\(d.name)\"""
-filter: strings.Join(
-	[for d in #dependencies {
-		[// switch
-			if d.#pluginKind == _|_ {"\(d.#name)=\"$\(d.#name)\""},
-			if d.#pluginKind != _|_ if d.#pluginKind != labelNamesVar.kind {"\(d.#name)=\"$\(d.#name)\""},
-		][0]
-	}],
-	",",
-	)
+filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
 		if #query != _|_ {#query},

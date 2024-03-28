@@ -40,7 +40,7 @@ We are publishing a set of tags to match different requirements when running Per
 
 Examples:
 
-- images built from the main branch:  `persesdev/perses:main-2023-12-14-f66e10ce-distroless-debug`
+- images built from the main branch: `persesdev/perses:main-2023-12-14-f66e10ce-distroless-debug`
   or `persesdev/perses:main-2023-12-14-f66e10ce-distroless`
 - latest Perses image: `persesdev/perses` or `persesdev/perses:latest-debug`
 - precise release image: `persesdev/perses:v0.42.1`, `persesdev/perses:v0.42.1-debug`, `persesdev/perses:v0.42.1-distroless`, `persesdev/perses:v0.42.1-distroless-debug`

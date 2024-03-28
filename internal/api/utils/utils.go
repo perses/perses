@@ -30,6 +30,8 @@ const (
 	PathCallback           = "callback"
 	PathLogout             = "logout"
 	PathRefresh            = "refresh"
+	PathDeviceCode         = "device/code"
+	PathToken              = "token"
 	AuthKindNative         = "native"
 	AuthKindOIDC           = "oidc"
 	AuthKindOAuth          = "oauth"

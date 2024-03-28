@@ -22,9 +22,9 @@ promFilterBuilder & {} // input parameters expected
 
 ## Output
 
-| Field     | Type   | Description                                                                                                                                    |
-|-----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| `filter`  | string | A labels matcher expression, that covers all the variables previously passed. E.g `{namespace="$namespace",pod="$pod",container="$container"}` |
+| Field    | Type   | Description                                                                                                                                    |
+|----------|--------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| `filter` | string | A labels matcher expression, that covers all the variables previously passed. E.g `{namespace="$namespace",pod="$pod",container="$container"}` |
 
 ## Example
 

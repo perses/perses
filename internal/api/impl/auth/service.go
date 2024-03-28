@@ -88,6 +88,10 @@ func (s *service) getOrPrepareUserEntity(login string) (*v1.User, bool, error) {
 }
 
 func (s *service) syncUser(uInfo externalUserInfo) (*v1.User, error) {
+	login := uInfo.GetLogin()
+	if len(login) == 0 {
+		return nil, errors.New("the user login cannot be empty")
+	}
 	entity, isNew, err := s.getOrPrepareUserEntity(uInfo.GetLogin())
 	if err != nil {
 		return nil, err

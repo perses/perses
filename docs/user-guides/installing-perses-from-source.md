@@ -61,7 +61,7 @@ All your monitoring dashboards in one place.               <\
 ⇨ http server started on [::]:8080
 ```
 
-If you are interested in exploring how to configure your Perses server, please see the 
+If you are interested in exploring how to configure your Perses server, please see the
 [configuration documentation](configuration.md).
 
 ## Connect a browser (default)

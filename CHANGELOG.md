@@ -1,5 +1,41 @@
 # Changelog
 
+## 0.44.0 / 2024-03-25
+
+- [FEATURE] Support Go and Cue SDK for the Dashboard as Code. That includes new commands in the CLI. Try `percli dac --help for more info` (#1664) (#1694) (#1695) (#1699) (#1710) (#1717) (#1722) (#1723) (#1743) (#1746) (#1752) (#1753) (#1754) (#1759) (#1760) (#1785) (#1788) (#1797) (#1798) (#1803) (#1805) (#1806) (#1807) (#1815) (#1817) (#1837)
+- [FEATURE] Support of a new resource `EphemeralDashboard` (#1730) (#1739) (#1790) (#1818)
+- [FEATURE] Authenticate with external providers using `percli` (Perses CLI) (#1734) (#1738) (#1832) (#1828) (#1836)
+- [FEATURE] Allow importing Perses dashboards (#1769)
+- [FEATURE] Initial ScatterChart Panel Plugin (#1672)
+- [FEATURE] By config, Perses can stop to serve the UI (#1793)
+- [FEATURE] Add duplicate button for global and project resources (#1781)
+- [ENHANCEMENT] Add `kubebuilder` annotations to dashboard types (#1764)
+- [ENHANCEMENT] Make default datasources more visible (#1767)
+- [ENHANCEMENT] Add `kubebuilder` annotations to runtime types (#1745)
+- [ENHANCEMENT] Allow dynamic selection of authentication provider in percli (#1735)
+- [ENHANCEMENT] Sign in with branded button for external auth provider (#1728)
+- [ENHANCEMENT] Support referencing variables in 'Min step' field (#1725)
+- [ENHANCEMENT] Run ID validation on Metadata.Name in all cases to avoid discrepancies (#1712)
+- [ENHANCEMENT] Improve project suggestion when creating dashboard (#1791)
+- [ENHANCEMENT] Make defaultPluginKinds of PluginRegistry provider optional (#1789)
+- [ENHANCEMENT] Grafana migrate: avoid error when variable defines a "ghost" All value (#1851)
+- [ENHANCEMENT] Allow empty value for non-constant TextVariables (= textbox use case) (#1850)
+- [ENHANCEMENT] Tab hidden if user do not have read permission (#1849)
+- [ENHANCEMENT] Grafana migrate: support capturing regexp in migration (#1848)
+- [BUGFIX] Builtin variables are rendered in prometheus variables (#1768)
+- [BUGFIX] Fixing variable loading indefinitely #1552 (#1763)
+- [BUGFIX] Fix dev provisioning (#1756)
+- [BUGFIX] Tooltip positioning broken in Firefox (#1750)
+- [BUGFIX] Fix the refresh token client in the CLI (#1737)
+- [BUGFIX] Fix initialScatterChartOptions to match schema scatter.cue file. (#1718)
+- [BUGFIX] Update relative timerange value when refreshing (#1780)
+- [BUGFIX] Fix plugin validation that was crashing when no cue file was loaded (#1785)
+- [BUGFIX] Fix dashboard duplication not working (#1827)
+- [BUGFIX] Change some section titles in API doc to fix broken links in DaC CUE SDK doc (#1802)
+- [BUGFIX] Fix broken location of scatter panel plugin (#1839)
+- [BREAKINGCHANGE] Make the database case-insensitive by config (#1744)
+- [BREAKINGCHANGE] Move Migrate Button into "Add Dashboard" (#1726)
+
 ## 0.43.0 / 2024-01-17
 
 - [FEATURE] Add Secret Form Editor (#1671)

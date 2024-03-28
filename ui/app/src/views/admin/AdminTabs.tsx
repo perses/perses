@@ -34,13 +34,13 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
 import { useCreateGlobalDatasourceMutation } from '../../model/admin-client';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
-import { useIsAuthEnable, useIsReadonly } from '../../context/Config';
+import { useIsAuthEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateGlobalRoleBindingMutation } from '../../model/global-rolebinding-client';
 import { useCreateGlobalRoleMutation, useGlobalRoleList } from '../../model/global-role-client';
 import { RoleDrawer } from '../../components/roles/RoleDrawer';
 import { RoleBindingDrawer } from '../../components/rolebindings/RoleBindingDrawer';
-import { GlobalProject } from '../../context/Authorization';
+import { GlobalProject, useHasPermission } from '../../context/Authorization';
 import { useIsMobileSize } from '../../utils/browser-size';
 import { useCreateGlobalSecretMutation } from '../../model/global-secret-client';
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
@@ -372,12 +372,18 @@ interface AdminTabsProps {
 
 export function AdminTabs(props: AdminTabsProps) {
   const { initialTab } = props;
-  const isAuthEnable = useIsAuthEnable();
+  const isAuthEnabled = useIsAuthEnabled();
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
 
   const [value, setValue] = useState((initialTab ?? variablesTabIndex).toLowerCase());
+
+  const hasGlobalDatasourceReadPermission = useHasPermission('read', GlobalProject, 'GlobalDatasource');
+  const hasGlobalRoleReadPermission = useHasPermission('read', GlobalProject, 'GlobalRole');
+  const hasGlobalRoleBindingReadPermission = useHasPermission('read', GlobalProject, 'GlobalRoleBinding');
+  const hasGlobalSecretReadPermission = useHasPermission('read', GlobalProject, 'GlobalSecret');
+  const hasGlobalVariableReadPermission = useHasPermission('read', GlobalProject, 'GlobalVariable');
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);
@@ -406,6 +412,7 @@ export function AdminTabs(props: AdminTabsProps) {
             iconPosition="start"
             {...a11yProps(variablesTabIndex)}
             value={variablesTabIndex}
+            disabled={!hasGlobalVariableReadPermission}
           />
           <MenuTab
             label="Global Datasources"
@@ -413,6 +420,7 @@ export function AdminTabs(props: AdminTabsProps) {
             iconPosition="start"
             {...a11yProps(datasourcesTabIndex)}
             value={datasourcesTabIndex}
+            disabled={!hasGlobalDatasourceReadPermission}
           />
           <MenuTab
             label="Global Secrets"
@@ -420,23 +428,28 @@ export function AdminTabs(props: AdminTabsProps) {
             iconPosition="start"
             {...a11yProps(secretsTabIndex)}
             value={secretsTabIndex}
+            disabled={!hasGlobalSecretReadPermission}
           />
-          <MenuTab
-            label="Global Roles"
-            icon={<ShieldIcon />}
-            iconPosition="start"
-            {...a11yProps(roleBindingsTabIndex)}
-            value={rolesTabIndex}
-            disabled={!isAuthEnable}
-          />
-          <MenuTab
-            label="Global Role Bindings"
-            icon={<ShieldAccountIcon />}
-            iconPosition="start"
-            {...a11yProps(roleBindingsTabIndex)}
-            value={roleBindingsTabIndex}
-            disabled={!isAuthEnable}
-          />
+          {isAuthEnabled && (
+            <MenuTab
+              label="Global Roles"
+              icon={<ShieldIcon />}
+              iconPosition="start"
+              {...a11yProps(roleBindingsTabIndex)}
+              value={rolesTabIndex}
+              disabled={!hasGlobalRoleReadPermission}
+            />
+          )}
+          {isAuthEnabled && (
+            <MenuTab
+              label="Global Role Bindings"
+              icon={<ShieldAccountIcon />}
+              iconPosition="start"
+              {...a11yProps(roleBindingsTabIndex)}
+              value={roleBindingsTabIndex}
+              disabled={!hasGlobalRoleBindingReadPermission}
+            />
+          )}
         </MenuTabs>
         {!isMobileSize && <TabButton index={value} />}
       </Stack>
@@ -450,7 +463,7 @@ export function AdminTabs(props: AdminTabsProps) {
       <TabPanel value={value} index={secretsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <GlobalSecrets id="global-secret-list" />
       </TabPanel>
-      {isAuthEnable && (
+      {isAuthEnabled && (
         <>
           <TabPanel value={value} index={rolesTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <GlobalRoles id="global-role-list" />

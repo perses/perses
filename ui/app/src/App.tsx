@@ -23,28 +23,28 @@ import { AuthorizationProvider } from './context/Authorization';
 function App() {
   const location = useLocation();
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        backgroundColor: ({ palette }) => palette.background.default,
-      }}
-    >
-      {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
-
+    <AuthorizationProvider>
       <Box
         sx={{
-          flex: 1,
           display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+          backgroundColor: ({ palette }) => palette.background.default,
         }}
       >
-        <AuthorizationProvider>
+        {location.pathname !== SignInRoute && location.pathname !== SignUpRoute && <Header />}
+
+        <Box
+          sx={{
+            flex: 1,
+            display: 'flex',
+          }}
+        >
           <Router />
-        </AuthorizationProvider>
+        </Box>
+        <Footer />
       </Box>
-      <Footer />
-    </Box>
+    </AuthorizationProvider>
   );
 }
 

@@ -16,9 +16,9 @@ varGroupBuilder & {} // input parameters expected
 
 ## Parameters
 
-| Parameter | Type            | Mandatory/Optional | Default | Description                                                                      |
-|-----------|-----------------|--------------------|---------|----------------------------------------------------------------------------------|
-| `#input`  | [...varBuilder] | Mandatory          |         | The list of variables to be grouped.                                             |
+| Parameter | Type            | Mandatory/Optional | Default | Description                          |
+|-----------|-----------------|--------------------|---------|--------------------------------------|
+| `#input`  | [...varBuilder] | Mandatory          |         | The list of variables to be grouped. |
 
 Technically the array could contain any kind of object, still it is meant to receive variables builder entries that are going to do something with the dependencies appended by the Variable Group builder.
 You can also pass to it variables for which the notion of dependencies don't/can't apply (like text variables or static lists) but that will still be used as dependencies for the following variables.

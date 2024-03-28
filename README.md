@@ -38,36 +38,25 @@ Perses aims to tackle multiple goals:
 
 ## Status
 
-While we already released a certain amount of versions, Perses is still in an early alpha stage and still a work in
-progress. The current pieces that are in place are:
-
-- The Plugin architecture has finally reached a stable point.
-  - The plugins concern the Variables, Panels, Queries and Datasources definitions.
-  - To provide a good static validation, the backend is using multiple CUE schemas and the CLI got a `lint` command.
-    All schemas are available in the [cue/schemas](./cue/schemas) folder.
-- A backend REST API provides R/W access to dashboard and datasource definitions.
-- A CLI that can be used to interact with the REST API. A short doc is available [here](./docs/tooling/cli.md)
-- While the UI is still in progress, we already have:
-  - a beginning of navigation that will help to move from a dashboard to another.
-  - support of the following panel types:
-    - Time series charts.
-    - Gauge panels.
-    - Stat panels (single value with sparkline).
-    - Markdown panels (as an alternative to the Text panel)
-  - Visual editing of the dashboard is available, which includes a number of editable panel options
-- A migration script that helps to move from Grafana to Perses.
-- The dashboard data model is still evolving along with the dashboard implementation and new requirements. Before reaching a stable state regarding the data model, we are waiting for feedback to know if we need to adjust and potentially break things.
+1. Perses as an application can now **be used**.
+   * Data-model reached a stable point, and we are providing different panels that should cover most of the use case
+     when you need to use Prometheus.
+   * Authentication and authorization are available.
+2. On the GitOps aspect:
+   * We provide a CLI that helps to interact with the API. A short doc is available [here](./docs/tooling/cli.md)
+   * Two SDKs (in Golang and in Cuelang) are available to create a Dashboard using language you would
+     like. (`Dashboard as Code` feature)
+     Probably these SDKs are going to involve depending on the feedback we might receive. Likely it will be to add more
+     util function rather than breaking things.
+3. We are eager to change the current plugin architecture to make it potentially simpler and above all to be able to
+   externalize the load and the implementation of a plugin.
+   * Changes are more on the frontend side. [cue/schemas](./cue/schemas) are kept in their current shape as there is no
+     point to remove the static validation of the plugin in the backend side.
+   * *Work is in progress*
 
 ## What's next
 
-Here is a not ordered list of what it can come in the future in Perses:
-
-- Perses native on Kubernetes using CRDs
-- Traces Visualization support
-- Docs, a lot of docs :)
-- Generating Panel #200
-- Sub folder management #183
-- Datasource discovery #74
+Current Roadmap is available [here](./ROADMAP.md)
 
 ## Install
 
@@ -119,7 +108,9 @@ document [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### UI development
 
-If you are primarily interested in contributing to the UI application and libraries, please refer to the [UI Readme](./ui/README.md). It includes quick start instructions for how to build, run, and test the React UI. It also includes details about the architecture and [guidelines](./ui/ui-guidelines.md) for development.
+If you are primarily interested in contributing to the UI application and libraries, please refer to
+the [UI Readme](./ui/README.md). It includes quick start instructions for how to build, run, and test the React UI. It
+also includes details about the architecture and [guidelines](./ui/ui-guidelines.md) for development.
 
 ## License
 
