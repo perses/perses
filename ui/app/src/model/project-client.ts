@@ -14,7 +14,7 @@
 import { ProjectResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodDELETE, HTTPMethodPOST } from './http';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST } from './http';
 import { resource as dashboardResource } from './dashboard-client';
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
@@ -30,6 +30,16 @@ const resource = 'projects';
 const dependingResources = [dashboardResource, variableResource, datasourceResource];
 
 type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
+
+/**
+ * Used to get a project in the API.
+ * Will automatically be refreshed when cache is invalidated
+ */
+export function useProject(name: string) {
+  return useQuery<ProjectResource, Error>([resource, name], () => {
+    return getProject(name);
+  });
+}
 
 /**
  * Used to get projects from the API
@@ -116,10 +126,10 @@ export function useDeleteProjectMutation() {
   });
 }
 
-export function fetchProject(name: string) {
-  const url = buildURL({
-    resource: resource,
-    name: name,
+export function getProject(name: string) {
+  const url = buildURL({ resource: resource, name: name });
+  return fetchJson<ProjectResource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
   });
-  return fetchJson<ProjectResource>(url);
 }

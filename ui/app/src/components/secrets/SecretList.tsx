@@ -20,7 +20,6 @@ import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
 import { useSnackbar } from '@perses-dev/components';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import { DeleteSecretDialog } from '../dialogs';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import { useIsReadonly } from '../../context/Config';
@@ -32,6 +31,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { DeleteResourceDialog } from '../dialogs';
 import { SecretDataGrid, Row } from './SecretDataGrid';
 import { SecretDrawer } from './SecretDrawer';
 
@@ -244,11 +244,11 @@ export function SecretList<T extends Secret>({
             onDelete={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
             onClose={() => setSecretDrawerOpened(false)}
           />
-          <DeleteSecretDialog
+          <DeleteResourceDialog
             open={isDeleteSecretDialogOpened}
+            resource={targetedSecret}
             onClose={() => setDeleteSecretDialogOpened(false)}
             onSubmit={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
-            secret={targetedSecret}
           />
         </>
       )}

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getMetadataProject, Role, Action } from '@perses-dev/core';
+import { Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import { DeleteResourceDialog } from '../dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { GlobalProject } from '../../context/Authorization';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
@@ -25,105 +26,118 @@ import {
   CREATED_AT_COL_DEF,
   ListPropertiesWithCallbacks,
   NAME_COL_DEF,
-  PROJECT_COL_DEF,
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { DeleteResourceDialog } from '../dialogs';
-import { RoleDataGrid, Row } from './RoleDataGrid';
-import { RoleDrawer } from './RoleDrawer';
+import { UserResource } from '../../model/user-client';
+import { UserDataGrid, Row } from './UserDataGrid';
+import { UserDrawer } from './UserDrawer';
 
 /**
- * Display roles in a table style.
- * @param props.data Contains all roles to display
+ * Display users in a table style.
+ * @param props.data Contains all users to display
  * @param props.hideToolbar Hide toolbar if enabled
  * @param props.onUpdate Event received when an 'update' action has been requested
  * @param props.onDelete Event received when a 'delete' action has been requested
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) {
+export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
-  const findRole = useCallback(
-    (name: string, project?: string) => {
-      return data.find((role) => getMetadataProject(role.metadata) === project && role.metadata.name === name);
+  const findUser = useCallback(
+    (name: string) => {
+      return data.find((user) => user.metadata.name === name);
     },
     [data]
   );
 
   const rows = useMemo(() => {
     return data.map(
-      (role) =>
+      (user) =>
         ({
-          project: getMetadataProject(role.metadata),
-          name: role.metadata.name,
-          version: role.metadata.version,
-          createdAt: role.metadata.createdAt,
-          updatedAt: role.metadata.updatedAt,
+          name: user.metadata.name,
+          nativeProvider: !!user.spec.nativeProvider?.password,
+          oauthProviders: !!user.spec.oauthProviders?.length,
+          version: user.metadata.version,
+          createdAt: user.metadata.createdAt,
+          updatedAt: user.metadata.updatedAt,
         }) as Row
     );
   }, [data]);
 
-  const [targetedRole, setTargetedRole] = useState<T>();
+  const [targetedUser, setTargetedUser] = useState<UserResource>();
   const [action, setAction] = useState<Action>('read');
-  const [isRoleDrawerOpened, setRoleDrawerOpened] = useState<boolean>(false);
-  const [isDeleteRoleDialogOpened, setDeleteRoleDialogOpened] = useState<boolean>(false);
+  const [isUserDrawerOpened, setUserDrawerOpened] = useState<boolean>(false);
+  const [isDeleteUserDialogOpened, setDeleteUserDialogOpened] = useState<boolean>(false);
 
-  const handleRoleSave = useCallback(
-    async (role: T) => {
+  const handleUserSave = useCallback(
+    async (user: UserResource) => {
       if (action === 'create') {
-        await onCreate(role);
+        await onCreate(user);
       } else if (action === 'update') {
-        await onUpdate(role);
+        await onUpdate(user);
       }
-      setRoleDrawerOpened(false);
+      setUserDrawerOpened(false);
     },
     [action, onCreate, onUpdate]
   );
 
   const handleRowClick = useCallback(
-    (name: string, project?: string) => {
-      setTargetedRole(findRole(name, project));
+    (name: string) => {
+      setTargetedUser(findUser(name));
       setAction('read');
-      setRoleDrawerOpened(true);
+      setUserDrawerOpened(true);
     },
-    [findRole]
+    [findUser]
   );
 
   const handleDuplicateButtonClick = useCallback(
-    (name: string, project?: string) => () => {
-      const role = findRole(name, project);
-      setTargetedRole(role);
+    (name: string) => () => {
+      const user = findUser(name);
+      setTargetedUser(user);
       setAction('create');
-      setRoleDrawerOpened(true);
+      setUserDrawerOpened(true);
     },
-    [findRole]
+    [findUser]
   );
 
   const handleEditButtonClick = useCallback(
-    (name: string, project?: string) => () => {
-      const role = findRole(name, project);
-      setTargetedRole(role);
+    (name: string) => () => {
+      const user = findUser(name);
+      setTargetedUser(user);
       setAction('update');
-      setRoleDrawerOpened(true);
+      setUserDrawerOpened(true);
     },
-    [findRole]
+    [findUser]
   );
 
   const handleDeleteButtonClick = useCallback(
-    (name: string, project?: string) => () => {
-      setTargetedRole(findRole(name, project));
-      setDeleteRoleDialogOpened(true);
+    (name: string) => () => {
+      setTargetedUser(findUser(name));
+      setDeleteUserDialogOpened(true);
     },
-    [findRole]
+    [findUser]
   );
 
   const columns = useMemo<Array<GridColDef<Row>>>(
     () => [
-      PROJECT_COL_DEF,
       NAME_COL_DEF,
+      {
+        field: 'nativeProvider',
+        headerName: 'Native Provider',
+        type: 'boolean',
+        flex: 3,
+        minWidth: 150,
+      },
+      {
+        field: 'oauthProviders',
+        headerName: 'External Providers',
+        type: 'boolean',
+        flex: 3,
+        minWidth: 150,
+      },
       VERSION_COL_DEF,
       CREATED_AT_COL_DEF,
       UPDATED_AT_COL_DEF,
@@ -139,27 +153,27 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
             icon={<PencilIcon />}
             label="Edit"
             action="update"
-            scope={params.row.project ? 'Role' : 'GlobalRole'}
-            project={params.row.project ? params.row.project : GlobalProject}
-            onClick={handleEditButtonClick(params.row.name, params.row.project)}
+            scope="User"
+            project={GlobalProject}
+            onClick={handleEditButtonClick(params.row.name)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-duplicate'}
             icon={<ContentCopyIcon />}
             label="Duplicate"
             action="create"
-            scope={params.row.project ? 'Role' : 'GlobalRole'}
-            project={params.row.project ? params.row.project : GlobalProject}
-            onClick={handleDuplicateButtonClick(params.row.name, params.row.project)}
+            scope="User"
+            project={GlobalProject}
+            onClick={handleDuplicateButtonClick(params.row.name)}
           />,
           <CRUDGridActionsCellItem
             key={params.id + '-delete'}
             icon={<DeleteIcon />}
             label="Delete"
             action="delete"
-            scope={params.row.project ? 'Role' : 'GlobalRole'}
-            project={params.row.project ? params.row.project : GlobalProject}
-            onClick={handleDeleteButtonClick(params.row.name, params.row.project)}
+            scope="User"
+            project={GlobalProject}
+            onClick={handleDeleteButtonClick(params.row.name)}
           />,
         ],
       },
@@ -169,7 +183,7 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
 
   return (
     <Stack width="100%">
-      <RoleDataGrid
+      <UserDataGrid
         rows={rows}
         columns={columns}
         initialState={initialState}
@@ -177,22 +191,22 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
         isLoading={isLoading}
         onRowClick={handleRowClick}
       />
-      {targetedRole && (
+      {targetedUser && (
         <>
-          <RoleDrawer
-            role={targetedRole}
-            isOpen={isRoleDrawerOpened}
+          <UserDrawer
+            user={targetedUser}
+            isOpen={isUserDrawerOpened}
             action={action}
             isReadonly={isReadonly}
-            onSave={handleRoleSave}
-            onDelete={(v) => onDelete(v).then(() => setRoleDrawerOpened(false))}
-            onClose={() => setRoleDrawerOpened(false)}
+            onSave={handleUserSave}
+            onDelete={(v) => onDelete(v).then(() => setUserDrawerOpened(false))}
+            onClose={() => setUserDrawerOpened(false)}
           />
           <DeleteResourceDialog
-            open={isDeleteRoleDialogOpened}
-            resource={targetedRole}
-            onClose={() => setDeleteRoleDialogOpened(false)}
-            onSubmit={(v: T) => onDelete(v).then(() => setDeleteRoleDialogOpened(false))}
+            open={isDeleteUserDialogOpened}
+            resource={targetedUser}
+            onClose={() => setDeleteUserDialogOpened(false)}
+            onSubmit={(v) => onDelete(v).then(() => setDeleteUserDialogOpened(false))}
           />
         </>
       )}

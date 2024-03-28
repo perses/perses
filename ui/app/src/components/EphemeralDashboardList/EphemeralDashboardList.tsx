@@ -11,14 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getDashboardDisplayName, EphemeralDashboardResource, parseDurationString } from '@perses-dev/core';
+import {
+  getDashboardDisplayName,
+  EphemeralDashboardResource,
+  parseDurationString,
+  getDashboardExtendedDisplayName,
+} from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance, add } from 'date-fns';
-import { DeleteEphemeralDashboardDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
+import { useSnackbar } from '@perses-dev/components';
+import { DeleteResourceDialog, UpdateEphemeralDashboardDialog } from '../dialogs';
 import { CRUDGridActionsCellItem } from '../CRUDButton/CRUDGridActionsCellItem';
 import {
   CREATED_AT_COL_DEF,
@@ -28,6 +34,7 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
+import { useDeleteEphemeralDashboardMutation } from '../../model/ephemeral-dashboard-client';
 import { EphemeralDashboardDataGrid, Row } from './EphemeralDashboardDataGrid';
 
 export interface EphemeralDashboardListProperties extends ListProperties {
@@ -43,6 +50,8 @@ export interface EphemeralDashboardListProperties extends ListProperties {
  */
 export function EphemeralDashboardList(props: EphemeralDashboardListProperties) {
   const { ephemeralDashboardList, hideToolbar, isLoading, initialState } = props;
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const deleteEphemeralDashboardMutation = useDeleteEphemeralDashboardMutation();
 
   const getDashboard = useCallback(
     (project: string, name: string) => {
@@ -88,6 +97,24 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
       setRenameEphemeralDashboardDialogStateOpened(true);
     },
     [getDashboard]
+  );
+
+  const handleEphemeralDashboardDelete = useCallback(
+    (dashboard: EphemeralDashboardResource): Promise<void> =>
+      new Promise((resolve, reject) => {
+        deleteEphemeralDashboardMutation.mutate(dashboard, {
+          onSuccess: (deletedDashboard: EphemeralDashboardResource) => {
+            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            resolve();
+          },
+          onError: (err) => {
+            exceptionSnackbar(err);
+            reject();
+            throw err;
+          },
+        });
+      }),
+    [exceptionSnackbar, successSnackbar, deleteEphemeralDashboardMutation]
   );
 
   const onDeleteButtonClick = useCallback(
@@ -166,10 +193,11 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
               onClose={() => setRenameEphemeralDashboardDialogStateOpened(false)}
               ephemeralDashboard={targetedEphemeralDashboard}
             />
-            <DeleteEphemeralDashboardDialog
+            <DeleteResourceDialog
+              resource={targetedEphemeralDashboard}
               open={isDeleteEphemeralDashboardDialogStateOpened}
+              onSubmit={() => handleEphemeralDashboardDelete(targetedEphemeralDashboard)}
               onClose={() => setDeleteEphemeralDashboardDialogStateOpened(false)}
-              ephemeralDashboard={targetedEphemeralDashboard}
             />
           </>
         )}

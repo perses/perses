@@ -29,6 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import ShieldIcon from 'mdi-material-ui/Shield';
+import AccountIcon from 'mdi-material-ui/Account';
 import { CRUDButton, CRUDButtonProps } from '../../components/CRUDButton/CRUDButton';
 import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { useCreateGlobalVariableMutation } from '../../model/global-variable-client';
@@ -46,14 +47,16 @@ import { useCreateGlobalSecretMutation } from '../../model/global-secret-client'
 import { SecretDrawer } from '../../components/secrets/SecretDrawer';
 import { GlobalVariables } from './tabs/GlobalVariables';
 import { GlobalDatasources } from './tabs/GlobalDatasources';
-import { GlobalSecrets } from './tabs/GlobalSecret';
+import { GlobalSecrets } from './tabs/GlobalSecrets';
 import { GlobalRoles } from './tabs/GlobalRoles';
 import { GlobalRoleBindings } from './tabs/GlobalRoleBindings';
+import { Users } from './tabs/Users';
 
 const datasourcesTabIndex = 'datasources';
 const rolesTabIndex = 'roles';
 const roleBindingsTabIndex = 'rolesbindings';
 const secretsTabIndex = 'secrets';
+const usersTabIndex = 'users';
 const variablesTabIndex = 'variables';
 
 interface TabButtonProps extends CRUDButtonProps {
@@ -384,6 +387,7 @@ export function AdminTabs(props: AdminTabsProps) {
   const hasGlobalRoleBindingReadPermission = useHasPermission('read', GlobalProject, 'GlobalRoleBinding');
   const hasGlobalSecretReadPermission = useHasPermission('read', GlobalProject, 'GlobalSecret');
   const hasGlobalVariableReadPermission = useHasPermission('read', GlobalProject, 'GlobalVariable');
+  const hasUserReadPermission = useHasPermission('read', GlobalProject, 'User');
 
   const handleChange = (event: SyntheticEvent, newTabIndex: string) => {
     setValue(newTabIndex);
@@ -450,6 +454,16 @@ export function AdminTabs(props: AdminTabsProps) {
               disabled={!hasGlobalRoleBindingReadPermission}
             />
           )}
+          {isAuthEnabled && (
+            <MenuTab
+              label="Users"
+              icon={<AccountIcon />}
+              iconPosition="start"
+              {...a11yProps(usersTabIndex)}
+              value={usersTabIndex}
+              disabled={!hasUserReadPermission}
+            />
+          )}
         </MenuTabs>
         {!isMobileSize && <TabButton index={value} />}
       </Stack>
@@ -470,6 +484,9 @@ export function AdminTabs(props: AdminTabsProps) {
           </TabPanel>
           <TabPanel value={value} index={roleBindingsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
             <GlobalRoleBindings id="global-rolebinding-list" />
+          </TabPanel>
+          <TabPanel value={value} index={usersTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
+            <Users id="user-list" />
           </TabPanel>
         </>
       )}

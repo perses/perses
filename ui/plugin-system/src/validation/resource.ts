@@ -15,6 +15,6 @@ import { z } from 'zod';
 
 export const resourceIdValidationSchema = z
   .string()
-  .nonempty('Required')
+  .min(1, 'Required')
   .max(75, 'Must be 75 or fewer characters long')
   .regex(/^[a-zA-Z0-9_.-]+$/, 'Must only contains alphanumerical characters and special characters _ . -');
