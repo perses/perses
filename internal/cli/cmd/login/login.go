@@ -18,7 +18,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"time"
 
 	"github.com/charmbracelet/huh"
@@ -30,6 +29,8 @@ import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	backendConfig "github.com/perses/perses/pkg/model/api/config"
+	"github.com/perses/perses/pkg/model/api/v1/common"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
 )
 
@@ -51,7 +52,7 @@ const (
 type option struct {
 	persesCMD.Option
 	writer               io.Writer
-	url                  string
+	url                  *common.URL
 	username             string
 	password             string
 	clientID             string
@@ -73,15 +74,21 @@ func (o *option) Complete(args []string) error {
 	if len(args) == 0 {
 		o.url = config.Global.RestClientConfig.URL
 	} else {
-		o.url = args[0]
+		var parseURLErr error
+		o.url, parseURLErr = common.ParseURL(args[0])
+		if parseURLErr != nil {
+			return parseURLErr
+		}
 	}
-	if len(o.url) == 0 {
+	if o.url == nil {
 		return fmt.Errorf("no URL has been provided neither found in the previous configuration")
 	}
-	o.restConfig = perseshttp.RestConfigClient{
-		URL:         o.url,
-		InsecureTLS: o.insecureTLS,
+	o.restConfig = config.Global.RestClientConfig
+	o.restConfig.URL = o.url
+	if o.restConfig.TLSConfig == nil {
+		o.restConfig.TLSConfig = &secret.TLSConfig{}
 	}
+	o.restConfig.TLSConfig.InsecureSkipVerify = o.insecureTLS
 	restClient, err := perseshttp.NewFromConfig(o.restConfig)
 	if err != nil {
 		return err
@@ -91,9 +98,6 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	if _, err := url.Parse(o.url); err != nil {
-		return err
-	}
 	if len(o.username) > 0 && len(o.accessToken) > 0 {
 		return fmt.Errorf("--token and --username are mutually exclusive")
 	}
@@ -113,7 +117,7 @@ func (o *option) Execute() error {
 			return authErr
 		}
 	}
-	o.restConfig.Token = o.accessToken
+	o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
 	if writeErr := config.Write(&config.Config{
 		RestClientConfig: o.restConfig,
 		RefreshToken:     o.refreshToken,

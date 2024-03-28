@@ -23,6 +23,7 @@ import (
 
 	"github.com/perses/perses/pkg/client/api"
 	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
 )
 
@@ -132,7 +133,7 @@ func SetProject(project string) error {
 
 func SetAccessToken(token string) error {
 	return Write(&Config{
-		RestClientConfig: perseshttp.RestConfigClient{Token: token},
+		RestClientConfig: perseshttp.RestConfigClient{Authorization: secret.NewBearerToken(token)},
 	})
 }
 
@@ -158,12 +159,17 @@ func Write(config *Config) error {
 		if config != nil {
 			restConfig := config.RestClientConfig
 			if !reflect.DeepEqual(restConfig, perseshttp.RestConfigClient{}) {
-				previousConf.RestClientConfig.InsecureTLS = restConfig.InsecureTLS
-				if len(restConfig.URL) > 0 {
+				if restConfig.TLSConfig != nil {
+					previousConf.RestClientConfig.TLSConfig = restConfig.TLSConfig
+				}
+				if restConfig.URL != nil {
 					previousConf.RestClientConfig.URL = restConfig.URL
 				}
-				if len(restConfig.Token) > 0 {
-					previousConf.RestClientConfig.Token = restConfig.Token
+				if restConfig.Authorization != nil {
+					previousConf.RestClientConfig.Authorization = restConfig.Authorization
+				}
+				if len(restConfig.Headers) > 0 {
+					previousConf.RestClientConfig.Headers = restConfig.Headers
 				}
 			}
 			if len(config.Project) > 0 {

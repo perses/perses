@@ -36,7 +36,7 @@ _sort=#sort?:                       v1Variable.#Sort
 #query:                             string
 #dependencies: [...{...}]
 
-filter: { filterBuilder & { #input: #dependencies } }.filter
+filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
 		if #query != _|_ {#query},

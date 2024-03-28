@@ -39,7 +39,7 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	datasourceHTTP "github.com/perses/perses/pkg/model/api/v1/datasource/http"
 	"github.com/perses/perses/pkg/model/api/v1/role"
-	promConfig "github.com/prometheus/common/config"
+	secretModel "github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
 )
 
@@ -505,20 +505,8 @@ func (h *httpProxy) prepareTransport() (*http.Transport, error) {
 }
 
 func (h *httpProxy) prepareTLSConfig() (*tls.Config, error) {
-	if h.secret == nil || h.secret.TLSConfig == nil {
+	if h.secret == nil {
 		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
 	}
-	cfg := &promConfig.TLSConfig{
-		CA:                 h.secret.TLSConfig.CA,
-		Cert:               h.secret.TLSConfig.Cert,
-		Key:                promConfig.Secret(h.secret.TLSConfig.Key),
-		CAFile:             h.secret.TLSConfig.CAFile,
-		CertFile:           h.secret.TLSConfig.CertFile,
-		KeyFile:            h.secret.TLSConfig.KeyFile,
-		ServerName:         h.secret.TLSConfig.ServerName,
-		InsecureSkipVerify: h.secret.TLSConfig.InsecureSkipVerify,
-		MinVersion:         promConfig.TLSVersions["TLS12"],
-		MaxVersion:         promConfig.TLSVersions["TLS13"],
-	}
-	return promConfig.NewTLSConfig(cfg)
+	return secretModel.BuildTLSConfig(h.secret.TLSConfig)
 }

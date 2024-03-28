@@ -39,6 +39,13 @@ func NewPublicAuthorization(a *Authorization) *PublicAuthorization {
 	}
 }
 
+func NewBearerToken(token string) *Authorization {
+	return &Authorization{
+		Type:        "Bearer",
+		Credentials: token,
+	}
+}
+
 // Authorization contains HTTP authorization credentials.
 type Authorization struct {
 	Type            string `json:"type,omitempty" yaml:"type,omitempty"`
