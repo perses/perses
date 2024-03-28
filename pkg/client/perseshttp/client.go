@@ -25,6 +25,30 @@ import (
 
 const connectionTimeout = 30 * time.Second
 
+// PublicRestConfigClient is the struct that should be used when printing the config
+type PublicRestConfigClient struct {
+	URL       *common.URL             `json:"url" yaml:"url"`
+	BasicAuth *secret.PublicBasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
+	// The HTTP authorization credentials for the targets.
+	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
+	// TLSConfig to use to connect to the targets.
+	TLSConfig *secret.PublicTLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
+	Headers   map[string]string       `json:"headers,omitempty" yaml:"headers,omitempty"`
+}
+
+func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient {
+	if config == nil {
+		return nil
+	}
+	return &PublicRestConfigClient{
+		URL:           config.URL,
+		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
+		Authorization: secret.NewPublicAuthorization(config.Authorization),
+		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
+		Headers:       config.Headers,
+	}
+}
+
 // RestConfigClient defines all parameters that can be set to customize the RESTClient
 type RestConfigClient struct {
 	URL       *common.URL       `json:"url" yaml:"url"`
