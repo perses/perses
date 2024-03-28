@@ -60,7 +60,7 @@ test.describe('Dashboard: Defaults', () => {
     await page.evaluate(() => {
       window.location.search = '';
     });
-    await page.getByRole('button', { name: 'Refresh dashboard' }).click();
+    await page.getByRole('button', { name: 'Refresh', exact: true }).click();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
     await expect(dashboardPage.getTemplateVariable('interval')).toHaveValue('5m');

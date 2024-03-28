@@ -15,12 +15,9 @@ import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
 import { DateTimeRangePicker, RefreshIntervalPicker, InfoTooltip, TimeOption } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { isDurationString, DurationString, DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
+import { DurationString } from '@perses-dev/core';
 import { useCallback } from 'react';
-import { TOOLTIP_TEXT } from '../../constants';
-import { useDashboardDuration } from '../../context';
 import { ToolbarIconButton } from '../ToolbarIconButton';
-import { useDashboard } from '../../context/useDashboard';
 
 export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
@@ -43,6 +40,11 @@ export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '60s' }, display: '1m' },
 ];
 
+export const TOOLTIP_TEXT = {
+  refresh: 'Refresh',
+  refreshInterval: 'Auto refresh interval',
+};
+
 const DEFAULT_HEIGHT = '34px';
 
 interface TimeRangeControlsProps {
@@ -62,46 +64,27 @@ export function TimeRangeControls({
   timePresets = DEFAULT_TIME_RANGE_OPTIONS,
 }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
-  // TODO: Remove this since it couples to the dashboard context
-  const dashboardDuration = useDashboardDuration();
-  const { dashboard, setDashboard } = useDashboard();
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
-  // add time shortcut if one does not match duration from dashboard JSON
-  if (!timePresets.some((option) => option.value.pastDuration === dashboardDuration)) {
-    if (isDurationString(dashboardDuration)) {
-      timePresets.push({
-        value: { pastDuration: dashboardDuration },
-        display: `Last ${dashboardDuration}`,
-      });
-    }
+  // add time preset if one does not match duration given in time range
+  if (
+    'pastDuration' in timeRange &&
+    !timePresets.some((option) => option.value.pastDuration === timeRange['pastDuration'])
+  ) {
+    timePresets.push({
+      value: { pastDuration: timeRange['pastDuration'] },
+      display: `Last ${timeRange['pastDuration']}`,
+    });
   }
 
   // set the new refresh interval both in the dashboard context & as query param
   const handleRefreshIntervalChange = useCallback(
     (duration: DurationString) => {
-      setDashboard(
-        dashboard.kind === 'Dashboard'
-          ? ({
-              ...dashboard,
-              spec: {
-                ...dashboard.spec,
-                refreshInterval: duration,
-              },
-            } as DashboardResource)
-          : ({
-              ...dashboard,
-              spec: {
-                ...dashboard.spec,
-                refreshInterval: duration,
-              },
-            } as EphemeralDashboardResource)
-      );
       setRefreshInterval(duration);
     },
-    [dashboard, setDashboard, setRefreshInterval]
+    [setRefreshInterval]
   );
 
   return (
@@ -110,14 +93,14 @@ export function TimeRangeControls({
         <DateTimeRangePicker timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
       )}
       {showRefreshButton && (
-        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboard}>
-          <ToolbarIconButton aria-label={TOOLTIP_TEXT.refreshDashboard} onClick={refresh} sx={{ height }}>
+        <InfoTooltip description={TOOLTIP_TEXT.refresh}>
+          <ToolbarIconButton aria-label={TOOLTIP_TEXT.refresh} onClick={refresh} sx={{ height }}>
             <RefreshIcon />
           </ToolbarIconButton>
         </InfoTooltip>
       )}
       {showRefreshInterval && (
-        <InfoTooltip description={TOOLTIP_TEXT.refreshDashboardInterval}>
+        <InfoTooltip description={TOOLTIP_TEXT.refreshInterval}>
           <RefreshIntervalPicker
             timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
             value={refreshInterval}

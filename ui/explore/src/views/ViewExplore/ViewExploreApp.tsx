@@ -14,10 +14,11 @@
 import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import { PanelEditorValues } from '@perses-dev/dashboards';
+import React from 'react';
 import { PanelEditorForm } from '../../components/PanelEditor/PanelEditorForm';
 
 export interface ViewAppProps {
-  exploreTitleComponent?: JSX.Element;
+  exploreTitleComponent?: React.ReactNode;
 }
 
 export function ViewExploreApp(props: ViewAppProps) {

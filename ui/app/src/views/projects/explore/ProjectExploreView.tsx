@@ -13,9 +13,8 @@
 
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { DashboardResource } from '@perses-dev/core';
 import { ViewExplore } from '@perses-dev/explore';
 import { CircularProgress, Stack } from '@mui/material';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
@@ -25,8 +24,7 @@ import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '.
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 
 export interface ProjectExploreViewProps {
-  dashboardResource: DashboardResource;
-  exploreTitleComponent?: JSX.Element;
+  exploreTitleComponent?: React.ReactNode;
 }
 
 function ProjectExploreView(props: ProjectExploreViewProps) {
@@ -38,15 +36,11 @@ function ProjectExploreView(props: ProjectExploreViewProps) {
 }
 
 function HelperExploreView(props: ProjectExploreViewProps) {
-  const { dashboardResource, exploreTitleComponent } = props;
+  const { exploreTitleComponent } = props;
   const { project } = useProjectStore();
   const projectName = project?.metadata.name == 'none' ? '' : project?.metadata.name;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
-
-  const dashResource = useMemo(() => {
-    return { ...dashboardResource, metadata: { ...dashboardResource.metadata, project: projectName } };
-  }, [projectName, dashboardResource]);
 
   useEffect(() => {
     // warm up the caching of the datasources
@@ -81,7 +75,6 @@ function HelperExploreView(props: ProjectExploreViewProps) {
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <ViewExplore
             datasourceApi={datasourceApi}
-            dashboardResource={dashResource}
             externalVariableDefinitions={externalVariableDefinitions}
             exploreTitleComponent={exploreTitleComponent}
           />
