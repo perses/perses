@@ -82,7 +82,7 @@ function ThemeSwitch(props: { isAuthEnabled: boolean }) {
 }
 
 function AccountMenu() {
-  const token = useAuthToken();
+  const { data: decodedToken } = useAuthToken();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -117,7 +117,7 @@ function AccountMenu() {
           <ListItemIcon>
             <AccountCircle />
           </ListItemIcon>
-          {token.decodedToken?.sub}
+          {decodedToken?.sub}
         </MenuItem>
         <Divider />
         <ThemeSwitch isAuthEnabled />

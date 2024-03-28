@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
-import { useJwt } from 'react-jwt';
+import { decodeToken } from 'react-jwt';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
@@ -35,13 +35,6 @@ export function useIsAccessTokenExist() {
   return cookies[jwtPayload] !== undefined;
 }
 
-// Remove error TS4058: Return type of exported function has or is using name X from external module Y but cannot be named
-interface IUseJwt {
-  isExpired: boolean;
-  decodedToken: Payload | null;
-  reEvaluateToken: (token: string) => void;
-}
-
 interface Payload {
   iss?: string;
   sub?: string;
@@ -52,14 +45,14 @@ interface Payload {
   jti?: string;
 }
 
-export function useAuthToken(): IUseJwt {
+export function useAuthToken(): UseQueryResult<Payload | null> {
   const [cookies] = useCookies();
   const partialToken = cookies[jwtPayload];
   // useJWT need a complete token (including a signature) to be able to decode it.
   // It doesn't need the accurate signature to decode the payload.
   // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-  return useJwt<Payload>(`${partialToken}.${fakeSignature}`);
+  return useQuery(['jwt'], () => decodeToken<Payload>(`${partialToken}.${fakeSignature}`));
 }
 
 export function useNativeAuthMutation() {
