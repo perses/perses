@@ -53,6 +53,26 @@ func Init(configPath string) {
 	}
 }
 
+// PublicConfig should be only used when displaying the config to the client
+type PublicConfig struct {
+	RestClientConfig perseshttp.PublicRestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
+	Project          string                            `json:"project,omitempty" yaml:"project,omitempty"`
+	RefreshToken     secret.Hidden                     `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
+	Dac              Dac                               `json:"dac,omitempty" yaml:"dac,omitempty"`
+}
+
+func NewPublicConfig(cfg *Config) *PublicConfig {
+	if cfg == nil {
+		return nil
+	}
+	return &PublicConfig{
+		RestClientConfig: *perseshttp.NewPublicRestConfigClient(&cfg.RestClientConfig),
+		Project:          cfg.Project,
+		RefreshToken:     secret.Hidden(cfg.RefreshToken),
+		Dac:              cfg.Dac,
+	}
+}
+
 // Dac wraps the configuration related to Dashboard-as-Code
 type Dac struct {
 	// outputFolder is the folder where the dac-generated files are stored

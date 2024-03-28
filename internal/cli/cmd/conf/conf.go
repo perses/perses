@@ -56,7 +56,7 @@ func (o *option) Validate() error {
 
 func (o *option) Execute() error {
 	if !o.online {
-		return output.Handle(o.writer, o.Output, config.Global)
+		return output.Handle(o.writer, o.Output, config.NewPublicConfig(config.Global))
 	}
 	cfg, err := o.apiClient.Config()
 	if err != nil {
@@ -74,6 +74,13 @@ func NewCMD() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config",
 		Short: "display local or remote config",
+		Example: `
+# Display local config in json
+percli config --output=json
+
+# Display remote config in yaml
+percli config --online --output=yaml
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
