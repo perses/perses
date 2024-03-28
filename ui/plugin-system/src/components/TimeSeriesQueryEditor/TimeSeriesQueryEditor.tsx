@@ -16,10 +16,8 @@ import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { TimeSeriesQueryDefinition, QueryDefinition } from '@perses-dev/core';
-import { usePlugin, usePluginRegistry } from '../../runtime';
+import { TIME_SERIES_QUERY_KEY, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { TimeSeriesQueryInput } from './TimeSeriesQueryInput';
-
-const DEFAULT_QUERY_PLUGIN_TYPE = 'TimeSeriesQuery';
 
 export interface TimeSeriesQueryEditorProps {
   queries?: TimeSeriesQueryDefinition[];
@@ -27,14 +25,23 @@ export interface TimeSeriesQueryEditorProps {
 }
 
 export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQueryEditorProps) {
-  const hasMoreThanOneQuery = queries.length > 1;
+  // Build the default query plugin
+  // Use as default the plugin kind explicitly set as default or the first in the list
   const { defaultPluginKinds } = usePluginRegistry();
-  const defaultTimeSeriesQueryKind = defaultPluginKinds?.[DEFAULT_QUERY_PLUGIN_TYPE] ?? '';
-
-  const { data: defaultQueryPlugin } = usePlugin(DEFAULT_QUERY_PLUGIN_TYPE, defaultTimeSeriesQueryKind, {
+  const { data: timeSeriesPlugins } = useListPluginMetadata(TIME_SERIES_QUERY_KEY);
+  const defaultTimeSeriesQueryKind = defaultPluginKinds?.[TIME_SERIES_QUERY_KEY] ?? timeSeriesPlugins?.[0]?.kind ?? '';
+  const { data: defaultQueryPlugin } = usePlugin(TIME_SERIES_QUERY_KEY, defaultTimeSeriesQueryKind, {
     useErrorBoundary: true,
     enabled: true,
   });
+
+  // This default query definition is used if no query is provided initially or when we add a new query
+  const defaultInitialQueryDefinition: TimeSeriesQueryDefinition = {
+    kind: TIME_SERIES_QUERY_KEY,
+    spec: {
+      plugin: { kind: defaultTimeSeriesQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
+    },
+  };
 
   // State for which queries are collapsed
   // TODO: Would be easier if we had IDs for queries.
@@ -57,16 +64,10 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
     if (!defaultQueryPlugin) return;
     onChange(
       produce(queries, (draft) => {
-        const queryDef: TimeSeriesQueryDefinition = {
-          kind: DEFAULT_QUERY_PLUGIN_TYPE,
-          spec: {
-            plugin: { kind: defaultTimeSeriesQueryKind, spec: defaultQueryPlugin.createInitialOptions() },
-          },
-        };
         if (draft) {
-          draft.push(queryDef);
+          draft.push(defaultInitialQueryDefinition);
         } else {
-          draft = [...queries, queryDef];
+          draft = [...queries, defaultInitialQueryDefinition];
         }
       })
     );
@@ -96,21 +97,7 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
   };
 
   // show one query input if queries is empty
-  const queryDefinitions: TimeSeriesQueryDefinition[] = queries.length
-    ? queries
-    : [
-        {
-          kind: 'TimeSeriesQuery',
-          spec: {
-            plugin: {
-              kind: defaultPluginKinds?.['TimeSeriesQuery'] ?? '',
-              spec: {
-                query: '',
-              },
-            },
-          },
-        },
-      ];
+  const queryDefinitions: TimeSeriesQueryDefinition[] = queries.length ? queries : [defaultInitialQueryDefinition];
 
   return (
     <>
@@ -122,7 +109,7 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
             query={query}
             isCollapsed={!!queriesCollapsed[i]}
             onChange={handleQueryChange}
-            onDelete={hasMoreThanOneQuery ? handleQueryDelete : undefined}
+            onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
           />
         ))}
