@@ -23,10 +23,15 @@ import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';
 
+type Input = {
+  name: string;
+  value?: string;
+};
+
 // GrafanaLightDashboard is a Grafana dashboard that may have some variables that need to be replaced by the user.
 interface GrafanaLightDashboard {
   // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
-  __inputs?: Array<{ name: string }>;
+  __inputs?: Input[];
   // In order to have an accurate type when matching this interface with the Grafana JSON,
   // we just say we have an unknown list of key that exists, but we don't really care about what they are.
   [key: string]: unknown;
@@ -48,8 +53,21 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
+  // initialize the map with the provided input values if exist
+  dashboard?.__inputs?.map((input) => {
+    grafanaInput[input.name] = input.value ?? '';
+  });
+
   const setInput = (key: string, value: string) => {
     grafanaInput[key] = value;
+    setGrafanaInput(grafanaInput);
+  };
+
+  // Users can provide input values that contain double quotes, we need to escape them before sending them to the backend
+  const escapeDoubleQuotesInInput = () => {
+    for (const [key, value] of Object.entries(grafanaInput)) {
+      grafanaInput[key] = value.replace(/"/g, '\\"');
+    }
     setGrafanaInput(grafanaInput);
   };
 
@@ -72,6 +90,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
           <TextField
             key={`input-${index}`}
             label={input.name}
+            defaultValue={input.value ?? ''}
             variant={'outlined'}
             onBlur={(e) => setInput(input.name, e.target.value)}
           />
@@ -90,6 +109,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
         disabled={migrateMutation.isLoading}
         startIcon={<AutoFix />}
         onClick={() => {
+          escapeDoubleQuotesInInput();
           migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: dashboard ?? {} });
         }}
       >
