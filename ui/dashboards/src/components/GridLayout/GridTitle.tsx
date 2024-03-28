@@ -55,7 +55,6 @@ export function GridTitle(props: GridTitleProps) {
         display: 'flex',
         justifyContent: 'start',
         alignItems: 'center',
-        padding: (theme) => theme.spacing(1),
         cursor: collapse ? 'pointer' : 'auto',
         backgroundColor: ({ palette }) => palette.background.paper,
       }}
