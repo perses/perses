@@ -13,11 +13,17 @@
 
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
-import { DateTimeRangePicker, RefreshIntervalPicker, InfoTooltip, TimeOption } from '@perses-dev/components';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import {
+  DateTimeRangePicker,
+  RefreshIntervalPicker,
+  InfoTooltip,
+  TimeOption,
+  ToolbarIconButton,
+} from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
 import { useCallback } from 'react';
-import { ToolbarIconButton } from '../ToolbarIconButton';
+import { TOOLTIP_TEXT } from '../../constants';
+import { useTimeRange } from '../../runtime';
 
 export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
@@ -39,11 +45,6 @@ export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '30s' }, display: '30s' },
   { value: { pastDuration: '60s' }, display: '1m' },
 ];
-
-export const TOOLTIP_TEXT = {
-  refresh: 'Refresh',
-  refreshInterval: 'Auto refresh interval',
-};
 
 const DEFAULT_HEIGHT = '34px';
 

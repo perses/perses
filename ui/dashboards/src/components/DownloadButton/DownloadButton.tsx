@@ -13,10 +13,9 @@
 
 import { useRef } from 'react';
 import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, ToolbarIconButton } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useDashboard } from '../../context';
-import { ToolbarIconButton } from '../ToolbarIconButton';
 
 interface DownloadButtonProps {
   // The button look best at heights >= 28 pixels

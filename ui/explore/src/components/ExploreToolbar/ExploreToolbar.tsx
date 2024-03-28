@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Box, useTheme, useMediaQuery } from '@mui/material';
-import { TimeRangeControls } from '@perses-dev/dashboards';
+import { TimeRangeControls } from '@perses-dev/plugin-system';
 import React from 'react';
 
 export interface ExploreToolbarProps {
