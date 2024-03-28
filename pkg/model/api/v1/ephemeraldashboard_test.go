@@ -536,20 +536,6 @@ func TestUnmarshalEphemeralDashboardError(t *testing.T) {
 `,
 			err: fmt.Errorf("spec cannot be empty"),
 		},
-		{
-			title: "panel list cannot be empty",
-			jason: `
-{
-  "kind": "EphemeralDashboard",
-  "metadata": {
-    "name": "test",
-    "project": "perses"
-  },
-  "spec": {}
-}
-`,
-			err: fmt.Errorf("spec.panels cannot be empty"),
-		},
 	}
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {

@@ -23,7 +23,7 @@ import (
 
 	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -231,7 +231,7 @@ func rearrangeGrafanaPanelsWithinExpandedRows(grafanaDashboardRaw json.RawMessag
 	}
 
 	// iterate over the panels & achieve recomposition of parent->children relationship when needed
-	var newPanelList []map[string]any
+	newPanelList := make([]map[string]any, 0)
 	var parentRow map[string]any
 	for _, panelAsAny := range panels {
 		panel, ok := panelAsAny.(map[string]any)
