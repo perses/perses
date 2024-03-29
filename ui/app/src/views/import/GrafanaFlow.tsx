@@ -23,10 +23,15 @@ import { useProjectList } from '../../model/project-client';
 import { useCreateDashboardMutation } from '../../model/dashboard-client';
 import { useIsReadonly } from '../../context/Config';
 
+type Input = {
+  name: string;
+  value?: string;
+};
+
 // GrafanaLightDashboard is a Grafana dashboard that may have some variables that need to be replaced by the user.
 interface GrafanaLightDashboard {
   // The only part that is interesting us is the list of the input that can exists in the Grafana dashboard definition.
-  __inputs?: Array<{ name: string }>;
+  __inputs?: Input[];
   // In order to have an accurate type when matching this interface with the Grafana JSON,
   // we just say we have an unknown list of key that exists, but we don't really care about what they are.
   [key: string]: unknown;
@@ -46,6 +51,11 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
   const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
+  });
+
+  // initialize the map with the provided input values if exist
+  dashboard?.__inputs?.map((input) => {
+    grafanaInput[input.name] = input.value ?? '';
   });
 
   const setInput = (key: string, value: string) => {
@@ -72,6 +82,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
           <TextField
             key={`input-${index}`}
             label={input.name}
+            defaultValue={input.value ?? ''}
             variant={'outlined'}
             onBlur={(e) => setInput(input.name, e.target.value)}
           />
