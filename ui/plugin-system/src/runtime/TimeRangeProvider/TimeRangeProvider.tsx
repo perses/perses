@@ -18,6 +18,7 @@ import {
   TimeRangeValue,
   isRelativeTimeRange,
   toAbsoluteTimeRange,
+  getSuggestedStepMs,
 } from '@perses-dev/core';
 import { getRefreshIntervalInMs } from './refresh-interval';
 
@@ -55,6 +56,15 @@ export function useTimeRangeContext() {
  */
 export function useTimeRange(): TimeRange {
   return useTimeRangeContext();
+}
+
+/**
+ * Gets the suggested step for a graph query in ms for the currently selected time range.
+ */
+export function useSuggestedStepMs(width?: number) {
+  const { absoluteTimeRange } = useTimeRange();
+  if (width === undefined) return 0;
+  return getSuggestedStepMs(absoluteTimeRange, width);
 }
 
 /**
