@@ -15,7 +15,6 @@ import { generatePath } from 'react-router';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import userEvent from '@testing-library/user-event';
 import { screen, act, RenderOptions, render } from '@testing-library/react';
-import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
 import { DurationString } from '@perses-dev/core';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { QueryParamProvider } from 'use-query-params';
@@ -23,6 +22,7 @@ import React, { useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
 import { SnackbarProvider } from '@perses-dev/components';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import { TimeRangeProvider, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
 import { TimeRangeControls } from './TimeRangeControls';
 
 const history = createMemoryHistory({

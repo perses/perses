@@ -12,9 +12,8 @@
 // limitations under the License.
 
 import CodeIcon from 'mdi-material-ui/CodeBraces';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, ToolbarIconButton } from '@perses-dev/components';
 import { TOOLTIP_TEXT } from '../../constants';
-import { ToolbarIconButton } from '../ToolbarIconButton';
 import { useEditJsonDialog } from '../../context';
 
 export interface EditJsonButtonProps {

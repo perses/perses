@@ -15,4 +15,7 @@ export const TOOLTIP_TEXT = {
   // Variable editor buttons
   refreshVariableValues: 'Refresh values',
   copyVariableValues: 'Copy values to clipboard',
+  // Time range controls buttons
+  refresh: 'Refresh',
+  refreshInterval: 'Auto refresh interval',
 };

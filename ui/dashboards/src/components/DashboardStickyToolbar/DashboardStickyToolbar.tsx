@@ -25,8 +25,8 @@ import {
 } from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import { TimeRangeControls } from '@perses-dev/plugin-system';
 import { TemplateVariableList } from '../Variables';
-import { TimeRangeControls } from '../TimeRangeControls';
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
