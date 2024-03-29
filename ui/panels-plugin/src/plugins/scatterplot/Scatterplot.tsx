@@ -14,11 +14,27 @@
 import { EChart, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
-import { GridComponent, TitleComponent, TooltipComponent } from 'echarts/components';
+import {
+  DatasetComponent,
+  DataZoomComponent,
+  LegendComponent,
+  GridComponent,
+  TitleComponent,
+  TooltipComponent,
+} from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption } from 'echarts';
 
-use([EChartsScatterChart, GridComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
+use([
+  DatasetComponent,
+  DataZoomComponent,
+  LegendComponent,
+  EChartsScatterChart,
+  GridComponent,
+  TitleComponent,
+  TooltipComponent,
+  CanvasRenderer,
+]);
 
 interface ScatterplotProps {
   width: number;
