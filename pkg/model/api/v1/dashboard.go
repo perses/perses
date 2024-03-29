@@ -128,9 +128,6 @@ func (d *DashboardSpec) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (d *DashboardSpec) validate() error {
-	if len(d.Panels) == 0 {
-		return nil
-	}
 	variables := make(map[string]bool, len(d.Variables))
 	for i, variable := range d.Variables {
 		name := variable.Spec.GetName()
