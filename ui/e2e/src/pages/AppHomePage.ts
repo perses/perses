@@ -69,9 +69,9 @@ export class AppHomePage {
   }
 
   async clickDashboardItem(projectName: string, dashboardName: string) {
-    const dashboardButton = this.page.locator(`#${projectName}-dashboard-list`).getByText(dashboardName, {
-      exact: true,
-    });
+    const dashboardButton = this.page
+      .locator(`#${projectName}-dashboard-list`)
+      .getByText(new RegExp(`^${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
@@ -85,7 +85,7 @@ export class AppHomePage {
   async clickImportantDashboardItem(projectName: string, dashboardName: string) {
     const dashboardButton = this.page
       .getByTestId('important-dashboards-mosaic')
-      .getByTestId(`dashboard-card-${projectName}-${dashboardName}`);
+      .getByTestId(new RegExp(`^dashboard-card-${projectName}-${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 

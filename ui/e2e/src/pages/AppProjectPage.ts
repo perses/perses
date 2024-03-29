@@ -134,9 +134,7 @@ export class AppProjectPage {
   }
 
   async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {
-    const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(dashboardName, {
-      exact: true,
-    });
+    const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(new RegExp(`^${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
