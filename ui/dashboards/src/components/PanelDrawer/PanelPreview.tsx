@@ -13,10 +13,9 @@
 
 import { useRef } from 'react';
 import { Box } from '@mui/material';
-import { DataQueriesProvider } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
 import { Panel } from '../Panel';
-import { useSuggestedStepMs } from '../../utils';
 
 const PANEL_PREVIEW_HEIGHT = 300;
 const PANEL_PREVIEW_DEFAULT_WIDTH = 840;

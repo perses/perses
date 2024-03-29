@@ -13,9 +13,8 @@
 
 import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
-import { PanelEditorValues } from '@perses-dev/dashboards';
 import React from 'react';
-import { PanelEditorForm } from '../../components/PanelEditor/PanelEditorForm';
+import { TimeSeriesExplorer } from '../../components/TimeSeriesExplorer/TimeSeriesExplorer';
 
 export interface ViewAppProps {
   exploreTitleComponent?: React.ReactNode;
@@ -25,22 +24,6 @@ export function ViewExploreApp(props: ViewAppProps) {
   const { exploreTitleComponent } = props;
 
   const chartsTheme = useChartsTheme();
-  const data: PanelEditorValues = {
-    groupId: 0,
-    panelDefinition: {
-      kind: 'Panel',
-      spec: {
-        display: {
-          name: '',
-        },
-        plugin: {
-          kind: 'TimeSeriesChart',
-          spec: {},
-        },
-        queries: [],
-      },
-    },
-  };
 
   return (
     <Box
@@ -53,7 +36,7 @@ export function ViewExploreApp(props: ViewAppProps) {
       }}
     >
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
-        <PanelEditorForm initialAction="update" initialValues={data} exploreTitleComponent={exploreTitleComponent} />
+        <TimeSeriesExplorer exploreTitleComponent={exploreTitleComponent} />
       </ChartsProvider>
     </Box>
   );

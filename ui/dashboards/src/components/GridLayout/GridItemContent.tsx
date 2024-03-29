@@ -13,9 +13,8 @@
 
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { DataQueriesProvider } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
-import { useSuggestedStepMs } from '../../utils';
 import { Panel, PanelProps } from '../Panel/Panel';
 import { PanelOptions } from '../Panel';
 
