@@ -106,13 +106,13 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string) {
-  const dashboards = useDashboardList(project);
+  const { data: dashboards, isLoading } = useDashboardList(project);
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {
     const result: DashboardResource[] = [];
     importantDashboardSelectors.forEach((selector) => {
-      const dashboard = (dashboards.data || []).find(
+      const dashboard = (dashboards || []).find(
         (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
       );
       if (dashboard) {
@@ -120,9 +120,9 @@ export function useImportantDashboardList(project?: string) {
       }
     });
     return result;
-  }, [dashboards.data, importantDashboardSelectors]);
+  }, [dashboards, importantDashboardSelectors]);
 
-  return { data: importantDashboards, isLoading: dashboards.isLoading };
+  return { data: importantDashboards, isLoading: isLoading };
 }
 
 /**

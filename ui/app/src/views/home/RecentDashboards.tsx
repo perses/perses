@@ -11,56 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
+import { Card, Stack } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
+import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
 import { useRecentDashboardList } from '../../model/dashboard-client';
-import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
-import { useIsMobileSize } from '../../utils/browser-size';
-
-function RecentDashboardsMosaic() {
-  const { data, isLoading } = useRecentDashboardList(undefined, 6);
-  const isMobileSize = useIsMobileSize();
-
-  if (isLoading) {
-    return (
-      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
-        <CircularProgress />
-      </Stack>
-    );
-  }
-
-  if (data.length === 0) {
-    return (
-      <Stack sx={{ alignItems: 'center', justifyContent: 'center' }} width="100%" height="50">
-        <Typography variant={'subtitle1'}>No dashboards recently viewed</Typography>
-      </Stack>
-    );
-  }
-
-  return (
-    <Grid container spacing={isMobileSize ? 1 : 2} data-testid="recent-dashboards-mosaic">
-      {data.map((datedDashboard) => (
-        <Grid
-          key={`${datedDashboard.dashboard.metadata.project}-${datedDashboard.dashboard.metadata.name}`}
-          item
-          xs={6}
-          lg={4}
-        >
-          <DashboardCard dashboard={datedDashboard.dashboard} hideIcon={isMobileSize}></DashboardCard>
-        </Grid>
-      ))}
-    </Grid>
-  );
-}
 
 export function RecentDashboards() {
+  const { data, isLoading } = useRecentDashboardList();
+
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <HistoryIcon />
-        <h2>Recent Dashboards</h2>
+        <h2>Recently Viewed Dashboards</h2>
       </Stack>
-      <RecentDashboardsMosaic />
+      <Card id="recent-dashboard-list">
+        <RecentDashboardList dashboardList={data} isLoading={isLoading} />
+      </Card>
     </Stack>
   );
 }

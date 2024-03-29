@@ -98,14 +98,18 @@ function HomeView() {
           </Stack>
         </Stack>
       </Box>
-      <Grid container columnSpacing={8}>
+      <Grid container spacing={8}>
         <Grid item xs={12} lg={8}>
-          <RecentDashboards />
-          <ProjectsAndDashboards />
+          <Stack gap={2}>
+            <ImportantDashboards />
+            <ProjectsAndDashboards />
+          </Stack>
         </Grid>
         <Grid item xs={12} lg={4}>
-          <ImportantDashboards />
-          <InformationSection />
+          <Stack gap={2}>
+            <InformationSection />
+            <RecentDashboards />
+          </Stack>
         </Grid>
       </Grid>
     </Stack>

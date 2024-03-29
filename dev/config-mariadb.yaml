@@ -37,11 +37,17 @@ schemas:
 
 important_dashboards:
   - project: "perses"
-    dashboard: "Demo"
+    dashboard: "demo"
+  - project: "perses"
+    dashboard: "NodeExporter"
+  - project: "perses"
+    dashboard: "benchmark"
   - project: "testing"
-    dashboard: "DuplicatePanels"
-  - project: "Unknown"
-    dashboard: "Dashboard"
+    dashboard: "defaults"
+  - project: "testing"
+    dashboard: "statchartpanel"
+  - project: "testing"
+    dashboard: "markdownpanel"
 
 information: |-
   # Hello World

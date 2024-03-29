@@ -13,7 +13,7 @@
 
 import { Page } from '@playwright/test';
 
-const importantDashboardListId = 'important-dashboard-list';
+const recentDashboardListId = 'recent-dashboard-list';
 
 /**
  * The Perses App home page.
@@ -75,16 +75,16 @@ export class AppHomePage {
     await dashboardButton.click();
   }
 
-  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
+  async clickRecentDashboardItem(projectName: string, dashboardName: string) {
     const dashboardButton = this.page
-      .locator(`#${importantDashboardListId}`)
+      .locator(`#${recentDashboardListId}`)
       .getByRole('row', { name: `${projectName} ${dashboardName}` });
     await dashboardButton.click();
   }
 
-  async clickRecentDashboardItem(projectName: string, dashboardName: string) {
+  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
     const dashboardButton = this.page
-      .getByTestId('recent-dashboards-mosaic')
+      .getByTestId('important-dashboards-mosaic')
       .getByTestId(`dashboard-card-${projectName}-${dashboardName}`);
     await dashboardButton.click();
   }
