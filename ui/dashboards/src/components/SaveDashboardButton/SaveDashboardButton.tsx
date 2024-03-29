@@ -20,7 +20,7 @@ import {
   useDashboard,
   useEditMode,
   useSaveChangesConfirmationDialog,
-  useTemplateVariableActions,
+  useVariableDefinitionActions,
 } from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
@@ -32,7 +32,7 @@ export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'>
 export const SaveDashboardButton = ({ onSave, isDisabled, variant = 'contained' }: SaveDashboardButtonProps) => {
   const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
   const { dashboard, setDashboard } = useDashboard();
-  const { getSavedVariablesStatus, setVariableDefaultValues } = useTemplateVariableActions();
+  const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { isSavedVariableModified } = getSavedVariablesStatus();
   const { timeRange } = useTimeRange();
   const { setEditMode } = useEditMode();

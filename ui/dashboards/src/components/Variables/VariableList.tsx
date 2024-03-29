@@ -15,16 +15,16 @@ import { Box } from '@mui/material';
 import { VariableDefinition, VariableSpec } from '@perses-dev/core';
 import {
   ExternalVariableDefinition,
-  useTemplateExternalVariableDefinitions,
-  useTemplateVariable,
-  useTemplateVariableDefinitions,
+  useExternalVariableDefinitions,
+  useVariableDefinitionAndState,
+  useVariableDefinitions,
 } from '../../context';
 import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
 import { TemplateVariable } from './TemplateVariable';
 
 export function TemplateVariableList() {
-  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
 
   return (
     <>
@@ -44,7 +44,7 @@ export function TemplateVariableList() {
 }
 
 export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
-  const ctx = useTemplateVariable(spec.name, source);
+  const ctx = useVariableDefinitionAndState(spec.name, source);
   return (
     <Box
       key={spec.name + source ?? ''}

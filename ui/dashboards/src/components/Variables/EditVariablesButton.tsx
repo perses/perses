@@ -20,9 +20,9 @@ import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import {
   ExternalVariableDefinition,
-  useTemplateExternalVariableDefinitions,
-  useTemplateVariableActions,
-  useTemplateVariableDefinitions,
+  useExternalVariableDefinitions,
+  useVariableDefinitionActions,
+  useVariableDefinitions,
 } from '../../context';
 import { VariableEditor } from './VariableEditor';
 
@@ -50,10 +50,10 @@ export function EditVariablesButton({
   fullWidth,
 }: EditVariablesButtonProps) {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
-  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
   const builtinVariableDefinitions: BuiltinVariableDefinition[] = useBuiltinVariableDefinitions();
-  const { setVariableDefinitions } = useTemplateVariableActions();
+  const { setVariableDefinitions } = useVariableDefinitionActions();
 
   const openVariableEditor = () => {
     setIsVariableEditorOpen(true);

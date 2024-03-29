@@ -60,7 +60,7 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
  * @param externalDefinitions external variables definitions. Static part.
  * @param initialValues values coming from query parameters
  */
-export function hydrateTemplateVariableStates(
+export function hydrateVariableDefinitionStates(
   localDefinitions: VariableDefinition[],
   initialValues: Record<string, VariableValue>,
   externalDefinitions: ExternalVariableDefinition[] = []

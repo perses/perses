@@ -13,7 +13,7 @@
 
 import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
 import React, { useEffect, useMemo, useState } from 'react';
-import { DatasourceStoreProvider, TemplateVariableProviderWithQueryParams } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginRegistry,
@@ -70,7 +70,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
         <PluginRegistry pluginLoader={bundledPluginLoader}>
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
             <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-              <TemplateVariableProviderWithQueryParams initialVariableDefinitions={[]}>
+              <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
                 <VariableEditorForm
                   initialVariableDefinition={variableDef}
                   initialAction={action}
@@ -80,7 +80,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                   onClose={onClose}
                   onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
                 />
-              </TemplateVariableProviderWithQueryParams>
+              </VariableProviderWithQueryParams>
             </TimeRangeProviderWithQueryParams>
           </DatasourceStoreProvider>
         </PluginRegistry>

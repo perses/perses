@@ -47,7 +47,7 @@ import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
-import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
+import { hydrateVariableDefinitionStates } from '../../context/TemplateVariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
 function getVariableLabelByKind(kind: string) {
@@ -84,7 +84,7 @@ export function VariableEditor(props: {
   const builtinVariableDefinitions = props.builtinVariableDefinitions;
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const [variableState] = useMemo(() => {
-    return [hydrateTemplateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
+    return [hydrateVariableDefinitionStates(variableDefinitions, {}, externalVariableDefinitions)];
   }, [externalVariableDefinitions, variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 

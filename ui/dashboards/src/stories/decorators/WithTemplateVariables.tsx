@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { TemplateVariableProvider, TemplateVariableProviderProps } from '@perses-dev/dashboards';
+import { VariableProvider, VariableDefinitionProviderProps } from '@perses-dev/dashboards';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -21,7 +21,7 @@ declare module '@storybook/react' {
 }
 
 export type WithTemplateVariableParameter = {
-  props: Partial<TemplateVariableProviderProps>;
+  props: Partial<VariableDefinitionProviderProps>;
 };
 
 // Type guard because storybook types parameters as `any`
@@ -37,8 +37,8 @@ export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unkn
   const props = parameter?.props;
 
   return (
-    <TemplateVariableProvider {...props}>
+    <VariableProvider {...props}>
       <Story />
-    </TemplateVariableProvider>
+    </VariableProvider>
   );
 };

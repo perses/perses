@@ -15,7 +15,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, TemplateVariableProvider } from '../../context';
+import { DashboardProvider, VariableProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { PanelGroupDialog } from './PanelGroupDialog';
 describe('Add Panel Group', () => {
@@ -25,10 +25,10 @@ describe('Add Panel Group', () => {
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
         <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
-          <TemplateVariableProvider>
+          <VariableProvider>
             <DashboardProviderSpy />
             <PanelGroupDialog />
-          </TemplateVariableProvider>
+          </VariableProvider>
         </TimeRangeProvider>
       </DashboardProvider>
     );

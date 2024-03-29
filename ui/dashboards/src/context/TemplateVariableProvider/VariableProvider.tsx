@@ -34,39 +34,93 @@ import {
   intervalToPrometheusDuration,
   BuiltinVariableDefinition,
 } from '@perses-dev/core';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
-import { hydrateTemplateVariableStates } from './hydrationUtils';
+import { hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
 
-type TemplateVariableStore = {
+/**
+ * This store is used to manipulate and read the definition of the variables and their state.
+ * - being local or external variables.
+ * - being text or list variables.
+ * - being of any state (value, options, loading, error, ...) check {@VariableState}
+ * Go and read each property documentation for more details.
+ */
+type VariableDefinitionStore = {
+  /**
+   * List of local variables definitions.
+   * This is typically the variable definition that can be modified through the setVariableDefinition setter.
+   *
+   * In Perses App ecosystem, this is typically the dashboard scope variables, that's why we call them local.
+   * Note that depending on the form, we can reuse this store to modify higher scope variables. For example,
+   * when we modify the variable of a project, we'll set this field with project scope variables. To be able to modify
+   * them.
+   */
   variableDefinitions: VariableDefinition[];
+  /**
+   * List of external variable definitions.
+   * This is static variable definitions that won´t be modified under this context.
+   * You'll have to set one list of external variable definition by scope. See {@link ExternalVariableDefinition} for
+   * more details.
+   *
+   * In Perses App ecosystem, this is typically the project or global scope variables.
+   * Note that depending on the form, we can reuse this store to modify higher scope variables. For example,
+   * when we modify the variable of a project, we'll set this field with global scope variables. Which means we
+   * won't be able to modify them from this form.
+   */
   externalVariableDefinitions: ExternalVariableDefinition[];
+  /**
+   * Additionally to definitions, we need to associate to each variable a state. That's what this map is meant for.
+   * This can be heavily modified under this context, using the different setters available.
+   * Note that the state of local AND external variables can be modified.
+   */
   variableState: VariableStoreStateMap;
+  /**
+   * Allow to modify the `value` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param value new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableValue: (variableName: VariableName, value: VariableValue, source?: string) => void;
+  /**
+   * Allow to modify the `options` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param options new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableOptions: (name: VariableName, options: VariableOption[], source?: string) => void;
+  /**
+   * Allow to modify the `loading` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param laoding new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableLoading: (name: VariableName, loading: boolean, source?: string) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
   setVariableDefaultValues: () => VariableDefinition[];
   getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
 };
 
-const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
+/**
+ * Context object for {@link VariableDefinitionStore}.
+ */
+const VariableDefinitionStoreCtx = createContext<ReturnType<typeof createVariableDefinitionStore> | undefined>(
   undefined
 );
-export function useTemplateVariableStoreCtx() {
-  const context = useContext(TemplateVariableStoreContext);
+export function useVariableDefinitionStoreCtx() {
+  const context = useContext(VariableDefinitionStoreCtx);
   if (!context) {
-    throw new Error('TemplateVariableStoreContext not initialized');
+    throw new Error('VariableDefinitionStoreCtx not initialized');
   }
   return context;
 }
 
-export function useTemplateVariableValues(variableNames?: string[]) {
-  const store = useTemplateVariableStoreCtx();
-  return useStore(
+export function useVariableDefinitionStates(variableNames?: string[]): VariableStateMap {
+  const store = useVariableDefinitionStoreCtx();
+  return useStoreWithEqualityFn(
     store,
     (s) => {
-      const vars: VariableStateMap = {};
+      const varStates: VariableStateMap = {};
 
       // Collect values of local variables, from the variable state
       const names = variableNames ?? s.variableDefinitions.map((value) => value.spec.name);
@@ -75,7 +129,7 @@ export function useTemplateVariableValues(variableNames?: string[]) {
         if (!varState || varState.overridden) {
           return;
         }
-        vars[name] = varState;
+        varStates[name] = varState;
       });
 
       // Collect values of external variables, from the variable state
@@ -87,11 +141,11 @@ export function useTemplateVariableValues(variableNames?: string[]) {
           if (!varState || varState.overridden) {
             return;
           }
-          vars[name] = varState;
+          varStates[name] = varState;
         });
       });
 
-      return vars;
+      return varStates;
     },
     (left, right) => {
       return JSON.stringify(left) === JSON.stringify(right);
@@ -104,8 +158,8 @@ export function useTemplateVariableValues(variableNames?: string[]) {
  * @param name name of the variable
  * @param source if given, it searches in the external variables
  */
-export function useTemplateVariable(name: string, source?: string) {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableDefinitionAndState(name: string, source?: string) {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     const state = s.variableState.get({ name, source });
     const definitions = source
@@ -117,8 +171,8 @@ export function useTemplateVariable(name: string, source?: string) {
   });
 }
 
-export function useTemplateVariableActions() {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableDefinitionActions() {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
@@ -131,19 +185,14 @@ export function useTemplateVariableActions() {
   });
 }
 
-export function useTemplateVariableDefinitions() {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableDefinitions() {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
-export function useTemplateExternalVariableDefinitions() {
-  const store = useTemplateVariableStoreCtx();
+export function useExternalVariableDefinitions() {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.externalVariableDefinitions);
-}
-
-export function useTemplateVariableStore() {
-  const store = useTemplateVariableStoreCtx();
-  return useStore(store);
 }
 
 interface PluginProviderProps {
@@ -152,9 +201,9 @@ interface PluginProviderProps {
 }
 
 function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
-  const originalValues = useTemplateVariableValues();
-  const definitions = useTemplateVariableDefinitions();
-  const externalDefinitions = useTemplateExternalVariableDefinitions();
+  const originalValues = useVariableDefinitionStates();
+  const definitions = useVariableDefinitions();
+  const externalDefinitions = useExternalVariableDefinitions();
   const { absoluteTimeRange } = useTimeRange();
 
   const values = useMemo(() => {
@@ -259,22 +308,22 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
   );
 }
 
-interface TemplateVariableSrvArgs {
+interface VariableDefinitionStoreArgs {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   queryParams?: ReturnType<typeof useVariableQueryParams>;
 }
 
-function createTemplateVariableSrvStore({
+function createVariableDefinitionStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
-}: TemplateVariableSrvArgs) {
+}: VariableDefinitionStoreArgs) {
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
-  const store = createStore<TemplateVariableStore>()(
+  return createStore<VariableDefinitionStore>()(
     devtools(
       immer((set, get) => ({
-        variableState: hydrateTemplateVariableStates(
+        variableState: hydrateVariableDefinitionStates(
           initialVariableDefinitions,
           initialParams,
           externalVariableDefinitions
@@ -285,7 +334,7 @@ function createTemplateVariableSrvStore({
           set(
             (state) => {
               state.variableDefinitions = definitions;
-              state.variableState = hydrateTemplateVariableStates(
+              state.variableState = hydrateVariableDefinitionStates(
                 definitions,
                 initialParams,
                 externalVariableDefinitions
@@ -392,10 +441,16 @@ function createTemplateVariableSrvStore({
       }))
     )
   );
-
-  return store;
 }
 
+/**
+ * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.
+ * It means that you won´t be able to update them from the dashboard itself, but you will see them appear and will be able
+ * to modify their runtime value as any other variable.
+ * If one of the external variable has the same name as a local one, it will be marked as overridden.
+ * You can define one list of variable definition by source and as many source as you want.
+ * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
+ */
 export type ExternalVariableDefinition = {
   source: string;
   tooltip?: {
@@ -406,51 +461,43 @@ export type ExternalVariableDefinition = {
   definitions: VariableDefinition[];
 };
 
-export interface TemplateVariableProviderProps {
+export interface VariableDefinitionProviderProps {
   children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
-  /**
-   * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.
-   * It means that you won´t be able to update them from the dashboard itself, but you will see them appear and will be able
-   * to modify their runtime value as any other variable.
-   * If one of the external variable has the same name as a local one, it will be marked as overridden.
-   * You can define one list of variable definition by source and as many source as you want.
-   * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
-   */
   externalVariableDefinitions?: ExternalVariableDefinition[];
   builtinVariables?: BuiltinVariableDefinition[];
 }
 
-export function TemplateVariableProvider({
+export function VariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariables = [],
-}: TemplateVariableProviderProps) {
-  const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions }));
+}: VariableDefinitionProviderProps) {
+  const [store] = useState(createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions }));
 
   return (
-    <TemplateVariableStoreContext.Provider value={store}>
+    <VariableDefinitionStoreCtx.Provider value={store}>
       <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </TemplateVariableStoreContext.Provider>
+    </VariableDefinitionStoreCtx.Provider>
   );
 }
 
-export function TemplateVariableProviderWithQueryParams({
+export function VariableProviderWithQueryParams({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariables = [],
-}: TemplateVariableProviderProps) {
+}: VariableDefinitionProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(
-    createTemplateVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
   );
 
   return (
-    <TemplateVariableStoreContext.Provider value={store}>
+    <VariableDefinitionStoreCtx.Provider value={store}>
       <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </TemplateVariableStoreContext.Provider>
+    </VariableDefinitionStoreCtx.Provider>
   );
 }

@@ -16,7 +16,7 @@ import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange, SAVE_DEFAULTS_DIALOG_TEXT } from '@perses-dev/core';
 import { Dialog } from '@perses-dev/components';
-import { useSaveChangesConfirmationDialog, useTemplateVariableActions } from '../../context';
+import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
 
 export const SaveChangesConfirmationDialog = () => {
   const { saveChangesConfirmationDialog: dialog } = useSaveChangesConfirmationDialog();
@@ -25,7 +25,7 @@ export const SaveChangesConfirmationDialog = () => {
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
 
-  const { getSavedVariablesStatus } = useTemplateVariableActions();
+  const { getSavedVariablesStatus } = useVariableDefinitionActions();
   const { modifiedVariableNames } = getSavedVariablesStatus();
 
   const isOpen = dialog !== undefined;

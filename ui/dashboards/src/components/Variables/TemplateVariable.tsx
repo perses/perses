@@ -24,7 +24,7 @@ import {
 } from '@perses-dev/core';
 import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useTemplateVariable, useTemplateVariableActions } from '../../context';
+import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
 import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
 
 type TemplateVariableProps = {
@@ -45,7 +45,7 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
 }
 
 export function TemplateVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const kind = ctx.definition?.kind;
   switch (kind) {
     case 'TextVariable':
@@ -181,10 +181,10 @@ const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
 };
 
 function ListVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
-  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useVariableDefinitionActions();
   const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
@@ -266,12 +266,12 @@ function ListVariable({ name, source }: TemplateVariableProps) {
 }
 
 function TextVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
-  const { setVariableValue } = useTemplateVariableActions();
+  const { setVariableValue } = useVariableDefinitionActions();
 
   useEffect(() => {
     setTempValue(state?.value ?? '');

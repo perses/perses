@@ -21,16 +21,16 @@ import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-de
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import {
   DatasourceStoreProviderProps,
-  TemplateVariableProviderProps,
+  VariableDefinitionProviderProps,
   DatasourceStoreProvider,
-  TemplateVariableProvider,
+  VariableProvider,
 } from '@perses-dev/dashboards';
 import React from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
-  externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
+  externalVariableDefinitions?: VariableDefinitionProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
 }
 
@@ -46,7 +46,7 @@ export function ViewExplore(props: ViewExploreProps) {
         initialTimeRange={initialTimeRange}
         initialRefreshInterval={initialRefreshInterval}
       >
-        <TemplateVariableProvider externalVariableDefinitions={externalVariableDefinitions}>
+        <VariableProvider externalVariableDefinitions={externalVariableDefinitions}>
           <Box
             sx={combineSx(
               {
@@ -64,7 +64,7 @@ export function ViewExplore(props: ViewExploreProps) {
               <ViewExploreApp exploreTitleComponent={exploreTitleComponent} />
             </ErrorBoundary>
           </Box>
-        </TemplateVariableProvider>
+        </VariableProvider>
       </TimeRangeProviderWithQueryParams>
     </DatasourceStoreProvider>
   );

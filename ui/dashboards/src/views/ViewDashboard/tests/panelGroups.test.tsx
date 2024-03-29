@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, DatasourceStoreProvider, TemplateVariableProvider } from '../../../context';
+import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
@@ -23,11 +23,11 @@ describe('Panel Groups', () => {
     renderWithContext(
       <DatasourceStoreProvider {...defaultDatasourceProps}>
         <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
-          <TemplateVariableProvider>
+          <VariableProvider>
             <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
               <DashboardApp dashboardResource={getTestDashboard()} isReadonly={false} />
             </DashboardProvider>
-          </TemplateVariableProvider>
+          </VariableProvider>
         </TimeRangeProvider>
       </DatasourceStoreProvider>
     );

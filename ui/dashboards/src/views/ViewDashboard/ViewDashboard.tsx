@@ -25,14 +25,14 @@ import {
   DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
-  TemplateVariableProviderProps,
-  TemplateVariableProviderWithQueryParams,
+  VariableDefinitionProviderProps,
+  VariableProviderWithQueryParams,
 } from '../../context';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
-  externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
+  externalVariableDefinitions?: VariableDefinitionProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
 }
@@ -105,7 +105,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
         >
-          <TemplateVariableProviderWithQueryParams
+          <VariableProviderWithQueryParams
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
             builtinVariables={builtinVariables}
@@ -136,7 +136,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 />
               </ErrorBoundary>
             </Box>
-          </TemplateVariableProviderWithQueryParams>
+          </VariableProviderWithQueryParams>
         </TimeRangeProviderWithQueryParams>
       </DashboardProvider>
     </DatasourceStoreProvider>
