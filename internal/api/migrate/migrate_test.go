@@ -58,6 +58,12 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "old_grafana_query_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard without panels should be migrated without error",
+			inputGrafanaDashboardFile:   "empty_panels_list_grafana_dashboard.json",
+			expectedPersesDashboardFile: "empty_panels_list_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 
 	for _, test := range testSuite {
