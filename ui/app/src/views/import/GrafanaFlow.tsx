@@ -63,14 +63,6 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
     setGrafanaInput(grafanaInput);
   };
 
-  // Users can provide input values that contain double quotes, we need to escape them before sending them to the backend
-  const escapeDoubleQuotesInInput = () => {
-    for (const [key, value] of Object.entries(grafanaInput)) {
-      grafanaInput[key] = value.replace(/"/g, '\\"');
-    }
-    setGrafanaInput(grafanaInput);
-  };
-
   const importOnClick = () => {
     const dashboard = migrateMutation.data;
     if (dashboard === undefined) {
@@ -109,7 +101,6 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
         disabled={migrateMutation.isLoading}
         startIcon={<AutoFix />}
         onClick={() => {
-          escapeDoubleQuotesInInput();
           migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: dashboard ?? {} });
         }}
       >

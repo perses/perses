@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync/atomic"
 
@@ -68,8 +69,13 @@ const (
 func ReplaceInputValue(input map[string]string, grafanaDashboard string) string {
 	result := grafanaDashboard
 	for key, value := range input {
-		result = strings.Replace(result, fmt.Sprintf("$%s", key), value, -1)
-		result = strings.Replace(result, fmt.Sprintf("${%s}", key), value, -1)
+		// Escape special characters that may be present in the value
+		escapedValue := strconv.Quote(value)
+		// Remove the extra surrounding quotes added by strconv.Quote
+		escapedValue = escapedValue[1 : len(escapedValue)-1]
+		// Do the replacement (2 syntaxes to support)
+		result = strings.ReplaceAll(result, fmt.Sprintf("$%s", key), escapedValue)
+		result = strings.ReplaceAll(result, fmt.Sprintf("${%s}", key), escapedValue)
 	}
 	return result
 }
