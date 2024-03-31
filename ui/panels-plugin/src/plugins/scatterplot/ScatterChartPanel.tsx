@@ -154,7 +154,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">
-      <Scatterplot width={contentDimensions.width} height={contentDimensions.height} options={options} />;
+      <Scatterplot width={contentDimensions.width} height={contentDimensions.height} options={options} />
     </div>
   );
 }
