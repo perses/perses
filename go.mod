@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/huh v0.3.1-0.20240131202516-c79328e79fbd
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0
-	github.com/go-sql-driver/mysql v1.8.0
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser v1.24.0
