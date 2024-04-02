@@ -13,7 +13,7 @@
 
 import { Page } from '@playwright/test';
 
-const importantDashboardListId = 'important-dashboard-list';
+const recentDashboardListId = 'recent-dashboard-list';
 
 /**
  * The Perses App home page.
@@ -69,23 +69,23 @@ export class AppHomePage {
   }
 
   async clickDashboardItem(projectName: string, dashboardName: string) {
-    const dashboardButton = this.page.locator(`#${projectName}-dashboard-list`).getByText(dashboardName, {
-      exact: true,
-    });
-    await dashboardButton.click();
-  }
-
-  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
     const dashboardButton = this.page
-      .locator(`#${importantDashboardListId}`)
-      .getByRole('row', { name: `${projectName} ${dashboardName}` });
+      .locator(`#${projectName}-dashboard-list`)
+      .getByText(new RegExp(`^${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 
   async clickRecentDashboardItem(projectName: string, dashboardName: string) {
     const dashboardButton = this.page
-      .getByTestId('recent-dashboards-mosaic')
-      .getByTestId(`dashboard-card-${projectName}-${dashboardName}`);
+      .locator(`#${recentDashboardListId}`)
+      .getByRole('row', { name: `${projectName} ${dashboardName}` });
+    await dashboardButton.click();
+  }
+
+  async clickImportantDashboardItem(projectName: string, dashboardName: string) {
+    const dashboardButton = this.page
+      .getByTestId('important-dashboards-mosaic')
+      .getByTestId(new RegExp(`^dashboard-card-${projectName}-${dashboardName}$`, 'i'));
     await dashboardButton.click();
   }
 

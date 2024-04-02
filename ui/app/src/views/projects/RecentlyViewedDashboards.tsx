@@ -51,7 +51,7 @@ export function RecentlyViewedDashboards(props: RecentlyViewedDashboardsProps) {
       </Stack>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <Card sx={{ marginTop: 2 }}>
-          <RecentDashboardList dashboardList={data} isLoading={isLoading} />
+          <RecentDashboardList dashboardList={data} isLoading={isLoading} hideProject={true} />
         </Card>
       </ErrorBoundary>
     </Box>

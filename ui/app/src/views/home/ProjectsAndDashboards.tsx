@@ -211,7 +211,7 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
 
 export function ProjectsAndDashboards() {
   return (
-    <Stack my={2}>
+    <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <FormatListBulletedIcon />
         <h2>Projects & Dashboards</h2>

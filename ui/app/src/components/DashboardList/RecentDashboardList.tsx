@@ -26,12 +26,13 @@ import { DashboardDataGrid, Row } from './DashboardDataGrid';
 
 export interface RecentDashboardListProperties {
   dashboardList: DatedDashboards[];
+  hideProject?: boolean;
   hideToolbar?: boolean;
   isLoading?: boolean;
 }
 
 export function RecentDashboardList(props: RecentDashboardListProperties) {
-  const { dashboardList, hideToolbar, isLoading } = props;
+  const { dashboardList, hideProject, hideToolbar, isLoading } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();
 
@@ -189,7 +190,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         initialState={{
           columns: {
             columnVisibilityModel: {
-              project: false,
+              project: !hideProject,
               id: false,
               version: false,
               createdAt: false,

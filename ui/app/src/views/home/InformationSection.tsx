@@ -26,7 +26,7 @@ export function InformationSection() {
   }
 
   return (
-    <Stack my={2}>
+    <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <InformationIcon />
         <h2>Information</h2>

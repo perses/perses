@@ -11,20 +11,62 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Card, Stack } from '@mui/material';
+import { CircularProgress, Grid, Stack, Typography } from '@mui/material';
+import { DashboardResource } from '@perses-dev/core';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { ImportantDashboardList } from '../../components/DashboardList/ImportantDashboardList';
+import { useImportantDashboardList } from '../../model/dashboard-client';
+import { DashboardCard } from '../../components/DashboardCard/DashboardCard';
+import { useIsMobileSize } from '../../utils/browser-size';
+import { useConfig } from '../../model/config-client';
+
+interface DashboardMosaicProps {
+  dashboards: DashboardResource[];
+}
+
+function DashboardMosaic({ dashboards }: DashboardMosaicProps) {
+  const isMobileSize = useIsMobileSize();
+
+  if (dashboards.length === 0) {
+    return (
+      <Stack sx={{ alignItems: 'center', justifyContent: 'center' }} width="100%" height="50">
+        <Typography variant={'subtitle1'}>Empty</Typography>
+      </Stack>
+    );
+  }
+
+  return (
+    <Grid container spacing={isMobileSize ? 1 : 2} data-testid="important-dashboards-mosaic">
+      {dashboards.map((dashboard) => (
+        <Grid key={`${dashboard.metadata.project}-${dashboard.metadata.name}`} item xs={6} lg={4}>
+          <DashboardCard dashboard={dashboard} hideIcon={isMobileSize}></DashboardCard>
+        </Grid>
+      ))}
+    </Grid>
+  );
+}
 
 export function ImportantDashboards() {
+  const { data: config } = useConfig();
+  const { data: dashboards, isLoading } = useImportantDashboardList();
+
+  // If no important dashboard defined, hide the section
+  if (!config?.important_dashboards?.length || dashboards.length === 0) {
+    return <></>;
+  }
+
   return (
     <Stack>
       <Stack direction="row" alignItems="center" gap={1}>
         <ViewDashboardIcon />
         <h2>Important Dashboards</h2>
       </Stack>
-      <Card id="important-dashboard-list">
-        <ImportantDashboardList />
-      </Card>
+      {isLoading ? (
+        <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </Stack>
+      ) : (
+        <DashboardMosaic dashboards={dashboards} />
+      )}
     </Stack>
   );
 }

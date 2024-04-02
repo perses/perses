@@ -28,6 +28,7 @@ export interface ConfigSchemasModel {
 export interface DatabaseFile {
   folder: string;
   extension: 'yaml' | 'json';
+  case_sensitive: boolean;
 }
 
 export interface TLSConfig {
@@ -69,6 +70,7 @@ export interface DatabaseSQL {
   multi_statements: boolean;
   parse_time: boolean;
   reject_read_only: boolean;
+  case_sensitive: boolean;
 }
 
 export interface Database {

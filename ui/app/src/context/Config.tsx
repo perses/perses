@@ -15,6 +15,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { marked } from 'marked';
 import * as DOMPurify from 'dompurify';
 import { CircularProgress, Stack } from '@mui/material';
+import { DashboardSelector } from '@perses-dev/core';
 import { ConfigModel, useConfig } from '../model/config-client';
 
 interface ConfigContextType {
@@ -43,27 +44,37 @@ export function useConfigContext(): ConfigContextType {
   return ctx;
 }
 
-export function useIsReadonly() {
+export function useIsReadonly(): boolean {
   const { config } = useConfigContext();
   return config.security.readonly;
 }
 
-export function useIsAuthEnabled() {
+export function useIsAuthEnabled(): boolean {
   const { config } = useConfigContext();
   return config.security.enable_auth;
 }
 
-export function useIsSignUpDisable() {
+export function useIsSignUpDisable(): boolean {
   const { config } = useConfigContext();
   return config.security.authentication.disable_sign_up;
 }
 
-export function useImportantDashboardSelectors() {
+export function useImportantDashboardSelectors(): DashboardSelector[] {
   const { config } = useConfigContext();
-  return config.important_dashboards ?? [];
+  return useMemo(() => {
+    if (!config.database.file?.case_sensitive || !config.database.sql?.case_sensitive) {
+      return (config.important_dashboards ?? []).map((selector) => {
+        return {
+          project: selector.project.toLowerCase(),
+          dashboard: selector.dashboard.toLowerCase(),
+        };
+      });
+    }
+    return config.important_dashboards ?? [];
+  }, [config.database.file?.case_sensitive, config.database.sql?.case_sensitive, config.important_dashboards]);
 }
 
-export function useInformation() {
+export function useInformation(): string {
   const { config } = useConfigContext();
 
   const html = useMemo(() => marked.parse(config.information ?? '', { gfm: true }), [config.information]);
