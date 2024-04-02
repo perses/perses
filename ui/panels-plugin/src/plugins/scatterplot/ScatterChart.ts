@@ -22,5 +22,6 @@ export const ScatterChart: PanelPlugin<ScatterChartOptions> = {
   PanelComponent: ScatterChartPanel,
   // TODO: add a chart options editor plugin, for example:
   // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
+  supportedQueryInterfaces: ['TraceQuery'],
   createInitialOptions: createInitialScatterChartOptions,
 };

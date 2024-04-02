@@ -31,6 +31,7 @@ export function BarChartPanel(props: BarChartPanelProps) {
   const PADDING = chartsTheme.container.padding.default;
 
   const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery'); // gets data queries from a context provider, see DataQueriesProvider
+  const { queryResults: queryResults2, isLoading: isLoading2, isFetching: isFetching2 } = useDataQueries('TraceQuery'); // gets data queries from a context provider, see DataQueriesProvider
 
   const barChartData: BarChartData[] = useMemo(() => {
     const calculate = CalculationsMap[calculation as CalculationType];
@@ -48,19 +49,32 @@ export function BarChartPanel(props: BarChartPanelProps) {
       }
     }
 
+    for (const result of queryResults2) {
+      // Skip queries that are still loading or don't have data
+      if (result.isLoading || result.isFetching || result.data === undefined) continue;
+
+      for (const tracesData of result.data.traces) {
+        const traces = {
+          value: tracesData.spanCount!,
+          label: tracesData.name ?? '',
+        };
+        barChartData.push(traces);
+      }
+    }
+
     const sortedBarChartData = sortSeriesData(barChartData, sort);
     if (mode === 'percentage') {
       return calculatePercentages(sortedBarChartData);
     } else {
       return sortedBarChartData;
     }
-  }, [queryResults, sort, mode, calculation]);
+  }, [queryResults, queryResults2, sort, mode, calculation]);
 
   if (queryResults[0]?.error) throw queryResults[0]?.error;
 
   if (contentDimensions === undefined) return null;
 
-  if (isLoading || isFetching) {
+  if (isLoading || isFetching || isLoading2 || isFetching2) {
     return (
       <Box
         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}

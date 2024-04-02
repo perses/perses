@@ -89,9 +89,16 @@ export function PluginRegistry(props: PluginRegistryProps) {
   );
 
   const listPluginMetadata = useCallback(
-    async (pluginType: PluginType) => {
+    async (pluginType: PluginType | PluginType[]) => {
+      if (!Array.isArray(pluginType)) {
+        pluginType = [pluginType];
+      }
       const pluginIndexes = await getPluginIndexes();
-      return pluginIndexes.pluginMetadataByType.get(pluginType) ?? [];
+      const result = [];
+      for (const type of pluginType) {
+        result.push(...(pluginIndexes.pluginMetadataByType.get(type) ?? []));
+      }
+      return result;
     },
     [getPluginIndexes]
   );

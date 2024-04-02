@@ -263,7 +263,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           width="100%"
           pluginType="Datasource"
           pluginKindLabel="Source"
-          value={state.spec.plugin}
+          value={{ ...state.spec.plugin }}
           isReadonly={action === 'read'}
           onChange={(v) => {
             setState((draft) => {

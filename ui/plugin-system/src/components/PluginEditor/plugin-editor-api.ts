@@ -13,23 +13,27 @@
 
 import { BoxProps } from '@mui/material';
 import { Definition, UnknownSpec, useEvent } from '@perses-dev/core';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { produce } from 'immer';
 import { PanelPlugin, PluginType } from '../../model';
 import { PluginKindSelectProps } from '../PluginKindSelect/PluginKindSelect';
 import { PluginSpecEditorProps } from '../PluginSpecEditor/PluginSpecEditor';
-import { usePlugin, usePluginRegistry } from '../../runtime';
+import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+
+export interface PluginEditorSelection extends Definition<UnknownSpec> {
+  pluginType?: PluginType;
+}
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
 export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
-  pluginType: PluginType;
+  pluginType: PluginType | PluginType[];
   pluginKindLabel: string;
-  value: Definition<UnknownSpec>;
+  value: PluginEditorSelection;
   isReadonly?: boolean;
-  onChange: (next: Definition<UnknownSpec>) => void;
+  onChange: (next: PluginEditorSelection) => void;
 }
 
 type PreviousSpecState = Record<string, Record<string, UnknownSpec>>;
@@ -46,15 +50,29 @@ export type UsePluginEditorProps = Pick<PluginEditorProps, 'pluginType' | 'value
  * Returns the state/handlers that power the `PluginEditor` component. Useful for custom components that want to provide
  * a different UI, but want the same behavior of changing `kind` and `spec` together on plugin kind changes. Also
  * remembers previous `spec` values that it's seen, allowing and restores those values if a user switches the plugin
- * kind back.
+ * type and kind back.
  */
 export function usePluginEditor(props: UsePluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const { pluginType, value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
+  const { value, onHideQueryEditorChange = () => {} } = props; // setting onHideQueryEditorChange to empty function here because useEvent requires a function
+  let { pluginType: pluginTypes } = props;
+  if (!Array.isArray(pluginTypes)) {
+    pluginTypes = [pluginTypes];
+  }
 
-  // Keep a stable reference so we don't run the effect below when we don't need to
+  // Keep a stable reference, so we don't run the effect below when we don't need to
   const onChange = useEvent(props.onChange);
   const onHideQuery = useEvent(onHideQueryEditorChange);
+  let pluginType: PluginType = useMemo(
+    () => value.pluginType || (pluginTypes as PluginType[])[0]!,
+    [pluginTypes, value.pluginType]
+  );
+
+  if (!pluginType) {
+    pluginType = 'TimeSeriesQuery';
+  }
+  console.log(value);
+  value.pluginType = value.pluginType || pluginType;
 
   // The previous spec state for PluginType and kind and a helper function for remembering current values
   const prevSpecState = useRef<PreviousSpecState>({
@@ -70,6 +88,7 @@ export function usePluginEditor(props: UsePluginEditorProps) {
   });
 
   // The previous hide query state for each panel kind
+  //TODO: Maybe we should introduce a type+kind key in order to make sure we don't mix up different plugin types
   const hideQueryState = useRef<HideQueryEditorState>({
     [value.kind]: false,
   });
@@ -81,7 +100,12 @@ export function usePluginEditor(props: UsePluginEditorProps) {
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
   const [pendingKind, setPendingKind] = useState(initPendingKind);
-  const { data: plugin, isFetching, error } = usePlugin(pluginType, pendingKind);
+  console.log('before');
+  console.log(pluginType, pendingKind);
+  const { data: listPluginMetadata } = useListPluginMetadata(pluginTypes);
+  const plType = listPluginMetadata?.find((v) => v.kind === pendingKind)?.pluginType;
+  const { data: plugin, isFetching, error } = usePlugin(plType || pluginType, pendingKind);
+  console.log('after');
 
   useEffect(() => {
     // Nothing to do if no new plugin kind is pending
@@ -90,9 +114,8 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     // Can't get spec value until we have a plugin
     if (plugin === undefined) return;
 
-    // Fire an onChange to change to the pending kind with initial values from the plugin
-    rememberCurrentSpecState();
     onChange({
+      pluginType: listPluginMetadata?.find((v) => v.kind === pendingKind)?.pluginType,
       kind: pendingKind,
       spec: plugin.createInitialOptions(),
     });
@@ -106,7 +129,17 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     }
 
     setPendingKind('');
-  }, [pendingKind, plugin, rememberCurrentSpecState, onChange, onHideQuery, hideQueryState, pluginType, value.kind]);
+  }, [
+    listPluginMetadata,
+    pendingKind,
+    plugin,
+    rememberCurrentSpecState,
+    onChange,
+    onHideQuery,
+    hideQueryState,
+    pluginType,
+    value.kind,
+  ]);
 
   /**
    * When the user tries to change the plugin kind, make sure we have the correct spec for that plugin kind before we
@@ -120,6 +153,7 @@ export function usePluginEditor(props: UsePluginEditorProps) {
     if (previousState !== undefined) {
       rememberCurrentSpecState();
       onChange({
+        pluginType: listPluginMetadata?.find((v) => v.kind === pendingKind)?.pluginType,
         kind: nextKind,
         spec: previousState,
       });

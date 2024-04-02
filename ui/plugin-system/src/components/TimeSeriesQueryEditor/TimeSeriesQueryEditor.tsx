@@ -28,7 +28,7 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
   // Build the default query plugin
   // Use as default the plugin kind explicitly set as default or the first in the list
   const { defaultPluginKinds } = usePluginRegistry();
-  const { data: timeSeriesPlugins } = useListPluginMetadata(TIME_SERIES_QUERY_KEY);
+  const { data: timeSeriesPlugins } = useListPluginMetadata([TIME_SERIES_QUERY_KEY, 'TraceQuery']);
   const defaultTimeSeriesQueryKind = defaultPluginKinds?.[TIME_SERIES_QUERY_KEY] ?? timeSeriesPlugins?.[0]?.kind ?? '';
   const { data: defaultQueryPlugin } = usePlugin(TIME_SERIES_QUERY_KEY, defaultTimeSeriesQueryKind, {
     useErrorBoundary: true,

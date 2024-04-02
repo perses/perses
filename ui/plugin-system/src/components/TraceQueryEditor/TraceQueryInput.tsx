@@ -87,7 +87,12 @@ function QueryEditor(props: QueryEditorProps) {
 
   return (
     <Box {...others}>
-      <PluginEditor pluginType="TraceQuery" pluginKindLabel="Query Type" value={plugin} onChange={handlePluginChange} />
+      <PluginEditor
+        pluginType="TraceQuery"
+        pluginKindLabel="Query Type"
+        value={{ ...plugin }}
+        onChange={handlePluginChange}
+      />
     </Box>
   );
 }

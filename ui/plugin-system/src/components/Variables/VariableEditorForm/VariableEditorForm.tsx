@@ -360,7 +360,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                       pluginType="Variable"
                       pluginKindLabel="Source"
                       isReadonly={action === 'read'}
-                      value={state.listVariableFields.plugin}
+                      value={{ ...state.listVariableFields.plugin }}
                       onChange={(val) => {
                         field.onChange(val);
                         setState((draft) => {

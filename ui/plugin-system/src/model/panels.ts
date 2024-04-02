@@ -29,6 +29,13 @@ export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
    */
   panelOptionsEditorComponents?: Array<PanelOptionsEditorComponent<Spec>>;
   /**
+   * Explicitly specify which query interfaces the panel supports.
+   * Allows panel to support several query interfaces.
+   * If not provided, the panel will guess which interface to use based on the queries
+   * given in parameters.
+   */
+  supportedQueryInterfaces?: Array<'TimeSeriesQuery' | 'LogQuery' | 'TraceQuery'>;
+  /**
    * If true, query editor will be hidden for panel plugin
    * @default false
    */

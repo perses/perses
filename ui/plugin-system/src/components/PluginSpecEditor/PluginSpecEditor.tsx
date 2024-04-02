@@ -24,6 +24,7 @@ export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {
   const { pluginType, pluginKind, ...others } = props;
+  console.log(pluginType, pluginKind);
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
 
   if (error) {

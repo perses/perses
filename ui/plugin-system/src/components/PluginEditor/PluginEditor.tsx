@@ -44,7 +44,7 @@ export function PluginEditor(props: PluginEditorProps) {
         onChange={onKindChange}
       />
       <PluginSpecEditor
-        pluginType={pluginType}
+        pluginType={value.pluginType!}
         pluginKind={value.kind}
         value={value.spec}
         onChange={onSpecChange}

@@ -17,7 +17,7 @@ import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 
 export interface PluginKindSelectProps extends Omit<TextFieldProps, 'children'> {
-  pluginType: PluginType;
+  pluginType: PluginType | PluginType[];
 }
 
 /**

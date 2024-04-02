@@ -44,31 +44,21 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  const getQueryType = (): string => {
+  const getQueryTypes = (): string[] => {
+    if (plugin.supportedQueryInterfaces && plugin.supportedQueryInterfaces.length > 0) {
+      return plugin.supportedQueryInterfaces;
+    }
     const queriesList = panelDefinition?.spec?.queries;
     if (queriesList === undefined) {
-      return '';
+      return [''];
     }
     const queryType: string = queriesList[0]?.kind;
-    return queryType;
+    return [queryType];
   };
 
   // Get the corresponding queryEditor depending on the queryType
   const getQueryEditorComponent = () => {
-    const queryType = getQueryType();
-    // default case handles cause where there is no queryType yet (e.g. UI > 'editing' mode > 'Add Panel')
-    switch (queryType) {
-      case 'TimeSeriesQuery':
-        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-      case 'TraceQuery':
-        return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-      default:
-        // ScatterChart only handles trace queries for now
-        if (kind === 'ScatterChart') {
-          return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-        }
-        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-    }
+    return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
   };
 
   const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
