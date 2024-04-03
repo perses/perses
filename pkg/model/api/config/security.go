@@ -34,7 +34,7 @@ type Security struct {
 	// stored in the database such as the password of the basic auth for a datasource.
 	// Note that if it is not provided, it will use a default value.
 	// On a production instance, you should set this key.
-	// Also note the key must be at least 32 bytes long.
+	// Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
 	EncryptionKey secret.Hidden `json:"encryption_key,omitempty" yaml:"encryption_key,omitempty"`
 	// EncryptionKeyFile is the path to file containing the secret key
 	EncryptionKeyFile string `json:"encryption_key_file,omitempty" yaml:"encryption_key_file,omitempty"`
@@ -63,8 +63,8 @@ func (s *Security) Verify() error {
 		}
 		s.EncryptionKey = secret.Hidden(data)
 	}
-	if len(s.EncryptionKey) < 32 {
-		return fmt.Errorf("encryption_key must be longer than 32 bytes")
+	if len(s.EncryptionKey) != 32 {
+		return fmt.Errorf("encryption_key size must be 32 bytes")
 	}
 	s.EncryptionKey = secret.Hidden(hex.EncodeToString([]byte(s.EncryptionKey)))
 

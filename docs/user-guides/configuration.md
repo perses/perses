@@ -110,7 +110,7 @@ Generic placeholders are defined as follows:
   # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
   # Note that if it is not provided, it will use a default value.
   # On a production instance, you should set this key.
-  # Also note the key must be at least 32 bytes long.
+  # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
   [ encryption_key: <secret> ]
 
   # The path to the file containing the secret key.
