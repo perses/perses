@@ -136,6 +136,8 @@ Generic placeholders are defined as follows:
 
 ##### Authentication providers
 
+Check the [helpers](./oauth-configuration-helpers.md) to help you to configure the different providers.
+
 ```yaml
   # Enable the native authentication providers
   [ enable_native: <boolean> | default = false ]
