@@ -243,6 +243,8 @@ Check the [helpers](./oauth-configuration-helpers.md) to help you to configure t
   user_infos_url: <string>
 
   # The provider Device Auth URL
+  # If we want to use the device code flow, we need to provide this URL, otherwise an error will fire saying
+  # it's not supported.
   [ device_auth_url: <string> ]
 
   # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
