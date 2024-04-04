@@ -13,17 +13,20 @@
 
 import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
-import { OptionsEditorProps, PluginType } from '../../model';
+import { OptionsEditorProps } from '../../model';
 import { usePlugin } from '../../runtime';
+import { PluginEditorSelection } from '../PluginEditor';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
-  pluginType: PluginType;
-  pluginKind: string;
+  pluginSelection: PluginEditorSelection;
   isEditor?: boolean;
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps) {
-  const { pluginType, pluginKind, ...others } = props;
+  const {
+    pluginSelection: { type: pluginType, kind: pluginKind },
+    ...others
+  } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
 
   if (error) {

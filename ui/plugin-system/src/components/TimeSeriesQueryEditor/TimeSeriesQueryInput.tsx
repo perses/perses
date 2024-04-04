@@ -80,7 +80,8 @@ function QueryEditor(props: QueryEditorProps) {
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
-        draft.spec.plugin = next;
+        draft.spec.plugin.kind = next.selection.kind;
+        draft.spec.plugin.spec = next.spec;
       })
     );
   };
@@ -89,9 +90,15 @@ function QueryEditor(props: QueryEditorProps) {
     <Box {...others}>
       {/* If TimeSeriesQuery plugins ever have common props on the definition, the inputs could go here */}
       <PluginEditor
-        pluginType="TimeSeriesQuery"
+        pluginTypes={['TimeSeriesQuery']}
         pluginKindLabel="Query Type"
-        value={plugin}
+        value={{
+          selection: {
+            kind: plugin.kind,
+            type: value.kind,
+          },
+          spec: plugin.spec,
+        }}
         onChange={handlePluginChange}
       />
     </Box>

@@ -357,14 +357,24 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   render={({ field }) => (
                     <PluginEditor
                       width="100%"
-                      pluginType="Variable"
+                      pluginTypes={['Variable']}
                       pluginKindLabel="Source"
                       isReadonly={action === 'read'}
-                      value={state.listVariableFields.plugin}
+                      value={{
+                        selection: {
+                          kind: state.listVariableFields.plugin.kind,
+                          type: 'Variable',
+                        },
+                        spec: state.listVariableFields.plugin.spec,
+                      }}
                       onChange={(val) => {
-                        field.onChange(val);
+                        field.onChange({
+                          spec: val.spec,
+                          kind: val.selection.kind,
+                        });
                         setState((draft) => {
-                          draft.listVariableFields.plugin = val;
+                          draft.listVariableFields.plugin.kind = val.selection.kind;
+                          draft.listVariableFields.plugin.spec = val.spec;
                         });
                       }}
                     />

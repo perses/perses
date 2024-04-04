@@ -31,8 +31,8 @@ describe('PluginKindSelect', () => {
 
   it('displays the list of plugins for a plugin type', async () => {
     renderComponent({
-      pluginType: 'Panel',
-      value: '',
+      pluginTypes: ['Panel'],
+      value: undefined,
     });
 
     // Open the select and verify the list of options from the test plugin data
@@ -47,8 +47,8 @@ describe('PluginKindSelect', () => {
 
   it('shows the correct selected value', async () => {
     renderComponent({
-      pluginType: 'Variable',
-      value: 'ErnieVariable1',
+      pluginTypes: ['Variable'],
+      value: { type: 'Variable', kind: 'ErnieVariable1' },
     });
 
     // Use findByRole to wait for loading to finish and selected value to appear
@@ -58,12 +58,12 @@ describe('PluginKindSelect', () => {
 
   it('can select new value', async () => {
     let onChangeValue: string | undefined = undefined;
-    const onChange = jest.fn((e) => {
-      onChangeValue = e.target.value;
+    const onChange = jest.fn((value) => {
+      onChangeValue = value;
     });
     renderComponent({
-      pluginType: 'Variable',
-      value: 'ErnieVariable1',
+      pluginTypes: ['Variable'],
+      value: { type: 'Variable', kind: 'ErnieVariable1' },
       onChange,
     });
 
@@ -72,6 +72,6 @@ describe('PluginKindSelect', () => {
     userEvent.click(newOption);
 
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChangeValue).toBe('BertVariable');
+    expect(onChangeValue).toStrictEqual({ type: 'Variable', kind: 'BertVariable' });
   });
 });

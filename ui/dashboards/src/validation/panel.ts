@@ -17,7 +17,10 @@ export const panelEditorValidationSchema = z.object({
   name: z.string().nonempty('Required'),
   groupId: z.number(),
   description: z.string().optional(),
-  type: z.string().nonempty('Required'),
+  selection: z.object({
+    type: z.string(),
+    kind: z.string(),
+  }),
 });
 
 export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

@@ -20,15 +20,18 @@ import { PluginEditor } from './PluginEditor';
 import { PluginEditorProps } from './plugin-editor-api';
 
 type RenderComponentOptions = {
-  pluginType?: PluginEditorProps['pluginType'];
+  pluginTypes?: PluginEditorProps['pluginTypes'];
   defaultPluginKinds?: DefaultPluginKinds;
   value?: PluginEditorProps['value'];
 };
 
 describe('PluginEditor', () => {
-  const renderComponent = ({ pluginType = 'Variable', defaultPluginKinds, value }: RenderComponentOptions = {}) => {
+  const renderComponent = ({ pluginTypes = ['Variable'], defaultPluginKinds, value }: RenderComponentOptions = {}) => {
     const testValue: PluginEditorProps['value'] = value || {
-      kind: 'ErnieVariable1',
+      selection: {
+        type: 'Variable',
+        kind: 'ErnieVariable1',
+      },
       spec: { variableOption: 'Option1Value' },
     };
 
@@ -38,7 +41,9 @@ describe('PluginEditor', () => {
       const [value, setValue] = useState(testValue);
       onChange = jest.fn((v) => setValue(v));
 
-      return <PluginEditor pluginType={pluginType} pluginKindLabel="Variable Type" value={value} onChange={onChange} />;
+      return (
+        <PluginEditor pluginTypes={pluginTypes} pluginKindLabel="Variable Type" value={value} onChange={onChange} />
+      );
     }
 
     renderWithContext(<TestHelperForm />, undefined, { defaultPluginKinds });
@@ -77,7 +82,10 @@ describe('PluginEditor', () => {
 
     // Make sure onChange was only called once (i.e. initializes both kind and spec at the same time
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith({ kind: 'ErnieVariable2', spec: { variableOption2: '' } });
+    expect(onChange).toHaveBeenCalledWith({
+      selection: { type: 'Variable', kind: 'ErnieVariable2' },
+      spec: { variableOption2: '' },
+    });
   });
 
   it('remembers previous spec values', async () => {
@@ -108,12 +116,12 @@ describe('PluginEditor', () => {
   describe('when defaultPluginKinds specified in plugin registry', () => {
     it('uses default kind when one is not provided', async () => {
       renderComponent({
-        pluginType: 'Variable',
+        pluginTypes: ['Variable'],
         defaultPluginKinds: {
           TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
           Variable: 'ErnieVariable1',
         },
-        value: { kind: '', spec: {} },
+        value: { selection: { type: 'Variable', kind: '' }, spec: {} },
       });
 
       // Wait for default panel kind to load.
@@ -123,9 +131,9 @@ describe('PluginEditor', () => {
 
     it('does not use default when kind is provided', async () => {
       renderComponent({
-        pluginType: 'Variable',
+        pluginTypes: ['Variable'],
         defaultPluginKinds: { Variable: 'ErnieVariable1', TimeSeriesQuery: 'PrometheusTimeSeriesQuery' },
-        value: { kind: 'ErnieVariable2', spec: {} },
+        value: { selection: { type: 'Variable', kind: 'ErnieVariable2' }, spec: {} },
       });
 
       // Wait for specified panel kind to load.

@@ -150,7 +150,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps) {
   const listDatasourceSelectItems = useEvent(
     async (datasourcePluginKind: string): Promise<DatasourceSelectItemGroup[]> => {
       const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
-        listPluginMetadata('Datasource'),
+        listPluginMetadata(['Datasource']),
         project ? datasourceApi.listDatasources(project, datasourcePluginKind) : [],
         datasourceApi.listGlobalDatasources(datasourcePluginKind),
       ]);

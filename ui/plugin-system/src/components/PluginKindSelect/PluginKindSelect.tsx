@@ -12,31 +12,64 @@
 // limitations under the License.
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
-import { forwardRef } from 'react';
+import { forwardRef, useCallback } from 'react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
+import { PluginEditorSelection } from '../PluginEditor';
 
-export interface PluginKindSelectProps extends Omit<TextFieldProps, 'children'> {
-  pluginType: PluginType;
+export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'onChange' | 'children'> {
+  pluginTypes: PluginType[];
+  value?: PluginEditorSelection;
+  onChange?: (s: PluginEditorSelection) => void;
 }
 
 /**
- * Displays a MUI Select input for selecting a plugin's kind from a list of all the available plugins of a specific
- * plugin type. (e.g. "Show a list of all the Panel plugins" or "Show a list of all the Variable plugins").
+ * Displays a MUI Select input for selecting a plugin's kind from a list of all the available plugins of some specific
+ * plugin types. (e.g. "Show a list of all the Panel plugins", or "Show a list of all the Variable plugins", or "Show
+ * a list of all the TimeSeriesQuery, TraceQuery, and LogQuery plugins").
+ * The value of the select is the kind of the plugin, but you can also listen to the `onPluginTypeChange` event to know
+ * when the user changes the plugin type (it fires at start for the default value.)
  */
 export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) => {
-  const { pluginType, value: propValue, ...others } = props;
-  const { data, isLoading } = useListPluginMetadata(pluginType);
+  const { pluginTypes, value: propValue, onChange, ...others } = props;
+  const { data, isLoading } = useListPluginMetadata(pluginTypes);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
-  const value = propValue !== '' && isLoading ? '' : propValue;
+  const value = propValue && isLoading ? '' : JSON.stringify(propValue);
+
+  const handleChange = (event: { target: { value: string } }) => {
+    onChange?.(JSON.parse(event.target.value));
+  };
+
+  const renderValue = useCallback(
+    (selected: unknown) => {
+      const selectedValue = JSON.parse(selected as string);
+      if (!selectedValue.kind) {
+        return '';
+      }
+      return data?.find((v) => v.pluginType === selectedValue.type && v.kind === selectedValue.kind)?.display.name;
+    },
+    [data]
+  );
 
   // TODO: Does this need a loading indicator of some kind?
   return (
-    <TextField select inputRef={ref} {...others} value={value} data-testid="plugin-kind-select">
+    <TextField
+      select
+      inputRef={ref}
+      {...others}
+      value={value}
+      onChange={handleChange}
+      SelectProps={{ renderValue }}
+      data-testid="plugin-kind-select"
+    >
       {isLoading && <MenuItem value="">Loading...</MenuItem>}
       {data?.map((metadata) => (
-        <MenuItem data-testid="option" key={metadata.kind} value={metadata.kind}>
+        <MenuItem
+          data-testid="option"
+          key={metadata.pluginType + metadata.kind}
+          value={JSON.stringify({ type: metadata.pluginType, kind: metadata.kind })}
+        >
           {metadata.display.name}
         </MenuItem>
       ))}

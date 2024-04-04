@@ -80,14 +80,26 @@ function QueryEditor(props: QueryEditorProps) {
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
-        draft.spec.plugin = next;
+        draft.spec.plugin.kind = next.selection.kind;
+        draft.spec.plugin.spec = next.spec;
       })
     );
   };
 
   return (
     <Box {...others}>
-      <PluginEditor pluginType="TraceQuery" pluginKindLabel="Query Type" value={plugin} onChange={handlePluginChange} />
+      <PluginEditor
+        pluginTypes={['TraceQuery']}
+        pluginKindLabel="Query Type"
+        value={{
+          selection: {
+            kind: plugin.kind,
+            type: value.kind,
+          },
+          spec: plugin.spec,
+        }}
+        onChange={handlePluginChange}
+      />
     </Box>
   );
 }

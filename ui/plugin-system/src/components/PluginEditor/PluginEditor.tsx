@@ -26,8 +26,8 @@ import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
  */
 export function PluginEditor(props: PluginEditorProps) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { value, pluginType, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
-  const { pendingKind, isLoading, error, onKindChange, onSpecChange } = usePluginEditor(props);
+  const { value, pluginTypes, pluginKindLabel, onChange: _, isReadonly, ...others } = props;
+  const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
   return (
     <Box {...others}>
       <PluginKindSelect
@@ -35,17 +35,16 @@ export function PluginEditor(props: PluginEditorProps) {
         sx={{ mb: 1, minWidth: 120 }}
         margin="dense"
         label={pluginKindLabel}
-        pluginType={pluginType}
+        pluginTypes={pluginTypes}
         disabled={isLoading}
-        value={pendingKind !== '' ? pendingKind : value.kind}
+        value={pendingSelection ? pendingSelection : value.selection}
         InputProps={{ readOnly: isReadonly }}
         error={!!error}
         helperText={error?.message}
-        onChange={onKindChange}
+        onChange={onSelectionChange}
       />
       <PluginSpecEditor
-        pluginType={pluginType}
-        pluginKind={value.kind}
+        pluginSelection={value.selection}
         value={value.spec}
         onChange={onSpecChange}
         isReadonly={isReadonly}

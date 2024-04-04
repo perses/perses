@@ -22,7 +22,7 @@ describe('PluginSpecEditor', () => {
   };
 
   it('shows the options editor component for a plugin', async () => {
-    renderComponent({ pluginType: 'Variable', pluginKind: 'ErnieVariable1', value: {}, onChange: jest.fn() });
+    renderComponent({ pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' }, value: {}, onChange: jest.fn() });
     const editor = await screen.findByLabelText('ErnieVariable editor');
     expect(editor).toBeInTheDocument();
   });
@@ -30,8 +30,7 @@ describe('PluginSpecEditor', () => {
   it('propagates value changes', async () => {
     const onChange = jest.fn();
     renderComponent({
-      pluginType: 'Variable',
-      pluginKind: 'ErnieVariable1',
+      pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' },
       value: { variableOption: 'Option1Value' },
       onChange,
     });
@@ -43,14 +42,14 @@ describe('PluginSpecEditor', () => {
   });
 
   it('shows an error if plugin fails to load', async () => {
-    renderComponent({ pluginType: 'Variable', pluginKind: 'DoesNotExist', value: {}, onChange: jest.fn() });
+    renderComponent({ pluginSelection: { type: 'Variable', kind: 'DoesNotExist' }, value: {}, onChange: jest.fn() });
     const errorAlert = await screen.findByRole('alert');
     expect(errorAlert).toHaveTextContent(/doesnotexist/i);
   });
 
   it('should throw an error if panel type is used', () => {
     try {
-      renderComponent({ pluginType: 'Panel', pluginKind: 'TimeSeriesChart', value: {}, onChange: jest.fn() });
+      renderComponent({ pluginSelection: { type: 'Panel', kind: 'TimeSeriesChart' }, value: {}, onChange: jest.fn() });
     } catch (e) {
       expect(e).toBe('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
     }
