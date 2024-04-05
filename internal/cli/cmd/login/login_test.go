@@ -28,6 +28,24 @@ func TestLoginCMD(t *testing.T) {
 			ExpectedMessage: "no URL has been provided neither found in the previous configuration",
 		},
 		{
+			Title:           "native login flag and provider flag cannot be set at the same time (1)",
+			Args:            []string{"--username", "foo", "--provider", "google", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --username or --token at the same time than --client-id or --client-secret or --provider",
+		},
+		{
+			Title:           "native login flag and provider flag cannot be set at the same time (2)",
+			Args:            []string{"--username", "foo", "--client-id", "bar", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "you can not set --username or --token at the same time than --client-id or --client-secret or --provider",
+		},
+		{
+			Title:           "provider not known",
+			Args:            []string{"--provider", "bar", "https://demo.perses.dev"},
+			IsErrorExpected: true,
+			ExpectedMessage: "provider \"bar\" does not exist",
+		},
+		{
 			Title:           "token flag used",
 			Args:            []string{"--token", "foo.bar.jwt", "https://demo.perses.dev"},
 			IsErrorExpected: false,
