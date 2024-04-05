@@ -14,11 +14,8 @@
 package login
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/charmbracelet/huh"
 	"github.com/perses/perses/internal/api/utils"
@@ -49,10 +46,16 @@ const (
 	errExpiredToken         = "expired_token"
 )
 
+type loginOption interface {
+	Login() (*modelAPI.AuthResponse, error)
+	SetMissingInput() error
+}
+
 type option struct {
 	persesCMD.Option
 	writer               io.Writer
 	url                  *common.URL
+	isNativeSelected     bool
 	username             string
 	password             string
 	clientID             string
@@ -64,6 +67,7 @@ type option struct {
 	insecureTLS          bool
 	apiClient            api.ClientInterface
 	restConfig           perseshttp.RestConfigClient
+	remoteConfig         *backendConfig.Config
 }
 
 func (o *option) Complete(args []string) error {
@@ -71,6 +75,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("only the server URL should be specified as an argument")
 	}
 
+	// get the URL from the parameter or from the previous config
 	if len(args) == 0 {
 		o.url = config.Global.RestClientConfig.URL
 	} else {
@@ -83,6 +88,8 @@ func (o *option) Complete(args []string) error {
 	if o.url == nil {
 		return fmt.Errorf("no URL has been provided neither found in the previous configuration")
 	}
+
+	// create a new apiClient
 	o.restConfig = config.Global.RestClientConfig
 	o.restConfig.URL = o.url
 	if o.restConfig.TLSConfig == nil {
@@ -94,29 +101,78 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = api.NewWithClient(restClient)
+
+	// Finally get the API config, we will need for later
+	cfg, err := o.apiClient.Config()
+	if err != nil {
+		return err
+	}
+	o.remoteConfig = cfg
 	return nil
 }
 
 func (o *option) Validate() error {
+	if !o.remoteConfig.Security.EnableAuth {
+		// In case the authentication is not activated on the Perses API side,
+		// there is no need to verify that the flags are correctly used since they are all being ignored.
+		return nil
+	}
+	// check if all parameters are properly set and if exclusive flags are not used
 	if len(o.username) > 0 && len(o.accessToken) > 0 {
 		return fmt.Errorf("--token and --username are mutually exclusive")
+	}
+	if (len(o.username) > 0 || len(o.accessToken) > 0) && (len(o.clientID) > 0 || len(o.clientSecret) > 0 || len(o.externalAuthProvider) > 0) {
+		return fmt.Errorf("you can not set --username or --token at the same time than --client-id or --client-secret or --provider")
+	}
+
+	// check if based on the API config, flags can be used
+	providers := o.remoteConfig.Security.Authentication.Providers
+	if !providers.EnableNative && (len(o.username) > 0 || len(o.password) > 0) {
+		return fmt.Errorf("username/password input is forbidden as backend does not support native auth provider")
+	}
+	if providers.EnableNative && (len(o.username) > 0 || len(o.password) > 0) {
+		o.isNativeSelected = true
+	}
+	if len(o.externalAuthProvider) > 0 {
+		for _, prov := range providers.OIDC {
+			if prov.SlugID == o.externalAuthProvider {
+				o.setExternalAuthProvider(externalAuthKindOIDC, prov.SlugID)
+			}
+		}
+		for _, prov := range providers.OAuth {
+			if prov.SlugID == o.externalAuthProvider {
+				o.setExternalAuthProvider(externalAuthKindOAuth, prov.SlugID)
+			}
+		}
+		if len(o.externalAuthKind) == 0 {
+			return fmt.Errorf("provider %q does not exist", o.externalAuthProvider)
+		}
 	}
 	return nil
 }
 
 func (o *option) Execute() error {
-	cfg, err := o.apiClient.Config()
-	if err != nil {
-		return err
-	}
-	if cfg.Security.EnableAuth && len(o.accessToken) == 0 {
-		if readErr := o.readAndSetLoginInput(cfg.Security.Authentication.Providers); readErr != nil {
-			return readErr
+	if o.remoteConfig.Security.EnableAuth && len(o.accessToken) == 0 {
+		if len(o.externalAuthProvider) == 0 && len(o.username) == 0 && len(o.password) == 0 {
+			if err := o.selectAndSetProvider(); err != nil {
+				return err
+			}
 		}
-		if authErr := o.authAndSetToken(); authErr != nil {
+		lgOption, err := o.newLoginOption()
+		if err != nil {
+			return err
+		}
+		if inputErr := lgOption.SetMissingInput(); inputErr != nil {
+			return inputErr
+		}
+		token, authErr := lgOption.Login()
+		if authErr != nil {
 			return authErr
 		}
+		o.accessToken = token.AccessToken
+		o.refreshToken = token.RefreshToken
 	}
+
 	o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
 	if writeErr := config.Write(&config.Config{
 		RestClientConfig: o.restConfig,
@@ -131,169 +187,87 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
-func (o *option) authAndSetToken() error {
-	// If the user has provided username and password, we use the native provider
-	if len(o.username) > 0 && len(o.password) > 0 {
-		token, err := o.apiClient.Auth().Login(o.username, o.password)
-		if err != nil {
-			return err
+func (o *option) newLoginOption() (loginOption, error) {
+	if o.isNativeSelected {
+		return &nativeLogin{
+			writer:    o.writer,
+			username:  o.username,
+			password:  o.password,
+			apiClient: o.apiClient,
+		}, nil
+	}
+	if len(o.externalAuthProvider) > 0 {
+		if len(o.clientSecret) > 0 || len(o.clientID) > 0 {
+			return &roboticLogin{
+				writer:               o.writer,
+				externalAuthKind:     o.externalAuthKind,
+				externalAuthProvider: o.externalAuthProvider,
+				clientID:             o.clientID,
+				clientSecret:         o.clientSecret,
+				apiClient:            o.apiClient,
+			}, nil
 		}
-		o.accessToken = token.AccessToken
-		o.refreshToken = token.RefreshToken
+		return &deviceCodeLogin{
+			writer:               o.writer,
+			externalAuthKind:     o.externalAuthKind,
+			externalAuthProvider: o.externalAuthProvider,
+			apiClient:            o.apiClient,
+		}, nil
+	}
+	return nil, fmt.Errorf("unable to know what kind of login should be executed")
+}
+
+func (o *option) selectAndSetProvider() error {
+	providers := o.remoteConfig.Security.Authentication.Providers
+	// The first step is to collect the different providers and store it into items + modifiers.
+	// items will be the selection items to display to users.
+	// modifiers will be the action to save the different user input into option struct.
+	modifiers := map[string]func(){}
+	var options []huh.Option[string]
+
+	if providers.EnableNative {
+		optKey := "Native (username/password)"
+		optValue := nativeProvider
+		options = append(options, huh.NewOption(optKey, optValue))
+		modifiers[optValue] = func() {
+			o.isNativeSelected = true
+		}
+	}
+
+	// Saving OIDC item(s)
+	for _, prov := range providers.OIDC {
+		optKey := fmt.Sprintf("OIDC (%s)", prov.Name)
+		optValue := prov.SlugID
+		options = append(options, huh.NewOption(optKey, optValue))
+		modifiers[optValue] = func() {
+			o.setExternalAuthProvider(externalAuthKindOIDC, prov.SlugID)
+		}
+	}
+
+	// Saving OAuth 2.0 item(s)
+	for _, prov := range providers.OAuth {
+		optKey := fmt.Sprintf("OAuth 2.0 (%s)", prov.Name)
+		optValue := prov.SlugID
+		options = append(options, huh.NewOption(optKey, optValue))
+		modifiers[optValue] = func() {
+			o.setExternalAuthProvider(externalAuthKindOAuth, prov.SlugID)
+		}
+	}
+
+	// In case there is only one item available, prompt selection is not necessary
+	if len(options) == 1 {
+		modifiers[options[0].Value]()
 		return nil
 	}
 
-	// If the user has provided clientID and clientSecret, we use the robotic access
-	if len(o.clientID) > 0 && len(o.clientSecret) > 0 {
-		token, err := o.apiClient.Auth().ClientCredentialsToken(string(o.externalAuthKind), o.externalAuthProvider, o.clientID, o.clientSecret)
-		if err != nil {
-			return err
-		}
-		o.accessToken = token.AccessToken
-		o.refreshToken = token.RefreshToken
-		return nil
-	}
-
-	// Otherwise, we start the device code flow
-	deviceCodeResponse, err := o.apiClient.Auth().DeviceCode(string(o.externalAuthKind), o.externalAuthProvider)
+	selectedItem, err := o.promptProvider(options)
 	if err != nil {
 		return err
 	}
 
-	// Display the user code and verification URL
-	if outErr := output.HandleString(o.writer, fmt.Sprintf("Go to %s and enter this user code: %s\nWaiting for user to authorize the application...", deviceCodeResponse.VerificationURI, deviceCodeResponse.UserCode)); err != nil {
-		return outErr
-	}
-
-	// Compute the expiry and interval from the response
-	ctx := context.Background()
-	if !deviceCodeResponse.Expiry.IsZero() {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithDeadline(ctx, deviceCodeResponse.Expiry)
-		defer cancel()
-	}
-	interval := deviceCodeResponse.Interval
-	if interval == 0 {
-		interval = 5
-	}
-
-	// Poll for an access token
-	ticker := time.NewTicker(time.Duration(interval) * time.Second)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return ctx.Err()
-		case <-ticker.C:
-			tokenResponse, tokenErr := o.apiClient.Auth().DeviceAccessToken(string(o.externalAuthKind), o.externalAuthProvider, deviceCodeResponse.DeviceCode)
-			if tokenErr == nil {
-				// Handle the access token
-				o.accessToken = tokenResponse.AccessToken
-				o.refreshToken = tokenResponse.RefreshToken
-				return nil
-			}
-
-			reqErr := &perseshttp.RequestError{}
-			if errors.As(tokenErr, &reqErr) && reqErr.Err != nil {
-				oauthErr := &modelAPI.OAuthError{}
-				if errors.As(reqErr.Err, &oauthErr) {
-					switch oauthErr.ErrorCode {
-					case errSlowDown:
-						// https://datatracker.ietf.org/doc/html/rfc8628#section-3.5
-						// "the interval MUST be increased by 5 seconds for this and all subsequent requests"
-						interval += 5
-						ticker.Reset(time.Duration(interval) * time.Second)
-						continue
-					case errAuthorizationPending:
-						// Do nothing.
-						continue
-					default:
-						return oauthErr
-					}
-				}
-				return reqErr.Err
-			}
-			return tokenErr
-		}
-	}
-}
-
-func (o *option) readAndSetLoginInputNative() error {
-	if len(o.username) == 0 {
-		input := huh.NewInput().Title("Username").Value(&o.username)
-		if err := input.Run(); err != nil {
-			return err
-		}
-		if err := output.HandleString(o.writer, input.View()); err != nil {
-			return err
-		}
-	}
-	if len(o.password) == 0 {
-		input := huh.NewInput().Title("Password").EchoMode(huh.EchoModeNone).Value(&o.password)
-		if err := input.Run(); err != nil {
-			return err
-		}
-		if err := output.HandleString(o.writer, input.View()); err != nil {
-			return err
-		}
-	}
+	// Apply the modifier of the corresponding item
+	modifiers[selectedItem]()
 	return nil
-}
-
-func (o *option) readAndSetClientCredentials() error {
-	if len(o.clientID) == 0 {
-		input := huh.NewInput().Title("Client ID").Value(&o.clientID)
-		if err := input.Run(); err != nil {
-			return err
-		}
-		if err := output.HandleString(o.writer, input.View()); err != nil {
-			return err
-		}
-	}
-	if len(o.clientSecret) == 0 {
-		input := huh.NewInput().Title("Client Secret").EchoMode(huh.EchoModeNone).Value(&o.clientSecret)
-		if err := input.Run(); err != nil {
-			return err
-		}
-		if err := output.HandleString(o.writer, input.View()); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// trySetLoginInputExternal will try to set the external auth provider based on the slugID.
-// If the slugID does not exist, it will return an error.
-func (o *option) trySetLoginInputExternal(providers backendConfig.AuthProviders, slugID string) error {
-	for _, prov := range providers.OIDC {
-		if prov.SlugID == slugID {
-			return o.setLoginInputExternal(externalAuthKindOIDC, slugID)
-		}
-	}
-	for _, prov := range providers.OAuth {
-		if prov.SlugID == slugID {
-			return o.setLoginInputExternal(externalAuthKindOAuth, slugID)
-		}
-	}
-	return fmt.Errorf("provider %q does not exist", slugID)
-}
-
-func (o *option) newLoginInputExternalModifier(kind externalAuthKind, slugID string) func() error {
-	return func() error {
-		return o.setLoginInputExternal(kind, slugID)
-	}
-}
-
-func (o *option) setLoginInputExternal(kind externalAuthKind, slugID string) error {
-	o.externalAuthKind = kind
-	o.externalAuthProvider = slugID
-
-	// In case the user is trying to set client id / secret, we do set
-	if len(o.clientID) > 0 || len(o.clientSecret) > 0 {
-		return o.readAndSetClientCredentials()
-	}
-	return nil
-
 }
 
 func (o *option) promptProvider(options []huh.Option[string]) (string, error) {
@@ -312,78 +286,9 @@ func (o *option) promptProvider(options []huh.Option[string]) (string, error) {
 	return selectedItem, nil
 }
 
-func (o *option) readAndSetLoginInput(providers backendConfig.AuthProviders) error {
-	if !providers.EnableNative && (len(o.username) > 0 || len(o.password) > 0) {
-		return errors.New("username/password input is forbidden as backend does not support native auth provider")
-	}
-
-	// In case the user is trying to set user / password, we don´t make selection. We know it's native provider.
-	if len(o.username) > 0 || len(o.password) > 0 {
-		return o.readAndSetLoginInputNative()
-	}
-
-	// Otherwise it's considered that it wants to use an external provider
-	if err := o.readAndSetExternalProvider(providers); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// readAndSetExternalProvider will prompt the user to select the external provider to use.
-func (o *option) readAndSetExternalProvider(providers backendConfig.AuthProviders) error {
-	if len(o.externalAuthProvider) > 0 {
-		// The user gave an external auth provider, we try to set it.
-		return o.trySetLoginInputExternal(providers, o.externalAuthProvider)
-	}
-	// The first step is to collect the different providers and store it into items + modifiers.
-	// items will be the selection items to display to users.
-	// modifiers will be the action to save the different user input into option struct.
-	modifiers := map[string]func() error{}
-
-	var options []huh.Option[string]
-
-	// We still give the possibility to the user to choose the native provider if it's supported by the backend
-	if providers.EnableNative {
-		optKey := "Native (username/password)"
-		optValue := nativeProvider
-		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = o.readAndSetLoginInputNative
-
-		// Make sure that if user started to provider username or password, it chooses by default the native provider
-		if len(o.username) > 0 || len(o.password) > 0 {
-			return modifiers[optValue]()
-		}
-	}
-
-	// Saving OIDC item(s)
-	for _, prov := range providers.OIDC {
-		optKey := fmt.Sprintf("OIDC (%s)", prov.Name)
-		optValue := prov.SlugID
-		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = o.newLoginInputExternalModifier(externalAuthKindOIDC, prov.SlugID)
-	}
-
-	// Saving OAuth 2.0 item(s)
-	for _, prov := range providers.OAuth {
-		optKey := fmt.Sprintf("OAuth 2.0 (%s)", prov.Name)
-		optValue := prov.SlugID
-		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = o.newLoginInputExternalModifier(externalAuthKindOAuth, prov.SlugID)
-	}
-
-	// In case there is only one item available, prompt selection is not necessary
-	if len(options) == 1 {
-		return modifiers[options[0].Value]()
-	}
-
-	selectedItem, err := o.promptProvider(options)
-	if err != nil {
-		return err
-	}
-
-	// Apply the modifier of the corresponding item
-	return modifiers[selectedItem]()
+func (o *option) setExternalAuthProvider(kind externalAuthKind, slugID string) {
+	o.externalAuthKind = kind
+	o.externalAuthProvider = slugID
 }
 
 func NewCMD() *cobra.Command {
@@ -393,7 +298,7 @@ func NewCMD() *cobra.Command {
 		Short: "Log in to the Perses API",
 		Example: `
 # Log in to the given server
-percli login https://perses.dev
+percli login https://demo.perses.dev
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
