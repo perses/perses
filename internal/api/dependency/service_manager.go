@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -33,6 +33,7 @@ import (
 	secretImpl "github.com/perses/perses/internal/api/impl/v1/secret"
 	userImpl "github.com/perses/perses/internal/api/impl/v1/user"
 	variableImpl "github.com/perses/perses/internal/api/impl/v1/variable"
+	viewImpl "github.com/perses/perses/internal/api/impl/v1/view"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
@@ -49,6 +50,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
+	"github.com/perses/perses/internal/api/interface/v1/view"
 	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/schemas"
@@ -77,6 +79,7 @@ type ServiceManager interface {
 	GetSecret() secret.Service
 	GetUser() user.Service
 	GetVariable() variable.Service
+	GetView() view.Service
 }
 
 type service struct {
@@ -102,6 +105,7 @@ type service struct {
 	secret             secret.Service
 	user               user.Service
 	variable           variable.Service
+	view               view.Service
 }
 
 func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManager, error) {
@@ -137,6 +141,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), rbacService, schemasService)
 	secretService := secretImpl.NewService(dao.GetSecret(), cryptoService)
 	userService := userImpl.NewService(dao.GetUser())
+	viewService := viewImpl.NewMetricsViewService()
 
 	svc := &service{
 		crypto:             cryptoService,
@@ -160,6 +165,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		secret:             secretService,
 		user:               userService,
 		variable:           variableService,
+		view:               viewService,
 	}
 	return svc, nil
 }
@@ -246,4 +252,8 @@ func (s *service) GetUser() user.Service {
 
 func (s *service) GetVariable() variable.Service {
 	return s.variable
+}
+
+func (s *service) GetView() view.Service {
+	return s.view
 }

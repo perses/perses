@@ -1,0 +1,65 @@
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package view
+
+import (
+	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/client_golang/prometheus"
+)
+
+// A counter for the total number of views of a dashboard.
+var dashboardViewCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "perses_dashboard_view_total",
+	Help: "The total number of views of a dashboard",
+}, []string{"project", "dashboard"})
+
+// A counter for the total number of render errors of a dashboard.
+var dashboardRenderErrorCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "perses_dashboard_render_error_total",
+	Help: "The total number of render errors of a dashboard",
+}, []string{"project", "dashboard"})
+
+// A histogram for the render time of a dashboard.
+var dashboardRenderTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	Name:    "perses_dashboard_render_time_seconds",
+	Help:    "The render time of a dashboard",
+	Buckets: prometheus.DefBuckets,
+}, []string{"project", "dashboard"})
+
+func init() {
+	prometheus.MustRegister(dashboardViewCounter)
+	prometheus.MustRegister(dashboardRenderErrorCounter)
+	prometheus.MustRegister(dashboardRenderTime)
+}
+
+// A service that keeps track of views in Prometheus metrics that can be
+// scraped and stored by Prometheus.
+type metricsViewService struct {
+}
+
+func NewMetricsViewService() *metricsViewService {
+	return &metricsViewService{}
+}
+
+func (m *metricsViewService) View(view *v1.View) error {
+	dashboardViewCounter.WithLabelValues(view.Project, view.Dashboard).Inc()
+
+	dashboardRenderErrorCounter.WithLabelValues(view.Project, view.Dashboard).Add(float64(view.RenderErrors))
+
+	if view.RenderTimeSecs > 0 {
+		dashboardRenderTime.WithLabelValues(view.Project, view.Dashboard).Observe(view.RenderTimeSecs)
+	}
+
+	return nil
+}
