@@ -15,7 +15,6 @@ package auth
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -268,11 +267,11 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 
 	// Send the device authorization request
 	conf := e.deviceCodeRelyingParty.OAuthConfig()
-	resp, err := callDeviceAuthorizationEndpoint(ctx.Request().Context(), e.deviceCodeRelyingParty, &oidc.ClientCredentialsRequest{
+	resp, err := client.CallDeviceAuthorizationEndpoint(ctx.Request().Context(), &oidc.ClientCredentialsRequest{
 		Scope:        conf.Scopes,
 		ClientID:     conf.ClientID,
 		ClientSecret: conf.ClientSecret,
-	})
+	}, e.deviceCodeRelyingParty, nil)
 	if err != nil {
 		logrus.WithError(err).Error("Failed to send device authorization request")
 		return err
@@ -402,81 +401,7 @@ func (e *oIDCEndpoint) retrieveClientCredentialsToken(ctx context.Context, clien
 	}
 
 	// Call the token endpoint
-	return callTokenEndpoint(ctx, req, e.clientCredRelyingParty)
-}
-
-// callDeviceAuthorizationEndpoint calls the device authorization endpoint of the provider.
-// It duplicates the original implementation of OIDC library to have a more flexible response reading.
-// An issue has been opened to the oidc library to make the verification_url field also supported.
-// https://github.com/zitadel/oidc/issues/565
-// TODO: Follow up
-func callDeviceAuthorizationEndpoint(ctx context.Context, relyingParty rp.RelyingParty, request *oidc.ClientCredentialsRequest) (*oidc.DeviceAuthorizationResponse, error) {
-	req, err := httphelper.FormRequest(ctx, relyingParty.GetDeviceAuthorizationEndpoint(), request, client.Encoder, "")
-	if err != nil {
-		return nil, err
-	}
-	if request.ClientSecret != "" {
-		req.SetBasicAuth(request.ClientID, request.ClientSecret)
-	}
-
-	// Perform the request making sure the verification_url field is also supported.
-	// Indeed, Google will return the verification_url field instead of the standard verification_uri one.
-	resp := new(struct {
-		oidc.DeviceAuthorizationResponse
-		VerificationURL string `json:"verification_url"`
-	})
-	if err := httphelper.HttpRequest(relyingParty.HttpClient(), req, &resp); err != nil {
-		return nil, err
-	}
-	if resp.VerificationURI == "" {
-		resp.VerificationURI = resp.VerificationURL
-	}
-	return &resp.DeviceAuthorizationResponse, nil
-}
-
-// callTokenEndpoint calls the token endpoint of the provider.
-// It duplicates the original implementation of OIDC library to return the oidc.Error if fails.
-// A PR has been opened to the oidc library to modify it on their side
-// https://github.com/zitadel/oidc/pull/571
-// TODO: Follow up
-func callTokenEndpoint(ctx context.Context, request any, caller client.TokenEndpointCaller) (newToken *oauth2.Token, err error) {
-	req, err := httphelper.FormRequest(ctx, caller.TokenEndpoint(), request, client.Encoder, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	httpResp, err := caller.HttpClient().Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer httpResp.Body.Close()
-
-	resp := new(struct {
-		*oidc.AccessTokenResponse
-		*oidc.Error
-	})
-	if err = json.NewDecoder(httpResp.Body).Decode(resp); err != nil {
-		return nil, err
-	}
-
-	if httpResp.StatusCode < http.StatusOK || httpResp.StatusCode >= http.StatusBadRequest {
-		return nil, resp.Error
-	}
-
-	tokenRes := resp.AccessTokenResponse
-
-	token := &oauth2.Token{
-		AccessToken:  tokenRes.AccessToken,
-		TokenType:    tokenRes.TokenType,
-		RefreshToken: tokenRes.RefreshToken,
-		Expiry:       time.Now().UTC().Add(time.Duration(tokenRes.ExpiresIn) * time.Second),
-	}
-	if tokenRes.IDToken != "" {
-		token = token.WithExtra(map[string]any{
-			"id_token": tokenRes.IDToken,
-		})
-	}
-	return token, nil
+	return client.CallTokenEndpoint(ctx, req, e.clientCredRelyingParty)
 }
 
 // logWithError is a little logrus helper to log with the provider slugID.
