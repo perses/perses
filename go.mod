@@ -22,7 +22,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.23.1
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/common v0.51.1
+	github.com/prometheus/common v0.52.2
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.15.0
 	github.com/sirupsen/logrus v1.9.3
