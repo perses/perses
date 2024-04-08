@@ -14,6 +14,7 @@
 package view
 
 import (
+	"github.com/perses/perses/internal/api/interface/v1/view"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -48,7 +49,7 @@ func init() {
 type metricsViewService struct {
 }
 
-func NewMetricsViewService() *metricsViewService {
+func NewMetricsViewService() view.Service {
 	return &metricsViewService{}
 }
 
