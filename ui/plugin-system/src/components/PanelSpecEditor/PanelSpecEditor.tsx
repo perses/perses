@@ -12,13 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import {
-  PanelDefinition,
-  QueryDefinition,
-  UnknownSpec,
-  isValidQueryPluginType,
-  QueryPluginType,
-} from '@perses-dev/core';
+import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
@@ -49,21 +43,6 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  // TODO: Every panel plugin should define which query type they support in their definition
-  const getQueryTypes = (): QueryPluginType[] => {
-    const firstQueryType = panelDefinition?.spec?.queries?.[0]?.kind;
-    if (!firstQueryType || firstQueryType === '' || !isValidQueryPluginType(firstQueryType)) {
-      // this case handles cause where there is no queryType yet (e.g. UI > 'editing' mode > 'Add Panel')
-      // ScatterChart only handles trace queries for now
-      // (this is needed as, otherwise, no way to know that ScatterChart support TraceQuery and not the default TimeSeriesQuery)
-      if (kind === 'ScatterChart') {
-        return ['TraceQuery'];
-      }
-      return ['TimeSeriesQuery'];
-    }
-    return [firstQueryType];
-  };
-
   const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
@@ -72,7 +51,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
       label: 'Query',
       content: (
         <MultiQueryEditor
-          queryTypes={getQueryTypes()}
+          queryTypes={plugin.supportedQueryTypes ?? []}
           queries={panelDefinition.spec.queries ?? []}
           onChange={onQueriesChange}
         />

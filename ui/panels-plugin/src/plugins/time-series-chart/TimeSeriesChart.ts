@@ -21,6 +21,7 @@ import { TimeSeriesChartPanel } from './TimeSeriesChartPanel';
  */
 export const TimeSeriesChart: PanelPlugin<TimeSeriesChartOptions> = {
   PanelComponent: TimeSeriesChartPanel,
+  supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [{ label: 'Settings', content: TimeSeriesChartOptionsEditorSettings }],
   createInitialOptions: createInitialTimeSeriesChartOptions,
 };

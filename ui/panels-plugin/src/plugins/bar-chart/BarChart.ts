@@ -27,5 +27,6 @@ export const BarChart: PanelPlugin<BarChartOptions> = {
       content: BarChartOptionsEditorSettings,
     },
   ],
+  supportedQueryTypes: ['TimeSeriesQuery'],
   createInitialOptions: createInitialBarChartOptions,
 };
