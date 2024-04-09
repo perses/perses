@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataQueriesProvider, TimeSeriesQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Box, Grid, Stack, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { QueryDefinition } from '@perses-dev/core';
@@ -74,7 +74,7 @@ export function TimeSeriesExplorer(props: TimeseriesExplorerProps) {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Stack gap={1}>
-            <TimeSeriesQueryEditor onChange={setQueries} queries={queries} />
+            <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
           </Stack>
         </Grid>
         <Grid item xs={12}>

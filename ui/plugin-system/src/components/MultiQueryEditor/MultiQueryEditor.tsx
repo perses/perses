@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,36 +15,55 @@ import { useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { TimeSeriesQueryDefinition, QueryDefinition } from '@perses-dev/core';
-import { TIME_SERIES_QUERY_KEY, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
-import { TimeSeriesQueryInput } from './TimeSeriesQueryInput';
+import { TimeSeriesQueryDefinition, QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
+import { QueryEditorContainer } from './QueryEditorContainer';
 
-export interface TimeSeriesQueryEditorProps {
-  queries?: TimeSeriesQueryDefinition[];
+export interface MultiQueryEditorProps {
+  queryTypes: QueryPluginType[];
+  queries?: QueryDefinition[];
   onChange: (queries: QueryDefinition[]) => void;
 }
 
-export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQueryEditorProps) {
+function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefinition {
   // Build the default query plugin
+  // This will be used only if the queries are empty, to open a starting query
+
+  // Firs the default query type
+  const defaultQueryType = queryTypes[0]!;
+
+  // Then the default plugin kind
   // Use as default the plugin kind explicitly set as default or the first in the list
+  const { data: queryPlugins } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
-  const { data: timeSeriesPlugins } = useListPluginMetadata([TIME_SERIES_QUERY_KEY]);
-  const defaultTimeSeriesQueryKind = defaultPluginKinds?.[TIME_SERIES_QUERY_KEY] ?? timeSeriesPlugins?.[0]?.kind ?? '';
-  const { data: defaultQueryPlugin } = usePlugin(TIME_SERIES_QUERY_KEY, defaultTimeSeriesQueryKind, {
+  const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.kind ?? '';
+
+  const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
     useErrorBoundary: true,
     enabled: true,
   });
 
   // This default query definition is used if no query is provided initially or when we add a new query
-  const defaultInitialQueryDefinition: TimeSeriesQueryDefinition = {
-    kind: TIME_SERIES_QUERY_KEY,
+  return {
+    kind: defaultQueryType,
     spec: {
-      plugin: { kind: defaultTimeSeriesQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
+      plugin: { kind: defaultQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
     },
   };
+}
+
+/**
+ * A component render a list of {@link QueryEditor} for the given query definitions.
+ * It allows adding, removing and editing queries.
+ * @param queryTypes The list of query types that the underlying editor will propose
+ * @param queries The list of query definitions to render
+ * @param onChange The callback to call when the queries are modified
+ * @constructor
+ */
+export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps) {
+  const defaultInitialQueryDefinition = useDefaultQueryDefinition(queryTypes);
 
   // State for which queries are collapsed
-  // TODO: Would be easier if we had IDs for queries.
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
   // Query handlers
@@ -61,7 +80,6 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
   };
 
   const handleQueryAdd = () => {
-    if (!defaultQueryPlugin) return;
     onChange(
       produce(queries, (draft) => {
         if (draft) {
@@ -102,8 +120,9 @@ export function TimeSeriesQueryEditor({ queries = [], onChange }: TimeSeriesQuer
   return (
     <>
       <Stack spacing={1}>
-        {queryDefinitions.map((query: TimeSeriesQueryDefinition, i: number) => (
-          <TimeSeriesQueryInput
+        {queryDefinitions.map((query: QueryDefinition, i: number) => (
+          <QueryEditorContainer
+            queryTypes={queryTypes}
             key={i}
             index={i}
             query={query}

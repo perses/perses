@@ -13,7 +13,7 @@
 
 import { Stack, FormControl, InputLabel } from '@mui/material';
 import { DatasourceSelect } from '@perses-dev/plugin-system';
-import { DatasourceSelector } from '@perses-dev/core/dist/model';
+import { DatasourceSelector } from '@perses-dev/core';
 import { TempoDatasourceSelector, TEMPO_DATASOURCE_KIND } from '../../model/tempo-selectors';
 import { TraceQLEditor } from './TraceQLEditor';
 

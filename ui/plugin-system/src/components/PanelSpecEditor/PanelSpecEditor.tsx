@@ -12,12 +12,17 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import {
+  PanelDefinition,
+  QueryDefinition,
+  UnknownSpec,
+  isValidQueryPluginType,
+  QueryPluginType,
+} from '@perses-dev/core';
 import { usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
-import { TimeSeriesQueryEditor } from '../TimeSeriesQueryEditor';
-import { TraceQueryEditor } from '../TraceQueryEditor';
+import { MultiQueryEditor } from '../MultiQueryEditor';
 
 export interface PanelSpecEditorProps {
   panelDefinition: PanelDefinition;
@@ -44,31 +49,19 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  const getQueryType = (): string => {
-    const queriesList = panelDefinition?.spec?.queries;
-    if (queriesList === undefined) {
-      return '';
+  // TODO: Every panel plugin should define which query type they support in their definition
+  const getQueryTypes = (): QueryPluginType[] => {
+    const firstQueryType = panelDefinition?.spec?.queries?.[0]?.kind;
+    if (!firstQueryType || firstQueryType === '' || !isValidQueryPluginType(firstQueryType)) {
+      // this case handles cause where there is no queryType yet (e.g. UI > 'editing' mode > 'Add Panel')
+      // ScatterChart only handles trace queries for now
+      // (this is needed as, otherwise, no way to know that ScatterChart support TraceQuery and not the default TimeSeriesQuery)
+      if (kind === 'ScatterChart') {
+        return ['TraceQuery'];
+      }
+      return ['TimeSeriesQuery'];
     }
-    const queryType: string = queriesList[0]?.kind;
-    return queryType;
-  };
-
-  // Get the corresponding queryEditor depending on the queryType
-  const getQueryEditorComponent = () => {
-    const queryType = getQueryType();
-    // default case handles cause where there is no queryType yet (e.g. UI > 'editing' mode > 'Add Panel')
-    switch (queryType) {
-      case 'TimeSeriesQuery':
-        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-      case 'TraceQuery':
-        return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-      default:
-        // ScatterChart only handles trace queries for now
-        if (kind === 'ScatterChart') {
-          return <TraceQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-        }
-        return <TimeSeriesQueryEditor queries={panelDefinition.spec.queries ?? []} onChange={onQueriesChange} />;
-    }
+    return [firstQueryType];
   };
 
   const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
@@ -77,7 +70,13 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
   if (!hideQueryEditor) {
     tabs.push({
       label: 'Query',
-      content: getQueryEditorComponent(),
+      content: (
+        <MultiQueryEditor
+          queryTypes={getQueryTypes()}
+          queries={panelDefinition.spec.queries ?? []}
+          onChange={onQueriesChange}
+        />
+      ),
     });
   }
 
