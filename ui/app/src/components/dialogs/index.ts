@@ -13,7 +13,7 @@
 
 export * from './CreateDashboardDialog';
 export * from './CreateProjectDialog';
-export * from './DeleteProjectDialog';
 export * from './DeleteResourceDialog';
 export * from './RenameDashboardDialog';
+export * from './RenameResourceDialog';
 export * from './UpdateEphemeralDashboardDialog';

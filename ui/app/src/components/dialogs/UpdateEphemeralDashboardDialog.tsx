@@ -17,8 +17,8 @@ import { Dialog, useSnackbar } from '@perses-dev/components';
 import {
   DurationString,
   EphemeralDashboardResource,
-  getDashboardDisplayName,
-  getDashboardExtendedDisplayName,
+  getResourceDisplayName,
+  getResourceExtendedDisplayName,
 } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -48,7 +48,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
     resolver: zodResolver(updateEphemeralDashboardDialogValidationSchema),
     mode: 'onBlur',
     defaultValues: {
-      dashboardName: getDashboardDisplayName(ephemeralDashboard),
+      dashboardName: getResourceDisplayName(ephemeralDashboard),
       ttl: ephemeralDashboard.spec.ttl,
     },
   });
@@ -66,7 +66,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
     updateEphemeralDashboardMutation.mutate(ephemeralDashboard, {
       onSuccess: (updatedEphemeralDashboard: EphemeralDashboardResource) => {
         successSnackbar(
-          `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+          `Ephemeral Dashboard ${getResourceExtendedDisplayName(
             updatedEphemeralDashboard
           )} has been successfully updated`
         );

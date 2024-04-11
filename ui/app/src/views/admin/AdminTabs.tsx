@@ -17,9 +17,9 @@ import CodeJsonIcon from 'mdi-material-ui/CodeJson';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
 import {
-  getDatasourceDisplayName,
+  getResourceDisplayName,
   GlobalDatasource,
-  getVariableExtendedDisplayName,
+  getResourceExtendedDisplayName,
   GlobalVariableResource,
   GlobalRoleResource,
   GlobalRoleBindingResource,
@@ -87,7 +87,7 @@ function TabButton({ index, ...props }: TabButtonProps) {
     (datasource: GlobalDatasource) => {
       createGlobalDatasourceMutation.mutate(datasource, {
         onSuccess: (createdDatasource: GlobalDatasource) => {
-          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
           setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
@@ -152,7 +152,7 @@ function TabButton({ index, ...props }: TabButtonProps) {
       createGlobalVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: GlobalVariableResource) => {
           successSnackbar(
-            `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`
+            `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`
           );
           setVariableDrawerOpened(false);
         },

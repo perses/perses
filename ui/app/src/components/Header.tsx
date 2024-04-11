@@ -39,6 +39,7 @@ import Brightness4 from 'mdi-material-ui/Brightness4';
 import Brightness5 from 'mdi-material-ui/Brightness5';
 import React, { MouseEvent, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
+import { getResourceDisplayName } from '@perses-dev/core';
 import { useProjectList } from '../model/project-client';
 import { useDarkMode } from '../context/DarkMode';
 import { useIsLaptopSize, useIsMobileSize } from '../utils/browser-size';
@@ -214,10 +215,6 @@ function ProjectMenu(): JSX.Element {
     return <CircularProgress size="1rem" />;
   }
 
-  if (data === undefined || data === null) {
-    return <></>;
-  }
-
   return (
     <Box>
       <Button
@@ -248,8 +245,8 @@ function ProjectMenu(): JSX.Element {
           },
         }}
       >
-        {data.length ? (
-          data.map((project, index) => {
+        {(data ?? []).length > 0 ? (
+          (data ?? []).map((project, index) => {
             return (
               <li key={index}>
                 <MenuItem
@@ -268,7 +265,7 @@ function ProjectMenu(): JSX.Element {
                       },
                     }}
                   >
-                    {project.metadata.name}
+                    {getResourceDisplayName(project)}
                   </Typography>
                 </MenuItem>
               </li>

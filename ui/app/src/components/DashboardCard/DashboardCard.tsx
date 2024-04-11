@@ -13,8 +13,7 @@
 
 import { Button, Stack, Typography } from '@mui/material';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import { DashboardResource } from '@perses-dev/core';
-import { getDashboardDisplayName } from '@perses-dev/core/dist/utils/text';
+import { DashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -32,7 +31,7 @@ export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps) {
         justifyContent: 'start',
         backgroundColor: (theme) => theme.palette.designSystem.blue[700],
       }}
-      title={getDashboardDisplayName(dashboard)}
+      title={getResourceDisplayName(dashboard)}
       component={RouterLink}
       to={`/projects/${dashboard.metadata.project}/dashboards/${dashboard.metadata.name}`}
       data-testid={`dashboard-card-${dashboard.metadata.project}-${dashboard.metadata.name}`}
@@ -59,9 +58,9 @@ export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps) {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
             }}
-            title={getDashboardDisplayName(dashboard)}
+            title={getResourceDisplayName(dashboard)}
           >
-            {getDashboardDisplayName(dashboard)}
+            {getResourceDisplayName(dashboard)}
           </Typography>
           <Typography
             variant="subtitle1"

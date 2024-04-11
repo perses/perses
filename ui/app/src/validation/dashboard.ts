@@ -17,34 +17,33 @@ import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 
-export const dashboardNameValidationSchema = z
+export const dashboardDisplayNameValidationSchema = z
   .string()
-  .nonempty('Required')
+  .min(1, 'Required')
   .max(75, 'Must be 75 or fewer characters long');
 
 export const createDashboardDialogValidationSchema = z.object({
   projectName: resourceIdValidationSchema,
-  dashboardName: dashboardNameValidationSchema,
+  dashboardName: dashboardDisplayNameValidationSchema,
 });
 export type CreateDashboardValidationType = z.infer<typeof createDashboardDialogValidationSchema>;
 
 export const renameDashboardDialogValidationSchema = z.object({
-  dashboardName: dashboardNameValidationSchema,
+  dashboardName: dashboardDisplayNameValidationSchema,
 });
 export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialogValidationSchema>;
 
+// Validate dashboard name and check if it doesn't already exist
 export function useDashboardValidationSchema(projectName?: string) {
   const dashboards = useDashboardList(projectName);
 
   return useMemo(() => {
     return createDashboardDialogValidationSchema.refine(
       (schema) => {
-        return (
-          (dashboards.data ?? []).filter(
-            (dashboard) =>
-              dashboard.metadata.project === schema.projectName &&
-              dashboard.metadata.name === generateMetadataName(schema.dashboardName)
-          ).length === 0
+        return !(dashboards.data ?? []).some(
+          (dashboard) =>
+            dashboard.metadata.project === schema.projectName &&
+            dashboard.metadata.name === generateMetadataName(schema.dashboardName)
         );
       },
       (schema) => ({

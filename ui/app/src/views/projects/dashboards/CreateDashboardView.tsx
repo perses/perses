@@ -15,7 +15,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import {
   DashboardResource,
-  getDashboardExtendedDisplayName,
+  getResourceExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
   DashboardSpec,
@@ -75,7 +75,7 @@ function CreateDashboardView() {
       return createDashboardMutation.mutateAsync(data, {
         onSuccess: (createdDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getDashboardExtendedDisplayName(createdDashboard)} has been successfully created`
+            `Dashboard ${getResourceExtendedDisplayName(createdDashboard)} has been successfully created`
           );
           navigate(`/projects/${createdDashboard.metadata.project}/dashboards/${createdDashboard.metadata.name}`);
           return createdDashboard;

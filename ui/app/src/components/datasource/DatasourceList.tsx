@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getDatasourceDisplayName, getMetadataProject, Datasource, Action } from '@perses-dev/core';
+import { getResourceDisplayName, getMetadataProject, Datasource, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
@@ -63,7 +63,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
           default: datasource.spec.default,
           project: getMetadataProject(datasource.metadata),
           name: datasource.metadata.name,
-          displayName: getDatasourceDisplayName(datasource),
+          displayName: getResourceDisplayName(datasource),
           description: datasource.spec.display?.description,
           type: datasource.spec.plugin.kind,
           version: datasource.metadata.version,

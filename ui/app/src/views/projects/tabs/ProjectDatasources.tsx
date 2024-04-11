@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
-import { getDatasourceDisplayName, ProjectDatasource } from '@perses-dev/core';
+import { getResourceDisplayName, ProjectDatasource } from '@perses-dev/core';
 import {
   useCreateDatasourceMutation,
   useDatasourceList,
@@ -44,7 +44,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       return new Promise((resolve, reject) => {
         createDatasourceMutation.mutate(datasource, {
           onSuccess: (createdDatasource: ProjectDatasource) => {
-            successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+            successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
             resolve();
           },
           onError: (err) => {
@@ -63,7 +63,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       return new Promise((resolve, reject) => {
         updateDatasourceMutation.mutate(datasource, {
           onSuccess: (updatedDatasource: ProjectDatasource) => {
-            successSnackbar(`Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`);
+            successSnackbar(`Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`);
             resolve();
           },
           onError: (err) => {
@@ -82,7 +82,7 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
       return new Promise((resolve, reject) => {
         deleteDatasourceMutation.mutate(datasource, {
           onSuccess: (deletedDatasource: ProjectDatasource) => {
-            successSnackbar(`Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`);
+            successSnackbar(`Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`);
             resolve();
           },
           onError: (err) => {

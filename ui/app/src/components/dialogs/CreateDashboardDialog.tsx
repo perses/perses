@@ -42,7 +42,7 @@ interface CreateDashboardProps {
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  */
-export const CreateDashboardDialog = (props: CreateDashboardProps) => {
+export function CreateDashboardDialog(props: CreateDashboardProps) {
   const { open, projectOptions, hideProjectSelect, mode, name, onClose, onSuccess } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
@@ -81,7 +81,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
       )}
     </Dialog>
   );
-};
+}
 
 interface DuplicationFormProps {
   projectOptions: string[];

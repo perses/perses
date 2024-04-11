@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Kind } from './kind';
+
 export interface Metadata {
   name: string;
   createdAt?: string;
@@ -20,6 +22,13 @@ export interface Metadata {
 
 export interface ProjectMetadata extends Metadata {
   project: string;
+}
+
+export interface Resource {
+  kind: Kind;
+  metadata: Metadata | ProjectMetadata;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  spec: any;
 }
 
 export function getMetadataProject(metadata: ProjectMetadata | Metadata): string | undefined {

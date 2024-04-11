@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Kind, Metadata } from '@perses-dev/core';
+import { getResourceExtendedDisplayName, Resource } from '@perses-dev/core';
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
 
-interface DeleteResourceDialogProps<T extends { metadata: Metadata; kind: Kind }> {
+interface DeleteResourceDialogProps<T extends Resource> {
   resource: T;
   open: boolean;
   onSubmit: Dispatch<T>;
@@ -30,10 +30,8 @@ interface DeleteResourceDialogProps<T extends { metadata: Metadata; kind: Kind }
  * @param props.onSubmit Action to perform when user confirmed.
  * @param props.onClose Provides the function to close itself.
  */
-export function DeleteResourceDialog<T extends { metadata: Metadata; kind: Kind }>(
-  props: DeleteResourceDialogProps<T>
-) {
-  const { resource, open, onClose, onSubmit } = props;
+export function DeleteResourceDialog<T extends Resource>(props: DeleteResourceDialogProps<T>) {
+  const { resource, open, onSubmit, onClose } = props;
 
   return (
     <Dialog open={open} onClose={onClose}>
@@ -41,8 +39,8 @@ export function DeleteResourceDialog<T extends { metadata: Metadata; kind: Kind 
         Delete {resource.kind}: {resource.metadata.name}
       </Dialog.Header>
       <Dialog.Content>
-        Are you sure you want to delete the {resource.kind} <strong>{resource.metadata.name}</strong>? This action
-        cannot be undone.
+        Are you sure you want to delete the {resource.kind}: <strong>{getResourceExtendedDisplayName(resource)}</strong>
+        ? This action cannot be undone.
       </Dialog.Content>
       <Dialog.Actions>
         <Button variant="contained" type="submit" onClick={() => onSubmit(resource)}>

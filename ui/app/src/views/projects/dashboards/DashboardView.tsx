@@ -14,7 +14,7 @@
 import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource, getDashboardExtendedDisplayName } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { useCallback, useEffect } from 'react';
 import { useDashboard, useUpdateDashboardMutation } from '../../../model/dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
@@ -51,7 +51,7 @@ function DashboardView() {
       return updateDashboardMutation.mutateAsync(data, {
         onSuccess: (updatedDashboard: DashboardResource) => {
           successSnackbar(
-            `Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`
+            `Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`
           );
           return updatedDashboard;
         },

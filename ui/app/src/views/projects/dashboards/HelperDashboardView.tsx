@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, CircularProgress, Stack } from '@mui/material';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardResource, EphemeralDashboardResource, getDashboardDisplayName } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import { useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
@@ -23,6 +23,7 @@ import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '.
 import { useVariableList } from '../../../model/variable-client';
 import { useGlobalVariableList } from '../../../model/global-variable-client';
 import ProjectBreadcrumbs from '../../../components/breadcrumbs/ProjectBreadcrumbs';
+import { useProject } from '../../../model/project-client';
 
 export interface GenericDashboardViewProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -47,6 +48,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
   }, [datasourceApi, dashboardResource]);
 
   // Collect the Project variables and setup external variables from it
+  const { data: project, isLoading: isLoadingProject } = useProject(dashboardResource.metadata.project);
   const { data: globalVars, isLoading: isLoadingGlobalVars } = useGlobalVariableList();
   const { data: projectVars, isLoading: isLoadingProjectVars } = useVariableList(dashboardResource.metadata.project);
   const externalVariableDefinitions: ExternalVariableDefinition[] | undefined = useMemo(
@@ -57,7 +59,17 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
     [dashboardResource, projectVars, globalVars]
   );
 
-  if (isLoadingProjectVars || isLoadingGlobalVars) return null;
+  if (isLoadingProject || isLoadingProjectVars || isLoadingGlobalVars) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  if (!project) {
+    throw new Error('Unable to get the project');
+  }
 
   return (
     <Box
@@ -81,10 +93,7 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
               datasourceApi={datasourceApi}
               externalVariableDefinitions={externalVariableDefinitions}
               dashboardTitleComponent={
-                <ProjectBreadcrumbs
-                  dashboardName={getDashboardDisplayName(dashboardResource)}
-                  projectName={dashboardResource.metadata.project}
-                />
+                <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
               }
               emptyDashboardProps={{
                 additionalText: 'In order to save this dashboard, you need to add at least one panel!',

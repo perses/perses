@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
+import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -52,7 +52,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         ({
           project: datedDashboard.dashboard.metadata.project,
           name: datedDashboard.dashboard.metadata.name,
-          displayName: getDashboardDisplayName(datedDashboard.dashboard),
+          displayName: getResourceDisplayName(datedDashboard.dashboard),
           version: datedDashboard.dashboard.metadata.version,
           createdAt: datedDashboard.dashboard.metadata.createdAt,
           updatedAt: datedDashboard.dashboard.metadata.updatedAt,
@@ -78,7 +78,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
       new Promise((resolve, reject) => {
         deleteDashboardMutation.mutate(dashboard, {
           onSuccess: (deletedDashboard: DashboardResource) => {
-            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
             resolve();
           },
           onError: (err) => {

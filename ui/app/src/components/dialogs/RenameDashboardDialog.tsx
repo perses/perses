@@ -14,7 +14,7 @@
 import { Dispatch, DispatchWithoutAction } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
-import { DashboardResource, getDashboardDisplayName, getDashboardExtendedDisplayName } from '@perses-dev/core';
+import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDashboardMutation } from '../../model/dashboard-client';
@@ -39,7 +39,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
   const form = useForm<RenameDashboardValidationType>({
     resolver: zodResolver(renameDashboardDialogValidationSchema),
     mode: 'onBlur',
-    defaultValues: { dashboardName: getDashboardDisplayName(dashboard) },
+    defaultValues: { dashboardName: getResourceDisplayName(dashboard) },
   });
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const updateDashboardMutation = useUpdateDashboardMutation();
@@ -53,7 +53,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
 
     updateDashboardMutation.mutate(dashboard, {
       onSuccess: (updatedDashboard: DashboardResource) => {
-        successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(updatedDashboard)} has been successfully updated`);
+        successSnackbar(`Dashboard ${getResourceExtendedDisplayName(updatedDashboard)} has been successfully updated`);
         onClose();
         if (onSuccess) {
           onSuccess(data.dashboardName);

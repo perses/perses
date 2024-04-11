@@ -13,23 +13,31 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { useProjectList } from '../model/project-client';
+import { generateMetadataName } from '../utils/metadata';
 
-export const projectNameValidationSchema = z.object({
-  name: resourceIdValidationSchema,
+export const projectDisplayNameValidationSchema = z
+  .string()
+  .min(1, 'Required')
+  .max(75, 'Must be 75 or fewer characters long');
+
+export const createProjectDialogValidationSchema = z.object({
+  projectName: projectDisplayNameValidationSchema,
 });
-export type ProjectNameValidationType = z.infer<typeof projectNameValidationSchema>;
+export type CreateProjectValidationType = z.infer<typeof createProjectDialogValidationSchema>;
 
-export function useProjectValidationSchema() {
+// Validate project name and check if it doesn't already exist
+export function useProjectValidationSchema(): z.Schema {
   const projects = useProjectList();
 
   return useMemo(() => {
-    return projectNameValidationSchema.refine(
+    return createProjectDialogValidationSchema.refine(
       (schema) => {
-        return (projects.data ?? []).filter((project) => project.metadata.name === schema.name).length === 0;
+        return !(projects.data ?? []).some(
+          (project) => project.metadata.name === generateMetadataName(schema.projectName)
+        );
       },
-      (schema) => ({ message: `Project name '${schema.name}' already exists!`, path: ['name'] })
+      (schema) => ({ message: `Project name '${schema.projectName}' already exists!`, path: ['projectName'] })
     );
   }, [projects.data]);
 }

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, getVariableDisplayName, getVariableProject, Variable } from '@perses-dev/core';
+import { Action, getResourceDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
@@ -64,7 +64,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         ({
           project: getVariableProject(variable),
           name: variable.metadata.name,
-          displayName: getVariableDisplayName(variable),
+          displayName: getResourceDisplayName(variable),
           description: variable.spec.spec.display?.description,
           type: variable.spec.kind,
           version: variable.metadata.version,

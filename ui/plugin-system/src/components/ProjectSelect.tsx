@@ -85,5 +85,6 @@ function optionValueToSelector(optionValue: string): ProjectResource {
     metadata: {
       name: optionValue,
     },
+    spec: {},
   };
 }

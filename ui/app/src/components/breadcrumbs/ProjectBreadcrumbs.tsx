@@ -14,15 +14,16 @@
 import { Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
+import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import { HomeLinkCrumb, Breadcrumbs, LinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface ProjectBreadcrumbsProps {
-  projectName: string;
+  project: ProjectResource;
   dashboardName?: string;
 }
 
 function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
-  const { projectName, dashboardName } = props;
+  const { project, dashboardName } = props;
 
   if (dashboardName) {
     return (
@@ -41,15 +42,14 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
         }}
       >
         <HomeLinkCrumb />
-        <LinkCrumb to={`/projects/${projectName}`}>
+        <LinkCrumb to={`/projects/${project.metadata.name}`}>
           <StackCrumb>
-            <Archive fontSize={'small'} />
-            {projectName}
+            <Archive fontSize="small" /> {getResourceDisplayName(project)}
           </StackCrumb>
         </LinkCrumb>
         <StackCrumb>
-          <ViewDashboardIcon fontSize={'small'} />
-          <Typography variant={'h3'}>{dashboardName}</Typography>
+          <ViewDashboardIcon fontSize="small" />
+          <Typography variant="h3">{dashboardName}</Typography>
         </StackCrumb>
       </Breadcrumbs>
     );
@@ -72,8 +72,8 @@ function ProjectBreadcrumbs(props: ProjectBreadcrumbsProps) {
     >
       <HomeLinkCrumb />
       <StackCrumb>
-        <Archive fontSize={'large'} />
-        <TitleCrumb>{projectName}</TitleCrumb>
+        <Archive fontSize="large" />
+        <TitleCrumb>{getResourceDisplayName(project)}</TitleCrumb>
       </StackCrumb>
     </Breadcrumbs>
   );

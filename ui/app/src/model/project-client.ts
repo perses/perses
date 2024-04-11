@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ProjectResource } from '@perses-dev/core';
+import { DashboardResource, ProjectResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
-import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST } from './http';
-import { resource as dashboardResource } from './dashboard-client';
+import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
+import { getDashboards, resource as dashboardResource } from './dashboard-client';
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
@@ -31,8 +31,57 @@ const dependingResources = [dashboardResource, variableResource, datasourceResou
 
 type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
 
+export interface ProjectDashboardsGroup {
+  project: ProjectResource;
+  dashboards: DashboardResource[];
+}
+
+function createProject(entity: ProjectResource) {
+  const url = buildURL({ resource });
+  return fetchJson<ProjectResource>(url, {
+    method: HTTPMethodPOST,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+export function getProject(name: string) {
+  const url = buildURL({ resource, name });
+  return fetchJson<ProjectResource>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+export function getProjects() {
+  const url = buildURL({ resource });
+  return fetchJson<ProjectResource[]>(url, {
+    method: HTTPMethodGET,
+    headers: HTTPHeader,
+  });
+}
+
+function updateProject(entity: ProjectResource) {
+  const name = entity.metadata.name;
+  const url = buildURL({ resource, name });
+  return fetchJson<ProjectResource>(url, {
+    method: HTTPMethodPUT,
+    headers: HTTPHeader,
+    body: JSON.stringify(entity),
+  });
+}
+
+function deleteProject(entity: ProjectResource) {
+  const name = entity.metadata.name;
+  const url = buildURL({ resource, name });
+  return fetch(url, {
+    method: HTTPMethodDELETE,
+    headers: HTTPHeader,
+  });
+}
+
 /**
- * Used to get a project in the API.
+ * Used to get a project from the API.
  * Will automatically be refreshed when cache is invalidated
  */
 export function useProject(name: string) {
@@ -46,42 +95,51 @@ export function useProject(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useProjectList(options?: ProjectListOptions) {
-  const key = buildQueryKey({ resource });
   return useQuery<ProjectResource[], Error>(
-    key,
+    buildQueryKey({ resource }),
     () => {
-      const url = buildURL({ resource });
-      return fetchJson<ProjectResource[]>(url);
+      return getProjects();
     },
     options
   );
 }
 
 /**
- * Used to create a project in the API
- *
- * Will automatically invalidate the project list and force get query to be executed again.
- *
- * @example:
- * const addProjectMutation = useAddProjectMutation()
- * // ...
- * addProjectMutation.mutate("MyProjectName")
+ * Returns a mutation that can be used to create a project.
+ * Will automatically refresh the cache for all the list.
  */
-export function useAddProjectMutation() {
+export function useCreateProjectMutation() {
   const queryClient = useQueryClient();
-  const key = buildQueryKey({ resource });
-  return useMutation<ProjectResource, Error, string>({
-    mutationKey: key,
-    mutationFn: (name: string) => {
-      const url = buildURL({ resource });
-      return fetchJson<ProjectResource>(url, {
-        method: HTTPMethodPOST,
-        headers: HTTPHeader,
-        body: JSON.stringify({ kind: 'Project', metadata: { name } }),
-      });
+  const queryKey = buildQueryKey({ resource });
+
+  return useMutation<ProjectResource, Error, ProjectResource>({
+    mutationKey: queryKey,
+    mutationFn: (project: ProjectResource) => {
+      return createProject(project);
     },
     onSuccess: () => {
-      return Promise.all([queryClient.invalidateQueries(key), queryClient.invalidateQueries([userKey])]);
+      return queryClient.invalidateQueries([...queryKey]);
+    },
+  });
+}
+
+/**
+ * Returns a mutation that can be used to update a project.
+ * Will automatically refresh the cache for all the list.
+ */
+export function useUpdateProjectMutation() {
+  const queryClient = useQueryClient();
+  const queryKey = buildQueryKey({ resource });
+  return useMutation<ProjectResource, Error, ProjectResource>({
+    mutationKey: queryKey,
+    mutationFn: (project: ProjectResource) => {
+      return updateProject(project);
+    },
+    onSuccess: (entity: ProjectResource) => {
+      return Promise.all([
+        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
+        queryClient.invalidateQueries(queryKey),
+      ]);
     },
   });
 }
@@ -98,38 +156,45 @@ export function useAddProjectMutation() {
  */
 export function useDeleteProjectMutation() {
   const queryClient = useQueryClient();
-  const key = buildQueryKey({ resource });
+  const queryKey = buildQueryKey({ resource });
 
-  return useMutation<string, Error, string>({
-    mutationKey: key,
-    mutationFn: (name: string) => {
-      const url = buildURL({ resource, name });
-      return fetch(url, {
-        method: HTTPMethodDELETE,
-        headers: HTTPHeader,
-      }).then(() => {
-        return name;
-      });
+  return useMutation<ProjectResource, Error, ProjectResource>({
+    mutationKey: queryKey,
+    mutationFn: async (entity: ProjectResource) => {
+      await deleteProject(entity);
+      return entity;
     },
-    onSuccess: (name) => {
-      queryClient.removeQueries([...key, name]);
+    onSuccess: (entity: ProjectResource) => {
+      queryClient.removeQueries([...queryKey, entity.metadata.name]);
 
       const dependingKeys = dependingResources.map((resource) => buildQueryKey({ resource }));
-      dependingKeys.forEach((k) => queryClient.removeQueries([...k, name]));
+      dependingKeys.forEach((k) => queryClient.removeQueries([...k, entity.metadata.name]));
 
       return Promise.all([
         ...dependingKeys.map((k) => queryClient.invalidateQueries(k)),
         queryClient.invalidateQueries([userKey]),
-        queryClient.invalidateQueries(key),
+        queryClient.invalidateQueries(queryKey),
       ]);
     },
   });
 }
 
-export function getProject(name: string) {
-  const url = buildURL({ resource: resource, name: name });
-  return fetchJson<ProjectResource>(url, {
-    method: HTTPMethodGET,
-    headers: HTTPHeader,
+async function dashboardsPerProject(): Promise<ProjectDashboardsGroup[]> {
+  const projects = await getProjects();
+  const result: ProjectDashboardsGroup[] = [];
+  for (const project of projects ?? []) {
+    const dashboards = await getDashboards(project.metadata.name);
+    result.push({ project: project, dashboards: dashboards });
+  }
+
+  return result;
+}
+
+export function useDashboardsPerProjects() {
+  // We use a custom query key to avoid having the same key as a project name
+  // and still have reinvalidation when a project is modified
+  const queryKey = buildQueryKey({ resource, name: '*custom*' });
+  return useQuery<ProjectDashboardsGroup[], Error>(queryKey, () => {
+    return dashboardsPerProject();
   });
 }
