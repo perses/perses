@@ -95,8 +95,10 @@ export function useProject(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useProjectList(options?: ProjectListOptions) {
+  const queryKey = buildQueryKey({ resource });
+
   return useQuery<ProjectResource[], Error>(
-    buildQueryKey({ resource }),
+    queryKey,
     () => {
       return getProjects();
     },

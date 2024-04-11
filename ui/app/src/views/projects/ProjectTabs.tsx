@@ -193,7 +193,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
           </CRUDButton>
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
-            projectOptions={[projectName]}
+            projectOptions={[{ kind: 'Project', metadata: { name: projectName }, spec: {} }]}
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}

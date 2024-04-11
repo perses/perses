@@ -95,7 +95,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
           </Dialog.Content>
           <Dialog.Actions>
             <Button variant="contained" type="submit" disabled={!form.formState.isValid}>
-              Create
+              Add
             </Button>
             <Button variant="outlined" color="secondary" onClick={handleClose}>
               Cancel

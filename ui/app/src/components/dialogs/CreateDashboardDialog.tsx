@@ -16,7 +16,7 @@ import { Button, FormControlLabel, MenuItem, Stack, Switch, TextField } from '@m
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { DashboardSelector, EphemeralDashboardInfo } from '@perses-dev/core';
+import { DashboardSelector, EphemeralDashboardInfo, getResourceDisplayName, ProjectResource } from '@perses-dev/core';
 import {
   CreateDashboardValidationType,
   CreateEphemeralDashboardValidationType,
@@ -26,7 +26,7 @@ import {
 
 interface CreateDashboardProps {
   open: boolean;
-  projectOptions: string[];
+  projectOptions: ProjectResource[];
   hideProjectSelect?: boolean;
   mode?: 'create' | 'duplicate';
   name?: string;
@@ -42,7 +42,7 @@ interface CreateDashboardProps {
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  */
-export function CreateDashboardDialog(props: CreateDashboardProps) {
+export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projectOptions, hideProjectSelect, mode, name, onClose, onSuccess } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
@@ -81,10 +81,10 @@ export function CreateDashboardDialog(props: CreateDashboardProps) {
       )}
     </Dialog>
   );
-}
+};
 
 interface DuplicationFormProps {
-  projectOptions: string[];
+  projectOptions: ProjectResource[];
   hideProjectSelect?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
@@ -98,7 +98,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
   const dashboardForm = useForm<CreateDashboardValidationType>({
     resolver: zodResolver(dashboardSchemaValidation),
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projectOptions[0] },
+    defaultValues: { dashboardName: '', projectName: projectOptions[0]?.metadata.name ?? '' },
   });
 
   const processDashboardForm: SubmitHandler<CreateDashboardValidationType> = (data) => {
@@ -135,8 +135,8 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
                   >
                     {projectOptions.map((option) => {
                       return (
-                        <MenuItem key={option} value={option}>
-                          {option}
+                        <MenuItem key={option.metadata.name} value={option.metadata.name}>
+                          {getResourceDisplayName(option)}
                         </MenuItem>
                       );
                     })}
@@ -183,7 +183,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
   const ephemeralDashboardForm = useForm<CreateEphemeralDashboardValidationType>({
     resolver: zodResolver(ephemeralDashboardSchemaValidation),
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projectOptions[0], ttl: '' },
+    defaultValues: { dashboardName: '', projectName: projectOptions[0]?.metadata.name ?? '', ttl: '' },
   });
 
   const processEphemeralDashboardForm: SubmitHandler<CreateEphemeralDashboardValidationType> = (data) => {
@@ -224,8 +224,8 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
                   >
                     {projectOptions.map((option) => {
                       return (
-                        <MenuItem key={option} value={option}>
-                          {option}
+                        <MenuItem key={option.metadata.name} value={option.metadata.name}>
+                          {getResourceDisplayName(option)}
                         </MenuItem>
                       );
                     })}

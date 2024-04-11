@@ -151,9 +151,11 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
     () =>
       new KVSearch<ProjectDashboardsGroup>({
         indexedKeys: [
-          ['dashboards', 'metadata', 'project'], // Matching on the project name
+          ['dashboards', 'metadata', 'project'], // Matching on the dashboard project name
           ['dashboards', 'metadata', 'name'], // Matching on the dashboard name
           ['dashboards', 'spec', 'display', 'name'], // Matching on the dashboard display name
+          ['project', 'metadata', 'name'], // Matching on the project name
+          ['project', 'metadata', 'display', 'name'], // Matching on the project display name
         ],
       }),
     []
