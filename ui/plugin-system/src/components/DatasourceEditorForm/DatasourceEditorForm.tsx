@@ -261,13 +261,20 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
         </Typography>
         <PluginEditor
           width="100%"
-          pluginType="Datasource"
+          pluginTypes={['Datasource']}
           pluginKindLabel="Source"
-          value={state.spec.plugin}
+          value={{
+            selection: {
+              kind: state.spec.plugin.kind,
+              type: 'Datasource',
+            },
+            spec: state.spec.plugin.spec,
+          }}
           isReadonly={action === 'read'}
           onChange={(v) => {
             setState((draft) => {
-              draft.spec.plugin = v;
+              draft.spec.plugin.kind = v.selection.kind;
+              draft.spec.plugin.spec = v.spec;
             });
           }}
         />

@@ -59,9 +59,10 @@ export function transformQueryResults(results: UseQueryResult[], definitions: Qu
 }
 
 export function useQueryType(): (pluginKind: string) => string | undefined {
-  const { data: timeSeriesQueryPlugins, isLoading: isTimeSeriesQueryLoading } =
-    useListPluginMetadata('TimeSeriesQuery');
-  const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata('TraceQuery');
+  const { data: timeSeriesQueryPlugins, isLoading: isTimeSeriesQueryLoading } = useListPluginMetadata([
+    'TimeSeriesQuery',
+  ]);
+  const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
   const queryTypeMap = useMemo(() => {

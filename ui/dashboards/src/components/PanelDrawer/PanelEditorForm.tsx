@@ -53,10 +53,13 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   // Use common plugin editor logic even though we've split the inputs up in this form
   const pluginEditor = usePluginEditor({
-    pluginType: 'Panel',
-    value: { kind: plugin.kind, spec: plugin.spec },
+    pluginTypes: ['Panel'],
+    value: { selection: { kind: plugin.kind, type: 'Panel' }, spec: plugin.spec },
     onChange: (plugin) => {
-      setPlugin(plugin);
+      setPlugin({
+        kind: plugin.selection.kind,
+        spec: plugin.spec,
+      });
     },
     onHideQueryEditorChange: (isHidden) => {
       setQueries(undefined, isHidden);
@@ -73,7 +76,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       name: initialPanelDef.spec.display.name,
       groupId: initialGroupId,
       description: initialPanelDef.spec.display.description,
-      type: pluginEditor.pendingKind ? pluginEditor.pendingKind : plugin.kind,
+      selection: pluginEditor.pendingSelection ? pluginEditor.pendingSelection : { type: 'Panel', kind: plugin.kind },
     },
   });
 
@@ -197,11 +200,11 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           </Grid>
           <Grid item xs={4}>
             <Controller
-              name="type"
+              name="selection"
               render={({ field, fieldState }) => (
                 <PluginKindSelect
                   {...field}
-                  pluginType="Panel"
+                  pluginTypes={['Panel']}
                   required
                   fullWidth
                   label="Type"
@@ -210,7 +213,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   helperText={pluginEditor.error?.message ?? fieldState.error?.message}
                   onChange={(event) => {
                     field.onChange(event);
-                    pluginEditor.onKindChange(event);
+                    pluginEditor.onSelectionChange(event);
                   }}
                 />
               )}

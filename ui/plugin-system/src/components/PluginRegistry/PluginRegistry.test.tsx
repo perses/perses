@@ -82,7 +82,7 @@ const PluginConsumer = (props: { pluginType: PluginType; kind: string }) => {
 
 // A helper component for testing the PluginRegistry metadata APIs by calling useListPluginMetadata
 const MetadataConsumer = (props: { pluginType: PluginType }) => {
-  const { data: pluginMetadata, isLoading, error } = useListPluginMetadata(props.pluginType);
+  const { data: pluginMetadata, isLoading, error } = useListPluginMetadata([props.pluginType]);
   if (error) {
     return <div>Error: {(error as Error).message}</div>;
   }
