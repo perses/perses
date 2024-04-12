@@ -91,7 +91,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
             )}
           </Stack>
         </AccordionSummary>
-        <AccordionDetails id={`${row.project}-dashboard-list`} sx={{ padding: 0 }}>
+        <AccordionDetails id={`${row.project.metadata.name}-dashboard-list`} sx={{ padding: 0 }}>
           <DashboardList
             dashboardList={row.dashboards}
             hideToolbar={true}
