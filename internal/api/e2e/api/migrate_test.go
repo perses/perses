@@ -18,6 +18,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"testing"
 
@@ -56,7 +57,7 @@ func TestMigrateEndpoint(t *testing.T) {
 			var persesDashboard modelV1.Dashboard
 			testUtils.JSONUnmarshal(rawPersesDashboard, &persesDashboard)
 
-			e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+			e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 				entity := modelAPI.Migrate{
 					GrafanaDashboard: grafanaDashboard,
 				}

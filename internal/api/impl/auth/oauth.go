@@ -368,27 +368,28 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 // tokenHandler is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
 func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
-	var reqBody api.TokenRequest
-	if err := ctx.Bind(&reqBody); err != nil {
-		e.logWithError(err).Error("Invalid request body")
-		return &oauth2.RetrieveError{
-			ErrorCode:        string(oidc.InvalidRequest), // Reuse oidc lib for convenience as they created an enum
-			ErrorDescription: err.Error(),
-		}
-	}
+	grantType := ctx.FormValue("grant_type")
 
 	var accessToken *oauth2.Token
 	var err error
-	switch reqBody.GrantType {
+	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
-		accessToken, err = e.retrieveDeviceAccessToken(ctx.Request().Context(), reqBody.DeviceCode)
+		deviceCode := ctx.FormValue("device_code")
+		accessToken, err = e.retrieveDeviceAccessToken(ctx.Request().Context(), deviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
 			return err
 		}
 	case api.GrantTypeClientCredentials:
-		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
+		// Extract client_id and client_secret from Authorization header
+		clientID, clientSecret, ok := ctx.Request().BasicAuth()
+		if !ok {
+			err = &oauth2.RetrieveError{ErrorCode: string(oidc.InvalidRequest)}
+			e.logWithError(err).Error("Invalid or missing Authorization header")
+			return err
+		}
+		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), clientID, clientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
 			return err

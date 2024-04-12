@@ -42,13 +42,19 @@ func (u *Auth) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// AuthResponse represents the response of an authentication request.
+// Disclaimer: This is an exception to the general camelCase convention in the project, to respect oauth 2.0 specs.
+// -> https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4
 type AuthResponse struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken,omitempty"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
+// RefreshRequest represents the request used to refresh an access token from a refresh token.
+// Disclaimer: This is an exception to the general camelCase convention in the project, to respect oauth 2.0 specs.
+// -> https://datatracker.ietf.org/doc/html/rfc6749#section-6
 type RefreshRequest struct {
-	RefreshToken string `json:"refreshToken"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (r *RefreshRequest) UnmarshalJSON(data []byte) error {
