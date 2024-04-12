@@ -230,7 +230,7 @@ export function DashboardList(props: DashboardListProperties) {
             />
             <CreateDashboardDialog
               open={isDuplicateDashboardDialogStateOpened}
-              projectOptions={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
+              projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
               hideProjectSelect={true}
               mode="duplicate"
               name={getResourceDisplayName(targetedDashboard)}

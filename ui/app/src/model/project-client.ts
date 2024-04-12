@@ -31,7 +31,7 @@ const dependingResources = [dashboardResource, variableResource, datasourceResou
 
 type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
 
-export interface ProjectDashboardsGroup {
+export interface ProjectWithDashboards {
   project: ProjectResource;
   dashboards: DashboardResource[];
 }
@@ -181,9 +181,9 @@ export function useDeleteProjectMutation() {
   });
 }
 
-async function dashboardsPerProject(): Promise<ProjectDashboardsGroup[]> {
+async function getProjectsWithDashboard(): Promise<ProjectWithDashboards[]> {
   const projects = await getProjects();
-  const result: ProjectDashboardsGroup[] = [];
+  const result: ProjectWithDashboards[] = [];
   for (const project of projects ?? []) {
     const dashboards = await getDashboards(project.metadata.name);
     result.push({ project: project, dashboards: dashboards });
@@ -192,11 +192,11 @@ async function dashboardsPerProject(): Promise<ProjectDashboardsGroup[]> {
   return result;
 }
 
-export function useDashboardsPerProjects() {
+export function useProjectsWithDashboards() {
   // We use a custom query key to avoid having the same key as a project name
   // and still have reinvalidation when a project is modified
   const queryKey = buildQueryKey({ resource, name: '*custom*' });
-  return useQuery<ProjectDashboardsGroup[], Error>(queryKey, () => {
-    return dashboardsPerProject();
+  return useQuery<ProjectWithDashboards[], Error>(queryKey, () => {
+    return getProjectsWithDashboard();
   });
 }

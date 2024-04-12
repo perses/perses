@@ -87,7 +87,7 @@ function HomeView() {
             />
             <CreateDashboardDialog
               open={isAddDashboardDialogOpen}
-              projectOptions={userProjects}
+              projects={userProjects}
               onClose={handleAddDashboardDialogClose}
               onSuccess={handleAddDashboardDialogSubmit}
             />

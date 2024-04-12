@@ -36,10 +36,10 @@ import { DashboardList } from '../../components/DashboardList/DashboardList';
 import { useIsReadonly } from '../../context/Config';
 import { useHasPermission } from '../../context/Authorization';
 import { DeleteResourceDialog } from '../../components/dialogs';
-import { ProjectDashboardsGroup, useDashboardsPerProjects, useDeleteProjectMutation } from '../../model/project-client';
+import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
 
 interface ProjectAccordionProps {
-  row: ProjectDashboardsGroup;
+  row: ProjectWithDashboards;
 }
 
 function ProjectAccordion({ row }: ProjectAccordionProps) {
@@ -121,7 +121,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
 }
 
 interface RenderDashboardListProps {
-  projectRows: ProjectDashboardsGroup[];
+  projectRows: ProjectWithDashboards[];
 }
 
 function RenderDashboardList(props: RenderDashboardListProps) {
@@ -149,7 +149,7 @@ interface SearchableDashboardsProps {
 export function SearchableDashboards(props: SearchableDashboardsProps) {
   const kvSearch = useMemo(
     () =>
-      new KVSearch<ProjectDashboardsGroup>({
+      new KVSearch<ProjectWithDashboards>({
         indexedKeys: [
           ['dashboards', 'metadata', 'project'], // Matching on the dashboard project name
           ['dashboards', 'metadata', 'name'], // Matching on the dashboard name
@@ -161,11 +161,11 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
     []
   );
 
-  const { data: projectRows, isLoading } = useDashboardsPerProjects();
+  const { data: projectRows, isLoading } = useProjectsWithDashboards();
 
   const [search, setSearch] = useState<string>('');
 
-  const filteredProjectRows: ProjectDashboardsGroup[] = useMemo(() => {
+  const filteredProjectRows: ProjectWithDashboards[] = useMemo(() => {
     if (search) {
       return kvSearch.filter(search, projectRows ?? []).map((res) => res.original);
     } else {

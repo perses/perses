@@ -26,7 +26,7 @@ import {
 
 interface CreateDashboardProps {
   open: boolean;
-  projectOptions: ProjectResource[];
+  projects: ProjectResource[];
   hideProjectSelect?: boolean;
   mode?: 'create' | 'duplicate';
   name?: string;
@@ -43,7 +43,7 @@ interface CreateDashboardProps {
  * @param props.onSuccess Action to perform when user confirmed.
  */
 export const CreateDashboardDialog = (props: CreateDashboardProps) => {
-  const { open, projectOptions, hideProjectSelect, mode, name, onClose, onSuccess } = props;
+  const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
   const action = mode == 'duplicate' ? 'Duplicate' : 'Create';
@@ -75,30 +75,30 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
         </Dialog.Content>
       )}
       {isTempCopyChecked ? (
-        <EphemeralDashboardDuplicationForm {...{ projectOptions, hideProjectSelect, onClose, onSuccess }} />
+        <EphemeralDashboardDuplicationForm {...{ projects: projects, hideProjectSelect, onClose, onSuccess }} />
       ) : (
-        <DashboardDuplicationForm {...{ projectOptions, hideProjectSelect, onClose, onSuccess }} />
+        <DashboardDuplicationForm {...{ projects: projects, hideProjectSelect, onClose, onSuccess }} />
       )}
     </Dialog>
   );
 };
 
 interface DuplicationFormProps {
-  projectOptions: ProjectResource[];
+  projects: ProjectResource[];
   hideProjectSelect?: boolean;
   onClose: DispatchWithoutAction;
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
 }
 
 const DashboardDuplicationForm = (props: DuplicationFormProps) => {
-  const { projectOptions, hideProjectSelect, onClose, onSuccess } = props;
+  const { projects, hideProjectSelect, onClose, onSuccess } = props;
 
   const dashboardSchemaValidation = useDashboardValidationSchema();
 
   const dashboardForm = useForm<CreateDashboardValidationType>({
     resolver: zodResolver(dashboardSchemaValidation),
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projectOptions[0]?.metadata.name ?? '' },
+    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '' },
   });
 
   const processDashboardForm: SubmitHandler<CreateDashboardValidationType> = (data) => {
@@ -133,7 +133,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   >
-                    {projectOptions.map((option) => {
+                    {projects.map((option) => {
                       return (
                         <MenuItem key={option.metadata.name} value={option.metadata.name}>
                           {getResourceDisplayName(option)}
@@ -176,14 +176,14 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
 };
 
 const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
-  const { projectOptions, hideProjectSelect, onClose, onSuccess } = props;
+  const { projects, hideProjectSelect, onClose, onSuccess } = props;
 
   const ephemeralDashboardSchemaValidation = useEphemeralDashboardValidationSchema();
 
   const ephemeralDashboardForm = useForm<CreateEphemeralDashboardValidationType>({
     resolver: zodResolver(ephemeralDashboardSchemaValidation),
     mode: 'onBlur',
-    defaultValues: { dashboardName: '', projectName: projectOptions[0]?.metadata.name ?? '', ttl: '' },
+    defaultValues: { dashboardName: '', projectName: projects[0]?.metadata.name ?? '', ttl: '' },
   });
 
   const processEphemeralDashboardForm: SubmitHandler<CreateEphemeralDashboardValidationType> = (data) => {
@@ -222,7 +222,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                   >
-                    {projectOptions.map((option) => {
+                    {projects.map((option) => {
                       return (
                         <MenuItem key={option.metadata.name} value={option.metadata.name}>
                           {getResourceDisplayName(option)}
