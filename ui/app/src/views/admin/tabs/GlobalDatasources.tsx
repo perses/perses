@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { getDatasourceDisplayName, GlobalDatasource } from '@perses-dev/core';
+import { getResourceDisplayName, GlobalDatasource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
 import { DatasourceList } from '../../../components/datasource/DatasourceList';
@@ -43,7 +43,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
         createDatasourceMutation.mutate(datasource, {
           onSuccess: (createdDatasource: GlobalDatasource) => {
             successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`
+              `Global Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`
             );
             resolve();
           },
@@ -64,7 +64,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
         updateDatasourceMutation.mutate(datasource, {
           onSuccess: (updatedDatasource: GlobalDatasource) => {
             successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(updatedDatasource)} has been successfully updated`
+              `Global Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`
             );
             resolve();
           },
@@ -85,7 +85,7 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
         deleteDatasourceMutation.mutate(datasource, {
           onSuccess: (deletedDatasource: GlobalDatasource) => {
             successSnackbar(
-              `Global Datasource ${getDatasourceDisplayName(deletedDatasource)} has been successfully deleted`
+              `Global Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`
             );
             resolve();
           },

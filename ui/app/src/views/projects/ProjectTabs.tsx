@@ -20,8 +20,8 @@ import ShieldIcon from 'mdi-material-ui/Shield';
 import ShieldAccountIcon from 'mdi-material-ui/ShieldAccount';
 import KeyIcon from 'mdi-material-ui/Key';
 import {
-  getDatasourceDisplayName,
-  getVariableExtendedDisplayName,
+  getResourceDisplayName,
+  getResourceExtendedDisplayName,
   DashboardSelector,
   ProjectDatasource,
   VariableResource,
@@ -101,7 +101,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
     (datasource: ProjectDatasource) => {
       createDatasourceMutation.mutate(datasource, {
         onSuccess: (createdDatasource: ProjectDatasource) => {
-          successSnackbar(`Datasource ${getDatasourceDisplayName(createdDatasource)} has been successfully created`);
+          successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
           setDatasourceDrawerOpened(false);
         },
         onError: (err) => {
@@ -165,7 +165,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
     (variable: VariableResource) => {
       createVariableMutation.mutate(variable, {
         onSuccess: (updatedVariable: VariableResource) => {
-          successSnackbar(`Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully created`);
+          successSnackbar(`Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully created`);
           setVariableDrawerOpened(false);
         },
         onError: (err) => {
@@ -193,7 +193,7 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
           </CRUDButton>
           <CreateDashboardDialog
             open={isCreateDashboardDialogOpened}
-            projectOptions={[projectName]}
+            projects={[{ kind: 'Project', metadata: { name: projectName }, spec: {} }]}
             hideProjectSelect={true}
             onClose={() => setCreateDashboardDialogOpened(false)}
             onSuccess={handleDashboardCreation}

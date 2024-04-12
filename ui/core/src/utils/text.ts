@@ -11,67 +11,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, Variable, Datasource, EphemeralDashboardResource } from '../model';
+import { Resource } from '../model';
 
 /**
- * If the dashboard has a display name, return the dashboard display name
- * Else, only return the dashboard name
- * @param dashboard
+ * If the resource has a display name, return the variable display name
+ * Else, only return the resource metdata name
  */
-export function getDashboardDisplayName(dashboard: DashboardResource | EphemeralDashboardResource) {
-  return dashboard.spec.display?.name ?? dashboard.metadata.name;
-}
-
-/**
- * If the variable has a display name, return the variable display name
- * Else, only return the variable name
- * @param variable Project or Global variable
- */
-export function getVariableDisplayName(variable: Variable) {
-  return variable.spec.spec.display?.name ?? variable.metadata.name;
-}
-
-/**
- * If the variable has a display name, return the datasource display name
- * Else, only return the datasource name
- * @param datasource Project or Global datasource
- */
-export function getDatasourceDisplayName(datasource: Datasource) {
-  return datasource.spec.display?.name || datasource.metadata.name;
-}
-
-/**
- * If the dashboard has a display name, return the dashboard display name and the dashboard name
- * Else, only return the dashboard name
- * @param dashboard
- */
-export function getDashboardExtendedDisplayName(dashboard: DashboardResource | EphemeralDashboardResource) {
-  if (dashboard.spec.display?.name) {
-    return `${dashboard.spec.display.name} (Name: ${dashboard.metadata.name})`;
+export function getResourceDisplayName<T extends Resource>(resource: T): string {
+  // Variables
+  if (resource.spec.spec?.display?.name) {
+    return resource.spec.spec.display.name;
   }
-  return dashboard.metadata.name;
+
+  // Other resources with display
+  if (resource.spec.display?.name) {
+    return resource.spec.display.name;
+  }
+
+  return resource.metadata.name;
 }
 
 /**
- * If the variable has a display name, return the variable display name and the variable name
- * Else, only return the variable name
- * @param variable Project or Global variable
+ * If the resource has a display name, return the resource display name with the resource name too
+ * Else, only return the resource name
  */
-export function getVariableExtendedDisplayName(variable: Variable) {
-  if (variable.spec.spec.display?.name) {
-    return `${variable.spec.spec.display.name} (Name: ${variable.metadata.name})`;
+export function getResourceExtendedDisplayName<T extends Resource>(resource: T): string {
+  // Variables
+  if (resource.spec.spec?.display?.name) {
+    return `${resource.spec.spec.display.name} (ID: ${resource.metadata.name})`;
   }
-  return variable.metadata.name;
-}
 
-/**
- * If the datasource has a display name, return the datasource display name and the datasource name
- * Else, only return the datasource name
- * @param datasource Project or Global datasource
- */
-export function getDatasourceExtendedDisplayName(datasource: Datasource) {
-  if (datasource.spec.display?.name) {
-    return `${datasource.spec.display.name} (Name: ${datasource.metadata.name})`;
+  // Other resources with display
+  if (resource.spec.display?.name) {
+    return `${resource.spec.display.name} (ID: ${resource.metadata.name})`;
   }
-  return datasource.metadata.name;
+
+  return resource.metadata.name;
 }

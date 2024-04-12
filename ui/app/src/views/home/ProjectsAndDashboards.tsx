@@ -24,53 +24,64 @@ import {
   Typography,
 } from '@mui/material';
 import { ChangeEvent, MouseEvent, useCallback, useMemo, useState } from 'react';
-import { DashboardResource } from '@perses-dev/core';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { ErrorAlert, ErrorBoundary, useSnackbar } from '@perses-dev/components';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import Archive from 'mdi-material-ui/Archive';
 import DeleteOutline from 'mdi-material-ui/DeleteOutline';
 import { Link as RouterLink } from 'react-router-dom';
 import { KVSearch } from '@nexucis/kvsearch';
 import FormatListBulletedIcon from 'mdi-material-ui/FormatListBulleted';
-import { useDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from '../../components/DashboardList/DashboardList';
-import { DeleteProjectDialog } from '../../components/dialogs';
 import { useIsReadonly } from '../../context/Config';
 import { useHasPermission } from '../../context/Authorization';
-
-interface ProjectRow {
-  project: string;
-  dashboards: DashboardResource[];
-}
+import { DeleteResourceDialog } from '../../components/dialogs';
+import { ProjectWithDashboards, useProjectsWithDashboards, useDeleteProjectMutation } from '../../model/project-client';
 
 interface ProjectAccordionProps {
-  row: ProjectRow;
+  row: ProjectWithDashboards;
 }
 
 function ProjectAccordion({ row }: ProjectAccordionProps) {
   const isReadonly = useIsReadonly();
-  const [openDeleteProjectDialog, setOpenDeleteProjectDialog] = useState<boolean>(false);
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
-  const closeDeleteProjectConfirmDialog = () => {
-    setOpenDeleteProjectDialog(false);
-  };
+  const [isDeleteProjectDialogOpen, setIsDeleteProjectDialogOpen] = useState<boolean>(false);
 
-  const openDeleteProjectConfirmDialog = ($event: MouseEvent) => {
+  const hasPermission = useHasPermission('delete', row.project.metadata.name, 'Project');
+  const deleteProjectMutation = useDeleteProjectMutation();
+
+  function openDeleteProjectConfirmDialog($event: MouseEvent) {
     $event.stopPropagation(); // Preventing the accordion to toggle when we click on the button
-    setOpenDeleteProjectDialog(true);
-  };
+    setIsDeleteProjectDialogOpen(true);
+  }
 
-  const hasPermission = useHasPermission('delete', row.project, 'Project');
+  function closeDeleteProjectConfirmDialog() {
+    setIsDeleteProjectDialogOpen(false);
+  }
+
+  function handleProjectDelete(project: ProjectResource) {
+    deleteProjectMutation.mutate(project, {
+      onSuccess: (deletedProject: ProjectResource) => {
+        successSnackbar(`Project ${deletedProject.metadata.name} has been successfully deleted`);
+        closeDeleteProjectConfirmDialog();
+      },
+      onError: (err) => {
+        exceptionSnackbar(err);
+        throw err;
+      },
+    });
+  }
 
   return (
     <>
-      <Accordion TransitionProps={{ unmountOnExit: true }} key={row.project}>
+      <Accordion TransitionProps={{ unmountOnExit: true }} key={row.project.metadata.name}>
         <AccordionSummary expandIcon={<ChevronDown />}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%">
             <Stack direction="row" alignItems="center" gap={1}>
               <Archive sx={{ margin: 1 }} />
-              <Link component={RouterLink} to={`/projects/${row.project}`} variant="h3" underline="hover">
-                {row.project}
+              <Link component={RouterLink} to={`/projects/${row.project.metadata.name}`} variant="h3" underline="hover">
+                {getResourceDisplayName(row.project)}
               </Link>
             </Stack>
             {hasPermission && (
@@ -80,7 +91,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
             )}
           </Stack>
         </AccordionSummary>
-        <AccordionDetails id={`${row.project}-dashboard-list`} sx={{ padding: 0 }}>
+        <AccordionDetails id={`${row.project.metadata.name}-dashboard-list`} sx={{ padding: 0 }}>
           <DashboardList
             dashboardList={row.dashboards}
             hideToolbar={true}
@@ -99,9 +110,10 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
           />
         </AccordionDetails>
       </Accordion>
-      <DeleteProjectDialog
-        name={row.project}
-        open={openDeleteProjectDialog}
+      <DeleteResourceDialog
+        resource={row.project}
+        open={isDeleteProjectDialogOpen}
+        onSubmit={() => handleProjectDelete(row.project)}
         onClose={closeDeleteProjectConfirmDialog}
       />
     </>
@@ -109,7 +121,7 @@ function ProjectAccordion({ row }: ProjectAccordionProps) {
 }
 
 interface RenderDashboardListProps {
-  projectRows: ProjectRow[];
+  projectRows: ProjectWithDashboards[];
 }
 
 function RenderDashboardList(props: RenderDashboardListProps) {
@@ -124,7 +136,7 @@ function RenderDashboardList(props: RenderDashboardListProps) {
   return (
     <Box>
       {projectRows.map((row) => (
-        <ProjectAccordion key={row.project} row={row} />
+        <ProjectAccordion key={row.project.metadata.name} row={row} />
       ))}
     </Box>
   );
@@ -134,48 +146,32 @@ interface SearchableDashboardsProps {
   id?: string;
 }
 
-function buildProjectRow(list: DashboardResource[]) {
-  const result: ProjectRow[] = [];
-  for (const item of list) {
-    const project = item.metadata.project;
-    const row = result.find((row) => row.project === item.metadata.project);
-    if (row) {
-      row.dashboards.push(item);
-    } else {
-      result.push({ project: project, dashboards: [item] });
-    }
-  }
-  return result;
-}
-
 export function SearchableDashboards(props: SearchableDashboardsProps) {
   const kvSearch = useMemo(
     () =>
-      new KVSearch<DashboardResource>({
+      new KVSearch<ProjectWithDashboards>({
         indexedKeys: [
-          ['metadata', 'project'], // Matching on the project name
-          ['metadata', 'name'], // Matching on the dashboard name
-          ['spec', 'display', 'name'], // Matching on the dashboard display name
+          ['dashboards', 'metadata', 'project'], // Matching on the dashboard project name
+          ['dashboards', 'metadata', 'name'], // Matching on the dashboard name
+          ['dashboards', 'spec', 'display', 'name'], // Matching on the dashboard display name
+          ['project', 'metadata', 'name'], // Matching on the project name
+          ['project', 'metadata', 'display', 'name'], // Matching on the project display name
         ],
       }),
     []
   );
 
-  const { data, isLoading } = useDashboardList();
-  const projectRows: ProjectRow[] = useMemo(() => {
-    return buildProjectRow(data || []);
-  }, [data]);
+  const { data: projectRows, isLoading } = useProjectsWithDashboards();
 
   const [search, setSearch] = useState<string>('');
 
-  const filteredProjectRows: ProjectRow[] = useMemo(() => {
+  const filteredProjectRows: ProjectWithDashboards[] = useMemo(() => {
     if (search) {
-      const result = kvSearch.filter(search, data || []);
-      return buildProjectRow(result.map((res) => res.original));
+      return kvSearch.filter(search, projectRows ?? []).map((res) => res.original);
     } else {
-      return projectRows;
+      return projectRows ?? [];
     }
-  }, [kvSearch, projectRows, search, data]);
+  }, [kvSearch, projectRows, search]);
 
   const handleSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.value) {

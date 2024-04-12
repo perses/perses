@@ -16,9 +16,10 @@ import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { ProjectResource } from '@perses-dev/core';
-import { useAddProjectMutation } from '../../model/project-client';
-import { ProjectNameValidationType, useProjectValidationSchema } from '../../validation';
+import { getResourceDisplayName, ProjectResource } from '@perses-dev/core';
+import { CreateProjectValidationType, useProjectValidationSchema } from '../../validation';
+import { generateMetadataName } from '../../utils/metadata';
+import { useCreateProjectMutation } from '../../model/project-client';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -32,37 +33,43 @@ interface CreateProjectDialogProps {
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  */
-export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
+export function CreateProjectDialog(props: CreateProjectDialogProps) {
   const { open, onClose, onSuccess } = props;
   const validationSchema = useProjectValidationSchema();
 
-  const form = useForm<ProjectNameValidationType>({
+  const form = useForm<CreateProjectValidationType>({
     resolver: zodResolver(validationSchema),
     mode: 'onBlur',
   });
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
-  const mutation = useAddProjectMutation();
+  const mutation = useCreateProjectMutation();
 
-  const processForm: SubmitHandler<ProjectNameValidationType> = (data) => {
-    mutation.mutate(data.name, {
-      onSuccess: (entity: ProjectResource) => {
-        successSnackbar(`project ${entity.metadata.name} was successfully created`);
-        onClose();
-        if (onSuccess) {
-          onSuccess(entity);
-        }
-      },
-      onError: (err) => {
-        exceptionSnackbar(err);
-      },
-    });
+  const processForm: SubmitHandler<CreateProjectValidationType> = (data) => {
+    const name = generateMetadataName(data.projectName);
+
+    mutation.mutate(
+      { kind: 'Project', metadata: { name: name }, spec: { display: { name: data.projectName } } },
+      {
+        onSuccess: (entity: ProjectResource) => {
+          successSnackbar(`Project ${getResourceDisplayName(entity)} was successfully created`);
+          onClose();
+          if (onSuccess) {
+            onSuccess(entity);
+          }
+        },
+        onError: (err: Error) => {
+          exceptionSnackbar(err);
+        },
+      }
+    );
   };
 
   const handleClose = () => {
     onClose();
     form.reset();
   };
+
   return (
     <Dialog open={open} onClose={handleClose} fullWidth={true}>
       <Dialog.Header>Add Project</Dialog.Header>
@@ -70,7 +77,7 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Controller
-              name="name"
+              name="projectName"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -98,4 +105,4 @@ export const CreateProjectDialog = (props: CreateProjectDialogProps) => {
       </FormProvider>
     </Dialog>
   );
-};
+}

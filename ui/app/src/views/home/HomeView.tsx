@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Grid, MenuItem, Stack } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import HomeIcon from 'mdi-material-ui/Home';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { DashboardSelector, ProjectResource } from '@perses-dev/core';
@@ -33,10 +33,6 @@ function HomeView() {
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
   const userProjects = useDashboardCreateAllowedProjects();
-
-  const projectOptions = useMemo(() => {
-    return userProjects.map((project) => project.metadata.name);
-  }, [userProjects]);
 
   const handleAddProjectDialogSubmit = (entity: ProjectResource) => navigate(`/projects/${entity.metadata.name}`);
   const handleAddDashboardDialogSubmit = (dashboardSelector: DashboardSelector) =>
@@ -76,11 +72,11 @@ function HomeView() {
               <CRUDButton
                 variant="contained"
                 onClick={handleAddDashboardDialogOpen}
-                disabled={projectOptions.length === 0}
+                disabled={userProjects.length === 0}
               >
                 Add Dashboard
               </CRUDButton>
-              <MenuItem component={RouterLink} to={ImportRoute} disabled={projectOptions.length === 0}>
+              <MenuItem component={RouterLink} to={ImportRoute} disabled={userProjects.length === 0}>
                 <CRUDButton style={{ backgroundColor: 'transparent' }}>Import Dashboard</CRUDButton>
               </MenuItem>
             </ButtonMenu>
@@ -91,7 +87,7 @@ function HomeView() {
             />
             <CreateDashboardDialog
               open={isAddDashboardDialogOpen}
-              projectOptions={projectOptions}
+              projects={userProjects}
               onClose={handleAddDashboardDialogClose}
               onSuccess={handleAddDashboardDialogSubmit}
             />

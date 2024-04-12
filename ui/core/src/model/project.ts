@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import { Metadata } from './resource';
+import { Display } from './display';
 
 export interface ProjectResource {
   kind: 'Project';
   metadata: Metadata;
+  spec: ProjectSpec;
+}
+
+export interface ProjectSpec {
+  display?: Display;
 }

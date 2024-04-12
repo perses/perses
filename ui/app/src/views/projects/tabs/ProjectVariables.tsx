@@ -13,7 +13,7 @@
 
 import { Card } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
-import { getVariableExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
+import { getResourceExtendedDisplayName, Variable, VariableResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { VariableList } from '../../../components/variable/VariableList';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
@@ -49,9 +49,9 @@ export function ProjectVariables(props: ProjectVariablesProps) {
     (variable: VariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         createVariableMutation.mutate(variable, {
-          onSuccess: (createdVariable: Variable) => {
+          onSuccess: (createdVariable: VariableResource) => {
             successSnackbar(
-              `Variable ${getVariableExtendedDisplayName(createdVariable)} has been successfully created`
+              `Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`
             );
             resolve();
           },
@@ -69,9 +69,9 @@ export function ProjectVariables(props: ProjectVariablesProps) {
     (variable: VariableResource): Promise<void> =>
       new Promise((resolve, reject) => {
         updateVariableMutation.mutate(variable, {
-          onSuccess: (updatedVariable: Variable) => {
+          onSuccess: (updatedVariable: VariableResource) => {
             successSnackbar(
-              `Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully updated`
+              `Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`
             );
             resolve();
           },
@@ -91,7 +91,7 @@ export function ProjectVariables(props: ProjectVariablesProps) {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: Variable) => {
             successSnackbar(
-              `Variable ${getVariableExtendedDisplayName(deletedVariable)} has been successfully deleted`
+              `Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
             );
             resolve();
           },

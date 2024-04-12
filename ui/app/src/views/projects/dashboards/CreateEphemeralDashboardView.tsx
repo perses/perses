@@ -15,7 +15,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import {
   EphemeralDashboardResource,
-  getDashboardExtendedDisplayName,
+  getResourceExtendedDisplayName,
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
   DashboardResource,
@@ -77,7 +77,7 @@ function CreateEphemeralDashboardView() {
       return createEphemeralDashboardMutation.mutateAsync(data, {
         onSuccess: (createdEphemeralDashboard: EphemeralDashboardResource) => {
           successSnackbar(
-            `Ephemeral Dashboard ${getDashboardExtendedDisplayName(
+            `Ephemeral Dashboard ${getResourceExtendedDisplayName(
               createdEphemeralDashboard
             )} has been successfully created`
           );

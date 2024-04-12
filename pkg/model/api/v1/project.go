@@ -18,9 +18,11 @@ import (
 	"fmt"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type ProjectSpec struct {
+	Display *common.Display `json:"display,omitempty" yaml:"display,omitempty"`
 }
 
 type Project struct {

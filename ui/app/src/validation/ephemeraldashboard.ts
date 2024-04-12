@@ -16,17 +16,17 @@ import { useMemo } from 'react';
 import { durationValidationSchema, resourceIdValidationSchema } from '@perses-dev/plugin-system';
 import { generateMetadataName } from '../utils/metadata';
 import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
-import { dashboardNameValidationSchema } from './dashboard';
+import { dashboardDisplayNameValidationSchema } from './dashboard';
 
 export const createEphemeralDashboardDialogValidationSchema = z.object({
   projectName: resourceIdValidationSchema,
-  dashboardName: dashboardNameValidationSchema,
+  dashboardName: dashboardDisplayNameValidationSchema,
   ttl: durationValidationSchema,
 });
 export type CreateEphemeralDashboardValidationType = z.infer<typeof createEphemeralDashboardDialogValidationSchema>;
 
 export const updateEphemeralDashboardDialogValidationSchema = z.object({
-  dashboardName: dashboardNameValidationSchema,
+  dashboardName: dashboardDisplayNameValidationSchema,
   ttl: durationValidationSchema,
 });
 export type UpdateEphemeralDashboardValidationType = z.infer<typeof updateEphemeralDashboardDialogValidationSchema>;

@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import {
-  getDashboardDisplayName,
+  getResourceDisplayName,
   EphemeralDashboardResource,
   parseDurationString,
-  getDashboardExtendedDisplayName,
+  getResourceExtendedDisplayName,
 } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
@@ -76,7 +76,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
         ({
           project: ephemeralDashboard.metadata.project,
           name: ephemeralDashboard.metadata.name,
-          displayName: getDashboardDisplayName(ephemeralDashboard),
+          displayName: getResourceDisplayName(ephemeralDashboard),
           expireAt: getExpirationDate(ephemeralDashboard),
           version: ephemeralDashboard.metadata.version,
           createdAt: ephemeralDashboard.metadata.createdAt,
@@ -104,7 +104,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
       new Promise((resolve, reject) => {
         deleteEphemeralDashboardMutation.mutate(dashboard, {
           onSuccess: (deletedDashboard: EphemeralDashboardResource) => {
-            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
             resolve();
           },
           onError: (err) => {

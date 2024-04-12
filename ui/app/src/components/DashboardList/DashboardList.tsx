@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import {
-  getDashboardDisplayName,
+  getResourceDisplayName,
   DashboardResource,
   DashboardSelector,
   EphemeralDashboardInfo,
-  getDashboardExtendedDisplayName,
+  getResourceExtendedDisplayName,
 } from '@perses-dev/core';
 import { Box, Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
@@ -71,7 +71,7 @@ export function DashboardList(props: DashboardListProperties) {
         ({
           project: dashboard.metadata.project,
           name: dashboard.metadata.name,
-          displayName: getDashboardDisplayName(dashboard),
+          displayName: getResourceDisplayName(dashboard),
           version: dashboard.metadata.version,
           createdAt: dashboard.metadata.createdAt,
           updatedAt: dashboard.metadata.updatedAt,
@@ -143,7 +143,7 @@ export function DashboardList(props: DashboardListProperties) {
       new Promise((resolve, reject) => {
         deleteDashboardMutation.mutate(dashboard, {
           onSuccess: (deletedDashboard: DashboardResource) => {
-            successSnackbar(`Dashboard ${getDashboardExtendedDisplayName(deletedDashboard)} was successfully deleted`);
+            successSnackbar(`Dashboard ${getResourceExtendedDisplayName(deletedDashboard)} was successfully deleted`);
             resolve();
           },
           onError: (err) => {
@@ -230,10 +230,10 @@ export function DashboardList(props: DashboardListProperties) {
             />
             <CreateDashboardDialog
               open={isDuplicateDashboardDialogStateOpened}
-              projectOptions={[targetedDashboard.metadata.project]}
+              projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
               hideProjectSelect={true}
               mode="duplicate"
-              name={getDashboardDisplayName(targetedDashboard)}
+              name={getResourceDisplayName(targetedDashboard)}
               onSuccess={handleDashboardDuplication}
               onClose={() => setDuplicateDashboardDialogStateOpened(false)}
             />

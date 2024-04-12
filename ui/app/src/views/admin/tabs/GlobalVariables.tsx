@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
-import { getVariableExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
+import { getResourceExtendedDisplayName, GlobalVariableResource, Variable } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { VariableList } from '../../../components/variable/VariableList';
 import {
@@ -49,7 +49,7 @@ export function GlobalVariables(props: GlobalVariablesProps) {
         createVariableMutation.mutate(variable, {
           onSuccess: (createdVariable: Variable) => {
             successSnackbar(
-              `Global Variable ${getVariableExtendedDisplayName(createdVariable)} has been successfully created`
+              `Global Variable ${getResourceExtendedDisplayName(createdVariable)} has been successfully created`
             );
             resolve();
           },
@@ -69,7 +69,7 @@ export function GlobalVariables(props: GlobalVariablesProps) {
         updateVariableMutation.mutate(variable, {
           onSuccess: (updatedVariable: Variable) => {
             successSnackbar(
-              `Global Variable ${getVariableExtendedDisplayName(updatedVariable)} has been successfully updated`
+              `Global Variable ${getResourceExtendedDisplayName(updatedVariable)} has been successfully updated`
             );
             resolve();
           },
@@ -89,7 +89,7 @@ export function GlobalVariables(props: GlobalVariablesProps) {
         deleteVariableMutation.mutate(variable, {
           onSuccess: (deletedVariable: Variable) => {
             successSnackbar(
-              `Global Variable ${getVariableExtendedDisplayName(deletedVariable)} has been successfully deleted`
+              `Global Variable ${getResourceExtendedDisplayName(deletedVariable)} has been successfully deleted`
             );
             resolve();
           },
