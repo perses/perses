@@ -24,7 +24,7 @@ export const Breadcrumbs = styled(MUIBreadcrumbs)({
 });
 
 export function HomeLinkCrumb() {
-  return <LinkCrumb to={'/'}>Home</LinkCrumb>;
+  return <LinkCrumb to="/">Home</LinkCrumb>;
 }
 
 export interface StackCrumbProps {
@@ -50,7 +50,7 @@ export function LinkCrumb(props: LinkCrumbProps) {
   const { children, to } = props;
 
   return (
-    <Link underline={'hover'} variant={'h3'} component={RouterLink} to={to}>
+    <Link underline="hover" variant="h3" component={RouterLink} to={to}>
       {children}
     </Link>
   );

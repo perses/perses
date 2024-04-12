@@ -189,7 +189,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
           </Typography>
           {fields && fields.length > 0 ? (
             fields.map((field, index) => (
-              <Stack key={field.id} direction={'row'} gap={1}>
+              <Stack key={field.id} direction="row" gap={1}>
                 <Controller
                   name={`spec.subjects.${index}.name`}
                   render={({ field, fieldState }) => (

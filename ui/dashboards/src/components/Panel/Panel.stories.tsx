@@ -86,7 +86,7 @@ type Story = StoryObj<typeof Panel>;
 
 export const ViewMode: StoryFn<typeof Panel> = (args) => {
   return (
-    <Box width={'500px'} height={'300px'}>
+    <Box width="500px" height="300px">
       <Panel {...args} />
     </Box>
   );
@@ -94,7 +94,7 @@ export const ViewMode: StoryFn<typeof Panel> = (args) => {
 
 export const EditMode: StoryFn<typeof Panel> = (args) => {
   return (
-    <Box width={'500px'} height={'300px'}>
+    <Box width="500px" height="300px">
       <Panel {...args} />
     </Box>
   );
@@ -110,7 +110,7 @@ EditMode.args = {
 
 export const PanelExtraContent: StoryFn<typeof Panel> = (args) => {
   return (
-    <Box width={'500px'} height={'300px'}>
+    <Box width="500px" height="300px">
       <Panel {...args} panelOptions={{ extra: () => <div>Custom Content</div> }} />
     </Box>
   );
@@ -163,7 +163,7 @@ export const AxisCustom: Story = {
   },
   render: (args) => {
     return (
-      <Box width={'500px'} height={'300px'}>
+      <Box width="500px" height="300px">
         <Panel {...args} />
       </Box>
     );

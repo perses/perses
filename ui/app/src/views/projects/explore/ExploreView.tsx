@@ -18,7 +18,7 @@ import ProjectExploreView from './ProjectExploreView';
 function ExploreView() {
   return (
     <ProjectExploreView
-      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize={'large'} />} />}
+      exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize="large" />} />}
     />
   );
 }

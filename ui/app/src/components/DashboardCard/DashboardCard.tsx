@@ -75,7 +75,7 @@ export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps) {
             }}
             title={dashboard.metadata.project}
           >
-            <Archive fontSize={'small'} /> {dashboard.metadata.project}
+            <Archive fontSize="small" /> {dashboard.metadata.project}
           </Typography>
         </Stack>
       </Stack>

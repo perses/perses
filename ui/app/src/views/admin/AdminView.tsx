@@ -24,7 +24,7 @@ function AdminView() {
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={1}>
-      <AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar fontSize={'large'} />} />
+      <AppBreadcrumbs rootPageName="Administration" icon={<ShieldStar fontSize="large" />} />
       <AdminTabs initialTab={tab} />
     </Stack>
   );

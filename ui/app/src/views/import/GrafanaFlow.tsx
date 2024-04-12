@@ -83,7 +83,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
             key={`input-${index}`}
             label={input.name}
             defaultValue={input.value ?? ''}
-            variant={'outlined'}
+            variant="outlined"
             onBlur={(e) => setInput(input.name, e.target.value)}
           />
         );
@@ -121,7 +121,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
           <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
             3. Import
           </Typography>
-          <Stack width={'100%'} gap={1}>
+          <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
               renderInput={(params) => (

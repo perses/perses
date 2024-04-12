@@ -49,7 +49,7 @@ export function ProjectSelect(props: ProjectSelectProps) {
   //    Ref: https://github.com/mui/material-ui/issues/36572
   return (
     <Select {...others} value={optionValue} onChange={handleChange}>
-      <MenuItem value={'none'}>
+      <MenuItem value="none">
         <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%" height={32}>
           <ListItemText>None</ListItemText>
         </Stack>

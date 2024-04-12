@@ -24,7 +24,7 @@ function ConfigView() {
 
   return (
     <Stack sx={{ width: '100%', overflowX: 'hidden' }} m={isMobileSize ? 1 : 2} mt={1.5} gap={2}>
-      <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize={'large'} />} />
+      <AppBreadcrumbs rootPageName="Configuration" icon={<Cog fontSize="large" />} />
       <JSONEditor value={config} readOnly />
     </Stack>
   );

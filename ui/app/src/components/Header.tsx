@@ -122,7 +122,7 @@ function AccountMenu() {
         </MenuItem>
         <Divider />
         <ThemeSwitch isAuthEnabled />
-        <MenuItem component="a" href={'/api/auth/logout'}>
+        <MenuItem component="a" href="/api/auth/logout">
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
@@ -375,7 +375,7 @@ export default function Header(): JSX.Element {
           )}
           <ProjectMenu />
         </Box>
-        <Stack direction={'row'} alignItems={'center'}>
+        <Stack direction="row" alignItems="center">
           {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
         </Stack>
       </Toolbar>
