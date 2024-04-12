@@ -237,20 +237,20 @@ func (o *option) selectAndSetProvider() error {
 	// Saving OIDC item(s)
 	for _, prov := range providers.OIDC {
 		optKey := fmt.Sprintf("OIDC (%s)", prov.Name)
-		optValue := prov.SlugID
-		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = func() {
-			o.setExternalAuthProvider(externalAuthKindOIDC, prov.SlugID)
+		slugID := prov.SlugID
+		options = append(options, huh.NewOption(optKey, slugID))
+		modifiers[slugID] = func() {
+			o.setExternalAuthProvider(externalAuthKindOIDC, slugID)
 		}
 	}
 
 	// Saving OAuth 2.0 item(s)
 	for _, prov := range providers.OAuth {
 		optKey := fmt.Sprintf("OAuth 2.0 (%s)", prov.Name)
-		optValue := prov.SlugID
-		options = append(options, huh.NewOption(optKey, optValue))
-		modifiers[optValue] = func() {
-			o.setExternalAuthProvider(externalAuthKindOAuth, prov.SlugID)
+		slugID := prov.SlugID
+		options = append(options, huh.NewOption(optKey, slugID))
+		modifiers[slugID] = func() {
+			o.setExternalAuthProvider(externalAuthKindOAuth, slugID)
 		}
 	}
 
