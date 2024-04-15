@@ -94,7 +94,7 @@ func (o *option) applyEntity() error {
 			return svcErr
 		}
 
-		if upsertError := service.Upsert(svc, name, entity); upsertError != nil {
+		if upsertError := service.Upsert(svc, entity); upsertError != nil {
 			return upsertError
 		}
 

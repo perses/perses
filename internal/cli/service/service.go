@@ -34,25 +34,13 @@ func convertToEntityIfNoError[T modelAPI.Entity](entities []T, err error) ([]mod
 	return result, nil
 }
 
-func Upsert(svc Service, name string, entity modelAPI.Entity) error {
-	// retrieve if exists the entity from the Perses API
-	_, apiError := svc.GetResource(name)
-	if apiError != nil && !errors.Is(apiError, perseshttp.RequestNotFoundError) {
-		return fmt.Errorf("unable to retrieve the %q from the Perses API. %w", modelV1.Kind(entity.GetKind()), apiError)
+func Upsert(svc Service, entity modelAPI.Entity) error {
+	if _, createError := svc.CreateResource(entity); createError != nil && !errors.Is(createError, perseshttp.ConflictError) {
+		return createError
 	}
 
-	if errors.Is(apiError, perseshttp.RequestNotFoundError) {
-		// the document doesn't exist, so we have to create it.
-		if _, createError := svc.CreateResource(entity); createError != nil {
-			return createError
-		}
-	} else {
-		// the document exists, so we have to update it.
-		if _, updateError := svc.UpdateResource(entity); updateError != nil {
-			return updateError
-		}
-	}
-	return nil
+	_, updateErr := svc.UpdateResource(entity)
+	return updateErr
 }
 
 type Service interface {

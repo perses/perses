@@ -325,6 +325,7 @@ func (re *RequestError) Unwrap() error {
 var (
 	RequestInternalError = &RequestError{Message: "internal server error", StatusCode: http.StatusInternalServerError}
 	RequestNotFoundError = &RequestError{Message: "document not found", StatusCode: http.StatusNotFound}
+	ConflictError        = &RequestError{Message: "document already exists", StatusCode: http.StatusConflict}
 )
 
 // Response contains the result of calling #Request.Do()
@@ -349,6 +350,9 @@ func (r *Response) Error() error {
 		}
 		if r.statusCode == http.StatusNotFound {
 			return RequestNotFoundError
+		}
+		if r.statusCode == http.StatusConflict {
+			return ConflictError
 		}
 		// check error message contains in the body
 		if r.body != nil {
