@@ -106,11 +106,14 @@ func DefaultViewerRole(projectName string) *v1.Role {
 }
 
 func DefaultOwnerRoleBinding(projectName string, username string) *v1.RoleBinding {
+	now := time.Now().UTC()
 	return &v1.RoleBinding{
 		Kind: v1.KindRoleBinding,
 		Metadata: v1.ProjectMetadata{
 			Metadata: v1.Metadata{
-				Name: owner,
+				Name:      owner,
+				CreatedAt: now,
+				UpdatedAt: now,
 			},
 			ProjectMetadataWrapper: v1.ProjectMetadataWrapper{
 				Project: projectName,
