@@ -63,7 +63,7 @@ func (o *option) Complete(args []string) error {
 	}
 	// Complete the Project field if only the flag all is not set
 	if !o.allProject && !modelV1.IsGlobal(o.kind) {
-		// Complete the project only if the user want to get project resources
+		// Complete the project only if the user wants to get project resources
 		if projectErr := o.ProjectOption.Complete(); projectErr != nil {
 			return projectErr
 		}
