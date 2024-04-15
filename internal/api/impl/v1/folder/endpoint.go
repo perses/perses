@@ -28,13 +28,13 @@ import (
 )
 
 type endpoint struct {
-	toolbox  toolbox.Toolbox
+	toolbox  toolbox.Toolbox[*v1.Folder, *folder.Query]
 	readonly bool
 }
 
 func NewEndpoint(service folder.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:  toolbox.New(service, rbacService, v1.KindFolder, caseSensitive),
+		toolbox:  toolbox.New[*v1.Folder, *v1.Folder, *folder.Query](service, rbacService, v1.KindFolder, caseSensitive),
 		readonly: readonly,
 	}
 }

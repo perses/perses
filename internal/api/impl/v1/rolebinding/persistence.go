@@ -53,7 +53,7 @@ func (d *dao) Get(project string, name string) (*v1.RoleBinding, error) {
 	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.RoleBinding, error) {
+func (d *dao) List(q *rolebinding.Query) ([]*v1.RoleBinding, error) {
 	var result []*v1.RoleBinding
 	err := d.client.Query(q, &result)
 	return result, err

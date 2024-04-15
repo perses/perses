@@ -14,14 +14,10 @@
 package globaldatasource
 
 import (
-	"fmt"
-
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/validate"
-	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -39,14 +35,7 @@ func NewService(dao globaldatasource.DAO, sch schemas.Schemas) globaldatasource.
 	}
 }
 
-func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
-	if object, ok := entity.(*v1.GlobalDatasource); ok {
-		return s.create(object)
-	}
-	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalDatasource format, received '%T'", entity))
-}
-
-func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -58,14 +47,7 @@ func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, err
 	return entity, nil
 }
 
-func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
-	if object, ok := entity.(*v1.GlobalDatasource); ok {
-		return s.update(object, parameters)
-	}
-	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting GlobalDatasource format, received '%T'", entity))
-}
-
-func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -90,17 +72,16 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *globaldatasource.Query, _ apiInterface.Parameters) ([]*v1.GlobalDatasource, error) {
 	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
 	}
-	dtsQuery := q.(*globaldatasource.Query)
-	return v1.FilterDatasource(dtsQuery.Kind, dtsQuery.Default, dtsList), nil
+	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
 }
 
 func (s *service) validate(entity *v1.GlobalDatasource) error {

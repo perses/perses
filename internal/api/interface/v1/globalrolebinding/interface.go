@@ -31,9 +31,9 @@ type DAO interface {
 	Update(entity *v1.GlobalRoleBinding) error
 	Delete(name string) error
 	Get(name string) (*v1.GlobalRoleBinding, error)
-	List(q databaseModel.Query) ([]*v1.GlobalRoleBinding, error)
+	List(q *Query) ([]*v1.GlobalRoleBinding, error)
 }
 
 type Service interface {
-	apiInterface.Service
+	apiInterface.Service[*v1.GlobalRoleBinding, *v1.GlobalRoleBinding, *Query]
 }

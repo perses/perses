@@ -16,7 +16,6 @@ package project
 import (
 	"fmt"
 
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -27,7 +26,6 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/rbac"
-	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/utils"
 	"github.com/sirupsen/logrus"
@@ -60,11 +58,20 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 	}
 }
 
-func (s *service) Create(ctx apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
-	if object, ok := entity.(*v1.Project); ok {
-		return s.create(object, ctx)
+func (s *service) Create(ctx apiInterface.PersesContext, entity *v1.Project) (*v1.Project, error) {
+	// Update the time contains in the entity
+	entity.Metadata.CreateNow()
+	if err := s.dao.Create(entity); err != nil {
+		return nil, err
 	}
-	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
+
+	// If authorization is enabled, permissions to the creator need to be given
+	if s.rbac.IsEnabled() {
+		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil {
+			return nil, err
+		}
+	}
+	return entity, nil
 }
 
 // Create default roles and role bindings for the project
@@ -91,30 +98,7 @@ func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInt
 	return s.rbac.Refresh()
 }
 
-func (s *service) create(entity *v1.Project, ctx apiInterface.PersesContext) (*v1.Project, error) {
-	// Update the time contains in the entity
-	entity.Metadata.CreateNow()
-	if err := s.dao.Create(entity); err != nil {
-		return nil, err
-	}
-
-	// If authorization is enabled, permissions to the creator need to be given
-	if s.rbac.IsEnabled() {
-		if err := s.createProjectRoleAndRoleBinding(entity.Metadata.Name, ctx); err != nil {
-			return nil, err
-		}
-	}
-	return entity, nil
-}
-
-func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
-	if object, ok := entity.(*v1.Project); ok {
-		return s.update(object, parameters)
-	}
-	return nil, apiInterface.HandleBadRequestError(fmt.Sprintf("wrong entity format, attempting project format, received '%T'", entity))
-}
-
-func (s *service) update(entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in project %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -170,10 +154,10 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.Project, error) {
 	return s.dao.Get(parameters.Name)
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]*v1.Project, error) {
 	return s.dao.List(q)
 }

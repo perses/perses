@@ -31,9 +31,9 @@ type DAO interface {
 	Update(entity *v1.GlobalRole) error
 	Delete(name string) error
 	Get(name string) (*v1.GlobalRole, error)
-	List(q databaseModel.Query) ([]*v1.GlobalRole, error)
+	List(q *Query) ([]*v1.GlobalRole, error)
 }
 
 type Service interface {
-	apiInterface.Service
+	apiInterface.Service[*v1.GlobalRole, *v1.GlobalRole, *Query]
 }

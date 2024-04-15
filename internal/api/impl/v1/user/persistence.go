@@ -52,7 +52,7 @@ func (d *dao) Get(name string) (*v1.User, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.User, error) {
+func (d *dao) List(q *user.Query) ([]*v1.User, error) {
 	var result []*v1.User
 	err := d.client.Query(q, &result)
 	return result, err

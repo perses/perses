@@ -19,9 +19,7 @@ import (
 	apiInterface "github.com/perses/perses/internal/api/interface"
 
 	"github.com/perses/perses/internal/api/crypto"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
-	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -37,14 +35,7 @@ func NewService(dao user.DAO) user.Service {
 	}
 }
 
-func (s *service) Create(_ apiInterface.PersesContext, entity api.Entity) (interface{}, error) {
-	if object, ok := entity.(*v1.User); ok {
-		return s.create(object)
-	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", apiInterface.BadRequestError, entity)
-}
-
-func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
+func (s *service) Create(_ apiInterface.PersesContext, entity *v1.User) (*v1.PublicUser, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	// check that the password is correctly filled
@@ -64,14 +55,7 @@ func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	return v1.NewPublicUser(entity), nil
 }
 
-func (s *service) Update(_ apiInterface.PersesContext, entity api.Entity, parameters apiInterface.Parameters) (interface{}, error) {
-	if userObject, ok := entity.(*v1.User); ok {
-		return s.update(userObject, parameters)
-	}
-	return nil, fmt.Errorf("%w: wrong entity format, attempting user format, received '%T'", apiInterface.BadRequestError, entity)
-}
-
-func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
+func (s *service) Update(_ apiInterface.PersesContext, entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in user '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", apiInterface.BadRequestError)
@@ -111,7 +95,7 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 	return s.dao.Delete(parameters.Name)
 }
 
-func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (interface{}, error) {
+func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	usr, err := s.dao.Get(parameters.Name)
 	if err != nil {
 		return nil, err
@@ -119,7 +103,7 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return v1.NewPublicUser(usr), nil
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q databaseModel.Query, _ apiInterface.Parameters) (interface{}, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *user.Query, _ apiInterface.Parameters) ([]*v1.PublicUser, error) {
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

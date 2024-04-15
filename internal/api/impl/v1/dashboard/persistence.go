@@ -53,7 +53,7 @@ func (d *dao) Get(project string, name string) (*v1.Dashboard, error) {
 	return entity, d.client.Get(d.kind, v1.NewProjectMetadata(project, name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.Dashboard, error) {
+func (d *dao) List(q *dashboard.Query) ([]*v1.Dashboard, error) {
 	var result []*v1.Dashboard
 	err := d.client.Query(q, &result)
 	return result, err

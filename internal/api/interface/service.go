@@ -55,10 +55,10 @@ type Parameters struct {
 	Name    string
 }
 
-type Service interface {
-	Create(ctx PersesContext, entity api.Entity) (interface{}, error)
-	Update(ctx PersesContext, entity api.Entity, parameters Parameters) (interface{}, error)
+type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
+	Create(ctx PersesContext, entity T) (K, error)
+	Update(ctx PersesContext, entity T, parameters Parameters) (K, error)
 	Delete(ctx PersesContext, parameters Parameters) error
-	Get(ctx PersesContext, parameters Parameters) (interface{}, error)
-	List(ctx PersesContext, q databaseModel.Query, parameters Parameters) (interface{}, error)
+	Get(ctx PersesContext, parameters Parameters) (K, error)
+	List(ctx PersesContext, q V, parameters Parameters) ([]K, error)
 }

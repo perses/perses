@@ -49,7 +49,7 @@ func (d *dao) Get(name string) (*v1.GlobalDatasource, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.GlobalDatasource, error) {
+func (d *dao) List(q *globaldatasource.Query) ([]*v1.GlobalDatasource, error) {
 	var result []*v1.GlobalDatasource
 	err := d.client.Query(q, &result)
 	return result, err

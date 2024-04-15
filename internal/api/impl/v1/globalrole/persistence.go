@@ -49,7 +49,7 @@ func (d *dao) Get(name string) (*v1.GlobalRole, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.GlobalRole, error) {
+func (d *dao) List(q *globalrole.Query) ([]*v1.GlobalRole, error) {
 	var result []*v1.GlobalRole
 	err := d.client.Query(q, &result)
 	return result, err
