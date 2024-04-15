@@ -1,7 +1,7 @@
 cuelabs.dev/go/oci/ociregistry v0.0.0-20240314152124-224736b49f2e h1:GwCVItFUPxwdsEYnlUcJ6PJxOjTeFFCKOh6QWg4oAzQ=
 cuelabs.dev/go/oci/ociregistry v0.0.0-20240314152124-224736b49f2e/go.mod h1:ApHceQLLwcOkCEXM1+DyCXTHEJhNGDpJ2kmV6axsx24=
-cuelang.org/go v0.8.0 h1:fO1XPe/SUGtc7dhnGnTPbpIDoQm/XxhDtoSF7jzO01c=
-cuelang.org/go v0.8.0/go.mod h1:CoDbYolfMms4BhWUlhD+t5ORnihR7wvjcfgyO9lL5FI=
+cuelang.org/go v0.8.1 h1:VFYsxIFSPY5KgSaH1jQ2GxHOrbu6Ga3kEI70yCZwnOg=
+cuelang.org/go v0.8.1/go.mod h1:CoDbYolfMms4BhWUlhD+t5ORnihR7wvjcfgyO9lL5FI=
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/TylerBrock/colorjson v0.0.0-20200706003622-8a50f05110d2 h1:ZBbLwSJqkHBuFDA6DUhhse0IGJ7T5bemHyNILUjvOq4=
