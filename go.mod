@@ -31,7 +31,7 @@ require (
 	github.com/zitadel/oidc/v3 v3.20.0
 	golang.org/x/crypto v0.22.0
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
-	golang.org/x/mod v0.16.0
+	golang.org/x/mod v0.17.0
 	golang.org/x/oauth2 v0.19.0
 	gopkg.in/yaml.v3 v3.0.1
 )
