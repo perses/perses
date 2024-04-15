@@ -43,6 +43,14 @@ func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parame
 	}
 }
 
+func buildMapFromList[T api.Entity](list []T) map[string]T {
+	result := make(map[string]T)
+	for _, item := range list {
+		result[item.GetMetadata().GetName()] = item
+	}
+	return result
+}
+
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox[T api.Entity, K databaseModel.Query] interface {
@@ -68,6 +76,34 @@ type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
 	rbac          rbac.RBAC
 	kind          v1.Kind
 	caseSensitive bool
+}
+
+// checkPermissionList will verify only the permission for the List method. As you can see, scope is hardcoded.
+// Use the generic checkPermission for any other purpose
+func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiInterface.Parameters, scope *role.Scope) error {
+	projectName := parameters.Project
+	claims := crypto.ExtractJWTClaims(ctx)
+	if claims == nil {
+		// Claims can be nil with anonymous endpoint and unauthenticated users, no need to continue
+		return nil
+	}
+	if role.IsGlobalScope(*scope) {
+		if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
+			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
+		}
+		return nil
+	}
+	if *scope == role.ProjectScope {
+		projectName = parameters.Name
+	}
+	if len(projectName) == 0 {
+		// In this particular context, the user would like to get every resource to every project he has access to.
+		return nil
+	}
+	if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, projectName, *scope); !ok {
+		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
+	}
+	return nil
 }
 
 func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, parameters apiInterface.Parameters, action role.Action) error {
@@ -106,7 +142,6 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
 		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
-
 	}
 	return nil
 }
@@ -169,12 +204,89 @@ func (t *toolbox[T, K, V]) List(ctx echo.Context, q V) error {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx, t.caseSensitive)
-	if err := t.checkPermission(ctx, nil, parameters, role.ReadAction); err != nil {
-		return err
+
+	if t.rbac.IsEnabled() {
+		// When permission is activated, the list is basically filtered based on what the user has access to.
+		// It considered multiple different cases, so that's why it's treated in a separated function.
+		return t.listWhenPermissionIsActivated(ctx, parameters, q)
 	}
-	result, err := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)
+	result, listErr := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)
+	if listErr != nil {
+		return listErr
+	}
+	return ctx.JSON(http.StatusOK, result)
+}
+
+func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) error {
+	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return err
+	}
+	if permErr := t.checkPermissionList(ctx, parameters, scope); permErr != nil {
+		return permErr
+	}
+	persesContext := apiInterface.NewPersesContext(ctx)
+	// Get the list of the project the user has access to, depending on the current scope.
+	projects := t.rbac.GetUserProjects(persesContext.GetUsername(), role.ReadAction, *scope)
+
+	// If there is no project associated to the user, then we should just return an empty list.
+	if len(projects) == 0 {
+		return ctx.JSON(http.StatusOK, []string{})
+	}
+
+	// Special case if the user is getting the list of the project, as "project" is not considered has a global scope.
+	// More explanation about why it's not a global scope available here: https://github.com/perses/perses/blob/611b7993257dcadb18d48de945ad4def18889bec/pkg/model/api/v1/role/scope.go#L137-L138
+	if *scope == role.ProjectScope {
+		return t.listProjectWhenPermissionIsActivated(ctx, parameters, persesContext, projects, q)
+	}
+
+	// In case, there is one result; it can mean the user has global access to the resource across the project.
+	// Or it can mean he has access to only one project. If he has global access, then the value parameters.Project is empty.
+	// So when running the query in the database, it will be done across the whole table (i.e. with no project filtering)
+	if len(projects) == 1 {
+		if projects[0] != rbac.GlobalProject {
+			parameters.Project = projects[0]
+		}
+		result, listErr := t.service.List(persesContext, q, parameters)
+		if listErr != nil {
+			return listErr
+		}
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	var result []K
+	for _, project := range projects {
+		parameters.Project = project
+		listResult, listErr := t.service.List(persesContext, q, parameters)
+		if listErr != nil {
+			return listErr
+		}
+		result = append(result, listResult...)
+	}
+	return ctx.JSON(http.StatusOK, result)
+}
+
+func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, persesContext apiInterface.PersesContext, projects []string, q V) error {
+	// User has global access to all projects and should get the complete list.
+	if projects[0] == rbac.GlobalProject {
+		result, listErr := t.service.List(persesContext, q, parameters)
+		if listErr != nil {
+			return listErr
+		}
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	// Last case, we want the list of the project that matches what the user has access to.
+	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
+	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
+	var result []K
+	projectList, listErr := t.service.List(persesContext, q, parameters)
+	if listErr != nil {
+		return listErr
+	}
+	projectMap := buildMapFromList(projectList)
+	for _, project := range projects {
+		result = append(result, projectMap[project])
 	}
 	return ctx.JSON(http.StatusOK, result)
 }

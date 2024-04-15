@@ -89,7 +89,10 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return v1.NewPublicSecret(scrt), nil
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, _ apiInterface.Parameters) ([]*v1.PublicSecret, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]*v1.PublicSecret, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
+	}
 	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

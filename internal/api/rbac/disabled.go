@@ -23,6 +23,10 @@ func (r *disabledImpl) IsEnabled() bool {
 	return false
 }
 
+func (r *disabledImpl) GetUserProjects(_ string, _ v1Role.Action, _ v1Role.Scope) []string {
+	return []string{}
+}
+
 func (r *disabledImpl) HasPermission(_ string, _ v1Role.Action, _ string, _ v1Role.Scope) bool {
 	return true
 }

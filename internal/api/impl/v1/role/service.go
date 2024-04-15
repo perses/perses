@@ -95,6 +95,9 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q *role.Query, _ apiInterface.Parameters) ([]*v1.Role, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *role.Query, params apiInterface.Parameters) ([]*v1.Role, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
+	}
 	return s.dao.List(q)
 }
