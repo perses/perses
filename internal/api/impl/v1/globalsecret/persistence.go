@@ -52,7 +52,7 @@ func (d *dao) Get(name string) (*v1.GlobalSecret, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.GlobalSecret, error) {
+func (d *dao) List(q *globalsecret.Query) ([]*v1.GlobalSecret, error) {
 	var result []*v1.GlobalSecret
 	err := d.client.Query(q, &result)
 	return result, err

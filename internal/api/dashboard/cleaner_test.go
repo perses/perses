@@ -18,7 +18,7 @@ import (
 	"testing"
 	"time"
 
-	databaseModel "github.com/perses/perses/internal/api/database/model"
+	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ type mockDAO struct {
 	dashboards []*v1.EphemeralDashboard
 }
 
-func (d *mockDAO) List(_ databaseModel.Query) ([]*v1.EphemeralDashboard, error) {
+func (d *mockDAO) List(_ *ephemeraldashboard.Query) ([]*v1.EphemeralDashboard, error) {
 	return d.dashboards, nil
 }
 

@@ -56,7 +56,7 @@ func (d *dao) Get(project string, name string) (*v1.Secret, error) {
 
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.Secret, error) {
+func (d *dao) List(q *secret.Query) ([]*v1.Secret, error) {
 	var result []*v1.Secret
 	err := d.client.Query(q, &result)
 	return result, err

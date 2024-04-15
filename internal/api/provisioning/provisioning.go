@@ -28,6 +28,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type insertFunc func() (modelAPI.Entity, error)
+
 func New(serviceManager dependency.ServiceManager, folders []string, caseSensitive bool) async.SimpleTask {
 	return &provisioning{
 		serviceManager: serviceManager,
@@ -73,70 +75,141 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		kind := modelV1.Kind(entity.GetKind())
 		name := entity.GetMetadata().GetName()
 		project := resource.GetProject(entity.GetMetadata(), "")
-		svc, svcErr := p.getService(kind)
+		param := apiInterface.Parameters{
+			Name:    name,
+			Project: project,
+		}
+		createFun, updateFunc, svcErr := p.getService(entity, param)
 		if svcErr != nil {
 			logrus.WithError(svcErr).Warningf("unable to retrieve the service associated to %q", kind)
 			continue
 		}
 
-		param := apiInterface.Parameters{
-			Name:    name,
-			Project: project,
-		}
-
-		// retrieve if exists the entity from the Perses API
-		_, apiError := svc.Get(apiInterface.EmptyCtx, param)
-		if apiError != nil && !databaseModel.IsKeyNotFound(apiError) {
-			logrus.WithError(apiError).Errorf("unable to retrieve the %q %s from the database", kind, param.Name)
-			continue
-		}
-
-		if databaseModel.IsKeyNotFound(apiError) {
-			// the document doesn't exist, so we have to create it.
-			if _, createError := svc.Create(apiInterface.EmptyCtx, entity); createError != nil {
-				logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
-			}
-		} else {
-			// the document doesn't exist, so we have to create it.
-			if _, updateError := svc.Update(apiInterface.EmptyCtx, entity, param); updateError != nil {
-				logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
-			}
+		// the document doesn't exist, so we have to create it.
+		if _, createError := createFun(); createError != nil && !databaseModel.IsKeyConflict(createError) {
+			logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
+		} else if _, updateError := updateFunc(); updateError != nil {
+			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}
 }
 
-func (p *provisioning) getService(kind modelV1.Kind) (apiInterface.Service, error) {
-	switch kind {
-	case modelV1.KindDashboard:
-		return p.serviceManager.GetDashboard(), nil
-	case modelV1.KindDatasource:
-		return p.serviceManager.GetDatasource(), nil
-	case modelV1.KindFolder:
-		return p.serviceManager.GetFolder(), nil
-	case modelV1.KindGlobalDatasource:
-		return p.serviceManager.GetGlobalDatasource(), nil
-	case modelV1.KindGlobalRole:
-		return p.serviceManager.GetGlobalRole(), nil
-	case modelV1.KindGlobalRoleBinding:
-		return p.serviceManager.GetGlobalRoleBinding(), nil
-	case modelV1.KindGlobalSecret:
-		return p.serviceManager.GetGlobalSecret(), nil
-	case modelV1.KindGlobalVariable:
-		return p.serviceManager.GetGlobalVariable(), nil
-	case modelV1.KindProject:
-		return p.serviceManager.GetProject(), nil
-	case modelV1.KindRole:
-		return p.serviceManager.GetRole(), nil
-	case modelV1.KindRoleBinding:
-		return p.serviceManager.GetRoleBinding(), nil
-	case modelV1.KindSecret:
-		return p.serviceManager.GetSecret(), nil
-	case modelV1.KindUser:
-		return p.serviceManager.GetUser(), nil
-	case modelV1.KindVariable:
-		return p.serviceManager.GetVariable(), nil
+func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterface.Parameters) (createFunc insertFunc, updateFunc insertFunc, err error) {
+	switch entity := object.(type) {
+	case *modelV1.Dashboard:
+		svc := p.serviceManager.GetDashboard()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Datasource:
+		svc := p.serviceManager.GetDatasource()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Folder:
+		svc := p.serviceManager.GetFolder()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.GlobalDatasource:
+		svc := p.serviceManager.GetGlobalDatasource()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.GlobalRole:
+		svc := p.serviceManager.GetGlobalRole()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.GlobalRoleBinding:
+		svc := p.serviceManager.GetGlobalRoleBinding()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.GlobalSecret:
+		svc := p.serviceManager.GetGlobalSecret()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.GlobalVariable:
+		svc := p.serviceManager.GetGlobalVariable()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Project:
+		svc := p.serviceManager.GetProject()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Role:
+		svc := p.serviceManager.GetRole()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.RoleBinding:
+		svc := p.serviceManager.GetRoleBinding()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Secret:
+		svc := p.serviceManager.GetSecret()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.User:
+		svc := p.serviceManager.GetUser()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
+	case *modelV1.Variable:
+		svc := p.serviceManager.GetVariable()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
 	// We don't support the provisioning of the following resources: EphemeralDashboard
 	default:
-		return nil, fmt.Errorf("resource %q not supported by the provisioning service", kind)
+		return nil, nil, fmt.Errorf("resource %q not supported by the provisioning service", entity.GetKind())
 	}
 }

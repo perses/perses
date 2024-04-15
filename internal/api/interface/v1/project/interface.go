@@ -31,9 +31,9 @@ type DAO interface {
 	Update(entity *v1.Project) error
 	Delete(name string) error
 	Get(name string) (*v1.Project, error)
-	List(q databaseModel.Query) ([]*v1.Project, error)
+	List(q *Query) ([]*v1.Project, error)
 }
 
 type Service interface {
-	apiInterface.Service
+	apiInterface.Service[*v1.Project, *v1.Project, *Query]
 }

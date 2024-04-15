@@ -31,7 +31,7 @@ import (
 )
 
 type endpoint struct {
-	toolbox       toolbox.Toolbox
+	toolbox       toolbox.Toolbox[*v1.User, *user.Query]
 	rbac          rbac.RBAC
 	readonly      bool
 	disableSignUp bool
@@ -40,7 +40,7 @@ type endpoint struct {
 
 func NewEndpoint(service user.Service, rbacService rbac.RBAC, disableSignUp bool, readonly bool, caseSensitive bool) route.Endpoint {
 	return &endpoint{
-		toolbox:       toolbox.New(service, rbacService, v1.KindUser, caseSensitive),
+		toolbox:       toolbox.New[*v1.User, *v1.PublicUser, *user.Query](service, rbacService, v1.KindUser, caseSensitive),
 		rbac:          rbacService,
 		readonly:      readonly,
 		disableSignUp: disableSignUp,

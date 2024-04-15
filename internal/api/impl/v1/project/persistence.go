@@ -49,7 +49,7 @@ func (d *dao) Delete(name string) error {
 	return d.client.Delete(d.kind, v1.NewMetadata(name))
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.Project, error) {
+func (d *dao) List(q *project.Query) ([]*v1.Project, error) {
 	var result []*v1.Project
 	err := d.client.Query(q, &result)
 	return result, err

@@ -49,7 +49,7 @@ func (d *dao) Get(name string) (*v1.GlobalRoleBinding, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.GlobalRoleBinding, error) {
+func (d *dao) List(q *globalrolebinding.Query) ([]*v1.GlobalRoleBinding, error) {
 	var result []*v1.GlobalRoleBinding
 	err := d.client.Query(q, &result)
 	return result, err

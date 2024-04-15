@@ -31,9 +31,9 @@ type DAO interface {
 	Update(entity *v1.User) error
 	Delete(name string) error
 	Get(name string) (*v1.User, error)
-	List(q databaseModel.Query) ([]*v1.User, error)
+	List(q *Query) ([]*v1.User, error)
 }
 
 type Service interface {
-	apiInterface.Service
+	apiInterface.Service[*v1.User, *v1.PublicUser, *Query]
 }

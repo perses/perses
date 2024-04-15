@@ -49,7 +49,7 @@ func (d *dao) Get(name string) (*v1.GlobalVariable, error) {
 	return entity, d.client.Get(d.kind, v1.NewMetadata(name), entity)
 }
 
-func (d *dao) List(q databaseModel.Query) ([]*v1.GlobalVariable, error) {
+func (d *dao) List(q *globalvariable.Query) ([]*v1.GlobalVariable, error) {
 	var result []*v1.GlobalVariable
 	err := d.client.Query(q, &result)
 	return result, err

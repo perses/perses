@@ -34,9 +34,9 @@ type DAO interface {
 	Delete(project string, name string) error
 	DeleteAll(project string) error
 	Get(project string, name string) (*v1.Variable, error)
-	List(q databaseModel.Query) ([]*v1.Variable, error)
+	List(q *Query) ([]*v1.Variable, error)
 }
 
 type Service interface {
-	apiInterface.Service
+	apiInterface.Service[*v1.Variable, *v1.Variable, *Query]
 }
