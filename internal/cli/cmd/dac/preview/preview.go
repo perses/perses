@@ -106,7 +106,7 @@ func (o *option) Execute() error {
 			return svcErr
 		}
 
-		if upsertError := service.Upsert(svc, name, ephemeralDashboard); upsertError != nil {
+		if upsertError := service.Upsert(svc, ephemeralDashboard); upsertError != nil {
 			return upsertError
 		}
 		response = append(response, o.buildPreviewResponse(dashboard, ephemeralDashboard))
