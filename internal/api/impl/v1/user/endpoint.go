@@ -93,7 +93,7 @@ func (e *endpoint) GetPermissions(ctx echo.Context) error {
 		return apiinterface.HandleUnauthorizedError("you need to be connected to retrieve your permissions")
 	}
 	if claims.Subject != parameters.Name {
-		return apiinterface.HandleUnauthorizedError("you can only retrieve your permissions")
+		return apiinterface.HandleForbiddenError("you can only retrieve your permissions")
 	}
 	permissions := e.rbac.GetPermissions(claims.Subject)
 	return ctx.JSON(http.StatusOK, permissions)

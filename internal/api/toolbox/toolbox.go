@@ -89,7 +89,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 	}
 	if role.IsGlobalScope(*scope) {
 		if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, rbac.GlobalProject, *scope); !ok {
-			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
+			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", role.ReadAction, *scope))
 		}
 		return nil
 	}
@@ -101,7 +101,7 @@ func (t *toolbox[T, K, V]) checkPermissionList(ctx echo.Context, parameters apiI
 		return nil
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, role.ReadAction, projectName, *scope); !ok {
-		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, projectName, *scope))
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 	}
 	if role.IsGlobalScope(*scope) {
 		if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
-			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+			return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 		}
 		return nil
 	}
@@ -129,7 +129,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		// Create is still a "Global" only permission
 		if action == role.CreateAction {
 			if ok := t.rbac.HasPermission(claims.Subject, action, rbac.GlobalProject, *scope); !ok {
-				return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
+				return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' global permission for '%s' kind", action, *scope))
 			}
 			return nil
 		}
@@ -141,7 +141,7 @@ func (t *toolbox[T, K, V]) checkPermission(ctx echo.Context, entity api.Entity, 
 		projectName = utils.GetMetadataProject(entity.GetMetadata())
 	}
 	if ok := t.rbac.HasPermission(claims.Subject, action, projectName, *scope); !ok {
-		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
+		return apiInterface.HandleForbiddenError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", action, projectName, *scope))
 	}
 	return nil
 }

@@ -140,7 +140,7 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
 
 		glRole := e2eframework.NewGlobalRole("test")
-		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).WithJSON(glRole).WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusUnauthorized)
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).WithJSON(glRole).WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusForbidden)
 
 		project2Entity := e2eframework.NewProject("mysuperproject2")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathProject)).WithJSON(project2Entity).WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusUnauthorized)

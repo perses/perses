@@ -14,7 +14,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser v1.25.1
 	github.com/gorilla/securecookie v1.1.2
-	github.com/huandu/go-sqlbuilder v1.26.0
+	github.com/huandu/go-sqlbuilder v1.27.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
@@ -22,13 +22,13 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/perses/common v0.23.1
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/common v0.52.2
+	github.com/prometheus/common v0.52.3
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.16.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
-	github.com/zitadel/oidc/v3 v3.20.0
+	github.com/zitadel/oidc/v3 v3.21.0
 	golang.org/x/crypto v0.22.0
 	golang.org/x/exp v0.0.0-20231206192017-f3f8817b8deb
 	golang.org/x/mod v0.17.0
@@ -62,7 +62,7 @@ require (
 	github.com/emicklei/proto v1.12.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect

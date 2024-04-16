@@ -39,6 +39,20 @@ export interface QueryType {
 }
 
 /**
+ * Check if the given type is a valid {@link QueryPluginType} with compile time safety
+ * @param type
+ */
+export function isValidQueryPluginType(type: string): type is QueryPluginType {
+  return ['TimeSeriesQuery', 'TraceQuery'].includes(type as QueryPluginType);
+}
+
+/**
+ * Extract the keys of QueryType
+ * ex: 'TimeSeriesQuery'
+ */
+export type QueryPluginType = keyof QueryType;
+
+/**
  * Values of QueryType
  * ex: 'TimeSeriesData'
  */

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,21 +16,21 @@ import { useState } from 'react';
 import { WithQueryClient } from '@perses-dev/storybook';
 import { action } from '@storybook/addon-actions';
 import { WithPluginRegistry, WithPluginSystemDatasourceStore } from '../../stories/shared-utils';
-import { TimeSeriesQueryEditor, TimeSeriesQueryEditorProps } from './TimeSeriesQueryEditor';
+import { MultiQueryEditor, MultiQueryEditorProps } from './MultiQueryEditor';
 
-function TimeSeriesQueryEditorWrapper(props: TimeSeriesQueryEditorProps) {
-  const [queries, setQueries] = useState<TimeSeriesQueryEditorProps['queries']>([]);
+function MultiQueryEditorWrapper(props: MultiQueryEditorProps) {
+  const [queries, setQueries] = useState<MultiQueryEditorProps['queries']>([]);
 
-  const handleChange: TimeSeriesQueryEditorProps['onChange'] = (newQueries) => {
+  const handleChange: MultiQueryEditorProps['onChange'] = (newQueries) => {
     action('onChange')(newQueries);
     setQueries(newQueries);
   };
 
-  return <TimeSeriesQueryEditor {...props} onChange={handleChange} queries={queries} />;
+  return <MultiQueryEditor {...props} onChange={handleChange} queries={queries} />;
 }
 
-const meta: Meta<typeof TimeSeriesQueryEditor> = {
-  component: TimeSeriesQueryEditor,
+const meta: Meta<typeof MultiQueryEditor> = {
+  component: MultiQueryEditor,
   argTypes: {
     // Disabling these props because we're managing them with `useState` in the wrapper, so it
     // doesn't make sense to let the user modify them.
@@ -47,14 +47,22 @@ const meta: Meta<typeof TimeSeriesQueryEditor> = {
   },
   decorators: [WithPluginSystemDatasourceStore, WithPluginRegistry, WithQueryClient],
   render: (args) => {
-    return <TimeSeriesQueryEditorWrapper {...args} />;
+    return <MultiQueryEditorWrapper {...args} />;
   },
 };
 
 export default meta;
 
-type Story = StoryObj<typeof TimeSeriesQueryEditor>;
+type Story = StoryObj<typeof MultiQueryEditor>;
 
 export const Primary: Story = {
-  args: {},
+  args: {
+    queryTypes: ['TimeSeriesQuery'],
+  },
+};
+
+export const Multiple: Story = {
+  args: {
+    queryTypes: ['TimeSeriesQuery', 'TraceQuery'],
+  },
 };
