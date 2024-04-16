@@ -82,7 +82,10 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, _ apiInterface.Parameters) ([]*v1.Datasource, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
+	}
 	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err

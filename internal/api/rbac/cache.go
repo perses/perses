@@ -65,6 +65,21 @@ func (r *cacheImpl) IsEnabled() bool {
 	return true
 }
 
+func (r *cacheImpl) GetUserProjects(user string, requestAction v1Role.Action, requestScope v1Role.Scope) []string {
+	projectPermission := r.cache.permissions[user]
+	if globalPermissions, ok := projectPermission[GlobalProject]; ok && permissionListHasPermission(globalPermissions, requestAction, requestScope) {
+		return []string{GlobalProject}
+	}
+
+	var projects []string
+	for project, permList := range projectPermission {
+		if project != GlobalProject && permissionListHasPermission(permList, requestAction, requestScope) {
+			projects = append(projects, project)
+		}
+	}
+	return projects
+}
+
 func (r *cacheImpl) HasPermission(user string, requestAction v1Role.Action, requestProject string, requestScope v1Role.Scope) bool {
 	// Checking default permissions
 	if ok := permissionListHasPermission(r.guestPermissions, requestAction, requestScope); ok {

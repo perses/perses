@@ -118,7 +118,10 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 
-func (s *service) List(_ apiInterface.PersesContext, q *rolebinding.Query, _ apiInterface.Parameters) ([]*v1.RoleBinding, error) {
+func (s *service) List(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]*v1.RoleBinding, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
+	}
 	return s.dao.List(q)
 }
 
