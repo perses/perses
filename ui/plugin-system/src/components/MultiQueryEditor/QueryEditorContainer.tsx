@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,40 +11,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import produce from 'immer';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
 import { Stack, IconButton, Typography, BoxProps, Box } from '@mui/material';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import produce from 'immer';
 import { PluginEditor, PluginEditorProps } from '../PluginEditor';
-import { TraceQueryDefinition } from '../../runtime';
 
-interface TraceQueryInputProps {
-  query: TraceQueryDefinition;
+/**
+ * Properties for {@link QueryEditorContainer}
+ */
+interface QueryEditorContainerProps {
+  queryTypes: QueryPluginType[];
   index: number;
-  onChange: (index: number, query: TraceQueryDefinition) => void;
+  query: QueryDefinition;
+  onChange: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
   onDelete?: (index: number) => void;
 }
 
-// Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
-// this component
-type OmittedMuiProps = 'children' | 'value' | 'onChange';
-
-interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
-  value: TraceQueryDefinition;
-  onChange: (next: TraceQueryDefinition) => void;
-}
-
-export const TraceQueryInput = ({
+/**
+ * Container for a query editor. This component is responsible for rendering the query editor, and make it collapsible
+ * to not take too much space.
+ * @param queryTypes the supported query types
+ * @param index the index of the query in the list
+ * @param query the query definition
+ * @param isCollapsed whether the query editor is collapsed or not
+ * @param onDelete callback when the query is deleted
+ * @param onChange callback when the query is changed
+ * @param onCollapseExpand callback when the query is collapsed or expanded
+ * @constructor
+ */
+export const QueryEditorContainer = ({
+  queryTypes,
   index,
   query,
   isCollapsed,
   onDelete,
   onChange,
   onCollapseExpand,
-}: TraceQueryInputProps) => {
+}: QueryEditorContainerProps) => {
   return (
     <Stack key={index} spacing={1}>
       <Stack direction="row" alignItems="center" borderBottom={1} borderColor={(theme) => theme.palette.divider}>
@@ -63,23 +71,34 @@ export const TraceQueryInput = ({
           <DeleteIcon />
         </IconButton>
       </Stack>
-      {!isCollapsed && <QueryEditor value={query} onChange={(next) => onChange(index, next)} />}
+      {!isCollapsed && <QueryEditor queryTypes={queryTypes} value={query} onChange={(next) => onChange(index, next)} />}
     </Stack>
   );
 };
 
+// Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
+// this component
+type OmittedMuiProps = 'children' | 'value' | 'onChange';
+interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
+  queryTypes: QueryPluginType[];
+  value: QueryDefinition;
+  onChange: (next: QueryDefinition) => void;
+}
+
 /**
- * Displays an editor for TraceQueryDefinition objects.
+ * Editor for a query definition. This component is responsible for rendering the plugin editor for the given query.
+ * This will allow user to select a plugin extending from the given supported query types, and then edit the plugin
+ * spec for this plugin.
+ * @param props
+ * @constructor
  */
 function QueryEditor(props: QueryEditorProps) {
-  const { value, onChange, ...others } = props;
-  const {
-    spec: { plugin },
-  } = value;
+  const { value, onChange, queryTypes, ...others } = props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
       produce(value, (draft) => {
+        draft.kind = next.selection.type;
         draft.spec.plugin.kind = next.selection.kind;
         draft.spec.plugin.spec = next.spec;
       })
@@ -89,14 +108,14 @@ function QueryEditor(props: QueryEditorProps) {
   return (
     <Box {...others}>
       <PluginEditor
-        pluginTypes={['TraceQuery']}
+        pluginTypes={queryTypes}
         pluginKindLabel="Query Type"
         value={{
           selection: {
-            kind: plugin.kind,
+            kind: value.spec.plugin.kind,
             type: value.kind,
           },
-          spec: plugin.spec,
+          spec: value.spec.plugin.spec,
         }}
         onChange={handlePluginChange}
       />
