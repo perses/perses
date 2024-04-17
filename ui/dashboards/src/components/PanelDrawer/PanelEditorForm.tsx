@@ -83,8 +83,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
 
   const links = useWatch({ control: form.control, name: 'links' });
   useEffect(() => {
-    // TODO: when moving to react-hook-form completely, remove this useEffect
-    console.log(links);
     setLinks(links);
   }, [setLinks, links]);
 

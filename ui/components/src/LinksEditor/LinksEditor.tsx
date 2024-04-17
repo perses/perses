@@ -81,6 +81,7 @@ function LinkControl({ index }: { index: number }) {
               {...field}
               fullWidth
               label="Name"
+              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {
@@ -96,6 +97,7 @@ function LinkControl({ index }: { index: number }) {
               {...field}
               fullWidth
               label="Tooltip"
+              defaultValue=""
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
               onChange={(event) => {
@@ -110,10 +112,10 @@ function LinkControl({ index }: { index: number }) {
             <TextField
               select
               {...field}
-              required
               label="Icon"
               type="text"
               fullWidth
+              defaultValue="external-link"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
             >

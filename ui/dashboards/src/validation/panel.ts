@@ -25,7 +25,7 @@ export const panelEditorValidationSchema = z.object({
   links: z.array(
     z.object({
       name: z.string().optional(),
-      url: z.string(),
+      url: z.string().min(1, 'Required'),
       tooltip: z.string().optional(),
       icon: z
         .enum([
