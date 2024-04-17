@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { Action, PanelDefinition } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -22,7 +22,7 @@ import {
   getTitleAction,
   getSubmitText,
 } from '@perses-dev/plugin-system';
-import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
@@ -46,7 +46,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   } = props;
   const panelGroups = useListPanelGroups();
   const [groupId, setGroupId] = useState(initialGroupId);
-  const { panelDefinition, setName, setDescription, setQueries, setPlugin, setPanelDefinition } =
+  const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialPanelDef);
   const { plugin } = panelDefinition.spec;
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
@@ -77,8 +77,16 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       groupId: initialGroupId,
       description: initialPanelDef.spec.display.description,
       selection: pluginEditor.pendingSelection ? pluginEditor.pendingSelection : { type: 'Panel', kind: plugin.kind },
+      links: initialPanelDef.spec.display.links,
     },
   });
+
+  const links = useWatch({ control: form.control, name: 'links' });
+  useEffect(() => {
+    // TODO: when moving to react-hook-form completely, remove this useEffect
+    console.log(links);
+    setLinks(links);
+  }, [setLinks, links]);
 
   const processForm: SubmitHandler<PanelEditorValidationType> = () => {
     const values: PanelEditorValues = { groupId, panelDefinition };

@@ -22,6 +22,7 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
   const { display, plugin: pluginDefinition, queries: initialQueries } = panelDefinition.spec;
   const [name, setName] = useState(display.name);
   const [description, setDescription] = useState(display.description);
+  const [links, setLinks] = useState(display.links);
   const [plugin, setPlugin] = useState(pluginDefinition);
 
   // need to keep track of prevQueries if switching from a panel with no queries (ex: markdown) to one with queries
@@ -50,10 +51,11 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
       const { display, plugin, queries } = panelDefinition.spec;
       setName(display.name);
       setDescription(display.description);
+      setLinks(display.links);
       setPlugin(plugin);
       setQueries(queries);
     },
-    [setName, setDescription, setPlugin, setQueries]
+    [setName, setDescription, setLinks, setPlugin, setQueries]
   );
 
   return useMemo(
@@ -61,17 +63,18 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
       panelDefinition: {
         kind: 'Panel',
         spec: {
-          display: { name, description },
+          display: { name, description, links },
           plugin,
           queries: currentQueries,
         },
       } as PanelDefinition,
       setName,
       setDescription,
+      setLinks,
       setQueries,
       setPlugin,
       setPanelDefinition,
     }),
-    [name, description, plugin, currentQueries, setName, setDescription, setQueries, setPlugin, setPanelDefinition]
+    [name, description, links, plugin, currentQueries, setQueries, setPanelDefinition]
   );
 };

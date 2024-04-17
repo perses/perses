@@ -24,6 +24,7 @@ export * from './FontSizeSelector';
 export * from './GaugeChart';
 export * from './InfoTooltip';
 export * from './JSONEditor';
+export * from './LinksEditor';
 export * from './Legend';
 export * from './LineChart';
 export * from './ModeSelector';

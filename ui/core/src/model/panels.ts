@@ -14,9 +14,29 @@
 import { Definition, UnknownSpec } from './definitions';
 import { QueryDefinition } from './query';
 
+export type LinkIcon =
+  | 'external-link'
+  | 'dashboard-link'
+  | 'info-link'
+  | 'question-link'
+  | 'danger-link'
+  | 'bolt-link'
+  | 'download-link'
+  | 'settings-link';
+
+export interface Link {
+  name?: string;
+  url: string;
+  tooltip?: string;
+  icon?: LinkIcon;
+  renderVariables?: boolean;
+  targetBlank?: boolean;
+}
+
 export interface PanelDisplay {
   name: string;
   description?: string;
+  links?: Link[];
 }
 
 export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {

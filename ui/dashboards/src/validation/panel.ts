@@ -13,14 +13,36 @@
 
 import { z } from 'zod';
 
+// TODO: align with panel struct
 export const panelEditorValidationSchema = z.object({
-  name: z.string().nonempty('Required'),
+  name: z.string().min(1, 'Required'),
   groupId: z.number(),
   description: z.string().optional(),
   selection: z.object({
     type: z.string(),
     kind: z.string(),
   }),
+  links: z.array(
+    z.object({
+      name: z.string().optional(),
+      url: z.string(),
+      tooltip: z.string().optional(),
+      icon: z
+        .enum([
+          'external-link',
+          'dashboard-link',
+          'info-link',
+          'question-link',
+          'danger-link',
+          'bolt-link',
+          'download-link',
+          'settings-link',
+        ])
+        .optional(),
+      renderVariables: z.boolean().optional(),
+      targetBlank: z.boolean().optional(),
+    })
+  ),
 });
 
 export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

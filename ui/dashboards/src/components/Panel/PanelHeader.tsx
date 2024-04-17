@@ -11,22 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, Typography, Stack, IconButton, CardHeaderProps, styled } from '@mui/material';
+import { CardHeader, Typography, Stack, CardHeaderProps, styled } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import ContentCopy from 'mdi-material-ui/ContentCopy';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { ReactNode } from 'react';
+import { Link } from '@perses-dev/core';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
+import { HeaderIconButton, PanelLinks } from './PanelLinks';
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   id: string;
   title: string;
   description?: string;
-  extra?: React.ReactNode;
+  links?: Link[];
+  extra?: ReactNode;
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -38,6 +42,7 @@ export function PanelHeader({
   id,
   title: rawTitle,
   description: rawDescription,
+  links,
   editHandlers,
   sx,
   extra,
@@ -69,7 +74,7 @@ export function PanelHeader({
             size="small"
             onClick={editHandlers.onDuplicatePanelClick}
           >
-            <ContentCopy
+            <ContentCopyIcon
               fontSize="inherit"
               sx={{
                 // Shrink this icon a little bit to look more consistent
@@ -134,6 +139,7 @@ export function PanelHeader({
               </HeaderIconButton>
             </InfoTooltip>
           )}
+          {links !== undefined && links.length > 0 && <PanelLinks links={links} />}
         </Stack>
       }
       action={
@@ -162,11 +168,6 @@ export function PanelHeader({
     />
   );
 }
-
-const HeaderIconButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));
 
 const HeaderActionWrapper = styled(Stack)(() => ({
   // Adding back the negative margins from MUI's defaults for actions, so we
