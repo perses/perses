@@ -73,7 +73,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
 		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
-		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetRBAC()),
+		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetRBAC(), serviceManager.GetDashboard()),
 	}
 
 	authEndpoint, err := authendpoint.New(

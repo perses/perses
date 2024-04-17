@@ -14,6 +14,7 @@
 package view
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -23,7 +24,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/rbac"
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	promclient "github.com/prometheus/client_model/go"
 	"github.com/stretchr/testify/assert"
@@ -31,6 +34,7 @@ import (
 )
 
 var _ = rbac.RBAC(&testRBAC{})
+var _ = dashboard.Service(&mockDashboardService{})
 
 type testRBAC struct {
 	allow bool
@@ -52,8 +56,43 @@ func (t *testRBAC) Refresh() error {
 	panic("unimplemented")
 }
 
+func (t *testRBAC) GetUserProjects(_ string, _ role.Action, _ role.Scope) []string {
+	panic("unimplemented")
+}
+
+type mockDashboardService struct {
+	dashboard *v1.Dashboard
+}
+
+func (*mockDashboardService) Validate(_ *v1.Dashboard) error {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) Create(_ apiInterface.PersesContext, _ *v1.Dashboard) (*v1.Dashboard, error) {
+	panic("unimplemented")
+}
+func (*mockDashboardService) Delete(_ apiInterface.PersesContext, _ apiInterface.Parameters) error {
+	panic("unimplemented")
+}
+
+func (m *mockDashboardService) Get(_ apiInterface.PersesContext, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+	if m.dashboard != nil {
+		return m.dashboard, nil
+	}
+
+	return nil, fmt.Errorf("not found")
+}
+
+func (*mockDashboardService) List(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]*v1.Dashboard, error) {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) Update(_ apiInterface.PersesContext, _ *v1.Dashboard, _ apiInterface.Parameters) (*v1.Dashboard, error) {
+	panic("unimplemented")
+}
+
 func TestEndpoint(t *testing.T) {
-	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}).(*endpoint)
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
@@ -64,7 +103,7 @@ func TestEndpoint(t *testing.T) {
 		Claims: &crypto.JWTCustomClaims{},
 	})
 
-	err := endpoint.View(ctx)
+	err := endpoint.view(ctx)
 	require.NoError(t, err)
 
 	metric := promclient.Metric{}
@@ -80,7 +119,7 @@ func TestEndpoint(t *testing.T) {
 }
 
 func TestNotAllowed(t *testing.T) {
-	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{false}).(*endpoint)
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{false}, &mockDashboardService{&v1.Dashboard{}}).(*endpoint)
 
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
@@ -91,7 +130,24 @@ func TestNotAllowed(t *testing.T) {
 		Claims: &crypto.JWTCustomClaims{},
 	})
 
-	err := endpoint.View(ctx)
+	err := endpoint.view(ctx)
 	require.Error(t, err)
 	require.ErrorIs(t, err, apiInterface.UnauthorizedError)
+}
+
+func TestDashboardDoesntExist(t *testing.T) {
+	endpoint := NewEndpoint(NewMetricsViewService(), &testRBAC{true}, &mockDashboardService{nil}).(*endpoint)
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/view", strings.NewReader(`{"project":"project","dashboard":"dashboard", "render_errors":2, "render_time_secs":1.7}`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.Set("user", &jwt.Token{
+		Claims: &crypto.JWTCustomClaims{},
+	})
+
+	err := endpoint.view(ctx)
+	require.Error(t, err)
+	require.ErrorIs(t, err, apiInterface.NotFoundError)
 }

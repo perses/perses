@@ -19,24 +19,33 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
+const (
+	namespace = "perses"
+)
+
+var labelNames = []string{"project", "dashboard"}
+
 // A counter for the total number of views of a dashboard.
 var dashboardViewCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "perses_dashboard_view_total",
-	Help: "The total number of views of a dashboard",
-}, []string{"project", "dashboard"})
+	Namespace: namespace,
+	Name:      "dashboard_views_total",
+	Help:      "The total number of views of a dashboard",
+}, labelNames)
 
 // A counter for the total number of render errors of a dashboard.
 var dashboardRenderErrorCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Name: "perses_dashboard_render_error_total",
-	Help: "The total number of render errors of a dashboard",
-}, []string{"project", "dashboard"})
+	Namespace: namespace,
+	Name:      "dashboard_render_errors_total",
+	Help:      "The total number of render errors of a dashboard",
+}, labelNames)
 
 // A histogram for the render time of a dashboard.
 var dashboardRenderTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-	Name:    "perses_dashboard_render_time_seconds",
-	Help:    "The render time of a dashboard",
-	Buckets: prometheus.DefBuckets,
-}, []string{"project", "dashboard"})
+	Namespace: namespace,
+	Name:      "dashboard_render_time_seconds",
+	Help:      "The render time of a dashboard",
+	Buckets:   prometheus.DefBuckets,
+}, labelNames)
 
 func init() {
 	prometheus.MustRegister(dashboardViewCounter)

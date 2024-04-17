@@ -13,7 +13,10 @@
 
 package v1
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type View struct {
 	// The resource being viewed.
@@ -25,7 +28,37 @@ type View struct {
 	RenderErrors   int     `json:"render_errors" yaml:"render_errors"`
 }
 
-func (v *View) Validate() error {
+func (v *View) UnmarshalJSON(data []byte) error {
+	var tmp View
+	type plain View
+
+	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
+		return err
+	}
+
+	if err := tmp.validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *View) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var tmp View
+	type plain View
+
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+
+	if err := tmp.validate(); err != nil {
+		return err
+	}
+	*v = tmp
+	return nil
+}
+
+func (v *View) validate() error {
 	if v.Project == "" {
 		return fmt.Errorf("project cannot be empty")
 	}
