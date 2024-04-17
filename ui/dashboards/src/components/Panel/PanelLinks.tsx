@@ -1,4 +1,16 @@
-// We don't use <Icon>foo</Icon> because it will explode bundle size
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, styled, SxProps, Theme } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
@@ -11,12 +23,14 @@ import CogIcon from 'mdi-material-ui/Cog';
 import { Link, LinkIcon } from '@perses-dev/core';
 import { MouseEvent, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
 export const HeaderIconButton = styled(IconButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   padding: '4px',
 }));
 
+// Translate link type to MUI Icon. We don't use <Icon>foo</Icon> because it will explode bundle size
 function LinkIcon({
   icon,
   ...props
@@ -56,26 +70,13 @@ export function PanelLinks({ links }: { links: Link[] }) {
     setAnchorEl(null);
   };
 
+  // If there is only one link, show it directly
   if (links.length === 1 && links[0]) {
     const link = links[0];
-    return (
-      <InfoTooltip description={link.tooltip ?? link.name ?? link.url} enterDelay={100}>
-        <HeaderIconButton
-          aria-label="Panel links"
-          size="small"
-          onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}
-        >
-          <LinkIcon
-            icon={link.icon}
-            aria-describedby="links-icon"
-            fontSize="inherit"
-            sx={{ color: (theme) => theme.palette.text.secondary }}
-          />
-        </HeaderIconButton>
-      </InfoTooltip>
-    );
+    return <LinkButton link={link} />;
   }
 
+  // Else we show a menu with a list of all links
   return (
     <>
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
@@ -97,14 +98,73 @@ export function PanelLinks({ links }: { links: Link[] }) {
         }}
       >
         {links.map((link: Link) => (
-          <MenuItem key={link.url} onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}>
-            <ListItemIcon>
-              <LinkIcon icon={link.icon} />
-            </ListItemIcon>
-            <ListItemText>{link.name ?? link.url}</ListItemText>
-          </MenuItem>
+          <LinkMenuItem key={link.url} link={link} />
         ))}
       </Menu>
     </>
+  );
+}
+
+function LinkButton({ link }: { link: Link }) {
+  // TODO: can be optimized if replace variable is disabled?
+  const url = useReplaceVariablesInString(link.url) ?? link.url;
+  const name = useReplaceVariablesInString(link.name);
+  const tooltip = useReplaceVariablesInString(link.tooltip);
+
+  if (link.renderVariables === true) {
+    return (
+      <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+        <HeaderIconButton
+          aria-label={name}
+          size="small"
+          onClick={() => window.open(url, link.targetBlank ? '_blank' : '_self')}
+        >
+          <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }
+
+  return (
+    <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
+      <HeaderIconButton
+        aria-label={link.name}
+        size="small"
+        onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}
+      >
+        <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} />
+      </HeaderIconButton>
+    </InfoTooltip>
+  );
+}
+
+function LinkMenuItem({ link }: { link: Link }) {
+  // TODO: can be optimized if replace variable is disabled?
+  const url = useReplaceVariablesInString(link.url) ?? link.url;
+  const name = useReplaceVariablesInString(link.name);
+  const tooltip = useReplaceVariablesInString(link.tooltip);
+
+  if (link.renderVariables === true) {
+    return (
+      <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+        <MenuItem onClick={() => window.open(url, link.targetBlank ? '_blank' : '_self')}>
+          <ListItemIcon>
+            <LinkIcon icon={link.icon} />
+          </ListItemIcon>
+          <ListItemText>{name ?? url}</ListItemText>
+        </MenuItem>
+      </InfoTooltip>
+    );
+  }
+
+  return (
+    <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
+      <MenuItem onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}>
+        <ListItemIcon>
+          <LinkIcon icon={link.icon} />
+        </ListItemIcon>
+        <ListItemText>{link.name ?? link.url}</ListItemText>
+      </MenuItem>
+    </InfoTooltip>
   );
 }
