@@ -29,10 +29,11 @@ import (
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/ui"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
 
-func New(conf config.Config, banner string) (*app.Runner, dependency.PersistenceManager, error) {
+func New(conf config.Config, banner string, metricNamespace string, registry *prometheus.Registry) (*app.Runner, dependency.PersistenceManager, error) {
 	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
@@ -47,7 +48,7 @@ func New(conf config.Config, banner string) (*app.Runner, dependency.Persistence
 	}
 	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
-	runner := app.NewRunner().WithDefaultHTTPServer("perses").SetBanner(banner)
+	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(metricNamespace, registry, registry).SetBanner(banner)
 
 	// enable hot reload of CUE schemas for dashboard validation:
 	// - watch for changes on the schemas folders

@@ -18,6 +18,8 @@ import (
 
 	"github.com/perses/perses/internal/api/core"
 	"github.com/perses/perses/pkg/model/api/config"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,6 +38,11 @@ All your monitoring dashboards in one place.               <\
                                                            </
 `
 
+func registerMetrics(register prometheus.Registerer, namespace string) {
+	register.MustRegister(collectors.NewGoCollector())
+	register.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+}
+
 func main() {
 	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
 	flag.Parse()
@@ -44,7 +51,13 @@ func main() {
 	if err != nil {
 		logrus.WithError(err).Fatalf("error reading configuration from file %q or from environment", *configFile)
 	}
-	runner, persistentManager, err := core.New(conf, banner)
+
+	// metrics setup
+	metricNamespace := "perses"
+	promRegistry := prometheus.NewRegistry()
+	registerMetrics(promRegistry, metricNamespace)
+
+	runner, persistentManager, err := core.New(conf, banner, metricNamespace, promRegistry)
 	if err != nil {
 		logrus.Fatal(err)
 	}
