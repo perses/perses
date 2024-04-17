@@ -21,6 +21,7 @@ import { GaugeChartPanel } from './GaugeChartPanel';
  */
 export const GaugeChart: PanelPlugin<GaugeChartOptions> = {
   PanelComponent: GaugeChartPanel,
+  supportedQueryTypes: ['TimeSeriesQuery'],
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
