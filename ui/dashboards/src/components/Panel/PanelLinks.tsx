@@ -69,34 +69,15 @@ export function PanelLinks({ links }: { links: Link[] }) {
 }
 
 function LinkButton({ link }: { link: Link }) {
-  // TODO: can be optimized if replace variable is disabled?
-  const url = useReplaceVariablesInString(link.url) ?? link.url;
-  const name = useReplaceVariablesInString(link.name);
-  const tooltip = useReplaceVariablesInString(link.tooltip);
-
-  if (link.renderVariables === true) {
-    return (
-      <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-        <IconButton
-          aria-label={name ?? url}
-          size="small"
-          href={link.url}
-          target={link.targetBlank ? '_blank' : '_self'}
-          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
-        >
-          <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
-        </IconButton>
-      </InfoTooltip>
-    );
-  }
+  const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
-    <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
+    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
       <IconButton
-        aria-label={link.name ?? link.url}
+        aria-label={name ?? url}
         size="small"
-        href={link.url}
-        target={link.targetBlank ? '_blank' : '_self'}
+        href={url}
+        target={targetBlank ? '_blank' : '_self'}
         sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
         <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
@@ -106,32 +87,28 @@ function LinkButton({ link }: { link: Link }) {
 }
 
 function LinkMenuItem({ link }: { link: Link }) {
-  // TODO: can be optimized if replace variable is disabled?
+  const { url, name, tooltip, targetBlank } = useLink(link);
+
+  return (
+    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
+        <ListItemIcon>
+          <LaunchIcon />
+        </ListItemIcon>
+        <ListItemText>{name ?? url}</ListItemText>
+      </MenuItem>
+    </InfoTooltip>
+  );
+}
+
+function useLink(link: Link): Link {
   const url = useReplaceVariablesInString(link.url) ?? link.url;
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
 
-  if (link.renderVariables === true) {
-    return (
-      <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-        <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
-          <ListItemIcon>
-            <LaunchIcon />
-          </ListItemIcon>
-          <ListItemText>{name ?? url}</ListItemText>
-        </MenuItem>
-      </InfoTooltip>
-    );
+  if (link.renderVariables === false) {
+    return link;
   }
 
-  return (
-    <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
-        <ListItemIcon>
-          <LaunchIcon />
-        </ListItemIcon>
-        <ListItemText>{link.name ?? link.url}</ListItemText>
-      </MenuItem>
-    </InfoTooltip>
-  );
+  return { ...link, url, name, tooltip };
 }
