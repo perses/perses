@@ -13,7 +13,6 @@
 
 import { z } from 'zod';
 
-// TODO: align with panel struct
 export const panelEditorValidationSchema = z.object({
   name: z.string().min(1, 'Required'),
   groupId: z.number(),

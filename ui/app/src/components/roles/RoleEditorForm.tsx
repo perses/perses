@@ -152,7 +152,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
           {fields && fields.length > 0 ? (
             fields.map((field, index) => (
               <Fragment key={field.id}>
-                <Stack direction={'row'} gap={1} alignItems="end">
+                <Stack key={field.id} direction={'row'} gap={1} alignItems="end">
                   <PermissionControl form={form} index={index} action={action} />
                   <IconButton
                     disabled={isReadonly || action === 'read'}

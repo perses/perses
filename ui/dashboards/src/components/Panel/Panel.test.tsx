@@ -25,6 +25,15 @@ describe('Panel', () => {
       display: {
         name: 'Fake Panel Title - $foo',
         description: 'This is a fake panel - $foo',
+        links: [
+          {
+            url: 'https://example.com',
+            name: 'Example Link',
+            tooltip: 'This is a fake panel link - $foo',
+            targetBlank: true,
+            renderVariables: true,
+          },
+        ],
       },
       plugin: {
         kind: 'TimeSeriesChart',
@@ -92,6 +101,18 @@ describe('Panel', () => {
     userEvent.hover(descriptionButton);
     const tooltip = await screen.findByRole('tooltip');
     expect(tooltip).toHaveTextContent('This is a fake panel - bar');
+  });
+
+  it('shows panel link', async () => {
+    renderPanel();
+
+    const linkButton = screen.getByRole('link', { name: 'Example Link' });
+    expect(linkButton).toBeInTheDocument();
+
+    // Can hover to see panel description in tooltip
+    userEvent.hover(linkButton);
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent('This is a fake panel link - bar');
   });
 
   it('does not show description when panel does not have one', () => {

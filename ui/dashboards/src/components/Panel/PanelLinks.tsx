@@ -78,7 +78,7 @@ function LinkButton({ link }: { link: Link }) {
     return (
       <InfoTooltip description={tooltip ?? url} enterDelay={100}>
         <IconButton
-          aria-label={name}
+          aria-label={name ?? url}
           size="small"
           href={link.url}
           target={link.targetBlank ? '_blank' : '_self'}
@@ -93,7 +93,7 @@ function LinkButton({ link }: { link: Link }) {
   return (
     <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
       <IconButton
-        aria-label={link.name}
+        aria-label={link.name ?? link.url}
         size="small"
         href={link.url}
         target={link.targetBlank ? '_blank' : '_self'}
