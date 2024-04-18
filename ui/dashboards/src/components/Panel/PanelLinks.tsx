@@ -24,7 +24,7 @@ import {
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/core';
 import { MouseEvent, useState } from 'react';
-import { InfoTooltip, LinkIcon } from '@perses-dev/components';
+import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
 export const HeaderIconButton = styled(IconButton)(({ theme }) => ({
@@ -93,11 +93,7 @@ function LinkButton({ link }: { link: Link }) {
           target={link.targetBlank ? '_blank' : '_self'}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
         >
-          <LinkIcon
-            icon={link.icon}
-            fontSize="inherit"
-            sx={{ color: (theme: Theme) => theme.palette.text.secondary }}
-          />
+          <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
         </IconButton>
       </InfoTooltip>
     );
@@ -112,7 +108,7 @@ function LinkButton({ link }: { link: Link }) {
         target={link.targetBlank ? '_blank' : '_self'}
         sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
-        <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
+        <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
       </IconButton>
     </InfoTooltip>
   );
@@ -129,7 +125,7 @@ function LinkMenuItem({ link }: { link: Link }) {
       <InfoTooltip description={tooltip ?? url} enterDelay={100}>
         <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
           <ListItemIcon>
-            <LinkIcon icon={link.icon} />
+            <LaunchIcon />
           </ListItemIcon>
           <ListItemText>{name ?? url}</ListItemText>
         </MenuItem>
@@ -141,7 +137,7 @@ function LinkMenuItem({ link }: { link: Link }) {
     <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
       <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
         <ListItemIcon>
-          <LinkIcon icon={link.icon} />
+          <LaunchIcon />
         </ListItemIcon>
         <ListItemText>{link.name ?? link.url}</ListItemText>
       </MenuItem>

@@ -24,61 +24,12 @@ import (
 	"github.com/prometheus/common/model"
 )
 
-type LinkIcon = string
-
-const (
-	ExternalLink  LinkIcon = "external-link"
-	DashboardLink LinkIcon = "dashboard-link"
-	InfoLink      LinkIcon = "info-link"
-	QuestionLink  LinkIcon = "question-link"
-	DangerLink    LinkIcon = "danger-link"
-	BoltLink      LinkIcon = "bolt-link"
-	DownloadLink  LinkIcon = "download-link"
-	SettingsLink  LinkIcon = "settings-link"
-)
-
 type Link struct {
 	Name            string `json:"name,omitempty" yaml:"name,omitempty"`
 	URL             string `json:"url" yaml:"url"`
 	Tooltip         string `json:"tooltip,omitempty" yaml:"tooltip,omitempty"`
-	Icon            string `json:"icon,omitempty" yaml:"icon,omitempty"`
 	RenderVariables bool   `json:"renderVariables,omitempty" yaml:"renderVariables,omitempty"`
 	TargetBlank     bool   `json:"targetBlank,omitempty" yaml:"targetBlank,omitempty"`
-}
-
-func (l *Link) UnmarshalJSON(data []byte) error {
-	var tmp Link
-	type plain Link
-	if err := json.Unmarshal(data, (*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*l = tmp
-	return nil
-}
-
-func (l *Link) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	var tmp Link
-	type plain Link
-	if err := unmarshal((*plain)(&tmp)); err != nil {
-		return err
-	}
-	if err := (&tmp).validate(); err != nil {
-		return err
-	}
-	*l = tmp
-	return nil
-}
-
-func (l *Link) validate() error {
-	if l.Icon != ExternalLink && l.Icon != DashboardLink && l.Icon != InfoLink &&
-		l.Icon != QuestionLink && l.Icon != DangerLink && l.Icon != BoltLink &&
-		l.Icon != DownloadLink && l.Icon != SettingsLink && l.Icon != "" {
-		return fmt.Errorf("link.icon not valid")
-	}
-	return nil
 }
 
 type PanelDisplay struct {

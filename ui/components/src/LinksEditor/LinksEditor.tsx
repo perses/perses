@@ -12,22 +12,14 @@
 // limitations under the License.
 
 import React, { Fragment, HTMLAttributes } from 'react';
-import { Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Checkbox, Divider, FormControlLabel, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { Controller, useFieldArray } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
-import { LinkIcon as Icon } from '@perses-dev/core';
-import { LinkIcon } from '../LinkIcon';
 
-// TODO: react hook form deps
-
-interface LinksEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
-  //onChange: (next: Link[]) => void;
-}
-
-export function LinksEditor({ ...props }: LinksEditorProps) {
+export function LinksEditor({ ...props }: HTMLAttributes<HTMLDivElement>) {
   const { fields, append, remove } = useFieldArray({
-    name: 'links', // unique name for your Field Array
+    name: 'links',
   });
 
   return (
@@ -110,40 +102,6 @@ function LinkControl({ index }: { index: number }) {
         />
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
-        <Controller
-          name={`links.${index}.icon`}
-          render={({ field, fieldState }) => (
-            <TextField
-              select
-              {...field}
-              label="Icon"
-              type="text"
-              fullWidth
-              defaultValue="external-link"
-              error={!!fieldState.error}
-              helperText={fieldState.error?.message}
-              sx={{ width: 70 }}
-            >
-              {[
-                'external-link', // TODO: refactor
-                'dashboard-link',
-                'info-link',
-                'question-link',
-                'danger-link',
-                'bolt-link',
-                'download-link',
-                'settings-link',
-              ].map((option) => {
-                return (
-                  <MenuItem key={option} value={option}>
-                    {<LinkIcon icon={option as Icon} />}
-                  </MenuItem>
-                );
-              })}
-            </TextField>
-          )}
-        />
-
         <Controller
           name={`links.${index}.renderVariables`}
           render={({ field }) => (
