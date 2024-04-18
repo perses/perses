@@ -12,11 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
-import {
-  PanelDefinition,
-  QueryDefinition,
-  UnknownSpec,
-} from '@perses-dev/core';
+import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
