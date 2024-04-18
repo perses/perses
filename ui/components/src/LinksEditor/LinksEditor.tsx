@@ -16,6 +16,8 @@ import { Checkbox, Divider, FormControlLabel, IconButton, MenuItem, Stack, TextF
 import { Controller, useFieldArray } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { LinkIcon as Icon } from '@perses-dev/core';
+import { LinkIcon } from '../LinkIcon';
 
 // TODO: react hook form deps
 
@@ -106,6 +108,8 @@ function LinkControl({ index }: { index: number }) {
             />
           )}
         />
+      </Stack>
+      <Stack gap={2} direction="row" alignItems="center">
         <Controller
           name={`links.${index}.icon`}
           render={({ field, fieldState }) => (
@@ -118,6 +122,7 @@ function LinkControl({ index }: { index: number }) {
               defaultValue="external-link"
               error={!!fieldState.error}
               helperText={fieldState.error?.message}
+              sx={{ width: 70 }}
             >
               {[
                 'external-link', // TODO: refactor
@@ -131,15 +136,14 @@ function LinkControl({ index }: { index: number }) {
               ].map((option) => {
                 return (
                   <MenuItem key={option} value={option}>
-                    {option}
+                    {<LinkIcon icon={option as Icon} />}
                   </MenuItem>
                 );
               })}
             </TextField>
           )}
         />
-      </Stack>
-      <Stack gap={2} direction="row">
+
         <Controller
           name={`links.${index}.renderVariables`}
           render={({ field }) => (

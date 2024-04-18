@@ -11,54 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, styled, SxProps, Theme } from '@mui/material';
+import {
+  IconButton,
+  Link as LinkComponent,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  styled,
+  Theme,
+} from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
-import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
-import InformationBoxOutlineIcon from 'mdi-material-ui/InformationBoxOutline';
-import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
-import AlertCircleOutlineIcon from 'mdi-material-ui/AlertCircleOutline';
-import LightningBoltIcon from 'mdi-material-ui/LightningBolt';
-import DownloadIcon from 'mdi-material-ui/DownloadOutline';
-import CogIcon from 'mdi-material-ui/Cog';
-import { Link, LinkIcon } from '@perses-dev/core';
+import { Link } from '@perses-dev/core';
 import { MouseEvent, useState } from 'react';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, LinkIcon } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
 export const HeaderIconButton = styled(IconButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   padding: '4px',
 }));
-
-// Translate link type to MUI Icon. We don't use <Icon>foo</Icon> because it will explode bundle size
-function LinkIcon({
-  icon,
-  ...props
-}: {
-  icon?: LinkIcon;
-  sx?: SxProps<Theme> | undefined;
-  fontSize?: 'small' | 'inherit' | 'large' | 'medium' | undefined;
-}) {
-  switch (icon) {
-    case 'external-link':
-      return <LaunchIcon {...props} />;
-    case 'dashboard-link':
-      return <ViewDashboardIcon {...props} />;
-    case 'info-link':
-      return <InformationBoxOutlineIcon {...props} />;
-    case 'question-link':
-      return <HelpCircleOutlineIcon {...props} />;
-    case 'danger-link':
-      return <AlertCircleOutlineIcon {...props} />;
-    case 'bolt-link':
-      return <LightningBoltIcon {...props} />;
-    case 'download-link':
-      return <DownloadIcon {...props} />;
-    case 'settings-link':
-      return <CogIcon {...props} />;
-  }
-  return <LaunchIcon {...props} />;
-}
 
 export function PanelLinks({ links }: { links: Link[] }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -114,26 +86,34 @@ function LinkButton({ link }: { link: Link }) {
   if (link.renderVariables === true) {
     return (
       <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-        <HeaderIconButton
+        <IconButton
           aria-label={name}
           size="small"
-          onClick={() => window.open(url, link.targetBlank ? '_blank' : '_self')}
+          href={link.url}
+          target={link.targetBlank ? '_blank' : '_self'}
+          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
         >
-          <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} />
-        </HeaderIconButton>
+          <LinkIcon
+            icon={link.icon}
+            fontSize="inherit"
+            sx={{ color: (theme: Theme) => theme.palette.text.secondary }}
+          />
+        </IconButton>
       </InfoTooltip>
     );
   }
 
   return (
     <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
-      <HeaderIconButton
+      <IconButton
         aria-label={link.name}
         size="small"
-        onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}
+        href={link.url}
+        target={link.targetBlank ? '_blank' : '_self'}
+        sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
-        <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme) => theme.palette.text.secondary }} />
-      </HeaderIconButton>
+        <LinkIcon icon={link.icon} fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
+      </IconButton>
     </InfoTooltip>
   );
 }
@@ -147,7 +127,7 @@ function LinkMenuItem({ link }: { link: Link }) {
   if (link.renderVariables === true) {
     return (
       <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-        <MenuItem onClick={() => window.open(url, link.targetBlank ? '_blank' : '_self')}>
+        <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
           <ListItemIcon>
             <LinkIcon icon={link.icon} />
           </ListItemIcon>
@@ -159,7 +139,7 @@ function LinkMenuItem({ link }: { link: Link }) {
 
   return (
     <InfoTooltip description={link.tooltip ?? link.url} enterDelay={100}>
-      <MenuItem onClick={() => window.open(link.url, link.targetBlank ? '_blank' : '_self')}>
+      <MenuItem component={LinkComponent} href={link.url} target={link.targetBlank ? '_blank' : '_self'}>
         <ListItemIcon>
           <LinkIcon icon={link.icon} />
         </ListItemIcon>
