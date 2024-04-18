@@ -17,6 +17,7 @@ import (
 	"flag"
 
 	"github.com/perses/perses/internal/api/core"
+	"github.com/perses/perses/internal/api/impl/v1/view"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -24,23 +25,22 @@ import (
 )
 
 const banner = `
-______                       
-| ___ \                      
-| |_/ /__ _ __ ___  ___  ___ 
-|  __/ _ \ '__/ __|/ _ \/ __|
-| | |  __/ |  \__ \  __/\__ \
-\_|  \___|_|  |___/\___||___/  %s 
+ ___________
+\___________/
+     ___________      ______
+    \___________/     | ___ \
+ ___________          | |_/ /__ _ __ ___  ___  ___
+\___________/         |  __/ _ \ '__/ __|/ _ \/ __|
+ ___                  | | |  __/ |  \__ \  __/\__ \
+\___/                 \_|  \___|_|  |___/\___||___/  %s
+__________________________________________________________
 
-All your monitoring dashboards in one place.               <\
-                                                            \\
---------------==========================================>|||<*>//////]
-                                                            //
-                                                           </
 `
 
-func registerMetrics(register prometheus.Registerer, namespace string) {
+func registerMetrics(register prometheus.Registerer) {
 	register.MustRegister(collectors.NewGoCollector())
 	register.MustRegister(collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}))
+	view.RegisterMetrics(register)
 }
 
 func main() {
@@ -53,11 +53,10 @@ func main() {
 	}
 
 	// metrics setup
-	metricNamespace := "perses"
 	promRegistry := prometheus.NewRegistry()
-	registerMetrics(promRegistry, metricNamespace)
+	registerMetrics(promRegistry)
 
-	runner, persistentManager, err := core.New(conf, banner, metricNamespace, promRegistry)
+	runner, persistentManager, err := core.New(conf, banner, promRegistry)
 	if err != nil {
 		logrus.Fatal(err)
 	}

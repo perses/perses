@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryPluginType } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
 import { OptionsEditorProps, Plugin } from './plugin-base';
 
 export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
   content: React.ComponentType<OptionsEditorProps<T>>;
 };
+
 /**
- * Plugin the provides custom visualizations inside of a Panel.
+ * Plugin the provides custom visualizations inside a Panel.
  */
 export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   PanelComponent: React.ComponentType<PanelProps<Spec>>;
@@ -28,6 +29,11 @@ export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
    * React components for custom tabs
    */
   panelOptionsEditorComponents?: Array<PanelOptionsEditorComponent<Spec>>;
+  /**
+   * List of query types supported by this panel.
+   * @default [] (no query types supported) only relevant if hideQueryEditor is true
+   */
+  supportedQueryTypes?: QueryPluginType[];
   /**
    * If true, query editor will be hidden for panel plugin
    * @default false

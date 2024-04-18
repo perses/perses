@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -37,6 +37,7 @@ import (
 	"github.com/perses/perses/internal/api/impl/v1/secret"
 	"github.com/perses/perses/internal/api/impl/v1/user"
 	"github.com/perses/perses/internal/api/impl/v1/variable"
+	"github.com/perses/perses/internal/api/impl/v1/view"
 	validateendpoint "github.com/perses/perses/internal/api/impl/validate"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
@@ -72,6 +73,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		secret.NewEndpoint(serviceManager.GetSecret(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		user.NewEndpoint(serviceManager.GetUser(), serviceManager.GetRBAC(), cfg.Security.Authentication.DisableSignUp, readonly, caseSensitive),
 		variable.NewEndpoint(serviceManager.GetVariable(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		view.NewEndpoint(serviceManager.GetView(), serviceManager.GetRBAC(), serviceManager.GetDashboard()),
 	}
 
 	authEndpoint, err := authendpoint.New(

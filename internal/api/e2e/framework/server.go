@@ -96,9 +96,8 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 			File: defaultFileConfig(),
 		}
 	}
-	metricNamespace := "perses"
 	registerer := prometheus.NewRegistry()
-	runner, persistenceManager, err := core.New(conf, "", metricNamespace, registerer)
+	runner, persistenceManager, err := core.New(conf, "", registerer)
 	if err != nil {
 		t.Fatal(err)
 	}
