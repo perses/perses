@@ -1,8 +1,5 @@
 # Panel Group Builder
 
-Panel group is a helper for adding panels to a dashboard.
-It wil
-
 ## Constructor
 
 ```golang

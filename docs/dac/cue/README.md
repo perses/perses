@@ -1,23 +1,26 @@
 # CUE SDK for Dashboard-as-Code
 
-This section provides all the information about the CUE SDK to develop dashboards as code in Perses.
-It's focusing on explaining how to use the different "builders" provided by the SDK, that you should rely on to simplify the coding.
+> [!NOTE]
+> To get started with Dashboard-as-Code in Perses, have a look at the [DaC user guide](../../user-guides/dashboard-as-code.md) first.
+
+This section provides detailed information about the CUE SDK to develop dashboards as code in Perses.
+It's focusing on explaining how to use the different builders provided by the SDK, that you should rely on to simplify the coding.
 Besides, you can always manipulate directly the base datamodel of the Perses dashboard, but this is less convenient.
 
 See the dedicated pages for each builder:
-- [Dashboard builder](./dashboard.md)
-- [Panel Groups builder](./panelgroups.md)
+- [Dashboard](./dashboard.md)
+- [Panel Groups](./panelgroups.md)
 - Variable-related builders:
-  - [Variable Group builder](./variable/group.md)
-  - [Static List Variable builder](./variable/staticlist.md)
-  - [Text Variable builder](./variable/text.md)
+  - [Variable Group](./variable/group.md)
+  - [Static List Variable](./variable/staticlist.md)
+  - [Text Variable](./variable/text.md)
 - Prometheus-related builders:
-  - [Filter builder](./prometheus/filter.md)
-  - [Panel builder](./prometheus/panel.md)
+  - [Filter](./prometheus/filter.md)
+  - [Panel](./prometheus/panel.md)
   - Variable-related builders:
-    - [Label Names Variable builder](./prometheus/variable/labelnames.md)
-    - [Label Values Variable builder](./prometheus/variable/labelvalues.md)
-    - [PromQL Variable builder](./prometheus/variable/promql.md)
+    - [Label Names Variable](./prometheus/variable/labelnames.md)
+    - [Label Values Variable](./prometheus/variable/labelvalues.md)
+    - [PromQL Variable](./prometheus/variable/promql.md)
 
 See also some useful patterns for DaC with the CUE SDK in the below section.
 
