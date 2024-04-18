@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, Typography, Stack, CardHeaderProps, styled } from '@mui/material';
+import { CardHeader, Typography, Stack, CardHeaderProps, styled, IconButton } from '@mui/material';
 import { InfoTooltip, combineSx } from '@perses-dev/components';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
@@ -22,7 +22,7 @@ import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactNode } from 'react';
 import { Link } from '@perses-dev/core';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
-import { HeaderIconButton, PanelLinks } from './PanelLinks';
+import { PanelLinks } from './PanelLinks';
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
@@ -168,6 +168,11 @@ export function PanelHeader({
     />
   );
 }
+
+const HeaderIconButton = styled(IconButton)(({ theme }) => ({
+  borderRadius: theme.shape.borderRadius,
+  padding: '4px',
+}));
 
 const HeaderActionWrapper = styled(Stack)(() => ({
   // Adding back the negative margins from MUI's defaults for actions, so we

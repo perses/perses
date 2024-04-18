@@ -22,27 +22,17 @@ export const panelEditorValidationSchema = z.object({
     type: z.string(),
     kind: z.string(),
   }),
-  links: z.array(
-    z.object({
-      name: z.string().optional(),
-      url: z.string().min(1, 'Required'),
-      tooltip: z.string().optional(),
-      icon: z
-        .enum([
-          'external-link',
-          'dashboard-link',
-          'info-link',
-          'question-link',
-          'danger-link',
-          'bolt-link',
-          'download-link',
-          'settings-link',
-        ])
-        .optional(),
-      renderVariables: z.boolean().optional(),
-      targetBlank: z.boolean().optional(),
-    })
-  ),
+  links: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.string().min(1, 'Required'),
+        tooltip: z.string().optional(),
+        renderVariables: z.boolean().optional(),
+        targetBlank: z.boolean().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;

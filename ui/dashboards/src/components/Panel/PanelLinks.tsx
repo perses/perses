@@ -11,26 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  IconButton,
-  Link as LinkComponent,
-  ListItemIcon,
-  ListItemText,
-  Menu,
-  MenuItem,
-  styled,
-  Theme,
-} from '@mui/material';
+import { IconButton, Link as LinkComponent, ListItemIcon, ListItemText, Menu, MenuItem, Theme } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/core';
 import { MouseEvent, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
-
-export const HeaderIconButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));
 
 export function PanelLinks({ links }: { links: Link[] }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -52,13 +38,18 @@ export function PanelLinks({ links }: { links: Link[] }) {
   return (
     <>
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
-        <HeaderIconButton aria-label="Panel links" size="small" onClick={handleOpenMenu}>
+        <IconButton
+          aria-label="Panel links"
+          size="small"
+          onClick={handleOpenMenu}
+          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+        >
           <LaunchIcon
             aria-describedby="links-icon"
             fontSize="inherit"
             sx={{ color: (theme) => theme.palette.text.secondary }}
           />
-        </HeaderIconButton>
+        </IconButton>
       </InfoTooltip>
 
       <Menu
