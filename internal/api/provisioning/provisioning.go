@@ -112,6 +112,14 @@ func (p *provisioning) getService(object modelAPI.Entity, parameters apiInterfac
 			func() (modelAPI.Entity, error) {
 				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
 			}, nil
+	case *modelV1.EphemeralDashboard:
+		svc := p.serviceManager.GetEphemeralDashboard()
+		return func() (modelAPI.Entity, error) {
+				return svc.Create(apiInterface.EmptyCtx, entity)
+			},
+			func() (modelAPI.Entity, error) {
+				return svc.Update(apiInterface.EmptyCtx, entity, parameters)
+			}, nil
 	case *modelV1.Folder:
 		svc := p.serviceManager.GetFolder()
 		return func() (modelAPI.Entity, error) {
