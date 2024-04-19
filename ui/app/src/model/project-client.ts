@@ -120,7 +120,7 @@ export function useCreateProjectMutation() {
       return createProject(project);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return Promise.all([queryClient.invalidateQueries([...queryKey]), queryClient.invalidateQueries([userKey])]);
     },
   });
 }
