@@ -2,13 +2,12 @@
   "kind": "StaticListVariable",
   "spec": {
     "values": [
-      {
-        "value": "1m"
-      },
+      "1m",
       {
         "value": "5m"
       },
       {
+        "label": "Ten minutes",
         "value": "10m"
       }
     ]
