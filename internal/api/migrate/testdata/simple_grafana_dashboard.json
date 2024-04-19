@@ -500,7 +500,7 @@
             "value": "three"
           }
         ],
-        "query": "one,two,three",
+        "query": "one,  two  ,three : 3  ",
         "skipUrlSync": false,
         "type": "custom"
       },

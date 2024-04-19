@@ -28,7 +28,10 @@
               "values": [
                 "one",
                 "two",
-                "three"
+                {
+                  "label": "three",
+                  "value": "3"
+                }
               ]
             }
           },
