@@ -58,7 +58,7 @@ export function useDashboard(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboardList(project?: string) {
-  return useQuery<DashboardResource[], Error>([resource, project], () => {
+  return useQuery<DashboardResource[] | null, Error>([resource, project], () => {
     return getDashboards(project);
   });
 }
@@ -182,7 +182,7 @@ export function getDashboard(project: string, name: string) {
 
 export function getDashboards(project?: string) {
   const url = buildURL({ resource: resource, project: project });
-  return fetchJson<DashboardResource[]>(url, {
+  return fetchJson<DashboardResource[] | null>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });
