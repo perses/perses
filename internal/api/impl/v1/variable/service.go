@@ -86,6 +86,7 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
 	query := &variable.Query{
 		Query:      q.Query,
 		NamePrefix: q.NamePrefix,

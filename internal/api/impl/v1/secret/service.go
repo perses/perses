@@ -89,6 +89,7 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]*v1.PublicSecret, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
 	query := &secret.Query{
 		Query:      q.Query,
 		NamePrefix: q.NamePrefix,

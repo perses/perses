@@ -119,6 +119,7 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *rolebinding.Query, params apiInterface.Parameters) ([]*v1.RoleBinding, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
 	query := &rolebinding.Query{
 		Query:      q.Query,
 		NamePrefix: q.NamePrefix,
