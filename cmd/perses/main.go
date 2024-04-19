@@ -36,13 +36,14 @@ __________________________________________________________
 
 func main() {
 	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
+	pprof := flag.Bool("pprof", false, "Enable pprof")
 	flag.Parse()
 	// load the config from file or/and from environment
 	conf, err := config.Resolve(*configFile)
 	if err != nil {
 		logrus.WithError(err).Fatalf("error reading configuration from file %q or from environment", *configFile)
 	}
-	runner, persistentManager, err := core.New(conf, banner)
+	runner, persistentManager, err := core.New(conf, *pprof, banner)
 	if err != nil {
 		logrus.Fatal(err)
 	}

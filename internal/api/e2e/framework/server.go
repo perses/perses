@@ -96,7 +96,7 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 			File: defaultFileConfig(),
 		}
 	}
-	runner, persistenceManager, err := core.New(conf, "")
+	runner, persistenceManager, err := core.New(conf, false, "")
 	if err != nil {
 		t.Fatal(err)
 	}

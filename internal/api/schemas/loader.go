@@ -72,7 +72,7 @@ func (c *cueDefs) Load() error {
 		schemaPath := filepath.Join(c.schemasPath, file.Name())
 
 		// load the cue files into build.Instances slice
-		// package `model` is imposed so that we dont mix model-related files with migration-related files
+		// package `model` is imposed so that we don't mix model-related files with migration-related files
 		buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: "model"})
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
@@ -120,7 +120,7 @@ func (c *cueDefs) Load() error {
 	}
 
 	if !isError {
-		// in case there is no error we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
+		// in case there is no error, we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
 		c.schemas.Store(&newSchemas)
 		c.context.Store(cueContext)
 	}
