@@ -14,9 +14,18 @@
 import { Definition, UnknownSpec } from './definitions';
 import { QueryDefinition } from './query';
 
+export interface Link {
+  name?: string;
+  url: string;
+  tooltip?: string;
+  renderVariables?: boolean;
+  targetBlank?: boolean;
+}
+
 export interface PanelDisplay {
   name: string;
   description?: string;
+  links?: Link[];
 }
 
 export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {

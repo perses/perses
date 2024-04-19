@@ -14,13 +14,24 @@
 import { z } from 'zod';
 
 export const panelEditorValidationSchema = z.object({
-  name: z.string().nonempty('Required'),
+  name: z.string().min(1, 'Required'),
   groupId: z.number(),
   description: z.string().optional(),
   selection: z.object({
     type: z.string(),
     kind: z.string(),
   }),
+  links: z
+    .array(
+      z.object({
+        name: z.string().optional(),
+        url: z.string().min(1, 'Required'),
+        tooltip: z.string().optional(),
+        renderVariables: z.boolean().optional(),
+        targetBlank: z.boolean().optional(),
+      })
+    )
+    .optional(),
 });
 
 export type PanelEditorValidationType = z.infer<typeof panelEditorValidationSchema>;
