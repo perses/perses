@@ -221,7 +221,6 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
-          "capturingRegexp": ".*type=\\\"(.*)\\\".*",
           "sort": "alphabetical-ci-asc",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
@@ -264,7 +263,6 @@
           },
           "allowAllValue": false,
           "allowMultiple": false,
-          "capturingRegexp": "^.*job=\"([a-z-]+)\".*$",
           "sort": "none",
           "plugin": {
             "kind": "PrometheusPromQLVariable",
