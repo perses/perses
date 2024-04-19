@@ -14,9 +14,8 @@
 package secret
 
 import (
-	apiInterface "github.com/perses/perses/internal/api/interface"
-
 	"github.com/perses/perses/internal/api/crypto"
+	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
@@ -90,10 +89,15 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]*v1.PublicSecret, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+	query := &secret.Query{
+		Query:      q.Query,
+		NamePrefix: q.NamePrefix,
+		Project:    q.Project,
 	}
-	l, err := s.dao.List(q)
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	l, err := s.dao.List(query)
 	if err != nil {
 		return nil, err
 	}

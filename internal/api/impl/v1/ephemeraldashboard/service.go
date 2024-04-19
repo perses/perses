@@ -94,10 +94,15 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]*v1.EphemeralDashboard, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+	query := &ephemeraldashboard.Query{
+		Query:      q.Query,
+		NamePrefix: q.NamePrefix,
+		Project:    q.Project,
 	}
-	return s.dao.List(q)
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return s.dao.List(query)
 }
 
 func (s *service) Validate(entity *v1.EphemeralDashboard) error {
