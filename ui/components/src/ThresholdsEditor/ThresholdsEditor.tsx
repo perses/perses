@@ -164,7 +164,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     <OptionsEditorGroup
       title="Thresholds"
       icon={
-        <InfoTooltip description={'Add threshold'}>
+        <InfoTooltip description="Add threshold">
           <IconButton size="small" aria-label="add threshold" onClick={addThresholdInput}>
             <PlusIcon />
           </IconButton>

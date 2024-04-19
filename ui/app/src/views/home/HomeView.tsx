@@ -60,7 +60,7 @@ function HomeView() {
       <Box sx={{ width: '100%' }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <StackCrumb>
-            <HomeIcon fontSize={'large'} />
+            <HomeIcon fontSize="large" />
             <TitleCrumb>Home</TitleCrumb>
           </StackCrumb>
           <Stack direction="row" gap={isMobileSize ? 0.5 : 2}>

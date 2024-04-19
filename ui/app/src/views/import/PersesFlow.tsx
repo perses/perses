@@ -48,7 +48,7 @@ function PersesFlow({ dashboard }: PersesFlowProps) {
           <Typography variant="h2" sx={{ paddingTop: 2, paddingBottom: 1 }}>
             2. Import
           </Typography>
-          <Stack width={'100%'} gap={1}>
+          <Stack width="100%" gap={1}>
             <Autocomplete
               disablePortal
               renderInput={(params) => (

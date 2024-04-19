@@ -89,7 +89,7 @@ export function GridLayout(props: GridLayoutProps) {
           breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
           cols={GRID_LAYOUT_COLS}
           rowHeight={30}
-          draggableHandle={'.drag-handle'}
+          draggableHandle=".drag-handle"
           resizeHandles={['se']}
           isDraggable={isEditMode}
           isResizable={isEditMode}

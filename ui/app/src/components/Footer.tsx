@@ -44,8 +44,8 @@ export default function Footer(): JSX.Element {
             <CircularProgress size="1rem" />
           ) : data !== undefined && data.version !== '' ? (
             <Link
-              color={'inherit'}
-              underline={'hover'}
+              color="inherit"
+              underline="hover"
               target="_blank"
               rel="noreferrer"
               href={

@@ -159,8 +159,8 @@ export function SignWrapper(props: { children: ReactNode }) {
           const SocialButton = provider.button;
           return (
             <SocialButton
-              iconSize={'20px'}
-              size={'32px'}
+              iconSize="20px"
+              size="32px"
               key={provider.path}
               fullWidth={true}
               style={{ fontSize: '1em' }}

@@ -72,7 +72,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps) => {
           {isEditMode ? (
             <Stack direction="row" gap={1} ml="auto">
               {isReadonly && (
-                <Alert severity={'warning'} sx={{ backgroundColor: 'transparent', padding: 0 }}>
+                <Alert severity="warning" sx={{ backgroundColor: 'transparent', padding: 0 }}>
                   Dashboard managed via code only. Download JSON and commit changes to save.
                 </Alert>
               )}
