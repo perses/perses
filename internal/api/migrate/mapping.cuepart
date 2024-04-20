@@ -113,9 +113,19 @@ spec: {
                 if allowAllValue if grafanaVar.allValue != _|_ {
                     customAllValue: grafanaVar.allValue
                 }
-                if grafanaVar.regex != _|_ {
-                    capturingRegexp: grafanaVar.regex
-                }
+                // TODO: enable (back) capturing regexp migration
+                capturingRegexp?: _|_
+                // Currently we don't migrate the regex field since (for the moment) one of the most used plugin,
+                // PromQL Variable, works differently in Perses than in Grafana: We are getting the values
+                // corresponding to the provided labelName, thus capturingRegexp applies on label values, while in
+                // Grafana the regexp applies on the full PromQL expression, thus migrating it as-is just makes the
+                // Perses variable return nothing - manual patching is required. We can't add logic here to decide
+                // whether the regexp should be migrated or not, because at this step we have no idea about the
+                // plugin used by the considered variable.
+                //
+                // if grafanaVar.regex != _|_ {
+                //     capturingRegexp: grafanaVar.regex
+                // }
                 if grafanaVar.sort != _|_ if #mapping.sort[grafanaVar.sort] != _|_ {
                     sort: #mapping.sort[grafanaVar.sort]
                 }
