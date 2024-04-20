@@ -190,7 +190,7 @@ export function SearchableDashboards(props: SearchableDashboardsProps) {
   }
 
   return (
-    <Stack gap={2} id={props.id}>
+    <Stack gap={2} id={props.id} marginBottom={4}>
       <TextField
         id="search"
         label="Search a Project or a Dashboard"
