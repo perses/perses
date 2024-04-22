@@ -105,3 +105,11 @@ func (o *ProjectOption) Complete() error {
 func AddProjectFlags(cmd *cobra.Command, o *ProjectOption) {
 	cmd.Flags().StringVarP(&o.Project, "project", "p", o.Project, "If present, the project scope for this CLI request")
 }
+
+type ForceCreateOption struct {
+	ForceCreate bool
+}
+
+func AddForceCreateFlags(cmd *cobra.Command, o *ForceCreateOption) {
+	cmd.Flags().BoolVarP(&o.ForceCreate, "force", "", false, "If present, the command will create the resource even if the projects are not consistent, it prioritize the json file")
+}
