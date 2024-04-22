@@ -134,10 +134,29 @@ func TestAuthListDashboardInProject(t *testing.T) {
 		firstProject := e2eframework.NewProject("first")
 		secondProject := e2eframework.NewProject("second")
 		thirdProject := e2eframework.NewProject("third")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject)
+		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, firstProject.GetMetadata().GetName(), utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
 		firstDashboard := e2eframework.NewDashboard(t, firstProject.Metadata.Name, "Demo-1")
 		secondDashboard := e2eframework.NewDashboard(t, secondProject.Metadata.Name, "Demo-2")
 		thirdDashboard := e2eframework.NewDashboard(t, thirdProject.Metadata.Name, "Demo-3")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject, firstDashboard, secondDashboard, thirdDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstDashboard, secondDashboard, thirdDashboard)
 
 		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
 			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).

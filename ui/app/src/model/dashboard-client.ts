@@ -58,7 +58,7 @@ export function useDashboard(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboardList(project?: string) {
-  return useQuery<DashboardResource[] | null, Error>([resource, project], () => {
+  return useQuery<DashboardResource[], Error>([resource, project], () => {
     return getDashboards(project);
   });
 }
@@ -81,8 +81,8 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
     const result: DatedDashboards[] = [];
 
     // Iterating with history first to keep history order in the result
-    (history || []).forEach((historyItem) => {
-      const dashboard = (data || []).find(
+    (history ?? []).forEach((historyItem) => {
+      const dashboard = (data ?? []).find(
         (dashboard) =>
           historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name
       );
@@ -112,7 +112,7 @@ export function useImportantDashboardList(project?: string) {
   const importantDashboards = useMemo(() => {
     const result: DashboardResource[] = [];
     importantDashboardSelectors.forEach((selector) => {
-      const dashboard = (dashboards || []).find(
+      const dashboard = (dashboards ?? []).find(
         (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
       );
       if (dashboard) {
@@ -182,7 +182,7 @@ export function getDashboard(project: string, name: string) {
 
 export function getDashboards(project?: string) {
   const url = buildURL({ resource: resource, project: project });
-  return fetchJson<DashboardResource[] | null>(url, {
+  return fetchJson<DashboardResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });
