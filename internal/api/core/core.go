@@ -57,17 +57,6 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	// There is a memory leak in the package Cuelang we are using: https://github.com/cue-lang/cue/issues/2121.
 	// A way to mitigate the issue is to deactivate the cron that is calling the method that leaks.
 	// For the moment, it's ok to deactivate it since it's not possible to load a plugin from outside (missing the JS loading).
-	// We still need to load the schemas.
-	for _, loader := range serviceManager.GetSchemas().GetLoaders() {
-		if loaderErr := loader.Load(); loaderErr != nil {
-			return nil, nil, fmt.Errorf("unable to load the schemas: %w", loaderErr)
-		}
-	}
-	for _, loader := range serviceManager.GetMigration().GetLoaders() {
-		if loaderErr := loader.Load(); loaderErr != nil {
-			return nil, nil, fmt.Errorf("unable to load the migration schemas: %w", loaderErr)
-		}
-	}
 	// Once the memory leak is fixed, then we can uncomment these lines.
 	// runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	// runner.WithTasks(watcher, migrateWatcher)
