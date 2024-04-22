@@ -185,7 +185,7 @@ async function getProjectsWithDashboard(): Promise<ProjectWithDashboards[]> {
   const projects = await getProjects();
   const result: ProjectWithDashboards[] = [];
   for (const project of projects ?? []) {
-    const dashboards = (await getDashboards(project.metadata.name)) ?? [];
+    const dashboards = await getDashboards(project.metadata.name);
     result.push({ project: project, dashboards: dashboards });
   }
 
