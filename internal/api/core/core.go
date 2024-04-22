@@ -23,8 +23,10 @@ import (
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/provisioning"
 	"github.com/perses/perses/internal/api/rbac"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/ui"
@@ -48,6 +50,19 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	persesAPI := NewPersesAPI(serviceManager, persistenceManager, conf)
 	persesFrontend := ui.NewPersesFrontend()
 	runner := app.NewRunner().WithDefaultHTTPServerAndPrometheusRegisterer(utils.MetricNamespace, registry, registry).SetBanner(banner)
+
+	// enable hot reload of CUE schemas for dashboard validation:
+	// - watch for changes on the schemas folders
+	// - register a cron task to reload all the schemas every <interval>
+	watcher, _, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of schemas: %w", err)
+	}
+	// enable hot reload of the migration schemas
+	migrateWatcher, _, err := migrate.NewHotReloaders(serviceManager.GetMigration())
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
+	}
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
 	if err != nil {
@@ -57,9 +72,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	// There is a memory leak in the package Cuelang we are using: https://github.com/cue-lang/cue/issues/2121.
 	// A way to mitigate the issue is to deactivate the cron that is calling the method that leaks.
 	// For the moment, it's ok to deactivate it since it's not possible to load a plugin from outside (missing the JS loading).
-	// Once the memory leak is fixed, then we can uncomment these lines.
+	// Once the memory leak is fixed, then we can uncomment this line.
 	// runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
-	// runner.WithTasks(watcher, migrateWatcher)
+	runner.WithTasks(watcher, migrateWatcher)
 
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
