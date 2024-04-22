@@ -47,7 +47,7 @@ export const ColorPicker = ({ color, onChange, palette }: ColorPickerProps) => {
   return (
     <Stack spacing={1}>
       <HexColorPicker color={color} onChange={handleColorChange} />
-      <Stack direction="row" flexWrap="wrap" justifyContent="space-evenly" width={'200px'}>
+      <Stack direction="row" flexWrap="wrap" justifyContent="space-evenly" width="200px">
         {palette &&
           palette.map((color, i) => (
             <IconButton

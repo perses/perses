@@ -45,6 +45,7 @@ func registerMetrics(register prometheus.Registerer) {
 
 func main() {
 	configFile := flag.String("config", "", "Path to the YAML configuration file for the API. Configuration settings can be overridden when using environment variables.")
+	pprof := flag.Bool("pprof", false, "Enable pprof")
 	flag.Parse()
 	// load the config from file or/and from environment
 	conf, err := config.Resolve(*configFile)
@@ -56,7 +57,7 @@ func main() {
 	promRegistry := prometheus.NewRegistry()
 	registerMetrics(promRegistry)
 
-	runner, persistentManager, err := core.New(conf, banner, promRegistry)
+	runner, persistentManager, err := core.New(conf, *pprof, promRegistry, banner)
 	if err != nil {
 		logrus.Fatal(err)
 	}

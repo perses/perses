@@ -94,10 +94,16 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *dashboard.Query, params apiInterface.Parameters) ([]*v1.Dashboard, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+	query := &dashboard.Query{
+		Query:      q.Query,
+		NamePrefix: q.NamePrefix,
+		Project:    q.Project,
 	}
-	return s.dao.List(q)
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return s.dao.List(query)
 }
 
 func (s *service) Validate(entity *v1.Dashboard) error {

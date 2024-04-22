@@ -34,7 +34,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func New(conf config.Config, banner string, registry *prometheus.Registry) (*app.Runner, dependency.PersistenceManager, error) {
+func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, banner string) (*app.Runner, dependency.PersistenceManager, error) {
 	persistenceManager, err := dependency.NewPersistenceManager(conf.Database)
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to instantiate the persistence manager")
@@ -83,6 +83,7 @@ func New(conf config.Config, banner string, registry *prometheus.Registry) (*app
 
 	// register the API
 	runner.HTTPServerBuilder().
+		ActivatePprof(enablePprof).
 		APIRegistration(persesAPI).
 		GzipSkipper(func(c echo.Context) bool {
 			// let's skip the gzip compression when using the proxy and rely on the datasource behind.

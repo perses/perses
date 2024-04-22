@@ -101,6 +101,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
         title={definition.spec.display.name}
         description={definition.spec.display.description}
         editHandlers={editHandlers}
+        links={definition.spec.display.links}
         sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
       />
       <CardContent

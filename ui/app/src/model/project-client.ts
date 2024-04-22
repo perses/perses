@@ -120,7 +120,7 @@ export function useCreateProjectMutation() {
       return createProject(project);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return Promise.all([queryClient.invalidateQueries([...queryKey]), queryClient.invalidateQueries([userKey])]);
     },
   });
 }
@@ -185,7 +185,7 @@ async function getProjectsWithDashboard(): Promise<ProjectWithDashboards[]> {
   const projects = await getProjects();
   const result: ProjectWithDashboards[] = [];
   for (const project of projects ?? []) {
-    const dashboards = await getDashboards(project.metadata.name);
+    const dashboards = (await getDashboards(project.metadata.name)) ?? [];
     result.push({ project: project, dashboards: dashboards });
   }
 

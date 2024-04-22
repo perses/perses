@@ -69,7 +69,7 @@ func extractCUEDepsToDst() error {
 			continue
 		}
 
-		newDepPath := fmt.Sprintf("%s/%s", cueDepsFolderName, currentDepPath)
+		newDepPath := fmt.Sprintf("%s/%s", cueDepsRootDstPath, currentDepPath)
 
 		switch header.Typeflag {
 		case tar.TypeDir:

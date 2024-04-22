@@ -56,7 +56,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   return (
     <OptionsEditorGroup title="Visual">
       <OptionsEditorControl
-        label={'Display'}
+        label="Display"
         control={
           <ToggleButtonGroup
             color="primary"

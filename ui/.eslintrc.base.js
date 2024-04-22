@@ -70,6 +70,7 @@ module.exports = {
     'react-hooks/exhaustive-deps': 'error',
     // Not necessary in React 17
     'react/react-in-jsx-scope': 'off',
+    'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never', propElementValues: 'always' }],
 
     // We use this rule instead of the core eslint `no-duplicate-imports`
     // because it avoids false errors on cases where we have a regular

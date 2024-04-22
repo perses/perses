@@ -29,7 +29,7 @@ function DashboardMosaic({ dashboards }: DashboardMosaicProps) {
   if (dashboards.length === 0) {
     return (
       <Stack sx={{ alignItems: 'center', justifyContent: 'center' }} width="100%" height="50">
-        <Typography variant={'subtitle1'}>Empty</Typography>
+        <Typography variant="subtitle1">Empty</Typography>
       </Stack>
     );
   }

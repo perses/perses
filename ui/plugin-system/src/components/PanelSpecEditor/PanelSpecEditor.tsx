@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorAlert, JSONEditor } from '@perses-dev/components';
+import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
@@ -68,10 +68,14 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     );
   }
 
-  // always show json editor by default
+  // always show json editor and links editor by default
   tabs.push({
     label: 'JSON',
     content: <JSONEditor maxHeight="80vh" value={panelDefinition} onChange={onJSONChange} />,
+  });
+  tabs.push({
+    label: 'Links',
+    content: <LinksEditor />,
   });
 
   return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
