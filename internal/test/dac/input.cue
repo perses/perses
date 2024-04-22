@@ -123,7 +123,8 @@ import (
 }
 
 dashboardBuilder & {
-	#name:      "ContainersMonitoring"
+	#name: "ContainersMonitoring"
+	#display: name: "Containers monitoring"
 	#project:   "MyProject"
 	#variables: #myVarsBuilder.variables
 	#panelGroups: panelGroupsBuilder & {
