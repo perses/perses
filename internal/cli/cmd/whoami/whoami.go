@@ -87,6 +87,6 @@ func NewCMD() *cobra.Command {
 		},
 	}
 	cmd.Flags().BoolVar(&o.showToken, "show-token", o.showToken, "Print the token the current session is using.")
-	cmd.Flags().BoolVar(&o.showURL, "show-url", o.showURL, "If true, print the current server's REST API URL.")
+	cmd.Flags().BoolVar(&o.showURL, "show-url", o.showURL, "Print the current server's REST API URL.")
 	return cmd
 }
