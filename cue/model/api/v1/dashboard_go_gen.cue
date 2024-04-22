@@ -20,6 +20,7 @@ import "github.com/perses/perses/cue/model/api/v1/common"
 	display: #PanelDisplay  @go(Display)
 	plugin:  common.#Plugin @go(Plugin)
 	queries?: [...#Query] @go(Queries,[]Query)
+	links?: [...#Link] @go(Links,[]Link)
 }
 
 #Panel: {
