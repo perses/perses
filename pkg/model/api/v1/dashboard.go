@@ -35,7 +35,6 @@ type Link struct {
 type PanelDisplay struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
-	Links       []Link `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
 func (p *PanelDisplay) UnmarshalJSON(data []byte) error {
@@ -75,6 +74,7 @@ type PanelSpec struct {
 	Display PanelDisplay  `json:"display" yaml:"display"`
 	Plugin  common.Plugin `json:"plugin" yaml:"plugin"`
 	Queries []Query       `json:"queries,omitempty" yaml:"queries,omitempty"`
+	Links   []Link        `json:"links,omitempty" yaml:"links,omitempty"`
 }
 
 type Panel struct {
