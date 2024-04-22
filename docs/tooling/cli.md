@@ -23,6 +23,7 @@ Usage:
 Available Commands:
   apply       Create or update resources through a file. JSON or YAML format supported
   completion  Generate the autocompletion script for the specified shell
+  config      display local or remote config
   dac         Commands related to Dashboard-as-Code
   delete      Delete resources
   describe    Show details of a specific resource
@@ -34,6 +35,7 @@ Available Commands:
   project     Select the project used by default.
   refresh     refresh the access token when it expires
   version     Display client version.
+  whoami      Display current user used
 
 Flags:
   -h, --help                  help for percli

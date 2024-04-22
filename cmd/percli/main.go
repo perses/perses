@@ -28,6 +28,7 @@ import (
 	"github.com/perses/perses/internal/cli/cmd/refresh"
 	"github.com/perses/perses/internal/cli/cmd/remove"
 	"github.com/perses/perses/internal/cli/cmd/version"
+	"github.com/perses/perses/internal/cli/cmd/whoami"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -57,6 +58,7 @@ func newRootCommand() *cobra.Command {
 	cmd.AddCommand(refresh.NewCMD())
 	cmd.AddCommand(remove.NewCMD())
 	cmd.AddCommand(version.NewCMD())
+	cmd.AddCommand(whoami.NewCMD())
 
 	// the list of supported global flags
 	cmd.PersistentFlags().StringVar(&configPath, "percliconfig", config.GetDefaultPath(), "Path to the percliconfig file to use for CLI requests.")
