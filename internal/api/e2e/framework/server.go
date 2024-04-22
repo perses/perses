@@ -30,6 +30,7 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/model"
@@ -59,6 +60,22 @@ func DefaultConfig() apiConfig.Config {
 			Interval:        0,
 		},
 	}
+}
+
+func DefaultAuthConfig() apiConfig.Config {
+	conf := DefaultConfig()
+	conf.Security.EnableAuth = true
+	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
+		{
+			Actions: []role.Action{role.ReadAction},
+			Scopes:  []role.Scope{role.WildcardScope},
+		},
+		{
+			Actions: []role.Action{role.CreateAction},
+			Scopes:  []role.Scope{role.ProjectScope},
+		},
+	}}
+	return conf
 }
 
 func ClearAllKeys(t *testing.T, dao databaseModel.DAO, entities ...modelAPI.Entity) {

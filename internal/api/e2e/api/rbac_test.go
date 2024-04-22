@@ -26,29 +26,11 @@ import (
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/utils"
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	apiConfig "github.com/perses/perses/pkg/model/api/config"
-	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/stretchr/testify/assert"
 )
 
-func serverAuthConfig() apiConfig.Config {
-	conf := e2eframework.DefaultConfig()
-	conf.Security.EnableAuth = true
-	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
-		{
-			Actions: []role.Action{role.ReadAction},
-			Scopes:  []role.Scope{role.WildcardScope},
-		},
-		{
-			Actions: []role.Action{role.CreateAction},
-			Scopes:  []role.Scope{role.ProjectScope},
-		},
-	}}
-	return conf
-}
-
 func TestNewProjectEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -89,7 +71,7 @@ func TestNewProjectEndpoints(t *testing.T) {
 }
 
 func TestAnonymousEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -119,7 +101,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 }
 
 func TestUnauthorizedEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, serverAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).

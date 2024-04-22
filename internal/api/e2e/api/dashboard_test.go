@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	testUtils "github.com/perses/perses/internal/test"
 	"github.com/perses/perses/pkg/model/api"
+	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/stretchr/testify/assert"
 )
@@ -107,4 +108,56 @@ func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashb
 	dashboard := &modelV1.Dashboard{}
 	testUtils.JSONUnmarshal(b, dashboard)
 	return dashboard
+}
+
+func TestAuthListDashboardInProject(t *testing.T) {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+
+		usrEntity := e2eframework.NewUser("creator")
+		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
+			WithJSON(usrEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authEntity := modelAPI.Auth{
+			Login:    usrEntity.GetMetadata().GetName(),
+			Password: usrEntity.Spec.NativeProvider.Password,
+		}
+		authResponse := expect.POST(fmt.Sprintf("%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindNative, utils.PathLogin)).
+			WithJSON(authEntity).
+			Expect().
+			Status(http.StatusOK)
+
+		authResponse.JSON().Object().Keys().ContainsAll("accessToken", "refreshToken")
+		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
+
+		firstProject := e2eframework.NewProject("first")
+		secondProject := e2eframework.NewProject("second")
+		thirdProject := e2eframework.NewProject("third")
+		firstDashboard := e2eframework.NewDashboard(t, firstProject.Metadata.Name, "Demo-1")
+		secondDashboard := e2eframework.NewDashboard(t, secondProject.Metadata.Name, "Demo-2")
+		thirdDashboard := e2eframework.NewDashboard(t, thirdProject.Metadata.Name, "Demo-3")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject, firstDashboard, secondDashboard, thirdDashboard)
+
+		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(3)
+
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, firstProject.GetMetadata().GetName(), utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(1)
+
+		e2eframework.ClearAllKeys(t, manager.GetPersesDAO(), usrEntity)
+		return []api.Entity{firstProject, secondProject, thirdProject, firstDashboard, secondDashboard, thirdDashboard}
+	})
 }

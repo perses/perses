@@ -240,13 +240,18 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return t.listProjectWhenPermissionIsActivated(ctx, parameters, persesContext, projects, q)
 	}
 
-	// In case, there is one result; it can mean the user has global access to the resource across the project.
-	// Or it can mean he has access to only one project. If he has global access, then the value parameters.Project is empty.
-	// So when running the query in the database, it will be done across the whole table (i.e. with no project filtering)
-	if len(projects) == 1 {
-		if projects[0] != rbac.GlobalProject {
-			parameters.Project = projects[0]
+	// In the case the request is done on a specific project, no need to compute resource for all other authorized projects.
+	if len(parameters.Project) > 0 {
+		result, listErr := t.service.List(persesContext, q, parameters)
+		if listErr != nil {
+			return listErr
 		}
+		return ctx.JSON(http.StatusOK, result)
+	}
+
+	// In case, there is one result; it can mean the user has global access to the resource across the project.
+	// Or it can mean he has access to only one project. If he has global access, then we should return the complete list.
+	if len(projects) == 1 && projects[0] == rbac.GlobalProject {
 		result, listErr := t.service.List(persesContext, q, parameters)
 		if listErr != nil {
 			return listErr

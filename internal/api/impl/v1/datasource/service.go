@@ -83,14 +83,21 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+
+	query := &datasource.Query{
+		Query:      q.Query,
+		NamePrefix: q.NamePrefix,
+		Project:    q.Project,
 	}
-	dtsList, err := s.dao.List(q)
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	dtsList, err := s.dao.List(query)
 	if err != nil {
 		return nil, err
 	}
-	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
+	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
 }
 
 func (s *service) validate(entity *v1.Datasource) error {
