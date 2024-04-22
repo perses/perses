@@ -54,12 +54,12 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	// enable hot reload of CUE schemas for dashboard validation:
 	// - watch for changes on the schemas folders
 	// - register a cron task to reload all the schemas every <interval>
-	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
+	watcher, _, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of schemas: %w", err)
 	}
 	// enable hot reload of the migration schemas
-	migrateWatcher, migrateReloader, err := migrate.NewHotReloaders(serviceManager.GetMigration())
+	migrateWatcher, _, err := migrate.NewHotReloaders(serviceManager.GetMigration())
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
 	}
@@ -69,8 +69,13 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
 	}
 
+	// There is a memory leak in the package Cuelang we are using: https://github.com/cue-lang/cue/issues/2121.
+	// A way to mitigate the issue is to deactivate the cron that is calling the method that leaks.
+	// For the moment, it's ok to deactivate it since it's not possible to load a plugin from outside (missing the JS loading).
+	// Once the memory leak is fixed, then we can uncomment this line.
+	// runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
 	runner.WithTasks(watcher, migrateWatcher)
-	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
