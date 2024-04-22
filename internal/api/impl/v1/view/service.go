@@ -15,42 +15,39 @@ package view
 
 import (
 	"github.com/perses/perses/internal/api/interface/v1/view"
+	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/client_golang/prometheus"
-)
-
-const (
-	namespace = "perses"
 )
 
 var labelNames = []string{"project", "dashboard"}
 
 // A counter for the total number of views of a dashboard.
 var dashboardViewCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Namespace: namespace,
+	Namespace: utils.MetricNamespace,
 	Name:      "dashboard_views_total",
 	Help:      "The total number of views of a dashboard",
 }, labelNames)
 
 // A counter for the total number of render errors of a dashboard.
 var dashboardRenderErrorCounter = prometheus.NewCounterVec(prometheus.CounterOpts{
-	Namespace: namespace,
+	Namespace: utils.MetricNamespace,
 	Name:      "dashboard_render_errors_total",
 	Help:      "The total number of render errors of a dashboard",
 }, labelNames)
 
 // A histogram for the render time of a dashboard.
 var dashboardRenderTime = prometheus.NewHistogramVec(prometheus.HistogramOpts{
-	Namespace: namespace,
+	Namespace: utils.MetricNamespace,
 	Name:      "dashboard_render_time_seconds",
 	Help:      "The render time of a dashboard",
 	Buckets:   prometheus.DefBuckets,
 }, labelNames)
 
-func init() {
-	prometheus.MustRegister(dashboardViewCounter)
-	prometheus.MustRegister(dashboardRenderErrorCounter)
-	prometheus.MustRegister(dashboardRenderTime)
+func RegisterMetrics(reg prometheus.Registerer) {
+	reg.MustRegister(dashboardViewCounter)
+	reg.MustRegister(dashboardRenderErrorCounter)
+	reg.MustRegister(dashboardRenderTime)
 }
 
 // A service that keeps track of views in Prometheus metrics that can be

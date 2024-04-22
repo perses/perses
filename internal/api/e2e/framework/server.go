@@ -113,11 +113,12 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 			File: defaultFileConfig(),
 		}
 	}
-	runner, persistenceManager, err := core.New(conf, false, "")
+	registerer := prometheus.NewRegistry()
+	runner, persistenceManager, err := core.New(conf, false, registerer, "")
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler, err := runner.HTTPServerBuilder().PrometheusRegisterer(prometheus.NewRegistry()).BuildHandler()
+	handler, err := runner.HTTPServerBuilder().BuildHandler()
 	if err != nil {
 		t.Fatal(err)
 	}
