@@ -51,6 +51,7 @@ var (
 
 func TestDashboardBuilder(t *testing.T) {
 	builder, buildErr := New("ContainersMonitoring",
+		Name("Containers monitoring"),
 		ProjectName("MyProject"),
 
 		// VARIABLES
@@ -137,6 +138,7 @@ func TestDashboardBuilder(t *testing.T) {
 
 func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 	builder, buildErr := New("ContainersMonitoring",
+		Name("Containers monitoring"),
 		ProjectName("MyProject"),
 
 		// VARIABLES

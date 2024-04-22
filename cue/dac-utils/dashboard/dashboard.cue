@@ -18,12 +18,14 @@ package dashboard
 
 import (
 	"github.com/perses/perses/cue/model/api/v1"
+	v1Common "github.com/perses/perses/cue/model/api/v1/common"
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
 // expected user inputs
-#name:    string
-#project: string
+#name:     string
+#display?: v1Common.#Display
+#project:  string
 #variables: [...v1Dashboard.#Variable]
 #panelGroups: [string]: {
 	layout: v1Dashboard.#Layout
@@ -37,6 +39,9 @@ v1.#Dashboard & {
 		project: #project
 	}
 	spec: {
+		if #display != _|_ {
+			display: #display
+		}
 		variables: #variables
 		panels: {for group in #panelGroups {group.panels}}
 		layouts: [for group in #panelGroups {group.layout}]

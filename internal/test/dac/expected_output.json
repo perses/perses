@@ -8,6 +8,9 @@
     "version": 0
   },
   "spec": {
+    "display": {
+      "name": "Containers monitoring"
+    },
     "variables": [
       {
         "kind": "ListVariable",
