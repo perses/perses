@@ -23,7 +23,7 @@ import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { UserResource } from '../../model/user-client';
-import { useConfig } from '../../model/config-client';
+import { useIsExternalProviderEnabled, useIsNativeProviderEnabled } from '../../context/Config';
 
 interface UserEditorFormProps {
   initialUser: UserResource;
@@ -38,10 +38,8 @@ interface UserEditorFormProps {
 export function UserEditorForm(props: UserEditorFormProps) {
   const { initialUser, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
-  const { data: config } = useConfig();
-
-  const externalProvidersEnabled =
-    config?.security.authentication.providers.oidc?.length || config?.security.authentication.providers.oauth?.length;
+  const externalProvidersEnabled = useIsExternalProviderEnabled();
+  const nativeProviderEnabled = useIsNativeProviderEnabled();
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
@@ -226,7 +224,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
             </IconButton>
           ) : (
             <Stack gap={2}>
-              {!config?.security.authentication.providers.enable_native && (
+              {!nativeProviderEnabled && (
                 <Alert severity="warning">Native provider is currently disabled in the config!</Alert>
               )}
               <Stack direction="row" gap={1} alignItems="end">
@@ -266,7 +264,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
           <Typography variant="h1" mb={2}>
             OAuth & OIDC Providers
           </Typography>
-          {externalProvidersEnabled && (
+          {!externalProvidersEnabled && (
             <Alert severity="warning">No OAuth or OIDC providers are currently enabled in the config!</Alert>
           )}
           <Stack gap={2}>

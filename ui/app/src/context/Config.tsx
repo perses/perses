@@ -80,3 +80,15 @@ export function useInformation(): string {
   const html = useMemo(() => marked.parse(config.information ?? '', { gfm: true }), [config.information]);
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
+
+export function useIsNativeProviderEnabled(): boolean {
+  const { config } = useConfigContext();
+  return config.security.authentication.providers.enable_native;
+}
+
+export function useIsExternalProviderEnabled(): boolean {
+  const { config } = useConfigContext();
+  return (
+    !!config.security.authentication.providers.oidc?.length || !!config.security.authentication.providers.oauth?.length
+  );
+}
