@@ -36,18 +36,6 @@ const (
 	cueExtension = ".cue"
 )
 
-// writeToFile writes data to a file
-func writeToFile(filePath string, data []byte) error {
-	file, err := os.Create(filePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	_, err = file.Write(data)
-	return err
-}
-
 type option struct {
 	persesCMD.Option
 	opt.FileOption
@@ -162,11 +150,9 @@ func (o *option) processFile(file string, extension string) error {
 	outputFilePath := o.buildOutputFilePath(file)
 
 	// Write the output to the file
-	err = writeToFile(outputFilePath, cmdOutput)
-	if err != nil {
-		return fmt.Errorf("error writing to %s: %v", outputFilePath, err)
+	if writeErr := os.WriteFile(outputFilePath, cmdOutput, 0644); writeErr != nil { // nolint: gosec
+		return fmt.Errorf("error writing to %s: %v", outputFilePath, writeErr)
 	}
-
 	return output.HandleString(o.writer, fmt.Sprintf("Succesfully built %s at %s", file, outputFilePath))
 }
 
