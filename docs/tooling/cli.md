@@ -58,11 +58,12 @@ The only parameter required to use this command is the URL to the API.
 $ percli login https://demo.perses.dev
 ```
 
-Depending on the server configuration, you will certainly have to provide a token or a user/password.
+If the server requires an authentication, you will have to provide either:
 
-- `--token` can be used to set a Bearer JWT token
-- `--username` and `--password` can be used to set a username & password. The command will contact the Perses server
+- a token: `--token` can be used to set a Bearer JWT token.
+- a user + password: `--username` and `--password` can be used to set a username & password. The command will contact the Perses server
   with the credential(s). It will return a Bearer JWT token which expires after 1h.
+- delegated auth information: if the server relies on an external OIDC/OAuth provider for authentication, use `--client-id` and `--client-secret` to pass the client credentials, plus `--provider` to pass the identifier of the external provider (e.g `google`, `azure`..).
 
 The URL and the token will be stored in JSON file that is by default `<UserHome>/.perses/config.json`.
 
