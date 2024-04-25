@@ -18,10 +18,13 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
 	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
+	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
 	"github.com/perses/perses/go-sdk/prometheus/query"
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
@@ -121,6 +124,18 @@ func TestDashboardBuilder(t *testing.T) {
 			cpuPanel,
 			memoryPanel,
 		),
+
+		// DATASOURCES
+		AddDatasource("myPromDemo",
+			datasource.Default(true),
+			promDs.Prometheus(
+				promDs.DirectURL("http://localhost:9090"),
+			),
+		),
+
+		// TIME
+		Duration(3*time.Hour),
+		RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
@@ -210,6 +225,18 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			cpuPanel,
 			memoryPanel,
 		),
+
+		// DATASOURCES
+		AddDatasource("myPromDemo",
+			datasource.Default(true),
+			promDs.Prometheus(
+				promDs.DirectURL("http://localhost:9090"),
+			),
+		),
+
+		// TIME
+		Duration(3*time.Hour),
+		RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
