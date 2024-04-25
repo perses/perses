@@ -11,53 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package panel
+package link
 
-import (
-	"github.com/perses/perses/go-sdk/link"
-	"github.com/perses/perses/go-sdk/query"
-	"github.com/perses/perses/pkg/model/api/v1/common"
-)
-
-func Title(title string) Option {
+func URL(url string) Option {
 	return func(builder *Builder) error {
-		builder.Spec.Display.Name = title
+		builder.URL = url
 		return nil
 	}
 }
 
-func Description(description string) Option {
+func Name(name string) Option {
 	return func(builder *Builder) error {
-		builder.Spec.Display.Description = description
+		builder.Name = name
 		return nil
 	}
 }
 
-func Plugin(plugin common.Plugin) Option {
+func Tooltip(tooltip string) Option {
 	return func(builder *Builder) error {
-		builder.Spec.Plugin = plugin
+		builder.Tooltip = tooltip
 		return nil
 	}
 }
 
-func AddQuery(options ...query.Option) Option {
+func RenderVariable(isRenderingVariable bool) Option {
 	return func(builder *Builder) error {
-		q, err := query.New(options...)
-		if err != nil {
-			return err
-		}
-		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
+		builder.RenderVariables = isRenderingVariable
 		return nil
 	}
 }
 
-func AddLink(url string, options ...link.Option) Option {
+func TargetBlank(isTargetingBlank bool) Option {
 	return func(builder *Builder) error {
-		l, err := link.New(url, options...)
-		if err != nil {
-			return err
-		}
-		builder.Spec.Links = append(builder.Spec.Links, l.Link)
+		builder.TargetBlank = isTargetingBlank
 		return nil
 	}
 }
