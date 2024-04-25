@@ -54,7 +54,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	// enable hot reload of CUE schemas for dashboard validation:
 	// - watch for changes on the schemas folders
 	// - register a cron task to reload all the schemas every <interval>
-	watcher, _, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
+	watcher, reloader, err := schemas.NewHotReloaders(serviceManager.GetSchemas().GetLoaders())
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of schemas: %w", err)
 	}
@@ -70,10 +70,22 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	// There is a memory leak in the package Cuelang we are using: https://github.com/cue-lang/cue/issues/2121.
-	// A way to mitigate the issue is to deactivate the cron that is calling the method that leaks.
-	// For the moment, it's ok to deactivate it since it's not possible to load a plugin from outside (missing the JS loading).
-	// Once the memory leak is fixed, then we can uncomment this line.
-	// runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+	// We need to clean up the Cuelang context periodically, because it kept in memory everything that has been validated.
+	// So each time we are creating / updating a dashboard, memory is increased and never flushed.
+	// The way to clean up the Cuelang context today is by reloading the schema.
+	//
+	// BUT each time we are reloading the schemas, memory is also increased because of the memory leak pointed in the above issue.
+	//
+	// The idea to mitigate this memory leak we cannot avoid is to reload the schema at the same rate as the provisioner or every 6h.
+	// We hope that the data stored during the provisioner is higher than the one kept during the reload of the schema.
+	// So if we reload the schema, then we will release more memory than the one kept by the reload of the schema.
+
+	schemaReloadDuration := time.Hour * 6
+	if len(conf.Provisioning.Folders) > 0 && time.Duration(conf.Provisioning.Interval) <= schemaReloadDuration {
+		schemaReloadDuration = time.Duration(conf.Provisioning.Interval)
+	}
+	// We are not reloading the migration schema as it doesn't help to flush the context used for the validation.
+	runner.WithTimerTasks(schemaReloadDuration, reloader)
 	runner.WithTasks(watcher, migrateWatcher)
 
 	if len(conf.Provisioning.Folders) > 0 {
