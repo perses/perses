@@ -19,8 +19,8 @@ import (
 )
 
 type Sparkline struct {
-	Color string `json:"color,omitempty" yaml:"color,omitempty"`
-	Width int    `json:"width,omitempty" yaml:"width,omitempty"`
+	Color string  `json:"color,omitempty" yaml:"color,omitempty"`
+	Width float64 `json:"width,omitempty" yaml:"width,omitempty"`
 }
 
 type PluginSpec struct {
