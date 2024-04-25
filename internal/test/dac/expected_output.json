@@ -322,6 +322,17 @@
         }
       }
     ],
-    "duration": "1h"
+    "duration": "1h",
+    "datasources": {
+      "myPromDemo": {
+        "default": true,
+        "plugin": {
+          "kind": "PrometheusDatasource",
+          "spec": {
+            "directUrl": "http://localhost:9090"
+          }
+        }
+      }
+    }
   }
 }
