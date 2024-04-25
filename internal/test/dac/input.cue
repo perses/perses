@@ -25,6 +25,7 @@ import (
 	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	prometheusDs "github.com/perses/perses/cue/schemas/datasources/prometheus:model"
 )
 
 #myVarsBuilder: varGroupBuilder & {
@@ -148,4 +149,10 @@ dashboardBuilder & {
 			},
 		]
 	}
+	#datasources: {myPromDemo: {
+		default: true
+		plugin: prometheusDs & {spec: {
+			directUrl: "http://localhost:9090"
+		}}
+	}}
 }
