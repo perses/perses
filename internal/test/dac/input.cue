@@ -155,4 +155,6 @@ dashboardBuilder & {
 			directUrl: "http://localhost:9090"
 		}}
 	}}
+	#duration:        "3h"
+	#refreshInterval: "30s"
 }
