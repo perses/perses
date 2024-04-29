@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -47,9 +47,13 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.User) (*v1.Pub
 		logrus.WithError(err).Errorf("unable to generate the hash for the password of the user %s", entity.Metadata.Name)
 		return nil, apiInterface.InternalError
 	}
+	plaintextPassword := entity.Spec.NativeProvider.Password
 	// save the hash in the password field
 	entity.Spec.NativeProvider.Password = string(hash)
 	if createErr := s.dao.Create(entity); createErr != nil {
+		// if the creation failed, then we restore the password to the plaintext value
+		// so that we can retry with the same user entity.
+		entity.Spec.NativeProvider.Password = plaintextPassword
 		return nil, createErr
 	}
 	return v1.NewPublicUser(entity), nil
