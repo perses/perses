@@ -86,9 +86,10 @@ func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params
 	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
 
 	query := &datasource.Query{
-		Query:      q.Query,
 		NamePrefix: q.NamePrefix,
 		Project:    q.Project,
+		Kind:       q.Kind,
+		Default:    q.Default,
 	}
 	if len(query.Project) == 0 {
 		query.Project = params.Project
