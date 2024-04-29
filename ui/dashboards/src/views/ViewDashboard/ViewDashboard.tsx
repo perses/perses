@@ -62,6 +62,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
+  // const showPanelRef = 'basicEx'; // TODO: query param for showing a specific panel
 
   const builtinVariables = useMemo(() => {
     const result = [
@@ -100,7 +101,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
+      <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing /*showPanelRef: showPanelRef*/ }}>
         <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}

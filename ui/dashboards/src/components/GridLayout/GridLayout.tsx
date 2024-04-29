@@ -10,31 +10,42 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { useEditMode, usePanelGroup, usePanelGroupActions, PanelGroupId } from '../../context';
+import {
+  useEditMode,
+  usePanelGroup,
+  usePanelGroupActions,
+  PanelGroupId,
+  PanelGroupItemLayout,
+  useShowPanel,
+  PanelGroupDefinition,
+} from '../../context';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelOptions } from '../Panel';
 import { GridTitle } from './GridTitle';
 import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
 const DEFAULT_MARGIN = 10;
+const ROW_HEIGHT = 30;
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
   panelOptions?: PanelOptions;
+  panelFullHeight?: number;
+  // showPanelRef?: string;
 }
 
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const { panelGroupId /*...others */ } = props;
+  const { panelGroupId, panelOptions, panelFullHeight /*showPanelRef*/ } = props;
   const theme = useTheme();
-  const groupDefinition = usePanelGroup(panelGroupId);
+  const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed ?? true);
@@ -42,13 +53,43 @@ export function GridLayout(props: GridLayoutProps) {
 
   const [gridColWidth, setGridColWidth] = useState(0);
 
+  const showPanelItemId = useShowPanel();
+  const hasShowPanel = showPanelItemId?.panelGroupId === panelGroupId;
+  const itemLayoutShowed = showPanelItemId?.panelGroupItemLayoutId;
+
+  const showGrid = useMemo(() => {
+    if (showPanelItemId === undefined) {
+      return true;
+    }
+    return hasShowPanel;
+  }, [hasShowPanel, showPanelItemId]);
+
+  const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
+    if (itemLayoutShowed) {
+      return groupDefinition.itemLayouts.map((itemLayout) => {
+        if (itemLayout.i === itemLayoutShowed) {
+          const rowTitleHeight = 40 + 8; // 8 is the margin
+          return {
+            h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)),
+            i: itemLayoutShowed,
+            w: 48,
+            x: 0,
+            y: 0,
+          } as PanelGroupItemLayout;
+        }
+        return itemLayout;
+      });
+    }
+    return groupDefinition.itemLayouts;
+  }, [groupDefinition.itemLayouts, itemLayoutShowed, panelFullHeight]);
+
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
     // a bug in react-layout-grid where `currentLayout` does not adjust properly
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
     const smallLayout = allLayouts[GRID_LAYOUT_SMALL_BREAKPOINT];
-    if (smallLayout) {
+    if (smallLayout && !hasShowPanel) {
       updatePanelGroupLayouts(smallLayout);
     }
   };
@@ -71,7 +112,7 @@ export function GridLayout(props: GridLayoutProps) {
   };
 
   return (
-    <GridContainer>
+    <GridContainer sx={{ display: showGrid ? 'unset' : 'none' }}>
       {groupDefinition.title !== undefined && (
         <GridTitle
           panelGroupId={panelGroupId}
@@ -88,24 +129,36 @@ export function GridLayout(props: GridLayoutProps) {
           className="layout"
           breakpoints={{ sm: theme.breakpoints.values.sm, xxs: 0 }}
           cols={GRID_LAYOUT_COLS}
-          rowHeight={30}
+          rowHeight={ROW_HEIGHT}
           draggableHandle=".drag-handle"
           resizeHandles={['se']}
-          isDraggable={isEditMode}
-          isResizable={isEditMode}
+          isDraggable={isEditMode && !hasShowPanel}
+          isResizable={isEditMode && !hasShowPanel}
           margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
-          layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: groupDefinition.itemLayouts }}
+          layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: itemLayouts }}
           onLayoutChange={handleLayoutChange}
           onWidthChange={handleWidthChange}
+          allowOverlap={hasShowPanel} // Enabling overlap when showing a specific panel because panel in front will add empty spaces (empty row height)
         >
-          {groupDefinition.itemLayouts.map(({ i, w }) => (
-            <div key={i}>
+          {itemLayouts.map(({ i, w }) => (
+            <div
+              key={i}
+              style={{
+                display: itemLayoutShowed !== undefined ? (itemLayoutShowed === i ? 'unset' : 'none') : 'unset',
+              }}
+            >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
                 <GridItemContent
-                  panelOptions={props.panelOptions}
+                  panelOptions={panelOptions}
                   panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
-                  width={calculateGridItemWidth(w, gridColWidth)}
+                  width={
+                    itemLayoutShowed !== undefined
+                      ? itemLayoutShowed === i
+                        ? calculateGridItemWidth(w, 1) // TODO
+                        : 0
+                      : calculateGridItemWidth(w, gridColWidth)
+                  }
                 />
               </ErrorBoundary>
             </div>

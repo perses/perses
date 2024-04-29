@@ -14,9 +14,8 @@
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
-import { Panel, PanelProps } from '../Panel/Panel';
-import { PanelOptions } from '../Panel';
+import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useShowPanel } from '../../context';
+import { Panel, PanelProps, PanelOptions } from '../Panel';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
@@ -34,13 +33,23 @@ export function GridItemContent(props: GridItemContentProps) {
     spec: { queries },
   } = panelDefinition;
   const { isEditMode } = useEditMode();
-  const { openEditPanel, openDeletePanelDialog, duplicatePanel } = usePanelActions(panelGroupItemId);
-
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel, showPanel } = usePanelActions(panelGroupItemId);
+  const showPanelGroupItemId = useShowPanel();
   const { ref, inView } = useInView({
     threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
     initialInView: false,
     triggerOnce: true,
   });
+
+  const readHandlers = {
+    onShowPanelClick: function () {
+      if (showPanelGroupItemId === undefined) {
+        showPanel(panelGroupItemId);
+      } else {
+        showPanel(undefined);
+      }
+    },
+  };
 
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
@@ -81,6 +90,7 @@ export function GridItemContent(props: GridItemContentProps) {
         {inView && (
           <Panel
             definition={panelDefinition}
+            readHandlers={readHandlers}
             editHandlers={editHandlers}
             panelOptions={props.panelOptions}
             panelGroupItemId={panelGroupItemId}

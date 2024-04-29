@@ -13,6 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { useRef } from 'react';
 import { usePanelGroupIds } from '../../context';
 import { GridLayout } from '../GridLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
@@ -32,10 +33,14 @@ export type DashboardProps = BoxProps & {
  */
 export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: DashboardProps) {
   const panelGroupIds = usePanelGroupIds();
+  const boxRef = useRef<HTMLDivElement>(null);
+  // const { showPanelRefState } = useShowPanelRef(); // TODO: check if panelRef exists => ignore
   const isEmpty = !panelGroupIds.length;
+  const dashboardTopPosition = boxRef.current?.getBoundingClientRect().top ?? 165;
+  const panelFullHeight = window.innerHeight - dashboardTopPosition - window.scrollY;
 
   return (
-    <Box {...boxProps} sx={{ height: '100%' }}>
+    <Box {...boxProps} sx={{ height: '100%' }} ref={boxRef}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isEmpty && (
           <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
@@ -44,7 +49,13 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
         )}
         {!isEmpty &&
           panelGroupIds.map((panelGroupId) => (
-            <GridLayout key={panelGroupId} panelGroupId={panelGroupId} panelOptions={panelOptions} />
+            <GridLayout
+              key={panelGroupId}
+              panelGroupId={panelGroupId}
+              panelOptions={panelOptions}
+              panelFullHeight={panelFullHeight}
+              // showPanelRef={showPanelRefState.showPanelRef}
+            />
           ))}
       </ErrorBoundary>
     </Box>

@@ -27,6 +27,7 @@ import {
   EphemeralDashboardResource,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
+import { ar } from 'date-fns/locale';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -38,6 +39,7 @@ import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
+import { createShowPanelSlice, ShowPanelSlice, ShowPanelState } from './show-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -49,7 +51,8 @@ export interface DashboardStoreState
     DiscardChangesConfirmationDialogSlice,
     DuplicatePanelSlice,
     EditJsonDialogSlice,
-    SaveChangesConfirmationDialogSlice {
+    SaveChangesConfirmationDialogSlice,
+    ShowPanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
@@ -59,12 +62,14 @@ export interface DashboardStoreState
   refreshInterval: DurationString;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
-  ttl?: DurationString;
+  showPanelRef?: string;
+  ttl?: DurationString; // Only for EphemeralDashboards
 }
 
 export interface DashboardStoreProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
+  showPanelRef?: string;
 }
 
 export interface DashboardProviderProps {
@@ -112,7 +117,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
 function initStore(props: DashboardProviderProps) {
   const {
-    initialState: { dashboardResource, isEditMode },
+    initialState: { dashboardResource, isEditMode, showPanelRef },
   } = props;
 
   const {
@@ -145,6 +150,7 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
           ...createDuplicatePanelSlice()(...args),
+          ...createShowPanelSlice(showPanelRef)(...args),
           /* General */
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),

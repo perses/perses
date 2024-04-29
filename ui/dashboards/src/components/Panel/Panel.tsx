@@ -22,6 +22,7 @@ import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
+  readHandlers?: PanelHeaderProps['readHandlers'];
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
@@ -55,7 +56,17 @@ export type PanelExtraProps = {
  * Renders a PanelDefinition's content inside of a Card.
  */
 export const Panel = memo(function Panel(props: PanelProps) {
-  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, panelOptions, panelGroupItemId, ...others } = props;
+  const {
+    definition,
+    readHandlers,
+    editHandlers,
+    onMouseEnter,
+    onMouseLeave,
+    sx,
+    panelOptions,
+    panelGroupItemId,
+    ...others
+  } = props;
 
   // Make sure we have an ID we can use for aria attributes
   const generatedPanelId = useId('Panel');
@@ -106,6 +117,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           id={headerId}
           title={definition.spec.display.name}
           description={definition.spec.display.description}
+          readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}

@@ -20,6 +20,10 @@ import Router from './Router';
 import { SignInRoute, SignUpRoute } from './model/route';
 import { AuthorizationProvider } from './context/Authorization';
 
+function isDashboardViewRoute(pathname: string): boolean {
+  return /\/projects\/[a-zA-Z0-9_]+\/dashboards\/[a-zA-Z0-9_]+/.test(pathname);
+}
+
 function App() {
   const location = useLocation();
   return (
@@ -42,7 +46,7 @@ function App() {
         >
           <Router />
         </Box>
-        <Footer />
+        {!isDashboardViewRoute(location.pathname) && <Footer />}
       </Box>
     </AuthorizationProvider>
   );

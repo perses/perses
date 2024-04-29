@@ -39,6 +39,7 @@ export interface DashboardAppProps {
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
   isCreating?: boolean;
+  // showPanelRshowPanelRefef?: string;
 }
 
 export const DashboardApp = (props: DashboardAppProps) => {

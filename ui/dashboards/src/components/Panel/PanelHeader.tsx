@@ -17,6 +17,7 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
+import ArrowExpand from 'mdi-material-ui/ArrowExpand';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactNode } from 'react';
@@ -31,6 +32,9 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   description?: string;
   links?: Link[];
   extra?: ReactNode;
+  readHandlers?: {
+    onShowPanelClick: () => void;
+  };
   editHandlers?: {
     onEditPanelClick: () => void;
     onDuplicatePanelClick: () => void;
@@ -43,6 +47,7 @@ export function PanelHeader({
   title: rawTitle,
   description: rawDescription,
   links,
+  readHandlers,
   editHandlers,
   sx,
   extra,
@@ -54,10 +59,24 @@ export function PanelHeader({
   const title = useReplaceVariablesInString(rawTitle) as string;
   const description = useReplaceVariablesInString(rawDescription);
 
-  let actions: CardHeaderProps['action'] = undefined;
+  let readActions: CardHeaderProps['action'] = undefined;
+  if (readHandlers !== undefined) {
+    readActions = (
+      <InfoTooltip description={TOOLTIP_TEXT.showPanel}>
+        <HeaderIconButton
+          aria-label={ARIA_LABEL_TEXT.showPanel(title)}
+          size="small"
+          onClick={readHandlers.onShowPanelClick}
+        >
+          <ArrowExpand fontSize="inherit" />
+        </HeaderIconButton>
+      </InfoTooltip>
+    );
+  }
+  let editActions: CardHeaderProps['action'] = undefined;
   if (editHandlers !== undefined) {
     // If there are edit handlers, always just show the edit buttons
-    actions = (
+    editActions = (
       <>
         <InfoTooltip description={TOOLTIP_TEXT.editPanel}>
           <HeaderIconButton
@@ -144,7 +163,7 @@ export function PanelHeader({
       }
       action={
         <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-          {editHandlers === undefined && extra} {actions}
+          {editHandlers === undefined && extra} {readActions} {editActions}
         </HeaderActionWrapper>
       }
       sx={combineSx(
