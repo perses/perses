@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.45.0-rc1 / 2024-04-30
+
+- [FEATURE] Add panel links to Go SDK (#1958)
+- [ENHANCEMENT] DaC CUE SDK: support time fields in dashboard builder
+- [ENHANCEMENT] DaC CUE SDK: support passing datasources in dashboard builder (#1957)
+- [BUGFIX] Fix auto refresh #1969
+- [BUGFIX] Fix datasource query (#1966)
+- [BUGFIX] Fix upsert function in provisioner and in the `apply` cmd (#1962)
+- [BUGFIX] Go SDK move some int to float (#1955)
+- [BUGFIX] Fix permission file gave when writing the result of dac command (#1951)
+- [BUGIFX] Fix external provider warning in user form (#1950)
+- [BREAKINGCHANGE] Reactivate the cron task that reloads the schemas (#1956)
+- [DOC] `percli login`: add some doc for the external provider use case. (#1953)
+
 ## 0.45.0-rc0 / 2024-04-22
 
 - [FEATURE] CLI: add cmd whoami (#1920)
