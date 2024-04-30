@@ -90,6 +90,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
     setRefreshCounter((counter) => counter + 1);
   }, [setRefreshCounter]);
 
+  const refreshIntervalInMs = getRefreshIntervalInMs(localRefreshInterval);
+  useEffect(() => {
+    if (refreshIntervalInMs > 0) {
+      const interval = setInterval(() => {
+        refresh();
+      }, refreshIntervalInMs);
+
+      return () => clearInterval(interval);
+    }
+  }, [refresh, refreshIntervalInMs]);
+
   const ctx = useMemo(() => {
     const absoluteTimeRange = isRelativeTimeRange(localTimeRange)
       ? toAbsoluteTimeRange(localTimeRange)
@@ -101,10 +112,18 @@ export function TimeRangeProvider(props: TimeRangeProviderProps) {
       refresh,
       refreshKey: `${absoluteTimeRange.start}:${absoluteTimeRange.end}:${localRefreshInterval}:${refreshCounter}`,
       refreshInterval: localRefreshInterval,
-      refreshIntervalInMs: getRefreshIntervalInMs(localRefreshInterval),
+      refreshIntervalInMs: refreshIntervalInMs,
       setRefreshInterval: setRefreshInterval ?? setLocalRefreshInterval,
     };
-  }, [localTimeRange, setTimeRange, refresh, refreshCounter, localRefreshInterval, setRefreshInterval]);
+  }, [
+    localTimeRange,
+    setTimeRange,
+    refresh,
+    localRefreshInterval,
+    refreshCounter,
+    refreshIntervalInMs,
+    setRefreshInterval,
+  ]);
 
   return <TimeRangeContext.Provider value={ctx}>{children}</TimeRangeContext.Provider>;
 }
