@@ -63,20 +63,23 @@ export function useImportantDashboardSelectors(): DashboardSelector[] {
   const { config } = useConfigContext();
   return useMemo(() => {
     if (!config.database.file?.case_sensitive || !config.database.sql?.case_sensitive) {
-      return (config.important_dashboards ?? []).map((selector) => {
+      return (config.frontend.important_dashboards ?? []).map((selector) => {
         return {
           project: selector.project.toLowerCase(),
           dashboard: selector.dashboard.toLowerCase(),
         };
       });
     }
-    return config.important_dashboards ?? [];
-  }, [config.database.file?.case_sensitive, config.database.sql?.case_sensitive, config.important_dashboards]);
+    return config.frontend.important_dashboards ?? [];
+  }, [config.database.file?.case_sensitive, config.database.sql?.case_sensitive, config.frontend.important_dashboards]);
 }
 
 export function useInformation(): string {
   const { config } = useConfigContext();
 
-  const html = useMemo(() => marked.parse(config.information ?? '', { gfm: true }), [config.information]);
+  const html = useMemo(
+    () => marked.parse(config.frontend.information ?? '', { gfm: true }),
+    [config.frontend.information]
+  );
   return useMemo(() => DOMPurify.sanitize(html), [html]);
 }
