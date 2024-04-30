@@ -16,6 +16,7 @@ package user
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 
 	"github.com/perses/perses/internal/api/crypto"
@@ -36,6 +37,14 @@ func NewService(dao user.DAO) user.Service {
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.User) (*v1.PublicUser, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.User) (*v1.PublicUser, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	// check that the password is correctly filled
@@ -56,6 +65,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.User) (*v1.Pub
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.User, parameters apiInterface.Parameters) (*v1.PublicUser, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in user '%s' and coming from the http request: '%s' doesn't match", entity.Metadata.Name, parameters.Name)
 		return nil, fmt.Errorf("%w: metadata.name and the name in the http path request doesn't match", apiInterface.BadRequestError)

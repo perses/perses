@@ -14,6 +14,9 @@
 package variable
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/validate"
 
@@ -37,8 +40,16 @@ func NewService(dao variable.DAO, sch schemas.Schemas) variable.Service {
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Variable) (*v1.Variable, error) {
-	if err := validate.Variable(entity, s.sch); err != nil {
-		return nil, apiInterface.HandleBadRequestError(err.Error())
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.Variable) (*v1.Variable, error) {
+	if validateErr := validate.Variable(entity, s.sch); validateErr != nil {
+		return nil, apiInterface.HandleBadRequestError(validateErr.Error())
 	}
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
@@ -49,6 +60,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Variable) (*v1
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Variable, parameters apiInterface.Parameters) (*v1.Variable, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.Variable, parameters apiInterface.Parameters) (*v1.Variable, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Variable %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -87,13 +106,16 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
 	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query := &variable.Query{
-		Query:      q.Query,
-		NamePrefix: q.NamePrefix,
-		Project:    q.Project,
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
 	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
+	return s.list(query, params)
+}
+
+func (s *service) list(q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
 	}
-	return s.dao.List(query)
+	return s.dao.List(q)
 }

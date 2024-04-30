@@ -14,6 +14,9 @@
 package datasource
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/schemas"
@@ -36,6 +39,14 @@ func NewService(dao datasource.DAO, sch schemas.Schemas) datasource.Service {
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Datasource) (*v1.Datasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.Datasource) (*v1.Datasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -48,6 +59,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Datasource) (*
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.Datasource, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -81,24 +100,24 @@ func (s *service) Delete(_ apiInterface.PersesContext, parameters apiInterface.P
 func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Parameters) (*v1.Datasource, error) {
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
-
 func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
 	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
+	}
+	return s.list(query, params)
+}
 
-	query := &datasource.Query{
-		NamePrefix: q.NamePrefix,
-		Project:    q.Project,
-		Kind:       q.Kind,
-		Default:    q.Default,
+func (s *service) list(q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
 	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
-	}
-	dtsList, err := s.dao.List(query)
+	dtsList, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
 	}
-	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
+	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
 }
 
 func (s *service) validate(entity *v1.Datasource) error {
