@@ -16,6 +16,7 @@ package globalrolebinding
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
@@ -47,6 +48,14 @@ func NewService(dao globalrolebinding.DAO, globalRoleDAO globalrole.DAO, userDAO
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.GlobalRoleBinding) (*v1.GlobalRoleBinding, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.validateGlobalRoleBinding(entity); err != nil {
@@ -63,6 +72,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRoleBind
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalRoleBinding, parameters apiInterface.Parameters) (*v1.GlobalRoleBinding, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.GlobalRoleBinding, parameters apiInterface.Parameters) (*v1.GlobalRoleBinding, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")

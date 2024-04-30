@@ -6,6 +6,7 @@ toolchain go1.21.0
 
 require (
 	cuelang.org/go v0.8.2
+	github.com/brunoga/deep v1.2.1
 	github.com/charmbracelet/huh v0.3.1-0.20240131202516-c79328e79fbd
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0

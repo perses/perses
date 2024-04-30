@@ -14,6 +14,9 @@
 package globalsecret
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
@@ -35,6 +38,14 @@ func NewService(dao globalsecret.DAO, crypto crypto.Crypto) globalsecret.Service
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.GlobalSecret) (*v1.PublicGlobalSecret, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.crypto.Encrypt(&entity.Spec); err != nil {
@@ -48,6 +59,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalSecret) 
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalSecret, parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.GlobalSecret, parameters apiInterface.Parameters) (*v1.PublicGlobalSecret, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in GlobalSecret %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")

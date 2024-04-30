@@ -14,6 +14,9 @@
 package globaldatasource
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/schemas"
@@ -36,6 +39,14 @@ func NewService(dao globaldatasource.DAO, sch schemas.Schemas) globaldatasource.
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -48,6 +59,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalDatasour
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}

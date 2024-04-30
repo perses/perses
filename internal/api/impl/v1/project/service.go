@@ -16,6 +16,7 @@ package project
 import (
 	"fmt"
 
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -59,6 +60,14 @@ func NewService(dao project.DAO, folderDAO folder.DAO, datasourceDAO datasource.
 }
 
 func (s *service) Create(ctx apiInterface.PersesContext, entity *v1.Project) (*v1.Project, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(ctx, copyEntity)
+}
+
+func (s *service) create(ctx apiInterface.PersesContext, entity *v1.Project) (*v1.Project, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -99,6 +108,14 @@ func (s *service) createProjectRoleAndRoleBinding(projectName string, ctx apiInt
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.Project, parameters apiInterface.Parameters) (*v1.Project, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in project %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
