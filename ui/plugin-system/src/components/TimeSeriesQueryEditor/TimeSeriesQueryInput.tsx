@@ -18,6 +18,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import { PluginEditor, PluginEditorProps } from '../PluginEditor';
+import { SingleSeriesColorPicker } from './SingleSeriesColorPicker';
 
 interface TimeSeriesQueryInputProps {
   query: TimeSeriesQueryDefinition;
@@ -85,15 +86,19 @@ function QueryEditor(props: QueryEditorProps) {
     );
   };
 
+  // TODO: update TimeSeriesQuery to work with color property and pass through SeriesConfig
+  // https://github.com/perses/perses/pull/1678/
+  // https://github.com/perses/perses/blob/8f1c4054ebcba605e4f95afcca50c7ae15a23a09/ui/panels-plugin/src/plugins/time-series-chart/SingleSeriesColorPicker.tsx
+
   return (
     <Box {...others}>
-      {/* If TimeSeriesQuery plugins ever have common props on the definition, the inputs could go here */}
       <PluginEditor
         pluginType="TimeSeriesQuery"
         pluginKindLabel="Query Type"
         value={plugin}
         onChange={handlePluginChange}
       />
+      {/* <SingleSeriesColorPicker /> */}
     </Box>
   );
 }

@@ -34,6 +34,14 @@ export interface TimeSeries {
   values: TimeSeriesValueTuple[];
   formattedName?: string;
   labels?: Labels;
+  config?: SeriesConfig;
+}
+
+/*
+ * Common configurations for a series for control over properties like color.
+ */
+export interface SeriesConfig {
+  color?: string;
 }
 
 export interface TimeSeriesMetadata {
