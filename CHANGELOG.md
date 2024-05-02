@@ -1,29 +1,17 @@
 # Changelog
 
-## 0.45.0-rc1 / 2024-04-30
-
-- [FEATURE] Add panel links to Go SDK (#1958)
-- [ENHANCEMENT] DaC CUE SDK: support time fields in dashboard builder
-- [ENHANCEMENT] DaC CUE SDK: support passing datasources in dashboard builder (#1957)
-- [BUGFIX] Fix auto refresh #1969
-- [BUGFIX] Fix datasource query (#1966)
-- [BUGFIX] Fix upsert function in provisioner and in the `apply` cmd (#1962)
-- [BUGFIX] Go SDK move some int to float (#1955)
-- [BUGFIX] Fix permission file gave when writing the result of dac command (#1951)
-- [BUGIFX] Fix external provider warning in user form (#1950)
-- [BREAKINGCHANGE] Reactivate the cron task that reloads the schemas (#1956)
-- [DOC] `percli login`: add some doc for the external provider use case. (#1953)
-
-## 0.45.0-rc0 / 2024-04-22
+## 0.45.0 / 2024-05-02
 
 - [FEATURE] CLI: add cmd whoami (#1920)
 - [FEATURE] Activate pprof by flag (#1933)
-- [FEATURE] Panels links (#1916) (#1936)
+- [FEATURE] Panels links (#1916) (#1936) (#1958)
 - [FEATURE] Backend work for usage tracking (#1889)
 - [FEATURE] Add `supportedQueryTypes` to the panel plugins definition (#1899)
 - [FEATURE] Project can be renamed (#1900)
 - [FEATURE] Add config command that displays local or remote config (#1845)
 - [FEATURE] Add Users tab in Admin view (#1853)
+- [ENHANCEMENT] DaC CUE SDK: support time fields in dashboard builder
+- [ENHANCEMENT] DaC CUE SDK: support passing datasources in dashboard builder (#1957)
 - [ENHANCEMENT] DaC CUE SDK: add display attributes support to dashboard builder (#1942)
 - [ENHANCEMENT] update the banner with the logo (#1915)
 - [ENHANCEMENT] Only decode JWT token if provided (#1903)
@@ -31,6 +19,13 @@
 - [ENHANCEMENT] Reduce panel group header height (#1868)
 - [ENHANCEMENT] Improve Home page layout (#1874)
 - [ENHANCEMENT] Explorer - don't reuse PanelPreview but directly the TimeseriesChart (#1872)
+- [BUGFIX] Fix schema config for the archive (#1970)
+- [BUGFIX] Fix auto refresh #1969
+- [BUGFIX] Fix datasource query (#1966)
+- [BUGFIX] Fix upsert function in provisioner and in the `apply` cmd (#1962)
+- [BUGFIX] Go SDK move some int to float (#1955)
+- [BUGFIX] Fix permission file gave when writing the result of dac command (#1951)
+- [BUGIFX] Fix external provider warning in user form (#1950)
 - [BUGFIX] Grafana migration: best-effort solution to not migrate irrelevant regexps (#1929)
 - [BUGFIX] Fix grafana migration failing for "custom" template variables (#1927)
 - [BUGFIX] Fix dashboard list with empty project on home page (#1928)
@@ -48,13 +43,14 @@
 - [BUGFIX] remove check on the number of panels in dashboard spec (#1873)
 - [BUGFIX] Don't reset token data when expired (#1867)
 - [BUGFIX] Fix setting projects when importing Perses dashboards (#1858)
-- [BREAKINGCHANGE] Deactivate cron task that reloads the cue schemas (#1935)
+- [BREAKINGCHANGE] Cron task that reloads the cue schema depends now on the frequency of the provisioner cron task. If provisioner is not activated, then schema cron is running every 6h. (#1935) (#1956)
 - [BREAKINGCHANGE] Replace TimeSeriesQueryEditor and TraceQueryEditor by MultiQueryEditor (#1898)
 - [BREAKINGCHANGE] PluginEditor takes multiple plugin types as input (#1887)
 - [BREAKINGCHANGE] Use package secret for the golang rest client (#1865)
 - [BREAKINGCHANGE] Remove isExplore + allow TimeSeriesQueryEditor to be used without defining explicitly default plugin kind (take the first) (#1864)
 - [BREAKINGCHANGE] Move TimeRangeControls/ToolbarIconButton respectively to plugin-system/components (#1869)
 - [BREAKINGCHANGE] Free TimeRangeControls from dashboard dep
+- [DOC] `percli login`: add some doc for the external provider use case. (#1953)
 - [DOC] Fix deprecated command usage in user guide (#1940)
 - [DOC] Go SDK: add entrypoint README (#1919)
 - [DOC] Add message about device_auth_url (#1885)
