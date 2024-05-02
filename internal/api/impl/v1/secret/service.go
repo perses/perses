@@ -14,6 +14,9 @@
 package secret
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
@@ -35,6 +38,14 @@ func NewService(dao secret.DAO, crypto crypto.Crypto) secret.Service {
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Secret) (*v1.PublicSecret, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.Secret) (*v1.PublicSecret, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.crypto.Encrypt(&entity.Spec); err != nil {
@@ -48,6 +59,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Secret) (*v1.P
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Secret, parameters apiInterface.Parameters) (*v1.PublicSecret, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.Secret, parameters apiInterface.Parameters) (*v1.PublicSecret, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Secret %q and name from the http request: %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -90,15 +109,18 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]*v1.PublicSecret, error) {
 	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query := &secret.Query{
-		Query:      q.Query,
-		NamePrefix: q.NamePrefix,
-		Project:    q.Project,
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
 	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
+	return s.list(query, params)
+}
+
+func (s *service) list(q *secret.Query, params apiInterface.Parameters) ([]*v1.PublicSecret, error) {
+	if len(q.Project) == 0 {
+		q.Project = params.Project
 	}
-	l, err := s.dao.List(query)
+	l, err := s.dao.List(q)
 	if err != nil {
 		return nil, err
 	}

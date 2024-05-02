@@ -322,7 +322,6 @@
         }
       }
     ],
-    "duration": "1h",
     "datasources": {
       "myPromDemo": {
         "default": true,
@@ -333,6 +332,8 @@
           }
         }
       }
-    }
+    },
+    "duration": "3h",
+    "refreshInterval": "30s"
   }
 }

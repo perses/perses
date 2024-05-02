@@ -18,6 +18,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/panel"
@@ -131,6 +132,10 @@ func TestDashboardBuilder(t *testing.T) {
 				promDs.DirectURL("http://localhost:9090"),
 			),
 		),
+
+		// TIME
+		Duration(3*time.Hour),
+		RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
@@ -228,6 +233,10 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				promDs.DirectURL("http://localhost:9090"),
 			),
 		),
+
+		// TIME
+		Duration(3*time.Hour),
+		RefreshInterval(30*time.Second),
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)

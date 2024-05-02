@@ -21,9 +21,9 @@ const (
 )
 
 type StepOption struct {
-	Value int    `json:"value" yaml:"value"`
-	Color string `json:"color,omitempty" yaml:"color,omitempty"`
-	Name  string `json:"name,omitempty" yaml:"name,omitempty"`
+	Value float64 `json:"value" yaml:"value"`
+	Color string  `json:"color,omitempty" yaml:"color,omitempty"`
+	Name  string  `json:"name,omitempty" yaml:"name,omitempty"`
 }
 
 type Thresholds struct {

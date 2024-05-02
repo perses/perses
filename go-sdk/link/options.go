@@ -11,36 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gauge
+package link
 
-import (
-	"github.com/perses/perses/go-sdk/common"
-)
-
-func Calculation(calculation common.Calculation) Option {
+func URL(url string) Option {
 	return func(builder *Builder) error {
-		builder.Calculation = calculation
+		builder.URL = url
 		return nil
 	}
 }
 
-func Format(format common.Format) Option {
+func Name(name string) Option {
 	return func(builder *Builder) error {
-		builder.Format = &format
+		builder.Name = name
 		return nil
 	}
 }
 
-func Thresholds(thresholds common.Thresholds) Option {
+func Tooltip(tooltip string) Option {
 	return func(builder *Builder) error {
-		builder.Thresholds = &thresholds
+		builder.Tooltip = tooltip
 		return nil
 	}
 }
 
-func Max(max float64) Option {
+func RenderVariable(isRenderingVariable bool) Option {
 	return func(builder *Builder) error {
-		builder.Max = max
+		builder.RenderVariables = isRenderingVariable
+		return nil
+	}
+}
+
+func TargetBlank(isTargetingBlank bool) Option {
+	return func(builder *Builder) error {
+		builder.TargetBlank = isTargetingBlank
 		return nil
 	}
 }

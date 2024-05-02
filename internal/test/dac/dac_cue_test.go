@@ -27,7 +27,6 @@ import (
 )
 
 func TestDashboardAsCodeCUESDK(t *testing.T) {
-
 	testSuite := []struct {
 		title                  string
 		inputCUEFile           string

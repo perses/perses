@@ -11,36 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gauge
+package link
 
-import (
-	"github.com/perses/perses/go-sdk/common"
-)
+import v1 "github.com/perses/perses/pkg/model/api/v1"
 
-func Calculation(calculation common.Calculation) Option {
-	return func(builder *Builder) error {
-		builder.Calculation = calculation
-		return nil
+type Option func(link *Builder) error
+
+func New(url string, options ...Option) (Builder, error) {
+	builder := &Builder{
+		Link: v1.Link{},
 	}
+
+	defaults := []Option{
+		URL(url),
+	}
+
+	for _, opt := range append(defaults, options...) {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
 }
 
-func Format(format common.Format) Option {
-	return func(builder *Builder) error {
-		builder.Format = &format
-		return nil
-	}
-}
-
-func Thresholds(thresholds common.Thresholds) Option {
-	return func(builder *Builder) error {
-		builder.Thresholds = &thresholds
-		return nil
-	}
-}
-
-func Max(max float64) Option {
-	return func(builder *Builder) error {
-		builder.Max = max
-		return nil
-	}
+type Builder struct {
+	v1.Link
 }

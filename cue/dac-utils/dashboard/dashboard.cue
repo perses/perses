@@ -32,6 +32,8 @@ import (
 	panels: [string]: v1.#Panel
 }
 #datasources?: [string]: v1.#DatasourceSpec
+#duration?:        string
+#refreshInterval?: string
 
 // output: the dashboard in the format expected by Perses 
 v1.#Dashboard & {
@@ -51,5 +53,11 @@ v1.#Dashboard & {
 		}
 		panels: {for group in #panelGroups {group.panels}}
 		layouts: [for group in #panelGroups {group.layout}]
+		if #duration != _|_ {
+			duration: #duration
+		}
+		if #refreshInterval != _|_ {
+			refreshInterval: #refreshInterval
+		}
 	}
 }

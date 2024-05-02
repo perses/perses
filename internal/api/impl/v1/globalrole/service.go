@@ -14,6 +14,9 @@
 package globalrole
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
 	"github.com/perses/perses/internal/api/rbac"
@@ -38,6 +41,14 @@ func NewService(dao globalrole.DAO, rbac rbac.RBAC, sch schemas.Schemas) globalr
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRole) (*v1.GlobalRole, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.GlobalRole) (*v1.GlobalRole, error) {
 	// Update the time contains in the entity
 	entity.Metadata.CreateNow()
 	if err := s.dao.Create(entity); err != nil {
@@ -51,6 +62,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalRole) (*
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.GlobalRole, parameters apiInterface.Parameters) (*v1.GlobalRole, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in Datasource %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")

@@ -35,10 +35,13 @@ func convertToEntityIfNoError[T modelAPI.Entity](entities []T, err error) ([]mod
 }
 
 func Upsert(svc Service, entity modelAPI.Entity) error {
-	if _, createError := svc.CreateResource(entity); createError != nil && !errors.Is(createError, perseshttp.ConflictError) {
-		return createError
+	_, createErr := svc.CreateResource(entity)
+	if createErr == nil {
+		return nil
 	}
-
+	if !errors.Is(createErr, perseshttp.ConflictError) {
+		return createErr
+	}
 	_, updateErr := svc.UpdateResource(entity)
 	return updateErr
 }

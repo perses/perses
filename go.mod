@@ -5,7 +5,8 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	cuelang.org/go v0.8.1
+	cuelang.org/go v0.8.2
+	github.com/brunoga/deep v1.2.1
 	github.com/charmbracelet/huh v0.3.1-0.20240131202516-c79328e79fbd
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0
@@ -14,7 +15,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser v1.25.1
 	github.com/gorilla/securecookie v1.1.2
-	github.com/huandu/go-sqlbuilder v1.27.0
+	github.com/huandu/go-sqlbuilder v1.27.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
