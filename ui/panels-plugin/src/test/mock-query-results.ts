@@ -13,7 +13,7 @@
 
 import { TimeSeriesData } from '@perses-dev/core';
 
-export const MOCK_TIME_SERIES_QUERY_RESULT = [
+export const MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE = [
   {
     status: 'success',
     fetchStatus: 'idle',
@@ -61,7 +61,49 @@ export const MOCK_TIME_SERIES_QUERY_RESULT = [
   },
 ];
 
-export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
+export const MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE = [
+  {
+    status: 'success',
+    fetchStatus: 'idle',
+    isLoading: false,
+    isSuccess: true,
+    isError: false,
+    data: {
+      timeRange: {
+        start: new Date(1666625535000),
+        end: new Date(1666625535000),
+      },
+      stepMs: 24379,
+      series: [
+        {
+          name: 'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"',
+          values: [[1666479357903, 0.27700745551584494]],
+        },
+        {
+          name: 'device="/dev/vda15", env="demo", fstype="vfat", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/boot/efi"',
+          values: [[1666479357903, 0.08486496097624885]],
+        },
+      ],
+    },
+    dataUpdatedAt: 1666500979895,
+    error: null,
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    errorUpdateCount: 0,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isRefetching: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPlaceholderData: false,
+    isPreviousData: false,
+    isRefetchError: false,
+    isStale: true,
+  },
+];
+
+export const MOCK_TIME_SERIES_DATA_MULTIVALUE: TimeSeriesData = {
   timeRange: {
     start: new Date(1666625490000),
     end: new Date(1666625535000),
@@ -81,6 +123,24 @@ export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
         [1666479357903, 0.08486496097624885],
         [1666479382282, 0.08486496097624885],
       ],
+    },
+  ],
+};
+
+export const MOCK_TIME_SERIES_DATA_SINGLEVALUE: TimeSeriesData = {
+  timeRange: {
+    start: new Date(1666625535000),
+    end: new Date(1666625535000),
+  },
+  stepMs: 24379,
+  series: [
+    {
+      name: 'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"',
+      values: [[1666479357903, 0.27700745551584494]],
+    },
+    {
+      name: 'device="/dev/vda15", env="demo", fstype="vfat", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/boot/efi"',
+      values: [[1666479357903, 0.08486496097624885]],
     },
   ],
 };

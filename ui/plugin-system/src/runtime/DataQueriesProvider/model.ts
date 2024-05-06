@@ -13,13 +13,13 @@
 
 import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
 import { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { ReactNode, useCallback, useMemo } from 'react';
 import { useListPluginMetadata } from '../plugin-registry';
 
-type QueryOptions = Record<string, unknown>;
+export type QueryOptions = Record<string, unknown>;
 export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
   definitions: Array<Definition<QueryPluginSpec>>;
-  children?: React.ReactNode;
+  children?: ReactNode;
   options?: QueryOptions;
   queryOptions?: QueryObserverOptions;
 }

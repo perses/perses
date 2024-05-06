@@ -15,10 +15,9 @@ import { useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { TimeSeriesChart } from '@perses-dev/panels-plugin';
 import useResizeObserver from 'use-resize-observer';
-import { PANEL_PREVIEW_DEFAULT_WIDTH, PANEL_PREVIEW_HEIGHT } from './constants';
+import { Panel } from '@perses-dev/dashboards';
+import { PANEL_PREVIEW_HEIGHT } from './constants';
 
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   const { width, ref: boxRef } = useResizeObserver();
@@ -38,10 +37,43 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
 
   return (
     <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-        <TimeSeriesChart.PanelComponent
-          contentDimensions={{ width: width ?? PANEL_PREVIEW_DEFAULT_WIDTH, height }}
-          spec={{}}
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+        <Panel
+          panelOptions={{
+            hideHeader: true,
+          }}
+          definition={{
+            kind: 'Panel',
+            spec: { queries: queries, display: { name: '' }, plugin: { kind: 'TimeSeriesChart', spec: {} } },
+          }}
+        />
+      </DataQueriesProvider>
+    </Box>
+  );
+}
+
+function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
+  const height = PANEL_PREVIEW_HEIGHT;
+
+  // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
+  const definitions = (queries ?? []).map((query) => {
+    return {
+      kind: query.spec.plugin.kind,
+      spec: query.spec.plugin.spec,
+    };
+  });
+
+  return (
+    <Box height={height}>
+      <DataQueriesProvider definitions={definitions} options={{ mode: 'instant' }}>
+        <Panel
+          panelOptions={{
+            hideHeader: true,
+          }}
+          definition={{
+            kind: 'Panel',
+            spec: { queries: queries, display: { name: '' }, plugin: { kind: 'TimeSeriesTable', spec: {} } },
+          }}
         />
       </DataQueriesProvider>
     </Box>
@@ -59,14 +91,14 @@ export function MetricsExplorer() {
         value={tabState}
         onChange={(_, state) => setTabState(state)}
         variant="scrollable"
-        sx={{ borderRight: 1, borderColor: 'divider' }}
+        sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
+        <Tab label="Table" />
         <Tab label="Graph" />
       </Tabs>
       <Stack gap={1}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          {tabState === 0 && <TimeSeriesPanel queries={queries ?? []} />}
-        </ErrorBoundary>
+        {tabState === 0 && <MetricDataTable queries={queries ?? []} />}
+        {tabState === 1 && <TimeSeriesPanel queries={queries ?? []} />}
       </Stack>
     </Stack>
   );

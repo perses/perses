@@ -35,11 +35,14 @@ export interface TimeSeriesQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> 
   dependsOn?: (spec: Spec, ctx: TimeSeriesQueryContext) => TimeSeriesQueryPluginDependencies;
 }
 
+export type TimeSeriesQueryMode = 'instant' | 'range';
+
 /**
  * Context available to TimeSeriesQuery plugins at runtime.
  */
 export interface TimeSeriesQueryContext {
   suggestedStepMs?: number;
+  mode?: TimeSeriesQueryMode;
   timeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
