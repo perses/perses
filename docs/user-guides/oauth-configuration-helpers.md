@@ -9,13 +9,16 @@ We support three types of authentication flows.
 See [authentication.md](../design-docs/authentication.md) for more information.
 
 #### Authorization Code Flow [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.1)
+
 When the user login with their own personal credentials in the external provider's website through the Perses UI.
 
 #### Device Code Flow [RFC 8628](https://datatracker.ietf.org/doc/html/rfc8628)
+
 When the user login with their own personal credentials in the external provider's website but this time from the Perses
-command line (``percli``). User will be invited to go to the provider's website to enter a device code, and then login.
+command line (`percli`). User will be invited to go to the provider's website to enter a device code, and then login.
 
 #### Client Credentials Flow [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749#section-1.3.4)
+
 Here we log in as an application, not a user. This is useful for scripted tasks not necessarily requiring a user to be logged in.
 
 ### List of providers
@@ -42,10 +45,12 @@ there.
           client_credentials:
             scopes: ["https://graph.microsoft.com/.default"] # For Client Credentials
 ```
-> [!tip] 
+
+> [!tip]
 > The **scope** used to generate a token from client credentials is different from the one used in other flows.
 >
 > *Ref: https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow*
 
 #### \<Place Your Provider here ...>
+
 ... (don't hesitate to propose new providers to add!)

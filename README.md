@@ -36,6 +36,11 @@ Perses aims to tackle multiple goals:
    means you will be able to validate your dashboards in a CI/CD using the Perses CLI (named `percli`)
 5. Support plugins, to allow users to extend the capacities natively provided.
 
+## Try it
+
+We are providing an online demo available on **https://demo.perses.dev**.
+You can create your own project and dashboards there, nobody will be able to modify them!
+
 ## Status
 
 1. Perses as an application can now **be used**.
