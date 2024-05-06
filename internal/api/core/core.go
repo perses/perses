@@ -108,7 +108,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
-	if !conf.DeactivateFront {
+	if !conf.Frontend.Deactivate {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
 	}
 	return runner, persistenceManager, nil

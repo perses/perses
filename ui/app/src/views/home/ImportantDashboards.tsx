@@ -50,7 +50,7 @@ export function ImportantDashboards() {
   const { data: dashboards, isLoading } = useImportantDashboardList();
 
   // If no important dashboard defined, hide the section
-  if (!config?.important_dashboards?.length || dashboards.length === 0) {
+  if (!config?.frontend.important_dashboards?.length || dashboards.length === 0) {
     return <></>;
   }
 

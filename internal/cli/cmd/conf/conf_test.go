@@ -45,7 +45,6 @@ func TestConfigCMD(t *testing.T) {
 			ExpectedMessage: `security:
     readonly: false
     enable_auth: true
-deactivate_front: false
 
 `,
 		},
