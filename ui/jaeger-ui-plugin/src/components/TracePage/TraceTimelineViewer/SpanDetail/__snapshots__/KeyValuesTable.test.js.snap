@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<KeyValuesTable> renders the expected text for each span value 1`] = `
+<div
+  className="ub-inline-block"
+>
+  <JsonView
+    data={
+      Object {
+        "<xss>": "safe",
+        "array": Array [
+          "x",
+          "y",
+          "z",
+        ],
+        "boolean": true,
+        "hello": "world",
+        "link": "https://example.com",
+        "null": null,
+        "number": 42,
+        "object": Object {
+          "a": "b",
+          "x": "y",
+        },
+        "xss_link": "https://example.com with \\"quotes\\"",
+      }
+    }
+    shouldExpandNode={[Function]}
+    style={
+      Object {
+        "basicChildStyle": "json-markup-child",
+        "booleanValue": "json-markup-bool",
+        "clickableLabel": "_2YKJg _1MGIk _1MFti",
+        "collapseIcon": "json-markup-icon-collapse",
+        "collapsedContent": "json-markup-collapse-content",
+        "container": "json-markup",
+        "expandIcon": "json-markup-icon-expand",
+        "label": "json-markup-key",
+        "noQuotesForStringValues": false,
+        "nullValue": "json-markup-null",
+        "numberValue": "json-markup-number",
+        "otherValue": "json-markup-other",
+        "punctuation": "json-markup-puncuation",
+        "stringValue": "json-markup-string",
+        "undefinedValue": "json-markup-undefined",
+      }
+    }
+  />
+</div>
+`;

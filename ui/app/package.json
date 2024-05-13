@@ -16,7 +16,7 @@
     "@emotion/styled": "^11.9.3",
     "@hookform/resolvers": "^3.2.0",
     "@loadable/component": "^5.15.2",
-    "@mui/material": "5.10.17",
+    "@mui/material": "^5.10.17",
     "@mui/x-data-grid": "^6.0.3",
     "@nexucis/kvsearch": "^0.8.1",
     "@perses-dev/components": "0.45.0",

@@ -1,0 +1,145 @@
+{
+  "traceID": "4766f1209f70a5e2e55417fc296fd101",
+  "spans": [
+    {
+      "traceID": "4766f1209f70a5e2e55417fc296fd101",
+      "spanID": "622a5079b565623e",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "4766f1209f70a5e2e55417fc296fd101",
+          "spanID": "e821b549888cbc3b"
+        }
+      ],
+      "startTime": 1579070675085840,
+      "duration": 52,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from pet"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "4766f1209f70a5e2e55417fc296fd101",
+      "spanID": "e821b549888cbc3b",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "4766f1209f70a5e2e55417fc296fd101",
+          "spanID": "22be69e72cbcde0b"
+        }
+      ],
+      "startTime": 1579070675084200,
+      "duration": 1739,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "4766f1209f70a5e2e55417fc296fd101",
+      "spanID": "4085dddb47429851",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "4766f1209f70a5e2e55417fc296fd101",
+          "spanID": "e821b549888cbc3b"
+        }
+      ],
+      "startTime": 1579070675085059,
+      "duration": 21,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "4766f1209f70a5e2e55417fc296fd101",
+      "spanID": "22be69e72cbcde0b",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "4766f1209f70a5e2e55417fc296fd101",
+          "spanID": "150c193cf155b46b"
+        }
+      ],
+      "startTime": 1579070675083820,
+      "duration": 2499,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "client"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "4766f1209f70a5e2e55417fc296fd101",
+      "spanID": "150c193cf155b46b",
+      "flags": 1,
+      "operationName": "GET /api/customer/owners/8/pets/10",
+      "references": [],
+      "startTime": 1579070675083000,
+      "duration": 4902,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    }
+  ],
+  "processes": {
+    "p1": {
+      "serviceName": "customers-service",
+      "tags": []
+    },
+    "p2": {
+      "serviceName": "api-gateway",
+      "tags": []
+    }
+  },
+  "warnings": null
+}

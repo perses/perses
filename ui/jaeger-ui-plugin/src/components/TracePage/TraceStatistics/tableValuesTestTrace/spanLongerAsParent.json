@@ -1,0 +1,220 @@
+{
+  "traceID": "9ced30503c58dab894a2d7598b01a87a",
+  "spans": [
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "afa59bdef0fc2561",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "4b52eb0cabcb50a"
+        }
+      ],
+      "startTime": 1573196810403381,
+      "duration": 415,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test2"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "d72e44f0b9a0a6ce",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "4b52eb0cabcb50a"
+        }
+      ],
+      "startTime": 1573196810404366,
+      "duration": 143,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "4b52eb0cabcb50a",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "6745965d0b964193"
+        }
+      ],
+      "startTime": 1573196810398782,
+      "duration": 7229,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "0a0000000000000",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "6745965d0b964193"
+        }
+      ],
+      "startTime": 1573196810398782,
+      "duration": 7229,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "00000000000001",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "6745965d0b964193"
+        }
+      ],
+      "startTime": 1573196810406080,
+      "duration": 1500,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "00000000000002",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "6745965d0b964193"
+        }
+      ],
+      "startTime": 1573196810406440,
+      "duration": 3500,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "6745965d0b964193",
+      "flags": 1,
+      "operationName": "GET /owners/8/pets/10",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "9ced30503c58dab894a2d7598b01a87a",
+          "spanID": "ab496a7591486ffd"
+        }
+      ],
+      "startTime": 1573196810397636,
+      "duration": 9521,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "client"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "9ced30503c58dab894a2d7598b01a87a",
+      "spanID": "ab496a7591486ffd",
+      "flags": 1,
+      "operationName": "GET /api/customer/owners/8/pets/10",
+      "references": [],
+      "startTime": 1573196810396000,
+      "duration": 12887,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    }
+  ],
+  "processes": {
+    "p1": {
+      "serviceName": "customers-service",
+      "tags": []
+    },
+    "p2": {
+      "serviceName": "api-gateway",
+      "tags": []
+    }
+  },
+  "warnings": null
+}

@@ -1,0 +1,95 @@
+{
+  "traceID": "006c3cf93508f205",
+  "spans": [
+    {
+      "traceID": "006c3cf93508f205",
+      "spanID": "006c3cf93508f205",
+      "flags": 1,
+      "operationName": "send",
+      "references": [],
+      "startTime": 1679437737490189,
+      "duration": 36,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "producer"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "006c3cf93508f205",
+      "spanID": "2dc4b796e2127e32",
+      "flags": 1,
+      "operationName": "async task 1",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "006c3cf93508f205",
+          "spanID": "006c3cf93508f205"
+        }
+      ],
+      "startTime": 1679437737490189,
+      "duration": 79182,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "client"
+        },
+        {
+          "key": "http.method",
+          "type": "string",
+          "value": "POST"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "006c3cf93508f205",
+      "spanID": "5d423585b4c63d48",
+      "flags": 1,
+      "operationName": "async task 2",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "006c3cf93508f205",
+          "spanID": "006c3cf93508f205"
+        }
+      ],
+      "startTime": 1679437737490189,
+      "duration": 12,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "client"
+        },
+        {
+          "key": "http.method",
+          "type": "string",
+          "value": "POST"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    }
+  ],
+  "processes": {
+    "p1": {
+      "serviceName": "service-one",
+      "tags": []
+    },
+    "p2": {
+      "serviceName": "service-two",
+      "tags": []
+    }
+  },
+  "warnings": null
+}

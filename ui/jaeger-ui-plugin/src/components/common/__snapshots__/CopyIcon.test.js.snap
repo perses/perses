@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CopyIcon /> renders as expected 1`] = `
+<Tooltip
+  arrowPointAtCenter={true}
+  mouseLeaveDelay={0}
+  onOpenChange={[Function]}
+  placement="top"
+  title="tooltipTitleValue"
+>
+  <Button
+    className="classNameValue CopyIcon"
+    htmlType="button"
+    icon={<IoCopyOutline />}
+    onClick={[Function]}
+  />
+</Tooltip>
+`;

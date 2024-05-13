@@ -1,0 +1,445 @@
+{
+  "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+  "spans": [
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "6962df17f54c3741",
+      "flags": 1,
+      "operationName": "GET /owners",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "9afcdf2e24e8d70a"
+        }
+      ],
+      "startTime": 1573131432955376,
+      "duration": 2977,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "client"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "9afcdf2e24e8d70a",
+      "flags": 1,
+      "operationName": "GET /api/customer/owners",
+      "references": [],
+      "startTime": 1573131432955000,
+      "duration": 3720,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p1",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "a68c6983a6d81a2",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956855,
+      "duration": 19,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "cbcdc46290379f7a",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956857,
+      "duration": 14,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "b33418a95acab83f",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956854,
+      "duration": 20,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "4308efcfd216cbb0",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956857,
+      "duration": 15,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "d0ae415b55555eb0",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956857,
+      "duration": 15,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "38b37689f26c5b9e",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956857,
+      "duration": 15,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "427f5b436c6ef2cb",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956857,
+      "duration": 14,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "0000000000000001",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956897,
+      "duration": 40,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "0000000000000002",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956897,
+      "duration": 40,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "0000000000000003",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956897,
+      "duration": 40,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "22a6dbf5f149e280",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956856,
+      "duration": 17,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "d293d7d80690ce74",
+      "flags": 1,
+      "operationName": "HikariProxyPreparedStatement.executeQuery",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6f9bbe751e5fd944"
+        }
+      ],
+      "startTime": 1573131432956849,
+      "duration": 31,
+      "tags": [
+        {
+          "key": "database",
+          "type": "string",
+          "value": "jdbc:hsqldb:mem:testdb"
+        },
+        {
+          "key": "sql",
+          "type": "string",
+          "value": "select * from test"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    },
+    {
+      "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+      "spanID": "6f9bbe751e5fd944",
+      "flags": 1,
+      "operationName": "GET /owners",
+      "references": [
+        {
+          "refType": "CHILD_OF",
+          "traceID": "df84e36b9e2ee3815d07f0867a5be1f",
+          "spanID": "6962df17f54c3741"
+        }
+      ],
+      "startTime": 1573131432956016,
+      "duration": 1696,
+      "tags": [
+        {
+          "key": "span.kind",
+          "type": "string",
+          "value": "server"
+        }
+      ],
+      "logs": [],
+      "processID": "p2",
+      "warnings": null
+    }
+  ],
+  "processes": {
+    "p1": {
+      "serviceName": "api-gateway",
+      "tags": []
+    },
+    "p2": {
+      "serviceName": "customers-service",
+      "tags": []
+    }
+  },
+  "warnings": null
+}

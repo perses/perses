@@ -1,0 +1,18 @@
+{
+  "kind": "PluginModule",
+  "metadata": {
+    "name": "Jaeger UI Panels"
+  },
+  "spec": {
+    "plugins": [
+      {
+        "pluginType": "Panel",
+        "kind": "TracingView",
+        "display": {
+          "name": "Tracing View",
+          "description": ""
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,76 @@
+/*
+Copyright (c) 2018 Uber Technologies, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+.TracePageSearchBar {
+  width: 40%;
+}
+
+.TracePageSearchBar--bar {
+  max-width: 20rem;
+  transition: max-width 0.5s;
+}
+
+.TracePageSearchBar--bar:focus-within {
+  max-width: 100%;
+}
+
+.TracePageSearchBar--count {
+  opacity: 0.6;
+}
+
+.TracePageSearchBar--btn {
+  border-left: 1px solid #d9d9d9;
+  transition: 0.2s;
+}
+
+.TracePageSearchBar--btn.is-disabled {
+  opacity: 0.5;
+}
+
+.ant-input-group.ant-input-group-compact .help-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid gainsboro;
+}
+.help-btn-container:hover {
+  border-top-color: rgb(23, 184, 190);
+  border-bottom-color: rgb(23, 184, 190);
+}
+.help-button {
+  border: 1px solid #999;
+  border-radius: 100px;
+  color: #999;
+  cursor: pointer;
+  padding: 1px;
+  margin: 0 10px;
+  font-size: 18px;
+}
+
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--locateBtn,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonUp,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonDown,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonClose {
+  display: flex;
+  align-items: center;
+}
+
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--locateBtn svg,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonUp svg,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonDown svg,
+.ant-input-group.ant-input-group-compact .TracePageSearchBar--ButtonClose svg {
+  font-size: 18px;
+}

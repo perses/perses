@@ -1,0 +1,92 @@
+/*
+Copyright (c) 2017 Uber Technologies, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+.TraceTimelineViewer {
+  border-bottom: 1px solid #bbb;
+}
+
+.json-markup {
+  line-height: 17px;
+  font-size: 13px;
+  font-family: monospace;
+
+  white-space: pre-wrap;
+
+  word-break: break-all;
+  word-wrap: break-word;
+}
+
+.json-markup-key {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.json-markup-bool {
+  color: firebrick;
+}
+
+.json-markup-string {
+  color: teal;
+}
+
+.json-markup-null,
+.json-markup-undefined {
+  color: gray;
+}
+
+.json-markup-number {
+  color: blue;
+}
+
+.json-markup-other {
+  color: lightgrey;
+}
+
+.json-markup-icon-expand {
+  margin-right: 4px;
+}
+
+.json-markup-icon-expand::after {
+  content: '\25B6';
+  color: black;
+  font-size: 12px;
+}
+
+.json-markup-icon-collapse {
+  margin-right: 4px;
+}
+
+.json-markup-icon-collapse::after {
+  content: '\25BC';
+  color: black;
+  font-size: 12px;
+}
+
+.json-markup-collapse-content::after {
+  content: '\2026';
+  color: black;
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.json-markup-child {
+  margin: 0.25rem 2.5rem;
+  padding: 0;
+}
+
+.json-markup-puncuation {
+  font-weight: bold;
+}

@@ -33,6 +33,7 @@
     "e2e",
     "internal-utils",
     "panels-plugin",
+    "jaeger-ui-plugin",
     "plugin-system",
     "prometheus-plugin",
     "storybook",

@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<FilteredList> renders without exploding 1`] = `
+<div>
+  <div
+    className="FilteredList--filterWrapper"
+  >
+    <label
+      className="FilteredList--inputWrapper"
+    >
+      <IoSearch
+        className="FilteredList--filterIcon"
+      />
+      <input
+        className="FilteredList--filterInput"
+        onChange={[Function]}
+        onKeyDown={[Function]}
+        placeholder="Filter..."
+        type="text"
+        value=""
+      />
+    </label>
+  </div>
+  <List
+    className="FilteredList--list u-simple-scrollbars"
+    direction="ltr"
+    height={210}
+    itemCount={6}
+    itemData={
+      Object {
+        "addValues": undefined,
+        "focusedIndex": null,
+        "highlightQuery": "",
+        "multi": undefined,
+        "options": Array [
+          "and",
+          "apples",
+          "are",
+          "0",
+          "1",
+          "2",
+        ],
+        "removeValues": undefined,
+        "selectedValue": null,
+        "setValue": [Function],
+      }
+    }
+    itemSize={35}
+    key=""
+    layout="vertical"
+    onItemsRendered={[Function]}
+    onScroll={[Function]}
+    overscanCount={25}
+    useIsScrolling={false}
+    width={650}
+  >
+    <Component />
+  </List>
+</div>
+`;

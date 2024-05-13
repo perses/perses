@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AltViewOptions renders correctly 1`] = `
+<Dropdown
+  menu={
+    Object {
+      "items": Array [
+        Object {
+          "key": "TraceGraph",
+          "label": <a
+            onClick={[Function]}
+            role="button"
+          >
+            Trace Graph
+          </a>,
+        },
+        Object {
+          "key": "TraceStatistics",
+          "label": <a
+            onClick={[Function]}
+            role="button"
+          >
+            Trace Statistics
+          </a>,
+        },
+        Object {
+          "key": "TraceSpansView",
+          "label": <a
+            onClick={[Function]}
+            role="button"
+          >
+            Trace Spans Table
+          </a>,
+        },
+        Object {
+          "key": "TraceFlamegraph",
+          "label": <a
+            onClick={[Function]}
+            role="button"
+          >
+            Trace Flamegraph
+          </a>,
+        },
+        Object {
+          "key": "trace-json",
+          "label": <Link
+            onClick={[MockFunction]}
+            rel="noopener noreferrer"
+            target="_blank"
+            to="/api/traces/test trace ID?prettyPrint=true"
+          >
+            Trace JSON
+          </Link>,
+        },
+        Object {
+          "key": "trace-json-unadjusted",
+          "label": <Link
+            onClick={[MockFunction]}
+            rel="noopener noreferrer"
+            target="_blank"
+            to="/api/traces/test trace ID?raw=true&prettyPrint=true"
+          >
+            Trace JSON (unadjusted)
+          </Link>,
+        },
+      ],
+    }
+  }
+>
+  <Button
+    className="AltViewOptions"
+  >
+    Trace Timeline 
+    <IoChevronDown />
+  </Button>
+</Dropdown>
+`;
