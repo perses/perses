@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -41,14 +41,6 @@ func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parame
 		Project: project,
 		Name:    name,
 	}
-}
-
-func buildMapFromList[T api.Entity](list []T) map[string]T {
-	result := make(map[string]T)
-	for _, item := range list {
-		result[item.GetMetadata().GetName()] = item
-	}
-	return result
 }
 
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
@@ -199,101 +191,17 @@ func (t *toolbox[T, K, V]) Get(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, entity)
 }
 
-func (t *toolbox[T, K, V]) List(ctx echo.Context, q V) error {
-	if err := ctx.Bind(q); err != nil {
+func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
+	if err := ctx.Bind(query); err != nil {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 	parameters := ExtractParameters(ctx, t.caseSensitive)
 
-	if t.rbac.IsEnabled() {
-		// When permission is activated, the list is basically filtered based on what the user has access to.
-		// It considered multiple different cases, so that's why it's treated in a separated function.
-		return t.listWhenPermissionIsActivated(ctx, parameters, q)
-	}
-	result, listErr := t.service.List(apiInterface.NewPersesContext(ctx), q, parameters)
+	list, listErr := t.list(ctx, parameters, query)
 	if listErr != nil {
 		return listErr
 	}
-	return ctx.JSON(http.StatusOK, result)
-}
-
-func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) error {
-	scope, err := role.GetScope(string(t.kind))
-	if err != nil {
-		return err
-	}
-	if permErr := t.checkPermissionList(ctx, parameters, scope); permErr != nil {
-		return permErr
-	}
-	persesContext := apiInterface.NewPersesContext(ctx)
-	// Get the list of the project the user has access to, depending on the current scope.
-	projects := t.rbac.GetUserProjects(persesContext.GetUsername(), role.ReadAction, *scope)
-
-	// If there is no project associated to the user, then we should just return an empty list.
-	if len(projects) == 0 {
-		return ctx.JSON(http.StatusOK, []string{})
-	}
-
-	// Special case if the user is getting the list of the project, as "project" is not considered has a global scope.
-	// More explanation about why it's not a global scope available here: https://github.com/perses/perses/blob/611b7993257dcadb18d48de945ad4def18889bec/pkg/model/api/v1/role/scope.go#L137-L138
-	if *scope == role.ProjectScope {
-		return t.listProjectWhenPermissionIsActivated(ctx, parameters, persesContext, projects, q)
-	}
-
-	// In the case the request is done on a specific project, no need to compute resource for all other authorized projects.
-	if len(parameters.Project) > 0 {
-		result, listErr := t.service.List(persesContext, q, parameters)
-		if listErr != nil {
-			return listErr
-		}
-		return ctx.JSON(http.StatusOK, result)
-	}
-
-	// In case, there is one result; it can mean the user has global access to the resource across the project.
-	// Or it can mean he has access to only one project. If he has global access, then we should return the complete list.
-	if len(projects) == 1 && projects[0] == rbac.GlobalProject {
-		result, listErr := t.service.List(persesContext, q, parameters)
-		if listErr != nil {
-			return listErr
-		}
-		return ctx.JSON(http.StatusOK, result)
-	}
-
-	var result []K
-	for _, project := range projects {
-		parameters.Project = project
-		listResult, listErr := t.service.List(persesContext, q, parameters)
-		if listErr != nil {
-			return listErr
-		}
-		result = append(result, listResult...)
-	}
-	return ctx.JSON(http.StatusOK, result)
-}
-
-func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, persesContext apiInterface.PersesContext, projects []string, q V) error {
-	// User has global access to all projects and should get the complete list.
-	if projects[0] == rbac.GlobalProject {
-		result, listErr := t.service.List(persesContext, q, parameters)
-		if listErr != nil {
-			return listErr
-		}
-		return ctx.JSON(http.StatusOK, result)
-	}
-
-	// Last case, we want the list of the project that matches what the user has access to.
-	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
-	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
-	var result []K
-	projectList, listErr := t.service.List(persesContext, q, parameters)
-	if listErr != nil {
-		return listErr
-	}
-	projectMap := buildMapFromList(projectList)
-	for _, project := range projects {
-		result = append(result, projectMap[project])
-	}
-	return ctx.JSON(http.StatusOK, result)
+	return ctx.JSON(http.StatusOK, list)
 }
 
 func (t *toolbox[T, K, V]) bind(ctx echo.Context, entity api.Entity) error {
