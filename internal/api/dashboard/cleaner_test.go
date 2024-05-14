@@ -15,6 +15,7 @@ package dashboard
 
 import (
 	"context"
+	"github.com/perses/perses/pkg/model/api"
 	"testing"
 	"time"
 
@@ -30,6 +31,18 @@ type mockDAO struct {
 
 func (d *mockDAO) List(_ *ephemeraldashboard.Query) ([]*v1.EphemeralDashboard, error) {
 	return d.dashboards, nil
+}
+
+func (d *mockDAO) MetadataList(_ *ephemeraldashboard.Query) ([]api.Entity, error) {
+	var result []api.Entity
+	for _, dashboard := range d.dashboards {
+		result = append(result, &v1.PartialProjectEntity{
+			Kind:     dashboard.Kind,
+			Metadata: dashboard.Metadata,
+			Spec:     struct{}{},
+		})
+	}
+	return result, nil
 }
 
 func (d *mockDAO) Delete(project string, name string) error {

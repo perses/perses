@@ -15,6 +15,7 @@ package ephemeraldashboard
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -113,19 +114,19 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]*v1.EphemeralDashboard, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query, err := deep.Copy(q)
+	query, err := manageQuery(q, params)
 	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
+		return nil, err
 	}
-	return s.list(query, params)
+	return s.dao.List(query)
 }
 
-func (s *service) list(q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]*v1.EphemeralDashboard, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *ephemeraldashboard.Query, params apiInterface.Parameters) ([]api.Entity, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
 	}
-	return s.dao.List(q)
+	return s.dao.MetadataList(query)
 }
 
 func (s *service) Validate(entity *v1.EphemeralDashboard) error {
@@ -154,4 +155,15 @@ func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error
 
 func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 	return s.globalVarDAO.List(&globalvariable.Query{})
+}
+
+func manageQuery(q *ephemeraldashboard.Query, params apiInterface.Parameters) (*ephemeraldashboard.Query, error) {
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
+	}
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return query, nil
 }

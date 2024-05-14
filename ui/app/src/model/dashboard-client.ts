@@ -181,7 +181,9 @@ export function getDashboard(project: string, name: string) {
 }
 
 export function getDashboards(project?: string) {
-  const url = buildURL({ resource: resource, project: project });
+  const queryParams = new URLSearchParams();
+  queryParams.set('metadata_only', 'true');
+  const url = buildURL({ resource: resource, project: project, queryParams: queryParams });
   return fetchJson<DashboardResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,

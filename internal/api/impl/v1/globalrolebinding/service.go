@@ -15,6 +15,7 @@ package globalrolebinding
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -131,6 +132,10 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([]*v1.GlobalRoleBinding, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return s.dao.MetadataList(q)
 }
 
 // Validating role and subjects are existing

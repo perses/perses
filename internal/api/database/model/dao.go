@@ -21,6 +21,7 @@ import (
 )
 
 type Query interface {
+	GetMetadataOnlyQueryParam() bool
 }
 
 type DAO interface {

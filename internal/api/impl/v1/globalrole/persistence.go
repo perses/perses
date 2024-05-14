@@ -16,6 +16,7 @@ package globalrole
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/globalrole"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -52,5 +53,15 @@ func (d *dao) Get(name string) (*v1.GlobalRole, error) {
 func (d *dao) List(q *globalrole.Query) ([]*v1.GlobalRole, error) {
 	var result []*v1.GlobalRole
 	err := d.client.Query(q, &result)
+	return result, err
+}
+
+func (d *dao) MetadataList(q *globalrole.Query) ([]api.Entity, error) {
+	var list []*v1.PartialEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
 	return result, err
 }
