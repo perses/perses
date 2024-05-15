@@ -31,8 +31,8 @@ export function GridContainer(props: GridContainerProps) {
     <ReactGridLayoutContainer
       sx={[
         {
-          // This adds spcing between grids (rows) in the overall dashboard
-          '& + &': { marginTop: (theme) => theme.spacing(1) },
+          // This adds spacing between grids (rows) in the overall dashboard
+          '& + &': { marginTop: 1 },
           // This disables the animation of grid items when a grid is first rendered
           // (see https://github.com/react-grid-layout/react-grid-layout/issues/103)
           '& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },

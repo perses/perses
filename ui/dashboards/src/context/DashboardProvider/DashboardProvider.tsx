@@ -61,7 +61,7 @@ export interface DashboardStoreState
   refreshInterval: DurationString;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
-  ttl?: DurationString; // Only for EphemeralDashboards
+  ttl?: DurationString;
 }
 
 export interface DashboardStoreProps {
