@@ -20,7 +20,7 @@ import {
   usePanelGroupActions,
   PanelGroupId,
   PanelGroupItemLayout,
-  useShowPanel,
+  useViewPanel,
   PanelGroupDefinition,
 } from '../../context';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
@@ -42,7 +42,7 @@ export interface GridLayoutProps {
  * Layout component that arranges children in a Grid based on the definition.
  */
 export function GridLayout(props: GridLayoutProps) {
-  const { panelGroupId, panelOptions, panelFullHeight /*showPanelRef*/ } = props;
+  const { panelGroupId, panelOptions, panelFullHeight /*viewPanelRef*/ } = props;
   const theme = useTheme();
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
@@ -52,25 +52,26 @@ export function GridLayout(props: GridLayoutProps) {
 
   const [gridColWidth, setGridColWidth] = useState(0);
 
-  const showPanelItemId = useShowPanel();
-  const hasShowPanel = showPanelItemId?.panelGroupId === panelGroupId;
-  const itemLayoutShowed = showPanelItemId?.panelGroupItemLayoutId;
+  const viewPanelItemId = useViewPanel();
+  const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
+  const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
-  const showGrid = useMemo(() => {
-    if (showPanelItemId === undefined) {
+  // If there is a panel in View mode, we should hide the grid if the panel is not in the current group. Else, View the grid
+  const ViewGrid = useMemo(() => {
+    if (viewPanelItemId === undefined) {
       return true;
     }
-    return hasShowPanel;
-  }, [hasShowPanel, showPanelItemId]);
+    return hasViewPanel;
+  }, [hasViewPanel, viewPanelItemId]);
 
   const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
-    if (itemLayoutShowed) {
+    if (itemLayoutViewed) {
       return groupDefinition.itemLayouts.map((itemLayout) => {
-        if (itemLayout.i === itemLayoutShowed) {
+        if (itemLayout.i === itemLayoutViewed) {
           const rowTitleHeight = 40 + 8; // 8 is the margin height
           return {
             h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)),
-            i: itemLayoutShowed,
+            i: itemLayoutViewed,
             w: 48,
             x: 0,
             y: 0,
@@ -80,7 +81,7 @@ export function GridLayout(props: GridLayoutProps) {
       });
     }
     return groupDefinition.itemLayouts;
-  }, [groupDefinition.itemLayouts, itemLayoutShowed, panelFullHeight]);
+  }, [groupDefinition.itemLayouts, itemLayoutViewed, panelFullHeight]);
 
   const handleLayoutChange = (currentLayout: Layout[], allLayouts: Layouts) => {
     // Using the value from `allLayouts` instead of `currentLayout` because of
@@ -88,7 +89,7 @@ export function GridLayout(props: GridLayoutProps) {
     // when going to a smaller breakpoint and then back to a larger breakpoint.
     // https://github.com/react-grid-layout/react-grid-layout/issues/1663
     const smallLayout = allLayouts[GRID_LAYOUT_SMALL_BREAKPOINT];
-    if (smallLayout && !hasShowPanel) {
+    if (smallLayout && !hasViewPanel) {
       updatePanelGroupLayouts(smallLayout);
     }
   };
@@ -111,7 +112,7 @@ export function GridLayout(props: GridLayoutProps) {
   };
 
   return (
-    <GridContainer sx={{ display: showGrid ? 'unset' : 'none' }}>
+    <GridContainer sx={{ display: ViewGrid ? 'unset' : 'none' }}>
       {groupDefinition.title !== undefined && (
         <GridTitle
           panelGroupId={panelGroupId}
@@ -131,20 +132,20 @@ export function GridLayout(props: GridLayoutProps) {
           rowHeight={ROW_HEIGHT}
           draggableHandle=".drag-handle"
           resizeHandles={['se']}
-          isDraggable={isEditMode && !hasShowPanel}
-          isResizable={isEditMode && !hasShowPanel}
+          isDraggable={isEditMode && !hasViewPanel}
+          isResizable={isEditMode && !hasViewPanel}
           margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
           layouts={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: itemLayouts }}
           onLayoutChange={handleLayoutChange}
           onWidthChange={handleWidthChange}
-          allowOverlap={hasShowPanel} // Enabling overlap when showing a specific panel because panel in front will add empty spaces (empty row height)
+          allowOverlap={hasViewPanel} // Enabling overlap when Viewing a specific panel because panel in front will add empty spaces (empty row height)
         >
           {itemLayouts.map(({ i, w }) => (
             <div
               key={i}
               style={{
-                display: itemLayoutShowed !== undefined ? (itemLayoutShowed === i ? 'unset' : 'none') : 'unset',
+                display: itemLayoutViewed !== undefined ? (itemLayoutViewed === i ? 'unset' : 'none') : 'unset',
               }}
             >
               <ErrorBoundary FallbackComponent={ErrorAlert}>
@@ -152,8 +153,8 @@ export function GridLayout(props: GridLayoutProps) {
                   panelOptions={panelOptions}
                   panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i }}
                   width={
-                    itemLayoutShowed !== undefined
-                      ? itemLayoutShowed === i
+                    itemLayoutViewed !== undefined
+                      ? itemLayoutViewed === i
                         ? calculateGridItemWidth(w, 1) // TODO
                         : 0
                       : calculateGridItemWidth(w, gridColWidth)

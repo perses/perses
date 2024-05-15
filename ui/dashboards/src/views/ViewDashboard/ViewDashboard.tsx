@@ -63,7 +63,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
-  const [showPanelRef, setShowPanelRef] = useQueryParam('showPanelRef', StringParam);
+  const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', StringParam);
 
   const builtinVariables = useMemo(() => {
     const result = [
@@ -106,8 +106,8 @@ export function ViewDashboard(props: ViewDashboardProps) {
         initialState={{
           dashboardResource,
           isEditMode: !!isEditing,
-          showPanelRef: showPanelRef ?? undefined, // showPanelRef can be null, forcing to undefined
-          setShowPanelRef: setShowPanelRef,
+          viewPanelRef: viewPanelRef ?? undefined, // viewPanelRef can be null, forcing to undefined
+          setViewPanelRef: setViewPanelRef,
         }}
       >
         <TimeRangeProviderWithQueryParams

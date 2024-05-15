@@ -33,7 +33,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   links?: Link[];
   extra?: ReactNode;
   readHandlers?: {
-    onShowPanelClick: () => void;
+    onViewPanelClick: () => void;
   };
   editHandlers?: {
     onEditPanelClick: () => void;
@@ -62,11 +62,11 @@ export function PanelHeader({
   let readActions: CardHeaderProps['action'] = undefined;
   if (readHandlers !== undefined) {
     readActions = (
-      <InfoTooltip description={TOOLTIP_TEXT.showPanel}>
+      <InfoTooltip description={TOOLTIP_TEXT.viewPanel}>
         <HeaderIconButton
-          aria-label={ARIA_LABEL_TEXT.showPanel(title)}
+          aria-label={ARIA_LABEL_TEXT.viewPanel(title)}
           size="small"
-          onClick={readHandlers.onShowPanelClick}
+          onClick={readHandlers.onViewPanelClick}
         >
           <ArrowExpand fontSize="inherit" />
         </HeaderIconButton>

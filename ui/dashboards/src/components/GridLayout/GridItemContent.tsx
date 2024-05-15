@@ -13,8 +13,8 @@
 
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useShowPanel } from '../../context';
+import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanel } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 
 export interface GridItemContentProps {
@@ -33,8 +33,8 @@ export function GridItemContent(props: GridItemContentProps) {
     spec: { queries },
   } = panelDefinition;
   const { isEditMode } = useEditMode();
-  const { openEditPanel, openDeletePanelDialog, duplicatePanel, showPanel } = usePanelActions(panelGroupItemId);
-  const showPanelGroupItemId = useShowPanel();
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
+  const viewPanelGroupItemId = useViewPanel();
   const { ref, inView } = useInView({
     threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
     initialInView: false,
@@ -42,11 +42,11 @@ export function GridItemContent(props: GridItemContentProps) {
   });
 
   const readHandlers = {
-    onShowPanelClick: function () {
-      if (showPanelGroupItemId === undefined) {
-        showPanel(panelGroupItemId);
+    onViewPanelClick: function () {
+      if (viewPanelGroupItemId === undefined) {
+        viewPanel(panelGroupItemId);
       } else {
-        showPanel(undefined);
+        viewPanel(undefined);
       }
     },
   };

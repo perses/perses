@@ -19,13 +19,13 @@ import { PanelGroupSlice } from './panel-group-slice';
 /**
  * Slice that handles duplicating Panels.
  */
-export interface ShowPanelSlice {
-  showPanel: ShowPanelState;
-  getShowPanel: () => PanelGroupItemId | undefined;
-  setShowPanel: (panelGroupItemId?: PanelGroupItemId) => void;
+export interface ViewPanelSlice {
+  viewPanel: ViewPanelState;
+  getViewPanel: () => PanelGroupItemId | undefined;
+  setViewPanel: (panelGroupItemId?: PanelGroupItemId) => void;
 }
 
-export interface ShowPanelState {
+export interface ViewPanelState {
   panelGroupItemId?: PanelGroupItemId;
   panelRef?: string;
 }
@@ -33,36 +33,36 @@ export interface ShowPanelState {
 /**
  * Curried function for viewing panel full screen.
  */
-export function createShowPanelSlice(
-  showPanelRef?: string,
-  setShowPanelRef?: (ref: string | undefined) => void
-): StateCreator<ShowPanelSlice & PanelGroupSlice, Middleware, [], ShowPanelSlice> {
+export function createViewPanelSlice(
+  viewPanelRef?: string,
+  setViewPanelRef?: (ref: string | undefined) => void
+): StateCreator<ViewPanelSlice & PanelGroupSlice, Middleware, [], ViewPanelSlice> {
   return (set, get) => ({
-    showPanel: {
+    viewPanel: {
       panelGroupItemId: undefined,
-      panelRef: showPanelRef,
+      panelRef: viewPanelRef,
     },
 
-    getShowPanel(): PanelGroupItemId | undefined {
-      return getShowPanelGroupId(get().panelGroups, get().showPanel.panelGroupItemId, get().showPanel.panelRef);
+    getViewPanel(): PanelGroupItemId | undefined {
+      return getViewPanelGroupId(get().panelGroups, get().viewPanel.panelGroupItemId, get().viewPanel.panelRef);
     },
 
-    setShowPanel(panelGroupItemId?: PanelGroupItemId) {
+    setViewPanel(panelGroupItemId?: PanelGroupItemId) {
       set((state) => {
-        state.showPanel = {
+        state.viewPanel = {
           panelRef: undefined,
           panelGroupItemId: panelGroupItemId,
         };
         const panelRef = findPanelRefOfPanelGroupItemId(get().panelGroups, panelGroupItemId);
-        if (setShowPanelRef) {
-          setShowPanelRef(panelRef);
+        if (setViewPanelRef) {
+          setViewPanelRef(panelRef);
         }
       });
     },
   });
 }
 
-function getShowPanelGroupId(
+function getViewPanelGroupId(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
   panelGroupItemId?: PanelGroupItemId,
   panelRef?: string
