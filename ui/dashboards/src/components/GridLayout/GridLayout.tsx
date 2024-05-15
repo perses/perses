@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
@@ -36,7 +36,6 @@ export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
   panelOptions?: PanelOptions;
   panelFullHeight?: number;
-  // showPanelRef?: string;
 }
 
 /**
@@ -68,7 +67,7 @@ export function GridLayout(props: GridLayoutProps) {
     if (itemLayoutShowed) {
       return groupDefinition.itemLayouts.map((itemLayout) => {
         if (itemLayout.i === itemLayoutShowed) {
-          const rowTitleHeight = 40 + 8; // 8 is the margin
+          const rowTitleHeight = 40 + 8; // 8 is the margin height
           return {
             h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)),
             i: itemLayoutShowed,

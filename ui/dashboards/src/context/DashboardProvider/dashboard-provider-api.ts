@@ -162,20 +162,6 @@ export function useDeletePanelGroupDialog() {
   };
 }
 
-export function usePanelGroupHasPanelRef(panelGroupId: PanelGroupId, panelRef?: string): boolean {
-  const panelGroup = useDashboardStore((state) => state.panelGroups[panelGroupId]);
-  return Object.values(panelGroup?.itemPanelKeys ?? []).some((value) => value === panelRef);
-}
-
-export function useItemLayoutOfPanelRef(panelGroupId: PanelGroupId, panelRef?: string): string | undefined {
-  const panelGroup = useDashboardStore((state) => state.panelGroups[panelGroupId]);
-  const itemLayoutIndex = Object.values(panelGroup?.itemPanelKeys ?? []).findIndex((value) => value === panelRef);
-  if (itemLayoutIndex === -1 || panelGroup === undefined) {
-    return undefined;
-  }
-  return Object.keys(panelGroup.itemPanelKeys)[itemLayoutIndex];
-}
-
 /**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */
@@ -224,7 +210,6 @@ export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
 }
 
 const selectPanelEditor = (state: DashboardStoreState) => state.panelEditor;
-
 /**
  * Gets the state for the Panel Editor.
  */
@@ -251,7 +236,7 @@ export function useDashboardDuration() {
   return useDashboardStore(selectDashboardDuration);
 }
 
-const selectShowPanel = (state: DashboardStoreState) => state.showPanel?.panelGroupItemId;
+const selectShowPanel = (state: DashboardStoreState) => state.getShowPanel();
 /**
  * Gets the current panel showed in full screen mode.
  */
@@ -296,14 +281,3 @@ const selectEditJsonDialog = ({ editJsonDialog, openEditJsonDialog, closeEditJso
 export function useEditJsonDialog() {
   return useDashboardStore(selectEditJsonDialog);
 }
-
-// const selectShowPanelRef = ({ showPanelRefState, setShowPanelRef }: DashboardStoreState) => ({
-//   showPanelRefState,
-//   setShowPanelRef,
-// });
-// /**
-//  * Gets the state for the edit JSON dialog.
-//  */
-// export function useShowPanelRef() {
-//   return useDashboardStore(selectShowPanelRef);
-// }

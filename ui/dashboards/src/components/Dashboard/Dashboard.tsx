@@ -34,7 +34,6 @@ export type DashboardProps = BoxProps & {
 export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: DashboardProps) {
   const panelGroupIds = usePanelGroupIds();
   const boxRef = useRef<HTMLDivElement>(null);
-  // const { showPanelRefState } = useShowPanelRef(); // TODO: check if panelRef exists => ignore
   const isEmpty = !panelGroupIds.length;
   const dashboardTopPosition = boxRef.current?.getBoundingClientRect().top ?? 165;
   const panelFullHeight = window.innerHeight - dashboardTopPosition - window.scrollY;
@@ -54,7 +53,6 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
               panelGroupId={panelGroupId}
               panelOptions={panelOptions}
               panelFullHeight={panelFullHeight}
-              // showPanelRef={showPanelRefState.showPanelRef}
             />
           ))}
       </ErrorBoundary>

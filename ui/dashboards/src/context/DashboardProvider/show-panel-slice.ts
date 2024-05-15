@@ -12,34 +12,102 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupItemId } from '@perses-dev/dashboards';
+import { PanelGroupDefinition, PanelGroupId, PanelGroupItemId } from '@perses-dev/dashboards';
 import { Middleware } from './common';
+import { PanelGroupSlice } from './panel-group-slice';
 
 /**
  * Slice that handles duplicating Panels.
  */
 export interface ShowPanelSlice {
-  showPanel?: ShowPanelState;
+  showPanel: ShowPanelState;
+  getShowPanel: () => PanelGroupItemId | undefined;
   setShowPanel: (panelGroupItemId?: PanelGroupItemId) => void;
 }
 
 export interface ShowPanelState {
   panelGroupItemId?: PanelGroupItemId;
+  panelRef?: string;
 }
 
 /**
  * Curried function for viewing panel full screen.
  */
 export function createShowPanelSlice(
-  showPanelRef?: string
-): StateCreator<ShowPanelSlice, Middleware, [], ShowPanelSlice> {
-  return (set) => ({
+  showPanelRef?: string,
+  setShowPanelRef?: (ref: string | undefined) => void
+): StateCreator<ShowPanelSlice & PanelGroupSlice, Middleware, [], ShowPanelSlice> {
+  return (set, get) => ({
+    showPanel: {
+      panelGroupItemId: undefined,
+      panelRef: showPanelRef,
+    },
+
+    getShowPanel(): PanelGroupItemId | undefined {
+      return getShowPanelGroupId(get().panelGroups, get().showPanel.panelGroupItemId, get().showPanel.panelRef);
+    },
+
     setShowPanel(panelGroupItemId?: PanelGroupItemId) {
       set((state) => {
         state.showPanel = {
+          panelRef: undefined,
           panelGroupItemId: panelGroupItemId,
         };
+        const panelRef = findPanelRefOfPanelGroupItemId(get().panelGroups, panelGroupItemId);
+        if (setShowPanelRef) {
+          setShowPanelRef(panelRef);
+        }
       });
     },
   });
+}
+
+function getShowPanelGroupId(
+  panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
+  panelGroupItemId?: PanelGroupItemId,
+  panelRef?: string
+): PanelGroupItemId | undefined {
+  if (panelGroupItemId) {
+    return panelGroupItemId;
+  }
+
+  if (panelRef) {
+    return findPanelGroupItemIdOfPanelRef(panelGroups, panelRef);
+  }
+
+  return undefined;
+}
+
+// Find the PanelGroupItemId of a Panel from a PanelRef
+function findPanelGroupItemIdOfPanelRef(
+  panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
+  panelRef?: string
+): PanelGroupItemId | undefined {
+  for (const panelGroup of Object.values(panelGroups)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef);
+    if (itemPanel) {
+      const [key] = itemPanel;
+      return {
+        panelGroupId: panelGroup.id,
+        panelGroupItemLayoutId: key,
+      };
+    }
+  }
+  return undefined;
+}
+
+// Find the PanelRef from a PanelGroupItemId
+function findPanelRefOfPanelGroupItemId(
+  panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
+  panelGroupItemId?: PanelGroupItemId
+): string | undefined {
+  if (!panelGroupItemId) {
+    return undefined;
+  }
+  const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
+  if (panelGroup) {
+    return panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+  }
+  return undefined;
 }

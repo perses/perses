@@ -21,6 +21,7 @@ import {
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
+import { StringParam, useQueryParam } from 'use-query-params';
 import {
   DashboardProvider,
   DatasourceStoreProviderProps,
@@ -62,7 +63,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
-  // const showPanelRef = 'basicEx'; // TODO: query param for showing a specific panel
+  const [showPanelRef, setShowPanelRef] = useQueryParam('showPanelRef', StringParam);
 
   const builtinVariables = useMemo(() => {
     const result = [
@@ -101,7 +102,14 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing /*showPanelRef: showPanelRef*/ }}>
+      <DashboardProvider
+        initialState={{
+          dashboardResource,
+          isEditMode: !!isEditing,
+          showPanelRef: showPanelRef ?? undefined, // showPanelRef can be null, forcing to undefined
+          setShowPanelRef: setShowPanelRef,
+        }}
+      >
         <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
