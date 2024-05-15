@@ -16,6 +16,7 @@ package globalrolebinding
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -23,7 +24,12 @@ type Query struct {
 	databaseModel.Query
 	// NamePrefix is a prefix of the GlobalRoleBinding.metadata.name that is used to filter the list of the GlobalRoleBinding.
 	// NamePrefix can be empty in case you want to return the full list of GlobalRoleBinding available.
-	NamePrefix string `query:"name"`
+	NamePrefix   string `query:"name"`
+	MetadataOnly bool   `query:"metadata_only"`
+}
+
+func (q *Query) GetMetadataOnlyQueryParam() bool {
+	return q.MetadataOnly
 }
 
 type DAO interface {
@@ -32,6 +38,7 @@ type DAO interface {
 	Delete(name string) error
 	Get(name string) (*v1.GlobalRoleBinding, error)
 	List(q *Query) ([]*v1.GlobalRoleBinding, error)
+	MetadataList(q *Query) ([]api.Entity, error)
 }
 
 type Service interface {

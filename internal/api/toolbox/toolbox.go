@@ -63,7 +63,7 @@ func New[T api.Entity, K api.Entity, V databaseModel.Query](service apiInterface
 }
 
 type toolbox[T api.Entity, K api.Entity, V databaseModel.Query] struct {
-	Toolbox[T, K]
+	Toolbox[T, V]
 	service       apiInterface.Service[T, K, V]
 	rbac          rbac.RBAC
 	kind          v1.Kind

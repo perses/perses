@@ -29,16 +29,24 @@ func buildMapFromList[T api.Entity](list []T) map[string]T {
 	return result
 }
 
-func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) ([]K, error) {
+func convertList[T api.Entity](list []T) []api.Entity {
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result
+}
+
+func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) ([]api.Entity, error) {
 	if t.rbac.IsEnabled() {
 		// When permission is activated, the list is filtered based on what the user has access to.
 		// It considered multiple different cases, so that's why it's treated in a separated function.
 		return t.listWhenPermissionIsActivated(ctx, parameters, query)
 	}
-	return t.service.List(apiInterface.NewPersesContext(ctx), query, parameters)
+	return t.metadataOrFullList(apiInterface.NewPersesContext(ctx), parameters, query)
 }
 
-func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) ([]K, error) {
+func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) ([]api.Entity, error) {
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return nil, err
@@ -52,30 +60,30 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 
 	// If there is no project associated to the user, then we should just return an empty list.
 	if len(projects) == 0 {
-		return []K{}, nil
+		return []api.Entity{}, nil
 	}
 
 	// Special case if the user is getting the list of the project, as "project" is not considered has a global scope.
 	// More explanation about why it's not a global scope available here: https://github.com/perses/perses/blob/611b7993257dcadb18d48de945ad4def18889bec/pkg/model/api/v1/role/scope.go#L137-L138
 	if *scope == role.ProjectScope {
-		return t.listProjectWhenPermissionIsActivated(parameters, persesContext, projects, q)
+		return t.listProjectWhenPermissionIsActivated(persesContext, parameters, projects, q)
 	}
 
 	// In the case the request is done on a specific project, no need to compute resource for all other authorized projects.
 	if len(parameters.Project) > 0 {
-		return t.service.List(persesContext, q, parameters)
+		return t.metadataOrFullList(persesContext, parameters, q)
 	}
 
 	// In case, there is one result; it can mean the user has global access to the resource across the project.
 	// Or it can mean he has access to only one project. If he has global access, then we should return the complete list.
 	if len(projects) == 1 && projects[0] == rbac.GlobalProject {
-		return t.service.List(persesContext, q, parameters)
+		return t.metadataOrFullList(persesContext, parameters, q)
 	}
 
-	var result []K
+	var result []api.Entity
 	for _, project := range projects {
 		parameters.Project = project
-		listResult, listErr := t.service.List(persesContext, q, parameters)
+		listResult, listErr := t.metadataOrFullList(persesContext, parameters, q)
 		if listErr != nil {
 			return nil, listErr
 		}
@@ -84,17 +92,17 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 	return result, nil
 }
 
-func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiInterface.Parameters, persesContext apiInterface.PersesContext, projects []string, query V) ([]K, error) {
+func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, projects []string, query V) ([]api.Entity, error) {
 	// User has global access to all projects and should get the complete list.
 	if projects[0] == rbac.GlobalProject {
-		return t.service.List(persesContext, query, parameters)
+		return t.metadataOrFullList(persesContext, parameters, query)
 	}
 
 	// Last case, we want the list of the project that matches what the user has access to.
 	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
 	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
-	var result []K
-	projectList, listErr := t.service.List(persesContext, query, parameters)
+	var result []api.Entity
+	projectList, listErr := t.metadataOrFullList(persesContext, parameters, query)
 	if listErr != nil {
 		return nil, listErr
 	}
@@ -103,4 +111,19 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(parameters apiIn
 		result = append(result, projectMap[project])
 	}
 	return result, nil
+}
+
+func (t *toolbox[T, K, V]) metadataOrFullList(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, query V) ([]api.Entity, error) {
+	if query.GetMetadataOnlyQueryParam() {
+		list, err := t.service.MetadataList(persesContext, query, parameters)
+		if err != nil {
+			return nil, err
+		}
+		return list, nil
+	}
+	list, err := t.service.List(persesContext, query, parameters)
+	if err != nil {
+		return nil, err
+	}
+	return convertList(list), nil
 }

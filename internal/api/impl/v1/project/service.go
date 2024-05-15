@@ -15,6 +15,7 @@ package project
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -177,4 +178,8 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 
 func (s *service) List(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]*v1.Project, error) {
 	return s.dao.List(q)
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *project.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return s.dao.MetadataList(q)
 }

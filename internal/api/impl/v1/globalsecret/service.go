@@ -15,6 +15,7 @@ package globalsecret
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	"github.com/perses/perses/internal/api/crypto"
@@ -111,4 +112,8 @@ func (s *service) List(_ apiInterface.PersesContext, q *globalsecret.Query, _ ap
 		result = append(result, v1.NewPublicGlobalSecret(scrt))
 	}
 	return result, nil
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return s.dao.MetadataList(q)
 }

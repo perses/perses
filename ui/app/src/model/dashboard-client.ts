@@ -57,9 +57,9 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(project?: string) {
+export function useDashboardList(project?: string, metadataOnly?: boolean) {
   return useQuery<DashboardResource[], Error>([resource, project], () => {
-    return getDashboards(project);
+    return getDashboards(project, metadataOnly);
   });
 }
 
@@ -73,7 +73,7 @@ export interface DatedDashboards {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useRecentDashboardList(project?: string, maxSize?: number) {
-  const { data, isLoading } = useDashboardList(project);
+  const { data, isLoading } = useDashboardList(project, true);
   const history = useNavHistory();
 
   const result = useMemo(() => {
@@ -106,7 +106,7 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string) {
-  const { data: dashboards, isLoading } = useDashboardList(project);
+  const { data: dashboards, isLoading } = useDashboardList(project, true);
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {
@@ -180,8 +180,12 @@ export function getDashboard(project: string, name: string) {
   });
 }
 
-export function getDashboards(project?: string) {
-  const url = buildURL({ resource: resource, project: project });
+export function getDashboards(project?: string, metadataOnly?: boolean) {
+  const queryParams = new URLSearchParams();
+  if (metadataOnly) {
+    queryParams.set('metadata_only', 'true');
+  }
+  const url = buildURL({ resource: resource, project: project, queryParams: queryParams });
   return fetchJson<DashboardResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,

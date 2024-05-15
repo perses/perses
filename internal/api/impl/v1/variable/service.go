@@ -15,6 +15,7 @@ package variable
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -105,17 +106,29 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.List(query)
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]api.Entity, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.MetadataList(query)
+}
+
+func manageQuery(q *variable.Query, params apiInterface.Parameters) (*variable.Query, error) {
 	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
 	query, err := deep.Copy(q)
 	if err != nil {
 		return nil, fmt.Errorf("unable to copy the query: %w", err)
 	}
-	return s.list(query, params)
-}
-
-func (s *service) list(q *variable.Query, params apiInterface.Parameters) ([]*v1.Variable, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
+	if len(query.Project) == 0 {
+		query.Project = params.Project
 	}
-	return s.dao.List(q)
+	return query, nil
 }

@@ -15,6 +15,7 @@ package view
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -84,6 +85,10 @@ func (m *mockDashboardService) Get(_ apiInterface.PersesContext, _ apiInterface.
 }
 
 func (*mockDashboardService) List(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]*v1.Dashboard, error) {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) MetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	panic("unimplemented")
 }
 
