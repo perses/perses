@@ -27,6 +27,7 @@ export type DashboardProps = BoxProps & {
   emptyDashboardProps?: EmptyDashboardProps;
   panelOptions?: PanelOptions;
 };
+const HEADER_HEIGHT = 165; // Approximate height of the header in dashboard view (including the navbar and variables toolbar)
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
@@ -35,7 +36,7 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
   const panelGroupIds = usePanelGroupIds();
   const boxRef = useRef<HTMLDivElement>(null);
   const isEmpty = !panelGroupIds.length;
-  const dashboardTopPosition = boxRef.current?.getBoundingClientRect().top ?? 165;
+  const dashboardTopPosition = boxRef.current?.getBoundingClientRect().top ?? HEADER_HEIGHT;
   const panelFullHeight = window.innerHeight - dashboardTopPosition - window.scrollY;
 
   return (

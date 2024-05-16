@@ -17,7 +17,8 @@ import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import DragIcon from 'mdi-material-ui/DragVertical';
-import ArrowExpand from 'mdi-material-ui/ArrowExpand';
+import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
+import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactNode } from 'react';
@@ -33,6 +34,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   links?: Link[];
   extra?: ReactNode;
   readHandlers?: {
+    isPanelViewed?: boolean;
     onViewPanelClick: () => void;
   };
   editHandlers?: {
@@ -68,7 +70,11 @@ export function PanelHeader({
           size="small"
           onClick={readHandlers.onViewPanelClick}
         >
-          <ArrowExpand fontSize="inherit" />
+          {readHandlers.isPanelViewed ? (
+            <ArrowCollapseIcon fontSize="inherit" />
+          ) : (
+            <ArrowExpandIcon fontSize="inherit" />
+          )}
         </HeaderIconButton>
       </InfoTooltip>
     );

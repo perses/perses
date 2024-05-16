@@ -69,7 +69,7 @@ export function GridLayout(props: GridLayoutProps) {
     if (itemLayoutViewed) {
       return groupDefinition.itemLayouts.map((itemLayout) => {
         if (itemLayout.i === itemLayoutViewed) {
-          const rowTitleHeight = 40 + 8; // 8 is the margin height
+          const rowTitleHeight = 40 + 8; // 40 is the height of the row title and 8 is the margin height
           return {
             h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)), // Viewed panel should take the full height remaining
             i: itemLayoutViewed,

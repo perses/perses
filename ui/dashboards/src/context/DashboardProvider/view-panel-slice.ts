@@ -17,7 +17,7 @@ import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 
 /**
- * Slice that handles duplicating Panels.
+ * Slice that handles viewing Panels in max size ("full screen").
  */
 export interface ViewPanelSlice {
   viewPanel: ViewPanelState;
@@ -26,12 +26,13 @@ export interface ViewPanelSlice {
 }
 
 export interface ViewPanelState {
+  // Do not use directly, use `getViewPanel()` instead for getting the current viewed PanelGroupItemId!
   panelGroupItemId?: PanelGroupItemId;
   panelRef?: string;
 }
 
 /**
- * Curried function for viewing panel full screen.
+ * Curried function for viewing panel in max size ("full screen").
  */
 export function createViewPanelSlice(
   viewPanelRef?: string,
@@ -84,7 +85,6 @@ function findPanelGroupItemIdOfPanelRef(
   panelRef?: string
 ): PanelGroupItemId | undefined {
   for (const panelGroup of Object.values(panelGroups)) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef);
     if (itemPanel) {
       const [key] = itemPanel;

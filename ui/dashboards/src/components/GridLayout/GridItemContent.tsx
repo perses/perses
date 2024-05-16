@@ -13,9 +13,10 @@
 
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanel } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
+import { isPanelGroupItemIdEqual } from '../../context/DashboardProvider/panel-group-slice';
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
@@ -42,6 +43,7 @@ export function GridItemContent(props: GridItemContentProps) {
   });
 
   const readHandlers = {
+    isPanelViewed: isPanelGroupItemIdEqual(viewPanelGroupItemId, panelGroupItemId),
     onViewPanelClick: function () {
       if (viewPanelGroupItemId === undefined) {
         viewPanel(panelGroupItemId);

@@ -21,14 +21,13 @@ import {
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
-import { StringParam, useQueryParam } from 'use-query-params';
 import {
-  DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
   TemplateVariableProviderProps,
   TemplateVariableProviderWithQueryParams,
 } from '../../context';
+import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
@@ -63,7 +62,6 @@ export function ViewDashboard(props: ViewDashboardProps) {
   const initialTimeRange = useInitialTimeRange(dashboardDuration);
   const initialRefreshInterval = useInitialRefreshInterval(dashboardRefreshInterval);
   const { data } = usePluginBuiltinVariableDefinitions();
-  const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', StringParam);
 
   const builtinVariables = useMemo(() => {
     const result = [
@@ -102,12 +100,10 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider
+      <DashboardProviderWithQueryParams
         initialState={{
           dashboardResource,
           isEditMode: !!isEditing,
-          viewPanelRef: viewPanelRef ?? undefined, // viewPanelRef can be null, forcing to undefined
-          setViewPanelRef: setViewPanelRef,
         }}
       >
         <TimeRangeProviderWithQueryParams
@@ -147,7 +143,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
             </Box>
           </TemplateVariableProviderWithQueryParams>
         </TimeRangeProviderWithQueryParams>
-      </DashboardProvider>
+      </DashboardProviderWithQueryParams>
     </DatasourceStoreProvider>
   );
 }
