@@ -41,7 +41,7 @@
         "pluginType": "TimeSeriesQuery",
         "kind": "PrometheusTimeSeriesQuery",
         "display": {
-          "name": "Prometheus Range Query",
+          "name": "Prometheus Query",
           "description": ""
         }
       },

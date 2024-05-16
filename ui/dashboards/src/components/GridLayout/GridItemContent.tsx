@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
-import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions } from '../../context';
 import { Panel, PanelProps } from '../Panel/Panel';
 import { PanelOptions } from '../Panel';
@@ -54,6 +54,9 @@ export function GridItemContent(props: GridItemContentProps) {
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const suggestedStepMs = useSuggestedStepMs(width);
+
+  const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
+
   const queryDefinitions = queries ?? [];
   const definitions = queryDefinitions.map((query) => {
     return {
@@ -70,7 +73,11 @@ export function GridItemContent(props: GridItemContentProps) {
         height: '100%',
       }}
     >
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }} queryOptions={{ enabled: inView }}>
+      <DataQueriesProvider
+        definitions={definitions}
+        options={{ suggestedStepMs, ...plugin?.queryOptions }}
+        queryOptions={{ enabled: inView }}
+      >
         {inView && (
           <Panel
             definition={panelDefinition}
