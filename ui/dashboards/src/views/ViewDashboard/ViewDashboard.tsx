@@ -22,12 +22,12 @@ import {
 } from '@perses-dev/plugin-system';
 import { useMemo } from 'react';
 import {
-  DashboardProvider,
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
   TemplateVariableProviderProps,
   TemplateVariableProviderWithQueryParams,
 } from '../../context';
+import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
@@ -100,7 +100,12 @@ export function ViewDashboard(props: ViewDashboardProps) {
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
-      <DashboardProvider initialState={{ dashboardResource, isEditMode: !!isEditing }}>
+      <DashboardProviderWithQueryParams
+        initialState={{
+          dashboardResource,
+          isEditMode: !!isEditing,
+        }}
+      >
         <TimeRangeProviderWithQueryParams
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
@@ -138,7 +143,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
             </Box>
           </TemplateVariableProviderWithQueryParams>
         </TimeRangeProviderWithQueryParams>
-      </DashboardProvider>
+      </DashboardProviderWithQueryParams>
     </DatasourceStoreProvider>
   );
 }

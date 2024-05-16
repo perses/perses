@@ -184,21 +184,28 @@ export function usePanel(panelGroupItemId: PanelGroupItemId) {
   return panel;
 }
 
-const selectPanelActions = ({ openEditPanel, openDeletePanelDialog, duplicatePanel }: DashboardStoreState) => ({
+const selectPanelActions = ({
   openEditPanel,
   openDeletePanelDialog,
   duplicatePanel,
+  setViewPanel,
+}: DashboardStoreState) => ({
+  openEditPanel,
+  openDeletePanelDialog,
+  duplicatePanel,
+  setViewPanel,
 });
 
 /**
  * Returns actions that can be performed on the given Panel.
  */
 export function usePanelActions(panelGroupItemId: PanelGroupItemId) {
-  const { openEditPanel, openDeletePanelDialog, duplicatePanel } = useDashboardStore(selectPanelActions);
+  const { openEditPanel, openDeletePanelDialog, duplicatePanel, setViewPanel } = useDashboardStore(selectPanelActions);
   return {
     openEditPanel: () => openEditPanel(panelGroupItemId),
     openDeletePanelDialog: () => openDeletePanelDialog(panelGroupItemId),
     duplicatePanel: () => duplicatePanel(panelGroupItemId),
+    viewPanel: (panelGroupItemId?: PanelGroupItemId) => setViewPanel(panelGroupItemId),
   };
 }
 
@@ -227,6 +234,14 @@ export function useDeletePanelDialog() {
 const selectDashboardDuration = (state: DashboardStoreState) => state.duration;
 export function useDashboardDuration() {
   return useDashboardStore(selectDashboardDuration);
+}
+
+const selectViewPanel = (state: DashboardStoreState) => state.getViewPanel();
+/**
+ * Gets the current panel viewed in max size ("full screen").
+ */
+export function useViewPanel() {
+  return useDashboardStore(selectViewPanel);
 }
 
 const selectSaveChangesConfirmationDialog = ({

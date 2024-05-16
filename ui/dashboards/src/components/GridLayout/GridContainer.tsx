@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
-import { styled } from '@mui/material';
+import { ReactNode, useEffect, useState } from 'react';
+import { styled, SxProps, Theme } from '@mui/material';
 
 export interface GridContainerProps {
-  children: React.ReactNode;
+  children: ReactNode;
+  sx?: SxProps<Theme>;
 }
 
 export function GridContainer(props: GridContainerProps) {
@@ -28,13 +29,16 @@ export function GridContainer(props: GridContainerProps) {
 
   return (
     <ReactGridLayoutContainer
-      sx={{
-        // This adds spcing between grids (rows) in the overall dashboard
-        '& + &': { marginTop: (theme) => theme.spacing(1) },
-        // This disables the animation of grid items when a grid is first rendered
-        // (see https://github.com/react-grid-layout/react-grid-layout/issues/103)
-        '& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },
-      }}
+      sx={[
+        {
+          // This adds spacing between grids (rows) in the overall dashboard
+          '& + &': { marginTop: 1 },
+          // This disables the animation of grid items when a grid is first rendered
+          // (see https://github.com/react-grid-layout/react-grid-layout/issues/103)
+          '& .react-grid-item.cssTransforms': { transitionProperty: isFirstRender ? 'none' : 'transform' },
+        },
+        ...(Array.isArray(props.sx) ? props.sx : [props.sx]),
+      ]}
       data-testid="panel-group"
     >
       {props.children}

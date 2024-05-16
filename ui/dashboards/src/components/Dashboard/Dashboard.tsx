@@ -13,6 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
+import { useRef } from 'react';
 import { usePanelGroupIds } from '../../context';
 import { GridLayout } from '../GridLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
@@ -26,16 +27,20 @@ export type DashboardProps = BoxProps & {
   emptyDashboardProps?: EmptyDashboardProps;
   panelOptions?: PanelOptions;
 };
+const HEADER_HEIGHT = 165; // Approximate height of the header in dashboard view (including the navbar and variables toolbar)
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
  */
 export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: DashboardProps) {
   const panelGroupIds = usePanelGroupIds();
+  const boxRef = useRef<HTMLDivElement>(null);
   const isEmpty = !panelGroupIds.length;
+  const dashboardTopPosition = boxRef.current?.getBoundingClientRect().top ?? HEADER_HEIGHT;
+  const panelFullHeight = window.innerHeight - dashboardTopPosition - window.scrollY;
 
   return (
-    <Box {...boxProps} sx={{ height: '100%' }}>
+    <Box {...boxProps} sx={{ height: '100%' }} ref={boxRef}>
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isEmpty && (
           <Box sx={{ height: '100%', display: 'flex', alignItems: 'center' }}>
@@ -44,7 +49,12 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
         )}
         {!isEmpty &&
           panelGroupIds.map((panelGroupId) => (
-            <GridLayout key={panelGroupId} panelGroupId={panelGroupId} panelOptions={panelOptions} />
+            <GridLayout
+              key={panelGroupId}
+              panelGroupId={panelGroupId}
+              panelOptions={panelOptions}
+              panelFullHeight={panelFullHeight}
+            />
           ))}
       </ErrorBoundary>
     </Box>

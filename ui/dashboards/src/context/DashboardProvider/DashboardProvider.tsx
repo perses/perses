@@ -38,6 +38,7 @@ import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
+import { createViewPanelSlice, ViewPanelSlice } from './view-panel-slice';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -49,7 +50,8 @@ export interface DashboardStoreState
     DiscardChangesConfirmationDialogSlice,
     DuplicatePanelSlice,
     EditJsonDialogSlice,
-    SaveChangesConfirmationDialogSlice {
+    SaveChangesConfirmationDialogSlice,
+    ViewPanelSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
@@ -65,6 +67,8 @@ export interface DashboardStoreState
 export interface DashboardStoreProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
   isEditMode?: boolean;
+  viewPanelRef?: string;
+  setViewPanelRef?: (viewPanelRef: string | undefined) => void;
 }
 
 export interface DashboardProviderProps {
@@ -112,7 +116,7 @@ export function DashboardProvider(props: DashboardProviderProps) {
 
 function initStore(props: DashboardProviderProps) {
   const {
-    initialState: { dashboardResource, isEditMode },
+    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
   } = props;
 
   const {
@@ -145,6 +149,7 @@ function initStore(props: DashboardProviderProps) {
           ...createPanelEditorSlice()(...args),
           ...createDeletePanelSlice()(...args),
           ...createDuplicatePanelSlice()(...args),
+          ...createViewPanelSlice(viewPanelRef, setViewPanelRef)(...args),
           /* General */
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),
