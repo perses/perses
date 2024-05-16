@@ -13,7 +13,6 @@
 
 import { Box } from '@mui/material';
 import { VariableDefinition, VariableSpec } from '@perses-dev/core';
-import { useMemo } from 'react';
 import {
   ExternalVariableDefinition,
   useTemplateExternalVariableDefinitions,
@@ -25,34 +24,18 @@ import { TemplateVariable } from './TemplateVariable';
 
 export function TemplateVariableList() {
   const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions()
-    .slice() // We reverse to have the most prioritized on top
-    .reverse();
-
-  const externalVariableDefinitionsNotOverrode = useMemo(() => {
-    const result: Record<string, VariableDefinition[]> = {};
-
-    for (const externalVariableDefinition of externalVariableDefinitions) {
-      for (const variableDefinition of externalVariableDefinition.definitions) {
-        if (!variableDefinitions.some((v) => v.spec.name === variableDefinition.spec.name)) {
-          const entry = result[externalVariableDefinition.source];
-          if (entry !== undefined) {
-            entry.push(variableDefinition);
-          } else {
-            result[externalVariableDefinition.source] = [variableDefinition];
-          }
-        }
-      }
-    }
-
-    return result;
-  }, [externalVariableDefinitions, variableDefinitions]);
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
 
   return (
     <>
-      {Object.entries(externalVariableDefinitionsNotOverrode).map(([source, definitions]) =>
-        definitions.map((v) => <TemplateVariableListItem key={v.spec.name + source} spec={v.spec} source={source} />)
-      )}
+      {externalVariableDefinitions
+        .slice()
+        .reverse() // We reverse to have the most prioritized on top
+        .map((def) =>
+          def.definitions.map((v) => (
+            <TemplateVariableListItem key={v.spec.name + def.source} spec={v.spec} source={def.source} />
+          ))
+        )}
       {variableDefinitions.map((v) => (
         <TemplateVariableListItem key={v.spec.name} spec={v.spec} />
       ))}
@@ -62,10 +45,13 @@ export function TemplateVariableList() {
 
 export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
   const ctx = useTemplateVariable(spec.name, source);
+  if (ctx.state?.overridden) {
+    return null;
+  }
   return (
     <Box
       key={spec.name + source ?? ''}
-      display={ctx.state?.overridden || spec.display?.hidden ? 'none' : undefined}
+      display={spec.display?.hidden ? 'none' : undefined}
       minWidth={`${MIN_TEMPLATE_VARIABLE_WIDTH}px`}
       maxWidth={`${MAX_TEMPLATE_VARIABLE_WIDTH}px`}
       flexShrink={0}
