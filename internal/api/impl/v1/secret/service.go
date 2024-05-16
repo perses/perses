@@ -123,12 +123,24 @@ func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params api
 	return result, nil
 }
 
+func (s *service) RawList(_ apiInterface.PersesContext, _ *secret.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
 func (s *service) MetadataList(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]api.Entity, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
 	}
 	return s.dao.MetadataList(query)
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([][]byte, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.RawMetadataList(query)
 }
 
 func manageQuery(q *secret.Query, params apiInterface.Parameters) (*secret.Query, error) {

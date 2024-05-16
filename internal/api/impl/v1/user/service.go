@@ -133,6 +133,14 @@ func (s *service) List(_ apiInterface.PersesContext, q *user.Query, _ apiInterfa
 	return result, nil
 }
 
+func (s *service) RawList(_ apiInterface.PersesContext, _ *user.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
 func (s *service) MetadataList(_ apiInterface.PersesContext, q *user.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *user.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return s.dao.RawMetadataList(q)
 }

@@ -68,3 +68,7 @@ func (d *dao) MetadataList(q *globalsecret.Query) ([]api.Entity, error) {
 	}
 	return result, err
 }
+
+func (d *dao) RawMetadataList(q *globalsecret.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
+}

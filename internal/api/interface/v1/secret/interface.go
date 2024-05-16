@@ -35,6 +35,14 @@ func (q *Query) GetMetadataOnlyQueryParam() bool {
 	return q.MetadataOnly
 }
 
+func (q *Query) IsRawQueryAllowed() bool {
+	return false
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.Secret) error
 	Update(entity *v1.Secret) error
@@ -43,6 +51,7 @@ type DAO interface {
 	Get(project string, name string) (*v1.Secret, error)
 	List(q *Query) ([]*v1.Secret, error)
 	MetadataList(q *Query) ([]api.Entity, error)
+	RawMetadataList(q *Query) ([][]byte, error)
 }
 
 type Service interface {

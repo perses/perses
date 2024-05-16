@@ -34,6 +34,14 @@ func (q *Query) GetMetadataOnlyQueryParam() bool {
 	return false
 }
 
+func (q *Query) IsRawQueryAllowed() bool {
+	return false
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return false
+}
+
 type DAO interface {
 	Create(entity *v1.GlobalDatasource) error
 	Update(entity *v1.GlobalDatasource) error

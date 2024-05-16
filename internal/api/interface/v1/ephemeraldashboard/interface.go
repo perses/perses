@@ -35,6 +35,14 @@ func (q *Query) GetMetadataOnlyQueryParam() bool {
 	return q.MetadataOnly
 }
 
+func (q *Query) IsRawQueryAllowed() bool {
+	return true
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.EphemeralDashboard) error
 	Update(entity *v1.EphemeralDashboard) error
@@ -42,7 +50,9 @@ type DAO interface {
 	DeleteAll(project string) error
 	Get(project string, name string) (*v1.EphemeralDashboard, error)
 	List(q *Query) ([]*v1.EphemeralDashboard, error)
+	RawList(q *Query) ([][]byte, error)
 	MetadataList(q *Query) ([]api.Entity, error)
+	RawMetadataList(q *Query) ([][]byte, error)
 }
 
 type Service interface {
