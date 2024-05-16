@@ -27,10 +27,15 @@ import {
   FontSizeSelectorProps,
   FontSizeOption,
 } from '@perses-dev/components';
+import merge from 'lodash/merge';
+import { DEFAULT_FORMAT } from '../gauge-chart/gauge-chart-model';
 import { StatChartOptions, StatChartOptionsEditorProps } from './stat-chart-model';
 
 export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProps) {
   const { onChange, value } = props;
+
+  // ensures decimalPlaces defaults to correct value
+  const format = merge({}, DEFAULT_FORMAT, value.format);
 
   const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
     onChange(
@@ -83,7 +88,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
             label="Sparkline"
             control={<Switch checked={!!value.sparkline} onChange={handleSparklineChange} />}
           />
-          <FormatControls value={value.format} onChange={handleUnitChange} />
+          <FormatControls value={format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
         </OptionsEditorGroup>
