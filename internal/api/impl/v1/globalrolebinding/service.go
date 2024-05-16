@@ -134,8 +134,16 @@ func (s *service) List(_ apiInterface.PersesContext, q *globalrolebinding.Query,
 	return s.dao.List(q)
 }
 
+func (s *service) RawList(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return s.dao.RawList(q)
+}
+
 func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
 	return s.dao.MetadataList(q)
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalrolebinding.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return s.dao.RawMetadataList(q)
 }
 
 // Validating role and subjects are existing

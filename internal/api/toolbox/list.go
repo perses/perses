@@ -19,6 +19,7 @@ import (
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/role"
+	"github.com/tidwall/gjson"
 )
 
 func buildMapFromList[T api.Entity](list []T) map[string]T {
@@ -29,15 +30,15 @@ func buildMapFromList[T api.Entity](list []T) map[string]T {
 	return result
 }
 
-func convertList[T api.Entity](list []T) []api.Entity {
-	result := make([]api.Entity, 0, len(list))
-	for _, el := range list {
-		result = append(result, el)
+func buildRawMapFromList(rows [][]byte) map[string][]byte {
+	result := make(map[string][]byte)
+	for _, item := range rows {
+		result[gjson.GetBytes(item, "metadata.name").String()] = item
 	}
 	return result
 }
 
-func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) ([]api.Entity, error) {
+func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parameters, query V) (any, error) {
 	if t.rbac.IsEnabled() {
 		// When permission is activated, the list is filtered based on what the user has access to.
 		// It considered multiple different cases, so that's why it's treated in a separated function.
@@ -46,7 +47,7 @@ func (t *toolbox[T, K, V]) list(ctx echo.Context, parameters apiInterface.Parame
 	return t.metadataOrFullList(apiInterface.NewPersesContext(ctx), parameters, query)
 }
 
-func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) ([]api.Entity, error) {
+func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, parameters apiInterface.Parameters, q V) (any, error) {
 	scope, err := role.GetScope(string(t.kind))
 	if err != nil {
 		return nil, err
@@ -80,19 +81,32 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return t.metadataOrFullList(persesContext, parameters, q)
 	}
 
-	var result []api.Entity
+	result := make([]any, 0)
 	for _, project := range projects {
 		parameters.Project = project
 		listResult, listErr := t.metadataOrFullList(persesContext, parameters, q)
 		if listErr != nil {
 			return nil, listErr
 		}
-		result = append(result, listResult...)
+		switch typedList := listResult.(type) {
+		case []api.Entity:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		case []K:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		case [][]byte:
+			for _, entity := range typedList {
+				result = append(result, entity)
+			}
+		}
 	}
 	return result, nil
 }
 
-func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, projects []string, query V) ([]api.Entity, error) {
+func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, projects []string, query V) (any, error) {
 	// User has global access to all projects and should get the complete list.
 	if projects[0] == rbac.GlobalProject {
 		return t.metadataOrFullList(persesContext, parameters, query)
@@ -101,29 +115,40 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext ap
 	// Last case, we want the list of the project that matches what the user has access to.
 	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
 	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
-	var result []api.Entity
+	var result []any
 	projectList, listErr := t.metadataOrFullList(persesContext, parameters, query)
 	if listErr != nil {
 		return nil, listErr
 	}
-	projectMap := buildMapFromList(projectList)
-	for _, project := range projects {
-		result = append(result, projectMap[project])
+	switch typedList := projectList.(type) {
+	case []K:
+		buildMap := buildMapFromList(typedList)
+		for _, project := range projects {
+			result = append(result, buildMap[project])
+		}
+	case []api.Entity:
+		buildMap := buildMapFromList(typedList)
+		for _, project := range projects {
+			result = append(result, buildMap[project])
+		}
+	case [][]byte:
+		buildMap := buildRawMapFromList(typedList)
+		for _, project := range projects {
+			result = append(result, buildMap[project])
+		}
 	}
 	return result, nil
 }
 
-func (t *toolbox[T, K, V]) metadataOrFullList(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, query V) ([]api.Entity, error) {
+func (t *toolbox[T, K, V]) metadataOrFullList(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, query V) (any, error) {
 	if query.GetMetadataOnlyQueryParam() {
-		list, err := t.service.MetadataList(persesContext, query, parameters)
-		if err != nil {
-			return nil, err
+		if query.IsRawMetadataQueryAllowed() {
+			return t.service.RawMetadataList(persesContext, query, parameters)
 		}
-		return list, nil
+		return t.service.MetadataList(persesContext, query, parameters)
 	}
-	list, err := t.service.List(persesContext, query, parameters)
-	if err != nil {
-		return nil, err
+	if query.IsRawQueryAllowed() {
+		return t.service.RawList(persesContext, query, parameters)
 	}
-	return convertList(list), nil
+	return t.service.List(persesContext, query, parameters)
 }

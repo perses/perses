@@ -99,12 +99,28 @@ func (s *service) List(_ apiInterface.PersesContext, q *folder.Query, params api
 	return s.dao.List(query)
 }
 
+func (s *service) RawList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([][]byte, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.RawList(query)
+}
+
 func (s *service) MetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]api.Entity, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
 	}
 	return s.dao.MetadataList(query)
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([][]byte, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.RawMetadataList(query)
 }
 
 func manageQuery(q *folder.Query, params apiInterface.Parameters) (*folder.Query, error) {

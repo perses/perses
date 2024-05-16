@@ -56,6 +56,10 @@ func (d *dao) List(q *globalrolebinding.Query) ([]*v1.GlobalRoleBinding, error) 
 	return result, err
 }
 
+func (d *dao) RawList(q *globalrolebinding.Query) ([][]byte, error) {
+	return d.client.RawQuery(q)
+}
+
 func (d *dao) MetadataList(q *globalrolebinding.Query) ([]api.Entity, error) {
 	var list []*v1.PartialEntity
 	err := d.client.Query(q, &list)
@@ -64,4 +68,8 @@ func (d *dao) MetadataList(q *globalrolebinding.Query) ([]api.Entity, error) {
 		result = append(result, el)
 	}
 	return result, err
+}
+
+func (d *dao) RawMetadataList(q *globalrolebinding.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }

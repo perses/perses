@@ -32,13 +32,23 @@ func (q *Query) GetMetadataOnlyQueryParam() bool {
 	return q.MetadataOnly
 }
 
+func (q *Query) IsRawQueryAllowed() bool {
+	return true
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.GlobalRoleBinding) error
 	Update(entity *v1.GlobalRoleBinding) error
 	Delete(name string) error
 	Get(name string) (*v1.GlobalRoleBinding, error)
 	List(q *Query) ([]*v1.GlobalRoleBinding, error)
+	RawList(q *Query) ([][]byte, error)
 	MetadataList(q *Query) ([]api.Entity, error)
+	RawMetadataList(q *Query) ([][]byte, error)
 }
 
 type Service interface {

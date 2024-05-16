@@ -22,6 +22,8 @@ import (
 
 type Query interface {
 	GetMetadataOnlyQueryParam() bool
+	IsRawQueryAllowed() bool
+	IsRawMetadataQueryAllowed() bool
 }
 
 type DAO interface {
@@ -36,6 +38,8 @@ type DAO interface {
 	// Query will find a list of resource that is matching the query passed in parameter. The list found will be set in slice.
 	// slice is an interface for casting simplification. But slice must be a pointer to a slice of modelAPI.Metadata
 	Query(query Query, slice interface{}) error
+	RawQuery(query Query) ([][]byte, error)
+	RawMetadataQuery(query Query, kind modelV1.Kind) ([][]byte, error)
 	Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error
 	DeleteByQuery(query Query) error
 	HealthCheck() bool

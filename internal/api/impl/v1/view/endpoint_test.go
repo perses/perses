@@ -88,7 +88,15 @@ func (*mockDashboardService) List(_ apiInterface.PersesContext, _ *dashboard.Que
 	panic("unimplemented")
 }
 
+func (*mockDashboardService) RawList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	panic("unimplemented")
+}
+
 func (*mockDashboardService) MetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	panic("unimplemented")
+}
+
+func (*mockDashboardService) RawMetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([][]byte, error) {
 	panic("unimplemented")
 }
 

@@ -20,6 +20,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -109,6 +110,18 @@ func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params
 		return nil, err
 	}
 	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
+}
+
+func (s *service) RawList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *service) validate(entity *v1.Datasource) error {

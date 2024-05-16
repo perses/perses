@@ -60,6 +60,10 @@ func (d *dao) List(q *role.Query) ([]*v1.Role, error) {
 	return result, err
 }
 
+func (d *dao) RawList(q *role.Query) ([][]byte, error) {
+	return d.client.RawQuery(q)
+}
+
 func (d *dao) MetadataList(q *role.Query) ([]api.Entity, error) {
 	var list []*v1.PartialProjectEntity
 	err := d.client.Query(q, &list)
@@ -68,4 +72,8 @@ func (d *dao) MetadataList(q *role.Query) ([]api.Entity, error) {
 		result = append(result, el)
 	}
 	return result, err
+}
+
+func (d *dao) RawMetadataList(q *role.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }
