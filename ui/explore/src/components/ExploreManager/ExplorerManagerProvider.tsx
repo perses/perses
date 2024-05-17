@@ -42,6 +42,8 @@ export function ExplorerManagerProvider({ children, initialState }: ExplorerMana
   const [queries, setInternalQueries] = useState<QueryDefinition[]>(initialState?.queries ?? []);
 
   function setExplorer(explorer: number) {
+    setInternalTab(0);
+    setInternalQueries([]);
     setInternalExplorer(explorer);
     if (initialState?.setExplorer) {
       initialState.setExplorer(explorer);
