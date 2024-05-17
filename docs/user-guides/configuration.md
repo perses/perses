@@ -72,22 +72,15 @@ Generic placeholders are defined as follows:
   # The configuration to access the CUE schemas
   [ schemas: <Schemas config> ]
 
-  # A list of dashboards you would like to display in the UI home page
-  important_dashboards:
-    - [ <Dashboard Selector config> ]
-
-  # The markdown content to be displayed on the UI home page
-  [ information: <string> ]
-
   # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
   # The data coming from the provisioning folder will totally override what exists in the database.
-  [ provisioning: <Provisioning specification> ]
-
-  # When it is true, Perses won't serve the frontend anymore.
-  [ deactivate_front: <bool> | default = false ]
+  [ provisioning: <Provisioning config> ]
 
   # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
   [ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
+
+  # Any configuration related to the UI itself
+  [ frontend: <Frontend config]
 ```
 
 ### Security config
@@ -435,7 +428,21 @@ A TLS config allows configuring TLS connections.
 [ max_version: <string> ]
 ```
 
-### Dashboard Selector config
+### Frontend config
+
+```yaml
+  # When it is true, Perses won't serve the frontend anymore.
+  [ deactivate: <bool> | default = false ]
+
+  # A list of dashboards you would like to display in the UI home page
+  important_dashboards:
+    - [ <Dashboard Selector config> ]
+
+  # The markdown content to be displayed on the UI home page
+  [ information: <string> ]
+```
+
+#### Dashboard Selector config
 
 ```yaml
   # The project name (dashboard.metadata.project)
@@ -445,7 +452,7 @@ A TLS config allows configuring TLS connections.
   dashboard: <string>
 ```
 
-### Provisioning specification
+#### Provisioning specification
 
 ```yaml
   [ interval: <duration> | default = 1h ]
