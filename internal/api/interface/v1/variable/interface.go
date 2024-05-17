@@ -16,6 +16,7 @@ package variable
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -26,8 +27,22 @@ type Query struct {
 	NamePrefix string `query:"name"`
 	// Project is the exact name of the project.
 	// The value can come from the path of the URL or from the query parameter
-	Project string `param:"project" query:"project"`
+	Project      string `param:"project" query:"project"`
+	MetadataOnly bool   `query:"metadata_only"`
 }
+
+func (q *Query) GetMetadataOnlyQueryParam() bool {
+	return q.MetadataOnly
+}
+
+func (q *Query) IsRawQueryAllowed() bool {
+	return true
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return true
+}
+
 type DAO interface {
 	Create(entity *v1.Variable) error
 	Update(entity *v1.Variable) error
@@ -35,6 +50,9 @@ type DAO interface {
 	DeleteAll(project string) error
 	Get(project string, name string) (*v1.Variable, error)
 	List(q *Query) ([]*v1.Variable, error)
+	RawList(q *Query) ([][]byte, error)
+	MetadataList(q *Query) ([]api.Entity, error)
+	RawMetadataList(q *Query) ([][]byte, error)
 }
 
 type Service interface {

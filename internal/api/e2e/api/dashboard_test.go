@@ -103,6 +103,28 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 	})
 }
 
+func TestListDashboardWithOnlyMetadata(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
+		persesProject := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoDashboard)
+
+		response := expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, persesProject.GetMetadata().GetName(), utils.PathDashboard)).
+			WithQuery("metadata_only", true).
+			Expect().
+			Status(http.StatusOK)
+
+		response.JSON().Array().Length().IsEqual(1)
+		response.JSON().Array().Value(0).Object().IsEqual(modelV1.PartialProjectEntity{
+			Kind:     demoDashboard.Kind,
+			Metadata: demoDashboard.Metadata,
+			Spec:     struct{}{},
+		})
+
+		return []api.Entity{persesProject, demoDashboard}
+	})
+}
+
 func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
 	b := testUtils.JSONMarshalStrict(body)
 	dashboard := &modelV1.Dashboard{}

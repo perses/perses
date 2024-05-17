@@ -16,6 +16,7 @@ package user
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -56,4 +57,18 @@ func (d *dao) List(q *user.Query) ([]*v1.User, error) {
 	var result []*v1.User
 	err := d.client.Query(q, &result)
 	return result, err
+}
+
+func (d *dao) MetadataList(q *user.Query) ([]api.Entity, error) {
+	var list []*v1.PartialEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result, err
+}
+
+func (d *dao) RawMetadataList(q *user.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }

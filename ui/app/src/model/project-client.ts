@@ -183,7 +183,7 @@ export function useDeleteProjectMutation() {
 
 async function getProjectsWithDashboard(): Promise<ProjectWithDashboards[]> {
   const projects = await getProjects();
-  const dashboards = await getDashboards();
+  const dashboards = await getDashboards(undefined, true);
   const dashboardList: Record<string, DashboardResource[]> = {};
 
   for (const dashboard of dashboards) {

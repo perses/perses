@@ -15,6 +15,7 @@ package globaldatasource
 
 import (
 	"fmt"
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -101,6 +102,18 @@ func (s *service) List(_ apiInterface.PersesContext, q *globaldatasource.Query, 
 		return nil, err
 	}
 	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *service) validate(entity *v1.GlobalDatasource) error {

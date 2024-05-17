@@ -16,6 +16,7 @@ package secret
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/secret"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -60,4 +61,18 @@ func (d *dao) List(q *secret.Query) ([]*v1.Secret, error) {
 	var result []*v1.Secret
 	err := d.client.Query(q, &result)
 	return result, err
+}
+
+func (d *dao) MetadataList(q *secret.Query) ([]api.Entity, error) {
+	var list []*v1.PartialProjectEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result, err
+}
+
+func (d *dao) RawMetadataList(q *secret.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }

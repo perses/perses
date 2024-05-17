@@ -15,12 +15,12 @@ package datasource
 
 import (
 	"fmt"
-
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/internal/api/validate"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 )
@@ -101,23 +101,27 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 	return s.dao.Get(parameters.Project, parameters.Name)
 }
 func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query, err := deep.Copy(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to copy the query: %w", err)
-	}
-	return s.list(query, params)
-}
-
-func (s *service) list(q *datasource.Query, params apiInterface.Parameters) ([]*v1.Datasource, error) {
-	if len(q.Project) == 0 {
-		q.Project = params.Project
-	}
-	dtsList, err := s.dao.List(q)
+	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
 	}
-	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
+	dtsList, err := s.dao.List(query)
+	if err != nil {
+		return nil, err
+	}
+	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
+}
+
+func (s *service) RawList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *service) validate(entity *v1.Datasource) error {
@@ -132,4 +136,16 @@ func (s *service) validate(entity *v1.Datasource) error {
 		}
 	}
 	return validate.Datasource(entity, list, s.sch)
+}
+
+func manageQuery(q *datasource.Query, params apiInterface.Parameters) (*datasource.Query, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
+	}
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return query, nil
 }

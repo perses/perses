@@ -16,6 +16,7 @@ package project
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/project"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -53,4 +54,22 @@ func (d *dao) List(q *project.Query) ([]*v1.Project, error) {
 	var result []*v1.Project
 	err := d.client.Query(q, &result)
 	return result, err
+}
+
+func (d *dao) RawList(q *project.Query) ([][]byte, error) {
+	return d.client.RawQuery(q)
+}
+
+func (d *dao) MetadataList(q *project.Query) ([]api.Entity, error) {
+	var list []*v1.PartialEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result, err
+}
+
+func (d *dao) RawMetadataList(q *project.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }
