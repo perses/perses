@@ -15,6 +15,7 @@ import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import { ReactNode } from 'react';
 import { ExploreManager } from '../../components/ExploreManager';
+import { ExplorerManagerProviderWithQueryParams } from '../../components/ExploreManager/ExplorerManagerProviderWithQueryParams';
 
 export interface ViewAppProps {
   exploreTitleComponent?: ReactNode;
@@ -36,7 +37,9 @@ export function ViewExploreApp(props: ViewAppProps) {
       }}
     >
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
-        <ExploreManager exploreTitleComponent={exploreTitleComponent} />
+        <ExplorerManagerProviderWithQueryParams>
+          <ExploreManager exploreTitleComponent={exploreTitleComponent} />
+        </ExplorerManagerProviderWithQueryParams>
       </ChartsProvider>
     </Box>
   );

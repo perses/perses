@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { ExploreToolbar } from '../ExploreToolbar';
 import { TracesExplorer } from './TracesExplorer';
 import { MetricsExplorer } from './MetricsExplorer';
+import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 export interface ExploreManagerProps {
   exploreTitleComponent?: ReactNode;
@@ -23,7 +24,7 @@ export interface ExploreManagerProps {
 
 export function ExploreManager(props: ExploreManagerProps) {
   const { exploreTitleComponent } = props;
-  const [tabState, setTabState] = useState(0);
+  const { explorer, setExplorer } = useExplorerManagerContext();
 
   const smallScreen = useMediaQuery('(max-width: 768px)');
   return (
@@ -33,8 +34,8 @@ export function ExploreManager(props: ExploreManagerProps) {
       <Stack direction={smallScreen ? 'column' : 'row'} gap={2} sx={{ width: '100%' }}>
         <Tabs
           orientation={smallScreen ? 'horizontal' : 'vertical'}
-          value={tabState}
-          onChange={(_, state) => setTabState(state)}
+          value={explorer}
+          onChange={(_, state) => setExplorer(state)}
           variant={smallScreen ? 'fullWidth' : 'scrollable'}
           sx={{
             borderRight: smallScreen ? 0 : 1,
@@ -47,8 +48,8 @@ export function ExploreManager(props: ExploreManagerProps) {
           <Tab label="Traces" />
         </Tabs>
         <Card sx={{ padding: '10px', width: '100%' }}>
-          {tabState === 0 && <MetricsExplorer />}
-          {tabState === 1 && <TracesExplorer />}
+          {explorer === 0 && <MetricsExplorer />}
+          {explorer === 1 && <TracesExplorer />}
         </Card>
       </Stack>
     </Stack>
