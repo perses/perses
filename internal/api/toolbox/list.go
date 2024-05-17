@@ -14,7 +14,11 @@
 package toolbox
 
 import (
+	"fmt"
+
+	"github.com/brunoga/deep"
 	"github.com/labstack/echo/v4"
+	"github.com/perses/common/async"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/pkg/model/api"
@@ -81,12 +85,15 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 		return t.metadataOrFullList(persesContext, parameters, q)
 	}
 
-	result := make([]any, 0)
+	result := make([]any, 0, len(projects))
+	asynchronousRequests := make([]async.Future[any], 0, len(projects))
 	for _, project := range projects {
-		parameters.Project = project
-		listResult, listErr := t.metadataOrFullList(persesContext, parameters, q)
-		if listErr != nil {
-			return nil, listErr
+		asynchronousRequests = append(asynchronousRequests, async.Async(t.asyncMetadataOrFullList(persesContext, parameters, project, q)))
+	}
+	for _, request := range asynchronousRequests {
+		listResult, requestErr := request.Await()
+		if requestErr != nil {
+			return nil, requestErr
 		}
 		switch typedList := listResult.(type) {
 		case []api.Entity:
@@ -151,4 +158,15 @@ func (t *toolbox[T, K, V]) metadataOrFullList(persesContext apiInterface.PersesC
 		return t.service.RawList(persesContext, query, parameters)
 	}
 	return t.service.List(persesContext, query, parameters)
+}
+
+func (t *toolbox[T, K, V]) asyncMetadataOrFullList(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, project string, query V) func() (any, error) {
+	return func() (any, error) {
+		param, err := deep.Copy(parameters)
+		if err != nil {
+			return [][]byte{}, fmt.Errorf("unable to copy the parameters: %w", err)
+		}
+		param.Project = project
+		return t.metadataOrFullList(persesContext, param, query)
+	}
 }
