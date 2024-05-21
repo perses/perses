@@ -74,7 +74,7 @@ export function ExplorerManagerProvider({ children, initialState }: ExplorerMana
 export function useExplorerManagerContext(): ExplorerManagerContextType {
   const ctx = useContext(ExplorerManagerContext);
   if (ctx === undefined) {
-    throw new Error('No ConfigContext found. Did you forget a Provider?');
+    throw new Error('No ExplorerManagerContext found. Did you forget a Provider?');
   }
   return ctx;
 }
