@@ -44,19 +44,19 @@ interface ExplorerManagerProviderProps {
   initialState?: ExplorerManagerInitialState;
 }
 
-function initialExplorerState(initialState?: ExplorerManagerInitialState): ExplorerState[] {
+function initExplorerStates(initialState?: ExplorerManagerInitialState): ExplorerState[] {
   const result: ExplorerState[] = [];
-  if (initialState?.explorer && initialState?.tab && initialState?.queries) {
+  if (initialState?.explorer !== undefined) {
     result[initialState.explorer] = {
-      tab: initialState.tab,
-      queries: initialState.queries,
+      tab: initialState.tab ?? 0,
+      queries: initialState.queries ?? [],
     };
   }
   return result;
 }
 
 export function ExplorerManagerProvider({ children, initialState }: ExplorerManagerProviderProps) {
-  const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initialExplorerState(initialState));
+  const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initExplorerStates(initialState));
   const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 0);
   const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 0, [explorer, explorerStates]);
   const queries: QueryDefinition[] = useMemo(() => explorerStates[explorer]?.queries ?? [], [explorer, explorerStates]);
