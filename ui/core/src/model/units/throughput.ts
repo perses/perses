@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { formatBytes } from './bytes';
 import { MAX_SIGNIFICANT_DIGITS } from './constants';
 import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
@@ -87,6 +88,12 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
 };
 
 export function formatThroughput(value: number, { unit, shortValues, decimalPlaces }: ThroughputFormatOptions): string {
+  // special case for data throughput
+  if (unit == 'bytes/sec') {
+    const denominator = Math.abs(value) < 1000 ? 'sec' : 's';
+    return formatBytes(value, { unit: 'bytes', shortValues, decimalPlaces }) + '/' + denominator;
+  }
+
   const formatterOptions: Intl.NumberFormatOptions = {
     style: 'decimal',
     useGrouping: true,
