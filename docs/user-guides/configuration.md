@@ -428,6 +428,17 @@ A TLS config allows configuring TLS connections.
 [ max_version: <string> ]
 ```
 
+### Provisioning specification
+
+```yaml
+  [ interval: <duration> | default = 1h ]
+
+  # List of folder that Perses will read periodically. 
+  # Every known data found in the different folders will be injected in the database regardless what exist.
+  folders:
+    - <string>
+```
+
 ### Frontend config
 
 ```yaml
@@ -450,15 +461,4 @@ A TLS config allows configuring TLS connections.
 
   # The dashboard name (dashboard.metadata.name)
   dashboard: <string>
-```
-
-#### Provisioning specification
-
-```yaml
-  [ interval: <duration> | default = 1h ]
-
-  # List of folder that Perses will read periodically. 
-  # Every known data found in the different folders will be injected in the database regardless what exist.
-  folders:
-    - <string>
 ```
