@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
+
+interface ExplorerState {
+  tab: number;
+  queries: QueryDefinition[];
+}
 
 interface ExplorerManagerContextType {
   explorer: number;
@@ -23,10 +28,13 @@ interface ExplorerManagerContextType {
   setQueries: (queries: QueryDefinition[]) => void;
 }
 
-interface ExplorerManagerInitialState extends Omit<ExplorerManagerContextType, 'explorer' | 'tab' | 'queries'> {
+interface ExplorerManagerInitialState {
   explorer?: number;
   tab?: number;
   queries?: QueryDefinition[];
+  setExplorer: (explorer: number | undefined) => void;
+  setTab: (tab: number | undefined) => void;
+  setQueries: (queries: QueryDefinition[] | undefined) => void;
 }
 
 const ExplorerManagerContext = createContext<ExplorerManagerContextType | undefined>(undefined);
@@ -36,29 +44,45 @@ interface ExplorerManagerProviderProps {
   initialState?: ExplorerManagerInitialState;
 }
 
+function initialExplorerState(initialState?: ExplorerManagerInitialState): ExplorerState[] {
+  const result: ExplorerState[] = [];
+  if (initialState?.explorer && initialState?.tab && initialState?.queries) {
+    result[initialState.explorer] = {
+      tab: initialState.tab,
+      queries: initialState.queries,
+    };
+  }
+  return result;
+}
+
 export function ExplorerManagerProvider({ children, initialState }: ExplorerManagerProviderProps) {
+  const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initialExplorerState(initialState));
   const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 0);
-  const [tab, setInternalTab] = useState<number>(initialState?.tab ?? 0);
-  const [queries, setInternalQueries] = useState<QueryDefinition[]>(initialState?.queries ?? []);
+  const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 0, [explorer, explorerStates]);
+  const queries: QueryDefinition[] = useMemo(() => explorerStates[explorer]?.queries ?? [], [explorer, explorerStates]);
 
   function setExplorer(explorer: number) {
-    setInternalTab(0);
-    setInternalQueries([]);
     setInternalExplorer(explorer);
     if (initialState?.setExplorer) {
       initialState.setExplorer(explorer);
+      initialState.setTab(explorerStates[explorer]?.tab);
+      initialState.setQueries(explorerStates[explorer]?.queries);
     }
   }
 
   function setTab(tab: number) {
-    setInternalTab(tab);
+    const state = [...explorerStates];
+    state[explorer] = { tab, queries: state[explorer]?.queries ?? [] };
+    setExplorerStates(state);
     if (initialState?.setTab) {
       initialState.setTab(tab);
     }
   }
 
   function setQueries(queries: QueryDefinition[]) {
-    setInternalQueries(queries);
+    const state = [...explorerStates];
+    state[explorer] = { tab: state[explorer]?.tab ?? 0, queries: queries };
+    setExplorerStates(state);
     if (initialState?.setQueries) {
       initialState?.setQueries(queries);
     }

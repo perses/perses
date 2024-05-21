@@ -34,11 +34,11 @@ export function ExplorerManagerProviderWithQueryParams({ children }: ExplorerMan
     explorer: queryParams.explorer ?? undefined, // can be null, forcing to undefined
     tab: queryParams.tab ?? undefined, // can be null, forcing to undefined
     queries: queryParams.queries ? (queryParams.queries as QueryDefinition[]) : undefined,
-    setExplorer: (explorer: number) => {
+    setExplorer: (explorer: number | undefined) => {
       setQueryParams({ explorer, queries: undefined, tab: undefined });
     },
-    setTab: (tab: number) => setQueryParams({ tab }),
-    setQueries: (queries: QueryDefinition[]) => setQueryParams({ queries }),
+    setTab: (tab: number | undefined) => setQueryParams({ tab }),
+    setQueries: (queries: QueryDefinition[] | undefined) => setQueryParams({ queries }),
   };
 
   return <ExplorerManagerProvider initialState={initialState}>{children}</ExplorerManagerProvider>;
