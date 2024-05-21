@@ -17,7 +17,6 @@ import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import { createReduxHistoryContext } from 'redux-first-history';
 import { createBrowserHistory } from 'history';
 
-import archive from '../components/TracePage/ArchiveNotifier/duck';
 import traceTimeline from '../components/TracePage/TraceTimelineViewer/duck';
 import { getAppEnvironment } from './constants';
 
@@ -28,7 +27,6 @@ const { createReduxHistory, routerMiddleware, routerReducer } = createReduxHisto
 export default function configureStore() {
   return createStore(
     combineReducers({
-      archive,
       traceTimeline,
       router: routerReducer,
     }),

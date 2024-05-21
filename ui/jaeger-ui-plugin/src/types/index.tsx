@@ -22,14 +22,12 @@ import { Config } from './config';
 import { EmbeddedState } from './embedded';
 import { SearchQuery } from './search';
 import tNil from './TNil';
-import iWebAnalytics from './tracking';
 import { Trace } from './trace';
 import TTraceDiffState from './TTraceDiffState';
 import TTraceTimeline from './TTraceTimeline';
 import { MetricsReduxState } from './metrics';
 
 export type TNil = tNil;
-export type IWebAnalytics = iWebAnalytics;
 
 export type FetchedState = 'FETCH_DONE' | 'FETCH_ERROR' | 'FETCH_LOADING';
 

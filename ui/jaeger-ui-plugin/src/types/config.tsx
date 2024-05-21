@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IWebAnalyticsFunc } from './tracking';
 import { TNil } from '.';
 
 export type ConfigMenuItem = {
@@ -154,13 +153,6 @@ export type Config = {
     // about the exceptions and report them as analytics events.
     // See https://github.com/jaegertracing/jaeger-ui/issues/39 for background.
     trackErrors: boolean | TNil;
-
-    // customWebAnalytics allows using custom implementation of event reporting,
-    // as an alternative to Google Analytics.
-    // This only works when using a JavaScript-based configuration file,
-    // which allows passing functions to the configuration.
-    // See https://github.com/jaegertracing/jaeger-ui/issues/652 for background.
-    customWebAnalytics: IWebAnalyticsFunc | TNil;
   };
 
   // linkPatterns allow customizing the display of traces with external links.
