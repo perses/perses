@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
+import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   const { width, ref: boxRef } = useResizeObserver();
@@ -81,15 +81,15 @@ function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
 }
 
 export function MetricsExplorer() {
-  const [queries, setQueries] = useState<QueryDefinition[]>();
-  const [tabState, setTabState] = useState(0);
+  const { tab, queries, setTab, setQueries } = useExplorerManagerContext();
+
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
 
       <Tabs
-        value={tabState}
-        onChange={(_, state) => setTabState(state)}
+        value={tab}
+        onChange={(_, state) => setTab(state)}
         variant="scrollable"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
@@ -97,8 +97,8 @@ export function MetricsExplorer() {
         <Tab label="Graph" />
       </Tabs>
       <Stack gap={1}>
-        {tabState === 0 && <MetricDataTable queries={queries ?? []} />}
-        {tabState === 1 && <TimeSeriesPanel queries={queries ?? []} />}
+        {tab === 0 && <MetricDataTable queries={queries} />}
+        {tab === 1 && <TimeSeriesPanel queries={queries} />}
       </Stack>
     </Stack>
   );

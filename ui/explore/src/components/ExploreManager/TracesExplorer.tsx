@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ScatterChart } from '@perses-dev/panels-plugin';
@@ -19,6 +18,7 @@ import { QueryDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import useResizeObserver from 'use-resize-observer';
 import { PANEL_PREVIEW_DEFAULT_WIDTH, PANEL_PREVIEW_HEIGHT } from './constants';
+import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 function TracePanel({ queries }: { queries: QueryDefinition[] }) {
   const { width, ref: boxRef } = useResizeObserver();
@@ -48,24 +48,22 @@ function TracePanel({ queries }: { queries: QueryDefinition[] }) {
 }
 
 export function TracesExplorer() {
-  const [queries, setQueries] = useState<QueryDefinition[]>();
-  const [tabState, setTabState] = useState(0);
+  const { tab, queries, setTab, setQueries } = useExplorerManagerContext();
+
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor queryTypes={['TraceQuery']} onChange={setQueries} queries={queries} />
 
       <Tabs
-        value={tabState}
-        onChange={(_, state) => setTabState(state)}
+        value={tab}
+        onChange={(_, state) => setTab(state)}
         variant="scrollable"
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
         <Tab label="Graph" />
       </Tabs>
       <Stack gap={1}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          {tabState === 0 && <TracePanel queries={queries ?? []} />}
-        </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>{tab === 0 && <TracePanel queries={queries} />}</ErrorBoundary>
       </Stack>
     </Stack>
   );
