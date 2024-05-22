@@ -38,25 +38,24 @@ Perses aims to tackle multiple goals:
 
 ## Try it
 
-We are providing an online demo available on **https://demo.perses.dev**.
-You can create your own project and dashboards there, nobody will be able to modify them!
+We are providing an online demo available at **https://demo.perses.dev**.
+You can create your own project(s) and dashboard(s) there, no one else will be able to modify them!
 
 ## Status
 
 1. Perses as an application can now **be used**.
-   * Data-model reached a stable point, and we are providing different panels that should cover most of the use case
-     when you need to use Prometheus.
+   * The data model reached a stable point, and we are providing multiple panel types that should cover most of the use cases
+     when using Prometheus.
    * Authentication and authorization are available.
 2. On the GitOps aspect:
-   * We provide a CLI that helps to interact with the API. A short doc is available [here](./docs/tooling/cli.md)
-   * Two SDKs (in Golang and in Cuelang) are available to create a Dashboard using language you would
-     like. (`Dashboard as Code` feature)
-     Probably these SDKs are going to involve depending on the feedback we might receive. Likely it will be to add more
-     util function rather than breaking things.
+   * We provide a CLI that helps interacting with the API. A short doc is available [here](./docs/tooling/cli.md)
+   * Two SDKs (in Golang and in Cuelang) are available to code dashboards. See [Dashboard-as-Code](./docs/user-guides/dashboard-as-code.md) guide.
+     Probably these SDKs are going to evolve depending on the feedbacks we might receive. Still it's likely to be about adding more
+     util functions rather than breaking things.
 3. We are eager to change the current plugin architecture to make it potentially simpler and above all to be able to
    externalize the load and the implementation of a plugin.
    * Changes are more on the frontend side. [cue/schemas](./cue/schemas) are kept in their current shape as there is no
-     point to remove the static validation of the plugin in the backend side.
+     point to remove the static validation of plugins on the backend side.
    * *Work is in progress*
 
 ## What's next
