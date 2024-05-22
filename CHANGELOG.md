@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.46.0-rc0 / 2024-05-22
+
+- [FEATURE] Explorer is sharable (#2000)
+- [FEATURE] Panels can be viewed in full screen (#1991)
+- [FEATURE] Instant query table view (#1982)
+- [FEATURE] Explorer: Add tracing support and introduce Graph tab (#1974)
+- [ENHANCEMENT] Add `bytes/sec` format (#2009)
+- [ENHANCEMENT] Keep data when switching explorer tabs (#2008)
+- [ENHANCEMENT] Upgrade cue to v0.9.0-alpha5 that fix the memory leak (#2001)
+- [ENHANCEMENT] On the backend side, queries are paralyzed when getting the list of resources (#1995)
+- [ENHANCEMENT] Avoid json decoding and encoding on query when it's possible (#1994)
+- [ENHANCEMENT] Add query param 'metadata_only' on almost all query endpoints (#1993)
+- [ENHANCEMENT] Optimize query to get dashboards on the home page (#1983)
+- [BUGFIX] Fix StatChart 'no defined' in Setting tab (#1997)
+- [BUGFIX] Fixing external ListVariable overriding dashboard ListVariable in query param (#1996)
+- [BUGFIX] Remove TimeSeriesQuery type from MultiQueryEditor (#1981)
+- [BREAKINGCHANGE] Introduce a dedicated config for the frontend (#1971)
+- [DOC] Update doc about new frontend configuration (#1999)
+- [DOC] Fix broken link to the contributing guide in the introduction page. (#1985)
+
 ## 0.45.0 / 2024-05-02
 
 - [FEATURE] CLI: add cmd whoami (#1920)
