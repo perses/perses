@@ -14,7 +14,7 @@
  eslint-disable @typescript-eslint/no-explicit-any
  */
 import { Fragment, ReactNode } from 'react';
-import { Table } from '@mui/material';
+import { Alert, Table } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
 import { SeriesName } from './SeriesName';
@@ -42,6 +42,11 @@ const DataTable = ({ result }: DataTableProps) => {
 
   return (
     <>
+      {series.length >= MAX_FORMATABLE_SERIES && (
+        <Alert severity="warning">
+          Showing more than 1000 series, turning off label formatting for performance reasons.
+        </Alert>
+      )}
       <Table className="data-table">
         <tbody>{rows}</tbody>
       </Table>
