@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Labels } from '@perses-dev/core';
-import { ReactElement, MouseEvent, ReactNode } from 'react';
+import { ReactElement, MouseEvent } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Typography } from '@mui/material';
 
@@ -28,7 +28,7 @@ interface SeriesNameProps {
  * Else it will only display the series in plain text (mostly use for performance reasons)
  */
 export function SeriesName({ name, labels, formattedName, isFormatted }: SeriesNameProps) {
-  if (isFormatted && labels) {
+  if (isFormatted && labels && Object.keys(labels).length > 0) {
     return <FormatedSeriesName labels={labels} />;
   }
   return <span>{formattedName ?? name}</span>;
