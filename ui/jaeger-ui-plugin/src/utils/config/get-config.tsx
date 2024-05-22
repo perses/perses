@@ -19,13 +19,7 @@ import processDeprecation from './process-deprecation';
 import defaultConfig, { deprecations, mergeFields } from '../../constants/default-config';
 
 function getUiConfig() {
-  const getter = window.getJaegerUiConfig;
-  if (typeof getter !== 'function') {
-    // eslint-disable-next-line no-console
-    console.warn('Embedded config not available');
-    return { ...defaultConfig };
-  }
-  return getter();
+  return { ...defaultConfig };
 }
 
 function getCapabilities() {

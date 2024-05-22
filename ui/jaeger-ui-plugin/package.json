@@ -32,10 +32,9 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
+    "@ant-design/compatible": "^5.1.2",
     "@perses-dev/core": "0.45.0",
     "@perses-dev/plugin-system": "0.45.0",
-    "lodash": "^4.17.21",
-    "@ant-design/compatible": "^5.1.2",
     "@pyroscope/flamegraph": "0.21.4",
     "antd": "^5.10.2",
     "chance": "^1.0.10",
@@ -47,6 +46,7 @@
     "drange": "^2.0.0",
     "global": "^4.3.2",
     "history": "^4.6.3",
+    "lodash": "^4.17.21",
     "lru-memoize": "^1.1.0",
     "memoize-one": "^6.0.0",
     "query-string": "^9.0.0",
@@ -71,5 +71,11 @@
   "files": [
     "dist",
     "plugin.json"
-  ]
+  ],
+  "devDependencies": {
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.8.0",
+    "enzyme": "^3.11.0",
+    "enzyme-to-json": "^3.6.2",
+    "sinon": "^17.0.0"
+  }
 }

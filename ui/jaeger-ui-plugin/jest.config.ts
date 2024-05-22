@@ -16,7 +16,13 @@ import shared from '../jest.shared';
 
 const jestConfig: Config.InitialOptions = {
   ...shared,
-
+  transformIgnorePatterns: [
+    "node_modules/.+\\\\.(js|jsx|mjs|cjs|ts|tsx)$"
+  ],
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true
+  },
   setupFilesAfterEnv: [...(shared.setupFilesAfterEnv ?? []), '<rootDir>/src/test/setup-tests.ts'],
 };
 

@@ -17,7 +17,7 @@ import { mount, shallow } from 'enzyme';
 import TraceSpanView from './index';
 import transformTraceData from '../../../model/transform-trace-data';
 
-import testTrace from '../TraceStatistics/tableValuesTestTrace/testTrace.json';
+import testTrace from './testTrace.json';
 
 const transformedTrace = transformTraceData(testTrace);
 

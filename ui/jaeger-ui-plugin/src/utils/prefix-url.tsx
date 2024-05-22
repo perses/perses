@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import sitePrefix from '../site-prefix';
 import { getAppEnvironment } from './constants';
 
 const origin = getAppEnvironment() === 'test' ? global.location.origin : window.location.origin;
@@ -33,7 +34,7 @@ export function getPathPrefix(orig?: string, sitePref?: string) {
   return s.replace(rx, '');
 }
 
-const pathPrefix = getPathPrefix(origin, "");
+const pathPrefix = getPathPrefix(origin, sitePrefix);
 
 /**
  * Add the path prefix to the  URL. See [site-prefix.js](../site-prefix.js) and

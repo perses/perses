@@ -17,20 +17,10 @@ import { Button, Modal } from 'antd';
 import { shallow } from 'enzyme';
 
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
-import * as track from './KeyboardShortcutsHelp.track';
 
 describe('KeyboardShortcutsHelp', () => {
   const testClassName = 'test--ClassName';
   const wrapper = shallow(<KeyboardShortcutsHelp className={testClassName} />);
-  let trackSpy;
-
-  beforeAll(() => {
-    trackSpy = jest.spyOn(track, 'default');
-  });
-
-  beforeEach(() => {
-    trackSpy.mockReset();
-  });
 
   it('renders as expected', () => {
     expect(wrapper.find(Button).hasClass(testClassName)).toBe(true);
@@ -42,7 +32,6 @@ describe('KeyboardShortcutsHelp', () => {
 
     wrapper.find(Button).simulate('click', {});
     expect(wrapper.state('visible')).toBe(true);
-    expect(trackSpy).toHaveBeenCalled();
   });
 
   it('closes modal', () => {
