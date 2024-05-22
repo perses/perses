@@ -17,6 +17,9 @@ import { Fragment, ReactNode } from 'react';
 import { Table } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
+import { SeriesName } from './SeriesName';
+
+const MAX_FORMATABLE_SERIES = 1000;
 
 export interface DataTableProps {
   result: Array<QueryData<TimeSeriesData>>;
@@ -47,6 +50,7 @@ const DataTable = ({ result }: DataTableProps) => {
 };
 
 function buildRows(series: TimeSeries[]): ReactNode[] {
+  const isFormatted = series.length < MAX_FORMATABLE_SERIES; // only format series names if we have less than 1000 series for performance reasons
   return series.map((s, seriesIdx) => {
     const displayTimeStamps = (s.values?.length || 0) > 1;
     const valuesAndTimes = s.values
@@ -71,7 +75,9 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
       : [];
     return (
       <tr style={{ whiteSpace: 'pre' }} key={seriesIdx}>
-        <td>{s.formattedName || s.name}</td>
+        <td>
+          <SeriesName name={s.name} formattedName={s.formattedName} labels={s.labels} isFormatted={isFormatted} />
+        </td>
         <td>
           {valuesAndTimes} {histogramsAndTimes}
         </td>
