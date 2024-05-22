@@ -23,9 +23,7 @@ function getUiConfig() {
 }
 
 function getCapabilities() {
-  const getter = window.getJaegerStorageCapabilities;
-  const capabilities = typeof getter === 'function' ? getter() : null;
-  return capabilities ?? defaultConfig.storageCapabilities;
+  return defaultConfig.storageCapabilities;
 }
 
 /**

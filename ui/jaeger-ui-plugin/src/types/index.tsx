@@ -17,13 +17,11 @@ import { Location } from 'history';
 
 import { Action } from 'redux';
 import { ApiError } from './api-error';
-import { TracesArchive } from './archive';
 import { Config } from './config';
 import { EmbeddedState } from './embedded';
 import { SearchQuery } from './search';
 import tNil from './TNil';
 import { Trace } from './trace';
-import TTraceDiffState from './TTraceDiffState';
 import TTraceTimeline from './TTraceTimeline';
 import { MetricsReduxState } from './metrics';
 
@@ -39,7 +37,6 @@ export type FetchedTrace = {
 };
 
 export type ReduxState = {
-  archive: TracesArchive;
   type: Action;
   config: Config;
   dependencies: {
@@ -67,7 +64,6 @@ export type ReduxState = {
       query?: SearchQuery;
     };
   };
-  traceDiff: TTraceDiffState;
   traceTimeline: TTraceTimeline;
   metrics: MetricsReduxState;
 };
