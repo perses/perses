@@ -46,7 +46,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
   const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
-  const action = mode == 'duplicate' ? 'Duplicate' : 'Create';
+  const action = mode === 'duplicate' ? 'Duplicate' : 'Create';
 
   // Disables closing on click out. This is a quick-win solution to make sure the currently-existing form
   // will be reset by the related child DuplicationForm component before closing.
@@ -59,7 +59,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
       <Dialog.Header>
         {action} Dashboard{name && ': ' + name}
       </Dialog.Header>
-      {mode == 'duplicate' && (
+      {mode === 'duplicate' && (
         <Dialog.Content sx={{ width: '100%' }}>
           <FormControlLabel
             control={

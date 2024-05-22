@@ -460,7 +460,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
             value={dashboardsTabIndex}
             disabled={!hasDashboardReadPermission}
           />
-          {(hasEphemeralDashboards || tab == ephemeralDashboardsTabIndex) && (
+          {(hasEphemeralDashboards || tab === ephemeralDashboardsTabIndex) && (
             <MenuTab
               label="Ephemeral Dashboards"
               icon={<ViewDashboardIcon />}

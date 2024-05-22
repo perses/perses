@@ -23,7 +23,7 @@ export const DeletePanelGroupDialog = () => {
 
   const handleDelete = (e: FormEvent) => {
     e.preventDefault();
-    if (panelGroupId == undefined) {
+    if (panelGroupId === undefined) {
       throw new Error('group index is undefined');
     }
     deletePanelGroup(panelGroupId);
