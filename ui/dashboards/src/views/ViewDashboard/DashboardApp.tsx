@@ -118,7 +118,7 @@ export const DashboardApp = (props: DashboardAppProps) => {
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />
-      <Box sx={{ padding: (theme) => theme.spacing(2), height: '100%' }}>
+      <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
             emptyDashboardProps={{
