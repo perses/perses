@@ -38,7 +38,7 @@ function ProjectExploreView(props: ProjectExploreViewProps) {
 function HelperExploreView(props: ProjectExploreViewProps) {
   const { exploreTitleComponent } = props;
   const { project } = useProjectStore();
-  const projectName = project?.metadata.name == 'none' ? '' : project?.metadata.name;
+  const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
 
