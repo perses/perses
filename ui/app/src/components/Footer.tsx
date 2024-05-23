@@ -24,8 +24,12 @@ const style: SxProps<Theme> = {
 };
 
 export default function Footer(): JSX.Element {
+  const { data, isLoading, error } = useHealth();
   const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useHealth({ onError: exceptionSnackbar });
+  if (error) {
+    exceptionSnackbar(error);
+  }
+
   return (
     <Box component="footer" sx={style}>
       <ul

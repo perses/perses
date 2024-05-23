@@ -66,9 +66,9 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
 
   const variablesValueKey = getVariableValuesKey(variables);
 
-  return useQuery(
-    [definition, variablesValueKey, timeRange, refreshKey],
-    async () => {
+  return useQuery({
+    queryKey: [definition, variablesValueKey, timeRange, refreshKey],
+    queryFn: async () => {
       const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange });
       if (resp === undefined) {
         return [];
@@ -78,8 +78,8 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
       }
       return filterVariableList(resp.data, capturingRegexp);
     },
-    { enabled: !!variablePlugin || waitToLoad }
-  );
+    enabled: !!variablePlugin || waitToLoad,
+  });
 }
 
 /**

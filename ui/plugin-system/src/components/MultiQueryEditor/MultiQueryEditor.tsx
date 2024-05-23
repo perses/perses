@@ -39,7 +39,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
   const defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.kind ?? '';
 
   const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
-    useErrorBoundary: true,
+    throwOnError: true,
     enabled: true,
   });
 

@@ -124,7 +124,7 @@ export const useTimeSeriesQuery = (
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
-  queryOptions?: QueryObserverOptions
+  queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
 ) {
   const { getPlugin } = usePluginRegistry();
   const context = {

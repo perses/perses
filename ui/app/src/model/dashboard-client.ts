@@ -38,7 +38,7 @@ export function useCreateDashboardMutation(
     },
     onSuccess: onSuccess,
     onSettled: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -48,8 +48,11 @@ export function useCreateDashboardMutation(
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboard(project: string, name: string) {
-  return useQuery<DashboardResource, Error>([resource, project, name], () => {
-    return getDashboard(project, name);
+  return useQuery<DashboardResource, Error>({
+    queryKey: [resource, project, name],
+    queryFn: () => {
+      return getDashboard(project, name);
+    },
   });
 }
 
@@ -58,8 +61,11 @@ export function useDashboard(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboardList(project?: string, metadataOnly?: boolean) {
-  return useQuery<DashboardResource[], Error>([resource, project], () => {
-    return getDashboards(project, metadataOnly);
+  return useQuery<DashboardResource[], Error>({
+    queryKey: [resource, project],
+    queryFn: () => {
+      return getDashboards(project, metadataOnly);
+    },
   });
 }
 
@@ -138,7 +144,7 @@ export function useUpdateDashboardMutation() {
       return updateDashboard(dashboard);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -157,8 +163,8 @@ export function useDeleteDashboardMutation() {
       });
     },
     onSuccess: (dashboard) => {
-      queryClient.removeQueries([resource, dashboard.metadata.project, dashboard.metadata.name]);
-      return queryClient.invalidateQueries([resource]);
+      queryClient.removeQueries({ queryKey: [resource, dashboard.metadata.project, dashboard.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }

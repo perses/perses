@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { DashboardSelector, fetchJson, Permission } from '@perses-dev/core';
 import buildURL from './url-builder';
 
@@ -143,16 +143,13 @@ export interface ConfigModel {
   frontend: FrontendConfig;
 }
 
-type ConfigOptions = Omit<UseQueryOptions<ConfigModel, Error>, 'queryKey' | 'queryFn'>;
-
-export function useConfig(options?: ConfigOptions) {
-  return useQuery<ConfigModel, Error>(
-    [resource],
-    () => {
+export function useConfig() {
+  return useQuery<ConfigModel, Error>({
+    queryKey: [resource],
+    queryFn: () => {
       return fetchConfig();
     },
-    options
-  );
+  });
 }
 
 export function fetchConfig() {

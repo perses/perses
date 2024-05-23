@@ -26,7 +26,7 @@ export interface PanelContentProps extends PanelProps<UnknownSpec> {
  */
 export function PanelContent(props: PanelContentProps) {
   const { panelPluginKind, contentDimensions, definition, ...others } = props;
-  const { data: plugin, isLoading } = usePlugin('Panel', panelPluginKind, { useErrorBoundary: true });
+  const { data: plugin, isLoading } = usePlugin('Panel', panelPluginKind, { throwOnError: true });
   const PanelComponent = plugin?.PanelComponent;
 
   if (isLoading) {

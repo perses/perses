@@ -72,7 +72,7 @@ function DashboardView() {
     );
   }
   if (dashboardNotFoundError !== null) {
-    exceptionSnackbar(dashboardNotFoundError);
+    exceptionSnackbar(`Dashboard '${dashboardName}' not found!`);
     navigate(`/projects/${projectName}`);
   }
   if (!data || data.spec === undefined || isReadonly === undefined) return null;

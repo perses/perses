@@ -91,9 +91,10 @@ export function useDatasourceStore() {
  */
 export function useListDatasourceSelectItems(datasourcePluginKind: string, project?: string) {
   const { listDatasourceSelectItems } = useDatasourceStore();
-  return useQuery(['listDatasourceSelectItems', datasourcePluginKind, project], () =>
-    listDatasourceSelectItems(datasourcePluginKind)
-  );
+  return useQuery({
+    queryKey: ['listDatasourceSelectItems', datasourcePluginKind, project],
+    queryFn: () => listDatasourceSelectItems(datasourcePluginKind),
+  });
 }
 
 /**
@@ -101,10 +102,16 @@ export function useListDatasourceSelectItems(datasourcePluginKind: string, proje
  */
 export function useDatasourceClient<Client>(selector: DatasourceSelector) {
   const store = useDatasourceStore();
-  return useQuery<Client>(['getDatasourceClient', selector], () => store.getDatasourceClient<Client>(selector));
+  return useQuery<Client>({
+    queryKey: ['getDatasourceClient', selector],
+    queryFn: () => store.getDatasourceClient<Client>(selector),
+  });
 }
 
 export function useDatasource(selector: DatasourceSelector) {
   const store = useDatasourceStore();
-  return useQuery(['getDatasource', selector], () => store.getDatasource(selector));
+  return useQuery({
+    queryKey: ['getDatasource', selector],
+    queryFn: () => store.getDatasource(selector),
+  });
 }

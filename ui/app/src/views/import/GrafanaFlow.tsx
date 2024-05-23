@@ -48,7 +48,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
-  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
+  const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
@@ -71,6 +71,10 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };
+
+  if (error) {
+    exceptionSnackbar(error);
+  }
 
   return (
     <>
@@ -98,7 +102,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
       </Alert>
       <Button
         variant="contained"
-        disabled={migrateMutation.isLoading}
+        disabled={migrateMutation.isPending}
         startIcon={<AutoFix />}
         onClick={() => {
           migrateMutation.mutate({ input: grafanaInput, grafanaDashboard: dashboard ?? {} });
@@ -106,7 +110,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
       >
         Migrate
       </Button>
-      {migrateMutation.isLoading && <CircularProgress sx={{ alignSelf: 'center' }} />}
+      {migrateMutation.isPending && <CircularProgress sx={{ alignSelf: 'center' }} />}
       {migrateMutation.isError && (
         <Alert variant="outlined" severity="error">
           {migrateMutation.error.message}
@@ -140,7 +144,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
             />
             <Button
               variant="contained"
-              disabled={dashboardMutation.isLoading || projectName.length === 0 || isReadonly}
+              disabled={dashboardMutation.isPending || projectName.length === 0 || isReadonly}
               startIcon={<Import />}
               onClick={importOnClick}
             >

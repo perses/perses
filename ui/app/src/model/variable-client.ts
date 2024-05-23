@@ -72,8 +72,11 @@ export function deleteVariable(entity: VariableResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useVariable(name: string, project: string) {
-  return useQuery<VariableResource, Error>(buildQueryKey({ resource, name, parent: project }), () => {
-    return getVariable(name, project);
+  return useQuery<VariableResource, Error>({
+    queryKey: buildQueryKey({ resource, name, parent: project }),
+    queryFn: () => {
+      return getVariable(name, project);
+    },
   });
 }
 
@@ -82,8 +85,11 @@ export function useVariable(name: string, project: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useVariableList(project?: string) {
-  return useQuery<VariableResource[], Error>(buildQueryKey({ resource, parent: project }), () => {
-    return getVariables(project);
+  return useQuery<VariableResource[], Error>({
+    queryKey: buildQueryKey({ resource, parent: project }),
+    queryFn: () => {
+      return getVariables(project);
+    },
   });
 }
 
@@ -104,7 +110,7 @@ export function useCreateVariableMutation(project: string) {
       return createVariable(variable);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
     },
   });
 }
@@ -126,8 +132,8 @@ export function useUpdateVariableMutation(project: string) {
     },
     onSuccess: (entity: VariableResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -151,8 +157,8 @@ export function useDeleteVariableMutation(project: string) {
       return entity;
     },
     onSuccess: (entity: VariableResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

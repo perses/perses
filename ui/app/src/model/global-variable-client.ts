@@ -69,8 +69,11 @@ export function deleteGlobalVariable(entity: GlobalVariableResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalVariable(name: string) {
-  return useQuery<GlobalVariableResource, Error>(buildQueryKey({ resource, name }), () => {
-    return getGlobalVariable(name);
+  return useQuery<GlobalVariableResource, Error>({
+    queryKey: buildQueryKey({ resource, name }),
+    queryFn: () => {
+      return getGlobalVariable(name);
+    },
   });
 }
 
@@ -79,8 +82,11 @@ export function useGlobalVariable(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalVariableList() {
-  return useQuery<GlobalVariableResource[], Error>(buildQueryKey({ resource }), () => {
-    return getGlobalVariables();
+  return useQuery<GlobalVariableResource[], Error>({
+    queryKey: buildQueryKey({ resource }),
+    queryFn: () => {
+      return getGlobalVariables();
+    },
   });
 }
 
@@ -98,7 +104,7 @@ export function useCreateGlobalVariableMutation() {
       return createGlobalVariable(entity);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(queryKey);
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -118,8 +124,8 @@ export function useUpdateGlobalVariableMutation() {
     },
     onSuccess: (entity: GlobalVariableResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -140,8 +146,8 @@ export function useDeleteGlobalVariableMutation() {
       return entity;
     },
     onSuccess: (entity: GlobalVariableResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

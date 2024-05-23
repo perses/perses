@@ -32,7 +32,7 @@ export function useCreateGlobalDatasourceMutation() {
       return createGlobalDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -50,7 +50,7 @@ export function useUpdateGlobalDatasourceMutation() {
       return updateGlobalDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -63,14 +63,13 @@ export function useDeleteGlobalDatasourceMutation() {
   const queryClient = useQueryClient();
   return useMutation<GlobalDatasource, Error, GlobalDatasource>({
     mutationKey: [globalDatasourceResource],
-    mutationFn: (entity: GlobalDatasource) => {
-      return deleteGlobalDatasource(entity).then(() => {
-        return entity;
-      });
+    mutationFn: async (entity: GlobalDatasource) => {
+      await deleteGlobalDatasource(entity);
+      return entity;
     },
     onSuccess: (datasource) => {
-      queryClient.removeQueries([globalDatasourceResource, datasource.metadata.name]);
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      queryClient.removeQueries({ queryKey: [globalDatasourceResource, datasource.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -80,8 +79,11 @@ export function useDeleteGlobalDatasourceMutation() {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasource(name: string) {
-  return useQuery<GlobalDatasource, Error>([globalDatasourceResource, name], () => {
-    return getGlobalDatasource(name);
+  return useQuery<GlobalDatasource, Error>({
+    queryKey: [globalDatasourceResource, name],
+    queryFn: () => {
+      return getGlobalDatasource(name);
+    },
   });
 }
 
@@ -90,8 +92,11 @@ export function useGlobalDatasource(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasourceList() {
-  return useQuery<GlobalDatasource[], Error>([globalDatasourceResource], () => {
-    return getGlobalDatasources();
+  return useQuery<GlobalDatasource[], Error>({
+    queryKey: [globalDatasourceResource],
+    queryFn: () => {
+      return getGlobalDatasources();
+    },
   });
 }
 

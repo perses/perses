@@ -201,7 +201,7 @@ function ToolMenu() {
 
 function ProjectMenu(): JSX.Element {
   const { exceptionSnackbar } = useSnackbar();
-  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
+  const { data, isLoading, error } = useProjectList();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
@@ -213,6 +213,10 @@ function ProjectMenu(): JSX.Element {
 
   if (isLoading) {
     return <CircularProgress size="1rem" />;
+  }
+
+  if (error) {
+    exceptionSnackbar(error);
   }
 
   return (

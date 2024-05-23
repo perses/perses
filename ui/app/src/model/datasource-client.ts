@@ -49,15 +49,15 @@ export function fetchDatasourceList(project: string, kind?: string, defaultDatas
  */
 export function useCreateDatasourceMutation(projectName: string) {
   const queryClient = useQueryClient();
-  const key = buildQueryKey({ resource, parent: projectName });
+  const queryKey = buildQueryKey({ resource, parent: projectName });
 
   return useMutation<ProjectDatasource, Error, ProjectDatasource>({
-    mutationKey: key,
+    mutationKey: queryKey,
     mutationFn: (datasource: ProjectDatasource) => {
       return createDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(key);
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -68,15 +68,15 @@ export function useCreateDatasourceMutation(projectName: string) {
  */
 export function useUpdateDatasourceMutation(projectName: string) {
   const queryClient = useQueryClient();
-  const key = buildQueryKey({ resource, parent: projectName });
+  const queryKey = buildQueryKey({ resource, parent: projectName });
 
   return useMutation<ProjectDatasource, Error, ProjectDatasource>({
-    mutationKey: key,
+    mutationKey: queryKey,
     mutationFn: (datasource: ProjectDatasource) => {
       return updateDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(key);
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -87,18 +87,18 @@ export function useUpdateDatasourceMutation(projectName: string) {
  */
 export function useDeleteDatasourceMutation(projectName: string) {
   const queryClient = useQueryClient();
-  const key = buildQueryKey({ resource, parent: projectName });
+  const queryKey = buildQueryKey({ resource, parent: projectName });
 
   return useMutation<ProjectDatasource, Error, ProjectDatasource>({
-    mutationKey: key,
+    mutationKey: queryKey,
     mutationFn: (entity: ProjectDatasource) => {
       return deleteDatasource(entity).then(() => {
         return entity;
       });
     },
     onSuccess: (datasource) => {
-      queryClient.removeQueries([...key, datasource.metadata.name]);
-      return queryClient.invalidateQueries(key);
+      queryClient.removeQueries({ queryKey: [...queryKey, datasource.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -108,8 +108,11 @@ export function useDeleteDatasourceMutation(projectName: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDatasource(project: string, name: string) {
-  return useQuery<ProjectDatasource, Error>(buildQueryKey({ resource, parent: project, name }), () => {
-    return getDatasource(project, name);
+  return useQuery<ProjectDatasource, Error>({
+    queryKey: buildQueryKey({ resource, parent: project, name }),
+    queryFn: () => {
+      return getDatasource(project, name);
+    },
   });
 }
 
@@ -118,8 +121,11 @@ export function useDatasource(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDatasourceList(project: string) {
-  return useQuery<ProjectDatasource[], Error>(buildQueryKey({ resource, parent: project }), () => {
-    return getDatasources(project);
+  return useQuery<ProjectDatasource[], Error>({
+    queryKey: buildQueryKey({ resource, parent: project }),
+    queryFn: () => {
+      return getDatasources(project);
+    },
   });
 }
 

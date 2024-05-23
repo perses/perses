@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DashboardResource, ProjectResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { getDashboards, resource as dashboardResource } from './dashboard-client';
@@ -28,8 +28,6 @@ const resource = 'projects';
  * List the resources that are under project, to invalidate their cache on project deletion.
  */
 const dependingResources = [dashboardResource, variableResource, datasourceResource];
-
-type ProjectListOptions = Omit<UseQueryOptions<ProjectResource[], Error>, 'queryKey' | 'queryFn'>;
 
 export interface ProjectWithDashboards {
   project: ProjectResource;
@@ -85,8 +83,11 @@ function deleteProject(entity: ProjectResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useProject(name: string) {
-  return useQuery<ProjectResource, Error>([resource, name], () => {
-    return getProject(name);
+  return useQuery<ProjectResource, Error>({
+    queryKey: [resource, name],
+    queryFn: () => {
+      return getProject(name);
+    },
   });
 }
 
@@ -94,16 +95,15 @@ export function useProject(name: string) {
  * Used to get projects from the API
  * Will automatically be refreshed when cache is invalidated
  */
-export function useProjectList(options?: ProjectListOptions) {
+export function useProjectList() {
   const queryKey = buildQueryKey({ resource });
 
-  return useQuery<ProjectResource[], Error>(
+  return useQuery<ProjectResource[], Error>({
     queryKey,
-    () => {
+    queryFn: () => {
       return getProjects();
     },
-    options
-  );
+  });
 }
 
 /**
@@ -120,7 +120,10 @@ export function useCreateProjectMutation() {
       return createProject(project);
     },
     onSuccess: () => {
-      return Promise.all([queryClient.invalidateQueries([...queryKey]), queryClient.invalidateQueries([userKey])]);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: [...queryKey] }),
+        queryClient.invalidateQueries({ queryKey: [userKey] }),
+      ]);
     },
   });
 }
@@ -139,8 +142,8 @@ export function useUpdateProjectMutation() {
     },
     onSuccess: (entity: ProjectResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -167,15 +170,15 @@ export function useDeleteProjectMutation() {
       return entity;
     },
     onSuccess: (entity: ProjectResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
 
       const dependingKeys = dependingResources.map((resource) => buildQueryKey({ resource }));
-      dependingKeys.forEach((k) => queryClient.removeQueries([...k, entity.metadata.name]));
+      dependingKeys.forEach((k) => queryClient.removeQueries({ queryKey: [...k, entity.metadata.name] }));
 
       return Promise.all([
-        ...dependingKeys.map((k) => queryClient.invalidateQueries(k)),
-        queryClient.invalidateQueries([userKey]),
-        queryClient.invalidateQueries(queryKey),
+        ...dependingKeys.map((k) => queryClient.invalidateQueries({ queryKey: k })),
+        queryClient.invalidateQueries({ queryKey: [userKey] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -204,7 +207,10 @@ export function useProjectsWithDashboards() {
   // We use a custom query key to avoid having the same key as a project name
   // and still have reinvalidation when a project is modified
   const queryKey = buildQueryKey({ resource, name: '*custom*' });
-  return useQuery<ProjectWithDashboards[], Error>(queryKey, () => {
-    return getProjectsWithDashboard();
+  return useQuery<ProjectWithDashboards[], Error>({
+    queryKey,
+    queryFn: () => {
+      return getProjectsWithDashboard();
+    },
   });
 }

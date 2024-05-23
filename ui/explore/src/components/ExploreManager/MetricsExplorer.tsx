@@ -96,7 +96,7 @@ export function MetricsExplorer() {
         <Tab label="Table" />
         <Tab label="Graph" />
       </Tabs>
-      <Stack gap={1}>
+      <Stack>
         {tab === 0 && <MetricDataTable queries={queries} />}
         {tab === 1 && <TimeSeriesPanel queries={queries} />}
       </Stack>
