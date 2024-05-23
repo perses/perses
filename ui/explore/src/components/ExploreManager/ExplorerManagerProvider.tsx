@@ -57,8 +57,8 @@ function initExplorerStates(initialState?: ExplorerManagerInitialState): Explore
 
 export function ExplorerManagerProvider({ children, initialState }: ExplorerManagerProviderProps) {
   const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initExplorerStates(initialState));
-  const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 0);
-  const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 0, [explorer, explorerStates]);
+  const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 1);
+  const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 1, [explorer, explorerStates]);
   const queries: QueryDefinition[] = useMemo(() => explorerStates[explorer]?.queries ?? [], [explorer, explorerStates]);
 
   function setExplorer(explorer: number) {

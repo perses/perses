@@ -106,10 +106,6 @@ export type Config = {
     dagMaxNumServices?: number;
   };
 
-  // menu controls the dropdown menu in the top-right corner of the UI.
-  // When populated, this element completely overrides the default menu.
-  menu: readonly (ConfigMenuGroup | ConfigMenuItem)[];
-
   // search section controls some aspects of the Search panel.
   search?: {
     // maxLookback controls how far back in time the search may apply.

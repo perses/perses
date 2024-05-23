@@ -92,7 +92,10 @@ export function TracesExplorer() {
         <Tab label="Gantt" />
       </Tabs>
       <Stack gap={1}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>{tab === 0 && <TracePanel queries={queries} />}</ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          {tab === 0 && <TracePanel queries={queries} />}
+          {tab === 1 && <GanttPanel queries={queries} />}
+        </ErrorBoundary>
       </Stack>
     </Stack>
   );

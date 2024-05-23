@@ -13,45 +13,12 @@
 // limitations under the License.
 
 import _get from 'lodash/get';
-import memoizeOne from 'memoize-one';
 
-import processDeprecation from './process-deprecation';
-import defaultConfig, { deprecations, mergeFields } from '../../constants/default-config';
+import defaultConfig from '../../constants/default-config';
 
-function getUiConfig() {
-  return { ...defaultConfig };
+export default function getConfig() {
+  return defaultConfig;
 }
-
-function getCapabilities() {
-  return defaultConfig.storageCapabilities;
-}
-
-/**
- * Merge the embedded config from the query service (if present) with the
- * default config from `../../constants/default-config`.
- */
-const getConfig = memoizeOne(function getConfig() {
-  const capabilities = getCapabilities();
-
-  const embedded = getUiConfig();
-  if (!embedded) {
-    return { ...defaultConfig, storageCapabilities: capabilities };
-  }
-  // check for deprecated config values
-  if (Array.isArray(deprecations)) {
-    deprecations.forEach(deprecation => processDeprecation(embedded, deprecation, true));
-  }
-  const rv = { ...defaultConfig, ...embedded };
-  // mergeFields config values should be merged instead of fully replaced
-  mergeFields.forEach(key => {
-    if (embedded && typeof embedded[key] === 'object' && embedded[key] !== null) {
-      rv[key] = { ...defaultConfig[key], ...embedded[key] };
-    }
-  });
-  return { ...rv, storageCapabilities: capabilities };
-});
-
-export default getConfig;
 
 export function getConfigValue(path: string) {
   return _get(getConfig(), path);
