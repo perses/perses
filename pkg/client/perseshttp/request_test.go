@@ -47,7 +47,6 @@ func TestRequest_BuildPath(t *testing.T) {
 		title          string
 		request        *Request
 		expectedResult string
-		expectedError  bool
 	}{
 		{
 			title: "Resource missing",
@@ -55,8 +54,7 @@ func TestRequest_BuildPath(t *testing.T) {
 				apiPrefix:  defaultAPIPrefix,
 				apiVersion: defaultAPIVersion,
 			},
-			expectedResult: "",
-			expectedError:  true,
+			expectedResult: "/api/v1",
 		},
 		{
 			title: "Basic path with resource",
@@ -66,7 +64,6 @@ func TestRequest_BuildPath(t *testing.T) {
 				resource:   "projects",
 			},
 			expectedResult: "/api/v1/projects",
-			expectedError:  false,
 		},
 		{
 			title: "Path using Projects path",
@@ -77,18 +74,12 @@ func TestRequest_BuildPath(t *testing.T) {
 				resource:   "prometheusrules",
 			},
 			expectedResult: "/api/v1/projects/perses/prometheusrules",
-			expectedError:  false,
 		},
 	}
 	for _, test := range testSuites {
 		t.Run(test.title, func(t *testing.T) {
-			path, err := test.request.buildPath()
-			if test.expectedError {
-				assert.NotNil(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, test.expectedResult, path)
-			}
+			path := test.request.buildPath()
+			assert.Equal(t, test.expectedResult, path)
 		})
 
 	}

@@ -1,4 +1,4 @@
-// Copyright 2021 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -181,10 +180,7 @@ func (r *Request) Do() *Response {
 // prepareRequest build the HTTP request that #Do function will execute
 // It set all necessary header and the correct URL
 func (r *Request) prepareRequest() (*http.Request, error) {
-	finalURL, err := r.url()
-	if err != nil {
-		return nil, err
-	}
+	finalURL := r.url()
 	httpRequest, err := http.NewRequest(r.method, finalURL, r.body)
 
 	if err != nil {
@@ -238,12 +234,8 @@ func (r *Request) setupAuthentication(req *http.Request) error {
 }
 
 // url build the final URL for the request, using the different pathParameter or queryParameter set
-func (r *Request) url() (string, error) {
-	path, err := r.buildPath()
-
-	if err != nil {
-		return "", err
-	}
+func (r *Request) url() string {
+	path := r.buildPath()
 
 	finalURL := &url.URL{}
 	if r.baseURL != nil {
@@ -255,19 +247,18 @@ func (r *Request) url() (string, error) {
 		finalURL.RawQuery = r.queryParam.Encode()
 	}
 
-	return finalURL.String(), nil
+	return finalURL.String()
 }
 
 // buildPath builds the REST path according to a predefined ordering
 // /<api name>/<api version>[/<address>]/<resource type>[/<resource name>[/versions/<resource version>]][/<verb>]
-func (r *Request) buildPath() (string, error) {
+func (r *Request) buildPath() string {
 	var path strings.Builder
 
 	// API name
-	if len(r.apiPrefix) <= 0 {
-		return "", errors.New("api prefix cannot be empty")
+	if len(r.apiPrefix) > 0 {
+		path.WriteString(r.apiPrefix)
 	}
-	path.WriteString(r.apiPrefix)
 
 	// API version
 	if len(r.apiVersion) > 0 {
@@ -281,17 +272,16 @@ func (r *Request) buildPath() (string, error) {
 	}
 
 	// Resource type (mandatory)
-	if len(r.resource) <= 0 {
-		return "", errors.New("resource cannot be empty")
+	if len(r.resource) > 0 {
+		path.WriteString(fmt.Sprintf("/%s", r.resource))
 	}
-	path.WriteString(fmt.Sprintf("/%s", r.resource))
 
 	// Resource name
 	if len(r.name) > 0 {
 		path.WriteString(fmt.Sprintf("/%s", r.name))
 	}
 
-	return path.String(), nil
+	return path.String()
 }
 
 // RequestError is a format struct to defines the error the results of calling #Request.Do()

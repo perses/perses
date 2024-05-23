@@ -39,6 +39,8 @@ type Config struct {
 	Schemas Schemas `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
+	// GlobalDatasourceDiscovery is the configuration that helps to generate a list of global datasource based on the discovery chosen.
+	GlobalDatasourceDiscovery []GlobalDatasourceDiscovery `json:"global_datasource_discovery,omitempty" yaml:"global_datasource_discovery,omitempty"`
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
