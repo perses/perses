@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "start": "cross-env NODE_ENV=development rspack serve",
-    "build": "cross-env NODE_ENV=development rspack build",
+    "build": "rspack build",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
@@ -49,7 +49,6 @@
   "devDependencies": {
     "@rspack/cli": "^0.6.5",
     "@rspack/core": "^0.6.5",
-    "@rspack/plugin-react-refresh": "^0.6.5",
-    "dotenv-defaults": "^5.0.2"
+    "@rspack/plugin-react-refresh": "^0.6.5"
   }
 }
