@@ -31,7 +31,7 @@ export function SeriesName({ name, labels, formattedName, isFormatted }: SeriesN
   if (isFormatted && labels && Object.keys(labels).length > 0) {
     return <FormatedSeriesName labels={labels} />;
   }
-  return <span>{formattedName ?? name}</span>;
+  return <Typography>{formattedName ?? name}</Typography>;
 }
 
 function FormatedSeriesName({ labels }: { labels: Labels }) {
@@ -82,11 +82,11 @@ function FormatedSeriesName({ labels }: { labels: Labels }) {
   }
 
   return (
-    <span>
+    <Typography>
       {labels ? labels.__name__ : ''}
       {'{'}
       {labelNodes}
       {'}'}
-    </span>
+    </Typography>
   );
 }
