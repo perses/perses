@@ -15,38 +15,35 @@ package httpsd
 
 import (
 	"context"
+	"time"
+
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
-	databaseModel "github.com/perses/perses/internal/api/database/model"
-	apiInterface "github.com/perses/perses/internal/api/interface"
-	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
+	"github.com/perses/perses/internal/api/discovery/service"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
-func NewDiscovery(cfg *config.HTTPDiscovery, svc globaldatasource.Service, caseSensitive bool) (taskhelper.Helper, error) {
+func NewDiscovery(cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
 	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err
 	}
 	sd := &discovery{
-		restClient:    client,
-		svc:           svc,
-		name:          cfg.Name,
-		caseSensitive: caseSensitive,
+		restClient: client,
+		svc:        svc,
+		name:       cfg.Name,
 	}
 	return taskhelper.NewTick(sd, time.Duration(cfg.RefreshInterval))
 }
 
 type discovery struct {
 	async.SimpleTask
-	restClient    *perseshttp.RESTClient
-	svc           globaldatasource.Service
-	name          string
-	caseSensitive bool
+	restClient *perseshttp.RESTClient
+	svc        *service.ApplyService
+	name       string
 }
 
 func (d *discovery) Execute(_ context.Context, _ context.Context) error {
@@ -59,25 +56,6 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 		logrus.Errorf("failed to execute http discovery %q: %v", d.name, err)
 		return nil
 	}
-	for _, entity := range result {
-		entity.GetMetadata().Flatten(d.caseSensitive)
-		_, createErr := d.svc.Create(apiInterface.EmptyCtx, entity)
-		if createErr == nil {
-			continue
-		}
-
-		if !databaseModel.IsKeyConflict(createErr) {
-			logrus.WithError(createErr).Errorf("unable to create the globaldatasource %q", entity.Metadata.Name)
-			continue
-		}
-
-		param := apiInterface.Parameters{
-			Name: entity.Metadata.Name,
-		}
-
-		if _, updateError := d.svc.Update(apiInterface.EmptyCtx, entity, param); updateError != nil {
-			logrus.WithError(updateError).Errorf("unable to update the globaldatasource %q", entity.Metadata.Name)
-		}
-	}
+	d.svc.Apply(result)
 	return nil
 }

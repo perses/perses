@@ -15,7 +15,6 @@ package core
 
 import (
 	"fmt"
-	"github.com/perses/perses/internal/api/discovery"
 	"strings"
 	"time"
 
@@ -24,6 +23,7 @@ import (
 	"github.com/perses/perses/internal/api/core/middleware"
 	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
+	"github.com/perses/perses/internal/api/discovery"
 	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/provisioning"
 	"github.com/perses/perses/internal/api/rbac"

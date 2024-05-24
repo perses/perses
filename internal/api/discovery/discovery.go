@@ -17,13 +17,15 @@ import (
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/dependency"
 	httpsd "github.com/perses/perses/internal/api/discovery/http"
+	"github.com/perses/perses/internal/api/discovery/service"
 	"github.com/perses/perses/pkg/model/api/config"
 )
 
 func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensitive bool) ([]taskhelper.Helper, error) {
 	var helpers []taskhelper.Helper
+	svc := service.New(caseSensitive, serviceManager.GetGlobalDatasource())
 	for _, c := range cfg.GlobalDatasourceDiscovery {
-		helper, err := httpsd.NewDiscovery(c.HTTPDiscovery, serviceManager.GetGlobalDatasource(), caseSensitive)
+		helper, err := httpsd.NewDiscovery(c.HTTPDiscovery, svc)
 		if err != nil {
 			return nil, err
 		}
