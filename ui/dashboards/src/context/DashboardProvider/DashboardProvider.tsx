@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createStore, useStore } from 'zustand';
+import { createStore } from 'zustand';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
@@ -83,7 +84,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
   if (store === undefined) {
     throw new Error('No DashboardContext found. Did you forget a Provider?');
   }
-  return useStore(store, selector, shallow);
+  return useStoreWithEqualityFn(store, selector, shallow);
 }
 
 export function DashboardProvider(props: DashboardProviderProps) {
