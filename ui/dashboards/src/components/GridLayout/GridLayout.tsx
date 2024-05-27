@@ -30,7 +30,6 @@ import { GridItemContent } from './GridItemContent';
 import { GridContainer } from './GridContainer';
 const DEFAULT_MARGIN = 10;
 const ROW_HEIGHT = 30;
-const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export interface GridLayoutProps {
   panelGroupId: PanelGroupId;
@@ -60,6 +59,9 @@ export function GridLayout(props: GridLayoutProps) {
   const isGridDisplayed = useMemo(() => {
     if (viewPanelItemId === undefined) {
       return true;
+    }
+    if (hasViewPanel) {
+      setIsOpen(true);
     }
     return hasViewPanel;
   }, [hasViewPanel, viewPanelItemId]);
@@ -112,8 +114,17 @@ export function GridLayout(props: GridLayoutProps) {
     setGridColWidth((containerWidth - marginWidth - containerPaddingWidth) / cols);
   };
 
+  // https://github.com/react-grid-layout/react-grid-layout?tab=readme-ov-file#react-hooks-performance
+  const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
+
   return (
-    <GridContainer sx={{ display: isGridDisplayed ? 'block' : 'none' }}>
+    <GridContainer
+      sx={{
+        display: isGridDisplayed ? 'block' : 'none',
+        height: itemLayoutViewed ? `${panelFullHeight}px` : 'unset',
+        overflow: itemLayoutViewed ? 'hidden' : 'unset',
+      }}
+    >
       {groupDefinition.title !== undefined && (
         <GridTitle
           panelGroupId={panelGroupId}
