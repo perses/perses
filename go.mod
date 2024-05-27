@@ -13,7 +13,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
-	github.com/goreleaser/goreleaser v1.26.1
+	github.com/goreleaser/goreleaser v1.26.2
 	github.com/gorilla/securecookie v1.1.2
 	github.com/huandu/go-sqlbuilder v1.27.2
 	github.com/kylelemons/godebug v1.1.0
