@@ -83,7 +83,7 @@ const OPTION_VALUE_DELIMITER = '_____';
 
 /**
  * Given a PluginEditorSelection,
- * returns a string value like `{kind}_____{type}` that can be used as a Select input value.
+ * returns a string value like `{type}_____{kind}` that can be used as a Select input value.
  * @param selector
  */
 function selectionToOptionValue(selector: PluginEditorSelection): string {
@@ -91,7 +91,7 @@ function selectionToOptionValue(selector: PluginEditorSelection): string {
 }
 
 /**
- * Given an option value name like `{kind}_____{type}`,
+ * Given an option value name like `{type}_____{kind}`,
  * returns a PluginEditorSelection to be used by the query data model.
  * @param optionValue
  */
