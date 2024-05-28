@@ -45,7 +45,6 @@ export function DashboardTempoTraceQueryEditor(props: DashboardTempoTraceQueryEd
         />
       </FormControl>
       <TraceQLEditor
-        completeConfig={{ remote: { url: datasourceURL } }}
         value={query}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
