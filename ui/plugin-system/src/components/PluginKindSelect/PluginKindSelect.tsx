@@ -87,7 +87,7 @@ const OPTION_VALUE_DELIMITER = '_____';
  * @param selector
  */
 function selectionToOptionValue(selector: PluginEditorSelection): string {
-  return [selector.kind, selector.type].join(OPTION_VALUE_DELIMITER);
+  return [selector.type, selector.kind].join(OPTION_VALUE_DELIMITER);
 }
 
 /**
@@ -97,13 +97,13 @@ function selectionToOptionValue(selector: PluginEditorSelection): string {
  */
 function optionValueToSelection(optionValue: string): PluginEditorSelection {
   const words = optionValue.split(OPTION_VALUE_DELIMITER);
-  const kind = words[0];
-  const type = words[1] as PluginType | undefined;
-  if (kind === undefined || type === undefined) {
+  const type = words[0] as PluginType | undefined;
+  const kind = words[1];
+  if (type === undefined || kind === undefined) {
     throw new Error('Invalid optionValue string');
   }
   return {
-    kind,
     type,
+    kind,
   };
 }
