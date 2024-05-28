@@ -1,16 +1,16 @@
 {
   "kind": "PluginModule",
   "metadata": {
-    "name": "Jaeger UI Panels"
+    "name": "Jaeger UI"
   },
   "spec": {
     "plugins": [
       {
         "pluginType": "Panel",
-        "kind": "TracingView",
+        "kind": "TracingGanttChart",
         "display": {
-          "name": "Tracing View",
-          "description": ""
+          "name": "Tracing Gantt Chart",
+          "description": "Tracing Gantt Chart Panel based on Jaeger UI"
         }
       }
     ]

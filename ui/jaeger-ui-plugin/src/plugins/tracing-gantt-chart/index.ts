@@ -11,14 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialTracingViewOptions, TracingViewOptions } from './tracing-view-model';
-import { TracingViewPanel } from './TracingViewPanel';
-
-export const TracingView: PanelPlugin<TracingViewOptions> = {
-  PanelComponent: TracingViewPanel,
-  // TODO: add a chart options editor plugin, for example:
-  // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
-  supportedQueryTypes: ['TraceQuery'],
-  createInitialOptions: createInitialTracingViewOptions,
-};
+export * from './TracingGanttChart';

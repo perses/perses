@@ -45,7 +45,7 @@
     "deep-freeze": "^0.0.1",
     "drange": "^2.0.0",
     "global": "^4.3.2",
-    "history": "^4.6.3",
+    "history": "^5.3.0",
     "lodash": "^4.17.21",
     "lru-memoize": "^1.1.0",
     "memoize-one": "^6.0.0",

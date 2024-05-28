@@ -147,6 +147,7 @@ function SpanBar(props: TCommonProps) {
           const key = `${each.spanId}-${index}`;
           return (
             <Tooltip
+              key={key}
               placement="top"
               title={
                 <div>
@@ -155,7 +156,6 @@ function SpanBar(props: TCommonProps) {
               }
             >
               <div
-                key={key}
                 data-testid="SpanBar--criticalPath"
                 className="SpanBar--criticalPath"
                 style={{

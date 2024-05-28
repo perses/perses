@@ -11,4 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TracingView';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './tracing-view-model';
+import { TracingGanttChartPanel } from './TracingGanttChartPanel';
+
+export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions> = {
+  PanelComponent: TracingGanttChartPanel,
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialTracingGanttChartOptions,
+};

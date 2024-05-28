@@ -21,7 +21,6 @@ import { IoArrowBack, IoFileTrayFull, IoChevronForward } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 
 import { Helmet } from 'react-helmet';
-import AltViewOptions from './AltViewOptions';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import SpanGraph from './SpanGraph';
 import TracePageSearchBar from './TracePageSearchBar';
@@ -191,14 +190,6 @@ export function TracePageHeaderFn(props: TracePageHeaderEmbedProps & { forwarded
           navigable={viewType === ETraceViewType.TraceTimelineViewer}
         />
         {showShortcutsHelp && <KeyboardShortcutsHelp className="ub-m2" />}
-        {showViewOptions && (
-          <AltViewOptions
-            disableJsonView={disableJsonView}
-            onTraceViewChange={onTraceViewChange}
-            traceID={trace.traceID}
-            viewType={viewType}
-          />
-        )}
         {showArchiveButton && (
           <Button className="ub-mr2 ub-flex ub-items-center" htmlType="button" onClick={onArchiveClicked}>
             <IoFileTrayFull className="TracePageHeader--archiveIcon" />

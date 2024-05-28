@@ -16,14 +16,14 @@ import { UnknownSpec, QueryDefinition } from '@perses-dev/core';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 
 /**
- * The Options object type supported by the TracingView panel plugin.
+ * The Options object type supported by the TracingGanttChart panel plugin.
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TracingViewOptions {}
+export interface TracingGanttChartOptions {}
 
 /**
- * Creates the initial/empty options for a ScatterChart panel.
+ * Creates the initial/empty options for a TracingGanttChart panel.
  */
-export function createInitialTracingViewOptions() {
+export function createInitialTracingGanttChartOptions() {
   return {};
 }

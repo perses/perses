@@ -34,12 +34,15 @@ export default function configureStore() {
       applyMiddleware(
         routerMiddleware
       ),
-      getAppEnvironment() !== 'production' && window && window.__REDUX_DEVTOOLS_EXTENSION__
-        ? window.__REDUX_DEVTOOLS_EXTENSION__()
-        : noop => noop
+      getAppEnvironment() !== 'production' && window && (window as any).__REDUX_DEVTOOLS_EXTENSION__
+        ? (window as any).__REDUX_DEVTOOLS_EXTENSION__()
+        : (noop: any) => noop
     )
   );
 }
 
 export const store = configureStore();
 export const history = createReduxHistory(store);
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

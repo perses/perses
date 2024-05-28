@@ -36,7 +36,7 @@ type AccordianKeyValuesProps = {
 
 // export for tests
 export function KeyValuesSummary(props: { data?: KeyValuePair[] }) {
-  const { data } = props;
+  const { data = null } = props;
   if (!Array.isArray(data) || !data.length) {
     return null;
   }
@@ -55,12 +55,8 @@ export function KeyValuesSummary(props: { data?: KeyValuePair[] }) {
   );
 }
 
-KeyValuesSummary.defaultProps = {
-  data: null,
-};
-
 export default function AccordianKeyValues(props: AccordianKeyValuesProps) {
-  const { className, data, highContrast, interactive, isOpen, label, linksGetter, onToggle } = props;
+  const { className, data, highContrast = false, interactive = true, isOpen, label, linksGetter, onToggle } = props;
   const isEmpty = !Array.isArray(data) || !data.length;
   const iconCls = cx('u-align-icon', { 'AccordianKeyValues--emptyIcon': isEmpty });
   let arrow: React.ReactNode | null = null;
@@ -94,10 +90,3 @@ export default function AccordianKeyValues(props: AccordianKeyValuesProps) {
     </div>
   );
 }
-
-AccordianKeyValues.defaultProps = {
-  className: null,
-  highContrast: false,
-  interactive: true,
-  onToggle: null,
-};

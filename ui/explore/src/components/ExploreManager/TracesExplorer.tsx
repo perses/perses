@@ -14,7 +14,7 @@
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { ScatterChart } from '@perses-dev/panels-plugin';
-import { TracingView } from '@perses-dev/jaeger-ui-plugin';
+import { TracingGanttChart } from '@perses-dev/jaeger-ui-plugin';
 import { QueryDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import useResizeObserver from 'use-resize-observer';
@@ -66,7 +66,7 @@ function GanttPanel({ queries }: { queries: QueryDefinition[] }) {
   return (
     <Box ref={boxRef} height={height}>
       <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-        <TracingView.PanelComponent
+        <TracingGanttChart.PanelComponent
           contentDimensions={{ width: width ?? PANEL_PREVIEW_DEFAULT_WIDTH, height }}
           spec={{}}
         />
