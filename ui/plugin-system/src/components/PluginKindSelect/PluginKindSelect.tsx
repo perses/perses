@@ -13,7 +13,7 @@
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { forwardRef, useCallback } from 'react';
-import { PluginType } from '../../model';
+import { PluginMetadata, PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
 
@@ -35,18 +35,18 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
   const { data, isLoading } = useListPluginMetadata(pluginTypes);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
-  const value = propValue && isLoading ? '' : JSON.stringify(propValue);
+  const value = !propValue || isLoading ? '' : selectionToOptionValue(propValue);
 
   const handleChange = (event: { target: { value: string } }) => {
-    onChange?.(JSON.parse(event.target.value));
+    onChange?.(optionValueToSelection(event.target.value));
   };
 
   const renderValue = useCallback(
     (selected: unknown) => {
-      const selectedValue = JSON.parse(selected as string);
-      if (!selectedValue.kind) {
+      if (selected === '') {
         return '';
       }
+      const selectedValue = optionValueToSelection(selected as string);
       return data?.find((v) => v.pluginType === selectedValue.type && v.kind === selectedValue.kind)?.display.name;
     },
     [data]
@@ -68,7 +68,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
         <MenuItem
           data-testid="option"
           key={metadata.pluginType + metadata.kind}
-          value={JSON.stringify({ type: metadata.pluginType, kind: metadata.kind })}
+          value={selectionToOptionValue({ type: metadata.pluginType, kind: metadata.kind })}
         >
           {metadata.display.name}
         </MenuItem>
@@ -77,3 +77,33 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
   );
 });
 PluginKindSelect.displayName = 'PluginKindSelect';
+
+// Delimiter used to stringify/parse option values
+const OPTION_VALUE_DELIMITER = '_____';
+
+/**
+ * Given a PluginEditorSelection,
+ * returns a string value like `{kind}_____{type}` that can be used as a Select input value.
+ * @param selector
+ */
+function selectionToOptionValue(selector: PluginEditorSelection): string {
+  return [selector.kind, selector.type].join(OPTION_VALUE_DELIMITER);
+}
+
+/**
+ * Given an option value name like `{kind}_____{type}`,
+ * returns a PluginEditorSelection to be used by the query data model.
+ * @param optionValue
+ */
+function optionValueToSelection(optionValue: string): PluginEditorSelection {
+  const words = optionValue.split(OPTION_VALUE_DELIMITER);
+  const kind = words[0];
+  const type = words[1] as PluginType|undefined;
+  if (kind === undefined || type === undefined) {
+    throw new Error('Invalid optionValue string');
+  }
+  return {
+    kind,
+    type,
+  };
+}
