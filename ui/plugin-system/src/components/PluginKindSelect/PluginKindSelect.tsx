@@ -13,7 +13,7 @@
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { forwardRef, useCallback } from 'react';
-import { PluginMetadata, PluginType } from '../../model';
+import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
 
@@ -98,7 +98,7 @@ function selectionToOptionValue(selector: PluginEditorSelection): string {
 function optionValueToSelection(optionValue: string): PluginEditorSelection {
   const words = optionValue.split(OPTION_VALUE_DELIMITER);
   const kind = words[0];
-  const type = words[1] as PluginType|undefined;
+  const type = words[1] as PluginType | undefined;
   if (kind === undefined || type === undefined) {
     throw new Error('Invalid optionValue string');
   }
