@@ -16,7 +16,6 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 import { Link } from 'react-router-dom';
 
-import AltViewOptions from './AltViewOptions';
 import KeyboardShortcutsHelp from './KeyboardShortcutsHelp';
 import SpanGraph from './SpanGraph';
 import { TracePageHeaderFn as TracePageHeader, HEADER_ITEMS } from './TracePageHeader';
@@ -100,15 +99,6 @@ describe('<TracePageHeader>', () => {
       props.showShortcutsHelp = false;
       wrapper.setProps(props);
       expect(wrapper.find(KeyboardShortcutsHelp).length).toBe(0);
-    });
-
-    it('toggles <AltViewOptions />', () => {
-      const props = { showViewOptions: true };
-      wrapper.setProps(props);
-      expect(wrapper.find(AltViewOptions).length).toBe(1);
-      props.showViewOptions = false;
-      wrapper.setProps(props);
-      expect(wrapper.find(AltViewOptions).length).toBe(0);
     });
 
     it('renders the link to search', () => {
