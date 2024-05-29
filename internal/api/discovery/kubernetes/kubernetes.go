@@ -11,50 +11,70 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package httpsd
+package kubesd
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/discovery/service"
-	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
-func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
-	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
+func buildLabelSelector(labels map[string]string) string {
+	var builder strings.Builder
+	for k, v := range labels {
+		builder.WriteString(fmt.Sprintf("%s=%s,", k, v))
+	}
+	return builder.String()
+}
+
+func NewDiscovery(cfg *config.KubernetesDiscovery, svc *service.ApplyService, discoveryName string, refreshInterval model.Duration) (taskhelper.Helper, error) {
+	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to get a kubeConfig: %w", err)
+	}
+	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create the kube client: %w", err)
 	}
 	sd := &discovery{
-		restClient: client,
+		kubeClient: kubeClient,
+		cfg:        cfg,
 		svc:        svc,
-		name:       Name,
+		name:       discoveryName,
 	}
 	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
 }
 
 type discovery struct {
 	async.SimpleTask
-	restClient *perseshttp.RESTClient
+	kubeClient *kubernetes.Clientset
+	cfg        *config.KubernetesDiscovery
 	svc        *service.ApplyService
 	name       string
 }
 
 func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 	var result []*v1.GlobalDatasource
-	err := d.restClient.Get().
-		Do().
-		Object(&result)
-
+	var err error
+	switch d.cfg.API {
+	case config.Pod:
+		result, err = d.pods()
+	case config.Service:
+		result, err = d.services()
+	}
 	if err != nil {
-		logrus.Errorf("failed to execute http discovery %q: %v", d.name, err)
+		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil
 	}
 	d.svc.Apply(result)

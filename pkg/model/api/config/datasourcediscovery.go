@@ -14,22 +14,61 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/prometheus/common/model"
 )
 
 type HTTPDiscovery struct {
 	perseshttp.RestConfigClient `json:",inline" yaml:",inline"`
-	// The name of the discovery config (optional)
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-	// Refresh interval to re-query the endpoint.
-	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
+}
+
+type KubernetesAPIRole string
+
+const (
+	Pod     KubernetesAPIRole = "pod"
+	Service KubernetesAPIRole = "service"
+)
+
+type KubernetesDiscovery struct {
+	// DatasourcePluginKind is the name of the datasource plugin that should be filled when creating datasources found.
+	DatasourcePluginKind string `json:"datasource_plugin_kind" yaml:"datasource_plugin_kind"`
+	// Kubernetes namespace to constraint the query to only one namespace.
+	// Leave empty if you are looking for datasource cross-namespace.
+	Namespace string `json:"namespace" yaml:"namespace"`
+	// The api name used to discover the datasources in Kubernetes (service, ingress, pod)
+	API KubernetesAPIRole `json:"api" yaml:"api"`
+	// The labels used to filter the list of resource when contacting the Kubernetes API.
+	Labels     map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
+	PortName   string            `json:"port_name,omitempty" yaml:"port_name,omitempty"`
+	PortNumber uint              `json:"port_number,omitempty" yaml:"port_number,omitempty"`
 }
 
 type GlobalDatasourceDiscovery struct {
+	// The name of the discovery config (optional)
+	DiscoveryName string `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
+	// Refresh interval to re-query the endpoint.
+	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
 	// HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
 	// It fetches an HTTP endpoint containing a list of zero or more global datasources.
 	// The target must reply with an HTTP 200 response.
 	// The HTTP header Content-Type must be application/json, and the body must be valid array of JSON.
 	HTTPDiscovery *HTTPDiscovery `json:"http_sd,omitempty" yaml:"http_sd,omitempty"`
+	// Kubernetes SD configurations allow retrieving global datasource from Kubernetes' REST API
+	// and always staying synchronized with the cluster state.
+	KubernetesDiscovery *KubernetesDiscovery `json:"kubernetes_sd,omitempty" yaml:"kubernetes_sd,omitempty"`
+}
+
+func (g *GlobalDatasourceDiscovery) Verify() error {
+	if len(g.DiscoveryName) == 0 {
+		return fmt.Errorf("global datasource discovery name is empty")
+	}
+	if g.RefreshInterval == 0 {
+		return fmt.Errorf("global datasource discovery refresh_interval is zero")
+	}
+	if g.HTTPDiscovery == nil && g.KubernetesDiscovery == nil {
+		return fmt.Errorf("no discovery has been defined for the global datasource discovery %q", g.DiscoveryName)
+	}
+	return nil
 }

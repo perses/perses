@@ -11,30 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package httpsd
+package kubesd
 
 import (
-	"context"
 	"time"
 
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/discovery/service"
-	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
-	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/model"
-	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
-func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
-	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
+func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
+	// creates the in-cluster config
+	kubeConfig, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+	// creates the kubeClient
+	kubeClient, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
 		return nil, err
 	}
 	sd := &discovery{
-		restClient: client,
+		kubeClient: kubeClient,
 		svc:        svc,
+		cfg:        cfg,
 		name:       Name,
 	}
 	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
@@ -42,21 +47,8 @@ func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPD
 
 type discovery struct {
 	async.SimpleTask
-	restClient *perseshttp.RESTClient
+	kubeClient *kubernetes.Clientset
 	svc        *service.ApplyService
+	cfg        *config.KubernetesDiscovery
 	name       string
-}
-
-func (d *discovery) Execute(_ context.Context, _ context.Context) error {
-	var result []*v1.GlobalDatasource
-	err := d.restClient.Get().
-		Do().
-		Object(&result)
-
-	if err != nil {
-		logrus.Errorf("failed to execute http discovery %q: %v", d.name, err)
-		return nil
-	}
-	d.svc.Apply(result)
-	return nil
 }
