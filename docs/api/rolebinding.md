@@ -17,11 +17,11 @@ There are two different scopes in which you can define a RoleBinding, depending 
 In case you would like to set a role binding for a Role, you will need to create a `RoleBinding`.
 
 ```yaml
-  kind: "RoleBinding"
-  metadata:
-    name: <string>
-    project: <string>
-  spec: <RoleBinding specification>
+kind: "RoleBinding"
+metadata:
+  name: <string>
+  project: <string>
+spec: <RoleBinding specification>
 ```
 
 ### Global level
@@ -29,30 +29,30 @@ In case you would like to set a role binding for a Role, you will need to create
 In case you would like to set a role binding for a GlobalRole , you will need to create a `GlobalRoleBinding`.
 
 ```yaml
-  kind: "GlobalRoleBinding"
-  metadata:
-    name: <string>
-  spec: <RoleBinding specification>
+kind: "GlobalRoleBinding"
+metadata:
+  name: <string>
+spec: <RoleBinding specification>
 ```
 
 ## RoleBinding specification
 
 ```yaml
-  # Name of the Role or GlobalRole concerned by the role binding (metadata.name)
-  role: <string>
-  # Subjects that will inherit permissions from the role
-  subjects: 
-    - <Subject specification>
+# Name of the Role or GlobalRole concerned by the role binding (metadata.name)
+role: <string>
+# Subjects that will inherit permissions from the role
+subjects: 
+  - <Subject specification>
 ```
 
 ### Subject specification
 
 ```yaml
-  # The type of the subject. For example: `User`
-  kind: <string>
+# The type of the subject. For example: `User`
+kind: <string>
 
-  # The name of the subject (metadata.name)
-  name: <string>
+# The name of the subject (metadata.name)
+name: <string>
 ```
 
 ### More info about authorization
