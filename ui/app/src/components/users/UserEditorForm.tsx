@@ -18,7 +18,7 @@ import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 
 import { Alert, Box, Button, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { userEditorValidationSchema, UserEditorValidationType } from '@perses-dev/plugin-system/dist/validation/user';
+import { userSchema, UserEditorSchemaType } from '@perses-dev/plugin-system/dist/validation/user';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -55,8 +55,8 @@ export function UserEditorForm(props: UserEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<UserEditorValidationType>({
-    resolver: zodResolver(userEditorValidationSchema),
+  const form = useForm<UserEditorSchemaType>({
+    resolver: zodResolver(userSchema),
     mode: 'onBlur',
     defaultValues: initialUserClean,
   });
@@ -68,7 +68,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
     name: 'spec.oauthProviders',
   });
 
-  const processForm: SubmitHandler<UserEditorValidationType> = (data: UserResource) => {
+  const processForm: SubmitHandler<UserEditorSchemaType> = (data: UserResource) => {
     onSave(data);
   };
 

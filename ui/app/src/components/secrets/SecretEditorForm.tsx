@@ -15,10 +15,7 @@ import { Action, Secret } from '@perses-dev/core';
 import React, { DispatchWithoutAction, SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import {
-  secretsEditorValidationSchema,
-  SecretsEditorValidationType,
-} from '@perses-dev/plugin-system/dist/validation/secret';
+import { secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/plugin-system/dist/validation/secret';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,
@@ -72,15 +69,15 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<SecretsEditorValidationType>({
-    resolver: zodResolver(secretsEditorValidationSchema),
+  const form = useForm<SecretsEditorSchemaType>({
+    resolver: zodResolver(secretsEditorSchema),
     mode: 'onBlur',
     defaultValues: initialSecretClean,
   });
 
   const [isTLSConfigEnabled, setTLSConfigEnabled] = useState<boolean>(initialSecretClean.spec.tlsConfig !== undefined);
 
-  const processForm: SubmitHandler<SecretsEditorValidationType> = (data: Secret) => {
+  const processForm: SubmitHandler<SecretsEditorSchemaType> = (data: Secret) => {
     onSave(data);
   };
 

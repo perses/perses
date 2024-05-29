@@ -12,39 +12,30 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { resourceIdValidationSchema } from './resource';
+import { nameSchema, metadataSchema, projectMetadataSchema } from './metadata';
 
-const subjectValidationSchema = z.object({
+export const subjectSchema = z.object({
   kind: z.enum(['User']),
-  name: resourceIdValidationSchema,
+  name: nameSchema,
 });
 
-const roleBindingValidationSchema = z.object({
+export const roleBindingSpecSchema = z.object({
+  role: nameSchema,
+  subjects: z.array(subjectSchema).nonempty(),
+});
+
+export const roleBindingSchema = z.object({
   kind: z.literal('RoleBinding'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-    project: resourceIdValidationSchema,
-  }),
-  spec: z.object({
-    role: resourceIdValidationSchema,
-    subjects: z.array(subjectValidationSchema).nonempty(),
-  }),
+  metadata: projectMetadataSchema,
+  spec: roleBindingSpecSchema,
 });
 
-const globalRoleBindingValidationSchema = z.object({
+export const globalRoleBindingSchema = z.object({
   kind: z.literal('GlobalRoleBinding'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-  }),
-  spec: z.object({
-    role: resourceIdValidationSchema,
-    subjects: z.array(subjectValidationSchema),
-  }),
+  metadata: metadataSchema,
+  spec: roleBindingSpecSchema,
 });
 
-export const roleBindingsEditorValidationSchema = z.discriminatedUnion('kind', [
-  roleBindingValidationSchema,
-  globalRoleBindingValidationSchema,
-]);
+export const roleBindingsEditorSchema = z.discriminatedUnion('kind', [roleBindingSchema, globalRoleBindingSchema]);
 
-export type RoleBindingsEditorValidationType = z.infer<typeof roleBindingsEditorValidationSchema>;
+export type RoleBindingsEditorSchemaType = z.infer<typeof roleBindingsEditorSchema>;

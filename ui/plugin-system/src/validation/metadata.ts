@@ -11,10 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DURATION_REGEX } from '@perses-dev/core';
 import { z } from 'zod';
 
-export const durationValidationSchema = z
+export const nameSchema = z
   .string()
   .min(1, 'Required')
-  .regex(DURATION_REGEX, 'Must be a valid duration string');
+  .max(75, 'Must be 75 or fewer characters long')
+  .regex(/^[a-zA-Z0-9_.-]+$/, 'Must only contains alphanumerical characters and special characters _ . -');
+
+export const metadataSchema = z.object({
+  name: nameSchema,
+});
+
+export const projectMetadataSchema = metadataSchema.extend({
+  project: nameSchema,
+});

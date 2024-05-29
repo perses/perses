@@ -23,7 +23,7 @@ import {
   getResourceDisplayName,
   getResourceExtendedDisplayName,
   DashboardSelector,
-  ProjectDatasource,
+  DatasourceResource,
   VariableResource,
   RoleResource,
   RoleBindingResource,
@@ -98,9 +98,9 @@ function TabButton({ index, projectName, ...props }: TabButtonProps) {
   }, [data]);
 
   const handleDatasourceCreation = useCallback(
-    (datasource: ProjectDatasource) => {
+    (datasource: DatasourceResource) => {
       createDatasourceMutation.mutate(datasource, {
-        onSuccess: (createdDatasource: ProjectDatasource) => {
+        onSuccess: (createdDatasource: DatasourceResource) => {
           successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
           setDatasourceDrawerOpened(false);
         },

@@ -12,32 +12,30 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { resourceIdValidationSchema } from './resource';
+import { metadataSchema } from './metadata';
 
-const nativeProviderSchema = z.object({
+export const nativeProviderSchema = z.object({
   password: z.string().optional(),
 });
 
-const oauthProvidersSchema = z.object({
+export const oauthProvidersSchema = z.object({
   issuer: z.string().optional(),
   email: z.string().optional(),
   subject: z.string().optional(),
 });
 
 // TODO: handle exclusion native / oauth?
-const userSpecSchema = z.object({
+export const userSpecSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   nativeProvider: nativeProviderSchema.optional(),
   oauthProviders: z.array(oauthProvidersSchema).optional(),
 });
 
-export const userEditorValidationSchema = z.object({
+export const userSchema = z.object({
   kind: z.literal('User'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-  }),
+  metadata: metadataSchema,
   spec: userSpecSchema,
 });
 
-export type UserEditorValidationType = z.infer<typeof userEditorValidationSchema>;
+export type UserEditorSchemaType = z.infer<typeof userSchema>;

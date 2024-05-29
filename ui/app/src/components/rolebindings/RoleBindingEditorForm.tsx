@@ -19,8 +19,8 @@ import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typog
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  roleBindingsEditorValidationSchema,
-  RoleBindingsEditorValidationType,
+  roleBindingsEditorSchema,
+  RoleBindingsEditorSchemaType,
 } from '@perses-dev/plugin-system/dist/validation/rolebinding';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -46,13 +46,13 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<RoleBindingsEditorValidationType>({
-    resolver: zodResolver(roleBindingsEditorValidationSchema),
+  const form = useForm<RoleBindingsEditorSchemaType>({
+    resolver: zodResolver(roleBindingsEditorSchema),
     mode: 'onBlur',
     defaultValues: initialRoleBinding,
   });
 
-  const processForm: SubmitHandler<RoleBindingsEditorValidationType> = (data: RoleBinding) => {
+  const processForm: SubmitHandler<RoleBindingsEditorSchemaType> = (data: RoleBinding) => {
     onSave(data);
   };
 

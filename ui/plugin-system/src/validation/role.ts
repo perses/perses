@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { resourceIdValidationSchema } from './resource';
+import { metadataSchema, projectMetadataSchema } from './metadata';
 
-const permissionValidationSchema = z.object({
+export const permissionSchema = z.object({
   // TODO: use SCOPE & ACTIONS constants
   actions: z.array(z.enum(['*', 'create', 'read', 'update', 'delete'])).nonempty('Must contains at least 1 action'),
   scopes: z
@@ -41,30 +41,22 @@ const permissionValidationSchema = z.object({
     .nonempty('Must contains at least 1 scope'), // TODO: limit project role
 });
 
-export const roleValidationSchema = z.object({
+export const roleSpecSchema = z.object({
+  permissions: z.array(permissionSchema),
+});
+
+export const roleSchema = z.object({
   kind: z.literal('Role'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-    project: resourceIdValidationSchema,
-  }),
-  spec: z.object({
-    permissions: z.array(permissionValidationSchema),
-  }),
+  metadata: projectMetadataSchema,
+  spec: roleSpecSchema,
 });
 
-export const globalRoleValidationSchema = z.object({
+export const globalRoleSchema = z.object({
   kind: z.literal('GlobalRole'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-  }),
-  spec: z.object({
-    permissions: z.array(permissionValidationSchema),
-  }),
+  metadata: metadataSchema,
+  spec: roleSpecSchema,
 });
 
-export const rolesEditorValidationSchema = z.discriminatedUnion('kind', [
-  roleValidationSchema,
-  globalRoleValidationSchema,
-]);
+export const rolesEditorSchema = z.discriminatedUnion('kind', [roleSchema, globalRoleSchema]);
 
-export type RolesEditorValidationType = z.infer<typeof rolesEditorValidationSchema>;
+export type RolesEditorSchemaType = z.infer<typeof rolesEditorSchema>;

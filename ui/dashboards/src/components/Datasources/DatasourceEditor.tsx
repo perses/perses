@@ -100,10 +100,10 @@ export function DatasourceEditor(props: {
           initialDatasourceDefinition={datasourceEdit}
           initialAction={datasourceFormAction}
           isDraft={true}
-          onSave={(name: string, spec: DatasourceSpec) => {
+          onSave={(def: DatasourceDefinition) => {
             setDatasources((draft) => {
               delete draft[datasourceEdit.name]; // to tackle the case where datasource name has been changed
-              draft[name] = spec;
+              draft[def.name] = def.spec;
               setDatasourceEdit(null);
             });
           }}

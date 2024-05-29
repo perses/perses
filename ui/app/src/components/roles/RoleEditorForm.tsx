@@ -18,7 +18,7 @@ import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm, UseFor
 import { Box, Button, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { rolesEditorValidationSchema, RolesEditorValidationType } from '@perses-dev/plugin-system/dist/validation/role';
+import { rolesEditorSchema, RolesEditorSchemaType } from '@perses-dev/plugin-system/dist/validation/role';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 
@@ -41,13 +41,13 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<RolesEditorValidationType>({
-    resolver: zodResolver(rolesEditorValidationSchema),
+  const form = useForm<RolesEditorSchemaType>({
+    resolver: zodResolver(rolesEditorSchema),
     mode: 'onBlur',
     defaultValues: initialRole,
   });
 
-  const processForm: SubmitHandler<RolesEditorValidationType> = (data: Role) => {
+  const processForm: SubmitHandler<RolesEditorSchemaType> = (data: Role) => {
     onSave(data);
   };
 
@@ -200,7 +200,7 @@ function PermissionControl({
   index,
   action,
 }: {
-  form: UseFormReturn<RolesEditorValidationType>;
+  form: UseFormReturn<RolesEditorSchemaType>;
   index: number;
   action: Action;
 }) {
