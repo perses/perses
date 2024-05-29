@@ -19,34 +19,34 @@ See the next section to get details about the `<dashboard_specification>`.
 ## Dashboard specification
 
 ```yaml
-  # Metadata.name has some restrictions. For example, you can't use space there.
-  # `display` allows to provide a rich name and a description for your dashboard.
-  [ display: <Display specification> ]
+# Metadata.name has some restrictions. For example, you can't use space there.
+# `display` allows to provide a rich name and a description for your dashboard.
+[ display: <Display specification> ]
 
-  # `datasources` is a map where the key is the reference of the datasource. The value is the actual datasource definition.
-  # A datasource can be referenced by the different panels and/or variables.
-  datasources:
-    [ <string>: <Datasource specification> ]
+# `datasources` is a map where the key is the reference of the datasource. The value is the actual datasource definition.
+# A datasource can be referenced by the different panels and/or variables.
+datasources:
+  [ <string>: <Datasource specification> ]
 
-  # `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
-  variables:
-    - [ <Variable specification> ]
+# `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
+variables:
+  - [ <Variable specification> ]
 
-  # `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
-  # the kind of chart this panel is using. A panel can only hold one chart.
-  panels:
-    [ <string>: <Panel specification> ]
+# `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
+# the kind of chart this panel is using. A panel can only hold one chart.
+panels:
+  [ <string>: <Panel specification> ]
 
-  # `layouts` is the list of layouts. A layout describes how to display the list of panels. 
-  # Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
-  layouts:
-    - <Layout specification>
+# `layouts` is the list of layouts. A layout describes how to display the list of panels. 
+# Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
+layouts:
+  - <Layout specification>
 
-  # `duration` is the default time range to use on the initial load of the dashboard.
-  [ duration: <duration> ]
+# `duration` is the default time range to use on the initial load of the dashboard.
+[ duration: <duration> ]
 
-  # `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
-  [ refreshInterval: <duration> ]
+# `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
+[ refreshInterval: <duration> ]
 ```
 
 A dashboard in its minimal definition only requires a panel and a layout.
@@ -57,13 +57,13 @@ This is the way to provide a rich name and a description for your dashboard. The
 characters you can use there.
 
 ```yaml
-  # The new name of the dashboard. If set, it will replace `metadata.name` in the dashboard title in the UI.
-  # Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the dashboard.
-  # This is just for display purpose.
-  [ name: <string> ]
+# The new name of the dashboard. If set, it will replace `metadata.name` in the dashboard title in the UI.
+# Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the dashboard.
+# This is just for display purpose.
+[ name: <string> ]
 
-  # The description of the dashboard.
-  [ description: <string> ]
+# The description of the dashboard.
+[ description: <string> ]
 ```
 
 ### Datasource specification
@@ -93,11 +93,11 @@ spec:
 #### Panel Plugin specification
 
 ```yaml
-  # `kind` is the plugin type of the panel. For example, `TimeSeriesChart`.
-  kind: <string>
+# `kind` is the plugin type of the panel. For example, `TimeSeriesChart`.
+kind: <string>
 
-  # `spec` is the actual definition of the panel plugin. Each `kind` comes with its own `spec`.
-  spec: <Plugin specification>
+# `spec` is the actual definition of the panel plugin. Each `kind` comes with its own `spec`.
+spec: <Plugin specification>
 ```
 
 See the [panel](../plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
@@ -114,11 +114,11 @@ spec:
 ##### Query Plugin specification
 
 ```yaml
-  # `kind` is the plugin type matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`.
-  kind: <string>
+# `kind` is the plugin type matching the type of query. For example, `PrometheusTimeSeriesQuery` for the query type `TimeSeriesQuery`.
+kind: <string>
 
-  # `spec` is the actual definition of the query. Each `kind` comes with its own `spec`.
-  spec: <Plugin specification>
+# `spec` is the actual definition of the query. Each `kind` comes with its own `spec`.
+spec: <Plugin specification>
 ```
 
 We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
