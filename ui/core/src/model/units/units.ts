@@ -140,5 +140,5 @@ export function isUnitWithShortValues(formatOptions: FormatOptions): formatOptio
 }
 
 export function isThroughputUnit(formatOptions: FormatOptions): formatOptions is ThroughputFormatOptions {
-  return getUnitGroup(formatOptions) == 'Throughput';
+  return getUnitGroup(formatOptions) === 'Throughput';
 }

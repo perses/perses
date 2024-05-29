@@ -77,7 +77,7 @@ describe('getFormattedPrometheusSeriesName', () => {
   it('should resolve empty metric to instead show query', () => {
     const query = 'node_load15{instance=~"(demo.do.prometheus.io:9100)"';
     const metric = {};
-    const output = { name: query, formattedName: query };
+    const output = { name: '{}', formattedName: '{}' };
     expect(getFormattedPrometheusSeriesName(query, metric)).toEqual(output);
   });
 
@@ -85,7 +85,7 @@ describe('getFormattedPrometheusSeriesName', () => {
     const query = 'up';
     const metric = {};
     const seriesNameFormat = 'Custom series name';
-    const output = { name: query, formattedName: 'Custom series name' };
+    const output = { name: '{}', formattedName: 'Custom series name' };
     expect(getFormattedPrometheusSeriesName(query, metric, seriesNameFormat)).toEqual(output);
   });
 

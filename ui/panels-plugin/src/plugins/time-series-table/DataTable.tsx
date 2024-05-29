@@ -14,9 +14,12 @@
  eslint-disable @typescript-eslint/no-explicit-any
  */
 import { Fragment, ReactNode } from 'react';
-import { Table } from '@mui/material';
+import { Alert, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
+import { SeriesName } from './SeriesName';
+
+const MAX_FORMATABLE_SERIES = 1000;
 
 export interface DataTableProps {
   result: Array<QueryData<TimeSeriesData>>;
@@ -39,23 +42,28 @@ const DataTable = ({ result }: DataTableProps) => {
 
   return (
     <>
+      {series.length >= MAX_FORMATABLE_SERIES && (
+        <Alert severity="warning">
+          Showing more than {MAX_FORMATABLE_SERIES} series, turning off label formatting for performance reasons.
+        </Alert>
+      )}
       <Table className="data-table">
-        <tbody>{rows}</tbody>
+        <TableBody>{rows}</TableBody>
       </Table>
     </>
   );
 };
 
 function buildRows(series: TimeSeries[]): ReactNode[] {
+  const isFormatted = series.length < MAX_FORMATABLE_SERIES; // only format series names if we have less than 1000 series for performance reasons
   return series.map((s, seriesIdx) => {
-    const displayTimeStamps = (s.values?.length || 0) > 1;
+    const displayTimeStamps = (s.values?.length ?? 0) > 1;
     const valuesAndTimes = s.values
       ? s.values.map((v, valIdx) => {
           return (
-            <Fragment key={valIdx}>
+            <Typography key={valIdx}>
               {v[1]} {displayTimeStamps && <span>@{v[0]}</span>}
-              <br />
-            </Fragment>
+            </Typography>
           );
         })
       : [];
@@ -64,18 +72,20 @@ function buildRows(series: TimeSeries[]): ReactNode[] {
           return (
             <Fragment key={-hisIdx}>
               {histogramTable(h[1])} @<span>{h[0]}</span>
-              <br />
             </Fragment>
           );
         })
       : [];
     return (
-      <tr style={{ whiteSpace: 'pre' }} key={seriesIdx}>
-        <td>{s.formattedName || s.name}</td>
-        <td>
-          {valuesAndTimes} {histogramsAndTimes}
-        </td>
-      </tr>
+      <TableRow style={{ whiteSpace: 'pre' }} key={seriesIdx}>
+        <TableCell>
+          <SeriesName name={s.name} formattedName={s.formattedName} labels={s.labels} isFormatted={isFormatted} />
+        </TableCell>
+        <TableCell>
+          {valuesAndTimes}
+          {histogramsAndTimes}
+        </TableCell>
+      </TableRow>
     );
   });
 }
@@ -94,25 +104,25 @@ export const bucketRangeString = ([boundaryRule, leftBoundary, rightBoundary, _]
 
 export const histogramTable = (h: any): ReactNode => (
   <Table>
-    <thead>
-      <tr>
-        <th style={{ textAlign: 'center' }} colSpan={2}>
+    <TableHead>
+      <TableRow>
+        <TableCell style={{ textAlign: 'center' }} colSpan={2}>
           Histogram Sample
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <th>Range</th>
-        <th>Count</th>
-      </tr>
+        </TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow>
+        <TableCell>Range</TableCell>
+        <TableCell>Count</TableCell>
+      </TableRow>
       {h.buckets?.map((b: any, i: any) => (
-        <tr key={i}>
-          <td>{bucketRangeString(b)}</td>
-          <td>{b[3]}</td>
-        </tr>
+        <TableRow key={i}>
+          <TableCell>{bucketRangeString(b)}</TableCell>
+          <TableCell>{b[3]}</TableCell>
+        </TableRow>
       ))}
-    </tbody>
+    </TableBody>
   </Table>
 );
 export default DataTable;
