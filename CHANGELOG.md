@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.46.0-rc1 / 2024-05-29
+
+- [ENHANCEMENT] Add formating to series name in explorer and use MUI Table (#2013)
+- [ENHANCEMENT] Make gauge chart background color close to theme color (#2018)
+- [BUGFIX] Replace unstable JSON.stringify() with custom string in `PluginKindSelect` (#2032)
+- [BUGFIX] Fix React warning when using TraceQL Editor (#2031)
+- [BUGFIX] Fix panel group collapsed + fix panel height (#2023)
+- [BUGFIX] Fix explorer failing to load query params when explorer is not set (#2026)
+- [BUGFIX] Scrollbar should not be present in panel view mode (#2014)
+
 ## 0.46.0-rc0 / 2024-05-22
 
 - [FEATURE] Explorer is sharable (#2000)
