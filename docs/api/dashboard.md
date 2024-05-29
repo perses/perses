@@ -23,11 +23,14 @@ See the next section to get details about the `<dashboard_specification>`.
   # `display` allows to provide a rich name and a description for your dashboard.
   [ display: <Display specification> ]
 
+  # `datasources` is a map where the key is the reference of the datasource. The value is the actual datasource definition.
+  # A datasource can be referenced by the different panels and/or variables.
   datasources:
     [ <string>: <Datasource specification> ]
 
   # `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
-  [ variables: <Variable specification> ]
+  variables:
+    - [ <Variable specification> ]
 
   # `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
   # the kind of chart this panel is using. A panel can only hold one chart.
