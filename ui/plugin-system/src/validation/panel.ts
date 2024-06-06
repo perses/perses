@@ -12,21 +12,22 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { pluginSchema } from './plugin';
+import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, QueryDefinition } from '@perses-dev/core';
+import { PluginSchema, pluginSchema } from './plugin';
 
-export const panelDisplaySpec = z.object({
+export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
   name: z.string(),
   description: z.string().optional(),
 });
 
-export const querySpecSchema = z.object({
+export const querySpecSchema: z.ZodSchema<QueryDefinition> = z.object({
   kind: z.string().min(1),
   spec: z.object({
     plugin: pluginSchema,
   }),
 });
 
-export const linkSchema = z.object({
+export const linkSchema: z.ZodSchema<Link> = z.object({
   name: z.string().optional(),
   url: z.string().min(1),
   tooltip: z.string().optional(),
@@ -34,16 +35,42 @@ export const linkSchema = z.object({
   targetBlank: z.boolean().optional(),
 });
 
-export const panelSpecSchema = z.object({
+export const panelSpecSchema: z.ZodSchema<PanelSpec> = z.object({
   display: panelDisplaySpec,
   plugin: pluginSchema,
   queries: z.array(querySpecSchema).optional(),
   links: z.array(linkSchema).optional(),
 });
 
-export const panelSchema = z.object({
+export function buildPanelSpecSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelSpec> {
+  return z.object({
+    display: panelDisplaySpec,
+    plugin: pluginSchema,
+    queries: z.array(querySpecSchema).optional(),
+    links: z.array(linkSchema).optional(),
+  });
+}
+
+export const panelDefinitionSchema: z.ZodSchema<PanelDefinition> = z.object({
   kind: z.literal('Panel'),
   spec: panelSpecSchema,
 });
 
-export type PanelEditorSchemaType = z.infer<typeof panelSchema>;
+export function buildPanelDefinitionSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelDefinition> {
+  return z.object({
+    kind: z.literal('Panel'),
+    spec: buildPanelSpecSchema(pluginSchema),
+  });
+}
+
+export const panelEditorSchema: z.ZodSchema<PanelEditorValues> = z.object({
+  groupId: z.number(),
+  panelDefinition: panelDefinitionSchema,
+});
+
+export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelEditorValues> {
+  return z.object({
+    groupId: z.number(),
+    panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+  });
+}

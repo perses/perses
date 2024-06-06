@@ -12,27 +12,28 @@
 // limitations under the License.
 
 import { z } from 'zod';
+import { NativeProvider, OAuthProvider, UserResource, UserSpec } from '@perses-dev/app/src/model/user-client';
 import { metadataSchema } from './metadata';
 
-export const nativeProviderSchema = z.object({
+export const nativeProviderSchema: z.Schema<NativeProvider> = z.object({
   password: z.string().optional(),
 });
 
-export const oauthProvidersSchema = z.object({
+export const oauthProvidersSchema: z.ZodSchema<OAuthProvider> = z.object({
   issuer: z.string().optional(),
   email: z.string().optional(),
   subject: z.string().optional(),
 });
 
 // TODO: handle exclusion native / oauth?
-export const userSpecSchema = z.object({
+export const userSpecSchema: z.ZodSchema<UserSpec> = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   nativeProvider: nativeProviderSchema.optional(),
   oauthProviders: z.array(oauthProvidersSchema).optional(),
 });
 
-export const userSchema = z.object({
+export const userSchema: z.ZodSchema<UserResource> = z.object({
   kind: z.literal('User'),
   metadata: metadataSchema,
   spec: userSpecSchema,

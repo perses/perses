@@ -12,14 +12,20 @@
 // limitations under the License.
 
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { buildDatasourceDefinition, datasourceDefinitionSchema, DatasourceEditorSchema } from './datasource';
+import { DatasourceDefinition, PanelEditorValues, VariableDefinition } from '@perses-dev/core';
+import { z } from 'zod';
+import { buildDatasourceDefinitionSchema, datasourceDefinitionSchema } from './datasource';
 import { PluginSchema } from './plugin';
+import { buildVariableDefinitionSchema, variableDefinitionSchema } from './variable';
+import { buildPanelEditorSchema, panelEditorSchema as defaultPanelEditorSchema } from './panel';
 
 export interface ValidationSchemas {
-  datasourcesEditorSchema: DatasourceEditorSchema;
-  // variablesEditorSchema: VariablesEditorSchemaType;
-  // panelEditorSchema: PanelEditorSchemaType;
-  setDatasourcesEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
+  datasourceEditorSchema: z.Schema<DatasourceDefinition>;
+  panelEditorSchema: z.Schema<PanelEditorValues>;
+  variableEditorSchema: z.Schema<VariableDefinition>;
+  setDatasourceEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
+  setPanelEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
+  setVariableEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
 }
 
 export const ValidationSchemasContext = createContext<ValidationSchemas | undefined>(undefined);
@@ -40,15 +46,34 @@ interface ValidationProviderProps {
  * Provide validation schemas for forms handling plugins (datasources, variables, panels).
  */
 export function ValidationProvider({ children }: ValidationProviderProps) {
-  const [datasourcesSchema, setDatasourcesEditorSchema] = useState<DatasourceEditorSchema>(datasourceDefinitionSchema);
+  const [datasourceEditorSchema, setDatasourceEditorSchema] =
+    useState<z.Schema<DatasourceDefinition>>(datasourceDefinitionSchema);
+  const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema);
+  const [variableEditorSchema, setVariableEditorSchema] =
+    useState<z.Schema<VariableDefinition>>(variableDefinitionSchema);
 
-  function setDatasourcesEditorSchemaPlugin(pluginSchema: PluginSchema) {
-    setDatasourcesEditorSchema(buildDatasourceDefinition(pluginSchema));
+  function setDatasourceEditorSchemaPlugin(pluginSchema: PluginSchema) {
+    setDatasourceEditorSchema(buildDatasourceDefinitionSchema(pluginSchema));
+  }
+
+  function setPanelEditorSchemaPlugin(pluginSchema: PluginSchema) {
+    setPanelEditorSchema(buildPanelEditorSchema(pluginSchema));
+  }
+
+  function setVariableEditorSchemaPlugin(pluginSchema: PluginSchema) {
+    setVariableEditorSchema(buildVariableDefinitionSchema(pluginSchema));
   }
 
   return (
     <ValidationSchemasContext.Provider
-      value={{ datasourcesEditorSchema: datasourcesSchema, setDatasourcesEditorSchemaPlugin }}
+      value={{
+        datasourceEditorSchema,
+        panelEditorSchema,
+        variableEditorSchema,
+        setDatasourceEditorSchemaPlugin,
+        setPanelEditorSchemaPlugin,
+        setVariableEditorSchemaPlugin,
+      }}
     >
       {children}
     </ValidationSchemasContext.Provider>

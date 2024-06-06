@@ -44,7 +44,7 @@ import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
-import { VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import { ValidationProvider, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
@@ -180,23 +180,25 @@ export function VariableEditor(props: {
   return (
     <>
       {currentEditingVariableDefinition && (
-        <VariableEditorForm
-          initialVariableDefinition={currentEditingVariableDefinition}
-          initialAction={variableFormAction}
-          isDraft={true}
-          onSave={(definition: VariableDefinition) => {
-            setVariableDefinitions((draft) => {
-              draft[variableEditIdx] = definition;
+        <ValidationProvider>
+          <VariableEditorForm
+            initialVariableDefinition={currentEditingVariableDefinition}
+            initialAction={variableFormAction}
+            isDraft={true}
+            onSave={(definition: VariableDefinition) => {
+              setVariableDefinitions((draft) => {
+                draft[variableEditIdx] = definition;
+                setVariableEditIdx(null);
+              });
+            }}
+            onClose={() => {
+              if (variableFormAction === 'create') {
+                removeVariable(variableEditIdx);
+              }
               setVariableEditIdx(null);
-            });
-          }}
-          onClose={() => {
-            if (variableFormAction === 'create') {
-              removeVariable(variableEditIdx);
-            }
-            setVariableEditIdx(null);
-          }}
-        />
+            }}
+          />
+        </ValidationProvider>
       )}
       {!currentEditingVariableDefinition && (
         <>

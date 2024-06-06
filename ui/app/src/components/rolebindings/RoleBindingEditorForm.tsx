@@ -12,16 +12,12 @@
 // limitations under the License.
 
 import { Action, RoleBinding } from '@perses-dev/core';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
+import { getSubmitText, getTitleAction, roleBindingsEditorSchema } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  roleBindingsEditorSchema,
-  RoleBindingsEditorSchemaType,
-} from '@perses-dev/plugin-system/dist/validation/rolebinding';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 import { useUserList } from '../../model/user-client';
@@ -46,13 +42,13 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<RoleBindingsEditorSchemaType>({
+  const form = useForm<RoleBinding>({
     resolver: zodResolver(roleBindingsEditorSchema),
     mode: 'onBlur',
     defaultValues: initialRoleBinding,
   });
 
-  const processForm: SubmitHandler<RoleBindingsEditorSchemaType> = (data: RoleBinding) => {
+  const processForm: SubmitHandler<RoleBinding> = (data: RoleBinding) => {
     onSave(data);
   };
 

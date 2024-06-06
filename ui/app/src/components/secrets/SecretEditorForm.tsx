@@ -13,9 +13,8 @@
 
 import { Action, Secret } from '@perses-dev/core';
 import React, { DispatchWithoutAction, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
+import { getSubmitText, getTitleAction, SecretsEditorSchemaType, secretsEditorSchema } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/plugin-system/dist/validation/secret';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box,

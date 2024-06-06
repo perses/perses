@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { z } from 'zod';
+import { Permission, Role, RoleSpec } from '@perses-dev/core';
 import { metadataSchema, projectMetadataSchema } from './metadata';
 
-export const permissionSchema = z.object({
+export const permissionSchema: z.ZodSchema<Permission> = z.object({
   // TODO: use SCOPE & ACTIONS constants
   actions: z.array(z.enum(['*', 'create', 'read', 'update', 'delete'])).nonempty('Must contains at least 1 action'),
   scopes: z
@@ -41,7 +42,7 @@ export const permissionSchema = z.object({
     .nonempty('Must contains at least 1 scope'), // TODO: limit project role
 });
 
-export const roleSpecSchema = z.object({
+export const roleSpecSchema: z.ZodSchema<RoleSpec> = z.object({
   permissions: z.array(permissionSchema),
 });
 
@@ -57,6 +58,4 @@ export const globalRoleSchema = z.object({
   spec: roleSpecSchema,
 });
 
-export const rolesEditorSchema = z.discriminatedUnion('kind', [roleSchema, globalRoleSchema]);
-
-export type RolesEditorSchemaType = z.infer<typeof rolesEditorSchema>;
+export const rolesEditorSchema: z.ZodSchema<Role> = z.discriminatedUnion('kind', [roleSchema, globalRoleSchema]);

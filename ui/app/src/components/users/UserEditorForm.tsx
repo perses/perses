@@ -12,13 +12,12 @@
 // limitations under the License.
 
 import { Action } from '@perses-dev/core';
-import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
+import { getSubmitText, getTitleAction, UserEditorSchemaType, userSchema } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Alert, Box, Button, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { userSchema, UserEditorSchemaType } from '@perses-dev/plugin-system/dist/validation/user';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';

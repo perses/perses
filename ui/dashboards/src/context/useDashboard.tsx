@@ -11,8 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardResource, EphemeralDashboardResource, GridDefinition } from '@perses-dev/core';
-import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
+import {
+  createPanelRef,
+  DashboardResource,
+  EphemeralDashboardResource,
+  GridDefinition,
+  PanelGroupId,
+} from '@perses-dev/core';
+import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
 export function useDashboard() {

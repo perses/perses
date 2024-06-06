@@ -21,21 +21,27 @@ import { fetch, fetchJson } from './fetch';
 const resource = 'users';
 export const userKey = 'user';
 
+export interface NativeProvider {
+  password?: string;
+}
+
+export interface OAuthProvider {
+  issuer?: string;
+  email?: string;
+  subject?: string;
+}
+
+export interface UserSpec {
+  firstName?: string;
+  lastName?: string;
+  nativeProvider?: NativeProvider;
+  oauthProviders?: OAuthProvider[];
+}
+
 export interface UserResource {
   kind: 'User';
   metadata: Metadata;
-  spec: {
-    firstName?: string;
-    lastName?: string;
-    nativeProvider?: {
-      password?: string;
-    };
-    oauthProviders?: Array<{
-      issuer?: string;
-      email?: string;
-      subject?: string;
-    }>;
-  };
+  spec: UserSpec;
 }
 
 function createUser(entity: UserResource) {

@@ -13,13 +13,21 @@
 
 import React, { Fragment, HTMLAttributes } from 'react';
 import { Checkbox, Divider, FormControlLabel, IconButton, Stack, TextField, Typography } from '@mui/material';
-import { Controller, useFieldArray } from 'react-hook-form';
+import { Controller, useFieldArray, Control } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { PanelEditorValues } from '@perses-dev/core';
 
-export function LinksEditor({ ...props }: HTMLAttributes<HTMLDivElement>) {
+export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {
+  control: Control<PanelEditorValues>;
+}
+
+export function LinksEditor({ control, ...props }: LinksEditorProps) {
+  const fieldName = 'panelDefinition.spec.links';
+
   const { fields, append, remove } = useFieldArray({
-    name: 'links',
+    control: control,
+    name: fieldName,
   });
 
   return (
@@ -28,7 +36,7 @@ export function LinksEditor({ ...props }: HTMLAttributes<HTMLDivElement>) {
         fields.map((field, index) => (
           <Fragment key={field.id}>
             <Stack direction="row" gap={1} alignItems="center">
-              <LinkControl index={index} />
+              <LinkControl fieldName={fieldName} index={index} />
               <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => remove(index)}>
                 <MinusIcon />
               </IconButton>
@@ -48,12 +56,12 @@ export function LinksEditor({ ...props }: HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-function LinkControl({ index }: { index: number }) {
+function LinkControl({ fieldName, index }: { fieldName: string; index: number }) {
   return (
     <Stack gap={2} flexGrow={1}>
       <Stack direction="row" gap={2}>
         <Controller
-          name={`links.${index}.url`}
+          name={`${fieldName}.${index}.url`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -69,7 +77,7 @@ function LinkControl({ index }: { index: number }) {
           )}
         />
         <Controller
-          name={`links.${index}.name`}
+          name={`${fieldName}.${index}.name`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -85,7 +93,7 @@ function LinkControl({ index }: { index: number }) {
           )}
         />
         <Controller
-          name={`links.${index}.tooltip`}
+          name={`${fieldName}.${index}.tooltip`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -103,7 +111,7 @@ function LinkControl({ index }: { index: number }) {
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
         <Controller
-          name={`links.${index}.renderVariables`}
+          name={`${fieldName}.${index}.renderVariables`}
           render={({ field }) => (
             <FormControlLabel
               label="Render Variables"
@@ -112,7 +120,7 @@ function LinkControl({ index }: { index: number }) {
           )}
         />
         <Controller
-          name={`links.${index}.targetBlank`}
+          name={`${fieldName}.${index}.targetBlank`}
           render={({ field }) => (
             <FormControlLabel
               label="Open in new tab"

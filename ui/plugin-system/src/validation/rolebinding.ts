@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { z } from 'zod';
+import { RoleBinding, RoleBindingSpec, Subject } from '@perses-dev/core';
 import { nameSchema, metadataSchema, projectMetadataSchema } from './metadata';
 
-export const subjectSchema = z.object({
+export const subjectSchema: z.ZodSchema<Subject> = z.object({
   kind: z.enum(['User']),
   name: nameSchema,
 });
 
-export const roleBindingSpecSchema = z.object({
+export const roleBindingSpecSchema: z.ZodSchema<RoleBindingSpec> = z.object({
   role: nameSchema,
   subjects: z.array(subjectSchema).nonempty(),
 });
@@ -36,6 +37,7 @@ export const globalRoleBindingSchema = z.object({
   spec: roleBindingSpecSchema,
 });
 
-export const roleBindingsEditorSchema = z.discriminatedUnion('kind', [roleBindingSchema, globalRoleBindingSchema]);
-
-export type RoleBindingsEditorSchemaType = z.infer<typeof roleBindingsEditorSchema>;
+export const roleBindingsEditorSchema: z.ZodSchema<RoleBinding> = z.discriminatedUnion('kind', [
+  roleBindingSchema,
+  globalRoleBindingSchema,
+]);

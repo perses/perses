@@ -19,7 +19,7 @@ import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-for
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { getSubmitText, getTitleAction } from '../../utils';
-import { datasourceDefinitionSchema, DatasourceEditorSchemaType, useValidationSchemas } from '../../validation';
+import { useValidationSchemas } from '../../validation';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;
@@ -39,15 +39,14 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const { datasourcesEditorSchema } = useValidationSchemas();
-
-  const form = useForm<DatasourceEditorSchemaType>({
-    resolver: zodResolver(datasourcesEditorSchema),
+  const { datasourceEditorSchema } = useValidationSchemas();
+  const form = useForm<DatasourceDefinition>({
+    resolver: zodResolver(datasourceEditorSchema),
     mode: 'onBlur',
     defaultValues: initialDatasourceDefinition,
   });
 
-  const processForm: SubmitHandler<DatasourceEditorSchemaType> = (data: DatasourceDefinition) => {
+  const processForm: SubmitHandler<DatasourceDefinition> = (data: DatasourceDefinition) => {
     // reset display attributes to undefined when empty, because we don't want to save empty strings
     onSave(data);
   };
@@ -115,6 +114,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
         <Grid container spacing={2} mb={2}>
           <Grid item xs={4}>
             <Controller
+              control={form.control}
               name="name"
               render={({ field, fieldState }) => (
                 <TextField
@@ -130,6 +130,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                   }}
@@ -139,6 +140,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           </Grid>
           <Grid item xs={8}>
             <Controller
+              control={form.control}
               name="spec.display.name"
               render={({ field, fieldState }) => (
                 <TextField
@@ -152,6 +154,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                   }}
@@ -161,6 +164,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           </Grid>
           <Grid item xs={12}>
             <Controller
+              control={form.control}
               name="spec.display.description"
               render={({ field, fieldState }) => (
                 <TextField
@@ -174,6 +178,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                   }}
@@ -184,6 +189,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
             <Stack>
               <Controller
+                control={form.control}
                 name="spec.default"
                 render={({ field }) => (
                   <FormControlLabel
@@ -213,6 +219,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           Plugin Options
         </Typography>
         <Controller
+          control={form.control}
           name="spec.plugin"
           render={({ field }) => (
             <PluginEditor
