@@ -15,6 +15,7 @@ package dashboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,21 +37,30 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	memoryPanel = panelgroup.AddPanel("Container memory",
-		timeseries.Chart(),
-		panel.AddQuery(
-			query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
-		),
-	)
-
-	cpuPanel = panelgroup.AddPanel("Container CPU",
-		timeseries.Chart(),
-		panel.AddQuery(
-			query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
-		),
-	)
+const (
+	filter    = "stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\""
+	memMetric = "container_memory_rss"
+	cpuMetric = "container_cpu_usage_seconds"
+	grouping  = "by (container)"
 )
+
+func buildMemoryPanel(grouping string) panelgroup.Option {
+	return panelgroup.AddPanel("Container memory",
+		timeseries.Chart(),
+		panel.AddQuery(
+			query.PromQL(fmt.Sprintf("max %s (%s{%s})", grouping, memMetric, filter)),
+		),
+	)
+}
+
+func buildCPUPanel(grouping string) panelgroup.Option {
+	return panelgroup.AddPanel("Container CPU",
+		timeseries.Chart(),
+		panel.AddQuery(
+			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
+		),
+	)
+}
 
 func TestDashboardBuilder(t *testing.T) {
 	builder, buildErr := New("ContainersMonitoring",
@@ -113,16 +123,16 @@ func TestDashboardBuilder(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			memoryPanel,
-			cpuPanel,
+			buildMemoryPanel(""),
+			buildCPUPanel(""),
 		),
 		AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
 			// PANELS
-			cpuPanel,
-			memoryPanel,
+			buildCPUPanel(grouping),
+			buildMemoryPanel(grouping),
 		),
 
 		// DATASOURCES
@@ -214,16 +224,16 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			memoryPanel,
-			cpuPanel,
+			buildMemoryPanel(""),
+			buildCPUPanel(""),
 		),
 		AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
 			// PANELS
-			cpuPanel,
-			memoryPanel,
+			buildCPUPanel(grouping),
+			buildMemoryPanel(grouping),
 		),
 
 		// DATASOURCES
