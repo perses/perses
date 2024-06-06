@@ -60,6 +60,14 @@
           "name": "Scatter Chart",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "GanttChart",
+        "display": {
+          "name": "Gantt Chart",
+          "description": ""
+        }
       }
     ]
   }

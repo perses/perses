@@ -13,7 +13,7 @@
 
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
-import { ScatterChart } from '@perses-dev/panels-plugin';
+import { ScatterChart, GanttChart } from '@perses-dev/panels-plugin';
 import { QueryDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import useResizeObserver from 'use-resize-observer';
@@ -47,6 +47,33 @@ function TracePanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
+function GanttPanel({ queries }: { queries: QueryDefinition[] }) {
+  const { width, ref: boxRef } = useResizeObserver();
+  const height = 600;
+  const suggestedStepMs = useSuggestedStepMs(width);
+
+  // map TraceQueryDefinition to Definition<UnknownSpec>
+  const definitions = queries.length
+    ? queries.map((query) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      })
+    : [];
+
+  return (
+    <Box ref={boxRef} height={height}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
+        <GanttChart.PanelComponent
+          contentDimensions={{ width: width ?? PANEL_PREVIEW_DEFAULT_WIDTH, height }}
+          spec={{}}
+        />
+      </DataQueriesProvider>
+    </Box>
+  );
+}
+
 export function TracesExplorer() {
   const { tab, queries, setTab, setQueries } = useExplorerManagerContext();
 
@@ -61,9 +88,13 @@ export function TracesExplorer() {
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
         <Tab label="Graph" />
+        <Tab label="Gantt" />
       </Tabs>
       <Stack gap={1}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>{tab === 0 && <TracePanel queries={queries} />}</ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>
+          {tab === 0 && <TracePanel queries={queries} />}
+          {tab === 1 && <GanttPanel queries={queries} />}
+        </ErrorBoundary>
       </Stack>
     </Stack>
   );
