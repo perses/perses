@@ -64,6 +64,7 @@ function parseResource(resource: api.Resource, colors: string[]): Resource {
 function parseSpan(span: api.Span) {
   return {
     spanId: span.spanId,
+    parentSpanId: span.parentSpanId,
     spanName: span.name,
     startTimeUnixNano: parseInt(span.startTimeUnixNano),
     endTimeUnixNano: parseInt(span.endTimeUnixNano),
@@ -72,13 +73,11 @@ function parseSpan(span: api.Span) {
 
 /**
  * buildTree builds a tree of spans from the Tempo API response
- * time complexity: O(n)
+ * time complexity: O(3n)
  */
-function buildTree(trace: api.TraceResponse, colors: string[]): Span | null {
-  let root: Span | null = null;
+export function buildTree(trace: api.TraceResponse, colors: string[]): Span | null {
+  // first pass: build lookup table <spanId, Span>
   const lookup: Map<string, Span> = new Map();
-
-  // build tree based on parentSpanId property
   for (const batch of trace.batches) {
     const resource = parseResource(batch.resource, colors);
 
@@ -87,52 +86,33 @@ function buildTree(trace: api.TraceResponse, colors: string[]): Span | null {
         const node: Span = {
           ...parseSpan(span),
           resource,
-          parents: [],
           children: [],
         };
         lookup.set(span.spanId, node);
-
-        if (!span.parentSpanId) {
-          root = node;
-        } else {
-          const parent = lookup.get(span.parentSpanId);
-          if (!parent) {
-            // TODO: check if this can happen with real world traces
-            // in this case, we'll need a second pass.
-            throw new Error(`parent not found for ${span.parentSpanId}`);
-          }
-
-          node.parents = [...parent.parents, parent];
-          parent.children.push(node);
-        }
       }
     }
   }
 
-  return root;
-}
+  // second pass: build tree based on parentSpanId property
+  let root: Span | null = null;
+  for (const [, span] of lookup) {
+    if (!span.parentSpanId) {
+      root = span;
+    } else {
+      const parent = lookup.get(span.parentSpanId);
+      if (!parent) {
+        throw new Error(`span ${span.spanId} has parent ${span.parentSpanId} which does not exist`);
+      }
 
-/**
- * sortChildren recursively sorts the child spans by start time
- * time complexity: O(n)
- */
-function sortChildren(node: Span) {
-  node.children.sort((a: Span, b: Span) => a.startTimeUnixNano - b.startTimeUnixNano);
-  for (const child of node.children) {
-    sortChildren(child);
+      span.parent = parent;
+      parent.children.push(span);
+    }
   }
-}
 
-/**
- * parseResponse parses the response from Tempo API and builds a tree of spans
- * time complexity: O(2n)
- */
-export function parseResponse(trace: api.TraceResponse, colors: string[]): Span | null {
-  const tree = buildTree(trace, colors);
-  if (!tree) return null;
+  // third pass: sort child spans by start time
+  for (const [, span] of lookup) {
+    span.children.sort((a: Span, b: Span) => a.startTimeUnixNano - b.startTimeUnixNano);
+  }
 
-  // once all span children are in the tree, sort them by start time
-  sortChildren(tree);
-
-  return tree;
+  return root;
 }

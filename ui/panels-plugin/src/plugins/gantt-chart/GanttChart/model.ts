@@ -14,11 +14,12 @@
 export interface Span {
   resource: Resource;
   spanId: string;
+  parentSpanId?: string;
   spanName: string;
   startTimeUnixNano: number;
   endTimeUnixNano: number;
 
-  parents: Span[];
+  parent?: Span;
   children: Span[];
 }
 

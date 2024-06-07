@@ -13,7 +13,7 @@
 
 import { PanelProps } from '@perses-dev/plugin-system';
 import { useChartsTheme } from '@perses-dev/components';
-import { GanttChartOptions, parseResponse } from './gantt-chart-model';
+import { GanttChartOptions, buildTree } from './gantt-chart-model';
 import { GanttChart } from './GanttChart/GanttChart';
 import { traceResponse } from './traceResponse';
 
@@ -28,7 +28,7 @@ export function GanttChartPanel(props: GanttChartPanelProps) {
   // TODO: fetch trace from Tempo API /api/traces/{props.spec.traceID}
   const trace = traceResponse;
 
-  const tree = parseResponse(trace, chartsTheme.echartsTheme.color as string[]);
+  const tree = buildTree(trace, chartsTheme.echartsTheme.color as string[]);
   if (!tree) {
     return null;
   }

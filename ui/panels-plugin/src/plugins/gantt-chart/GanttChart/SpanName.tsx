@@ -25,12 +25,16 @@ export interface SpanNameProps {
 export function SpanName(props: SpanNameProps) {
   const { span } = props;
 
+  let parent = span.parent;
+  const indents = [<SpanIndent key="last" span={span} parentSpanId={parent?.spanId ?? ''} showIcon={true} />];
+  for (let i = 0; parent; i++) {
+    indents.unshift(<SpanIndent key={i} span={span} parentSpanId={parent.spanId} showIcon={false} />);
+    parent = parent.parent;
+  }
+
   return (
     <Stack direction="row" alignItems="center" style={{ width: '25%' }}>
-      <SpanIndent span={span} parentSpanId="" showIcon={span.parents.length === 0} />
-      {span.parents.map((parent, i) => (
-        <SpanIndent key={i} span={span} parentSpanId={parent.spanId} showIcon={i === span.parents.length - 1} />
-      ))}
+      {indents}
       <Box>
         <strong style={{ color: span.resource.color }}>{span.resource.serviceName}:</strong> {span.spanName}
       </Box>
