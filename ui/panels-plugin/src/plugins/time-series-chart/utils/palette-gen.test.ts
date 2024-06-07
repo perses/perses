@@ -45,7 +45,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -62,7 +61,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 6,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#D55E00');
@@ -80,7 +78,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
@@ -98,7 +95,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -111,17 +107,15 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     } as unknown as SeriesColorProps;
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 
-  it('should return color set in singleSeriesColor', () => {
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=true', () => {
     const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
       palette: {
         mode: 'auto',
-        singleSeriesColor: '#000',
       },
     };
     const props: SeriesColorProps = {
@@ -130,17 +124,21 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: true,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#000');
   });
 
-  it('should fallback to regular palette instead of using singleSeriesColor when more than one series', () => {
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=false', () => {
     const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
       palette: {
         mode: 'auto',
-        singleSeriesColor: '#000',
       },
     };
     const props: SeriesColorProps = {
@@ -149,10 +147,61 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 2,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: false,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
+  });
+
+  it('should fallback to regular palette instead of using querySettings when colorMode=fixed-single & queryHasMultipleResults=true', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed-single',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: true,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('hsla(27.48,50%,50%,0.9)');
+  });
+
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=false', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed-single',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: false,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
   });
 });
 

@@ -82,7 +82,7 @@ export class PanelEditor {
   }
 
   async openThresholdColorPicker(label: string) {
-    const openColorPickerButton = this.container.getByRole('button', { name: `change threshold ${label} color` });
+    const openColorPickerButton = this.container.getByRole('button', { name: `change ${label} color` });
     await openColorPickerButton.click();
   }
 

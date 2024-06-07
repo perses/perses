@@ -196,7 +196,15 @@
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {}
+            "spec": {
+              "querySettings": [
+                {
+                  "queryIndex": 0,
+                  "colorMode": "fixed-single",
+                  "colorValue": "#0be300"
+                }
+              ]
+            }
           },
           "queries": [
             {
@@ -221,7 +229,15 @@
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {}
+            "spec": {
+              "querySettings": [
+                {
+                  "queryIndex": 0,
+                  "colorMode": "fixed-single",
+                  "colorValue": "#0be300"
+                }
+              ]
+            }
           },
           "queries": [
             {

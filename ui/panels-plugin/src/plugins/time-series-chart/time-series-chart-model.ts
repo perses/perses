@@ -30,6 +30,13 @@ export interface TimeSeriesChartOptions {
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
   tooltip?: TooltipSpecOptions;
+  querySettings?: QuerySettingsOptions[];
+}
+
+export interface QuerySettingsOptions {
+  queryIndex: number;
+  colorMode: 'fixed' | 'fixed-single';
+  colorValue: string;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -48,7 +55,6 @@ export interface TooltipSpecOptions {
 
 export interface TimeSeriesChartPaletteOptions {
   mode: 'auto' | 'categorical';
-  singleSeriesColor?: string;
 }
 
 export type TimeSeriesChartVisualOptions = {

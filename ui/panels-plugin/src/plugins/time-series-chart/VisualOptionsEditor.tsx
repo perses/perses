@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { Slider, Switch, ToggleButton, ToggleButtonGroup, Stack, IconButton } from '@mui/material';
-import CloseCircleOutline from 'mdi-material-ui/CloseCircleOutline';
+import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   DEFAULT_AREA_OPACITY,
@@ -27,9 +26,6 @@ import {
   VISUAL_CONFIG,
   TimeSeriesChartVisualOptions,
 } from './time-series-chart-model';
-import { SingleSeriesColorPicker } from './SingleSeriesColorPicker';
-
-const EMPTY_TEMP_COLOR = '#555'; // Never visible on rendered lines, used since color picker can't be disabled
 
 export interface VisualOptionsEditorProps {
   value: TimeSeriesChartVisualOptions;
@@ -60,18 +56,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   const currentStack: StackOptions = value.stack ?? 'none';
   const stackConfig = STACK_CONFIG[currentStack];
 
-  const handleSingleSeriesColorChange = (color: string) => {
-    onChange(
-      produce(value, (draft) => {
-        draft.palette = {
-          ...draft.palette,
-          mode: 'auto',
-          singleSeriesColor: color,
-        };
-      })
-    );
-  };
-
   return (
     <OptionsEditorGroup title="Visual">
       <OptionsEditorControl
@@ -99,59 +83,6 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
               Bar
             </ToggleButton>
           </ToggleButtonGroup>
-        }
-      />
-      <OptionsEditorControl
-        label={'Palette'}
-        control={
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            value={value.palette?.mode ?? 'auto'}
-            onChange={(__, newValue) => {
-              onChange(
-                produce(value, (draft) => {
-                  if (!draft.palette) {
-                    draft.palette = {
-                      mode: 'auto',
-                    };
-                  }
-                  draft.palette.mode = newValue === 'categorical' ? 'categorical' : 'auto';
-                })
-              );
-            }}
-          >
-            <ToggleButton value="auto">Auto</ToggleButton>
-            <ToggleButton value="categorical">Categorical</ToggleButton>
-          </ToggleButtonGroup>
-        }
-      />
-      <OptionsEditorControl
-        label={'Single Series Color'}
-        control={
-          <Stack gap={1}>
-            <Stack direction="row" spacing={0.5}>
-              <SingleSeriesColorPicker
-                color={value.palette?.singleSeriesColor ?? EMPTY_TEMP_COLOR}
-                onColorChange={handleSingleSeriesColorChange}
-              />
-              <IconButton
-                size="small"
-                onClick={() =>
-                  onChange(
-                    produce(value, (draft) => {
-                      if (draft.palette) {
-                        draft.palette.singleSeriesColor = undefined;
-                      }
-                    })
-                  )
-                }
-                aria-label="reset color"
-              >
-                <CloseCircleOutline />
-              </IconButton>
-            </Stack>
-          </Stack>
         }
       />
       <OptionsEditorControl

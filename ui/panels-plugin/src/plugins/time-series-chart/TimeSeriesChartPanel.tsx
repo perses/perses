@@ -53,6 +53,7 @@ import {
   DEFAULT_FORMAT,
   DEFAULT_VISUAL,
   THRESHOLD_PLOT_INTERVAL,
+  QuerySettingsOptions,
 } from './time-series-chart-model';
 import {
   getTimeSeries,
@@ -76,7 +77,7 @@ export type TimeSeriesChartProps = PanelProps<TimeSeriesChartOptions>;
 
 export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   const {
-    spec: { thresholds, yAxis, tooltip },
+    spec: { thresholds, yAxis, tooltip, querySettings: querySettingsList },
     contentDimensions,
   } = props;
   const chartsTheme = useChartsTheme();
@@ -161,18 +162,23 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     // Index is counted across multiple queries which ensures the categorical color palette does not reset for every query
     let seriesIndex = 0;
 
-    // Total series count across all queries is needed before mapping below to determine which color palette to use
-    // This calculation should not impact performance since total number of queries rarely exceeds ~5
-    let totalSeries = 0;
-    for (let i = 0; i < queryResults.length; i++) {
-      totalSeries += queryResults[i]?.data?.series?.length ?? 0;
-    }
-
     // Mapping of each set of query results to be ECharts option compatible
     // TODO: Look into performance optimizations and moving parts of mapping to the lower level chart
-    for (const result of queryResults) {
+    for (let queryIndex = 0; queryIndex < queryResults.length; queryIndex++) {
+      const result = queryResults[queryIndex];
       // Skip queries that are still loading or don't have data
-      if (result.isLoading || result.isFetching || result.data === undefined) continue;
+      if (!result || result.isLoading || result.isFetching || result.data === undefined) continue;
+
+      // Retrieve querySettings for this query, if exists.
+      // queries & querySettings indices do not necessarily match, so we have to check the tail value of the $ref attribute
+      let querySettings: QuerySettingsOptions | undefined;
+      for (const item of querySettingsList ?? []) {
+        if (item.queryIndex === queryIndex) {
+          querySettings = item;
+          // We don't break the loop here just in case there are multiple querySettings defined for the
+          // same queryIndex, because in that case we want the last one to take precedence.
+        }
+      }
 
       for (let i = 0; i < result.data.series.length; i++) {
         const timeSeries: TimeSeries | undefined = result.data.series[i];
@@ -183,8 +189,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
         // Format is determined by seriesNameFormat in query spec
         const formattedSeriesName = timeSeries.formattedName ?? timeSeries.name;
 
-        // Color is used for line, tooltip, and legend, categorical palette set in ChartsProvider.
-        // When only one series returned check if custom color is defined, otherwise fallback to visual.palette.mode.
+        // Color is used for line, tooltip, and legend
         const seriesColor = getSeriesColor({
           // ECharts type for color is not always an array but it is always an array in ChartsProvider
           categoricalPalette: categoricalPalette as string[],
@@ -192,7 +197,8 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
           muiPrimaryColor: muiTheme.palette.primary.main,
           seriesName: formattedSeriesName,
           seriesIndex,
-          totalSeries,
+          querySettings: querySettings,
+          queryHasMultipleResults: (queryResults[queryIndex]?.data?.series?.length ?? 0) > 1,
         });
 
         // We add a unique id for the chart to disambiguate items across charts
@@ -288,6 +294,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
     selectedLegendItems,
     legend,
     visual,
+    querySettingsList,
     isFetching,
     isLoading,
     yAxis?.max,

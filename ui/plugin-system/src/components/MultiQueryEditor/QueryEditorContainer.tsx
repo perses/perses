@@ -60,7 +60,7 @@ export const QueryEditorContainer = ({
           {isCollapsed ? <ChevronRight /> : <ChevronDown />}
         </IconButton>
         <Typography variant="overline" component="h4">
-          Query {index + 1}
+          Query #{index + 1}
         </Typography>
         <IconButton
           size="small"

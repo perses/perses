@@ -15,14 +15,15 @@ import React from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
 import { useChartsTheme } from '../context/ChartsProvider';
-import { ColorPicker } from '../ColorPicker';
-import { ThresholdInputProps } from './ThresholdInput';
+import { ColorPicker } from './ColorPicker';
 
-export function ThresholdColorPicker({
-  color,
-  onColorChange,
-  label,
-}: Pick<ThresholdInputProps, 'color' | 'onColorChange' | 'label'>) {
+export interface OptionsColorPickerProps {
+  label: string;
+  color: string;
+  onColorChange: (color: string) => void;
+}
+
+export function OptionsColorPicker({ color, onColorChange, label }: OptionsColorPickerProps) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -42,7 +43,7 @@ export function ThresholdColorPicker({
     <>
       <ColorIconButton
         size="small"
-        aria-label={`change threshold ${label} color`}
+        aria-label={`change ${label} color`}
         isSelected={isOpen}
         iconColor={color}
         onClick={openColorPicker}
@@ -50,7 +51,7 @@ export function ThresholdColorPicker({
         <CircleIcon />
       </ColorIconButton>
       <Popover
-        data-testid="threshold color picker"
+        data-testid="options color picker"
         open={isOpen}
         anchorEl={anchorEl}
         onClose={closeColorPicker}

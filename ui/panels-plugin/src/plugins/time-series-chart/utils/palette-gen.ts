@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import ColorHash from 'color-hash';
-import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
+import { QuerySettingsOptions, TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 
 export interface SeriesColorProps {
   categoricalPalette: string[];
@@ -20,18 +20,31 @@ export interface SeriesColorProps {
   muiPrimaryColor: string;
   seriesName: string;
   seriesIndex: number;
-  totalSeries: number;
+  querySettings?: QuerySettingsOptions;
+  queryHasMultipleResults?: boolean;
 }
 
 /**
  * Get line color as well as color for tooltip and legend, account for whether palette is 'categorical' or 'auto' aka generative
  */
 export function getSeriesColor(props: SeriesColorProps) {
-  const { categoricalPalette, visual, muiPrimaryColor, seriesName, seriesIndex, totalSeries } = props;
+  const {
+    categoricalPalette,
+    visual,
+    muiPrimaryColor,
+    seriesName,
+    seriesIndex,
+    querySettings,
+    queryHasMultipleResults,
+  } = props;
 
-  // When single series is returned, check if a color override is set in singleSeriesColor
-  if (visual.palette?.singleSeriesColor && totalSeries === 1) {
-    return visual.palette.singleSeriesColor;
+  // Use color overrides defined in query settings in priority, if applicable
+  if (querySettings) {
+    if (querySettings.colorMode === 'fixed') {
+      return querySettings.colorValue;
+    } else if (querySettings.colorMode === 'fixed-single' && !queryHasMultipleResults) {
+      return querySettings.colorValue;
+    }
   }
 
   // Fallback is unlikely to set unless echarts theme palette in charts theme provider is undefined.
