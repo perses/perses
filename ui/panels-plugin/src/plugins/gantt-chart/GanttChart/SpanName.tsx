@@ -27,8 +27,8 @@ export function SpanName(props: SpanNameProps) {
 
   let parent = span.parent;
   const indents = [<SpanIndent key="last" span={span} parentSpanId={parent?.spanId ?? ''} showIcon={true} />];
-  for (let i = 0; parent; i++) {
-    indents.unshift(<SpanIndent key={i} span={span} parentSpanId={parent.spanId} showIcon={false} />);
+  while (parent) {
+    indents.unshift(<SpanIndent key={parent.spanId} span={span} parentSpanId={parent.spanId} showIcon={false} />);
     parent = parent.parent;
   }
 
