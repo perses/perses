@@ -39,5 +39,5 @@ func New(title string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Panel
+	v1.Panel `json:",inline" yaml:",inline"`
 }

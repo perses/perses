@@ -126,7 +126,7 @@ func New(options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	PluginSpec
+	PluginSpec `json:",inline" yaml:",inline"`
 }
 
 func Chart(options ...Option) panel.Option {
