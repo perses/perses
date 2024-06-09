@@ -48,7 +48,7 @@ func NewPlugin(query string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	PluginSpec
+	PluginSpec `json:",inline" yaml:",inline"`
 }
 
 func PromQL(expr string, options ...Option) query.Option {

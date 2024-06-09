@@ -22,7 +22,7 @@ type PluginSpec struct {
 type Option func(plugin *Builder) error
 
 type Builder struct {
-	PluginSpec
+	PluginSpec `json:",inline" yaml:",inline"`
 }
 
 func New(text string, options ...Option) (Builder, error) {

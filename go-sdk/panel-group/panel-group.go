@@ -26,7 +26,7 @@ type PanelGroup struct {
 type Option func(plugin *Builder) error
 
 type Builder struct {
-	PanelGroup
+	PanelGroup `json:",inline" yaml:",inline"`
 }
 
 func New(title string, options ...Option) (Builder, error) {
