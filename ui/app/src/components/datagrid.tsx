@@ -71,8 +71,8 @@ export function GridToolbar() {
           <GridToolbarQuickFilter sx={{ width: '100%' }} />
         </Stack>
         <Stack direction="row" sx={{ flexShrink: 3 }} width="100%">
-          <GridToolbarColumnsButton sx={{ width: '100%' }} />
-          <GridToolbarFilterButton sx={{ width: '100%' }} />
+          <GridToolbarColumnsButton slotProps={{ button: { sx: { width: '100%' } } }} />
+          <GridToolbarFilterButton slotProps={{ button: { sx: { width: '100%' } } }} />
         </Stack>
       </Stack>
     </GridToolbarContainer>

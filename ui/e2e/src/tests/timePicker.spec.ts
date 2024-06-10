@@ -148,11 +148,11 @@ test.describe('Time Picker', () => {
 
       const startTimeInput = page.getByLabel('Start Time');
       await startTimeInput.clear();
-      await startTimeInput.type('2023-01-15 13:05:00');
+      await startTimeInput.fill('2023-01-15 13:05:00');
 
       const endTimeInput = page.getByLabel('End Time');
       await endTimeInput.clear();
-      await endTimeInput.type('2023-02-01 10:00:00');
+      await endTimeInput.fill('2023-02-01 10:00:00');
 
       await page.getByRole('button', { name: 'Cancel' }).click();
 
