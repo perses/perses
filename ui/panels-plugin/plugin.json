@@ -60,6 +60,14 @@
           "name": "Scatter Chart",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "Table",
+        "display": {
+          "name": "Table",
+          "description": ""
+        }
       }
     ]
   }
