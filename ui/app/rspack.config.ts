@@ -76,7 +76,11 @@ module.exports = {
         allowedHosts: 'all',
         proxy: [
           {
-            context: ['/api', '/proxy'],
+            context: ['/plugins-dev'],
+            target: 'http://localhost:3005',
+          },
+          {
+            context: ['/api', '/proxy', '/plugins'],
             target: 'http://localhost:8080',
           },
         ],

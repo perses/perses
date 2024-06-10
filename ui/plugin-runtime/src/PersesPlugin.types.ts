@@ -14,6 +14,7 @@
 export interface PersesPlugin {
   name: string;
   moduleName: string;
+  baseURL?: string;
 }
 
 export interface PersesPluginModule {
