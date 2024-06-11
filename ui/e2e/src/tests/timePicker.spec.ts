@@ -86,14 +86,6 @@ test.describe('Time Picker', () => {
       const expectedEnd = '2023-02-09 19:55:15';
       const expectedTimeRange = `${expectedStart} - ${expectedEnd}`;
 
-      // Time picker dropdown shows the new time range
-      await expect(page.getByRole('option', { name: expectedTimeRange })).toBeVisible();
-
-      // Dismiss dropdown. This happens automatically when these steps are done
-      // manually, but is required in playwright. Guessing it is something
-      // subtle with the click targets and/or speed of actions.
-      await page.keyboard.press('Escape');
-
       // Time picker shows the new time range.
       await expect(dashboardPage.timePicker).toContainText(expectedTimeRange);
 
@@ -111,25 +103,17 @@ test.describe('Time Picker', () => {
 
       const startTimeInput = page.getByLabel('Start Time');
       await startTimeInput.clear();
-      await startTimeInput.type('2023-01-15 13:05:00');
+      await startTimeInput.fill('2023-01-15 13:05:00');
 
       const endTimeInput = page.getByLabel('End Time');
       await endTimeInput.clear();
-      await endTimeInput.type('2023-02-01 10:00:00');
+      await endTimeInput.fill('2023-02-01 10:00:00');
 
       await page.getByRole('button', { name: 'Apply' }).click();
 
       const expectedStart = '2023-01-15 13:05:00';
       const expectedEnd = '2023-02-01 10:00:00';
       const expectedTimeRange = `${expectedStart} - ${expectedEnd}`;
-
-      // Time picker dropdown shows the new time range
-      await expect(page.getByRole('option', { name: expectedTimeRange })).toBeVisible();
-
-      // Dismiss dropdown. This happens automatically when these steps are done
-      // manually, but is required in playwright. Guessing it is something
-      // subtle with the click targets and/or speed of actions.
-      await page.keyboard.press('Escape');
 
       // Time picker shows the new time range.
       await expect(dashboardPage.timePicker).toContainText(expectedTimeRange);
@@ -155,14 +139,6 @@ test.describe('Time Picker', () => {
       await endTimeInput.fill('2023-02-01 10:00:00');
 
       await page.getByRole('button', { name: 'Cancel' }).click();
-
-      // Time picker dropdown shows custom time range option
-      await expect(page.getByRole('option', { name: 'Custom time range' })).toBeVisible();
-
-      // Dismiss dropdown. This happens automatically when these steps are done
-      // manually, but is required in playwright. Guessing it is something
-      // subtle with the click targets and/or speed of actions.
-      await page.keyboard.press('Escape');
 
       // Time picker shows the original time range.
       await expect(dashboardPage.timePicker).toContainText('6 hours');

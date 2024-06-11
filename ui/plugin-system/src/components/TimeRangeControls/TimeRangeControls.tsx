@@ -14,11 +14,11 @@
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
 import {
-  DateTimeRangePicker,
   RefreshIntervalPicker,
   InfoTooltip,
   TimeOption,
   ToolbarIconButton,
+  TimeRangeSelector,
 } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
 import { useCallback } from 'react';
@@ -91,7 +91,7 @@ export function TimeRangeControls({
   return (
     <Stack direction="row" spacing={1}>
       {showTimeRangeSelector && (
-        <DateTimeRangePicker timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
+        <TimeRangeSelector timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
       )}
       {showRefreshButton && (
         <InfoTooltip description={TOOLTIP_TEXT.refresh}>
