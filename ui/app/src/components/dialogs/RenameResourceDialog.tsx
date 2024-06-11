@@ -57,6 +57,7 @@ export function RenameResourceDialog(props: RenameResourceDialogProps) {
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Controller
+              control={form.control}
               name="name"
               render={({ field, fieldState }) => (
                 <TextField

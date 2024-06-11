@@ -46,9 +46,19 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
     defaultValues: initialDatasourceDefinition,
   });
 
+  /*
+   * Remove empty fields that are optional
+   */
+  function clearFormData(data: DatasourceDefinition): DatasourceDefinition {
+    const result = { ...data };
+    if (result.spec.display?.name === undefined && result.spec.display?.description === undefined) {
+      delete result.spec.display;
+    }
+    return result;
+  }
+
   const processForm: SubmitHandler<DatasourceDefinition> = (data: DatasourceDefinition) => {
-    // reset display attributes to undefined when empty, because we don't want to save empty strings
-    onSave(data);
+    onSave(clearFormData(data));
   };
 
   // When user click on cancel, several possibilities:
@@ -56,7 +66,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (JSON.stringify(initialDatasourceDefinition) !== JSON.stringify(form.getValues())) {
+    if (JSON.stringify(initialDatasourceDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {
       onClose();

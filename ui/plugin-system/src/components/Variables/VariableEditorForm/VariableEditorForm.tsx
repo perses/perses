@@ -68,6 +68,7 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
                 }}
                 error={!!fieldState.error}
                 helperText={fieldState.error?.message}
+                value={field.value ?? ''}
                 onChange={(event) => {
                   field.onChange(event);
                 }}
@@ -86,6 +87,7 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   {...field}
                   checked={!!field.value}
                   readOnly={action === 'read'}
+                  value={field.value ?? false}
                   onChange={(event) => {
                     if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                     field.onChange(event);
@@ -116,6 +118,17 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     control: control,
     name: 'spec.allowAllValue',
   });
+
+  // When variable kind is selected we need to provide default values
+  // TODO: check if react-hook-form has a better way to do this
+  const values = form.getValues() as ListVariableDefinition;
+  if (values.spec.allowAllValue === undefined) {
+    form.setValue('spec.allowAllValue', false);
+  }
+
+  if (values.spec.allowMultiple === undefined) {
+    form.setValue('spec.allowMultiple', false);
+  }
 
   return (
     <>
@@ -247,8 +260,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   <Switch
                     {...field}
                     checked={!!field.value}
-                    value={field.value ?? false}
                     readOnly={action === 'read'}
+                    value={field.value ?? false}
                     onChange={(event) => {
                       if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                       field.onChange(event);
@@ -271,8 +284,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   <Switch
                     {...field}
                     checked={!!field.value}
-                    value={field.value ?? false}
                     readOnly={action === 'read'}
+                    value={field.value ?? false}
                     onChange={(event) => {
                       if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                       field.onChange(event);
@@ -285,33 +298,37 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
           <Typography mb={1} variant="caption">
             Enables an option to include all variable values
           </Typography>
-          <Controller
-            control={control}
-            name="spec.customAllValue"
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                fullWidth
-                label="Custom All Value"
-                InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                InputProps={{
-                  readOnly: action === 'read',
-                }}
-                error={!!fieldState.error}
-                helperText={
-                  fieldState.error?.message ? fieldState.error.message : 'When All is selected, this value will be used'
-                }
-                value={field.value ?? ''}
-                onChange={(event) => {
-                  if (event.target.value === '') {
-                    field.onChange(undefined);
-                  } else {
-                    field.onChange(event);
+          {_allowAllValue && (
+            <Controller
+              control={control}
+              name="spec.customAllValue"
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label="Custom All Value"
+                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                  InputProps={{
+                    readOnly: action === 'read',
+                  }}
+                  error={!!fieldState.error}
+                  helperText={
+                    fieldState.error?.message
+                      ? fieldState.error.message
+                      : 'When All is selected, this value will be used'
                   }
-                }}
-              />
-            )}
-          />
+                  value={field.value ?? ''}
+                  onChange={(event) => {
+                    if (event.target.value === '') {
+                      field.onChange(undefined);
+                    } else {
+                      field.onChange(event);
+                    }
+                  }}
+                />
+              )}
+            />
+          )}
         </Stack>
       </Stack>
     </>
@@ -340,14 +357,26 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   const form = useForm<VariableDefinition>({
     resolver: zodResolver(variableEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialVariableDefinition, // TODO: fix
+    defaultValues: initialVariableDefinition,
   });
 
   const kind = useWatch({ control: form.control, name: 'kind' });
 
+  function clearFormData(data: VariableDefinition): VariableDefinition {
+    const result = { ...data };
+    if (
+      result.spec.display?.name === undefined &&
+      result.spec.display?.description === undefined &&
+      result.spec.display?.hidden === undefined
+    ) {
+      delete result.spec.display;
+    }
+    return result;
+  }
+
   const processForm: SubmitHandler<VariableDefinition> = (data: VariableDefinition) => {
     // reset display attributes to undefined when empty, because we don't want to save empty strings
-    onSave(data);
+    onSave(clearFormData(data));
   };
 
   // When user click on cancel, several possibilities:
@@ -355,7 +384,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (JSON.stringify(initialVariableDefinition) !== JSON.stringify(form.getValues())) {
+    if (JSON.stringify(initialVariableDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -503,8 +532,9 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? 'TextVariable'}
                   onChange={(event) => {
-                    field.onChange(event); // TODO: init dummy value for kind in new func
+                    field.onChange(event);
                   }}
                 >
                   {VARIABLE_TYPES.map((v) => (

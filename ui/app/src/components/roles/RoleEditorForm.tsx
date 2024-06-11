@@ -122,6 +122,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
           <Controller
+            control={form.control}
             name="metadata.name"
             render={({ field, fieldState }) => (
               <TextField
@@ -220,6 +221,7 @@ function PermissionControl({ control, index, action }: PermissionControl) {
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.permissions.${index}.actions`}
           render={({ field, fieldState }) => (
             <TextField
@@ -256,6 +258,7 @@ function PermissionControl({ control, index, action }: PermissionControl) {
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.permissions.${index}.scopes`}
           render={({ field, fieldState }) => (
             <TextField

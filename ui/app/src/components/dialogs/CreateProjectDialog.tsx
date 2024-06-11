@@ -77,6 +77,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Controller
+              control={form.control}
               name="projectName"
               render={({ field, fieldState }) => (
                 <TextField

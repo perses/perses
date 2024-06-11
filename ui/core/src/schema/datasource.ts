@@ -43,7 +43,6 @@ export const globalDatasourceSchema = z.object({
   spec: datasourceSpecSchema,
 });
 
-// TODO: fix
 export const datasourcesSchema: z.Schema<Datasource> = z.discriminatedUnion('kind', [
   datasourceSchema,
   globalDatasourceSchema,

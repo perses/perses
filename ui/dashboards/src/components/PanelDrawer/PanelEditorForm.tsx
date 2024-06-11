@@ -137,6 +137,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   label="Name"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setName(event.target.value);
@@ -182,7 +183,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   label="Description"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
-                  defaultValue="" // TODO: all other forms
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setDescription(event.target.value);
@@ -207,7 +208,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   helperText={pluginEditor.error?.message ?? fieldState.error?.message}
                   value={{ type: 'Panel', kind: field.value }}
                   onChange={(event) => {
-                    field.onChange(event);
+                    field.onChange(event.kind);
                     pluginEditor.onSelectionChange(event);
                   }}
                 />

@@ -129,6 +129,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
           <Controller
+            control={form.control}
             name="metadata.name"
             render={({ field, fieldState }) => (
               <TextField
@@ -150,6 +151,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
             )}
           />
           <Controller
+            control={form.control}
             name="spec.role"
             render={({ field, fieldState }) => (
               <Autocomplete
@@ -187,6 +189,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
             fields.map((field, index) => (
               <Stack key={field.id} direction="row" gap={1}>
                 <Controller
+                  control={form.control}
                   name={`spec.subjects.${index}.name`}
                   render={({ field, fieldState }) => (
                     <Autocomplete

@@ -23,11 +23,9 @@ export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function LinksEditor({ control, ...props }: LinksEditorProps) {
-  const fieldName = 'panelDefinition.spec.links';
-
   const { fields, append, remove } = useFieldArray({
     control: control,
-    name: fieldName,
+    name: 'panelDefinition.spec.links',
   });
 
   return (
@@ -36,7 +34,7 @@ export function LinksEditor({ control, ...props }: LinksEditorProps) {
         fields.map((field, index) => (
           <Fragment key={field.id}>
             <Stack direction="row" gap={1} alignItems="center">
-              <LinkControl fieldName={fieldName} index={index} />
+              <LinkControl control={control} index={index} />
               <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => remove(index)}>
                 <MinusIcon />
               </IconButton>
@@ -56,12 +54,13 @@ export function LinksEditor({ control, ...props }: LinksEditorProps) {
   );
 }
 
-function LinkControl({ fieldName, index }: { fieldName: string; index: number }) {
+function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }) {
   return (
     <Stack gap={2} flexGrow={1}>
       <Stack direction="row" gap={2}>
         <Controller
-          name={`${fieldName}.${index}.url`}
+          control={control}
+          name={`panelDefinition.spec.links.${index}.url`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -77,7 +76,8 @@ function LinkControl({ fieldName, index }: { fieldName: string; index: number })
           )}
         />
         <Controller
-          name={`${fieldName}.${index}.name`}
+          control={control}
+          name={`panelDefinition.spec.links.${index}.name`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -93,7 +93,8 @@ function LinkControl({ fieldName, index }: { fieldName: string; index: number })
           )}
         />
         <Controller
-          name={`${fieldName}.${index}.tooltip`}
+          control={control}
+          name={`panelDefinition.spec.links.${index}.tooltip`}
           render={({ field, fieldState }) => (
             <TextField
               {...field}
@@ -111,7 +112,8 @@ function LinkControl({ fieldName, index }: { fieldName: string; index: number })
       </Stack>
       <Stack gap={2} direction="row" alignItems="center">
         <Controller
-          name={`${fieldName}.${index}.renderVariables`}
+          control={control}
+          name={`panelDefinition.spec.links.${index}.renderVariables`}
           render={({ field }) => (
             <FormControlLabel
               label="Render Variables"
@@ -120,7 +122,8 @@ function LinkControl({ fieldName, index }: { fieldName: string; index: number })
           )}
         />
         <Controller
-          name={`${fieldName}.${index}.targetBlank`}
+          control={control}
+          name={`panelDefinition.spec.links.${index}.targetBlank`}
           render={({ field }) => (
             <FormControlLabel
               label="Open in new tab"

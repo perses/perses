@@ -39,24 +39,26 @@ export const BertPanel1: PanelPlugin<{ option1: string }> = {
   createInitialOptions: () => ({ option1: '' }),
 };
 
+function BertPanel2Editor({ value, onChange }: OptionsEditorProps<{ option2: string }>) {
+  return (
+    <div>
+      <label htmlFor="editor-input">BertPanel2 editor</label>
+      <input
+        type="text"
+        id="editor-input"
+        value={value.option2}
+        onChange={(e) => onChange({ ...value, option2: e.target.value })}
+      />
+    </div>
+  );
+}
+
 export const BertPanel2: PanelPlugin<{ option2: string }> = {
   PanelComponent: () => null,
   panelOptionsEditorComponents: [
     {
       label: 'Settings',
-      content: function BertPanel2Editor({ value, onChange }) {
-        return (
-          <div>
-            <label htmlFor="editor-input">BertPanel2 editor</label>
-            <input
-              type="text"
-              id="editor-input"
-              value={value.option2}
-              onChange={(e) => onChange({ ...value, option2: e.target.value })}
-            />
-          </div>
-        );
-      },
+      content: BertPanel2Editor,
     },
     {
       label: 'Custom Tab',

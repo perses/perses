@@ -176,6 +176,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
           <Controller
+            control={form.control}
             name="metadata.name"
             render={({ field, fieldState }) => (
               <TextField
@@ -247,6 +248,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
               />
               <Stack direction="row">
                 <Controller
+                  control={form.control}
                   name="spec.basicAuth.password"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -268,6 +270,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
                 <Divider orientation="vertical">OR</Divider>
                 <Controller
+                  control={form.control}
                   name="spec.basicAuth.passwordFile"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -292,6 +295,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
           <TabPanel value={tabValue} index={authorizationIndex}>
             <Stack gap={2}>
               <Controller
+                control={form.control}
                 name="spec.authorization.type"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -312,6 +316,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
               />
               <Stack direction="row">
                 <Controller
+                  control={form.control}
                   name="spec.authorization.credentials"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -333,6 +338,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
                 <Divider orientation="vertical">OR</Divider>
                 <Controller
+                  control={form.control}
                   name="spec.authorization.credentialsFile"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -376,6 +382,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
             <Stack gap={2}>
               <Stack direction="row">
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.ca"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -397,6 +404,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
                 <Divider orientation="vertical">OR</Divider>
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.caFile"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -418,6 +426,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
               </Stack>
               <Stack direction="row">
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.cert"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -439,6 +448,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
                 <Divider orientation="vertical">OR</Divider>
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.certFile"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -460,6 +470,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
               </Stack>
               <Stack direction="row">
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.key"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -481,6 +492,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
                 <Divider orientation="vertical">OR</Divider>
                 <Controller
+                  control={form.control}
                   name="spec.tlsConfig.keyFile"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -501,6 +513,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 />
               </Stack>
               <Controller
+                control={form.control}
                 name="spec.tlsConfig.serverName"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -520,6 +533,7 @@ export function SecretEditorForm(props: SecretEditorFormProps) {
                 )}
               />
               <Controller
+                control={form.control}
                 name="spec.tlsConfig.insecureSkipVerify"
                 render={({ field }) => (
                   <FormControlLabel

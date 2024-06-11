@@ -18,15 +18,19 @@ import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {
-  const renderComponent = (props: PanelSpecEditorProps) => {
-    renderWithContext(<PanelSpecEditor {...props} />);
+  const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+    // Intermediary component to wrap the PanelSpecEditor with a form
+    const Component = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+      const form = useForm<PanelEditorValues>();
+
+      return <PanelSpecEditor {...props} control={form.control} />;
+    };
+
+    renderWithContext(<Component {...props} />);
   };
 
   it('should show query, options and json editors', async () => {
-    const form = useForm<PanelEditorValues>({});
-
     renderComponent({
-      control: form.control,
       panelDefinition: {
         kind: 'Panel',
         spec: {
@@ -51,10 +55,7 @@ describe('PanelSpecEditor', () => {
   });
 
   it('should hide query editor if hideQueryEditor is true', async () => {
-    const form = useForm<PanelEditorValues>({});
-
     renderComponent({
-      control: form.control,
       panelDefinition: {
         kind: 'Panel',
         spec: {
