@@ -15,7 +15,7 @@ import { useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { TimeSeriesQueryDefinition, QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
 import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
@@ -67,7 +67,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
   // Query handlers
-  const handleQueryChange = (index: number, queryDef: TimeSeriesQueryDefinition) => {
+  const handleQueryChange = (index: number, queryDef: QueryDefinition) => {
     onChange(
       produce(queries, (draft) => {
         if (draft) {
@@ -115,7 +115,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
   };
 
   // show one query input if queries is empty
-  const queryDefinitions: TimeSeriesQueryDefinition[] = queries.length ? queries : [defaultInitialQueryDefinition];
+  const queryDefinitions: QueryDefinition[] = queries.length ? queries : [defaultInitialQueryDefinition];
 
   return (
     <>

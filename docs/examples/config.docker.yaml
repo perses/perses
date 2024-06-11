@@ -8,4 +8,4 @@ schemas:
   queries_path: "/etc/perses/cue/schemas/queries"
   datasources_path: "/etc/perses/cue/schemas/datasources"
   variables_path: "/etc/perses/cue/schemas/variables"
-  interval: "5m"
+  interval: "6h"

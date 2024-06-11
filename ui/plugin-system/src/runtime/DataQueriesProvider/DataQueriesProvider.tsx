@@ -79,7 +79,6 @@ export function DataQueriesProvider(props: DataQueriesProviderProps) {
     (definition) => definition.kind === 'TimeSeriesQuery'
   ) as TimeSeriesQueryDefinition[];
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
-
   const traceQueries = queryDefinitions.filter(
     (definition) => definition.kind === 'TraceQuery'
   ) as TraceQueryDefinition[];

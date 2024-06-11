@@ -16,6 +16,7 @@ package globalvariable
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -53,4 +54,22 @@ func (d *dao) List(q *globalvariable.Query) ([]*v1.GlobalVariable, error) {
 	var result []*v1.GlobalVariable
 	err := d.client.Query(q, &result)
 	return result, err
+}
+
+func (d *dao) RawList(q *globalvariable.Query) ([][]byte, error) {
+	return d.client.RawQuery(q)
+}
+
+func (d *dao) MetadataList(q *globalvariable.Query) ([]api.Entity, error) {
+	var list []*v1.PartialEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result, err
+}
+
+func (d *dao) RawMetadataList(q *globalvariable.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }

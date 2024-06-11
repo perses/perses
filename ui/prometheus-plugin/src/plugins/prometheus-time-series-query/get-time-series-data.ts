@@ -18,6 +18,7 @@ import {
   msToPrometheusDuration,
   Notice,
   parseDurationString,
+  TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/core';
 import { TimeSeriesQueryPlugin, replaceTemplateVariables, replaceTemplateVariable } from '@perses-dev/plugin-system';
@@ -29,6 +30,9 @@ import {
   getPrometheusTimeRange,
   getRangeStep,
   DEFAULT_PROM,
+  MatrixData,
+  VectorData,
+  ScalarData,
 } from '../../model';
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
@@ -91,15 +95,27 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   const client: PrometheusClient = await context.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
 
   // Make the request to Prom
-  const response = await client.rangeQuery({
-    query,
-    start,
-    end,
-    step,
-  });
+  let response;
+  switch (context.mode) {
+    case 'instant':
+      response = await client.instantQuery({
+        query,
+        time: end,
+      });
+      break;
+    case 'range':
+    default:
+      response = await client.rangeQuery({
+        query,
+        start,
+        end,
+        step,
+      });
+      break;
+  }
 
   // TODO: What about error responses from Prom that have a response body?
-  const result = response.data?.result ?? [];
+  const result = response.data;
 
   // Custom display for response header warnings, configurable error responses display coming next
   const notices: Notice[] = [];
@@ -120,19 +136,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     timeRange: { start: fromUnixTime(start), end: fromUnixTime(end) },
     stepMs: step * 1000,
 
-    series: result.map((value) => {
-      const { metric, values } = value;
-
-      // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
-      const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
-
-      return {
-        name,
-        values: values.map(parseValueTuple),
-        formattedName,
-        labels: metric,
-      };
-    }),
+    series: buildTimeSeries(result, query, seriesNameFormat),
     metadata: {
       notices,
       executedQueryString: query,
@@ -141,3 +145,70 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
 
   return chartData;
 };
+
+function buildVectorData(data: VectorData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+  return data.result.map((res) => {
+    const { metric, value } = res;
+
+    // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
+    const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
+
+    return {
+      name,
+      values: [parseValueTuple(value)],
+      formattedName,
+      labels: metric,
+    };
+  });
+}
+
+function buildMatrixData(data: MatrixData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+  return data.result.map((res) => {
+    const { metric, values } = res;
+
+    // Account for seriesNameFormat from query editor when determining name to show in legend, tooltip, etc.
+    const { name, formattedName } = getFormattedPrometheusSeriesName(query, metric, seriesNameFormat);
+
+    return {
+      name,
+      values: values.map(parseValueTuple),
+      formattedName,
+      labels: metric,
+    };
+  });
+}
+
+function buildScalarData(data: ScalarData, query: string, seriesNameFormat: string | undefined): TimeSeries[] {
+  const { name, formattedName } = getFormattedPrometheusSeriesName(query, {}, seriesNameFormat);
+  return [
+    {
+      name,
+      values: [parseValueTuple(data.result)],
+      formattedName,
+    },
+  ];
+}
+
+function buildTimeSeries(
+  data: MatrixData | VectorData | ScalarData | undefined,
+  query: string,
+  seriesNameFormat?: string
+): TimeSeries[] {
+  if (!data) {
+    return [];
+  }
+
+  const resultType = data.resultType;
+
+  switch (resultType) {
+    case 'vector':
+      return buildVectorData(data, query, seriesNameFormat);
+    case 'matrix':
+      return buildMatrixData(data, query, seriesNameFormat);
+    case 'scalar':
+      return buildScalarData(data, query, seriesNameFormat);
+    default:
+      console.warn('Unknown result type', resultType, data);
+      return [];
+  }
+}

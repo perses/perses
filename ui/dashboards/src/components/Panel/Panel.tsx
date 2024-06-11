@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo, ReactNode } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { ErrorBoundary, ErrorAlert, combineSx, useId, useChartsTheme } from '@perses-dev/components';
 import { PanelDefinition } from '@perses-dev/core';
@@ -22,6 +22,7 @@ import { PanelContent } from './PanelContent';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
+  readHandlers?: PanelHeaderProps['readHandlers'];
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
@@ -29,10 +30,15 @@ export interface PanelProps extends CardProps<'section'> {
 
 export type PanelOptions = {
   /**
-   * Content to render in the top-right corner of the panel. It will only be
-   * rendered when the panel is in edit mode.
+   * Allow you to hide the panel header if desired.
+   * This can be useful in embedded mode for example.
    */
-  extra?: (props: PanelExtraProps) => React.ReactNode;
+  hideHeader?: boolean;
+  /**
+   * Content to render in right of the panel header. (top right of the panel)
+   * It will only be rendered when the panel is in edit mode.
+   */
+  extra?: (props: PanelExtraProps) => ReactNode;
 };
 
 export type PanelExtraProps = {
@@ -50,7 +56,17 @@ export type PanelExtraProps = {
  * Renders a PanelDefinition's content inside of a Card.
  */
 export const Panel = memo(function Panel(props: PanelProps) {
-  const { definition, editHandlers, onMouseEnter, onMouseLeave, sx, panelOptions, panelGroupItemId, ...others } = props;
+  const {
+    definition,
+    readHandlers,
+    editHandlers,
+    onMouseEnter,
+    onMouseLeave,
+    sx,
+    panelOptions,
+    panelGroupItemId,
+    ...others
+  } = props;
 
   // Make sure we have an ID we can use for aria attributes
   const generatedPanelId = useId('Panel');
@@ -95,15 +111,18 @@ export const Panel = memo(function Panel(props: PanelProps) {
       data-testid="panel"
       {...others}
     >
-      <PanelHeader
-        extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
-        id={headerId}
-        title={definition.spec.display.name}
-        description={definition.spec.display.description}
-        editHandlers={editHandlers}
-        links={definition.spec.display.links}
-        sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
-      />
+      {!panelOptions?.hideHeader && (
+        <PanelHeader
+          extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
+          id={headerId}
+          title={definition.spec.display.name}
+          description={definition.spec.display.description}
+          readHandlers={readHandlers}
+          editHandlers={editHandlers}
+          links={definition.spec.links}
+          sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
+        />
+      )}
       <CardContent
         component="figure"
         sx={{

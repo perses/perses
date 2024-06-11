@@ -110,6 +110,42 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	}
 	return nil
 }
+
+func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([][]byte, error) {
+	return nil, fmt.Errorf("raw metadata query not implemented")
+}
+
+func (d *DAO) RawQuery(query databaseModel.Query) ([][]byte, error) {
+	folder, prefix, isExist, err := d.buildQuery(query)
+	if err != nil {
+		return nil, fmt.Errorf("unable to build the query: %s", err)
+	}
+	if !isExist {
+		// There is nothing to return. So let's initialize the slice just to avoid returning a nil slice
+		return make([][]byte, 0), nil
+	}
+	// so now we have the proper folder to looking for and potentially a filter to use
+	var files []string
+	if files, err = d.visit(folder, prefix); err != nil {
+		return nil, err
+	}
+	if len(files) <= 0 {
+		// in case the result is empty, let's initialize the slice just to avoid returning a nil slice
+		return make([][]byte, 0), nil
+	}
+	var result [][]byte
+
+	for _, file := range files {
+		// now read all files and append them to the final result
+		data, readErr := os.ReadFile(file)
+		if readErr != nil {
+			return nil, readErr
+		}
+		result = append(result, data)
+	}
+	return result, nil
+}
+
 func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)

@@ -19,10 +19,10 @@ import { PanelDefinition, QueryDefinition } from '@perses-dev/core';
  * This hook stores the states of panel definition and returns the onChange handlers for each state
  */
 export const usePanelEditor = (panelDefinition: PanelDefinition) => {
-  const { display, plugin: pluginDefinition, queries: initialQueries } = panelDefinition.spec;
+  const { display, plugin: pluginDefinition, queries: initialQueries, links: initialLinks } = panelDefinition.spec;
   const [name, setName] = useState(display.name);
   const [description, setDescription] = useState(display.description);
-  const [links, setLinks] = useState(display.links);
+  const [links, setLinks] = useState(initialLinks);
   const [plugin, setPlugin] = useState(pluginDefinition);
 
   // need to keep track of prevQueries if switching from a panel with no queries (ex: markdown) to one with queries
@@ -48,10 +48,10 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
   // reset panel definition
   const setPanelDefinition = useCallback(
     (panelDefinition: PanelDefinition) => {
-      const { display, plugin, queries } = panelDefinition.spec;
+      const { display, plugin, queries, links } = panelDefinition.spec;
       setName(display.name);
       setDescription(display.description);
-      setLinks(display.links);
+      setLinks(links);
       setPlugin(plugin);
       setQueries(queries);
     },
@@ -63,9 +63,10 @@ export const usePanelEditor = (panelDefinition: PanelDefinition) => {
       panelDefinition: {
         kind: 'Panel',
         spec: {
-          display: { name, description, links },
+          display: { name, description },
           plugin,
           queries: currentQueries,
+          links,
         },
       } as PanelDefinition,
       setName,

@@ -84,11 +84,11 @@ const (
 
 type Visual struct {
 	Display      VisualDisplay    `json:"display,omitempty" yaml:"display,omitempty"`
-	LineWidth    int              `json:"lineWidth,omitempty" yaml:"lineWidth,omitempty"`
-	AreaOpacity  int              `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
+	LineWidth    float64          `json:"lineWidth,omitempty" yaml:"lineWidth,omitempty"`
+	AreaOpacity  float64          `json:"areaOpacity,omitempty" yaml:"areaOpacity,omitempty"`
 	ShowPoints   VisualShowPoints `json:"showPoints,omitempty" yaml:"showPoints,omitempty"`
-	Palette      int              `json:"palette,omitempty" yaml:"palette,omitempty"`
-	PointRadius  int              `json:"pointRadius,omitempty" yaml:"pointRadius,omitempty"`
+	Palette      Palette          `json:"palette,omitempty" yaml:"palette,omitempty"`
+	PointRadius  float64          `json:"pointRadius,omitempty" yaml:"pointRadius,omitempty"`
 	Stack        VisualStack      `json:"stack,omitempty" yaml:"stack,omitempty"`
 	ConnectNulls bool             `json:"connectNulls,omitempty" yaml:"connectNulls,omitempty"`
 }
@@ -97,8 +97,8 @@ type YAxis struct {
 	Show   bool              `json:"show,omitempty" yaml:"show,omitempty"`
 	Label  string            `json:"label,omitempty" yaml:"label,omitempty"`
 	Format *commonSdk.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Min    int               `json:"min,omitempty" yaml:"min,omitempty"`
-	Max    int               `json:"max,omitempty" yaml:"max,omitempty"`
+	Min    float64           `json:"min,omitempty" yaml:"min,omitempty"`
+	Max    float64           `json:"max,omitempty" yaml:"max,omitempty"`
 }
 
 type PluginSpec struct {

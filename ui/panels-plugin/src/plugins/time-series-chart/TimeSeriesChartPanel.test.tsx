@@ -24,7 +24,7 @@ import {
   MockPlugin,
 } from '@perses-dev/plugin-system';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { MOCK_TIME_SERIES_QUERY_RESULT, MOCK_TIME_SERIES_DATA } from '../../test';
+import { MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE, MOCK_TIME_SERIES_DATA_MULTIVALUE } from '../../test';
 import { TimeSeriesChartPanel, TimeSeriesChartProps } from './TimeSeriesChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -36,7 +36,7 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 const FakeTimeSeriesQuery: TimeSeriesQueryPlugin<UnknownSpec> = {
   getTimeSeriesData: async () => {
-    return MOCK_TIME_SERIES_DATA;
+    return MOCK_TIME_SERIES_DATA_MULTIVALUE;
   },
   OptionsEditorComponent: () => {
     return <div>Edit options here</div>;
@@ -83,7 +83,7 @@ describe('TimeSeriesChartPanel', () => {
   beforeEach(() => {
     // TODO: remove and instead use addMockPlugin after rest of runtime dependencies are mocked
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TIME_SERIES_QUERY_RESULT,
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_MULTIVALUE,
       isLoading: false,
       isFetching: false,
     });
@@ -126,7 +126,7 @@ describe('TimeSeriesChartPanel', () => {
   it('should toggle selected state when a legend item is clicked', async () => {
     renderPanel();
 
-    const seriesArr = MOCK_TIME_SERIES_DATA.series;
+    const seriesArr = MOCK_TIME_SERIES_DATA_MULTIVALUE.series;
     const firstName = seriesArr[0]?.name;
     const secondName = seriesArr[1]?.name;
 
@@ -141,7 +141,7 @@ describe('TimeSeriesChartPanel', () => {
 
   it('should modify selected state when a legend item is clicked with shift key', async () => {
     renderPanel();
-    const seriesArr = MOCK_TIME_SERIES_DATA.series;
+    const seriesArr = MOCK_TIME_SERIES_DATA_MULTIVALUE.series;
 
     const firstName = seriesArr[0]?.name;
     const secondName = seriesArr[1]?.name;
@@ -177,7 +177,7 @@ describe('TimeSeriesChartPanel', () => {
 
   it('should modify selected state when a legend item is clicked with meta key', async () => {
     renderPanel();
-    const seriesArr = MOCK_TIME_SERIES_DATA.series;
+    const seriesArr = MOCK_TIME_SERIES_DATA_MULTIVALUE.series;
 
     // Falling back to a bogus string if not set to appease typescript.
     const firstName = seriesArr[0]?.name;

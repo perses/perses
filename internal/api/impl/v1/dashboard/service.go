@@ -14,6 +14,10 @@
 package dashboard
 
 import (
+	"fmt"
+	"github.com/perses/perses/pkg/model/api"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/globalvariable"
@@ -42,6 +46,14 @@ func NewService(dao dashboard.DAO, globalVarDAO globalvariable.DAO, projectVarDA
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Dashboard) (*v1.Dashboard, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.Dashboard) (*v1.Dashboard, error) {
 	// verify this new dashboard passes the validation
 	if err := s.Validate(entity); err != nil {
 		return nil, err
@@ -56,6 +68,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.Dashboard) (*v
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.Dashboard, parameters apiInterface.Parameters) (*v1.Dashboard, error) {
 	if entity.Metadata.Name != parameters.Name {
 		logrus.Debugf("name in dashboard %q and name from the http request %q don't match", entity.Metadata.Name, parameters.Name)
 		return nil, apiInterface.HandleBadRequestError("metadata.name and the name in the http path request don't match")
@@ -94,16 +114,35 @@ func (s *service) Get(_ apiInterface.PersesContext, parameters apiInterface.Para
 }
 
 func (s *service) List(_ apiInterface.PersesContext, q *dashboard.Query, params apiInterface.Parameters) ([]*v1.Dashboard, error) {
-	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
-	query := &dashboard.Query{
-		Query:      q.Query,
-		NamePrefix: q.NamePrefix,
-		Project:    q.Project,
-	}
-	if len(query.Project) == 0 {
-		query.Project = params.Project
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
 	}
 	return s.dao.List(query)
+}
+
+func (s *service) RawList(_ apiInterface.PersesContext, q *dashboard.Query, params apiInterface.Parameters) ([][]byte, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.RawList(query)
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, q *dashboard.Query, params apiInterface.Parameters) ([]api.Entity, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.MetadataList(query)
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *dashboard.Query, params apiInterface.Parameters) ([][]byte, error) {
+	query, err := manageQuery(q, params)
+	if err != nil {
+		return nil, err
+	}
+	return s.dao.RawMetadataList(query)
 }
 
 func (s *service) Validate(entity *v1.Dashboard) error {
@@ -132,4 +171,16 @@ func (s *service) collectProjectVariables(project string) ([]*v1.Variable, error
 
 func (s *service) collectGlobalVariables() ([]*v1.GlobalVariable, error) {
 	return s.globalVarDAO.List(&globalvariable.Query{})
+}
+
+func manageQuery(q *dashboard.Query, params apiInterface.Parameters) (*dashboard.Query, error) {
+	// Query is copied because it can be modified by the toolbox.go: listWhenPermissionIsActivated(...) and need to `q` need to keep initial value
+	query, err := deep.Copy(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to copy the query: %w", err)
+	}
+	if len(query.Project) == 0 {
+		query.Project = params.Project
+	}
+	return query, nil
 }

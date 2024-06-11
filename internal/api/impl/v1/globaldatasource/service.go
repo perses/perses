@@ -14,6 +14,10 @@
 package globaldatasource
 
 import (
+	"fmt"
+	"github.com/perses/perses/pkg/model/api"
+
+	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
 	"github.com/perses/perses/internal/api/schemas"
@@ -36,6 +40,14 @@ func NewService(dao globaldatasource.DAO, sch schemas.Schemas) globaldatasource.
 }
 
 func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.create(copyEntity)
+}
+
+func (s *service) create(entity *v1.GlobalDatasource) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -48,6 +60,14 @@ func (s *service) Create(_ apiInterface.PersesContext, entity *v1.GlobalDatasour
 }
 
 func (s *service) Update(_ apiInterface.PersesContext, entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
+	copyEntity, err := deep.Copy(entity)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy entity: %w", err)
+	}
+	return s.update(copyEntity, parameters)
+}
+
+func (s *service) update(entity *v1.GlobalDatasource, parameters apiInterface.Parameters) (*v1.GlobalDatasource, error) {
 	if err := s.validate(entity); err != nil {
 		return nil, apiInterface.HandleBadRequestError(err.Error())
 	}
@@ -82,6 +102,18 @@ func (s *service) List(_ apiInterface.PersesContext, q *globaldatasource.Query, 
 		return nil, err
 	}
 	return v1.FilterDatasource(q.Kind, q.Default, dtsList), nil
+}
+
+func (s *service) MetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([]api.Entity, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+	return nil, fmt.Errorf("not implemented")
 }
 
 func (s *service) validate(entity *v1.GlobalDatasource) error {

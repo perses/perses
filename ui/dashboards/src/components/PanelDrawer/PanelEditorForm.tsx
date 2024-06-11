@@ -77,7 +77,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
       groupId: initialGroupId,
       description: initialPanelDef.spec.display.description,
       selection: pluginEditor.pendingSelection ? pluginEditor.pendingSelection : { type: 'Panel', kind: plugin.kind },
-      links: initialPanelDef.spec.display.links,
+      links: initialPanelDef.spec.links,
     },
   });
 

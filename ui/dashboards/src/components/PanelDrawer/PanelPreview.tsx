@@ -13,7 +13,7 @@
 
 import { useRef } from 'react';
 import { Box } from '@mui/material';
-import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { PanelEditorValues } from '../../context';
 import { Panel } from '../Panel';
 
@@ -27,6 +27,11 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
     width = boxRef.current.getBoundingClientRect().width;
   }
   const suggestedStepMs = useSuggestedStepMs(width);
+
+  const { data: plugin, isLoading } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
+  if (isLoading) {
+    return null;
+  }
 
   if (panelDefinition.spec.plugin.kind === '') {
     return null;
@@ -46,7 +51,7 @@ export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panel
 
   return (
     <Box ref={boxRef} height={PANEL_PREVIEW_HEIGHT}>
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, ...plugin?.queryOptions }}>
         <Panel definition={panelDefinition} />
       </DataQueriesProvider>
     </Box>

@@ -170,8 +170,8 @@ func main() {
 Anytime you want to build the final dashboard definition (i.e: Perses dashboard in JSON or YAML format) corresponding to your as-code definition, you can use the `dac build` command, as the following:
 
 ```
-percli dac build main.go -ojson
-percli dac build my_dashboard.cue -ojson
+percli dac build -f main.go -ojson
+percli dac build -f my_dashboard.cue -ojson
 ```
 
 If the build is successful, the result can be found in the generated `built` folder.

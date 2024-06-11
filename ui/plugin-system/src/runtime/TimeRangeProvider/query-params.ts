@@ -30,16 +30,13 @@ function getEncodedValue(
   input: string | Array<string | null> | null | undefined,
   allowEmptyString?: boolean
 ): string | null | undefined {
-  if (input == null) {
-    return input;
-  }
   // '' or []
-  if (input.length === 0 && (!allowEmptyString || (allowEmptyString && input !== ''))) {
+  if (!input || (input.length === 0 && (!allowEmptyString || (allowEmptyString && input !== '')))) {
     return null;
   }
 
   const str = input instanceof Array ? input[0] : input;
-  if (str == null) {
+  if (str === null || str === undefined) {
     return str;
   }
   if (!allowEmptyString && str === '') {
@@ -68,7 +65,7 @@ export function decodeTimeRangeValue(
   input: string | Array<string | null> | null | undefined
 ): Date | DurationString | null | undefined {
   const paramString = getEncodedValue(input);
-  if (paramString == null) return paramString;
+  if (!paramString) return null;
   return isDurationString(paramString) ? paramString : new Date(Number(paramString));
 }
 
@@ -81,7 +78,7 @@ export const TimeRangeParam: QueryParamConfig<TimeOptionValue, TimeOptionValue> 
   decode: decodeTimeRangeValue,
   equals: (valueA: TimeOptionValue, valueB: TimeOptionValue) => {
     if (valueA === valueB) return true;
-    if (valueA == null || valueB == null) return valueA === valueB;
+    if (!valueA || !valueB) return valueA === valueB;
     return valueA.valueOf() === valueB.valueOf();
   },
 };

@@ -16,6 +16,9 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	modelAPI "github.com/perses/perses/pkg/model/api"
+	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/tidwall/gjson"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -27,13 +30,70 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type dao struct {
+	databaseModel.DAO
+	client databaseModel.DAO
+}
+
+func (d *dao) Close() error {
+	return d.client.Close()
+}
+
+func (d *dao) Init() error {
+	return d.client.Init()
+}
+func (d *dao) IsCaseSensitive() bool {
+	return d.client.IsCaseSensitive()
+}
+func (d *dao) Create(entity modelAPI.Entity) error {
+	return d.client.Create(entity)
+}
+func (d *dao) Upsert(entity modelAPI.Entity) error {
+	return d.client.Upsert(entity)
+}
+func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI.Entity) error {
+	return d.client.Get(kind, metadata, entity)
+}
+func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
+	return d.client.Query(query, slice)
+}
+func (d *dao) RawQuery(query databaseModel.Query) ([][]byte, error) {
+	return d.client.RawQuery(query)
+}
+func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([][]byte, error) {
+	raws, err := d.client.RawQuery(query)
+	if err != nil {
+		return nil, err
+	}
+	// now let's extract the metadata and the kind
+	result := make([][]byte, 0, len(raws))
+	for _, raw := range raws {
+		metadata := gjson.GetBytes(raw, "metadata").String()
+		result = append(result, []byte(fmt.Sprintf(`{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata)))
+	}
+	return result, nil
+}
+func (d *dao) Delete(kind modelV1.Kind, metadata modelAPI.Metadata) error {
+	return d.client.Delete(kind, metadata)
+}
+func (d *dao) DeleteByQuery(query databaseModel.Query) error {
+	return d.client.DeleteByQuery(query)
+}
+func (d *dao) HealthCheck() bool {
+	return d.client.HealthCheck()
+}
+func (d *dao) GetLatestUpdateTime(kind []modelV1.Kind) (*string, error) {
+	return d.client.GetLatestUpdateTime(kind)
+}
+
 func New(conf config.Database) (databaseModel.DAO, error) {
+	var client databaseModel.DAO
 	if conf.File != nil {
-		return &databaseFile.DAO{
+		client = &databaseFile.DAO{
 			Folder:        conf.File.Folder,
 			Extension:     conf.File.Extension,
 			CaseSensitive: conf.File.CaseSensitive,
-		}, nil
+		}
 	} else if conf.SQL != nil {
 		c := conf.SQL
 		mysqlConfig := mysql.Config{
@@ -82,11 +142,13 @@ func New(conf config.Database) (databaseModel.DAO, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &databaseSQL.DAO{
+		client = &databaseSQL.DAO{
 			DB:            db,
 			SchemaName:    c.DBName,
 			CaseSensitive: c.CaseSensitive,
-		}, nil
+		}
+	} else {
+		return nil, fmt.Errorf("no dao defined")
 	}
-	return nil, fmt.Errorf("no dao defined")
+	return &dao{client: client}, nil
 }

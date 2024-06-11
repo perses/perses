@@ -82,7 +82,7 @@ export function GaugeChart(props: GaugeChartProps) {
           },
           axisLine: {
             lineStyle: {
-              color: [[1, '#e1e5e9']], // TODO (sjcobb): use future chart theme colors
+              color: [[1, 'rgba(127,127,127,0.35)']], // TODO (sjcobb): use future chart theme colors
               width: PROGRESS_WIDTH,
             },
           },

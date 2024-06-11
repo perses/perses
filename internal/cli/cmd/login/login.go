@@ -299,6 +299,9 @@ func NewCMD() *cobra.Command {
 		Example: `
 # Log in to the given server
 percli login https://demo.perses.dev
+
+# Log in to the given server via delegated authentication, non-interactively
+percli login https://demo.perses.dev --provider <slug_id> --client-id <client_id> --client-secret <client-secret>
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)

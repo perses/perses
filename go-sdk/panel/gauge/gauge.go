@@ -22,7 +22,7 @@ type PluginSpec struct {
 	Calculation commonSdk.Calculation `json:"calculation" yaml:"calculation"`
 	Format      *commonSdk.Format     `json:"format,omitempty" yaml:"format,omitempty"`
 	Thresholds  *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
-	Max         int                   `json:"max,omitempty" yaml:"max,omitempty"`
+	Max         float64               `json:"max,omitempty" yaml:"max,omitempty"`
 }
 
 type Option func(plugin *Builder) error

@@ -21,7 +21,7 @@
       }
     ]
   },
-  "description": " A simple grafana dashboard to be converted to perses format",
+  "description": "A simple grafana dashboard to be converted to perses format",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
@@ -54,7 +54,7 @@
               }
             ]
           },
-          "unit": "pressurekbar"
+          "unit": "Bps"
         },
         "overrides": []
       },

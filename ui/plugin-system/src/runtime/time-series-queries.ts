@@ -21,7 +21,7 @@ import {
   QueryObserverOptions,
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
-import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryPlugin } from '../model';
+import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
 import { VariableStateMap, useVariableValues } from './template-variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
@@ -29,6 +29,7 @@ import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 
 export interface UseTimeSeriesQueryOptions {
   suggestedStepMs?: number;
+  mode?: TimeSeriesQueryMode;
 }
 
 export const TIME_SERIES_QUERY_KEY = 'TimeSeriesQuery';
@@ -58,7 +59,7 @@ function getQueryOptions({
   definition: TimeSeriesQueryDefinition;
   context: TimeSeriesQueryContext;
 }) {
-  const { timeRange, datasourceStore, suggestedStepMs, variableState, refreshKey } = context;
+  const { timeRange, datasourceStore, suggestedStepMs, mode, variableState, refreshKey } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
@@ -66,7 +67,15 @@ function getQueryOptions({
   // Determine queryKey
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const queryKey = [definition, timeRange, datasourceStore, suggestedStepMs, variablesValueKey, refreshKey] as const;
+  const queryKey = [
+    definition,
+    timeRange,
+    datasourceStore,
+    suggestedStepMs,
+    mode,
+    variablesValueKey,
+    refreshKey,
+  ] as const;
 
   // Determine queryEnabled
   let waitToLoad = false;
@@ -97,7 +106,6 @@ export const useTimeSeriesQuery = (
   return useQuery({
     enabled: (queryOptions?.enabled ?? true) || queryEnabled,
     queryKey: queryKey,
-    refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : false,
     queryFn: () => {
       // The 'enabled' option should prevent this from happening, but make TypeScript happy by checking
       if (plugin === undefined) {
@@ -119,7 +127,11 @@ export function useTimeSeriesQueries(
   queryOptions?: QueryObserverOptions
 ) {
   const { getPlugin } = usePluginRegistry();
-  const context = useTimeSeriesQueryContext();
+  const context = {
+    ...useTimeSeriesQueryContext(),
+    // We need mode to be part query key because this drives the type of query done (instant VS range query)
+    mode: options?.mode,
+  };
 
   const pluginLoaderResponse = usePlugins(
     TIME_SERIES_QUERY_KEY,
@@ -133,10 +145,12 @@ export function useTimeSeriesQueries(
       return {
         enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
-        refetchInterval: context.refreshIntervalInMs > 0 ? context.refreshIntervalInMs : undefined,
         queryFn: async () => {
-          // Keep options out of query key so we don't re-run queries because suggested step changes
-          const ctx: TimeSeriesQueryContext = { ...context, suggestedStepMs: options?.suggestedStepMs };
+          const ctx: TimeSeriesQueryContext = {
+            ...context,
+            // Keep suggested step changes out of the query key, so we don´t have to run again query when it changes
+            suggestedStepMs: options?.suggestedStepMs,
+          };
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx);
           return data;
@@ -150,7 +164,7 @@ export function useTimeSeriesQueries(
  * Build the time series query context object from data available at runtime
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
-  const { absoluteTimeRange, refreshKey, refreshIntervalInMs } = useTimeRange();
+  const { absoluteTimeRange, refreshKey } = useTimeRange();
   const variableState = useVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -159,7 +173,6 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     variableState,
     datasourceStore,
     refreshKey,
-    refreshIntervalInMs: refreshIntervalInMs,
   };
 }
 

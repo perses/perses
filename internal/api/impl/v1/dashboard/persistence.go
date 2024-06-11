@@ -16,6 +16,7 @@ package dashboard
 import (
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
@@ -57,4 +58,22 @@ func (d *dao) List(q *dashboard.Query) ([]*v1.Dashboard, error) {
 	var result []*v1.Dashboard
 	err := d.client.Query(q, &result)
 	return result, err
+}
+
+func (d *dao) RawList(q *dashboard.Query) ([][]byte, error) {
+	return d.client.RawQuery(q)
+}
+
+func (d *dao) MetadataList(q *dashboard.Query) ([]api.Entity, error) {
+	var list []*v1.PartialProjectEntity
+	err := d.client.Query(q, &list)
+	result := make([]api.Entity, 0, len(list))
+	for _, el := range list {
+		result = append(result, el)
+	}
+	return result, err
+}
+
+func (d *dao) RawMetadataList(q *dashboard.Query) ([][]byte, error) {
+	return d.client.RawMetadataQuery(q, d.kind)
 }

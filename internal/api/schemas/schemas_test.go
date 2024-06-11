@@ -49,7 +49,7 @@ func loadQueries(testDataPath string, t *testing.T) []v1.Query {
 		t.Fatal(readErr)
 	}
 
-	queries := []v1.Query{}
+	var queries []v1.Query
 	unmarshallErr := json.Unmarshal(data, &queries)
 	if unmarshallErr != nil {
 		t.Fatal(unmarshallErr)

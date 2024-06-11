@@ -18,17 +18,22 @@ package dashboard
 
 import (
 	"github.com/perses/perses/cue/model/api/v1"
+	v1Common "github.com/perses/perses/cue/model/api/v1/common"
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
 )
 
 // expected user inputs
-#name:    string
-#project: string
-#variables: [...v1Dashboard.#Variable]
+#name:     string
+#display?: v1Common.#Display
+#project:  string
+#variables?: [...v1Dashboard.#Variable]
 #panelGroups: [string]: {
 	layout: v1Dashboard.#Layout
 	panels: [string]: v1.#Panel
 }
+#datasources?: [string]: v1.#DatasourceSpec
+#duration?:        string
+#refreshInterval?: string
 
 // output: the dashboard in the format expected by Perses 
 v1.#Dashboard & {
@@ -37,8 +42,22 @@ v1.#Dashboard & {
 		project: #project
 	}
 	spec: {
-		variables: #variables
+		if #display != _|_ {
+			display: #display
+		}
+		if #datasources != _|_ {
+			datasources: #datasources
+		}
+		if #variables != _|_ {
+			variables: #variables
+		}
 		panels: {for group in #panelGroups {group.panels}}
 		layouts: [for group in #panelGroups {group.layout}]
+		if #duration != _|_ {
+			duration: #duration
+		}
+		if #refreshInterval != _|_ {
+			refreshInterval: #refreshInterval
+		}
 	}
 }

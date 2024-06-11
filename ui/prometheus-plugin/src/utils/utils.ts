@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isEmptyObject } from '@perses-dev/core';
 import { Metric } from '../model/api-types';
 
 /**
@@ -53,7 +52,7 @@ function stringifyPrometheusMetricLabels(labels: { [key: string]: unknown }, rem
 }
 
 /*
- * Metric labels formattter which checks for __name__ and outputs valid PromQL for series name
+ * Metric labels formatter which checks for __name__ and outputs valid PromQL for series name
  */
 export function getUniqueKeyForPrometheusResult(
   metricLabels: {
@@ -62,24 +61,21 @@ export function getUniqueKeyForPrometheusResult(
   { removeExprWrap }: { removeExprWrap?: boolean } = {}
 ) {
   const metricNameKey = '__name__';
-  if (metricLabels) {
-    if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
-      const stringifiedLabels = stringifyPrometheusMetricLabels(
-        {
-          ...metricLabels,
-          [metricNameKey]: undefined,
-        },
-        removeExprWrap
-      );
-      if (removeExprWrap === true) {
-        return `${stringifiedLabels}`;
-      } else {
-        return `${metricLabels[metricNameKey]}${stringifiedLabels}`;
-      }
+  if (Object.prototype.hasOwnProperty.call(metricLabels, metricNameKey)) {
+    const stringifiedLabels = stringifyPrometheusMetricLabels(
+      {
+        ...metricLabels,
+        [metricNameKey]: undefined,
+      },
+      removeExprWrap
+    );
+    if (removeExprWrap) {
+      return `${stringifiedLabels}`;
+    } else {
+      return `${metricLabels[metricNameKey]}${stringifiedLabels}`;
     }
-    return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
   }
-  return '';
+  return stringifyPrometheusMetricLabels(metricLabels, removeExprWrap);
 }
 
 /*
@@ -87,11 +83,7 @@ export function getUniqueKeyForPrometheusResult(
  */
 export function getFormattedPrometheusSeriesName(query: string, metric: Metric, formatter?: string) {
   // Name the series after the metric labels by default.
-  // Use the query if no metric or metric labels are empty.
-  let name = getUniqueKeyForPrometheusResult(metric);
-  if (name === '' || isEmptyObject(metric)) {
-    name = query;
-  }
+  const name = getUniqueKeyForPrometheusResult(metric);
 
   // Query editor allows you to define an optional seriesNameFormat property.
   // This controls the regex used to customize legend and tooltip display.

@@ -27,8 +27,7 @@ interface DashboardTempoTraceQueryEditorProps {
 }
 
 export function DashboardTempoTraceQueryEditor(props: DashboardTempoTraceQueryEditorProps) {
-  const { selectedDatasource, handleDatasourceChange, datasourceURL, query, handleQueryChange, handleQueryBlur } =
-    props;
+  const { selectedDatasource, handleDatasourceChange, query, handleQueryChange, handleQueryBlur } = props;
 
   return (
     <Stack spacing={2}>
@@ -44,12 +43,7 @@ export function DashboardTempoTraceQueryEditor(props: DashboardTempoTraceQueryEd
           label="Tempo Datasource"
         />
       </FormControl>
-      <TraceQLEditor
-        completeConfig={{ remote: { url: datasourceURL } }}
-        value={query}
-        onChange={handleQueryChange}
-        onBlur={handleQueryBlur}
-      />
+      <TraceQLEditor value={query} onChange={handleQueryChange} onBlur={handleQueryBlur} />
     </Stack>
   );
 }

@@ -56,7 +56,9 @@ func TestJSONMarshalConfig(t *testing.T) {
   "database": {},
   "schemas": {},
   "provisioning": {},
-  "deactivate_front": false
+  "frontend": {
+    "deactivate": false
+  }
 }`,
 		},
 		{
@@ -96,8 +98,10 @@ func TestJSONMarshalConfig(t *testing.T) {
   "provisioning": {
     "interval": "1h"
   },
-  "deactivate_front": false,
-  "ephemeral_dashboards_cleanup_interval": "1d"
+  "ephemeral_dashboards_cleanup_interval": "1d",
+  "frontend": {
+    "deactivate": false
+  }
 }`,
 		},
 	}
@@ -159,21 +163,23 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     "variables_path": "cue/schemas/variables",
     "interval": "5m"
   },
-  "important_dashboards": [
-    {
-      "project": "perses",
-      "dashboard": "Demo"
-    },
-    {
-      "project": "testing",
-      "dashboard": "DuplicatePanels"
-    },
-    {
-      "project": "Unknown",
-      "dashboard": "Dashboard"
-    }
-  ],
-  "information": "# Hello World\n## File Database setup",
+  "frontend": {
+    "important_dashboards": [
+      {
+        "project": "perses",
+        "dashboard": "Demo"
+      },
+      {
+        "project": "testing",
+        "dashboard": "DuplicatePanels"
+      },
+      {
+        "project": "Unknown",
+        "dashboard": "Dashboard"
+      }
+    ],
+    "information": "# Hello World\n## File Database setup"
+  },
   "provisioning": {
     "folders": [
       "dev/data"
@@ -221,21 +227,23 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					VariablesPath:   path.Join("cue", DefaultVariablesPath),
 					Interval:        model.Duration(5 * time.Minute),
 				},
-				ImportantDashboards: []dashboardSelector{
-					{
-						Project:   "perses",
-						Dashboard: "Demo",
+				Frontend: Frontend{
+					ImportantDashboards: []dashboardSelector{
+						{
+							Project:   "perses",
+							Dashboard: "Demo",
+						},
+						{
+							Project:   "testing",
+							Dashboard: "DuplicatePanels",
+						},
+						{
+							Project:   "Unknown",
+							Dashboard: "Dashboard",
+						},
 					},
-					{
-						Project:   "testing",
-						Dashboard: "DuplicatePanels",
-					},
-					{
-						Project:   "Unknown",
-						Dashboard: "Dashboard",
-					},
+					Information: "# Hello World\n## File Database setup",
 				},
-				Information: "# Hello World\n## File Database setup",
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
 						"dev/data",
@@ -298,17 +306,18 @@ schemas:
   variables_path: "cue/schemas/variables"
   interval: "5m"
 
-important_dashboards:
-  - project: "perses"
-    dashboard: "Demo"
-  - project: "testing"
-    dashboard: "DuplicatePanels"
-  - project: "Unknown"
-    dashboard: "Dashboard"
-
-information: |-
-  # Hello World
-  ## File Database setup
+frontend:
+  important_dashboards:
+    - project: "perses"
+      dashboard: "Demo"
+    - project: "testing"
+      dashboard: "DuplicatePanels"
+    - project: "Unknown"
+      dashboard: "Dashboard"
+  
+  information: |-
+    # Hello World
+    ## File Database setup
 
 ephemeral_dashboards_cleanup_interval: "2h"
 `,
@@ -360,21 +369,23 @@ ephemeral_dashboards_cleanup_interval: "2h"
 					VariablesPath:   path.Join("cue", DefaultVariablesPath),
 					Interval:        model.Duration(5 * time.Minute),
 				},
-				ImportantDashboards: []dashboardSelector{
-					{
-						Project:   "perses",
-						Dashboard: "Demo",
+				Frontend: Frontend{
+					ImportantDashboards: []dashboardSelector{
+						{
+							Project:   "perses",
+							Dashboard: "Demo",
+						},
+						{
+							Project:   "testing",
+							Dashboard: "DuplicatePanels",
+						},
+						{
+							Project:   "Unknown",
+							Dashboard: "Dashboard",
+						},
 					},
-					{
-						Project:   "testing",
-						Dashboard: "DuplicatePanels",
-					},
-					{
-						Project:   "Unknown",
-						Dashboard: "Dashboard",
-					},
+					Information: "# Hello World\n## File Database setup",
 				},
-				Information: "# Hello World\n## File Database setup",
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
 						"dev/data",

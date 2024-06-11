@@ -66,6 +66,13 @@ export interface PanelGroupItemId {
   panelGroupItemLayoutId: PanelGroupItemLayoutId;
 }
 
+/*
+ * Check if two PanelGroupItemId are equal
+ */
+export function isPanelGroupItemIdEqual(a?: PanelGroupItemId, b?: PanelGroupItemId) {
+  return a?.panelGroupId === b?.panelGroupId && a?.panelGroupItemLayoutId === b?.panelGroupItemLayoutId;
+}
+
 /**
  * Curried function for creating a PanelGroupSlice.
  */

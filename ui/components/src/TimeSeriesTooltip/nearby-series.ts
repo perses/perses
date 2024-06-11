@@ -79,10 +79,10 @@ export function checkforNearbyTimeSeries(
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentSeries = seriesMapping[seriesIdx];
-    if (currentSeries === undefined) break;
+    if (!currentSeries) break;
 
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
-    if (currentDataset == null) break;
+    if (!currentDataset) break;
 
     const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
     if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;

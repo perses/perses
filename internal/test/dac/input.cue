@@ -25,6 +25,7 @@ import (
 	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
+	prometheusDs "github.com/perses/perses/cue/schemas/datasources/prometheus:model"
 )
 
 #myVarsBuilder: varGroupBuilder & {
@@ -123,7 +124,8 @@ import (
 }
 
 dashboardBuilder & {
-	#name:      "ContainersMonitoring"
+	#name: "ContainersMonitoring"
+	#display: name: "Containers monitoring"
 	#project:   "MyProject"
 	#variables: #myVarsBuilder.variables
 	#panelGroups: panelGroupsBuilder & {
@@ -147,4 +149,12 @@ dashboardBuilder & {
 			},
 		]
 	}
+	#datasources: {myPromDemo: {
+		default: true
+		plugin: prometheusDs & {spec: {
+			directUrl: "http://localhost:9090"
+		}}
+	}}
+	#duration:        "3h"
+	#refreshInterval: "30s"
 }

@@ -35,6 +35,7 @@ const (
 	PercentDecimalUnit     PercentageUnit = "percent-decimal"
 	DecimalUnit            string         = "decimal"
 	BytesUnit              string         = "bytes"
+	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
 	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
 	EventsPerSecondsUnit   ThroughputUnit = "events/sec"
 	MessagesPerSecondsUnit ThroughputUnit = "messages/sec"
@@ -84,9 +85,10 @@ func (f *Format) validate() error {
 	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
 		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, BytesUnit,
-		string(CountsPerSecondsUnit), string(EventsPerSecondsUnit), string(MessagesPerSecondsUnit),
-		string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit), string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit),
-		string(RequestsPerSecondsUnit), string(RowsPerSecondsUnit), string(WritesPerSecondsUnit):
+		string(BytesPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
+		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
+		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
+		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit):
 		return nil
 	default:
 		return fmt.Errorf("unknown format")

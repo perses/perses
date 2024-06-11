@@ -86,9 +86,18 @@ func (p *provisioning) applyEntity(entities []modelAPI.Entity) {
 		}
 
 		// the document doesn't exist, so we have to create it.
-		if _, createError := createFun(); createError != nil && !databaseModel.IsKeyConflict(createError) {
-			logrus.WithError(createError).Errorf("unable to create the %q %q", kind, name)
-		} else if _, updateError := updateFunc(); updateError != nil {
+		_, createErr := createFun()
+
+		if createErr == nil {
+			continue
+		}
+
+		if !databaseModel.IsKeyConflict(createErr) {
+			logrus.WithError(createErr).Errorf("unable to create the %q %q", kind, name)
+			continue
+		}
+
+		if _, updateError := updateFunc(); updateError != nil {
 			logrus.WithError(updateError).Errorf("unable to update the %q %q", kind, name)
 		}
 	}

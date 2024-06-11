@@ -70,7 +70,10 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	}
 
 	runner.WithTasks(watcher, migrateWatcher)
+	// The Cuelang context used to validate the data is keeping in memory something when it validates a JSON.
+	// So to keep the memory low, we need sometime to flush the Cuelang context and that's what is done naturally with the reloader.
 	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
 		runner.WithTimerTasks(time.Duration(conf.Provisioning.Interval), provisioningTask)
@@ -91,7 +94,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		}).
 		Middleware(middleware.HandleError()).
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
-	if !conf.DeactivateFront {
+	if !conf.Frontend.Deactivate {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
 	}
 	return runner, persistenceManager, nil

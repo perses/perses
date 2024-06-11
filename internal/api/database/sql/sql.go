@@ -263,6 +263,33 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	return &databaseModel.Error{Key: id, Code: databaseModel.ErrorCodeNotFound}
 }
 
+func (d *DAO) RawQuery(query databaseModel.Query) ([][]byte, error) {
+	q, args, buildQueryErr := d.buildQuery(query)
+	if buildQueryErr != nil {
+		return nil, fmt.Errorf("unable to build the query: %s", buildQueryErr)
+	}
+	rows, runQueryErr := d.DB.Query(q, args...)
+	if runQueryErr != nil {
+		return nil, runQueryErr
+	}
+	defer rows.Close()
+
+	var result [][]byte
+
+	for rows.Next() {
+		var rowJSONDoc string
+		if scanErr := rows.Scan(&rowJSONDoc); scanErr != nil {
+			return nil, scanErr
+		}
+		result = append(result, []byte(rowJSONDoc))
+	}
+	return result, nil
+}
+
+func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([][]byte, error) {
+	return nil, fmt.Errorf("raw metadata query not implemented")
+}
+
 func (d *DAO) Query(query databaseModel.Query, slice interface{}) error {
 	typeParameter := reflect.TypeOf(slice)
 	result := reflect.ValueOf(slice)

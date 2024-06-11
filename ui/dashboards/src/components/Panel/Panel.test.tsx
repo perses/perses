@@ -25,21 +25,21 @@ describe('Panel', () => {
       display: {
         name: 'Fake Panel Title - $foo',
         description: 'This is a fake panel - $foo',
-        links: [
-          {
-            url: 'https://example.com',
-            name: 'Example Link',
-            tooltip: 'This is a fake panel link - $foo',
-            targetBlank: true,
-            renderVariables: true,
-          },
-        ],
       },
       plugin: {
         kind: 'TimeSeriesChart',
         spec: {},
       },
       queries: [],
+      links: [
+        {
+          url: 'https://example.com',
+          name: 'Example Link',
+          tooltip: 'This is a fake panel link - $foo',
+          targetBlank: true,
+          renderVariables: true,
+        },
+      ],
     },
   });
 

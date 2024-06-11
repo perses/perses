@@ -35,20 +35,23 @@ schemas:
   variables_path: "cue/schemas/variables"
   interval: "5m"
 
-important_dashboards:
-  - project: "perses"
-    dashboard: "Demo"
-  - project: "perses"
-    dashboard: "NodeExporter"
-  - project: "perses"
-    dashboard: "Benchmark"
-  - project: "testing"
-    dashboard: "Defaults"
-  - project: "testing"
-    dashboard: "StatChartPanel"
-  - project: "testing"
-    dashboard: "MarkdownPanel"
+ephemeral_dashboards_cleanup_interval: "1h"
 
-information: |-
-  # Hello World
-  ## MariaDB Database setup
+frontend:
+  important_dashboards:
+    - project: "perses"
+      dashboard: "Demo"
+    - project: "perses"
+      dashboard: "NodeExporter"
+    - project: "perses"
+      dashboard: "Benchmark"
+    - project: "testing"
+      dashboard: "Defaults"
+    - project: "testing"
+      dashboard: "StatChartPanel"
+    - project: "testing"
+      dashboard: "MarkdownPanel"
+
+  information: |-
+    # Hello World
+    ## File Database setup

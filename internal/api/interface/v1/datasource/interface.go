@@ -33,6 +33,18 @@ type Query struct {
 	Default *bool `query:"default"`
 }
 
+func (q *Query) GetMetadataOnlyQueryParam() bool {
+	return false
+}
+
+func (q *Query) IsRawQueryAllowed() bool {
+	return false
+}
+
+func (q *Query) IsRawMetadataQueryAllowed() bool {
+	return false
+}
+
 type DAO interface {
 	Create(entity *v1.Datasource) error
 	Update(entity *v1.Datasource) error

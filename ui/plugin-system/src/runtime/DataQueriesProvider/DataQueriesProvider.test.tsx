@@ -31,7 +31,7 @@ jest.mock('../plugin-registry', () => ({
     data: [
       {
         display: {
-          name: 'Prometheus Range Query',
+          name: 'Prometheus Query',
         },
         kind: 'PrometheusTimeSeriesQuery',
         pluginType: 'TimeSeriesQuery',

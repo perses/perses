@@ -14,5 +14,4 @@
 package model
 
 kind: "ScatterChart"
-spec: close({
-})
+spec: close({})

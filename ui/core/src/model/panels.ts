@@ -25,7 +25,6 @@ export interface Link {
 export interface PanelDisplay {
   name: string;
   description?: string;
-  links?: Link[];
 }
 
 export interface PanelDefinition<PluginSpec = UnknownSpec> extends Definition<PanelSpec<PluginSpec>> {
@@ -36,6 +35,7 @@ export interface PanelSpec<PluginSpec> {
   display: PanelDisplay;
   plugin: Definition<PluginSpec>;
   queries?: QueryDefinition[];
+  links?: Link[];
 }
 
 /**

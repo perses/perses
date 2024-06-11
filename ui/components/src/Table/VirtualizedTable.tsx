@@ -186,7 +186,7 @@ export function VirtualizedTable<TableData>({
 
                 const cellContext = cell.getContext();
                 const cellRenderFn = cell.column.columnDef.cell;
-                const cellContent = typeof cellRenderFn == 'function' ? cellRenderFn(cellContext) : null;
+                const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
 
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;

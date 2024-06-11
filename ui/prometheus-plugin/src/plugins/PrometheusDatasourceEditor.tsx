@@ -116,7 +116,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             Allowed endpoints
           </Typography>
           <Grid container spacing={2} mb={2}>
-            {value.proxy?.spec.allowedEndpoints && value.proxy?.spec.allowedEndpoints.length != 0 ? (
+            {value.proxy?.spec.allowedEndpoints && value.proxy?.spec.allowedEndpoints.length !== 0 ? (
               value.proxy.spec.allowedEndpoints.map(({ endpointPattern, method }, i) => {
                 return (
                   <Fragment key={i}>
@@ -419,8 +419,8 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
 
   // Use of findIndex instead of providing hardcoded values to avoid desynchronisatio or
   // bug in case the tabs get eventually swapped in the future.
-  const directModeId = tabs.findIndex((tab) => tab.label == strDirect);
-  const proxyModeId = tabs.findIndex((tab) => tab.label == strProxy);
+  const directModeId = tabs.findIndex((tab) => tab.label === strDirect);
+  const proxyModeId = tabs.findIndex((tab) => tab.label === strProxy);
 
   // In "update datasource" case, set defaultTab to the mode that this datasource is currently relying on.
   // Otherwise (create datasource), set defaultTab to Direct access.
@@ -473,10 +473,10 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
 
   // When changing mode, remove previous mode's config + append default values for the new mode.
   const handleModeChange = (v: number) => {
-    if (tabs[v]?.label == strDirect) {
+    if (tabs[v]?.label === strDirect) {
       setPreviousSpecProxy(value);
       onChange(previousSpecDirect);
-    } else if (tabs[v]?.label == strProxy) {
+    } else if (tabs[v]?.label === strProxy) {
       setPreviousSpecDirect(value);
       onChange(previousSpecProxy);
     }

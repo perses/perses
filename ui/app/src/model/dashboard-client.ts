@@ -57,9 +57,9 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(project?: string) {
-  return useQuery<DashboardResource[] | null, Error>([resource, project], () => {
-    return getDashboards(project);
+export function useDashboardList(project?: string, metadataOnly?: boolean) {
+  return useQuery<DashboardResource[], Error>([resource, project], () => {
+    return getDashboards(project, metadataOnly);
   });
 }
 
@@ -73,7 +73,7 @@ export interface DatedDashboards {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useRecentDashboardList(project?: string, maxSize?: number) {
-  const { data, isLoading } = useDashboardList(project);
+  const { data, isLoading } = useDashboardList(project, true);
   const history = useNavHistory();
 
   const result = useMemo(() => {
@@ -81,8 +81,8 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
     const result: DatedDashboards[] = [];
 
     // Iterating with history first to keep history order in the result
-    (history || []).forEach((historyItem) => {
-      const dashboard = (data || []).find(
+    (history ?? []).forEach((historyItem) => {
+      const dashboard = (data ?? []).find(
         (dashboard) =>
           historyItem.project === dashboard.metadata.project && historyItem.name === dashboard.metadata.name
       );
@@ -106,13 +106,13 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string) {
-  const { data: dashboards, isLoading } = useDashboardList(project);
+  const { data: dashboards, isLoading } = useDashboardList(project, true);
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {
     const result: DashboardResource[] = [];
     importantDashboardSelectors.forEach((selector) => {
-      const dashboard = (dashboards || []).find(
+      const dashboard = (dashboards ?? []).find(
         (dashboard) => selector.project === dashboard.metadata.project && selector.dashboard === dashboard.metadata.name
       );
       if (dashboard) {
@@ -180,9 +180,13 @@ export function getDashboard(project: string, name: string) {
   });
 }
 
-export function getDashboards(project?: string) {
-  const url = buildURL({ resource: resource, project: project });
-  return fetchJson<DashboardResource[] | null>(url, {
+export function getDashboards(project?: string, metadataOnly?: boolean) {
+  const queryParams = new URLSearchParams();
+  if (metadataOnly) {
+    queryParams.set('metadata_only', 'true');
+  }
+  const url = buildURL({ resource: resource, project: project, queryParams: queryParams });
+  return fetchJson<DashboardResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });

@@ -130,13 +130,17 @@ export interface SecurityConfig {
   authentication: AuthenticationConfig;
 }
 
+export interface FrontendConfig {
+  important_dashboards?: DashboardSelector[];
+  information?: string;
+}
+
 export interface ConfigModel {
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
-  important_dashboards?: DashboardSelector[];
-  information?: string;
   provisioning?: ProvisioningConfig;
+  frontend: FrontendConfig;
 }
 
 type ConfigOptions = Omit<UseQueryOptions<ConfigModel, Error>, 'queryKey' | 'queryFn'>;

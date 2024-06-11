@@ -60,5 +60,8 @@ type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
 	Update(ctx PersesContext, entity T, parameters Parameters) (K, error)
 	Delete(ctx PersesContext, parameters Parameters) error
 	Get(ctx PersesContext, parameters Parameters) (K, error)
-	List(ctx PersesContext, q V, parameters Parameters) ([]K, error)
+	List(ctx PersesContext, query V, parameters Parameters) ([]K, error)
+	RawList(ctx PersesContext, query V, parameters Parameters) ([][]byte, error)
+	MetadataList(ctx PersesContext, query V, parameters Parameters) ([]api.Entity, error)
+	RawMetadataList(ctx PersesContext, query V, parameters Parameters) ([][]byte, error)
 }

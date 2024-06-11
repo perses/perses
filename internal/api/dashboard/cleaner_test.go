@@ -15,6 +15,8 @@ package dashboard
 
 import (
 	"context"
+	"encoding/json"
+	"github.com/perses/perses/pkg/model/api"
 	"testing"
 	"time"
 
@@ -30,6 +32,41 @@ type mockDAO struct {
 
 func (d *mockDAO) List(_ *ephemeraldashboard.Query) ([]*v1.EphemeralDashboard, error) {
 	return d.dashboards, nil
+}
+
+func (d *mockDAO) RawList(_ *ephemeraldashboard.Query) ([][]byte, error) {
+	result := make([][]byte, 0, len(d.dashboards))
+	for _, dash := range d.dashboards {
+		b, _ := json.Marshal(dash)
+		result = append(result, b)
+	}
+	return result, nil
+}
+
+func (d *mockDAO) MetadataList(_ *ephemeraldashboard.Query) ([]api.Entity, error) {
+	var result []api.Entity
+	for _, dashboard := range d.dashboards {
+		result = append(result, &v1.PartialProjectEntity{
+			Kind:     dashboard.Kind,
+			Metadata: dashboard.Metadata,
+			Spec:     struct{}{},
+		})
+	}
+	return result, nil
+}
+
+func (d *mockDAO) RawMetadataList(_ *ephemeraldashboard.Query) ([][]byte, error) {
+	result := make([][]byte, 0, len(d.dashboards))
+	for _, dash := range d.dashboards {
+		partial := &v1.PartialProjectEntity{
+			Kind:     dash.Kind,
+			Metadata: dash.Metadata,
+			Spec:     struct{}{},
+		}
+		b, _ := json.Marshal(partial)
+		result = append(result, b)
+	}
+	return result, nil
 }
 
 func (d *mockDAO) Delete(project string, name string) error {

@@ -32,6 +32,7 @@ export interface TimeSeriesData {
 export interface TimeSeries {
   name: string;
   values: TimeSeriesValueTuple[];
+  histograms?: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   formattedName?: string;
   labels?: Labels;
 }

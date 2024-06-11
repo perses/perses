@@ -10,15 +10,23 @@ import (
 #mapping: {
     // mapping table for the unit attribute (key = grafana unit, value = perses equivalent)
     unit: {
+        // time units
         ms: "milliseconds"
         s: "seconds"
         m: "minutes"
         h: "hours"
         d: "days"
+        // percent units
         percent: "percent"
         percentunit: "percent-decimal"
+        // decimal units
+        // TODO
+        // bytes units
         bytes: "bytes"
         decbytes: "bytes"
+        // throughput units
+        Bps: "bytes/sec"
+        // TODO add mappings for all throughput units
     }
     // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
     calc: {

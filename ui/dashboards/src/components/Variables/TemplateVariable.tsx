@@ -170,7 +170,7 @@ const StyledPopper = (props: PopperProps) => (
 const LETTER_HSIZE = 8; // approximation
 const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
 const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
-  const width = (inputValue.length + 1) * LETTER_HSIZE + (kind == 'list' ? ARROW_OFFSET : 0);
+  const width = (inputValue.length + 1) * LETTER_HSIZE + (kind === 'list' ? ARROW_OFFSET : 0);
   if (width < MIN_TEMPLATE_VARIABLE_WIDTH) {
     return MIN_TEMPLATE_VARIABLE_WIDTH;
   } else if (width > MAX_TEMPLATE_VARIABLE_WIDTH) {

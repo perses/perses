@@ -90,7 +90,7 @@ func (o *option) Execute() error {
 		if err != nil {
 			return err
 		}
-		if writeErr := os.WriteFile(path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name)), []byte(d), 0600); writeErr != nil {
+		if writeErr := os.WriteFile(path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name)), []byte(d), 0644); writeErr != nil { // nolint: gosec
 			return fmt.Errorf("unable to write the diff file: %w", writeErr)
 		}
 	}

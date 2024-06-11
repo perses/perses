@@ -14,6 +14,7 @@
 import React from 'react';
 import { UnknownSpec, PanelDefinition, QueryPluginType } from '@perses-dev/core';
 import { OptionsEditorTab } from '../components';
+import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
 
 export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
@@ -34,6 +35,12 @@ export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
    * @default [] (no query types supported) only relevant if hideQueryEditor is true
    */
   supportedQueryTypes?: QueryPluginType[];
+  /**
+   * Static options for the queries that will be executed.
+   * Each {@link QueryPluginType} implementation can have its own options.
+   * For example see {@link UseTimeSeriesQueryOptions} for time series queries.
+   */
+  queryOptions?: QueryOptions;
   /**
    * If true, query editor will be hidden for panel plugin
    * @default false

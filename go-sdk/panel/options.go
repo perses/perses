@@ -14,6 +14,7 @@
 package panel
 
 import (
+	"github.com/perses/perses/go-sdk/link"
 	"github.com/perses/perses/go-sdk/query"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -46,6 +47,17 @@ func AddQuery(options ...query.Option) Option {
 			return err
 		}
 		builder.Spec.Queries = append(builder.Spec.Queries, q.Query)
+		return nil
+	}
+}
+
+func AddLink(url string, options ...link.Option) Option {
+	return func(builder *Builder) error {
+		l, err := link.New(url, options...)
+		if err != nil {
+			return err
+		}
+		builder.Spec.Links = append(builder.Spec.Links, l.Link)
 		return nil
 	}
 }

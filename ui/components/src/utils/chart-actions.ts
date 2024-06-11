@@ -193,7 +193,7 @@ export function getClosestTimestampInFullDataset(data: TimeSeries[], cursorX?: n
   let closestTimestamp = null;
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
-    if (currentDataset == null) break;
+    if (!currentDataset) break;
     const currentValues: TimeSeriesValueTuple[] = currentDataset.values;
     closestTimestamp = getClosestTimestamp(currentValues, cursorX);
   }

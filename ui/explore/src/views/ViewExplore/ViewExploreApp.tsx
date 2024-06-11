@@ -13,11 +13,12 @@
 
 import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
-import React from 'react';
-import { TimeSeriesExplorer } from '../../components/TimeSeriesExplorer/TimeSeriesExplorer';
+import { ReactNode } from 'react';
+import { ExploreManager } from '../../components/ExploreManager';
+import { ExplorerManagerProviderWithQueryParams } from '../../components/ExploreManager/ExplorerManagerProviderWithQueryParams';
 
 export interface ViewAppProps {
-  exploreTitleComponent?: React.ReactNode;
+  exploreTitleComponent?: ReactNode;
 }
 
 export function ViewExploreApp(props: ViewAppProps) {
@@ -36,7 +37,9 @@ export function ViewExploreApp(props: ViewAppProps) {
       }}
     >
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
-        <TimeSeriesExplorer exploreTitleComponent={exploreTitleComponent} />
+        <ExplorerManagerProviderWithQueryParams>
+          <ExploreManager exploreTitleComponent={exploreTitleComponent} />
+        </ExplorerManagerProviderWithQueryParams>
       </ChartsProvider>
     </Box>
   );

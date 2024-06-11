@@ -299,6 +299,9 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last-number",
+              "format": {
+                "unit": "bytes/sec"
+              },
               "thresholds": {
                 "steps": [
                   {

@@ -45,8 +45,8 @@ import (
 		[string]: #Panel @go(Panels)
 	}
 	layouts: [...dashboard.#Layout] @go(Layouts,[]Layout)
-	duration:         _ | *"1h" @go(Duration)        // TODO def should come from github.com/prometheus/common/model 
-	refreshInterval?: _         @go(RefreshInterval) // TODO def should come from github.com/prometheus/common/model
+	duration:         string | *"1h" @go(Duration)        // TODO instead of string the def should come from github.com/prometheus/common/model 
+	refreshInterval?: string         @go(RefreshInterval) // TODO instead of string the def should come from github.com/prometheus/common/model
 }
 
 #Dashboard: {

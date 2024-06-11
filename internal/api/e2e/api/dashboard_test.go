@@ -103,6 +103,28 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 	})
 }
 
+func TestListDashboardWithOnlyMetadata(t *testing.T) {
+	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
+		persesProject := e2eframework.NewProject("perses")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoDashboard)
+
+		response := expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, persesProject.GetMetadata().GetName(), utils.PathDashboard)).
+			WithQuery("metadata_only", true).
+			Expect().
+			Status(http.StatusOK)
+
+		response.JSON().Array().Length().IsEqual(1)
+		response.JSON().Array().Value(0).Object().IsEqual(modelV1.PartialProjectEntity{
+			Kind:     demoDashboard.Kind,
+			Metadata: demoDashboard.Metadata,
+			Spec:     struct{}{},
+		})
+
+		return []api.Entity{persesProject, demoDashboard}
+	})
+}
+
 func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashboard {
 	b := testUtils.JSONMarshalStrict(body)
 	dashboard := &modelV1.Dashboard{}
@@ -134,10 +156,29 @@ func TestAuthListDashboardInProject(t *testing.T) {
 		firstProject := e2eframework.NewProject("first")
 		secondProject := e2eframework.NewProject("second")
 		thirdProject := e2eframework.NewProject("third")
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject)
+		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
+		expect.GET(fmt.Sprintf("%s/%s/%s/%s", utils.APIV1Prefix, utils.PathProject, firstProject.GetMetadata().GetName(), utils.PathDashboard)).
+			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).
+			Expect().
+			Status(http.StatusOK).
+			JSON().
+			Array().
+			Length().
+			IsEqual(0)
+
 		firstDashboard := e2eframework.NewDashboard(t, firstProject.Metadata.Name, "Demo-1")
 		secondDashboard := e2eframework.NewDashboard(t, secondProject.Metadata.Name, "Demo-2")
 		thirdDashboard := e2eframework.NewDashboard(t, thirdProject.Metadata.Name, "Demo-3")
-		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstProject, secondProject, thirdProject, firstDashboard, secondDashboard, thirdDashboard)
+		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, firstDashboard, secondDashboard, thirdDashboard)
 
 		expect.GET(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathDashboard)).
 			WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).

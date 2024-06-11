@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Link as LinkComponent, ListItemIcon, ListItemText, Menu, MenuItem, Theme } from '@mui/material';
+import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/core';
 import { MouseEvent, useState } from 'react';
@@ -92,10 +92,7 @@ function LinkMenuItem({ link }: { link: Link }) {
   return (
     <InfoTooltip description={tooltip ?? url} enterDelay={100}>
       <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
-        <ListItemIcon>
-          <LaunchIcon />
-        </ListItemIcon>
-        <ListItemText>{name ?? url}</ListItemText>
+        {name ?? url}
       </MenuItem>
     </InfoTooltip>
   );
