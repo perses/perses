@@ -19,7 +19,7 @@ import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-for
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { getSubmitText, getTitleAction } from '../../utils';
-import { useValidationSchemas } from '../../validation';
+import { useValidationSchemas } from '../../context';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;

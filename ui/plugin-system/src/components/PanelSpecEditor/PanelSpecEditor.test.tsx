@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { screen } from '@testing-library/react';
+import { useForm } from 'react-hook-form';
+import { PanelEditorValues } from '@perses-dev/core';
 import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
@@ -21,7 +23,10 @@ describe('PanelSpecEditor', () => {
   };
 
   it('should show query, options and json editors', async () => {
+    const form = useForm<PanelEditorValues>({});
+
     renderComponent({
+      control: form.control,
       panelDefinition: {
         kind: 'Panel',
         spec: {
@@ -46,7 +51,10 @@ describe('PanelSpecEditor', () => {
   });
 
   it('should hide query editor if hideQueryEditor is true', async () => {
+    const form = useForm<PanelEditorValues>({});
+
     renderComponent({
+      control: form.control,
       panelDefinition: {
         kind: 'Panel',
         spec: {

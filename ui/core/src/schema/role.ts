@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { Permission, Role, RoleSpec } from '@perses-dev/core';
+import { Permission, Role, RoleSpec } from '../model';
 import { metadataSchema, projectMetadataSchema } from './metadata';
 
 export const permissionSchema: z.ZodSchema<Permission> = z.object({

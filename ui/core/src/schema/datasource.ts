@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { Datasource, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
+import { Datasource, DatasourceDefinition, DatasourceSpec } from '../model';
 import { metadataSchema, projectMetadataSchema } from './metadata';
 import { PluginSchema, pluginSchema } from './plugin';
 import { displaySchema } from './display';

@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { nameSchema } from '@perses-dev/plugin-system';
+import { nameSchema } from '@perses-dev/core';
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 

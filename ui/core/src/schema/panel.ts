@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, QueryDefinition } from '@perses-dev/core';
+import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, QueryDefinition } from '../model';
 import { PluginSchema, pluginSchema } from './plugin';
 
 export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({

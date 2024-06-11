@@ -12,12 +12,19 @@
 // limitations under the License.
 
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { DatasourceDefinition, PanelEditorValues, VariableDefinition } from '@perses-dev/core';
+import {
+  DatasourceDefinition,
+  PanelEditorValues,
+  VariableDefinition,
+  PluginSchema,
+  datasourceDefinitionSchema,
+  panelEditorSchema as defaultPanelEditorSchema,
+  variableDefinitionSchema,
+  buildDatasourceDefinitionSchema,
+  buildPanelEditorSchema,
+  buildVariableDefinitionSchema,
+} from '@perses-dev/core';
 import { z } from 'zod';
-import { buildDatasourceDefinitionSchema, datasourceDefinitionSchema } from './datasource';
-import { PluginSchema } from './plugin';
-import { buildVariableDefinitionSchema, variableDefinitionSchema } from './variable';
-import { buildPanelEditorSchema, panelEditorSchema as defaultPanelEditorSchema } from './panel';
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;

@@ -20,7 +20,7 @@ import {
   Variable,
   VariableDefinition,
   VariableDisplay,
-} from '@perses-dev/core';
+} from '../model';
 import { projectMetadataSchema } from './metadata';
 import { PluginSchema, pluginSchema } from './plugin';
 

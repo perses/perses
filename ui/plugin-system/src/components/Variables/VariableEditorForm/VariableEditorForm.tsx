@@ -32,7 +32,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { getSubmitText, getTitleAction } from '../../../utils';
 import { VARIABLE_TYPES } from '../variable-model';
 import { PluginEditor } from '../../PluginEditor';
-import { useValidationSchemas } from '../../../validation';
+import { useValidationSchemas } from '../../../context';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 
 function FallbackPreview() {

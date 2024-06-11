@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { NativeProvider, OAuthProvider, UserResource, UserSpec } from '@perses-dev/app/src/model/user-client';
+import { NativeProvider, OAuthProvider, UserResource, UserSpec } from '../model';
 import { metadataSchema } from './metadata';
 
 export const nativeProviderSchema: z.Schema<NativeProvider> = z.object({

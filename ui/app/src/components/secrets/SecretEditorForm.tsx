@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, Secret } from '@perses-dev/core';
+import { Action, Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
 import React, { DispatchWithoutAction, SyntheticEvent, useEffect, useMemo, useState } from 'react';
-import { getSubmitText, getTitleAction, SecretsEditorSchemaType, secretsEditorSchema } from '@perses-dev/plugin-system';
+import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {

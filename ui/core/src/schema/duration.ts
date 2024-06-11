@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DURATION_REGEX } from '@perses-dev/core';
 import { z } from 'zod';
+import { DURATION_REGEX } from '../model';
 
 export const durationValidationSchema = z
   .string()

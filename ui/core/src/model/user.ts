@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,7 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './constants';
-export * from './model';
-export * from './schema';
-export * from './utils';
+import { Metadata } from './resource';
+
+export interface NativeProvider {
+  password?: string;
+}
+
+export interface OAuthProvider {
+  issuer?: string;
+  email?: string;
+  subject?: string;
+}
+
+export interface UserSpec {
+  firstName?: string;
+  lastName?: string;
+  nativeProvider?: NativeProvider;
+  oauthProviders?: OAuthProvider[];
+}
+
+export interface UserResource {
+  kind: 'User';
+  metadata: Metadata;
+  spec: UserSpec;
+}

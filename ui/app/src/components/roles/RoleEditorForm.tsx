@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role } from '@perses-dev/core';
-import { getSubmitText, getTitleAction, rolesEditorSchema } from '@perses-dev/plugin-system';
+import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/core';
+import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Box, Button, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';

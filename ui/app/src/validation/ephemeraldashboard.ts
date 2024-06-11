@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { durationValidationSchema, nameSchema } from '@perses-dev/plugin-system';
+import { durationValidationSchema, nameSchema } from '@perses-dev/core';
 import { generateMetadataName } from '../utils/metadata';
 import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
 import { dashboardDisplayNameValidationSchema } from './dashboard';

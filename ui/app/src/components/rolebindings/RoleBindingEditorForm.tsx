@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, RoleBinding } from '@perses-dev/core';
-import { getSubmitText, getTitleAction, roleBindingsEditorSchema } from '@perses-dev/plugin-system';
+import { Action, RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
+import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
