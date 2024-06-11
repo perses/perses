@@ -42,6 +42,7 @@ function parseResource(resource: api.Resource, colors: string[]): Resource {
   for (const attr of resource.attributes) {
     if (attr.key === 'service.name' && attr.value.stringValue) {
       serviceName = attr.value.stringValue;
+      break;
     }
   }
 
