@@ -14,15 +14,15 @@ spec: <prometheus_plugin_spec>
 Prometheus as a datasource is basically an HTTP server. So we need to define an HTTP config.
 
 ```yaml
-  # It is the url of the datasource.
-  # Leave it empty if you don't want to access the datasource directly from the UI.
-  # You should define a proxy if you want to access the datasource through the Perses' server.
-  [ directUrl: <url> ]
+# It is the url of the datasource.
+# Leave it empty if you don't want to access the datasource directly from the UI.
+# You should define a proxy if you want to access the datasource through the Perses' server.
+[ directUrl: <url> ]
 
-  # It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
-  [ proxy: <HTTP Proxy specification> ]
-  
-  [ scrapeInterval: <duration> ]
+# It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
+[ proxy: <HTTP Proxy specification> ]
+
+[ scrapeInterval: <duration> ]
 ```
 
 #### HTTP Proxy specification
@@ -41,6 +41,7 @@ spec:
   # It can be used to provide additional headers that need to be forwarded when requesting the datasource
   headers:
     [ <string>: <string> ]
+
   # This is the name of the secret that should be used for the proxy or discovery configuration
   # It will contain any sensitive information such as password, token, certificate.
   # Please read the documentation about secrets to understand how to create one
@@ -115,17 +116,17 @@ spec: <Timeseries Query specification>
 ### Timeseries Query specification
 
 ```yaml
-  #`query` is the promQL expression.
-  query: <string>
+#`query` is the promQL expression.
+query: <string>
 
-  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
-  # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <Datasource selector> ]
-  [ seriesNameFormat: <string> ]
+# `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+# See the documentation about the datasources to understand how it is selected.
+[ datasource: <Datasource selector> ]
+[ seriesNameFormat: <string> ]
 
-  # `minStep` is the minimum time interval you want between each data points.
-  [ minStep: <duration> ]
-  [ resolution: number ]
+# `minStep` is the minimum time interval you want between each data points.
+[ minStep: <duration> ]
+[ resolution: number ]
 ```
 
 #### Example
@@ -153,11 +154,11 @@ spec: <Prometheus Label Names specification>
 #### Prometheus Label Names specification
 
 ```yaml
-  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
-  # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <datasource_selector> ]
-  matchers:
-   [ - <string> ]
+# `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+# See the documentation about the datasources to understand how it is selected.
+[ datasource: <datasource_selector> ]
+matchers:
+  [ - <string> ]
 ```
 
 #### Example
@@ -208,12 +209,12 @@ spec: <Prometheus Label Values specification>
 #### Prometheus Label Values specification
 
 ```yaml
-  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
-  # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <Datasource selector> ]
-  labelName: <string>
-  matchers:
-   [ - <string> ]
+# `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+# See the documentation about the datasources to understand how it is selected.
+[ datasource: <Datasource selector> ]
+labelName: <string>
+matchers:
+  [ - <string> ]
 ```
 
 #### Example
@@ -269,20 +270,20 @@ spec: <Prometheus PromQL specification>
 #### Prometheus PromQL specification
 
 ```yaml
-  # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
-  # See the documentation about the datasources to understand how it is selected.
-  [ datasource: <Datasource selector> ]
+# `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
+# See the documentation about the datasources to understand how it is selected.
+[ datasource: <Datasource selector> ]
 
-  # The promql expression
-  expr: <string>
-  [ labelName: <string> ]
+# The promql expression
+expr: <string>
+[ labelName: <string> ]
 ```
 
 ### Datasource selector
 
 ```yaml
-  kind: "PrometheusDatasource"
+kind: "PrometheusDatasource"
 
-  # The name of the datasource regardless its level
-  [ name: <string> ]
+# The name of the datasource regardless its level
+[ name: <string> ]
 ```

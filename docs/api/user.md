@@ -28,14 +28,14 @@ spec:
 ### OAuth Provider specification
 
 ```yaml
-  # Identifying the provider
-  issuer: <string>
+# Identifying the provider
+issuer: <string>
 
-  # Email of the user in the provider
-  email: <string>
+# Email of the user in the provider
+email: <string>
 
-  # Identifying the user in the provider
-  subject: <string>
+# Identifying the user in the provider
+subject: <string>
 ```
 
 ## API definition

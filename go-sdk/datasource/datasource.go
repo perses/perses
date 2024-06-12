@@ -40,5 +40,5 @@ func New(name string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Datasource
+	v1.Datasource `json:",inline" yaml:",inline"`
 }

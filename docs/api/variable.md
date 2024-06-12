@@ -25,11 +25,11 @@ In case you would like to share a variable across different dashboards in the **
 create a `Variable`.
 
 ```yaml
-  kind: "Variable"
-  metadata:
-    name: <string>
-    project: <string>
-  spec: <Variable specification>
+kind: "Variable"
+metadata:
+  name: <string>
+  project: <string>
+spec: <Variable specification>
 ```
 
 ### Global level
@@ -41,10 +41,10 @@ living outside a project.
 That’s why we have another resource called `GlobalVariable`
 
 ```yaml
-  kind: "GlobalVariable"
-  metadata:
-    name: <string>
-  spec: <Variable specification>
+kind: "GlobalVariable"
+metadata:
+  name: <string>
+spec: <Variable specification>
 ```
 
 ## Variable specification
@@ -61,14 +61,14 @@ spec: <Text Variable specification>
 #### Text Variable specification
 
 ```yaml
-  # It is a mandatory attribute when you are defining a variable directly in a dashboard.
-  # If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
-  # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
-  [ name: <string> ]
+# It is a mandatory attribute when you are defining a variable directly in a dashboard.
+# If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
+# This is the unique name of the variable that can be used in another variable or in the different dashboard to use
+[ name: <string> ]
 
-  [ display: <Display specification> ]
-  value: <string>
-  [ constant: <boolean> | default = false ]
+[ display: <Display specification> ]
+value: <string>
+[ constant: <boolean> | default = false ]
 ```
 
 #### Example
@@ -87,11 +87,11 @@ spec:
 Or in case you are defining the variable in a dashboard
 
 ```yaml
-  variables:
-    - kind: "TextVariable"
-      spec:
-        name: "text"
-        value: "my text"
+variables:
+  - kind: "TextVariable"
+    spec:
+      name: "text"
+      value: "my text"
 ```
 
 ### ListVariable
@@ -104,60 +104,60 @@ spec: <List Variable specification>
 #### List Variable specification
 
 ```yaml
-  # It is a mandatory attribute when you are defining a variable directly in a dashboard.
-  # If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
-  # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
-  [ name: <string> ]
+# It is a mandatory attribute when you are defining a variable directly in a dashboard.
+# If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
+# This is the unique name of the variable that can be used in another variable or in the different dashboard to use
+[ name: <string> ]
 
-  [ display: <Display specification> ]
+[ display: <Display specification> ]
 
-  # It's a value from the list to be selected by default
-  # It can be a single value or a list.
-  [ defaultValue: <string> | <array of string> ]
+# It's a value from the list to be selected by default
+# It can be a single value or a list.
+[ defaultValue: <string> | <array of string> ]
 
-  # Whether to append the "All" value that allows selecting all available values at once.
-  [ allowAllValue: <boolean> | default = false ]
+# Whether to append the "All" value that allows selecting all available values at once.
+[ allowAllValue: <boolean> | default = false ]
 
-  # Whether to allow multi-selection of values.
-  [ allMultiple: <boolean> | default = false ]
+# Whether to allow multi-selection of values.
+[ allMultiple: <boolean> | default = false ]
 
-  # It is a custom value that will be used if allowAllValue is true and if then `all` is selected
-  [ customAllValue: <string> ]
+# It is a custom value that will be used if allowAllValue is true and if then `all` is selected
+[ customAllValue: <string> ]
 
-  # CapturingRegexp is the regexp used to catch and filter the result of the query.
-  # If empty, then nothing is filtered. This is the equivalent of setting capturingRegexp with (.*)
-  [ capturingRegexp: <string> ]
-  
-  # The method to apply when rendering the list of values
-  [ sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" ]
+# CapturingRegexp is the regexp used to catch and filter the result of the query.
+# If empty, then nothing is filtered. This is the equivalent of setting capturingRegexp with (.*)
+[ capturingRegexp: <string> ]
 
-  # The definition of the plugin variable
-  plugin: <Plugin specification>
+# The method to apply when rendering the list of values
+[ sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" ]
+
+# The definition of the plugin variable
+plugin: <Plugin specification>
 ```
 
 #### Display specification
 
 ```yaml
-  # The new name of the variable. If set, it will replace `metadata.name` in the variable title in the UI.
-  # Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the variable.
-  # This is just for display purpose.
-  [ name: <string> ]
+# The new name of the variable. If set, it will replace `metadata.name` in the variable title in the UI.
+# Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the variable.
+# This is just for display purpose.
+[ name: <string> ]
 
-  # The description of the variable
-  [ description: <string> ]
+# The description of the variable
+[ description: <string> ]
 
-  # If true, the variable won't be displayed above the dashboard.
-  [ hidden: <boolean> | default = false ]
+# If true, the variable won't be displayed above the dashboard.
+[ hidden: <boolean> | default = false ]
 ```
 
 #### Plugin definition
 
 ```yaml
-  # The type of the variable. For example, `PrometheusPromQLVariable`
-  kind: <string>
+# The type of the variable. For example, `PrometheusPromQLVariable`
+kind: <string>
 
-  # The actual definition of the variable. It will depend on the type defined in the previous field `kind`
-  spec: <Plugin specification>
+# The actual definition of the variable. It will depend on the type defined in the previous field `kind`
+spec: <Plugin specification>
 ```
 
 We are supporting only prometheus for the variables for the moment.

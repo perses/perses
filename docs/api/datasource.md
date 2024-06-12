@@ -27,11 +27,11 @@ In case you would like to share a datasource across different dashboards in the 
 create a `Datasource`.
 
 ```yaml
-  kind: "Datasource"
-  metadata:
-    name: <string>
-    project: <string>
-  spec: <Datasource specification>
+kind: "Datasource"
+metadata:
+  name: <string>
+  project: <string>
+spec: <Datasource specification>
 ```
 
 ### Global level
@@ -43,32 +43,32 @@ living outside a project.
 That’s why we have another resource called `GlobalDatasource`
 
 ```yaml
-  kind: "GlobalDatasource"
-  metadata:
-    name: <string>
-  spec: <Datasource specification>
+kind: "GlobalDatasource"
+metadata:
+  name: <string>
+spec: <Datasource specification>
 ```
 
 ## Datasource specification
 
 ```yaml
-  [ display: <Display specification> ]
+[ display: <Display specification> ]
 
-  # If true, then it's the default datasource for the type defined in the plugin.
-  [ default: <boolean> | default = false ]
+# If true, then it's the default datasource for the type defined in the plugin.
+[ default: <boolean> | default = false ]
 
-  # The definition of the plugin datasource
-  plugin: <plugin>
+# The definition of the plugin datasource
+plugin: <plugin>
 ```
 
 ### Plugin definition
 
 ```yaml
-  # The type of the datasource. For example, `PrometheusDatasource`
-  kind: <string>
+# The type of the datasource. For example, `PrometheusDatasource`
+kind: <string>
 
-  # The actual definition of the datasource. It will depend on the type defined in the previous field `kind`
-  spec: <Plugin specification>
+# The actual definition of the datasource. It will depend on the type defined in the previous field `kind`
+spec: <Plugin specification>
 ```
 
 We are supporting only prometheus as a datasource for the moment.

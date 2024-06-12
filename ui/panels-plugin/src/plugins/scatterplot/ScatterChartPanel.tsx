@@ -20,8 +20,11 @@ import { ErrorAlert, useChartsTheme } from '@perses-dev/components';
 import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
-export interface EChartTraceValue extends Omit<TraceValue, 'startTimeUnixMs'> {
+export interface EChartTraceValue extends Omit<TraceValue, 'startTimeUnixMs' | 'serviceStats'> {
+  name: string;
   startTime: Date;
+  spanCount: number;
+  errorCount: number;
 }
 
 const generateErrorAlert = (message: string) => {
@@ -51,7 +54,7 @@ export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
  *  https://echarts.apache.org/examples/en/index.html#chart-type-scatter
  *
  * @returns a `ScatterPlot` component that contains an EChart which will handle
- * visuzliation of the data.
+ * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps) {
   const { contentDimensions } = props;
@@ -62,21 +65,32 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
   // Generate dataset
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
   // https://echarts.apache.org/handbook/en/concepts/dataset
-  const dataset = useMemo(() => {
-    const traceData = traceResults[0]?.data;
-    if (traceIsLoading || traceData === undefined) {
-      return [];
+  const { dataset, maxSpanCount } = useMemo(() => {
+    if (traceIsLoading) {
+      return { dataset: [], maxSpanCount: 1 };
     }
+
     const dataset = [];
+    let maxSpanCount = 1;
     for (const result of traceResults) {
-      if (traceIsLoading || traceData === undefined) {
-        return [];
-      }
       if (result.isLoading || result.data === undefined) continue;
       const dataSeries = result.data.traces.map((trace) => {
+        let spanCount = 0;
+        let errorCount = 0;
+        for (const stats of Object.values(trace.serviceStats)) {
+          spanCount += stats.spanCount;
+          errorCount += stats.errorCount ?? 0;
+        }
+        if (spanCount > maxSpanCount) {
+          maxSpanCount = spanCount;
+        }
+
         const newTraceValue: EChartTraceValue = {
           ...trace,
+          name: `${trace.rootServiceName}: ${trace.rootTraceName}`,
           startTime: new Date(trace.startTimeUnixMs), // convert unix epoch time to Date
+          spanCount,
+          errorCount,
         };
         return newTraceValue;
       });
@@ -84,7 +98,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
         source: dataSeries,
       });
     }
-    return dataset;
+    return { dataset, maxSpanCount };
   }, [traceIsLoading, traceResults]);
 
   // Formatting for the dataset
@@ -102,14 +116,14 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       },
       symbolSize: function (data) {
         // Changes datapoint to correspond to number of spans in a trace
-        const scaleSymbolSize = 10;
-        return data.spanCount * scaleSymbolSize;
+        const maxScaleSymbolSize = 80;
+        return (data.spanCount / maxSpanCount) * maxScaleSymbolSize;
       },
       itemStyle: {
         color: function (params) {
           const traceData: EChartTraceValue = params.data as EChartTraceValue;
           // If the trace contains an error, color the datapoint in red
-          if (traceData.errorCount !== undefined && traceData.errorCount > 0) {
+          if (traceData.errorCount > 0) {
             return 'red';
           }
           // Else return default color
@@ -124,13 +138,13 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       series.push({ ...seriesTemplate2, datasetIndex: i });
     }
     return series;
-  }, [dataset, defaultColor]);
+  }, [dataset, defaultColor, maxSpanCount]);
 
   // Error check: specify an alert if no traces are returned from the query
   const traceData = traceResults[0]?.data;
   if (!traceIsLoading && traceData?.traces.length === 0) {
     const query = traceData?.metadata?.executedQueryString;
-    return generateErrorAlert(`No traces found for the query : " ${query} " .`);
+    return generateErrorAlert(`No traces found for the query: " ${query} " .`);
   }
 
   const options: EChartsOption = {

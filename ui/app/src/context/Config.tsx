@@ -44,6 +44,11 @@ export function useConfigContext(): ConfigContextType {
   return ctx;
 }
 
+export function useIsEphemeralDashboardActivated(): boolean {
+  const { config } = useConfigContext();
+  return config.ephemeral_dashboard.activate;
+}
+
 export function useIsReadonly(): boolean {
   const { config } = useConfigContext();
   return config.security.readonly;

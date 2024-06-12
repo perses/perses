@@ -59,7 +59,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 	apiV1Endpoints := []route.Endpoint{
 		dashboard.NewEndpoint(serviceManager.GetDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		datasource.NewEndpoint(serviceManager.GetDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
-		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive),
+		ephemeraldashboard.NewEndpoint(serviceManager.GetEphemeralDashboard(), serviceManager.GetRBAC(), readonly, caseSensitive, cfg.EphemeralDashboard.Activate),
 		folder.NewEndpoint(serviceManager.GetFolder(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globaldatasource.NewEndpoint(serviceManager.GetGlobalDatasource(), serviceManager.GetRBAC(), readonly, caseSensitive),
 		globalrole.NewEndpoint(serviceManager.GetGlobalRole(), serviceManager.GetRBAC(), readonly, caseSensitive),

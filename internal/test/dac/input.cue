@@ -62,7 +62,7 @@ import (
 		},
 		promQLVarBuilder & {
 			#name:           "pod"
-			#query:          "group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})"
+			#query:          "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})"
 			#allowAllValue:  true
 			#allowMultiple:  true
 			#datasourceName: "promDemo"
@@ -81,7 +81,7 @@ import (
 				description: "simply the list of labels for the considered metric"
 				hidden:      true
 			}
-			#query:          "kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"
+			#query:          "kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"}"
 			#datasourceName: "promDemo"
 			#sort:           "alphabetical-ci-desc"
 		},
@@ -90,7 +90,9 @@ import (
 
 #filter: {promFilterBuilder & #myVarsBuilder}.filter
 
-#cpuPanel: this=panelBuilder & {
+#cpuPanel: panelBuilder & {
+	#grouping: string | *""
+
 	spec: {
 		display: name: "Container CPU"
 		plugin: timeseriesChart
@@ -98,16 +100,15 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "sum \(this.#aggr) (container_cpu_usage_seconds{\(#filter)})"
+					spec: query: "sum \(#grouping) (container_cpu_usage_seconds{\(#filter)})"
 				}
 			},
 		]
 	}
 }
 
-#memoryPanel: this=panelBuilder & {
-	#clause: "by"
-	#clauseLabels: ["container"]
+#memoryPanel: panelBuilder & {
+	#grouping: string | *""
 
 	spec: {
 		display: name: "Container memory"
@@ -116,7 +117,7 @@ import (
 			{
 				kind: "TimeSeriesQuery"
 				spec: plugin: promQuery & {
-					spec: query: "max \(this.#aggr) (container_memory_rss{\(#filter)})"
+					spec: query: "max \(#grouping) (container_memory_rss{\(#filter)})"
 				}
 			},
 		]
@@ -143,8 +144,8 @@ dashboardBuilder & {
 				#cols:   1
 				#height: 4
 				#panels: [
-					#cpuPanel,
-					#memoryPanel,
+					#cpuPanel & {#grouping: "by (container)"},
+					#memoryPanel & {#grouping: "by (container)"},
 				]
 			},
 		]
