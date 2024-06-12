@@ -47,7 +47,15 @@ function hashCode(str: string) {
   return hash;
 }
 
-export function traceServiceColor(serviceName: string, colors: string[]) {
-  const hash = hashCode(serviceName);
-  return colors[hash % colors.length];
+/**
+ * Assign a color based on the serviceName.
+ * The same serviceName should always get the same color assigned.
+ */
+export function traceServiceColor(serviceName: string, colors: string[]): string {
+  if (colors.length === 0) {
+    throw new Error('List of colors is empty.');
+  }
+
+  const hash = Math.abs(hashCode(serviceName));
+  return colors[hash % colors.length] as string;
 }
