@@ -41,11 +41,32 @@ export const MOCK_TRACE_DATA: TraceData = {
   traces: [
     {
       durationMs: 1120,
-      errorCount: 0,
-      spanCount: 10,
+      serviceStats: {
+        'shop-backend': {
+          spanCount: 4,
+          errorCount: 0,
+        },
+        'cart-service': {
+          spanCount: 2,
+          errorCount: 0,
+        },
+        'article-service': {
+          spanCount: 2,
+          errorCount: 0,
+        },
+        'auth-service': {
+          spanCount: 1,
+          errorCount: 0,
+        },
+        postgres: {
+          spanCount: 1,
+          errorCount: 0,
+        },
+      },
       startTimeUnixMs: 1699916103945861,
       traceId: '95ba9202315c29c801b5aa41452aa775',
-      name: 'rootServiceName="shop-backend", rootTraceName="shop-backend"',
+      rootServiceName: 'shop-backend',
+      rootTraceName: 'article-to-cart',
     },
   ],
   metadata: {
