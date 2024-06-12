@@ -62,29 +62,30 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
   // Generate dataset
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
   // https://echarts.apache.org/handbook/en/concepts/dataset
-  const dataset = useMemo(() => {
-    const traceData = traceResults[0]?.data;
-    if (traceIsLoading || traceData === undefined) {
-      return [];
+  const { dataset, maxSpanCount } = useMemo(() => {
+    if (traceIsLoading) {
+      return { dataset: [], maxSpanCount: 1 };
     }
+
     const dataset = [];
+    let maxSpanCount = 1;
     for (const result of traceResults) {
-      if (traceIsLoading || traceData === undefined) {
-        return [];
-      }
       if (result.isLoading || result.data === undefined) continue;
       const dataSeries = result.data.traces.map((trace) => {
         const newTraceValue: EChartTraceValue = {
           ...trace,
           startTime: new Date(trace.startTimeUnixMs), // convert unix epoch time to Date
         };
+        if (newTraceValue.spanCount && newTraceValue.spanCount > maxSpanCount) {
+          maxSpanCount = newTraceValue.spanCount;
+        }
         return newTraceValue;
       });
       dataset.push({
         source: dataSeries,
       });
     }
-    return dataset;
+    return { dataset, maxSpanCount };
   }, [traceIsLoading, traceResults]);
 
   // Formatting for the dataset
@@ -102,8 +103,8 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       },
       symbolSize: function (data) {
         // Changes datapoint to correspond to number of spans in a trace
-        const scaleSymbolSize = 10;
-        return data.spanCount * scaleSymbolSize;
+        const maxScaleSymbolSize = 80;
+        return (data.spanCount / maxSpanCount) * maxScaleSymbolSize;
       },
       itemStyle: {
         color: function (params) {
@@ -124,7 +125,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       series.push({ ...seriesTemplate2, datasetIndex: i });
     }
     return series;
-  }, [dataset, defaultColor]);
+  }, [dataset, defaultColor, maxSpanCount]);
 
   // Error check: specify an alert if no traces are returned from the query
   const traceData = traceResults[0]?.data;
