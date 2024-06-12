@@ -50,6 +50,7 @@ export function Scatterplot(props: ScatterplotProps) {
   const eChartOptions: EChartsCoreOption = {
     dataset: options.dataset,
     series: options.series,
+    dataZoom: options.dataZoom,
     grid: {
       bottom: 40,
       top: 50,
@@ -89,17 +90,6 @@ export function Scatterplot(props: ScatterplotProps) {
         ].join('');
       },
     },
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 0,
-        end: 20,
-      },
-      {
-        start: 0,
-        end: 20,
-      },
-    ],
     legend: {
       show: true,
       type: 'scroll',

@@ -20,7 +20,7 @@ import (
 type Option func(proxy *Builder) error
 
 type Builder struct {
-	http.Proxy
+	http.Proxy `json:",inline" yaml:",inline"`
 }
 
 func New(url string, options ...Option) (Builder, error) {

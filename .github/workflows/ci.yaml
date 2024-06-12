@@ -188,7 +188,7 @@ jobs:
         if: ${{ github.ref_name == 'main' }}
         run: ./scripts/override_version.sh
       - name: install goreleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
           install-only: true
