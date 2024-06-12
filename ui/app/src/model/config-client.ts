@@ -135,11 +135,17 @@ export interface FrontendConfig {
   information?: string;
 }
 
+export interface EphemeralDashboardConfig {
+  activate: boolean;
+  cleanup_interval: string;
+}
+
 export interface ConfigModel {
   security: SecurityConfig;
   database: Database;
   schemas: ConfigSchemasModel;
   provisioning?: ProvisioningConfig;
+  ephemeral_dashboard: EphemeralDashboardConfig;
   frontend: FrontendConfig;
 }
 

@@ -18,11 +18,24 @@ import (
 
 	"github.com/perses/common/config"
 	"github.com/prometheus/common/model"
+	"github.com/sirupsen/logrus"
 )
 
 const (
 	defaultEphemeralDashboardsCleanupInterval = 24 * time.Hour
 )
+
+type EphemeralDashboard struct {
+	Activate        bool           `json:"activate" yaml:"activate"`
+	CleanupInterval model.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
+}
+
+func (e *EphemeralDashboard) Verify() error {
+	if e.Activate && e.CleanupInterval <= 0 {
+		e.CleanupInterval = model.Duration(defaultEphemeralDashboardsCleanupInterval)
+	}
+	return nil
+}
 
 type dashboardSelector struct {
 	// Project is the name of the project (dashboard.metadata.project)
@@ -40,14 +53,23 @@ type Config struct {
 	// Provisioning contains the provisioning config that can be used if you want to provide default resources.
 	Provisioning ProvisioningConfig `json:"provisioning,omitempty" yaml:"provisioning,omitempty"`
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
+	// DEPRECATED.
+	// Please use the config EphemeralDashboard instead.
 	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
+	// EphemeralDashboard contains the config about the ephemeral dashboard feature
+	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
 }
 
 func (c *Config) Verify() error {
-	if c.EphemeralDashboardsCleanupInterval <= 0 {
-		c.EphemeralDashboardsCleanupInterval = model.Duration(defaultEphemeralDashboardsCleanupInterval)
+	if c.EphemeralDashboardsCleanupInterval > 0 {
+		logrus.Warn("'ephemeral_dashboards_cleanup_interval' is deprecated. Please use the config 'ephemeral_dashboard' instead")
+		// This is to avoid an immediate breaking change. This code will be removed for the version v0.49.0
+		c.EphemeralDashboard = EphemeralDashboard{
+			Activate:        true,
+			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
+		}
 	}
 	return nil
 }

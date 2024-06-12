@@ -77,7 +77,11 @@ Generic placeholders are defined as follows:
 [ provisioning: <Provisioning config> ]
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-[ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
+# This config is deprecated. Please use the config ephemeral_dashboard instead.
+[ ephemeral_dashboards_cleanup_interval: <duration> ]
+
+# The config for the ephemeral dashboard feature. This is the way to activate the feature.
+[ ephemeral_dashboard: < EphemeralDashboard config > ]
 
 # Any configuration related to the UI itself
 [ frontend: <Frontend config]
@@ -428,7 +432,7 @@ A TLS config allows configuring TLS connections.
 [ max_version: <string> ]
 ```
 
-### Provisioning specification
+### Provisioning config
 
 ```yaml
 [ interval: <duration> | default = 1h ]
@@ -437,6 +441,16 @@ A TLS config allows configuring TLS connections.
 # Every known data found in the different folders will be injected in the database regardless what exist.
 folders:
   - <string>
+```
+
+### EphemeralDashboard config
+
+```yaml
+# When true user will be able to use the ephemeral dashboard at project level
+[ activate: <bool> | default = false ]
+
+# The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
+[ cleanup_interval <duration> | default = 1d ]
 ```
 
 ### Frontend config
