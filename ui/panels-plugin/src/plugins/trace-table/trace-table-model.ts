@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './plugins/time-series-chart';
-export * from './plugins/gauge-chart';
-export * from './plugins/stat-chart';
-export * from './plugins/markdown';
-export * from './plugins/bar-chart';
-export * from './plugins/scatterplot';
-export * from './plugins/time-series-table';
-export * from './plugins/trace-table';
+/**
+ * The Options object type supported by the TraceTable panel plugin.
+ */
+// Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TraceTableOptions {}
+
+/**
+ * Creates the initial/empty options for a TraceTable panel.
+ */
+export function createInitialTraceTableOptions() {
+  return {};
+}

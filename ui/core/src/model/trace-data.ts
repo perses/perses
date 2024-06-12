@@ -38,3 +38,16 @@ export interface TraceData {
   traces: TraceValue[];
   metadata?: TraceMetaData;
 }
+
+function hashCode(str: string) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return hash;
+}
+
+export function traceServiceColor(serviceName: string, colors: string[]) {
+  const hash = hashCode(serviceName);
+  return colors[hash % colors.length];
+}
