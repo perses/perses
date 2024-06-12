@@ -64,9 +64,12 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
 	}
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
-	ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
+	if conf.EphemeralDashboard.Activate {
+		ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
+		if err != nil {
+			return nil, nil, fmt.Errorf("unable to instantiate the task for cleaning ephemeral dashboards: %w", err)
+		}
+		runner.WithTimerTasks(time.Duration(conf.EphemeralDashboard.CleanupInterval), ephemeralDashboardsCleaner)
 	}
 
 	runner.WithTasks(watcher, migrateWatcher)
@@ -82,7 +85,6 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		rbacTask := rbac.NewCronTask(serviceManager.GetRBAC(), persesDAO)
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
-	runner.WithTimerTasks(time.Duration(conf.EphemeralDashboardsCleanupInterval), ephemeralDashboardsCleaner)
 
 	// register the API
 	runner.HTTPServerBuilder().
