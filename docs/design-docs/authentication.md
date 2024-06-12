@@ -46,27 +46,27 @@ authenticate this user in the subsequent requests.
 ### => Configuration example
 
 ```yaml
-  authentication:
-    providers:
-      oidc:
-      # Example with an Azure AD OIDC configuration
-      - slug_id: azure
-        name: "Azure AD"
-        client_id: "<secret>"
-        client_secret: "<secret>"
-        issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
-        redirect_uri: "http://localhost:3000/api/auth/providers/oidc-azure/callback"
-        scopes: ["openid", "profile", "email", "User.read"]
-      oauth:
-      - slug_id: github
-        name: "Github"
-        client_id: "<secret>"
-        client_secret: "<secret>"
-        auth_url: "https://github.com/login/oauth/authorize"
-        token_url: "https://github.com/login/oauth/access_token"
-        logout_url: "https://github.com/login/oauth/logout"
-        redirect_uri: "http://localhost:3000/api/auth/providers/oauth-github/callback"
-        user_infos_url: "https://api.github.com/user"
+authentication:
+  providers:
+    oidc:
+    # Example with an Azure AD OIDC configuration
+    - slug_id: azure
+      name: "Azure AD"
+      client_id: "<secret>"
+      client_secret: "<secret>"
+      issuer: "https://login.microsoftonline.com/<tenant-id>/v2.0"
+      redirect_uri: "http://localhost:3000/api/auth/providers/oidc-azure/callback"
+      scopes: ["openid", "profile", "email", "User.read"]
+    oauth:
+    - slug_id: github
+      name: "Github"
+      client_id: "<secret>"
+      client_secret: "<secret>"
+      auth_url: "https://github.com/login/oauth/authorize"
+      token_url: "https://github.com/login/oauth/access_token"
+      logout_url: "https://github.com/login/oauth/logout"
+      redirect_uri: "http://localhost:3000/api/auth/providers/oauth-github/callback"
+      user_infos_url: "https://api.github.com/user"
 ```
 
 ### => Login from external OIDC or OAuth2.0 provider with interactive flow, through WEB UI. (`authorization_code`)

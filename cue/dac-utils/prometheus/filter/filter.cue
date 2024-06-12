@@ -24,8 +24,8 @@ import (
 filter: strings.Join(
 	[for var in #input {
 		[// switch
-			if var.#kind == "TextVariable" {"\(var.#name)=\"$\(var.#name)\""},
-			if var.#kind == "ListVariable" if var.#pluginKind != labelNamesVar.kind {"\(var.#name)=\"$\(var.#name)\""},
+			if var.#kind == "TextVariable" {"\(var.#name)=~\"$\(var.#name)\""},
+			if var.#kind == "ListVariable" if var.#pluginKind != labelNamesVar.kind {"\(var.#name)=~\"$\(var.#name)\""},
 		][0]
 	}],
 	",",

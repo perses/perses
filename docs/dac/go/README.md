@@ -1,4 +1,4 @@
-# CUE SDK for Dashboard-as-Code
+# Go SDK for Dashboard-as-Code
 
 > [!NOTE]
 > To get started with Dashboard-as-Code in Perses, have a look at the [DaC user guide](../../user-guides/dashboard-as-code.md) first.

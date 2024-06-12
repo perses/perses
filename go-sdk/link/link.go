@@ -36,5 +36,5 @@ func New(url string, options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	v1.Link
+	v1.Link `json:",inline" yaml:",inline"`
 }
