@@ -21,7 +21,7 @@ export const TempoTraceQuery = {
   getTraceData,
   OptionsEditorComponent: TempoTraceQueryEditor,
   createInitialOptions: () => ({
-    query: '{}',
+    query: '',
     datasource: undefined,
   }),
 };
