@@ -16,6 +16,7 @@ export interface Span {
   spanId?: string; // Span from api/search/<query>
   spanID?: string; // Span from api/traces/<traceID>
   attributes?: Attribute[];
+  events?: Event[];
   durationNanos?: string;
   endTimeUnixNano?: string;
   kind?: string;
@@ -32,11 +33,25 @@ export interface Trace {
   rootServiceName: string;
   rootTraceName: string;
   startTimeUnixNano: string;
-  durationMs: number;
+  /** unset if duration is less than 1ms */
+  durationMs?: number;
+  /** @deprecated spanSet is deprecated in favor of spanSets */
+  spanSet?: {
+    spans: Span[];
+    matched: number;
+  };
   spanSets?: Array<{
     spans: Span[];
     matched: number;
   }>;
+  /** ServiceStats are only available in Tempo vParquet4+ blocks */
+  serviceStats?: Record<string, ServiceStats>;
+}
+
+export interface ServiceStats {
+  spanCount: number;
+  /** number of spans with errors, unset if zero */
+  errorCount?: number;
 }
 
 /**
@@ -48,11 +63,15 @@ export interface SearchTraceQueryResponse {
 
 export interface Attribute {
   key: string;
-  value: {
-    stringValue?: string;
-    intValue?: string;
-  };
+  value: AttributeValue;
 }
+
+export type AttributeValue =
+  | { stringValue: string }
+  | { intValue: string }
+  | { arrayValue: { values: AttributeValue[] } };
+
+export interface Event {}
 
 export interface ScopeSpan {
   scope: {
@@ -73,19 +92,4 @@ export interface Batch {
  */
 export interface SearchTraceIDResponse {
   batches: Batch[];
-}
-
-/**
- * Combined Response of Tempo HTTP API endpoint GET /api/search/<query>
- * and GET /api/traces/<traceID>. For each trace returned from GET /api/search/<query>
- * a detailed trace report is fetched from  GET /api/traces/<traceID>.
- */
-export interface EnrichedTraceQueryResponse {
-  query: string;
-  traces: Array<{
-    spanCount: number;
-    errorCount: number;
-    summary: Trace;
-    traceDetails: SearchTraceIDResponse;
-  }>;
 }

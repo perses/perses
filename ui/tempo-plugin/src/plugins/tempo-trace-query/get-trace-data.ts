@@ -64,25 +64,16 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return queryWithTimeRange;
   };
 
-  const enrichedTraceResponse = await client.getEnrichedTraceQuery(getQuery(), datasourceUrl);
+  const searchResultResponse = await client.searchTraceQueryFallback(getQuery(), datasourceUrl);
 
-  const traces: TraceValue[] = enrichedTraceResponse.traces.map((traceValue) => {
-    const startTimeUnixMs = parseInt(traceValue.summary.startTimeUnixNano) * 1e-6; // convert to millisecond for eChart time format
-    const durationMs = traceValue.summary.durationMs;
-    const spanCount = traceValue.spanCount;
-    const errorCount = traceValue.errorCount;
-    const traceId = traceValue.summary.traceID;
-    const name = `rootServiceName="${traceValue.summary.rootServiceName.trim()}", rootTraceName="${traceValue.summary.rootServiceName.trim()}"`;
-
-    return {
-      startTimeUnixMs,
-      durationMs,
-      spanCount,
-      errorCount,
-      traceId,
-      name,
-    };
-  });
+  const traces: TraceValue[] = searchResultResponse.traces.map((trace) => ({
+    startTimeUnixMs: parseInt(trace.startTimeUnixNano) * 1e-6, // convert to millisecond for eChart time format,
+    durationMs: trace.durationMs ?? 0, // Tempo API doesn't return 0 values
+    traceId: trace.traceID,
+    rootServiceName: trace.rootServiceName,
+    rootTraceName: trace.rootTraceName,
+    serviceStats: trace.serviceStats || {},
+  }));
 
   const traceData: TraceData = {
     traces,

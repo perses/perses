@@ -21,10 +21,14 @@ export const MOCK_TRACE_DATA: TraceData = {
     {
       startTimeUnixMs: 1702915645000, // unix epoch time in milliseconds
       durationMs: 100,
-      spanCount: 10,
-      errorCount: 0,
+      serviceStats: {
+        serviceA: {
+          spanCount: 10,
+        },
+      },
       traceId: '123',
-      name: 'mock-trace-service-name',
+      rootServiceName: 'service-name',
+      rootTraceName: 'span-name',
     },
   ],
   metadata: {
