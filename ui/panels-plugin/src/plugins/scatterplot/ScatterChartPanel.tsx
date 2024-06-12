@@ -81,6 +81,9 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
           spanCount += stats.spanCount;
           errorCount += stats.errorCount ?? 0;
         }
+        if (spanCount > maxSpanCount) {
+          maxSpanCount = spanCount;
+        }
 
         const newTraceValue: EChartTraceValue = {
           ...trace,
@@ -89,9 +92,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
           spanCount,
           errorCount,
         };
-        if (newTraceValue.spanCount && newTraceValue.spanCount > maxSpanCount) {
-          maxSpanCount = newTraceValue.spanCount;
-        }
         return newTraceValue;
       });
       dataset.push({
