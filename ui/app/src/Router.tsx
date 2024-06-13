@@ -27,7 +27,12 @@ import {
   SignUpRoute,
   ExploreRoute,
 } from './model/route';
-import { useIsAuthEnabled, useIsEphemeralDashboardActivated, useIsSignUpDisable } from './context/Config';
+import {
+  useIsAuthEnabled,
+  useIsEphemeralDashboardActivated,
+  useIsExplorerActivated,
+  useIsSignUpDisable,
+} from './context/Config';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -45,6 +50,7 @@ function Router() {
   const isAuthEnabled = useIsAuthEnabled();
   const isSignUpDisable = useIsSignUpDisable();
   const isEphemeralDashboardActivated = useIsEphemeralDashboardActivated();
+  const isExplorerActivated = useIsExplorerActivated();
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
       {/* TODO: What sort of loading fallback do we want? */}
@@ -57,7 +63,7 @@ function Router() {
           <Route path={ConfigRoute} element={<ConfigView />} />
           <Route path={ImportRoute} element={<ImportView />} />
           <Route path={ProjectRoute} element={<HomeView />} />
-          <Route path={ExploreRoute} element={<ExploreView />} />
+          {isExplorerActivated && <Route path={ExploreRoute} element={<ExploreView />} />}
           <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
             <Route path="" element={<ProjectView />} />
             <Route path=":tab" element={<ProjectView />} />
