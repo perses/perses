@@ -141,7 +141,7 @@ export interface FrontendConfig {
 }
 
 export interface EphemeralDashboardConfig {
-  activate: boolean;
+  enable: boolean;
   cleanup_interval: string;
 }
 

@@ -26,12 +26,14 @@ const (
 )
 
 type EphemeralDashboard struct {
-	Activate        bool           `json:"activate" yaml:"activate"`
+	// When true user will be able to use the ephemeral dashboard at project level.
+	Enable bool `json:"enable" yaml:"enable"`
+	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 	CleanupInterval model.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
 }
 
 func (e *EphemeralDashboard) Verify() error {
-	if e.Activate && e.CleanupInterval <= 0 {
+	if e.Enable && e.CleanupInterval <= 0 {
 		e.CleanupInterval = model.Duration(defaultEphemeralDashboardsCleanupInterval)
 	}
 	return nil
@@ -67,7 +69,7 @@ func (c *Config) Verify() error {
 		logrus.Warn("'ephemeral_dashboards_cleanup_interval' is deprecated. Please use the config 'ephemeral_dashboard' instead")
 		// This is to avoid an immediate breaking change. This code will be removed for the version v0.49.0
 		c.EphemeralDashboard = EphemeralDashboard{
-			Activate:        true,
+			Enable:          true,
 			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
 		}
 	}

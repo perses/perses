@@ -44,14 +44,14 @@ export function useConfigContext(): ConfigContextType {
   return ctx;
 }
 
-export function useIsExplorerActivated(): boolean {
+export function useIsExplorerEnabled(): boolean {
   const { config } = useConfigContext();
   return config.frontend.explorer.enable;
 }
 
-export function useIsEphemeralDashboardActivated(): boolean {
+export function useIsEphemeralDashboardEnabled(): boolean {
   const { config } = useConfigContext();
-  return config.ephemeral_dashboard.activate;
+  return config.ephemeral_dashboard.enable;
 }
 
 export function useIsReadonly(): boolean {

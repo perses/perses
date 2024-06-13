@@ -28,21 +28,21 @@ import (
 )
 
 type endpoint struct {
-	toolbox     toolbox.Toolbox[*v1.EphemeralDashboard, *ephemeraldashboard.Query]
-	readonly    bool
-	isActivated bool
+	toolbox   toolbox.Toolbox[*v1.EphemeralDashboard, *ephemeraldashboard.Query]
+	readonly  bool
+	isEnabled bool
 }
 
-func NewEndpoint(service ephemeraldashboard.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool, isActivated bool) route.Endpoint {
+func NewEndpoint(service ephemeraldashboard.Service, rbacService rbac.RBAC, readonly bool, caseSensitive bool, isEnabled bool) route.Endpoint {
 	return &endpoint{
-		toolbox:     toolbox.New[*v1.EphemeralDashboard, *v1.EphemeralDashboard, *ephemeraldashboard.Query](service, rbacService, v1.KindEphemeralDashboard, caseSensitive),
-		readonly:    readonly,
-		isActivated: isActivated,
+		toolbox:   toolbox.New[*v1.EphemeralDashboard, *v1.EphemeralDashboard, *ephemeraldashboard.Query](service, rbacService, v1.KindEphemeralDashboard, caseSensitive),
+		readonly:  readonly,
+		isEnabled: isEnabled,
 	}
 }
 
 func (e *endpoint) CollectRoutes(g *route.Group) {
-	if !e.isActivated {
+	if !e.isEnabled {
 		return
 	}
 	group := g.Group(fmt.Sprintf("/%s", utils.PathEphemeralDashboard))
