@@ -13,9 +13,16 @@
 
 package config
 
+type Explorer struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
 	Deactivate bool `json:"deactivate" yaml:"deactivate"`
+	// Explorer is activating the different kind of explorer supported.
+	// Be sure you have installed an associated plugin for each explorer type.
+	Explorer Explorer `json:"explorer" yaml:"explorer"`
 	// Information contains markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains important dashboard selectors

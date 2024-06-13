@@ -130,9 +130,14 @@ export interface SecurityConfig {
   authentication: AuthenticationConfig;
 }
 
+export interface ExplorerConfig {
+  enable: boolean;
+}
+
 export interface FrontendConfig {
   important_dashboards?: DashboardSelector[];
   information?: string;
+  explorer: ExplorerConfig;
 }
 
 export interface EphemeralDashboardConfig {

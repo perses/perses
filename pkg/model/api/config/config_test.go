@@ -61,7 +61,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "cleanup_interval": "0s"
   },
   "frontend": {
-    "deactivate": false
+    "deactivate": false,
+    "explorer": {
+      "enable": false
+    }
   }
 }`,
 		},
@@ -107,7 +110,10 @@ func TestJSONMarshalConfig(t *testing.T) {
     "cleanup_interval": "0s"
   },
   "frontend": {
-    "deactivate": false
+    "deactivate": false,
+    "explorer": {
+      "enable": false
+    }
   }
 }`,
 		},

@@ -40,6 +40,9 @@ ephemeral_dashboard:
   cleanup_interval: 1h
 
 frontend:
+  explorer:
+    enable: true
+
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"
