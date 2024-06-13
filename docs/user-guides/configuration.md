@@ -94,6 +94,9 @@ Generic placeholders are defined as follows:
 # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
 [ readonly: <boolean> | default = false ]
   
+# Cookie configuration
+[ cookie: <Cookie config> ]
+  
 # It contains the config regarding the time to live of the refresh/access token.
 [ authentication: <Authentication config> ]
 
@@ -112,6 +115,18 @@ Generic placeholders are defined as follows:
 
 # The path to the file containing the secret key.
 [ encryption_key_file: <filename> ]
+```
+
+### Cookie config
+
+```yaml
+# Set the same_site cookie attribute and prevents the browser from sending the cookie along with cross-site requests.
+# The main goal is to mitigate the risk of cross-origin information leakage.
+# This setting also provides some protection against cross-site request forgery attacks (CSRF)
+[ same_site: < enum | possibleValue = 'strict' | 'lax' | 'none' > | default = lax ]
+
+# Set to true if you host Perses behind HTTPS. Default is false
+[ secure: <boolean> | default = false ]
 ```
 
 #### Authentication config
@@ -450,7 +465,7 @@ folders:
 [ activate: <bool> | default = false ]
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-[ cleanup_interval <duration> | default = 1d ]
+[ cleanup_interval: <duration> | default = 1d ]
 ```
 
 ### Frontend config

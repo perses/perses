@@ -53,6 +53,7 @@ func New(security config.Security) (Crypto, JWT, error) {
 			refreshKey:      append(key, []byte("-refresh")...),
 			accessTokenTTL:  time.Duration(security.Authentication.AccessTokenTTL),
 			refreshTokenTTL: time.Duration(security.Authentication.RefreshTokenTTL),
+			cookieConfig:    security.Cookie,
 		}, nil
 }
 
