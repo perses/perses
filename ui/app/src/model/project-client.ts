@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { DashboardResource, ProjectResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
-import { getDashboards, resource as dashboardResource } from './dashboard-client';
+import { resource as dashboardResource, useDashboardList } from './dashboard-client';
 import { resource as variableResource } from './variable-client';
 import { resource as datasourceResource } from './datasource-client';
 import buildQueryKey from './querykey-builder';
@@ -181,30 +182,53 @@ export function useDeleteProjectMutation() {
   });
 }
 
-async function getProjectsWithDashboard(): Promise<ProjectWithDashboards[]> {
-  const projects = await getProjects();
-  const dashboards = await getDashboards(undefined, true);
-  const dashboardList: Record<string, DashboardResource[]> = {};
-
-  for (const dashboard of dashboards) {
-    const list = dashboardList[dashboard.metadata.project] ?? [];
-    list.push(dashboard);
-    dashboardList[dashboard.metadata.project] = list;
+/**
+ * Used to merge the results of multiple queries.
+ * It is returning the first result being loading or in error. Otherwise, it returns the first result.
+ *
+ * It's based on the following statement found in tanstack/query documentation
+ * https://tanstack.com/query/v4/docs/framework/react/guides/queries#query-basics
+ * " For most queries, it's usually sufficient to check for the isLoading state, then the isError state, then finally,
+ *   assume that the data is available and render the successful state. "
+ *
+ * The first + others params is just a trick to ensure that we have at least one query result to process.
+ * Consider it as a list with at least one element.
+ * @param first
+ * @param others
+ */
+function mergeQueryResults(first: UseQueryResult, ...others: UseQueryResult[]): UseQueryResult {
+  for (const result of [first, ...others]) {
+    if (result.isLoading || result.isError) {
+      return result;
+    }
   }
-
-  const result: ProjectWithDashboards[] = [];
-  for (const project of projects ?? []) {
-    const list = dashboardList[project.metadata.name] ?? [];
-    result.push({ project: project, dashboards: list });
-  }
-  return result;
+  return first;
 }
 
-export function useProjectsWithDashboards() {
-  // We use a custom query key to avoid having the same key as a project name
-  // and still have reinvalidation when a project is modified
-  const queryKey = buildQueryKey({ resource, name: '*custom*' });
-  return useQuery<ProjectWithDashboards[], Error>(queryKey, () => {
-    return getProjectsWithDashboard();
-  });
+export function useProjectsWithDashboards(): UseQueryResult<ProjectWithDashboards[]> {
+  const projectsQueryResult = useProjectList();
+  const dashboardsQueryResult = useDashboardList(undefined, true);
+
+  return {
+    ...mergeQueryResults(projectsQueryResult, dashboardsQueryResult),
+    data: useMemo(() => {
+      const dashboards = dashboardsQueryResult.data ?? [];
+      const projects = projectsQueryResult.data ?? [];
+
+      // Store dashboard list by project
+      const dashboardList: Record<string, DashboardResource[]> = {};
+      for (const dashboard of dashboards) {
+        const list = dashboardList[dashboard.metadata.project] ?? [];
+        list.push(dashboard);
+        dashboardList[dashboard.metadata.project] = list;
+      }
+
+      const result: ProjectWithDashboards[] = [];
+      for (const project of projects) {
+        const list = dashboardList[project.metadata.name] ?? [];
+        result.push({ project: project, dashboards: list });
+      }
+      return result;
+    }, [projectsQueryResult.data, dashboardsQueryResult.data]),
+  } as UseQueryResult<ProjectWithDashboards[]>;
 }
