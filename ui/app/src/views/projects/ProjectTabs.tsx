@@ -37,7 +37,7 @@ import { VariableDrawer } from '../../components/variable/VariableDrawer';
 import { DatasourceDrawer } from '../../components/datasource/DatasourceDrawer';
 import { useCreateDatasourceMutation } from '../../model/datasource-client';
 import { useCreateVariableMutation } from '../../model/variable-client';
-import { useIsAuthEnabled, useIsEphemeralDashboardActivated, useIsReadonly } from '../../context/Config';
+import { useIsAuthEnabled, useIsEphemeralDashboardEnabled, useIsReadonly } from '../../context/Config';
 import { MenuTab, MenuTabs } from '../../components/tabs';
 import { useCreateRoleBindingMutation } from '../../model/rolebinding-client';
 import { useCreateRoleMutation, useRoleList } from '../../model/role-client';
@@ -418,7 +418,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
 
   const navigate = useNavigate();
   const isMobileSize = useIsMobileSize();
-  const isEphemeralDashboardActivated = useIsEphemeralDashboardActivated();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
   const { data } = useEphemeralDashboardList(projectName);
   const hasEphemeralDashboards = (data ?? []).length > 0;
 
@@ -522,7 +522,7 @@ export function ProjectTabs(props: DashboardVariableTabsProps) {
       <TabPanel value={value} index={dashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
         <ProjectDashboards projectName={projectName} id="main-dashboard-list" />
       </TabPanel>
-      {isEphemeralDashboardActivated && hasEphemeralDashboards && (
+      {isEphemeralDashboardEnabled && hasEphemeralDashboards && (
         <TabPanel value={value} index={ephemeralDashboardsTabIndex} sx={{ marginTop: isMobileSize ? 1 : 2 }}>
           <ProjectEphemeralDashboards projectName={projectName} id="project-ephemeral-dashboard-list" />
         </TabPanel>

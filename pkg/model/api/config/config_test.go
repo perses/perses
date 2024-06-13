@@ -61,11 +61,11 @@ func TestJSONMarshalConfig(t *testing.T) {
   "schemas": {},
   "provisioning": {},
   "ephemeral_dashboard": {
-    "activate": false,
+    "enable": false,
     "cleanup_interval": "0s"
   },
   "frontend": {
-    "deactivate": false,
+    "disable": false,
     "explorer": {
       "enable": false
     }
@@ -114,11 +114,11 @@ func TestJSONMarshalConfig(t *testing.T) {
     "interval": "1h"
   },
   "ephemeral_dashboard": {
-    "activate": false,
+    "enable": false,
     "cleanup_interval": "0s"
   },
   "frontend": {
-    "deactivate": false,
+    "disable": false,
     "explorer": {
       "enable": false
     }
@@ -419,7 +419,7 @@ ephemeral_dashboards_cleanup_interval: "2h"
 				},
 				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
 				EphemeralDashboard: EphemeralDashboard{
-					Activate:        true,
+					Enable:          true,
 					CleanupInterval: model.Duration(2 * time.Hour),
 				},
 			},

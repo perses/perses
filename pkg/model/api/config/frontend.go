@@ -19,7 +19,7 @@ type Explorer struct {
 
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
-	Deactivate bool `json:"deactivate" yaml:"deactivate"`
+	Disable bool `json:"disable" yaml:"disable"`
 	// Explorer is activating the different kind of explorer supported.
 	// Be sure you have installed an associated plugin for each explorer type.
 	Explorer Explorer `json:"explorer" yaml:"explorer"`

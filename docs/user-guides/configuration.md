@@ -462,7 +462,7 @@ folders:
 
 ```yaml
 # When true user will be able to use the ephemeral dashboard at project level
-[ activate: <bool> | default = false ]
+[ enable: <bool> | default = false ]
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 [ cleanup_interval: <duration> | default = 1d ]
@@ -472,7 +472,7 @@ folders:
 
 ```yaml
 # When it is true, Perses won't serve the frontend anymore.
-[ deactivate: <bool> | default = false ]
+[ disable: <bool> | default = false ]
 
 # A list of dashboards you would like to display in the UI home page
 important_dashboards:

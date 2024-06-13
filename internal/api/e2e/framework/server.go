@@ -54,7 +54,7 @@ func DefaultConfig() apiConfig.Config {
 			EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 		},
 		EphemeralDashboard: apiConfig.EphemeralDashboard{
-			Activate: true,
+			Enable: true,
 		},
 		Schemas: apiConfig.Schemas{
 			PanelsPath:      filepath.Join(projectPath, "cue", apiConfig.DefaultPanelsPath),
