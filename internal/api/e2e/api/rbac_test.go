@@ -124,6 +124,11 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 		glRole := e2eframework.NewGlobalRole("test")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).WithJSON(glRole).WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusForbidden)
 
+		// This test only work if the auth cookies are not present from a request to another one.
+		// During the execution of the e2e tests, cookies are persisted from a request to another one.
+		// The only way to avoid keeping the auth cookie is to set the cookie param 'secure' at true.
+		// As the connection is not secured, the cookies cannot be kept (secure means it works only with https).
+		// This is what is done in e2eframework.DefaultAuthConfig
 		project2Entity := e2eframework.NewProject("mysuperproject2")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathProject)).WithJSON(project2Entity).WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusUnauthorized)
 

@@ -16,6 +16,7 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
+	"net/http"
 	"path"
 	"testing"
 	"time"
@@ -44,6 +45,9 @@ func TestJSONMarshalConfig(t *testing.T) {
 			jason: `{
   "security": {
     "readonly": false,
+    "cookie": {
+      "secure": false
+    },
     "enable_auth": false,
     "authorization": {},
     "authentication": {
@@ -74,6 +78,10 @@ func TestJSONMarshalConfig(t *testing.T) {
 			jason: `{
   "security": {
     "readonly": false,
+    "cookie": {
+      "same_site": "lax",
+      "secure": false
+    },
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
     "authorization": {
@@ -336,7 +344,11 @@ ephemeral_dashboards_cleanup_interval: "2h"
 `,
 			result: Config{
 				Security: Security{
-					Readonly:      false,
+					Readonly: false,
+					Cookie: Cookie{
+						SameSite: SameSite(http.SameSiteLaxMode),
+						Secure:   false,
+					},
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{

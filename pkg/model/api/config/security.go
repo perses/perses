@@ -15,8 +15,10 @@ package config
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/perses/perses/pkg/model/api/v1/secret"
@@ -27,9 +29,111 @@ const (
 	defaultEncryptionKey = "e=dz;`M'5Pjvy^Sq3FVBkTC@N9?H/gua"
 )
 
+type SameSite http.SameSite
+
+const (
+	SameSiteLaxMode    string = "lax"
+	SameSiteStrictMode string = "strict"
+	SameSiteNoneMode   string = "none"
+)
+
+func ParseSameSite(s string) (SameSite, error) {
+	switch s {
+	case SameSiteNoneMode:
+		return SameSite(http.SameSiteNoneMode), nil
+	case "", SameSiteLaxMode:
+		return SameSite(http.SameSiteLaxMode), nil
+	case SameSiteStrictMode:
+		return SameSite(http.SameSiteStrictMode), nil
+	default:
+		return 0, fmt.Errorf("cookie same_site %q mode not knowm", s)
+	}
+}
+
+func (s SameSite) String() string {
+	switch http.SameSite(s) {
+	case http.SameSiteNoneMode:
+		return SameSiteNoneMode
+	case http.SameSiteLaxMode:
+		return SameSiteLaxMode
+	case http.SameSiteStrictMode:
+		return SameSiteStrictMode
+	default:
+		return SameSiteLaxMode
+	}
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+func (s SameSite) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+func (s *SameSite) UnmarshalJSON(bytes []byte) error {
+	var str string
+	if err := json.Unmarshal(bytes, &str); err != nil {
+		return err
+	}
+	sameSite, err := ParseSameSite(str)
+	if err != nil {
+		return err
+	}
+	*s = sameSite
+	return nil
+}
+
+// MarshalText implements the encoding.TextMarshaler interface.
+func (s *SameSite) MarshalText() ([]byte, error) {
+	return []byte(s.String()), nil
+}
+
+// UnmarshalText implements the encoding.TextUnmarshaler interface.
+func (s *SameSite) UnmarshalText(text []byte) error {
+	var err error
+	*s, err = ParseSameSite(string(text))
+	return err
+}
+
+// MarshalYAML implements the yaml.Marshaler interface.
+func (s SameSite) MarshalYAML() (interface{}, error) {
+	return s.String(), nil
+}
+
+// UnmarshalYAML implements the yaml.Unmarshaler interface.
+func (s *SameSite) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var str string
+	if err := unmarshal(&str); err != nil {
+		return err
+	}
+	sameSite, err := ParseSameSite(str)
+	if err != nil {
+		return err
+	}
+	*s = sameSite
+	return nil
+}
+
+func (s *SameSite) Verify() error {
+	if *s == 0 {
+		*s = SameSite(http.SameSiteLaxMode)
+	}
+	return nil
+}
+
+type Cookie struct {
+	// Set the SameSite cookie attribute and prevents the browser from sending the cookie along with cross-site requests.
+	// The main goal is to mitigate the risk of cross-origin information leakage.
+	// This setting also provides some protection against cross-site request forgery attacks (CSRF)
+	SameSite SameSite `json:"same_site,omitempty" yaml:"same_site,omitempty"`
+	// Set to true if you host Perses behind HTTPS. Default is false
+	Secure bool `json:"secure" yaml:"secure"`
+}
+
 type Security struct {
 	// Readonly will deactivate any HTTP POST, PUT, DELETE endpoint
 	Readonly bool `json:"readonly" yaml:"readonly"`
+	// Cookie configuration
+	Cookie Cookie `json:"cookie" yaml:"cookie"`
 	// EncryptionKey is the secret key used to encrypt and decrypt sensitive data
 	// stored in the database such as the password of the basic auth for a datasource.
 	// Note that if it is not provided, it will use a default value.

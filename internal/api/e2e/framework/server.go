@@ -17,6 +17,7 @@ package e2eframework
 
 import (
 	"encoding/hex"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -68,6 +69,10 @@ func DefaultConfig() apiConfig.Config {
 func DefaultAuthConfig() apiConfig.Config {
 	conf := DefaultConfig()
 	conf.Security.EnableAuth = true
+	conf.Security.Cookie = apiConfig.Cookie{
+		SameSite: apiConfig.SameSite(http.SameSiteNoneMode),
+		Secure:   true,
+	}
 	conf.Security.Authorization = apiConfig.AuthorizationConfig{GuestPermissions: []*role.Permission{
 		{
 			Actions: []role.Action{role.ReadAction},

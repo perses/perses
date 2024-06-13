@@ -44,6 +44,8 @@ func TestConfigCMD(t *testing.T) {
 			APIClient:       fakeapi.New(),
 			ExpectedMessage: `security:
     readonly: false
+    cookie:
+        secure: false
     enable_auth: true
 
 `,
