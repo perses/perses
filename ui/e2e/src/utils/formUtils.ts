@@ -21,7 +21,7 @@ import { Locator } from '@playwright/test';
  */
 export async function selectMenuItem(container: Locator, selectName: string | RegExp, itemName: string | RegExp) {
   await container
-    .getByRole('button', {
+    .getByRole('combobox', {
       name: selectName,
     })
     .click();

@@ -72,6 +72,6 @@ export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>) {
       pageSizeOptions={PAGE_SIZE_OPTIONS}
       initialState={mergedInitialState}
       sx={DATA_GRID_STYLES}
-    ></DataGrid>
+    />
   );
 }

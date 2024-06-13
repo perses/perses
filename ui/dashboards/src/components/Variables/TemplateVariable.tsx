@@ -164,7 +164,7 @@ export function useListVariableState(
 }
 
 const StyledPopper = (props: PopperProps) => (
-  <Popper placeholder={undefined} {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
+  <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
 const LETTER_HSIZE = 8; // approximation

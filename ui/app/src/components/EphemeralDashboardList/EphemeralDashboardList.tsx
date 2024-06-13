@@ -18,7 +18,7 @@ import {
   getResourceExtendedDisplayName,
 } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
@@ -136,7 +136,7 @@ export function EphemeralDashboardList(props: EphemeralDashboardListProperties) 
         type: 'dateTime',
         flex: 3,
         minWidth: 150,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.expireAt),
+        valueGetter: (_, row) => new Date(row.expireAt),
         renderCell: (params) => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
