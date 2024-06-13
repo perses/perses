@@ -57,8 +57,8 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(project?: string, metadataOnly?: boolean) {
-  return useQuery<DashboardResource[], Error>([resource, project], () => {
+export function useDashboardList(project?: string, metadataOnly: boolean = false) {
+  return useQuery<DashboardResource[], Error>([resource, project, metadataOnly], () => {
     return getDashboards(project, metadataOnly);
   });
 }
@@ -180,7 +180,7 @@ export function getDashboard(project: string, name: string) {
   });
 }
 
-export function getDashboards(project?: string, metadataOnly?: boolean) {
+export function getDashboards(project?: string, metadataOnly: boolean = false) {
   const queryParams = new URLSearchParams();
   if (metadataOnly) {
     queryParams.set('metadata_only', 'true');
