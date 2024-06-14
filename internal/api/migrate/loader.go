@@ -65,13 +65,15 @@ func (c *migCuePart) GetSchemaPath() string {
 	return c.schemasPath
 }
 
-func (c *migCuePart) Load() error {
-	conditions, err := c.buildListOfConditions()
+// NB There are no relevant case of "failed loads" in the case of migration schemas at the moment
+func (c *migCuePart) Load() (successfulLoadsCount, _ int, err error) {
+	var conditions string
+	conditions, successfulLoadsCount, err = c.buildListOfConditions()
 	if err != nil {
-		return err
+		return
 	}
 	c.listOfConditions.Store(&conditions)
-	return nil
+	return
 }
 
 func (c *migCuePart) getConditions() string {
@@ -82,15 +84,16 @@ func (c *migCuePart) getPlaceholder() string {
 	return c.placeholderText
 }
 
-func (c *migCuePart) buildListOfConditions() (string, error) {
+func (c *migCuePart) buildListOfConditions() (string, int, error) {
+	successfulLoadsCount := 0
+
 	files, err := os.ReadDir(c.schemasPath)
 	if err != nil {
-		return "", err
+		return "", successfulLoadsCount, err
 	}
 
+	// gather the content of all migration files found
 	var listOfConditions strings.Builder
-
-	// process each schema plugin to convert it into a CUE Value
 	for _, file := range files {
 		if !file.IsDir() {
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
@@ -105,6 +108,7 @@ func (c *migCuePart) buildListOfConditions() (string, error) {
 
 		listOfConditions.WriteString(string(contentStr))
 		listOfConditions.WriteString("\n")
+		successfulLoadsCount++
 	}
 
 	// append a default conditional for any Grafana plugin that has no corresponding Perses plugin
@@ -114,5 +118,5 @@ func (c *migCuePart) buildListOfConditions() (string, error) {
 	}`, c.defaultValue))
 	listOfConditions.WriteString("\n")
 
-	return listOfConditions.String(), nil
+	return listOfConditions.String(), successfulLoadsCount, nil
 }

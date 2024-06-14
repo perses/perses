@@ -184,10 +184,9 @@ func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
 }
 
 func (m *mig) init() error {
-	for _, l := range m.loaders {
-		if err := l.Load(); err != nil {
-			return err
-		}
+	err := schemas.RunLoaders(m.GetLoaders(), "migration", "full")
+	if err != nil {
+		return err
 	}
 	m.BuildMigrationSchemaString()
 	return nil
