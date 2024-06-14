@@ -50,18 +50,18 @@ export function DataTable({ result }: DataTableProps) {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>
+            <StyledTableCell>
               <Typography>Trace Name</Typography>
-            </TableCell>
-            <TableCell>
+            </StyledTableCell>
+            <StyledTableCell>
               <Typography>Spans</Typography>
-            </TableCell>
-            <TableCell>
+            </StyledTableCell>
+            <StyledTableCell>
               <Typography>Duration</Typography>
-            </TableCell>
-            <TableCell>
+            </StyledTableCell>
+            <StyledTableCell>
               <Typography>Start time</Typography>
-            </TableCell>
+            </StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>{rows}</TableBody>
@@ -80,13 +80,13 @@ function buildRow(theme: PersesChartsTheme, trace: TraceValue): ReactNode {
 
   return (
     <StyledTableRow key={trace.traceId}>
-      <TableCell>
+      <StyledTableCell>
         <Typography>
           <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
         </Typography>
         {buildServiceStatsChips(theme, trace.serviceStats)}
-      </TableCell>
-      <TableCell>
+      </StyledTableCell>
+      <StyledTableCell>
         <Typography display="inline">{totalSpanCount} spans</Typography>
         {totalErrorCount > 0 && (
           <Chip
@@ -98,15 +98,15 @@ function buildRow(theme: PersesChartsTheme, trace: TraceValue): ReactNode {
             color="error"
           />
         )}
-      </TableCell>
-      <TableCell>
+      </StyledTableCell>
+      <StyledTableCell>
         <Typography>
           {trace.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(trace.durationMs))}
         </Typography>
-      </TableCell>
-      <TableCell>
+      </StyledTableCell>
+      <StyledTableCell>
         <Typography>{DATE_FORMATTER(new Date(trace.startTimeUnixMs))}</Typography>
-      </TableCell>
+      </StyledTableCell>
     </StyledTableRow>
   );
 }
@@ -132,4 +132,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:hover': {
     backgroundColor: theme.palette.grey.A100,
   },
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  paddingTop: theme.spacing(1),
+  paddingBottom: theme.spacing(1),
 }));
