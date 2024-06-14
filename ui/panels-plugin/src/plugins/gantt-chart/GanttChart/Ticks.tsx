@@ -11,19 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Theme, useTheme } from '@mui/material';
+import { Box, styled } from '@mui/material';
 import { formatTime, gridColor } from './utils';
 import { Span, Viewport } from './model';
-
-export const tickStyle = (theme: Theme, pos: number): React.CSSProperties => ({
-  position: 'absolute',
-  height: '100%',
-  left: `${pos}%`,
-  display: 'flex',
-  alignItems: 'center',
-  borderLeft: `1px solid ${gridColor(theme)}`,
-  padding: '.25rem',
-});
 
 interface TicksHeaderProps {
   rootSpan: Span;
@@ -35,20 +25,19 @@ interface TicksHeaderProps {
  */
 export function TicksHeader(props: TicksHeaderProps) {
   const { rootSpan, viewport } = props;
-  const theme = useTheme();
 
   const duration = viewport.endTimeUnixNano - viewport.startTimeUnixNano;
   const startAt = viewport.startTimeUnixNano - rootSpan.startTimeUnixNano;
 
   return (
     <>
-      <Box style={tickStyle(theme, 0)}>{formatTime(startAt + duration * 0)}</Box>
-      <Box style={tickStyle(theme, 25)}>{formatTime(startAt + duration * 0.25)}</Box>
-      <Box style={tickStyle(theme, 50)}>{formatTime(startAt + duration * 0.5)}</Box>
-      <Box style={tickStyle(theme, 75)}>{formatTime(startAt + duration * 0.75)}</Box>
-      <Box style={tickStyle(theme, 100)}>
+      <TickBox style={{ left: '0%' }}>{formatTime(startAt + duration * 0)}</TickBox>
+      <TickBox style={{ left: '25%' }}>{formatTime(startAt + duration * 0.25)}</TickBox>
+      <TickBox style={{ left: '50%' }}>{formatTime(startAt + duration * 0.5)}</TickBox>
+      <TickBox style={{ left: '75%' }}>{formatTime(startAt + duration * 0.75)}</TickBox>
+      <TickBox style={{ left: '100%' }}>
         <span style={{ position: 'absolute', right: '.75rem' }}>{formatTime(startAt + duration * 1)}</span>
-      </Box>
+      </TickBox>
     </>
   );
 }
@@ -57,14 +46,20 @@ export function TicksHeader(props: TicksHeaderProps) {
  * Ticks renders all ticks in the span duration
  */
 export function Ticks() {
-  const theme = useTheme();
   return (
     <>
-      <Box style={tickStyle(theme, 0)} />
-      <Box style={tickStyle(theme, 25)} />
-      <Box style={tickStyle(theme, 50)} />
-      <Box style={tickStyle(theme, 75)} />
-      <Box style={tickStyle(theme, 100)} />
+      <TickBox style={{ left: '0%' }} />
+      <TickBox style={{ left: '25%' }} />
+      <TickBox style={{ left: '50%' }} />
+      <TickBox style={{ left: '75%' }} />
+      <TickBox style={{ left: '100%' }} />
     </>
   );
 }
+
+const TickBox = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  height: '100%',
+  borderLeft: `1px solid ${gridColor(theme)}`,
+  padding: '.25rem',
+}));

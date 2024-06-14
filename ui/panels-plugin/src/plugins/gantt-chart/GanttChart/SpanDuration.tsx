@@ -34,30 +34,34 @@ export function SpanDuration(props: SpanDurationProps) {
   const relativeStart = (span.startTimeUnixNano - viewport.startTimeUnixNano) / viewportDuration;
 
   return (
-    <Box style={{ position: 'relative', height: '100%', flexGrow: 1 }}>
+    <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
       <Ticks />
       <Box
-        style={{
+        sx={{
           position: 'absolute',
-          left: `${relativeStart * 100}%`,
-          width: `${relativeDuration * 100}%`,
           top: 0,
           bottom: 0,
           margin: 'auto',
           height: '8px',
-          backgroundColor: span.resource.color,
           borderRadius: theme.shape.borderRadius,
+        }}
+        style={{
+          left: `${relativeStart * 100}%`,
+          width: `${relativeDuration * 100}%`,
+          backgroundColor: span.resource.color,
         }}
       />
       <Box
-        style={{
+        sx={{
           position: 'absolute',
-          left: `${(relativeStart + relativeDuration) * 100}%`,
           top: '50%',
           transform: 'translateY(-50%)',
           marginLeft: '8px',
           color: theme.palette.grey[700],
           fontSize: '.7rem',
+        }}
+        style={{
+          left: `${(relativeStart + relativeDuration) * 100}%`,
         }}
       >
         {formatTime(spanDuration)}

@@ -17,12 +17,12 @@ import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import { useContext } from 'react';
 import { Span } from './model';
 import { gridColor } from './utils';
-import { CollapsedSpansContext, HoveredParentsContext } from './context';
+import { GanttChartContext } from './context';
 
 export interface SpanIndentProps {
   span: Span;
   parentSpanId: string;
-  showIcon: boolean;
+  isLastIndent?: boolean;
 }
 
 /**
@@ -30,19 +30,9 @@ export interface SpanIndentProps {
  * and handles the click and mouseOver events
  */
 export function SpanIndent(props: SpanIndentProps) {
-  const { span, parentSpanId, showIcon } = props;
-  const { collapsedSpans, setCollapsedSpans } = useContext(CollapsedSpansContext);
-  const { hoveredParent, setHoveredParent } = useContext(HoveredParentsContext);
+  const { span, parentSpanId, isLastIndent } = props;
+  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent } = useContext(GanttChartContext);
   const theme = useTheme();
-
-  const spacerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    width: 24,
-    height: '100%',
-    borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}`,
-  };
 
   const handleToggleClick = () => {
     if (collapsedSpans.includes(span.spanId)) {
@@ -65,8 +55,13 @@ export function SpanIndent(props: SpanIndentProps) {
   };
 
   return (
-    <Box style={spacerStyle} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      {showIcon &&
+    <Box
+      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: 24, height: '100%' }}
+      style={{ borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}` }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {isLastIndent &&
         span.children.length > 0 &&
         (collapsedSpans.includes(span.spanId) ? (
           <ChevronRightIcon onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />

@@ -33,5 +33,5 @@ export function GanttChartPanel(props: GanttChartPanelProps) {
     return null;
   }
 
-  return <GanttChart width={contentDimensions.width} height={contentDimensions.height} tree={tree} />;
+  return <GanttChart width={contentDimensions.width} height={contentDimensions.height} rootSpan={tree} />;
 }

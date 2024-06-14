@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec, QueryDefinition } from '@perses-dev/core';
-import ColorHash from 'color-hash';
+import { UnknownSpec, QueryDefinition, traceServiceColor } from '@perses-dev/core';
 import * as api from './traceResponse';
 import { Resource, Span } from './GanttChart/model';
 
@@ -32,8 +31,6 @@ export function createInitialGanttChartOptions() {
   return {};
 }
 
-const colorHasher = new ColorHash();
-
 /**
  * parseResource parses the Resource API type and assigns a color
  */
@@ -46,15 +43,9 @@ function parseResource(resource: api.Resource, colors: string[]): Resource {
     }
   }
 
-  // Assign a color based on the serviceName.
-  // The same serviceName should always get the same color assigned.
-  // TODO: use https://github.com/zenozeng/color-hash/blob/main/lib/sha256.ts directly
-  const hash = (colorHasher as unknown as { hash: (s: string) => number }).hash(serviceName);
-  const color = colors[hash % colors.length]!;
-
   return {
     serviceName,
-    color,
+    color: traceServiceColor(serviceName, colors),
   };
 }
 

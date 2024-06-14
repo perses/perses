@@ -26,14 +26,14 @@ export function SpanName(props: SpanNameProps) {
   const { span } = props;
 
   let parent = span.parent;
-  const indents = [<SpanIndent key="last" span={span} parentSpanId={parent?.spanId ?? ''} showIcon={true} />];
+  const indents = [<SpanIndent key="lastIndent" span={span} parentSpanId={parent?.spanId ?? ''} isLastIndent={true} />];
   while (parent) {
-    indents.unshift(<SpanIndent key={parent.spanId} span={span} parentSpanId={parent.spanId} showIcon={false} />);
     parent = parent.parent;
+    indents.unshift(<SpanIndent key={parent?.spanId ?? ''} span={span} parentSpanId={parent?.spanId ?? ''} />);
   }
 
   return (
-    <Stack direction="row" alignItems="center" style={{ width: '25%' }}>
+    <Stack direction="row" alignItems="center" sx={{ width: '25%' }}>
       {indents}
       <Box>
         <strong style={{ color: span.resource.color }}>{span.resource.serviceName}:</strong> {span.spanName}

@@ -13,20 +13,16 @@
 
 import { createContext } from 'react';
 
-interface CollapsedSpansContextType {
+interface GanttChartContextType {
   collapsedSpans: string[];
   setCollapsedSpans: (s: string[]) => void;
-}
-export const CollapsedSpansContext = createContext<CollapsedSpansContextType>({
-  collapsedSpans: [],
-  setCollapsedSpans: () => null,
-});
-
-interface HoveredParentsContextType {
   hoveredParent?: string; // can be a spanId, an empty string for the root span or undefined for no hover
   setHoveredParent: (s?: string) => void;
 }
-export const HoveredParentsContext = createContext<HoveredParentsContextType>({
+
+export const GanttChartContext = createContext<GanttChartContextType>({
+  collapsedSpans: [],
+  setCollapsedSpans: () => null,
   hoveredParent: '',
   setHoveredParent: () => null,
 });

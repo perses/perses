@@ -16,43 +16,45 @@ import { useState } from 'react';
 import { SpanRow } from './SpanRow';
 import { HeaderRow } from './HeaderRow';
 import { Span, Viewport } from './model';
-import { CollapsedSpansContext, HoveredParentsContext } from './context';
+import { GanttChartContext } from './context';
+import { MiniGanttChart } from './MiniGanttChart';
 
 export interface GanttChart {
   width: number;
   height: number;
-  tree: Span;
+  rootSpan: Span;
 }
 
 /**
  * treeToRows recursively transforms the span tree to a list of rows
  * and hides collapsed child spans.
  */
-function treeToRows(rows: Span[], node: Span, collapsedSpans: string[]) {
-  rows.push(node);
-  if (!collapsedSpans.includes(node.spanId)) {
-    for (const child of node.children) {
+function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
+  rows.push(span);
+  if (!collapsedSpans.includes(span.spanId)) {
+    for (const child of span.children) {
       treeToRows(rows, child, collapsedSpans);
     }
   }
 }
 
 export function GanttChart(props: GanttChart) {
-  const { width, height, tree } = props;
+  const { width, height, rootSpan } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
   const [viewport, _] = useState<Viewport>({
-    startTimeUnixNano: tree.startTimeUnixNano,
-    endTimeUnixNano: tree.endTimeUnixNano,
+    startTimeUnixNano: rootSpan.startTimeUnixNano,
+    endTimeUnixNano: rootSpan.endTimeUnixNano,
   });
 
   const rows: Span[] = [];
-  treeToRows(rows, tree, collapsedSpans);
+  treeToRows(rows, rootSpan, collapsedSpans);
 
   return (
-    <CollapsedSpansContext.Provider value={{ collapsedSpans, setCollapsedSpans }}>
-      <HoveredParentsContext.Provider value={{ hoveredParent, setHoveredParent }}>
-        <HeaderRow rootSpan={tree} viewport={viewport} />
+    <>
+      <MiniGanttChart rootSpan={rootSpan} />
+      <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
+        <HeaderRow rootSpan={rootSpan} viewport={viewport} />
         <Virtuoso
           style={{
             width: width,
@@ -61,7 +63,7 @@ export function GanttChart(props: GanttChart) {
           data={rows}
           itemContent={(_, span) => <SpanRow span={span} viewport={viewport} />}
         />
-      </HoveredParentsContext.Provider>
-    </CollapsedSpansContext.Provider>
+      </GanttChartContext.Provider>
+    </>
   );
 }

@@ -29,16 +29,16 @@ export function HeaderRow(props: HeaderRowProps) {
     <Stack
       direction="row"
       alignItems="center"
-      style={{
+      sx={{
         height: rowHeight,
         backgroundColor: theme.palette.grey.A100,
         fontSize: '0.9rem',
       }}
     >
-      <Box style={{ width: '25%' }}>
+      <Box sx={{ width: '25%' }}>
         <span style={{ padding: '.25rem' }}>Service & Operation</span>
       </Box>
-      <Box style={{ position: 'relative', height: '100%', flexGrow: 1 }}>
+      <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
         <TicksHeader rootSpan={rootSpan} viewport={viewport} />
       </Box>
     </Stack>

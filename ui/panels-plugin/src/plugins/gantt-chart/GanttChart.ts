@@ -17,6 +17,9 @@ import { GanttChartPanel } from './GanttChartPanel';
 
 /**
  * The core GanttChart panel plugin for Perses.
+ *
+ * The UI/UX of this panel is based on Jaeger UI, licensed under Apache License, Version 2.0.
+ * https://github.com/jaegertracing/jaeger-ui
  */
 export const GanttChart: PanelPlugin<GanttChartOptions> = {
   PanelComponent: GanttChartPanel,
