@@ -38,6 +38,11 @@ interface TimeRangeSelectorProps {
    * Custom line height for the select component.
    */
   height?: string;
+  /**
+   * Whether to show the custom time range option.
+   * Defaults to true.
+   */
+  showCustomTimeRange?: boolean;
 }
 
 /**
@@ -46,8 +51,13 @@ interface TimeRangeSelectorProps {
  * @param props
  * @constructor
  */
-export function TimeRangeSelector(props: TimeRangeSelectorProps) {
-  const { value, timeOptions, onChange, height } = props;
+export function TimeRangeSelector({
+  value,
+  timeOptions,
+  onChange,
+  height,
+  showCustomTimeRange = true,
+}: TimeRangeSelectorProps) {
   const { timeZone } = useTimeZone();
 
   const anchorEl = useRef(); // Used to position the absolute time range picker
@@ -133,13 +143,14 @@ export function TimeRangeSelector(props: TimeRangeSelectorProps) {
               {item.display}
             </MenuItem>
           ))}
-          <MenuItem
-            key={timeOptions.length}
-            value={formatTimeRange(lastOption.value, timeZone)}
-            onClick={() => setShowCustomDateSelector(true)}
-          >
-            {lastOption.display}
-          </MenuItem>
+          {showCustomTimeRange && (
+            <MenuItem
+              value={formatTimeRange(lastOption.value, timeZone)}
+              onClick={() => setShowCustomDateSelector(true)}
+            >
+              {lastOption.display}
+            </MenuItem>
+          )}
         </Select>
       </Box>
     </>

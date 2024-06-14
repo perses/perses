@@ -480,8 +480,20 @@ important_dashboards:
 
 # The markdown content to be displayed on the UI home page
 [ information: <string> ]
+
+# TimeRange configuration
+[ time_range: <TimeRange config> ]
 ```
 
+#### TimeRange config
+
+```yaml
+# The different relative timerange options available in dashboards and explorer
+# Use duration format. The display will be computed automatically. Eg: "5m: will be display "Last 5 minutes"
+[ options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] ]
+# Allow you to disable the custom time range (absolute time range)
+[ disable_custom:  <bool> | default = false ]
+```
 #### Dashboard Selector config
 
 ```yaml

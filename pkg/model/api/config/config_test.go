@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -68,6 +68,9 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
+    },
+    "time_range": {
+      "disable_custom": false
     }
   }
 }`,
@@ -121,6 +124,20 @@ func TestJSONMarshalConfig(t *testing.T) {
     "disable": false,
     "explorer": {
       "enable": false
+    },
+    "time_range": {
+      "disable_custom": false,
+      "options": [
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "6h",
+        "12h",
+        "1d",
+        "1w",
+        "2w"
+      ]
     }
   }
 }`,
@@ -410,6 +427,10 @@ ephemeral_dashboards_cleanup_interval: "2h"
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					TimeRange: TimeRange{
+						DisableCustomTimeRange: false,
+						Options:                defaultTimeRangeOptions,
+					},
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
