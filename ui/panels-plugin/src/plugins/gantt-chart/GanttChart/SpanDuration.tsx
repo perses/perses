@@ -34,7 +34,7 @@ export function SpanDuration(props: SpanDurationProps) {
   const relativeStart = (span.startTimeUnixNano - viewport.startTimeUnixNano) / viewportDuration;
 
   return (
-    <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
+    <Box sx={{ position: 'relative', height: '100%', flexGrow: 1, overflow: 'hidden' }}>
       <Ticks />
       <Box
         sx={{

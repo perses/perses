@@ -14,5 +14,6 @@
 import { Theme } from '@mui/material';
 
 export const rowHeight = '30px';
+export const rowHeaderColor = (theme: Theme) => theme.palette.grey.A100;
 export const gridColor = (theme: Theme) => theme.palette.grey[100];
 export const formatTime = (timeNano: number) => `${(timeNano / 1000000).toFixed(2)}ms`;

@@ -42,7 +42,7 @@ export function GanttChart(props: GanttChart) {
   const { width, height, rootSpan } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
-  const [viewport, _] = useState<Viewport>({
+  const [viewport, setViewport] = useState<Viewport>({
     startTimeUnixNano: rootSpan.startTimeUnixNano,
     endTimeUnixNano: rootSpan.endTimeUnixNano,
   });
@@ -52,7 +52,7 @@ export function GanttChart(props: GanttChart) {
 
   return (
     <>
-      <MiniGanttChart rootSpan={rootSpan} />
+      <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
       <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
         <HeaderRow rootSpan={rootSpan} viewport={viewport} />
         <Virtuoso

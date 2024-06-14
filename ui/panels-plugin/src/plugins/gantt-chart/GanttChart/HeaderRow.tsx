@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, Stack, useTheme } from '@mui/material';
-import { rowHeight } from './utils';
+import { rowHeaderColor, rowHeight } from './utils';
 import { TicksHeader } from './Ticks';
 import { Span, Viewport } from './model';
 
@@ -31,7 +31,7 @@ export function HeaderRow(props: HeaderRowProps) {
       alignItems="center"
       sx={{
         height: rowHeight,
-        backgroundColor: theme.palette.grey.A100,
+        backgroundColor: rowHeaderColor(theme),
         fontSize: '0.9rem',
       }}
     >

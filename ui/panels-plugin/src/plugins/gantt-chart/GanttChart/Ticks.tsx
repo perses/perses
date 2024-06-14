@@ -42,17 +42,23 @@ export function TicksHeader(props: TicksHeaderProps) {
   );
 }
 
+interface TicksProps {
+  skipFirstLast?: boolean;
+}
+
 /**
  * Ticks renders all ticks in the span duration
  */
-export function Ticks() {
+export function Ticks(props: TicksProps) {
+  const { skipFirstLast } = props;
+
   return (
     <>
-      <TickBox style={{ left: '0%' }} />
+      {!skipFirstLast && <TickBox style={{ left: '0%' }} />}
       <TickBox style={{ left: '25%' }} />
       <TickBox style={{ left: '50%' }} />
       <TickBox style={{ left: '75%' }} />
-      <TickBox style={{ left: '100%' }} />
+      {!skipFirstLast && <TickBox style={{ left: '100%' }} />}
     </>
   );
 }
