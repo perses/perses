@@ -100,9 +100,9 @@ describe('ThresholdsEditor', () => {
 
   it('should update threshold T1 color', async () => {
     renderThresholdEditor(thresholds, onChange);
-    const openColorPickerButton = screen.getByLabelText('change threshold T1 color');
+    const openColorPickerButton = screen.getByLabelText('change T1 color');
     userEvent.click(openColorPickerButton);
-    await screen.findByTestId('threshold color picker');
+    await screen.findByTestId('options color picker');
     const redColorButton = screen.getByLabelText('change color to #d32f2f');
     userEvent.click(redColorButton);
     await waitFor(() => {
@@ -118,9 +118,9 @@ describe('ThresholdsEditor', () => {
 
   it('should update default color', async () => {
     renderThresholdEditor(thresholds, onChange);
-    const openColorPickerButton = screen.getByLabelText('change threshold default color');
+    const openColorPickerButton = screen.getByLabelText('change default color');
     userEvent.click(openColorPickerButton);
-    await screen.findByTestId('threshold color picker');
+    await screen.findByTestId('options color picker');
     const colorInput = screen.getByLabelText('enter hex color');
     userEvent.clear(colorInput);
     userEvent.type(colorInput, '6a44eb');

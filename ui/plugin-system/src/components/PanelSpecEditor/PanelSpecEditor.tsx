@@ -13,7 +13,7 @@
 
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { usePlugin } from '../../runtime';
+import { QueryCountProvider, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
@@ -78,5 +78,9 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     content: <LinksEditor />,
   });
 
-  return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
+  return (
+    <QueryCountProvider queryCount={(panelDefinition.spec.queries ?? []).length}>
+      <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
+    </QueryCountProvider>
+  );
 }

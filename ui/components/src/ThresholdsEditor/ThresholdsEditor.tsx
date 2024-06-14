@@ -20,7 +20,7 @@ import { ThresholdOptions } from '@perses-dev/core';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
 import { InfoTooltip } from '../InfoTooltip';
-import { ThresholdColorPicker } from './ThresholdColorPicker';
+import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 import { ThresholdInput } from './ThresholdInput';
 
 export interface ThresholdsEditorProps {
@@ -214,11 +214,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
           .reverse()}
       {!hideDefault && (
         <Stack flex={1} direction="row" alignItems="center" spacing={1}>
-          <ThresholdColorPicker
-            label="default"
-            color={defaultThresholdColor}
-            onColorChange={handleDefaultColorChange}
-          />
+          <OptionsColorPicker label="default" color={defaultThresholdColor} onColorChange={handleDefaultColorChange} />
           <Typography>Default</Typography>
         </Stack>
       )}

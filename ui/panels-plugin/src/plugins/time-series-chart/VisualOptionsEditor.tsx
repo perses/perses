@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { produce } from 'immer';
 import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
@@ -35,19 +36,21 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
   const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
-    onChange({
-      ...value,
-      lineWidth: newValue,
-      pointRadius: symbolSize,
-    });
+    onChange(
+      produce(value, (draft) => {
+        draft.lineWidth = newValue;
+        draft.pointRadius = symbolSize;
+      })
+    );
   };
 
   const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
-    onChange({
-      ...value,
-      areaOpacity: newValue,
-    });
+    onChange(
+      produce(value, (draft) => {
+        draft.areaOpacity = newValue;
+      })
+    );
   };
 
   const currentStack: StackOptions = value.stack ?? 'none';

@@ -95,7 +95,15 @@ import (
 
 	spec: {
 		display: name: "Container CPU"
-		plugin: timeseriesChart
+		plugin: timeseriesChart & {
+			spec: querySettings: [
+				{
+					queryIndex: 0
+					colorMode:  "fixed-single"
+					colorValue: "#0be300"
+				},
+			]
+		}
 		queries: [
 			{
 				kind: "TimeSeriesQuery"

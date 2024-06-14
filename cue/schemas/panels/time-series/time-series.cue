@@ -32,7 +32,6 @@ import (
 
 #palette: {
 	mode: "auto" | "categorical"
-	// colors: [...string]; // TODO: add colors to override ECharts theme
 }
 
 #visual: {
@@ -56,9 +55,16 @@ import (
 
 kind: "TimeSeriesChart"
 spec: close({
-	legend?:     #legend
-	tooltip?:    #tooltip
-	yAxis?:      #yAxis
-	thresholds?: common.#thresholds
-	visual?:     #visual
+	legend?:        #legend
+	tooltip?:       #tooltip
+	yAxis?:         #yAxis
+	thresholds?:    common.#thresholds
+	visual?:        #visual
+	querySettings?: #querySettings
 })
+
+#querySettings: [...{
+	queryIndex: int & >=0
+	colorMode:  "fixed" | "fixed-single"       // NB: "palette" could be added later
+	colorValue: =~"^#(?:[0-9a-fA-F]{3}){1,2}$" // hexadecimal color code
+}]
