@@ -48,7 +48,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.0-alpha.5"
+          cue_version: "v0.9.1"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -64,7 +64,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.9.0-alpha.5"
+          cue_version: "v0.9.1"
       - name: test
         run: make integration-test
   test-mysql:
@@ -88,7 +88,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.9.0-alpha.5"
+          cue_version: "v0.9.1"
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -122,7 +122,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.0-alpha.5"
+          cue_version: "v0.9.1"
       - name: eval cue schema
         run: make cue-eval
       - name: test cue schema
@@ -138,7 +138,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.0-alpha.5"
+          cue_version: "v0.9.1"
       - name: generate cue files
         run: make cue-gen
       - name: check for changes
