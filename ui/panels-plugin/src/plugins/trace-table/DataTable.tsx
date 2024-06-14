@@ -43,7 +43,7 @@ export function DataTable({ result }: DataTableProps) {
   }
 
   const traces = result.flatMap((d) => d.data).flatMap((d) => d?.traces || []);
-  const rows = traces.map(buildRow.bind(null, theme));
+  const rows = traces.map((trace) => buildRow(theme, trace));
 
   return (
     <>

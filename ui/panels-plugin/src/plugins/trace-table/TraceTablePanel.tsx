@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { Box, Skeleton } from '@mui/material';
-import { ErrorAlert, useChartsTheme } from '@perses-dev/components';
+import { Box, Skeleton, Stack, Typography } from '@mui/material';
+import { useChartsTheme } from '@perses-dev/components';
 import { DataTable } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -48,7 +48,11 @@ export function TraceTablePanel(props: TraceTableProps) {
 
   const tracesFound = queryResults.some((traceData) => (traceData.data?.traces ?? []).length > 0);
   if (!tracesFound) {
-    return <ErrorAlert error={{ name: 'No traces found.', message: 'No traces found.' }} />;
+    return (
+      <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+        <Typography>No traces found</Typography>
+      </Stack>
+    );
   }
 
   return (
