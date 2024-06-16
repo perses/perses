@@ -63,68 +63,87 @@ Generic placeholders are defined as follows:
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
-  # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
-  [ security: <Security config> ]
+# It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
+[ security: <Security config> ]
 
-  # Database configuration 
-  [ database: <Database config> ]
+# Database configuration 
+[ database: <Database config> ]
 
-  # The configuration to access the CUE schemas
-  [ schemas: <Schemas config> ]
+# The configuration to access the CUE schemas
+[ schemas: <Schemas config> ]
 
-  # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
-  # The data coming from the provisioning folder will totally override what exists in the database.
-  [ provisioning: <Provisioning config> ]
+# If provided, Perses server will look to the different folders configured and populate the database based on what it is found
+# The data coming from the provisioning folder will totally override what exists in the database.
+[ provisioning: <Provisioning config> ]
 
-  # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-  [ ephemeral_dashboards_cleanup_interval: <duration> | default = '1d' ]
+# The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
+# This config is deprecated. Please use the config ephemeral_dashboard instead.
+[ ephemeral_dashboards_cleanup_interval: <duration> ]
 
-  # Any configuration related to the UI itself
-  [ frontend: <Frontend config]
+# The config for the ephemeral dashboard feature. This is the way to activate the feature.
+[ ephemeral_dashboard: < EphemeralDashboard config > ]
+
+# Any configuration related to the UI itself
+[ frontend: <Frontend config]
 ```
 
 ### Security config
 
 ```yaml
-  # A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
-  # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
-  [ readonly: <boolean> | default = false ]
-    
-  # It contains the config regarding the time to live of the refresh/access token.
-  [ authentication: <Authentication config> ]
+# A flag that will disable any HTTP POST, PUT and DELETE endpoint in the API.
+# It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
+[ readonly: <boolean> | default = false ]
+  
+# Cookie configuration
+[ cookie: <Cookie config> ]
+  
+# It contains the config regarding the time to live of the refresh/access token.
+[ authentication: <Authentication config> ]
 
-  # It contains any configuration that changes authorization behavior like default permissions
-  [ authorization: <Authorization config> ]
+# It contains any configuration that changes authorization behavior like default permissions
+[ authorization: <Authorization config> ]
 
-  # When it is true, the authentication and authorization config are considered.
-  # And you will need a valid JWT token to contact most of the endpoints exposed by the API
-  [ enable_auth: <boolean> | default = false ]
+# When it is true, the authentication and authorization config are considered.
+# And you will need a valid JWT token to contact most of the endpoints exposed by the API
+[ enable_auth: <boolean> | default = false ]
 
-  # The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
-  # Note that if it is not provided, it will use a default value.
-  # On a production instance, you should set this key.
-  # Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
-  [ encryption_key: <secret> ]
+# The secret key used to encrypt and decrypt sensitive data stored in the database such as the password of the basic auth for a datasource.
+# Note that if it is not provided, it will use a default value.
+# On a production instance, you should set this key.
+# Also note the key size must be exactly 32 bytes long as we are using AES-256 to encrypt the data.
+[ encryption_key: <secret> ]
 
-  # The path to the file containing the secret key.
-  [ encryption_key_file: <filename> ]
+# The path to the file containing the secret key.
+[ encryption_key_file: <filename> ]
+```
+
+### Cookie config
+
+```yaml
+# Set the same_site cookie attribute and prevents the browser from sending the cookie along with cross-site requests.
+# The main goal is to mitigate the risk of cross-origin information leakage.
+# This setting also provides some protection against cross-site request forgery attacks (CSRF)
+[ same_site: < enum | possibleValue = 'strict' | 'lax' | 'none' > | default = lax ]
+
+# Set to true if you host Perses behind HTTPS. Default is false
+[ secure: <boolean> | default = false ]
 ```
 
 #### Authentication config
 
 ```yaml
-  # It is the time to live of the access token. By default, it is 15 minutes.
-  [ access_token_ttl: <duration> | default = 15min ]
+# It is the time to live of the access token. By default, it is 15 minutes.
+[ access_token_ttl: <duration> | default = 15min ]
 
-  # It is the time to live of the refresh token. The refresh token is used to get a new access token when it is expired.
-  # By default, it is 24 hours.
-  [ refresh_token_ttl: <duration> | default = 24h ]
+# It is the time to live of the refresh token. The refresh token is used to get a new access token when it is expired.
+# By default, it is 24 hours.
+[ refresh_token_ttl: <duration> | default = 24h ]
 
-  # With this attribute, you can deactivate the Sign-up page which induces the deactivation of the endpoint that gives the possibility to create a user.
-  [ disable_sign_up: <boolean> | default = false ]
+# With this attribute, you can deactivate the Sign-up page which induces the deactivation of the endpoint that gives the possibility to create a user.
+[ disable_sign_up: <boolean> | default = false ]
 
-  # Authentication providers
-  [ providers: <Authentication providers> ]
+# Authentication providers
+[ providers: <Authentication providers> ]
 ```
 
 ##### Authentication providers
@@ -132,264 +151,264 @@ Generic placeholders are defined as follows:
 Check the [helpers](./oauth-configuration-helpers.md) to help you to configure the different providers.
 
 ```yaml
-  # Enable the native authentication providers
-  [ enable_native: <boolean> | default = false ]
-  
-  # List of the OIDC authentication providers
-  oidc:
-    - [ <OIDC provider> ]
-  # List of the OIDC authentication providers
-  oauth:
-    - [ <OAuth provider> ]
+# Enable the native authentication providers
+[ enable_native: <boolean> | default = false ]
+
+# List of the OIDC authentication providers
+oidc:
+  - [ <OIDC provider> ]
+# List of the OIDC authentication providers
+oauth:
+  - [ <OAuth provider> ]
 ```
 
 ##### OIDC provider
 
 ```yaml
-  # The id of the provider that will be used in the URLs (must be unique for all providers)
-  slug_id: <string>
+# The id of the provider that will be used in the URLs (must be unique for all providers)
+slug_id: <string>
 
-  # A verbose name for the provider. Will be used to visually identify it in the frontend.
-  name: <string>
+# A verbose name for the provider. Will be used to visually identify it in the frontend.
+name: <string>
 
-  # The Client ID of the Perses application into the provider
-  client_id: <secret>
+# The Client ID of the Perses application into the provider
+client_id: <secret>
 
-  # The Client Secret of the Perses application into the provider
-  client_secret: <secret>
-  
-  device_code:
-    # Allow to use a different Client ID for the device code flow
-    [ client_id: <secret> ]
-    # Allow to use a different Client Secret for the device code flow
-    [ client_secret: <secret> ]
+# The Client Secret of the Perses application into the provider
+client_secret: <secret>
 
-  # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
-  # If not set it will get it from the request.
-  [ redirect_uri: <string> ]
+device_code:
+  # Allow to use a different Client ID for the device code flow
+  [ client_id: <secret> ]
+  # Allow to use a different Client Secret for the device code flow
+  [ client_secret: <secret> ]
 
-  # The needed scopes to authenticate a user in the provider. It's not mandatory because it will depend on the provider
-  scopes:
-    - [ <string> ]
+# The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
+# If not set it will get it from the request.
+[ redirect_uri: <string> ]
 
-  # The provider issuer URL
-  issuer: <string>
+# The needed scopes to authenticate a user in the provider. It's not mandatory because it will depend on the provider
+scopes:
+  - [ <string> ]
 
-  # A custom discovery URL if different from {issuer}/.well-known/openid-configuration
-  [ discovery_url: <string> ]
+# The provider issuer URL
+issuer: <string>
 
-  # Disable PKCE verification
-  [ disable_pkce: <boolean> | default = false ]
-  
-  # The additional url params that will be appended to /authorize provider's endpoint
-  [ url_params:
-    [ <string>: [<string>, ...] ] ]]
+# A custom discovery URL if different from {issuer}/.well-known/openid-configuration
+[ discovery_url: <string> ]
+
+# Disable PKCE verification
+[ disable_pkce: <boolean> | default = false ]
+
+# The additional url params that will be appended to /authorize provider's endpoint
+url_params:
+  [ <string>: [<string>, ...] ]
 ```
 
 ##### OAuth provider
 
 ```yaml
-  # The id of the provider that will be used in the URLs (must be unique for all providers)
-  slug_id: <string>
+# The id of the provider that will be used in the URLs (must be unique for all providers)
+slug_id: <string>
 
-  # A verbose name for the provider. Will be used to visually identify it in the frontend.
-  name: <string>
+# A verbose name for the provider. Will be used to visually identify it in the frontend.
+name: <string>
 
-  # The Client ID of the Perses application into the provider
-  client_id: <secret>
+# The Client ID of the Perses application into the provider
+client_id: <secret>
 
-  # The Client Secret of the Perses application into the provider
-  client_secret: <secret>
+# The Client Secret of the Perses application into the provider
+client_secret: <secret>
 
-  device_code:
-    # Allow using a different Client ID for the device code flow
-    [ client_id: <secret> ]
-    # Allow using a different Client Secret for the device code flow
-    [ client_secret: <secret> ]
-    # Allow using different Scopes for the device code flow
-    scopes:
-      - [ <string> ]
-
-  client_credentials:
-    # Allow using a different Client ID for the client credentials flow
-    [ client_id: <secret> ]
-    # Allow using a different Client Secret for the client credentials flow
-    [ client_secret: <secret> ]
-    # Allow using different Scopes for the client credentials flow
-    scopes:
-      - [ <string> ]
-
-  # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
-  [ redirect_uri: <string> ]
-
-  # The needed scopes to authenticate a user in the provider
+device_code:
+  # Allow using a different Client ID for the device code flow
+  [ client_id: <secret> ]
+  # Allow using a different Client Secret for the device code flow
+  [ client_secret: <secret> ]
+  # Allow using different Scopes for the device code flow
   scopes:
     - [ <string> ]
 
-  # The provider Authorization URL
-  auth_url: <string>
+client_credentials:
+  # Allow using a different Client ID for the client credentials flow
+  [ client_id: <secret> ]
+  # Allow using a different Client Secret for the client credentials flow
+  [ client_secret: <secret> ]
+  # Allow using different Scopes for the client credentials flow
+  scopes:
+    - [ <string> ]
 
-  # The provider Token URL
-  token_url: <string>
+# The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
+[ redirect_uri: <string> ]
 
-  # The provider User Infos URL
-  user_infos_url: <string>
+# The needed scopes to authenticate a user in the provider
+scopes:
+  - [ <string> ]
 
-  # The provider Device Auth URL
-  # If we want to use the device code flow, we need to provide this URL, otherwise an error will fire saying
-  # it's not supported.
-  [ device_auth_url: <string> ]
+# The provider Authorization URL
+auth_url: <string>
 
-  # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
-  # The login is mandatory to store in the database the name of the user.
-  [ custom_login_property: <string>]
+# The provider Token URL
+token_url: <string>
+
+# The provider User Infos URL
+user_infos_url: <string>
+
+# The provider Device Auth URL
+# If we want to use the device code flow, we need to provide this URL, otherwise an error will fire saying
+# it's not supported.
+[ device_auth_url: <string> ]
+
+# Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
+# The login is mandatory to store in the database the name of the user.
+[ custom_login_property: <string>]
 ```
 
 #### Authorization config
 
 ```yaml
-  # Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
-  [ check_latest_update_interval: <duration> | default = 30s ]
+# Time interval that check if the RBAC cache need to be refreshed with db content. Only for SQL database setup.
+[ check_latest_update_interval: <duration> | default = 30s ]
 
-  # Default permissions for guest users (logged-in users)
-  guest_permissions:
-    - [ <Permissions> ]
+# Default permissions for guest users (logged-in users)
+guest_permissions:
+  - [ <Permissions> ]
 ```
 
 ##### Permissions
 
 ```yaml
-  # Actions authorized by the permission
-  actions:
-    - <enum= "read" | "create" | "update" | "delete" | "*">
-  # Resource kinds that are concerned by the permission
-  scopes:
-    - <enum= kind | "*">
+# Actions authorized by the permission
+actions:
+  - <enum= "read" | "create" | "update" | "delete" | "*">
+# Resource kinds that are concerned by the permission
+scopes:
+  - <enum= kind | "*">
 ```
 
 ### Database config
 
 ```yaml
-  # Config in case you want to use a file DB.
-  # Prefer the SQL config in case you are running multiple Perses instances.
-  [ file: <Database file config> ]
-  
-  # The SQL config
-  [ sql: <Database SQL config> ]
+# Config in case you want to use a file DB.
+# Prefer the SQL config in case you are running multiple Perses instances.
+[ file: <Database file config> ]
+
+# The SQL config
+[ sql: <Database SQL config> ]
 ```
 
 #### Database_file config
 
 ```yaml
-  # The path to the folder containing the database
-  folder: <path>
+# The path to the folder containing the database
+folder: <path>
 
-  # The file extension and so the file format used when storing and reading data from/to the database
-  [ extension: <string> | default = yaml ]
+# The file extension and so the file format used when storing and reading data from/to the database
+[ extension: <string> | default = yaml ]
 
-  # Whether the database is case-sensitive.
-  # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
-  [ case_sensitive: <string> | default = false ]
+# Whether the database is case-sensitive.
+# Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
+[ case_sensitive: <string> | default = false ]
 ```
 
 #### Database SQL config
 
 ```yaml
-  # TLS configuration.
-  [ tls_config: <TLS config> ]
+# TLS configuration.
+[ tls_config: <TLS config> ]
 
-  # Username used for the connection
-  [ user: <secret> ]
+# Username used for the connection
+[ user: <secret> ]
 
-  # The password associated to the user. Mandatory if the user is set
-  [ password: <secret> ]
+# The password associated to the user. Mandatory if the user is set
+[ password: <secret> ]
 
-  # The path to a file containing a password
-  [ password_file: <filename> ]
+# The path to a file containing a password
+[ password_file: <filename> ]
 
-  # Network type. For example "tcp"
-  [ net: <string> ]
+# Network type. For example "tcp"
+[ net: <string> ]
 
-  # The network address. If set then `net` is mandatory. Example: "localhost:3306"
-  [ addr: <secret> ]
+# The network address. If set then `net` is mandatory. Example: "localhost:3306"
+[ addr: <secret> ]
 
-  # Database name
-  [ db_name: <string> ]
-  [ collation: <string> ]
+# Database name
+[ db_name: <string> ]
+[ collation: <string> ]
 
-  # Max packet size allowed
-  [ max_allowed_packet: <int> ]
+# Max packet size allowed
+[ max_allowed_packet: <int> ]
 
-  # Server public key name
-  [ server_pub_key: <string> ]
+# Server public key name
+[ server_pub_key: <string> ]
 
-  # Dial timeout
-  [ timeout: <duration> ]
+# Dial timeout
+[ timeout: <duration> ]
 
-  # I/O read timeout
-  [ read_timeout: <duration> ]
+# I/O read timeout
+[ read_timeout: <duration> ]
 
-  # I/O write timeout
-  [ write_timeout: <duration> ]
+# I/O write timeout
+[ write_timeout: <duration> ]
 
-  # Allow all files to be used with LOAD DATA LOCAL INFILE
-  [ allow_all_files: <boolean> | default = false ]
+# Allow all files to be used with LOAD DATA LOCAL INFILE
+[ allow_all_files: <boolean> | default = false ]
 
-  # Allows the cleartext client side plugin
-  [ allow_cleartext_passwords: <boolean> | default = false ]
+# Allows the cleartext client side plugin
+[ allow_cleartext_passwords: <boolean> | default = false ]
 
-  # Allows fallback to unencrypted connection if server does not support TLS
-  [ allow_fallback_to_plaintext: <boolean> | default = false ]
+# Allows fallback to unencrypted connection if server does not support TLS
+[ allow_fallback_to_plaintext: <boolean> | default = false ]
 
-  # Allows the native password authentication method
-  [ allow_native_passwords: <boolean> | default = false ]
+# Allows the native password authentication method
+[ allow_native_passwords: <boolean> | default = false ]
 
-  # Allows the old insecure password method
-  [ allow_old_passwords: <boolean> | default = false ]
+# Allows the old insecure password method
+[ allow_old_passwords: <boolean> | default = false ]
 
-  # Check connections for liveness before using them
-  [ check_conn_liveness: <boolean> | default = false ]
+# Check connections for liveness before using them
+[ check_conn_liveness: <boolean> | default = false ]
 
-  # Return number of matching rows instead of rows changed
-  [ client_found_rows: <boolean> | default = false ]
+# Return number of matching rows instead of rows changed
+[ client_found_rows: <boolean> | default = false ]
 
-  # Prepend table alias to column names
-  [ columns_with_alias: <boolean> | default = false ]
+# Prepend table alias to column names
+[ columns_with_alias: <boolean> | default = false ]
 
-  # Interpolate placeholders into query string
-  [ interpolate_params: <boolean> | default = false ]
+# Interpolate placeholders into query string
+[ interpolate_params: <boolean> | default = false ]
 
-  # Allow multiple statements in one query
-  [ multi_statements: <boolean> | default = false ]
+# Allow multiple statements in one query
+[ multi_statements: <boolean> | default = false ]
 
-  # Parse time values to time.Time
-  [ parse_time: <boolean> | default = false ]
+# Parse time values to time.Time
+[ parse_time: <boolean> | default = false ]
 
-  # Reject read-only connections
-  [ reject_read_only: <boolean> | default = false ]
+# Reject read-only connections
+[ reject_read_only: <boolean> | default = false ]
 
-  # Whether the database is case-sensitive.
-  # Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
-  [ case_sensitive: <string> | default = false ]
+# Whether the database is case-sensitive.
+# Be aware that to reflect this config, metadata.project and metadata.name from the resources managed can be modified before the insertion in the database.
+[ case_sensitive: <string> | default = false ]
 ```
 
 ### Schemas config
 
 ```yaml
-    # Path to the Cue schemas of the panels
-  [ panels_path: <path> | default = "schemas/panels" ]
+# Path to the Cue schemas of the panels
+[ panels_path: <path> | default = "schemas/panels" ]
 
-  # Path to the Cue schemas of the queries
-  [ queries_path: <path> | default = "schemas/queries" ]
+# Path to the Cue schemas of the queries
+[ queries_path: <path> | default = "schemas/queries" ]
 
-  # Path to the Cue schemas of the datasources
-  [ datasources_path: <path> | default = "schemas/datasources" ]
+# Path to the Cue schemas of the datasources
+[ datasources_path: <path> | default = "schemas/datasources" ]
 
-  # Path to the Cue schemas of the variables
-  [ variables_path: <path> | default = "schemas/variables" ]
+# Path to the Cue schemas of the variables
+[ variables_path: <path> | default = "schemas/variables" ]
 
-  # The refresh interval of the cue schemas regardless their paths
-  [ interval: <duration> | default = 1h ]
+# The refresh interval of the cue schemas regardless their paths
+[ interval: <duration> | default = 1h ]
 ```
 
 ### TLS config
@@ -428,37 +447,59 @@ A TLS config allows configuring TLS connections.
 [ max_version: <string> ]
 ```
 
-### Provisioning specification
+### Provisioning config
 
 ```yaml
-  [ interval: <duration> | default = 1h ]
+[ interval: <duration> | default = 1h ]
 
-  # List of folder that Perses will read periodically. 
-  # Every known data found in the different folders will be injected in the database regardless what exist.
-  folders:
-    - <string>
+# List of folder that Perses will read periodically. 
+# Every known data found in the different folders will be injected in the database regardless what exist.
+folders:
+  - <string>
+```
+
+### EphemeralDashboard config
+
+```yaml
+# When true user will be able to use the ephemeral dashboard at project level
+[ enable: <bool> | default = false ]
+
+# The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
+[ cleanup_interval: <duration> | default = 1d ]
 ```
 
 ### Frontend config
 
 ```yaml
-  # When it is true, Perses won't serve the frontend anymore.
-  [ deactivate: <bool> | default = false ]
+# When it is true, Perses won't serve the frontend anymore.
+[ disable: <bool> | default = false ]
 
-  # A list of dashboards you would like to display in the UI home page
-  important_dashboards:
-    - [ <Dashboard Selector config> ]
+# A list of dashboards you would like to display in the UI home page
+important_dashboards:
+  - [ <Dashboard Selector config> ]
 
-  # The markdown content to be displayed on the UI home page
-  [ information: <string> ]
+# The markdown content to be displayed on the UI home page
+[ information: <string> ]
+
+# TimeRange configuration
+[ time_range: <TimeRange config> ]
 ```
 
+#### TimeRange config
+
+```yaml
+# The different relative timerange options available in dashboards and explorer
+# Use duration format. The display will be computed automatically. Eg: "5m: will be display "Last 5 minutes"
+[ options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] ]
+# Allow you to disable the custom time range (absolute time range)
+[ disable_custom:  <bool> | default = false ]
+```
 #### Dashboard Selector config
 
 ```yaml
-  # The project name (dashboard.metadata.project)
-  project: <string>
+# The project name (dashboard.metadata.project)
+project: <string>
 
-  # The dashboard name (dashboard.metadata.name)
-  dashboard: <string>
+# The dashboard name (dashboard.metadata.name)
+dashboard: <string>
 ```

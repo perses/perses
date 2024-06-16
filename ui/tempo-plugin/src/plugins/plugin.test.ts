@@ -13,7 +13,7 @@
 
 import { DatasourceSpec } from '@perses-dev/core';
 import { TraceQueryContext } from '@perses-dev/plugin-system';
-import { MOCK_ENRICHED_TRACE_QUERY_RESPONSE, MOCK_TRACE_DATA } from '../test';
+import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA } from '../test';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
 import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
@@ -25,11 +25,7 @@ const datasource: TempoDatasourceSpec = {
 };
 
 const tempoStubClient = TempoDatasource.createClient(datasource, {});
-
-tempoStubClient.getEnrichedTraceQuery = jest.fn(async () => {
-  const stubResponse = MOCK_ENRICHED_TRACE_QUERY_RESPONSE;
-  return stubResponse;
-});
+tempoStubClient.searchTraceQueryFallback = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
   return tempoStubClient;

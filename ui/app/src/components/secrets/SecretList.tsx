@@ -13,7 +13,7 @@
 
 import { Action, getMetadataProject, Secret } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ClipboardIcon from 'mdi-material-ui/ClipboardOutline';
@@ -151,7 +151,7 @@ export function SecretList<T extends Secret>({
         type: 'string',
         flex: 3,
         minWidth: 150,
-        valueGetter: (params: GridValueGetterParams) => params.row.name,
+        valueGetter: (_, row) => row.name,
         renderCell: (params) => (
           <>
             <pre>{params.value}</pre>

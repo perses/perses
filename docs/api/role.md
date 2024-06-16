@@ -15,11 +15,11 @@ There are two different scopes in which you can define a Role, depending on how 
 In case you would like to set permissions at Project level, you will need to create a `Role`.
 
 ```yaml
-  kind: "Role"
-  metadata:
-    name: <string>
-    project: <string>
-  spec: <Role specification>
+kind: "Role"
+metadata:
+  name: <string>
+  project: <string>
+spec: <Role specification>
 ```
 
 ### Global level
@@ -27,31 +27,31 @@ In case you would like to set permissions at Project level, you will need to cre
 In case you would like to set permissions at Global level , you will need to create a `GlobalRole`.
 
 ```yaml
-  kind: "GlobalRole"
-  metadata:
-    name: <string>
-  spec: <Role specification>
+kind: "GlobalRole"
+metadata:
+  name: <string>
+spec: <Role specification>
 ```
 
 ## Role specification
 
 ```yaml
-  # List of permissions owned by the role
-  permissions:
-    - <Permission specification>
+# List of permissions owned by the role
+permissions:
+  - <Permission specification>
 ```
 
 ### Permission specification
 
 ```yaml
-  # Types of actions the permission grant access
-  actions:
-    - <enum= "create" | "read" | "update" | "delete">
+# Types of actions the permission grant access
+actions:
+  - <enum= "create" | "read" | "update" | "delete">
 
-  # The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
-  # With Role, you can't target global kinds
-  scopes:
-    - <string>
+# The list of kind targeted by the permission. For example: `Datasource`, `Dashboard`, ...
+# With Role, you can't target global kinds
+scopes:
+  - <string>
 ```
 
 ### More info about authorization

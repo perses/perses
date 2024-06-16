@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,7 +15,9 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { marked } from 'marked';
 import * as DOMPurify from 'dompurify';
 import { CircularProgress, Stack } from '@mui/material';
-import { DashboardSelector } from '@perses-dev/core';
+import { DashboardSelector, DurationString } from '@perses-dev/core';
+import { TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
+import { buildRelativeTimeOption } from '@perses-dev/components';
 import { ConfigModel, useConfig } from '../model/config-client';
 
 interface ConfigContextType {
@@ -33,7 +35,16 @@ export function ConfigContextProvider(props: { children: React.ReactNode }) {
       </Stack>
     );
   }
-  return <ConfigContext.Provider value={{ config: data }}>{props.children}</ConfigContext.Provider>;
+  return (
+    <ConfigContext.Provider value={{ config: data }}>
+      <TimeRangeSettingsProvider
+        showCustom={!data.frontend.time_range.disable_custom}
+        options={data.frontend.time_range.options?.map((opt: DurationString) => buildRelativeTimeOption(opt))}
+      >
+        {props.children}
+      </TimeRangeSettingsProvider>
+    </ConfigContext.Provider>
+  );
 }
 
 export function useConfigContext(): ConfigContextType {
@@ -42,6 +53,16 @@ export function useConfigContext(): ConfigContextType {
     throw new Error('No ConfigContext found. Did you forget a Provider?');
   }
   return ctx;
+}
+
+export function useIsExplorerEnabled(): boolean {
+  const { config } = useConfigContext();
+  return config.frontend.explorer.enable;
+}
+
+export function useIsEphemeralDashboardEnabled(): boolean {
+  const { config } = useConfigContext();
+  return config.ephemeral_dashboard.enable;
 }
 
 export function useIsReadonly(): boolean {

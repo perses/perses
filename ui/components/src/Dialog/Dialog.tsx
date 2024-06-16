@@ -38,17 +38,14 @@ export interface DialogHeaderProps extends DialogTitleProps {
 
 export type DialogButtonProps = Omit<ButtonProps, 'variant' | 'color' | 'type'>;
 
-export interface DialogContentProps extends MuiDialogContentProps {
-  /**
-   * @default 500
-   */
-  width?: number;
-}
+export type DialogContentProps = MuiDialogContentProps;
 
 const Header = ({ children, onClose, ...props }: DialogHeaderProps) => {
   return (
     <>
-      <DialogTitle {...props}>{children}</DialogTitle>
+      <DialogTitle style={{ textOverflow: 'ellipsis', overflow: 'hidden' }} {...props}>
+        {children}
+      </DialogTitle>
       {onClose && (
         <IconButton aria-label="Close" onClick={onClose} sx={dialogCloseIconButtonStyle}>
           <CloseIcon />
@@ -58,8 +55,8 @@ const Header = ({ children, onClose, ...props }: DialogHeaderProps) => {
   );
 };
 
-const Content = ({ children, width = 500, sx, ...props }: DialogContentProps) => (
-  <DialogContent dividers {...props} sx={combineSx({ width: `${width}px` }, sx)}>
+const Content = ({ children, sx, ...props }: DialogContentProps) => (
+  <DialogContent dividers {...props} sx={combineSx({ minWidth: `500px`, textWrap: 'balance' }, sx)}>
     {children}
   </DialogContent>
 );

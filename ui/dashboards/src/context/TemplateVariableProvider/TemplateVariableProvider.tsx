@@ -13,6 +13,7 @@
 
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 import { createStore, useStore } from 'zustand';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
 import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import produce from 'immer';
@@ -63,7 +64,7 @@ export function useTemplateVariableStoreCtx() {
 
 export function useTemplateVariableValues(variableNames?: string[]) {
   const store = useTemplateVariableStoreCtx();
-  return useStore(
+  return useStoreWithEqualityFn(
     store,
     (s) => {
       const vars: VariableStateMap = {};

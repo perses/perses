@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,6 +16,7 @@ package config
 import (
 	"encoding/hex"
 	"encoding/json"
+	"net/http"
 	"path"
 	"testing"
 	"time"
@@ -44,6 +45,9 @@ func TestJSONMarshalConfig(t *testing.T) {
 			jason: `{
   "security": {
     "readonly": false,
+    "cookie": {
+      "secure": false
+    },
     "enable_auth": false,
     "authorization": {},
     "authentication": {
@@ -56,8 +60,18 @@ func TestJSONMarshalConfig(t *testing.T) {
   "database": {},
   "schemas": {},
   "provisioning": {},
+  "ephemeral_dashboard": {
+    "enable": false,
+    "cleanup_interval": "0s"
+  },
   "frontend": {
-    "deactivate": false
+    "disable": false,
+    "explorer": {
+      "enable": false
+    },
+    "time_range": {
+      "disable_custom": false
+    }
   }
 }`,
 		},
@@ -67,6 +81,10 @@ func TestJSONMarshalConfig(t *testing.T) {
 			jason: `{
   "security": {
     "readonly": false,
+    "cookie": {
+      "same_site": "lax",
+      "secure": false
+    },
     "encryption_key": "\u003csecret\u003e",
     "enable_auth": false,
     "authorization": {
@@ -98,9 +116,29 @@ func TestJSONMarshalConfig(t *testing.T) {
   "provisioning": {
     "interval": "1h"
   },
-  "ephemeral_dashboards_cleanup_interval": "1d",
+  "ephemeral_dashboard": {
+    "enable": false,
+    "cleanup_interval": "0s"
+  },
   "frontend": {
-    "deactivate": false
+    "disable": false,
+    "explorer": {
+      "enable": false
+    },
+    "time_range": {
+      "disable_custom": false,
+      "options": [
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "6h",
+        "12h",
+        "1d",
+        "1w",
+        "2w"
+      ]
+    }
   }
 }`,
 		},
@@ -323,7 +361,11 @@ ephemeral_dashboards_cleanup_interval: "2h"
 `,
 			result: Config{
 				Security: Security{
-					Readonly:      false,
+					Readonly: false,
+					Cookie: Cookie{
+						SameSite: SameSite(http.SameSiteLaxMode),
+						Secure:   false,
+					},
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
@@ -385,6 +427,10 @@ ephemeral_dashboards_cleanup_interval: "2h"
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					TimeRange: TimeRange{
+						DisableCustomTimeRange: false,
+						Options:                defaultTimeRangeOptions,
+					},
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -393,6 +439,10 @@ ephemeral_dashboards_cleanup_interval: "2h"
 					Interval: model.Duration(defaultInterval),
 				},
 				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
+				EphemeralDashboard: EphemeralDashboard{
+					Enable:          true,
+					CleanupInterval: model.Duration(2 * time.Hour),
+				},
 			},
 		},
 	}

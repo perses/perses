@@ -37,11 +37,14 @@ describe('getSeriesColor', () => {
   it('should return the first color from default Categorical palette', () => {
     const props: SeriesColorProps = {
       categoricalPalette: testCategoricalPalette,
-      visual: {},
+      visual: {
+        palette: {
+          mode: 'categorical',
+        },
+      },
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -50,27 +53,17 @@ describe('getSeriesColor', () => {
   it('should return the last color from default Categorical palette', () => {
     const props: SeriesColorProps = {
       categoricalPalette: testCategoricalPalette,
-      visual: {},
+      visual: {
+        palette: {
+          mode: 'categorical',
+        },
+      },
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 6,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual('#D55E00');
-  });
-
-  it('should return color from the generative Auto palette when all Categorical colors have been used', () => {
-    const props: SeriesColorProps = {
-      categoricalPalette: testCategoricalPalette,
-      visual: {},
-      muiPrimaryColor: fallbackColor,
-      seriesName: testSeriesName,
-      seriesIndex: 0,
-      totalSeries: 8,
-    };
-    const paletteColor = getSeriesColor(props);
-    expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
   });
 
   it('should return color from the generative Auto palette when visual option is defined', () => {
@@ -85,7 +78,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 1,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
@@ -103,7 +95,6 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     };
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testCategoricalPalette[0]);
@@ -116,10 +107,101 @@ describe('getSeriesColor', () => {
       muiPrimaryColor: fallbackColor,
       seriesName: testSeriesName,
       seriesIndex: 0,
-      totalSeries: 8,
     } as unknown as SeriesColorProps;
     const paletteColor = getSeriesColor(props);
     expect(paletteColor).toEqual(testSeriesNameGeneratedColor);
+  });
+
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=true', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: true,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
+  });
+
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=false', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: false,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
+  });
+
+  it('should fallback to regular palette instead of using querySettings when colorMode=fixed-single & queryHasMultipleResults=true', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed-single',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: true,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('hsla(27.48,50%,50%,0.9)');
+  });
+
+  it('should return color set in querySettings when colorMode=fixed & queryHasMultipleResults=false', () => {
+    const visualOptionSingleSeriesOverride: TimeSeriesChartVisualOptions = {
+      palette: {
+        mode: 'auto',
+      },
+    };
+    const props: SeriesColorProps = {
+      categoricalPalette: testCategoricalPalette,
+      visual: visualOptionSingleSeriesOverride,
+      muiPrimaryColor: fallbackColor,
+      seriesName: testSeriesName,
+      seriesIndex: 0,
+      querySettings: {
+        queryIndex: 0,
+        colorMode: 'fixed-single',
+        colorValue: '#000',
+      },
+      queryHasMultipleResults: false,
+    };
+    const paletteColor = getSeriesColor(props);
+    expect(paletteColor).toEqual('#000');
   });
 });
 

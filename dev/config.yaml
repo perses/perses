@@ -33,9 +33,14 @@ schemas:
   variables_path: "cue/schemas/variables"
   interval: "5m"
 
-ephemeral_dashboards_cleanup_interval: "1h"
+ephemeral_dashboard:
+  enable: true
+  cleanup_interval: 1h
 
 frontend:
+  explorer:
+    enable: true
+
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"

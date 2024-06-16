@@ -33,55 +33,55 @@ See the next section to get details about the `<secret_specification>`
 ## Secret specification
 
 ```yaml
-  [ basicAuth: <Basic Auth specification> ]
+[ basicAuth: <Basic Auth specification> ]
 
-  # The HTTP authorization credentials for the targets.
-  # Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
-  [ authorization: <Authorization specification> ]
+# The HTTP authorization credentials for the targets.
+# Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
+[ authorization: <Authorization specification> ]
 
-  # Config used to connect to the targets.
-  [ tlsConfig: <TLS Config specification> ]
+# Config used to connect to the targets.
+[ tlsConfig: <TLS Config specification> ]
 ```
 
 ### Basic Auth specification
 
 ```yaml
-  username: <string>
-  [ password: <string> ]
-  [ passwordFile: <filename> ]
+username: <string>
+[ password: <string> ]
+[ passwordFile: <filename> ]
 ```
 
 ### Authorization specification
 
 ```yaml
-  [ type: <string> | default = "Bearer" ]
+[ type: <string> | default = "Bearer" ]
 
-  # The HTTP credentials like a Bearer token
-  [ credentials: <string> ]
-  [ credentialsFile: <filename> ]
+# The HTTP credentials like a Bearer token
+[ credentials: <string> ]
+[ credentialsFile: <filename> ]
 ```
 
 ### TLS Config specification
 
 ```yaml
-  # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
-  [ ca: <secret> ]
-  [ caFile: <filename> ]
+# CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
+[ ca: <secret> ]
+[ caFile: <filename> ]
 
-  # Certificate and key for client cert authentication to the server.
-  # At most one of cert and cert_file is allowed.
-  # At most one of key and key_file is allowed.
-  [ cert: <secret> ]
-  [ certFile: <filename> ]
-  [ key: <secret> ]
-  [ keyFile: <filename> ]
+# Certificate and key for client cert authentication to the server.
+# At most one of cert and cert_file is allowed.
+# At most one of key and key_file is allowed.
+[ cert: <secret> ]
+[ certFile: <filename> ]
+[ key: <secret> ]
+[ keyFile: <filename> ]
 
-  # ServerName extension to indicate the name of the server.
-  # https://tools.ietf.org/html/rfc4366#section-3.1
-  [ serverName: <string> ]
+# ServerName extension to indicate the name of the server.
+# https://tools.ietf.org/html/rfc4366#section-3.1
+[ serverName: <string> ]
 
-  # Disable validation of the server certificate.
-  [ insecureSkipVerify: <boolean> | default = false ]
+# Disable validation of the server certificate.
+[ insecureSkipVerify: <boolean> | default = false ]
 ```
 
 ### Example

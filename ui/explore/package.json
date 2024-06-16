@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/explore",
-  "version": "0.45.0",
+  "version": "0.46.0",
   "description": "The explore feature in Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -27,11 +27,11 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@perses-dev/components": "0.45.0",
-    "@perses-dev/core": "0.45.0",
-    "@perses-dev/panels-plugin": "0.45.0",
-    "@perses-dev/plugin-system": "0.45.0",
-    "@perses-dev/dashboards": "0.45.0",
+    "@perses-dev/components": "0.46.0",
+    "@perses-dev/core": "0.46.0",
+    "@perses-dev/panels-plugin": "0.46.0",
+    "@perses-dev/plugin-system": "0.46.0",
+    "@perses-dev/dashboards": "0.46.0",
     "@types/react-grid-layout": "^1.3.2",
     "date-fns": "^2.28.0",
     "immer": "^9.0.15",
@@ -45,13 +45,13 @@
     "zustand": "^4.3.3"
   },
   "devDependencies": {
-    "@perses-dev/internal-utils": "0.45.0",
-    "@perses-dev/storybook": "0.45.0",
+    "@perses-dev/internal-utils": "0.46.0",
+    "@perses-dev/storybook": "0.46.0",
     "history": "^5.3.0",
     "intersection-observer": "^0.12.2"
   },
   "peerDependencies": {
-    "@mui/material": "^5.10.0",
+    "@mui/material": "^5.15.19",
     "@tanstack/react-query": "^4.7.1",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"

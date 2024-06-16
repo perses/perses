@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
-import { DashboardSelector, fetchJson, Permission } from '@perses-dev/core';
+import { DashboardSelector, DurationString, fetchJson, Permission } from '@perses-dev/core';
 import buildURL from './url-builder';
 
 const resource = 'config';
@@ -130,9 +130,25 @@ export interface SecurityConfig {
   authentication: AuthenticationConfig;
 }
 
+export interface ExplorerConfig {
+  enable: boolean;
+}
+
+export interface TimeRangeConfig {
+  disable_custom: boolean;
+  options: DurationString[];
+}
+
 export interface FrontendConfig {
   important_dashboards?: DashboardSelector[];
   information?: string;
+  explorer: ExplorerConfig;
+  time_range: TimeRangeConfig;
+}
+
+export interface EphemeralDashboardConfig {
+  enable: boolean;
+  cleanup_interval: string;
 }
 
 export interface ConfigModel {
@@ -140,6 +156,7 @@ export interface ConfigModel {
   database: Database;
   schemas: ConfigSchemasModel;
   provisioning?: ProvisioningConfig;
+  ephemeral_dashboard: EphemeralDashboardConfig;
   frontend: FrontendConfig;
 }
 

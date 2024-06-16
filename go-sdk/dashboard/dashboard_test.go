@@ -15,6 +15,7 @@ package dashboard
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -36,21 +37,40 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var (
-	memoryPanel = panelgroup.AddPanel("Container memory",
-		timeseries.Chart(),
-		panel.AddQuery(
-			query.PromQL("max by (container) (container_memory_rss{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
-		),
-	)
-
-	cpuPanel = panelgroup.AddPanel("Container CPU",
-		timeseries.Chart(),
-		panel.AddQuery(
-			query.PromQL("sum  (container_cpu_usage_seconds{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"})"),
-		),
-	)
+const (
+	filter    = "stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\""
+	memMetric = "container_memory_rss"
+	cpuMetric = "container_cpu_usage_seconds"
+	grouping  = "by (container)"
 )
+
+func buildMemoryPanel(grouping string) panelgroup.Option {
+	return panelgroup.AddPanel("Container memory",
+		timeseries.Chart(),
+		panel.AddQuery(
+			query.PromQL(fmt.Sprintf("max %s (%s{%s})", grouping, memMetric, filter)),
+		),
+	)
+}
+
+func buildCPUPanel(grouping string) panelgroup.Option {
+	return panelgroup.AddPanel("Container CPU",
+		timeseries.Chart(
+			timeseries.WithQuerySettings(
+				[]timeseries.QuerySettingsItem{
+					{
+						QueryIndex: 0,
+						ColorMode:  "fixed-single",
+						ColorValue: "#0be300",
+					},
+				},
+			),
+		),
+		panel.AddQuery(
+			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
+		),
+	)
+}
 
 func TestDashboardBuilder(t *testing.T) {
 	builder, buildErr := New("ContainersMonitoring",
@@ -78,22 +98,22 @@ func TestDashboardBuilder(t *testing.T) {
 			),
 		),
 		AddVariable("namespace", listVar.List(
-			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", promqlVar.LabelName("namespace"), promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\"})", promqlVar.LabelName("namespace"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 		)),
 		AddVariable("namespaceLabels", listVar.List(
 			labelNamesVar.PrometheusLabelNames(
-				labelNamesVar.Matchers("kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"}"),
+				labelNamesVar.Matchers("kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
 		)),
 		AddVariable("pod", listVar.List(
-			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", promqlVar.LabelName("pod"), promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})", promqlVar.LabelName("pod"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 		)),
 		AddVariable("container", listVar.List(
-			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
+			promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
 			listVar.AllowMultiple(true),
 			listVar.AllowAllValue(true),
 			listVar.CustomAllValue(".*"),
@@ -102,7 +122,7 @@ func TestDashboardBuilder(t *testing.T) {
 			listVar.Description("simply the list of labels for the considered metric"),
 			listVar.Hidden(true),
 			labelNamesVar.PrometheusLabelNames(
-				labelNamesVar.Matchers("kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\",container=\"$container\"}"),
+				labelNamesVar.Matchers("kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"}"),
 				labelNamesVar.Datasource("promDemo"),
 			),
 			listVar.SortingBy("alphabetical-ci-desc"),
@@ -113,16 +133,16 @@ func TestDashboardBuilder(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			memoryPanel,
-			cpuPanel,
+			buildMemoryPanel(""),
+			buildCPUPanel(""),
 		),
 		AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
 			// PANELS
-			cpuPanel,
-			memoryPanel,
+			buildCPUPanel(grouping),
+			buildMemoryPanel(grouping),
 		),
 
 		// DATASOURCES
@@ -178,7 +198,7 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				),
 			),
 			variablegroup.AddVariable("namespace", listVar.List(
-				promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\"})", promqlVar.LabelName("namespace"), promqlVar.Datasource("promDemo")),
+				promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\"})", promqlVar.LabelName("namespace"), promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
 			)),
 			variablegroup.AddIgnoredVariable("namespaceLabels", listVar.List(
@@ -188,12 +208,12 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				),
 			)),
 			variablegroup.AddVariable("pod", listVar.List(
-				promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\"})", promqlVar.LabelName("pod"), promqlVar.Datasource("promDemo")),
+				promqlVar.PrometheusPromQL("group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})", promqlVar.LabelName("pod"), promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
 				listVar.AllowAllValue(true),
 			)),
 			variablegroup.AddVariable("container", listVar.List(
-				promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=\"$stack\",prometheus=\"$prometheus\",prometheus_namespace=\"$prometheus_namespace\",namespace=\"$namespace\",pod=\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
+				promqlVar.PrometheusPromQL("group by (container) (kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\"})", promqlVar.LabelName("container"), promqlVar.Datasource("promDemo")),
 				listVar.AllowMultiple(true),
 				listVar.AllowAllValue(true),
 				listVar.CustomAllValue(".*"),
@@ -214,16 +234,16 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			panelgroup.PanelsPerLine(3),
 
 			// PANELS
-			memoryPanel,
-			cpuPanel,
+			buildMemoryPanel(""),
+			buildCPUPanel(""),
 		),
 		AddPanelGroup("Resource usage bis",
 			panelgroup.PanelsPerLine(1),
 			panelgroup.PanelHeight(4),
 
 			// PANELS
-			cpuPanel,
-			memoryPanel,
+			buildCPUPanel(grouping),
+			buildMemoryPanel(grouping),
 		),
 
 		// DATASOURCES

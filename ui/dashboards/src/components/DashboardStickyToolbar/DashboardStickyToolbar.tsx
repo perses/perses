@@ -97,7 +97,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
               direction="row"
               justifyContent="end"
             >
-              <TimeRangeControls></TimeRangeControls>
+              <TimeRangeControls />
             </Stack>
           )}
         </Box>

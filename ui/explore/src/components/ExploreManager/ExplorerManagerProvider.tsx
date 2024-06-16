@@ -46,10 +46,10 @@ interface ExplorerManagerProviderProps {
 
 function initExplorerStates(initialState?: ExplorerManagerInitialState): ExplorerState[] {
   const result: ExplorerState[] = [];
-  if (initialState?.explorer !== undefined) {
-    result[initialState.explorer] = {
-      tab: initialState.tab ?? 0,
-      queries: initialState.queries ?? [],
+  if (initialState?.explorer || initialState?.tab || initialState?.queries) {
+    result[initialState?.explorer ?? 0] = {
+      tab: initialState?.tab ?? 0,
+      queries: initialState?.queries ?? [],
     };
   }
   return result;

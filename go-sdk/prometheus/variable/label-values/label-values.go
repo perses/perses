@@ -72,7 +72,7 @@ type Builder struct {
 func (b *Builder) ApplyFilters() error {
 	var filters []string
 	for _, variables := range b.Filters {
-		filters = append(filters, fmt.Sprintf("%s=\"$%s\"", variables.Metadata.Name, variables.Metadata.Name))
+		filters = append(filters, fmt.Sprintf("%s=~\"$%s\"", variables.Metadata.Name, variables.Metadata.Name))
 	}
 
 	for index, matcher := range b.PluginSpec.Matchers {

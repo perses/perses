@@ -27,7 +27,12 @@ import {
   SignUpRoute,
   ExploreRoute,
 } from './model/route';
-import { useIsAuthEnabled, useIsSignUpDisable } from './context/Config';
+import {
+  useIsAuthEnabled,
+  useIsEphemeralDashboardEnabled,
+  useIsExplorerEnabled,
+  useIsSignUpDisable,
+} from './context/Config';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -44,6 +49,8 @@ const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/Ep
 function Router() {
   const isAuthEnabled = useIsAuthEnabled();
   const isSignUpDisable = useIsSignUpDisable();
+  const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();
+  const isExplorerEnabled = useIsExplorerEnabled();
   return (
     <ErrorBoundary FallbackComponent={ErrorAlert}>
       {/* TODO: What sort of loading fallback do we want? */}
@@ -56,14 +63,18 @@ function Router() {
           <Route path={ConfigRoute} element={<ConfigView />} />
           <Route path={ImportRoute} element={<ImportView />} />
           <Route path={ProjectRoute} element={<HomeView />} />
-          <Route path={ExploreRoute} element={<ExploreView />} />
+          {isExplorerEnabled && <Route path={ExploreRoute} element={<ExploreView />} />}
           <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
             <Route path="" element={<ProjectView />} />
             <Route path=":tab" element={<ProjectView />} />
             <Route path="dashboard/new" element={<CreateDashboardView />} />
             <Route path="dashboards/:dashboardName" element={<DashboardView />} />
-            <Route path="ephemeraldashboard/new" element={<CreateEphemeralDashboardView />} />
-            <Route path="ephemeraldashboards/:ephemeralDashboardName" element={<EphemeralDashboardView />} />
+            {isEphemeralDashboardEnabled && (
+              <Route path="ephemeraldashboard/new" element={<CreateEphemeralDashboardView />} />
+            )}
+            {isEphemeralDashboardEnabled && (
+              <Route path="ephemeraldashboards/:ephemeralDashboardName" element={<EphemeralDashboardView />} />
+            )}
           </Route>
           <Route path="/" element={<HomeView />} />
           <Route path="*" element={<Navigate replace to="/" />} />

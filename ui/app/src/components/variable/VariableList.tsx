@@ -13,7 +13,7 @@
 
 import { Action, getResourceDisplayName, getVariableProject, Variable } from '@perses-dev/core';
 import React, { useCallback, useMemo, useState } from 'react';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -147,7 +147,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         type: 'string',
         flex: 3,
         minWidth: 150,
-        valueGetter: (params: GridValueGetterParams) => `$${params.row.name}`,
+        valueGetter: (_, row) => `$${row.name}`,
         renderCell: (params) => (
           <>
             <pre>{params.value}</pre>

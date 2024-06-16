@@ -49,7 +49,6 @@ const ButtonMenu = ({ children }: ButtonMenuProps) => {
         anchorEl={anchorRef.current}
         transition
         disablePortal
-        placeholder={undefined}
       >
         {({ TransitionProps, placement }) => (
           <Grow

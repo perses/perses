@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { searchTraceQuery, searchTraceID, getEnrichedTraceQuery, TempoClient } from '../model/tempo-client';
+import { searchTraceQuery, searchTraceID, searchTraceQueryFallback, TempoClient } from '../model/tempo-client';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 
 /**
@@ -33,8 +33,8 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
       datasourceUrl,
     },
     searchTraceQuery: (query: string) => searchTraceQuery(query, datasourceUrl),
+    searchTraceQueryFallback: (query: string) => searchTraceQueryFallback(query, datasourceUrl),
     searchTraceID: (traceID: string) => searchTraceID(traceID, datasourceUrl),
-    getEnrichedTraceQuery: (query: string) => getEnrichedTraceQuery(query, datasourceUrl),
   };
 };
 

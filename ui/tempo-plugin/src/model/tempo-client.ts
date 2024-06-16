@@ -13,7 +13,7 @@
 
 import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
-import { SearchTraceIDResponse, EnrichedTraceQueryResponse, SearchTraceQueryResponse } from './api-types';
+import { SearchTraceIDResponse, SearchTraceQueryResponse, ServiceStats } from './api-types';
 
 interface TempoClientOptions {
   datasourceUrl: string;
@@ -22,8 +22,8 @@ interface TempoClientOptions {
 
 export interface TempoClient extends DatasourceClient {
   options: TempoClientOptions;
-  getEnrichedTraceQuery(query: string, datasourceUrl: string): Promise<EnrichedTraceQueryResponse>;
   searchTraceQuery(query: string, datasourceUrl: string): Promise<SearchTraceQueryResponse>;
+  searchTraceQueryFallback(query: string, datasourceUrl: string): Promise<SearchTraceQueryResponse>;
   searchTraceID(traceID: string, datasourceUrl: string): Promise<SearchTraceIDResponse>;
 }
 
@@ -53,48 +53,61 @@ export function searchTraceID(traceID: string, datasourceUrl: string) {
 }
 
 /**
- * Combined response of Tempo HTTP API endpoints GET /api/search/<query>
- * and GET /api/traces/<traceID>. For each trace returned from GET /api/search/<query>
- * a detailed trace report is fetched from  GET /api/traces/<traceID>. This is a
- * temporary workaround to obtain the total number of spans and total number
- * of errors for a trace.
+ * Returns a summary report of traces that satisfy the query.
  *
- * TODO: This workaround should be replaced once this issue,
- * https://github.com/grafana/tempo/issues/2940, is resolved upstream in
- * Tempo.
+ * If the serviceStats field is missing in the response, fetches all traces
+ * and calculates the serviceStats.
+ *
+ * Tempo computes the serviceStats field during ingestion since vParquet4,
+ * this fallback is required for older block formats.
  */
-export async function getEnrichedTraceQuery(query: string, datasourceUrl: string): Promise<EnrichedTraceQueryResponse> {
+export async function searchTraceQueryFallback(
+  query: string,
+  datasourceUrl: string
+): Promise<SearchTraceQueryResponse> {
   // Get a list of traces that satisfy the query.
   const searchResponse = await searchTraceQuery(query, datasourceUrl);
-  if (!searchResponse.traces) {
-    return { query, traces: [] };
+  if (!searchResponse.traces || searchResponse.traces.length === 0) {
+    return { traces: [] };
   }
 
+  // exit early if fallback is not required (serviceStats are contained in the response)
+  if (searchResponse.traces[0]?.serviceStats) {
+    return searchResponse;
+  }
+
+  // calculate serviceStats (number of spans and errors) per service
   return {
-    query,
     traces: await Promise.all(
       searchResponse.traces.map(async (trace) => {
-        let spanCount = 0;
-        let errorCount = 0;
+        const serviceStats: Record<string, ServiceStats> = {};
         const searchTraceIDResponse = await searchTraceID(trace.traceID, datasourceUrl);
 
-        // For every trace, get the full trace, and find the total number of spans and errors.
+        // For every trace, get the full trace, and find the number of spans and errors.
         for (const batch of searchTraceIDResponse.batches) {
+          let serviceName = '?';
+          for (const attr of batch.resource.attributes) {
+            if (attr.key === 'service.name' && 'stringValue' in attr.value) {
+              serviceName = attr.value.stringValue;
+              break;
+            }
+          }
+
+          const stats = serviceStats[serviceName] ?? { spanCount: 0 };
           for (const scopeSpan of batch.scopeSpans) {
-            spanCount += scopeSpan.spans.length;
+            stats.spanCount += scopeSpan.spans.length;
             for (const span of scopeSpan.spans) {
               if (span.status?.code) {
-                errorCount++;
+                stats.errorCount = (stats.errorCount ?? 0) + 1;
               }
             }
           }
+          serviceStats[serviceName] = stats;
         }
 
         return {
-          summary: trace,
-          traceDetails: searchTraceIDResponse,
-          spanCount,
-          errorCount,
+          ...trace,
+          serviceStats,
         };
       })
     ),

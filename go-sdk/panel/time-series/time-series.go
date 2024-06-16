@@ -102,11 +102,25 @@ type YAxis struct {
 }
 
 type PluginSpec struct {
-	Legend     *Legend               `json:"legend,omitempty" yaml:"legend,omitempty"`
-	Tooltip    *Tooltip              `json:"tooltip,omitempty" yaml:"tooltip,omitempty"`
-	YAxis      *YAxis                `json:"yAxis,omitempty" yaml:"yAxis,omitempty"`
-	Thresholds *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
-	Visual     *Visual               `json:"visual,omitempty" yaml:"visual,omitempty"`
+	Legend        *Legend               `json:"legend,omitempty" yaml:"legend,omitempty"`
+	Tooltip       *Tooltip              `json:"tooltip,omitempty" yaml:"tooltip,omitempty"`
+	YAxis         *YAxis                `json:"yAxis,omitempty" yaml:"yAxis,omitempty"`
+	Thresholds    *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
+	Visual        *Visual               `json:"visual,omitempty" yaml:"visual,omitempty"`
+	QuerySettings *[]QuerySettingsItem  `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
+}
+
+type ColorMode string
+
+const (
+	FixedMode       ColorMode = "fixed"
+	FixedSingleMode ColorMode = "fixed-single"
+)
+
+type QuerySettingsItem struct {
+	QueryIndex uint      `json:"queryIndex" yaml:"queryIndex"`
+	ColorMode  ColorMode `json:"colorMode" yaml:"colorMode"`
+	ColorValue string    `json:"colorValue" yaml:"colorValue"`
 }
 
 type Option func(plugin *Builder) error
@@ -126,7 +140,7 @@ func New(options ...Option) (Builder, error) {
 }
 
 type Builder struct {
-	PluginSpec
+	PluginSpec `json:",inline" yaml:",inline"`
 }
 
 func Chart(options ...Option) panel.Option {

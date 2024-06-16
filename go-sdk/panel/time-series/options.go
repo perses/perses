@@ -49,3 +49,10 @@ func WithVisual(visual Visual) Option {
 		return nil
 	}
 }
+
+func WithQuerySettings(querySettingsList []QuerySettingsItem) Option {
+	return func(builder *Builder) error {
+		builder.QuerySettings = &querySettingsList
+		return nil
+	}
+}

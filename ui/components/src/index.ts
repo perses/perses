@@ -14,7 +14,6 @@
 export * from './BarChart';
 export * from './ColorPicker';
 export * from './ContentWithLegend';
-export * from './DateTimeRangePicker';
 export * from './Dialog';
 export * from './Drawer';
 export * from './EChart';
@@ -35,6 +34,7 @@ export * from './StatChart';
 export * from './Table';
 export * from './ThresholdsEditor';
 export * from './TimeChart';
+export * from './TimeRangeSelector';
 export * from './TimeSeriesTooltip';
 export * from './ToolbarIconButton';
 export * from './FormatControls';

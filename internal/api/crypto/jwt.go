@@ -24,6 +24,7 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/sirupsen/logrus"
 )
 
@@ -84,6 +85,7 @@ type jwtImpl struct {
 	refreshKey      []byte
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
+	cookieConfig    config.Cookie
 }
 
 func (j *jwtImpl) SignedAccessToken(login string) (string, error) {
@@ -99,17 +101,15 @@ func (j *jwtImpl) SignedRefreshToken(login string) (string, error) {
 func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *http.Cookie) {
 	expireDate := time.Now().Add(j.accessTokenTTL)
 	tokenSplit := strings.Split(accessToken, ".")
-	sameSite := http.SameSiteNoneMode
-	secure := true
 	headerPayloadCookie := &http.Cookie{
 		Name:     CookieKeyJWTPayload,
 		Value:    fmt.Sprintf("%s.%s", tokenSplit[0], tokenSplit[1]),
 		Path:     cookiePath,
 		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
-		Secure:   secure,
+		Secure:   j.cookieConfig.Secure,
 		HttpOnly: false,
-		SameSite: sameSite,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 	signatureCookie := &http.Cookie{
 		Name:     CookieKeyJWTSignature,
@@ -117,9 +117,9 @@ func (j *jwtImpl) CreateAccessTokenCookie(accessToken string) (*http.Cookie, *ht
 		Path:     cookiePath,
 		MaxAge:   int(j.accessTokenTTL.Seconds()),
 		Expires:  expireDate,
-		Secure:   secure,
+		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,
-		SameSite: sameSite,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 	return headerPayloadCookie, signatureCookie
 }
@@ -149,9 +149,9 @@ func (j *jwtImpl) CreateRefreshTokenCookie(refreshToken string) *http.Cookie {
 		Path:     cookiePath,
 		MaxAge:   int(j.refreshTokenTTL.Seconds()),
 		Expires:  time.Now().Add(j.refreshTokenTTL),
-		Secure:   true,
+		Secure:   j.cookieConfig.Secure,
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
+		SameSite: http.SameSite(j.cookieConfig.SameSite),
 	}
 }
 

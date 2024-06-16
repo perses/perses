@@ -47,17 +47,15 @@ spec:
 ### Sparkline specification
 
 ```yaml
-  [ color: <string> ]
-  [ width: <int> ]
+[ color: <string> ]
+[ width: <int> ]
 ```
 
 ## ScatterChart
 
-Note: Currently, ther are are no spec options avaiable for this panel
-
 ```yaml
 kind: "ScatterChart"
-spec:
+spec: # TODO document the spec of ScatterChart
 ```
 
 ## TimeSeriesChart
@@ -66,10 +64,12 @@ spec:
 kind: "TimeSeriesChart"
 spec:
   [ legend: <Legend specification> ]
-    [ tooltip: <Tooltip specification> ]
-    [ yAxis: <YAxis specification> ]
-    [ thresholds: <Thresholds specification> ]
-    [ visual: <Visual specification> ]
+  [ tooltip: <Tooltip specification> ]
+  [ yAxis: <YAxis specification> ]
+  [ thresholds: <Thresholds specification> ]
+  [ visual: <Visual specification> ]
+  querySettings:
+  - [ <Query Settings specification> ]
 ```
 
 ### Legend specification
@@ -91,33 +91,46 @@ values:
 ### YAxis specification
 
 ```yaml
-  [ show: <boolean> ]
-  [ label: <string> ]
-  [ format: <format_spec> ]
-  [ min: <int> ]
-  [ max: <int> ]
+[ show: <boolean> ]
+[ label: <string> ]
+[ format: <format_spec> ]
+[ min: <int> ]
+[ max: <int> ]
 ```
 
 ### Visual specification
 
 ```yaml
-  [ display: <enum = "line" | "bar"> ]
-  # Must be between 0.25 and 3
-  [ lineWidth: <int> ]
-  # Must be between 0 and 1
-  [ areaOpacity: <int> ]
-  [ showPoints: <enum = "auto" | "always"> ]
-  [ palette: <Palette specification> ]
-  # Must be between 0 and 6
-  [ pointRadius: <number> ]
-  [ stack: <enum = "all" | "percent"> ]
-  [ connectNulls: boolean | default = false ]
+[ display: <enum = "line" | "bar"> ]
+# Must be between 0.25 and 3
+[ lineWidth: <int> ]
+# Must be between 0 and 1
+[ areaOpacity: <int> ]
+[ showPoints: <enum = "auto" | "always"> ]
+[ palette: <Palette specification> ]
+# Must be between 0 and 6
+[ pointRadius: <number> ]
+[ stack: <enum = "all" | "percent"> ]
+[ connectNulls: boolean | default = false ]
 ```
 
 #### Palette specification
 
 ```yaml
-  mode: <enum = "auto" | "categorical">
+mode: <enum = "auto" | "categorical">
+```
+
+### Query Settings specification
+
+```yaml
+# queryIndex is an unsigned integer that should match an existing index in the panel's `queries` array
+queryIndex: <number>
+# colorMode represents the coloring strategy to use
+# - "fixed":        for any serie returned by the query, apply the colorValue defined
+# - "fixed-single": if only one serie returned by the query, apply the colorValue defined, otherwise do nothing
+colorMode: <enum = "fixed" | "fixed-single">
+# colorValue is an hexadecimal color code
+colorValue: <string>
 ```
 
 ## Common definitions
@@ -142,54 +155,54 @@ The format spec is one of the following:
 #### Time format
 
 ```yaml
-  unit: <enum = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years">
-  [ decimalPlaces: <int> ]
+unit: <enum = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years">
+[ decimalPlaces: <int> ]
 ```
 
 #### Percent format
 
 ```yaml
-  unit: <enum =  "percent" | "percent-decimal">
-  [ decimalPlaces: <int> ]
+unit: <enum =  "percent" | "percent-decimal">
+[ decimalPlaces: <int> ]
 ```
 
 #### Decimal format
 
 ```yaml
-  unit: "decimal"
-  [ decimalPlaces: <int> ]
-  [ shortValues: <boolean> | default = false ]
+unit: "decimal"
+[ decimalPlaces: <int> ]
+[ shortValues: <boolean> | default = false ]
 ```
 
 #### Bytes format
 
 ```yaml
-  unit: "bytes"
-  [ decimalPlaces: <int> ]
-  [ shortValues: <boolean> | default = false ]
+unit: "bytes"
+[ decimalPlaces: <int> ]
+[ shortValues: <boolean> | default = false ]
 ```
 
 #### Throughput format
 
 ```yaml
-  unit: < enum = "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec">
-  [ decimalPlaces: <int> ]
-  [ shortValues: <boolean> | default = false ]
+unit: < enum = "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec">
+[ decimalPlaces: <int> ]
+[ shortValues: <boolean> | default = false ]
 ```
 
 ### Thresholds specification
 
 ```yaml
-  [ mode: <enum = "percent" | "absolute"> ]
-  [ defaultColor: string ]
-  steps:
-    - [ <Step specification> ]
+[ mode: <enum = "percent" | "absolute"> ]
+[ defaultColor: string ]
+steps:
+  - [ <Step specification> ]
 ```
 
 #### Step specification
 
 ```yaml
-  value: <int>
-  [ color: <string> ]
-  [ name: <string> ]
+value: <int>
+[ color: <string> ]
+[ name: <string> ]
 ```

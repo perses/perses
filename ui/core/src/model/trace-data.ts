@@ -16,12 +16,18 @@ export interface TraceMetaData {
 }
 
 export interface TraceValue {
+  traceId: string;
+  rootServiceName: string;
+  rootTraceName: string;
   startTimeUnixMs: number;
   durationMs: number;
-  spanCount?: number;
+  serviceStats: Record<string, ServiceStats>;
+}
+
+export interface ServiceStats {
+  spanCount: number;
+  /** number of spans with errors, unset if zero */
   errorCount?: number;
-  traceId?: string;
-  name?: string;
 }
 
 /**
