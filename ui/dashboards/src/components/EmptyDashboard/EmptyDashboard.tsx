@@ -62,7 +62,7 @@ const DEFAULT_DESCRIPTION = {
 };
 
 // Constants from specifics in designs to make the default messaging look good.
-const CONTAINER_WIDTH = '450px';
+const CONTAINER_WIDTH = '500px';
 const PRIMARY_CONTENT_WIDTH = '289px';
 
 const COMMON_BUTTON_PROPS = {
