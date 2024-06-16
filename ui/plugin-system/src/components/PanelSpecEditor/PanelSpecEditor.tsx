@@ -80,7 +80,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
 
   return (
     <QueryCountProvider queryCount={(panelDefinition.spec.queries ?? []).length}>
-      <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
+      <OptionsEditorTabs key={tabs.length} tabs={tabs} />
     </QueryCountProvider>
   );
 }
