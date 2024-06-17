@@ -55,7 +55,17 @@ func buildMemoryPanel(grouping string) panelgroup.Option {
 
 func buildCPUPanel(grouping string) panelgroup.Option {
 	return panelgroup.AddPanel("Container CPU",
-		timeseries.Chart(),
+		timeseries.Chart(
+			timeseries.WithQuerySettings(
+				[]timeseries.QuerySettingsItem{
+					{
+						QueryIndex: 0,
+						ColorMode:  "fixed-single",
+						ColorValue: "#0be300",
+					},
+				},
+			),
+		),
 		panel.AddQuery(
 			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
 		),

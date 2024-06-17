@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.3
 
 require (
-	cuelang.org/go v0.9.0-alpha.5
+	cuelang.org/go v0.9.1
 	github.com/brunoga/deep v1.2.3
 	github.com/charmbracelet/huh v0.4.2
 	github.com/fsnotify/fsnotify v1.7.0

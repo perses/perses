@@ -113,7 +113,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
         await panelEditor.openThresholdColorPicker('T1');
-        const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+        const colorPicker = dashboardPage.page.getByTestId('options color picker');
         await colorPicker.isVisible();
         const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
         await colorInput.clear();
@@ -138,7 +138,7 @@ test.describe('Dashboard: Gauge Chart Panel', () => {
       await dashboardPage.editPanel('Single Gauge', async (panelEditor) => {
         await panelEditor.selectTab('Settings');
         await panelEditor.openThresholdColorPicker('default');
-        const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+        const colorPicker = dashboardPage.page.getByTestId('options color picker');
         await colorPicker.isVisible();
         const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
         await colorInput.clear();

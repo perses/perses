@@ -13,7 +13,7 @@
 
 import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
 import { Box, Stack, Tooltip } from '@mui/material';
-import { GridColDef, GridRowParams, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import { useCallback, useMemo, useState } from 'react';
@@ -118,7 +118,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
+        valueGetter: (_, row) => new Date(row.createdAt),
         renderCell: (params) => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
@@ -131,7 +131,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 125,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
+        valueGetter: (_, row) => new Date(row.updatedAt),
         renderCell: (params) => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>
@@ -144,7 +144,7 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         type: 'dateTime',
         flex: 1,
         minWidth: 150,
-        valueGetter: (params: GridValueGetterParams) => new Date(params.row.viewedAt),
+        valueGetter: (_, row) => (row.viewedAt ? new Date(row.viewedAt) : undefined),
         renderCell: (params) => (
           <Tooltip title={params.value.toUTCString()} placement="top">
             <span>{intlFormatDistance(params.value, new Date())}</span>

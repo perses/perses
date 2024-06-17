@@ -13,7 +13,7 @@
 
 import { Switch, SwitchProps } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
-import { ErrorAlert, OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
+import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
@@ -125,7 +125,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
   }, [] as LegendValueOption[]);
 
   return (
-    <>
+    <OptionsEditorGroup title="Legend">
       {!isValidLegend && <ErrorAlert error={{ name: 'invalid-legend', message: 'Invalid legend spec' }} />}
       <OptionsEditorControl
         label="Show"
@@ -199,6 +199,6 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           />
         }
       />
-    </>
+    </OptionsEditorGroup>
   );
 }

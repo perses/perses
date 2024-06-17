@@ -94,8 +94,8 @@ export class DashboardPage {
     this.themeToggle = page.getByRole('button', { name: 'Theme' });
 
     this.toolbar = page.getByTestId('dashboard-toolbar');
-    this.timePicker = page.getByRole('button', { name: 'Select time range' });
-    this.refreshIntervalPicker = page.getByRole('button', { name: 'Select refresh interval' });
+    this.timePicker = page.getByRole('combobox', { name: 'Select time range' });
+    this.refreshIntervalPicker = page.getByRole('combobox', { name: 'Select refresh interval' });
     this.editButton = this.toolbar.getByRole('button', { name: /Edit$/ });
     this.cancelButton = this.toolbar.getByRole('button', { name: 'Cancel' });
     this.saveButton = this.toolbar.getByRole('button', { name: 'Save' });

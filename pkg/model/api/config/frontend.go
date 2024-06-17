@@ -13,11 +13,50 @@
 
 package config
 
+import (
+	"time"
+
+	"github.com/prometheus/common/model"
+)
+
+var defaultTimeRangeOptions = []model.Duration{
+	model.Duration(5 * time.Minute),
+	model.Duration(15 * time.Minute),
+	model.Duration(30 * time.Minute),
+	model.Duration(1 * time.Hour),
+	model.Duration(6 * time.Hour),
+	model.Duration(12 * time.Hour),
+	model.Duration(24 * time.Hour),
+	model.Duration(7 * 24 * time.Hour),
+	model.Duration(14 * 24 * time.Hour),
+}
+
+type Explorer struct {
+	Enable bool `json:"enable" yaml:"enable"`
+}
+
+type TimeRange struct {
+	DisableCustomTimeRange bool             `json:"disable_custom" yaml:"disable_custom"`
+	Options                []model.Duration `json:"options,omitempty" yaml:"options,omitempty"`
+}
+
+func (t *TimeRange) Verify() error {
+	if len(t.Options) == 0 {
+		t.Options = defaultTimeRangeOptions
+	}
+	return nil
+}
+
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
-	Deactivate bool `json:"deactivate" yaml:"deactivate"`
+	Disable bool `json:"disable" yaml:"disable"`
+	// Explorer is activating the different kind of explorer supported.
+	// Be sure you have installed an associated plugin for each explorer type.
+	Explorer Explorer `json:"explorer" yaml:"explorer"`
 	// Information contains markdown content to be display on the home page
 	Information string `json:"information,omitempty" yaml:"information,omitempty"`
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
+	// TimeRange contains the time range configuration for the dropdown
+	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 }

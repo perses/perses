@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,28 +14,17 @@
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import { Stack } from '@mui/material';
 import {
-  DateTimeRangePicker,
   RefreshIntervalPicker,
   InfoTooltip,
   TimeOption,
   ToolbarIconButton,
+  TimeRangeSelector,
+  buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { DurationString } from '@perses-dev/core';
 import { useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
-import { useTimeRange } from '../../runtime';
-
-export const DEFAULT_TIME_RANGE_OPTIONS: TimeOption[] = [
-  { value: { pastDuration: '5m' }, display: 'Last 5 minutes' },
-  { value: { pastDuration: '15m' }, display: 'Last 15 minutes' },
-  { value: { pastDuration: '30m' }, display: 'Last 30 minutes' },
-  { value: { pastDuration: '1h' }, display: 'Last 1 hour' },
-  { value: { pastDuration: '6h' }, display: 'Last 6 hours' },
-  { value: { pastDuration: '12h' }, display: 'Last 12 hours' },
-  { value: { pastDuration: '24h' }, display: 'Last 1 day' },
-  { value: { pastDuration: '7d' }, display: 'Last 7 days' },
-  { value: { pastDuration: '14d' }, display: 'Last 14 days' },
-];
+import { useTimeRange, useShowCustomTimeRangeSetting, useTimeRangeOptionsSetting } from '../../runtime';
 
 export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
@@ -54,6 +43,7 @@ interface TimeRangeControlsProps {
   showTimeRangeSelector?: boolean;
   showRefreshButton?: boolean;
   showRefreshInterval?: boolean;
+  showCustomTimeRange?: boolean;
   timePresets?: TimeOption[];
 }
 
@@ -62,9 +52,13 @@ export function TimeRangeControls({
   showTimeRangeSelector = true,
   showRefreshButton = true,
   showRefreshInterval = true,
-  timePresets = DEFAULT_TIME_RANGE_OPTIONS,
+  showCustomTimeRange,
+  timePresets,
 }: TimeRangeControlsProps) {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
+
+  const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
+  const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
@@ -72,12 +66,9 @@ export function TimeRangeControls({
   // add time preset if one does not match duration given in time range
   if (
     'pastDuration' in timeRange &&
-    !timePresets.some((option) => option.value.pastDuration === timeRange['pastDuration'])
+    !timePresetsValue.some((option) => option.value.pastDuration === timeRange['pastDuration'])
   ) {
-    timePresets.push({
-      value: { pastDuration: timeRange['pastDuration'] },
-      display: `Last ${timeRange['pastDuration']}`,
-    });
+    timePresetsValue.push(buildRelativeTimeOption(timeRange['pastDuration']));
   }
 
   // set the new refresh interval both in the dashboard context & as query param
@@ -91,7 +82,13 @@ export function TimeRangeControls({
   return (
     <Stack direction="row" spacing={1}>
       {showTimeRangeSelector && (
-        <DateTimeRangePicker timeOptions={timePresets} value={timeRange} onChange={setTimeRange} height={height} />
+        <TimeRangeSelector
+          timeOptions={timePresetsValue}
+          value={timeRange}
+          onChange={setTimeRange}
+          height={height}
+          showCustomTimeRange={showCustomTimeRangeValue}
+        />
       )}
       {showRefreshButton && (
         <InfoTooltip description={TOOLTIP_TEXT.refresh}>

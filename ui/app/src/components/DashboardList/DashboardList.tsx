@@ -240,7 +240,7 @@ export function DashboardList(props: DashboardListProperties) {
             <DeleteResourceDialog
               open={isDeleteDashboardDialogStateOpened}
               resource={targetedDashboard}
-              onSubmit={() => handleDashboardDelete(targetedDashboard)}
+              onSubmit={(v) => handleDashboardDelete(v).then(() => setDeleteDashboardDialogStateOpened(false))}
               onClose={() => setDeleteDashboardDialogStateOpened(false)}
             />
           </>

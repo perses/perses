@@ -62,6 +62,7 @@ function FormatedSeriesName({ labels }: { labels: Labels }) {
         {!first && ', '}
         <Typography
           display="inline"
+          component="span"
           sx={{
             '&:hover': {
               cursor: 'pointer',

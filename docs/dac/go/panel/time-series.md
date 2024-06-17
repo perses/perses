@@ -71,6 +71,16 @@ timeseries.WithVisual(timeseries.Visual{...})
 
 Define visual properties of the chart.
 
+### WithQuerySettings
+
+```golang
+import "github.com/perses/perses/go-sdk/panel/time-series"
+
+timeseries.WithQuerySettings([]timeseries.QuerySettingsItem{...})
+```
+
+Define settings for the queries.
+
 ## Example
 
 ```golang

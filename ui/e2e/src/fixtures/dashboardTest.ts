@@ -72,7 +72,7 @@ async function duplicateDashboard(projectName: string, dashboardName: string, ne
   const result = await createDashboard(newDashboardJson);
   if (!result.ok) {
     throw new Error(
-      `Unable to create test dashboard '${newDashboardName}'. Failed with status '${result.status}: ${result.statusText}'.`
+      `Unable to create test dashboard '${newDashboardName}'. Failed with status '${result.status}: ${result.statusText}'. \n${await result.text()}`
     );
   }
 }

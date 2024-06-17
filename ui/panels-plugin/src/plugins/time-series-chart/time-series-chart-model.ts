@@ -30,6 +30,13 @@ export interface TimeSeriesChartOptions {
   thresholds?: ThresholdOptions;
   visual?: TimeSeriesChartVisualOptions;
   tooltip?: TooltipSpecOptions;
+  querySettings?: QuerySettingsOptions[];
+}
+
+export interface QuerySettingsOptions {
+  queryIndex: number;
+  colorMode: 'fixed' | 'fixed-single';
+  colorValue: string;
 }
 
 export type TimeSeriesChartOptionsEditorProps = OptionsEditorProps<TimeSeriesChartOptions>;
@@ -48,7 +55,6 @@ export interface TooltipSpecOptions {
 
 export interface TimeSeriesChartPaletteOptions {
   mode: 'auto' | 'categorical';
-  // colors: string []; // TODO: add colors to override ECharts theme
 }
 
 export type TimeSeriesChartVisualOptions = {
@@ -83,7 +89,7 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
-export const DEFAULT_LINE_WIDTH = 1.5;
+export const DEFAULT_LINE_WIDTH = 1.25;
 export const DEFAULT_AREA_OPACITY = 0;
 
 // How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.

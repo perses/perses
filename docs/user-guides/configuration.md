@@ -94,6 +94,9 @@ Generic placeholders are defined as follows:
 # It will also change the UI to reflect this config, by removing any action button and will prevent the access to a form.
 [ readonly: <boolean> | default = false ]
   
+# Cookie configuration
+[ cookie: <Cookie config> ]
+  
 # It contains the config regarding the time to live of the refresh/access token.
 [ authentication: <Authentication config> ]
 
@@ -112,6 +115,18 @@ Generic placeholders are defined as follows:
 
 # The path to the file containing the secret key.
 [ encryption_key_file: <filename> ]
+```
+
+### Cookie config
+
+```yaml
+# Set the same_site cookie attribute and prevents the browser from sending the cookie along with cross-site requests.
+# The main goal is to mitigate the risk of cross-origin information leakage.
+# This setting also provides some protection against cross-site request forgery attacks (CSRF)
+[ same_site: < enum | possibleValue = 'strict' | 'lax' | 'none' > | default = lax ]
+
+# Set to true if you host Perses behind HTTPS. Default is false
+[ secure: <boolean> | default = false ]
 ```
 
 #### Authentication config
@@ -447,17 +462,17 @@ folders:
 
 ```yaml
 # When true user will be able to use the ephemeral dashboard at project level
-[ activate: <bool> | default = false ]
+[ enable: <bool> | default = false ]
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
-[ cleanup_interval <duration> | default = 1d ]
+[ cleanup_interval: <duration> | default = 1d ]
 ```
 
 ### Frontend config
 
 ```yaml
 # When it is true, Perses won't serve the frontend anymore.
-[ deactivate: <bool> | default = false ]
+[ disable: <bool> | default = false ]
 
 # A list of dashboards you would like to display in the UI home page
 important_dashboards:
@@ -465,8 +480,20 @@ important_dashboards:
 
 # The markdown content to be displayed on the UI home page
 [ information: <string> ]
+
+# TimeRange configuration
+[ time_range: <TimeRange config> ]
 ```
 
+#### TimeRange config
+
+```yaml
+# The different relative timerange options available in dashboards and explorer
+# Use duration format. The display will be computed automatically. Eg: "5m: will be display "Last 5 minutes"
+[ options: <duration[]> | default = [ "5m", "15m", "30m", "1h", "6h", "12h", "1d", "1w", "2w" ] ]
+# Allow you to disable the custom time range (absolute time range)
+[ disable_custom:  <bool> | default = false ]
+```
 #### Dashboard Selector config
 
 ```yaml

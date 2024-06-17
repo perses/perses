@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,10 +16,8 @@ import { Box, Stack, TextField, Typography, Button } from '@mui/material';
 import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { AbsoluteTimeRange } from '@perses-dev/core';
-import { useTimeZone } from '../context/TimeZoneProvider';
-import { validateDateRange } from './utils';
-
-const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+import { useTimeZone } from '../context';
+import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
 interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
@@ -31,7 +29,16 @@ type AbsoluteTimeRangeInputValue = {
   [Property in keyof AbsoluteTimeRange]: string;
 };
 
-export const AbsoluteTimePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps) => {
+/**
+ * Start and End datetime picker, allowing use to select a specific time range selecting two absolute dates and times.
+ * TODO: Use directly the MUI X ``DateTimePicker`` for datetime selection which is better. https://next.mui.com/x/react-date-pickers/date-time-picker/
+ *   Use ``DateTimeRangePicker`` directly would be cool but paid https://next.mui.com/x/react-date-pickers/date-time-range-picker/
+ * @param initialTimeRange initial time range to pre-select.
+ * @param onChange event received when start and end has been selected (click on apply)
+ * @param onCancel event received when user click on cancel
+ * @constructor
+ */
+export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: AbsoluteTimeFormProps) => {
   const { formatWithUserTimeZone } = useTimeZone();
 
   // Time range values as dates that can be used as a time range.

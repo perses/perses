@@ -60,7 +60,7 @@ test.describe('Dashboard: Stat Chart Panel', () => {
       await panelEditor.addThreshold();
       await panelEditor.editThreshold('T1', '5');
       await panelEditor.openThresholdColorPicker('T1');
-      const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+      const colorPicker = dashboardPage.page.getByTestId('options color picker');
       await colorPicker.isVisible();
       const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
       await colorInput.clear();

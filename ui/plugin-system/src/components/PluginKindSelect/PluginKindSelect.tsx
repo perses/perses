@@ -59,6 +59,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) =
       inputRef={ref}
       {...others}
       value={value}
+      aria-label={value}
       onChange={handleChange}
       SelectProps={{ renderValue }}
       data-testid="plugin-kind-select"

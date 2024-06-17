@@ -68,6 +68,8 @@ spec:
   [ yAxis: <YAxis specification> ]
   [ thresholds: <Thresholds specification> ]
   [ visual: <Visual specification> ]
+  querySettings:
+  - [ <Query Settings specification> ]
 ```
 
 ### Legend specification
@@ -116,6 +118,19 @@ values:
 
 ```yaml
 mode: <enum = "auto" | "categorical">
+```
+
+### Query Settings specification
+
+```yaml
+# queryIndex is an unsigned integer that should match an existing index in the panel's `queries` array
+queryIndex: <number>
+# colorMode represents the coloring strategy to use
+# - "fixed":        for any serie returned by the query, apply the colorValue defined
+# - "fixed-single": if only one serie returned by the query, apply the colorValue defined, otherwise do nothing
+colorMode: <enum = "fixed" | "fixed-single">
+# colorValue is an hexadecimal color code
+colorValue: <string>
 ```
 
 ## Common definitions

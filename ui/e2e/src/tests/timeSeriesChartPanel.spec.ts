@@ -138,7 +138,7 @@ test.describe('Dashboard: Time Series Chart Panel', () => {
         })
         .fill('5');
       await panelEditor.openThresholdColorPicker('T2');
-      const colorPicker = dashboardPage.page.getByTestId('threshold color picker');
+      const colorPicker = dashboardPage.page.getByTestId('options color picker');
       await colorPicker.isVisible();
       const colorInput = colorPicker.getByRole('textbox', { name: 'enter hex color' });
       await colorInput.clear();

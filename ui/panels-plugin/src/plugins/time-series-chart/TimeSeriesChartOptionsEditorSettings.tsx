@@ -29,6 +29,7 @@ import {
 } from './time-series-chart-model';
 import { VisualOptionsEditor, VisualOptionsEditorProps } from './VisualOptionsEditor';
 import { YAxisOptionsEditor, YAxisOptionsEditorProps } from './YAxisOptionsEditor';
+import { QuerySettingsEditor, QuerySettingsEditorProps } from './QuerySettingsEditor';
 
 export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptionsEditorProps) {
   const { onChange, value } = props;
@@ -58,6 +59,14 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
     );
   };
 
+  const handleQuerySettingsChange: QuerySettingsEditorProps['onChange'] = (newQuerySettings) => {
+    onChange(
+      produce(value, (draft: TimeSeriesChartOptions) => {
+        draft.querySettings = newQuerySettings;
+      })
+    );
+  };
+
   const handleThresholdsChange: ThresholdsEditorProps['onChange'] = (thresholds) => {
     onChange(
       produce(value, (draft: TimeSeriesChartOptions) => {
@@ -69,9 +78,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <OptionsEditorGroup title="Legend">
-          <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
-        </OptionsEditorGroup>
+        <LegendOptionsEditor value={value.legend} onChange={handleLegendChange} />
         <VisualOptionsEditor value={value.visual ?? DEFAULT_VISUAL} onChange={handleVisualChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
@@ -79,6 +86,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <ThresholdsEditor hideDefault thresholds={value.thresholds} onChange={handleThresholdsChange} />
+        <QuerySettingsEditor querySettingsList={value.querySettings} onChange={handleQuerySettingsChange} />
         <OptionsEditorGroup title="Reset Settings">
           <Button
             variant="outlined"
@@ -91,6 +99,7 @@ export function TimeSeriesChartOptionsEditorSettings(props: TimeSeriesChartOptio
                   draft.legend = undefined;
                   draft.visual = undefined;
                   draft.thresholds = undefined;
+                  draft.querySettings = undefined;
                 })
               );
             }}

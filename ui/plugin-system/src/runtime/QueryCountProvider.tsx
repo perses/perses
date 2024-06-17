@@ -11,7 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './TimeRangeProvider';
-export * from './TimeRangeProviderWithQueryParams';
-export * from './TimeRangeSettingsProvider';
-export * from './query-params';
+import React, { createContext, useContext, ReactNode } from 'react';
+
+interface QueryCountProviderProps {
+  queryCount: number;
+  children: ReactNode;
+}
+
+const QueryCountContext = createContext<number>(0);
+
+export const QueryCountProvider: React.FC<QueryCountProviderProps> = ({ queryCount, children }) => {
+  return <QueryCountContext.Provider value={queryCount}>{children}</QueryCountContext.Provider>;
+};
+
+export const useQueryCountContext = () => {
+  return useContext(QueryCountContext);
+};

@@ -36,10 +36,13 @@ schemas:
   interval: "5m"
 
 ephemeral_dashboard:
-  activate: true
+  enable: true
   cleanup_interval: 1h
 
 frontend:
+  explorer:
+    enable: true
+
   important_dashboards:
     - project: "perses"
       dashboard: "Demo"

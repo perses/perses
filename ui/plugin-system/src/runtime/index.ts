@@ -19,3 +19,4 @@ export * from './TimeRangeProvider';
 export * from './time-series-queries';
 export * from './trace-queries';
 export * from './DataQueriesProvider';
+export * from './QueryCountProvider';

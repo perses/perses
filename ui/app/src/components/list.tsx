@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Tooltip } from '@mui/material';
-import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { GridColDef } from '@mui/x-data-grid';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { DispatchWithPromise } from '@perses-dev/core';
 import { intlFormatDistance } from 'date-fns';
@@ -65,7 +65,7 @@ export const CREATED_AT_COL_DEF: GridColDef = {
   type: 'dateTime',
   flex: 1,
   minWidth: 125,
-  valueGetter: (params: GridValueGetterParams) => new Date(params.row.createdAt),
+  valueGetter: (_, row) => new Date(row.createdAt),
   renderCell: (params) => (
     <Tooltip title={params.value.toUTCString()} placement="top">
       <span>{intlFormatDistance(params.value, new Date())}</span>
@@ -79,7 +79,7 @@ export const UPDATED_AT_COL_DEF: GridColDef = {
   type: 'dateTime',
   flex: 1,
   minWidth: 125,
-  valueGetter: (params: GridValueGetterParams) => new Date(params.row.updatedAt),
+  valueGetter: (_, row) => new Date(row.updatedAt),
   renderCell: (params) => (
     <Tooltip title={params.value.toUTCString()} placement="top">
       <span>{intlFormatDistance(params.value, new Date())}</span>

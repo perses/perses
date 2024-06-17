@@ -15,7 +15,7 @@ import { RefObject, useState } from 'react';
 import { Stack, FormLabel, TextField, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { ThresholdOptions } from '@perses-dev/core';
-import { ThresholdColorPicker } from './ThresholdColorPicker';
+import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 
 export interface ThresholdInputProps {
   label: string;
@@ -43,7 +43,7 @@ export function ThresholdInput({
   const [key, setKey] = useState(0); // use key to cause input to lose focus when pressing enter
   return (
     <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
-      <ThresholdColorPicker label={label} color={color} onColorChange={onColorChange} />
+      <OptionsColorPicker label={label} color={color} onColorChange={onColorChange} />
       <FormLabel htmlFor={label}>{label}</FormLabel>
       <TextField
         id={label}
