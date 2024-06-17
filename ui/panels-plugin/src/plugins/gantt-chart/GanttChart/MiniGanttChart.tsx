@@ -132,7 +132,8 @@ function Canvas(props: CanvasProps) {
       }
 
       case 'drag': {
-        // e.movementX skips events in chrome, resulting in the mouse pointer moving faster than the viewport box
+        // avoid using e.movementX here, as it skips events in chrome,
+        // resulting in the mouse pointer moving faster than the viewport box
         let cursor = translateCursorToTime(e);
         const { start, end } = mouseState;
 
