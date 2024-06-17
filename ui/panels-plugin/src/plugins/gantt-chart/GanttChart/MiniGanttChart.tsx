@@ -48,7 +48,10 @@ interface CanvasProps {
   setViewport: (v: Viewport) => void;
 }
 
-type MouseState = { type: 'none' } | { type: 'resize'; fixedPoint: number } | { type: 'drag' };
+type MouseState =
+  | { type: 'none' }
+  | { type: 'resize'; fixedPoint: number }
+  | { type: 'drag'; start: number; end: number };
 
 function Canvas(props: CanvasProps) {
   const { rootSpan, viewport, setViewport } = props;
@@ -77,7 +80,7 @@ function Canvas(props: CanvasProps) {
     return (px / width) * traceDuration;
   };
 
-  const translateMouseToTime = (e: MouseEvent) => {
+  const translateCursorToTime = (e: MouseEvent) => {
     if (!canvasRef.current) return 0;
     // e.nativeEvent.offsetX doesn't work when sliding over a tick box
     const offsetX = e.clientX - canvasRef.current.getBoundingClientRect().left;
@@ -92,17 +95,21 @@ function Canvas(props: CanvasProps) {
       viewport.startTimeUnixNano === rootSpan.startTimeUnixNano &&
       viewport.endTimeUnixNano === rootSpan.endTimeUnixNano;
     const elem = e.target.dataset['elem'];
+    const cursor = translateCursorToTime(e);
 
     if (elem === 'resizerLeft') {
       setMouseState({ type: 'resize', fixedPoint: viewport.endTimeUnixNano });
     } else if (elem === 'resizerRight') {
       setMouseState({ type: 'resize', fixedPoint: viewport.startTimeUnixNano });
     } else if (elem === 'cutoffBox' || isDefaultViewport) {
-      const time = translateMouseToTime(e);
-      setMouseState({ type: 'resize', fixedPoint: time });
-      setViewport({ startTimeUnixNano: time, endTimeUnixNano: time });
+      setMouseState({ type: 'resize', fixedPoint: cursor });
+      setViewport({ startTimeUnixNano: cursor, endTimeUnixNano: cursor });
     } else {
-      setMouseState({ type: 'drag' });
+      setMouseState({
+        type: 'drag',
+        start: cursor - viewport.startTimeUnixNano,
+        end: viewport.endTimeUnixNano - cursor,
+      });
     }
   };
 
@@ -115,7 +122,7 @@ function Canvas(props: CanvasProps) {
 
       case 'resize': {
         const pointA = mouseState.fixedPoint;
-        const pointB = translateMouseToTime(e);
+        const pointB = translateCursorToTime(e);
         if (pointA < pointB) {
           setViewport({ startTimeUnixNano: pointA, endTimeUnixNano: pointB });
         } else {
@@ -125,16 +132,20 @@ function Canvas(props: CanvasProps) {
       }
 
       case 'drag': {
-        let movement = translatePxToTime(e.movementX);
-        if (viewport.startTimeUnixNano + movement < rootSpan.startTimeUnixNano) {
-          movement = rootSpan.startTimeUnixNano - viewport.startTimeUnixNano;
+        // e.movementX skips events in chrome, resulting in the mouse pointer moving faster than the viewport box
+        let cursor = translateCursorToTime(e);
+        const { start, end } = mouseState;
+
+        if (cursor - start < rootSpan.startTimeUnixNano) {
+          cursor = rootSpan.startTimeUnixNano + start;
         }
-        if (viewport.endTimeUnixNano + movement > rootSpan.endTimeUnixNano) {
-          movement = rootSpan.endTimeUnixNano - viewport.endTimeUnixNano;
+        if (cursor + end > rootSpan.endTimeUnixNano) {
+          cursor = rootSpan.endTimeUnixNano - end;
         }
+
         setViewport({
-          startTimeUnixNano: viewport.startTimeUnixNano + movement,
-          endTimeUnixNano: viewport.endTimeUnixNano + movement,
+          startTimeUnixNano: cursor - start,
+          endTimeUnixNano: cursor + end,
         });
         return;
       }
