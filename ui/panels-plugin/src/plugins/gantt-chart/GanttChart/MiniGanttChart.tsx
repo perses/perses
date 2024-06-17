@@ -155,6 +155,7 @@ function Canvas(props: CanvasProps) {
     <Box
       ref={wrapperRef}
       sx={{ position: 'relative', height }}
+      style={{ cursor: mouseState.type === 'none' ? 'inherit' : mouseState.type === 'resize' ? 'col-resize' : 'move' }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
