@@ -14,7 +14,7 @@
 import { Box, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import { useContext } from 'react';
+import { useContext, MouseEvent } from 'react';
 import { Span } from './model';
 import { gridColor } from './utils';
 import { GanttChartContext } from './context';
@@ -34,7 +34,8 @@ export function SpanIndent(props: SpanIndentProps) {
   const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent } = useContext(GanttChartContext);
   const theme = useTheme();
 
-  const handleToggleClick = () => {
+  const handleToggleClick = (e: MouseEvent) => {
+    e.stopPropagation();
     if (collapsedSpans.includes(span.spanId)) {
       setCollapsedSpans(collapsedSpans.filter((spanId) => spanId !== span.spanId));
     } else {

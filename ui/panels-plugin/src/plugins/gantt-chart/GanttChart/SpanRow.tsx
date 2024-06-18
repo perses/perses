@@ -20,13 +20,14 @@ import { Span, Viewport } from './model';
 interface SpanRowProps {
   span: Span;
   viewport: Viewport;
+  onClick: () => void;
 }
 
 export function SpanRow(props: SpanRowProps) {
-  const { span, viewport } = props;
+  const { span, viewport, onClick } = props;
 
   return (
-    <SpanRowContainer direction="row">
+    <SpanRowContainer direction="row" onClick={onClick}>
       <SpanName span={span} />
       <SpanDuration span={span} viewport={viewport} />
     </SpanRowContainer>

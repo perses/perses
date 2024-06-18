@@ -20,10 +20,8 @@ import { traceResponse } from './traceResponse';
 export type GanttChartPanelProps = PanelProps<GanttChartOptions>;
 
 export function GanttChartPanel(props: GanttChartPanelProps) {
-  const { contentDimensions } = props;
+  console.log(`fetching traceID=${props.spec.traceID}...`);
   const chartsTheme = useChartsTheme();
-
-  if (contentDimensions === undefined) return null;
 
   // TODO: fetch trace from Tempo API /api/traces/{props.spec.traceID}
   const trace = traceResponse;
@@ -33,5 +31,5 @@ export function GanttChartPanel(props: GanttChartPanelProps) {
     return null;
   }
 
-  return <GanttChart width={contentDimensions.width} height={contentDimensions.height} rootSpan={tree} />;
+  return <GanttChart rootSpan={tree} />;
 }

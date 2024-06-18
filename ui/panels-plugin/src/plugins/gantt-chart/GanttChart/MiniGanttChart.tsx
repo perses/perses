@@ -33,7 +33,7 @@ export function MiniGanttChart(props: MiniGanttChartProps) {
   const theme = useTheme();
 
   return (
-    <Box sx={{ margin: '10px', border: `1px solid ${rowHeaderColor(theme)}` }}>
+    <Box sx={{ marginBottom: '20px', border: `1px solid ${rowHeaderColor(theme)}` }}>
       <Box sx={{ position: 'relative', height: rowHeight, backgroundColor: rowHeaderColor(theme) }}>
         <TicksHeader rootSpan={rootSpan} viewport={rootSpan} />
       </Box>
@@ -134,8 +134,8 @@ function Canvas(props: CanvasProps) {
       case 'drag': {
         // avoid using e.movementX here, as it skips events in chrome,
         // resulting in the mouse pointer moving faster than the viewport box
-        let cursor = translateCursorToTime(e);
         const { start, end } = mouseState;
+        let cursor = translateCursorToTime(e);
 
         if (cursor - start < rootSpan.startTimeUnixNano) {
           cursor = rootSpan.startTimeUnixNano + start;
@@ -192,8 +192,8 @@ const CutoffBox = styled(Box)({
 const Resizer = styled(Box)(({ theme }) => ({
   position: 'absolute',
   height: '100%',
-  backgroundColor: theme.palette.grey[900],
-  width: '3px',
+  backgroundColor: theme.palette.grey[700],
+  width: '2px',
   cursor: 'col-resize',
 }));
 
@@ -219,7 +219,9 @@ function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: number,
     const relativeStart = (span.startTimeUnixNano - rootSpan.startTimeUnixNano) / traceDuration;
 
     ctx.fillStyle = span.resource.color;
-    ctx.fillRect(Math.round(relativeStart * width), y, Math.round(relativeDuration * width), barHeight);
+    ctx.beginPath();
+    ctx.rect(Math.round(relativeStart * width), y, Math.round(relativeDuration * width), barHeight);
+    ctx.fill();
     y += barHeight;
 
     // stop painting when out of canvas

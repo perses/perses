@@ -37,7 +37,7 @@ export function createInitialGanttChartOptions() {
 function parseResource(resource: api.Resource, colors: string[]): Resource {
   let serviceName = '?';
   for (const attr of resource.attributes) {
-    if (attr.key === 'service.name' && attr.value.stringValue) {
+    if (attr.key === 'service.name' && 'stringValue' in attr.value) {
       serviceName = attr.value.stringValue;
       break;
     }
@@ -46,6 +46,7 @@ function parseResource(resource: api.Resource, colors: string[]): Resource {
   return {
     serviceName,
     color: traceServiceColor(serviceName, colors),
+    attributes: resource.attributes,
   };
 }
 
@@ -60,6 +61,7 @@ function parseSpan(span: api.Span) {
     spanName: span.name,
     startTimeUnixNano: parseInt(span.startTimeUnixNano),
     endTimeUnixNano: parseInt(span.endTimeUnixNano),
+    attributes: span.attributes,
   };
 }
 

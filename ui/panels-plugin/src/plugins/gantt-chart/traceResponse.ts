@@ -25,15 +25,6 @@ export interface Resource {
   attributes: Attribute[];
 }
 
-export interface Attribute {
-  key: string;
-  value: Value;
-}
-
-export interface Value {
-  stringValue?: string;
-}
-
 export interface ScopeSpan {
   spans: Span[];
 }
@@ -44,7 +35,19 @@ export interface Span {
   name: string;
   startTimeUnixNano: string;
   endTimeUnixNano: string;
+  attributes?: Attribute[];
 }
+
+export interface Attribute {
+  key: string;
+  value: AttributeValue;
+}
+
+export type AttributeValue =
+  | { stringValue: string }
+  | { intValue: string }
+  | { boolValue: boolean }
+  | { arrayValue: { values: AttributeValue[] } };
 
 export const traceResponse = {
   batches: [

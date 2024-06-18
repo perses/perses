@@ -18,6 +18,7 @@ export interface Span {
   spanName: string;
   startTimeUnixNano: number;
   endTimeUnixNano: number;
+  attributes?: Attribute[];
 
   parent?: Span;
   children: Span[];
@@ -26,7 +27,19 @@ export interface Span {
 export interface Resource {
   serviceName: string;
   color: string;
+  attributes: Attribute[];
 }
+
+export interface Attribute {
+  key: string;
+  value: AttributeValue;
+}
+
+export type AttributeValue =
+  | { stringValue: string }
+  | { intValue: string }
+  | { boolValue: boolean }
+  | { arrayValue: { values: AttributeValue[] } };
 
 /**
  * Viewport contains the current zoom, i.e. which timeframe of the trace should be visible

@@ -13,15 +13,15 @@
 
 import { Virtuoso } from 'react-virtuoso';
 import { useState } from 'react';
+import { Box, Stack } from '@mui/material';
 import { SpanRow } from './SpanRow';
 import { HeaderRow } from './HeaderRow';
 import { Span, Viewport } from './model';
 import { GanttChartContext } from './context';
 import { MiniGanttChart } from './MiniGanttChart';
+import { DetailPane } from './DetailPane';
 
 export interface GanttChart {
-  width: number;
-  height: number;
   rootSpan: Span;
 }
 
@@ -39,9 +39,10 @@ function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
 }
 
 export function GanttChart(props: GanttChart) {
-  const { width, height, rootSpan } = props;
+  const { rootSpan } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
+  const [selectedSpan, setSelectedSpan] = useState<Span>(rootSpan);
   const [viewport, setViewport] = useState<Viewport>({
     startTimeUnixNano: rootSpan.startTimeUnixNano,
     endTimeUnixNano: rootSpan.endTimeUnixNano,
@@ -51,19 +52,20 @@ export function GanttChart(props: GanttChart) {
   treeToRows(rows, rootSpan, collapsedSpans);
 
   return (
-    <>
-      <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
-      <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
-        <HeaderRow rootSpan={rootSpan} viewport={viewport} />
-        <Virtuoso
-          style={{
-            width: width,
-            height: height,
-          }}
-          data={rows}
-          itemContent={(_, span) => <SpanRow span={span} viewport={viewport} />}
-        />
-      </GanttChartContext.Provider>
-    </>
+    <Stack direction="row" gap={2} sx={{ height: '100%' }}>
+      <Stack sx={{ flexGrow: 1 }}>
+        <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
+        <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
+          <HeaderRow rootSpan={rootSpan} viewport={viewport} />
+          <Virtuoso
+            data={rows}
+            itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={() => setSelectedSpan(span)} />}
+          />
+        </GanttChartContext.Provider>
+      </Stack>
+      <Box sx={{ width: '17%', overflow: 'auto' }}>
+        <DetailPane span={selectedSpan} />
+      </Box>
+    </Stack>
   );
 }
