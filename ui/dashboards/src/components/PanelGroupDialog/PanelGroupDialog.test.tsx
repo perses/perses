@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,7 +15,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, TemplateVariableProvider } from '../../context';
+import { DashboardProvider, VariableProvider } from '../../context';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../../test';
 import { PanelGroupDialog } from './PanelGroupDialog';
 describe('Add Panel Group', () => {
@@ -25,10 +25,10 @@ describe('Add Panel Group', () => {
     renderWithContext(
       <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
         <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
-          <TemplateVariableProvider>
+          <VariableProvider>
             <DashboardProviderSpy />
             <PanelGroupDialog />
-          </TemplateVariableProvider>
+          </VariableProvider>
         </TimeRangeProvider>
       </DashboardProvider>
     );

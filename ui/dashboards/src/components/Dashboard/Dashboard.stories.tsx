@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { Dashboard, TemplateVariableList } from '@perses-dev/dashboards';
+import { Dashboard, VariableList } from '@perses-dev/dashboards';
 import { action } from '@storybook/addon-actions';
 import { Button, Stack } from '@mui/material';
 import { DashboardResource } from '@perses-dev/core';
@@ -24,13 +24,13 @@ import {
 } from '@perses-dev/internal-utils';
 import { mockQueryRangeRequests, waitForStableCanvas, WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
-import { WithDashboard, WithDatasourceStore, WithTemplateVariables } from '../../stories/decorators';
+import { WithDashboard, WithDatasourceStore, WithVariables } from '../../stories/decorators';
 
 const meta: Meta<typeof Dashboard> = {
   component: Dashboard,
   decorators: [
     WithDashboard,
-    WithTemplateVariables,
+    WithVariables,
     WithTimeRange,
     WithDatasourceStore,
     WithPluginRegistry,
@@ -225,7 +225,7 @@ function formatProviderParameters(dashboardState: DashboardResource) {
         dashboardResource: dashboardState,
       },
     },
-    withTemplateVariables: {
+    withVariables: {
       props: {
         initialVariableDefinitions: dashboardState.spec.variables,
       },
@@ -249,7 +249,7 @@ export const ListVariableWithDefaultAll: Story = {
   render: (args) => {
     return (
       <Stack spacing={1}>
-        <TemplateVariableList />
+        <VariableList />
         <Dashboard {...args} />
       </Stack>
     );

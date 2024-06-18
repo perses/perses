@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,7 +21,7 @@ import {
   TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, replaceTemplateVariables, replaceTemplateVariable } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, replaceVariables, replaceVariable } from '@perses-dev/plugin-system';
 import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   parseValueTuple,
@@ -58,7 +58,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     getDurationStringSeconds(
       // resolve any variable that may have been provided
       // TODO add a validation check to make sure the variable is a DurationString, to avoid the back & forth cast here
-      replaceTemplateVariables(spec.minStep as string, context.variableState) as DurationString
+      replaceVariables(spec.minStep as string, context.variableState) as DurationString
     ) ?? datasourceScrapeInterval;
   const timeRange = getPrometheusTimeRange(context.timeRange);
   const step = getRangeStep(timeRange, minStep, undefined, context.suggestedStepMs); // TODO: resolution
@@ -72,23 +72,23 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   start = alignedStart;
   end = alignedEnd;
 
-  // Replace template variable placeholders in PromQL query
+  // Replace variable placeholders in PromQL query
   const intervalMs = context.suggestedStepMs ?? step * 1000; // Step is in seconds
-  let query = replaceTemplateVariable(spec.query, '__interval_ms', intervalMs.toString());
-  query = replaceTemplateVariable(spec.query, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
+  let query = replaceVariable(spec.query, '__interval_ms', intervalMs.toString());
+  query = replaceVariable(spec.query, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
 
   const scrapeIntervalMs = minStep * 1000;
   // The $__rate_interval variable is meant to be used in the rate function.
   // It is defined as max($__interval + Scrape interval, 4 * Scrape interval), where Scrape interval is the Min step setting (a setting per PromQL query),
   // if any is set, and otherwise the Scrape interval as set in the Prometheus datasource
   const rateIntervalMs = Math.max(intervalMs + scrapeIntervalMs, 4 * scrapeIntervalMs);
-  query = replaceTemplateVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateIntervalMs)));
-  query = replaceTemplateVariables(query, context.variableState);
+  query = replaceVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateIntervalMs)));
+  query = replaceVariables(query, context.variableState);
 
   let seriesNameFormat = spec.seriesNameFormat;
-  // if series name format is defined, replace template variable placeholders in series name format
+  // if series name format is defined, replace variable placeholders in series name format
   if (seriesNameFormat) {
-    seriesNameFormat = replaceTemplateVariables(seriesNameFormat, context.variableState);
+    seriesNameFormat = replaceVariables(seriesNameFormat, context.variableState);
   }
 
   // Get the datasource, using the default Prom Datasource if one isn't specified in the query

@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './BuiltinVariableAccordions';
-export * from './EditVariablesButton';
-export * from './Variable';
-export * from './VariableEditor';
-export * from './VariableList';
+package model
+
+kind: "TraceTable"
+spec: close({})

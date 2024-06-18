@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,18 +15,11 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { EditVariablesButton } from '@perses-dev/dashboards';
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
-import { WithTemplateVariables, WithDashboard } from '../../stories/decorators';
+import { WithVariables, WithDashboard } from '../../stories/decorators';
 
 const meta: Meta<typeof EditVariablesButton> = {
   component: EditVariablesButton,
-  decorators: [
-    WithTemplateVariables,
-    WithTimeRange,
-    WithDashboard,
-    WithPluginRegistry,
-    WithQueryClient,
-    WithQueryParams,
-  ],
+  decorators: [WithVariables, WithTimeRange, WithDashboard, WithPluginRegistry, WithQueryClient, WithQueryParams],
 };
 
 export default meta;

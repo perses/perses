@@ -11,8 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './BuiltinVariableAccordions';
-export * from './EditVariablesButton';
-export * from './Variable';
-export * from './VariableEditor';
-export * from './VariableList';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { TraceTablePanel } from './TraceTablePanel';
+import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
+
+/**
+ * The core TraceTable panel plugin for Perses.
+ */
+export const TraceTable: PanelPlugin<TraceTableOptions> = {
+  PanelComponent: TraceTablePanel,
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialTraceTableOptions,
+};

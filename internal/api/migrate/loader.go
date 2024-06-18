@@ -65,13 +65,16 @@ func (c *migCuePart) GetSchemaPath() string {
 	return c.schemasPath
 }
 
-func (c *migCuePart) Load() error {
-	conditions, err := c.buildListOfConditions()
-	if err != nil {
-		return err
+// Load will load the migration schemas from the filesystem
+func (c *migCuePart) Load() (int, int, error) {
+	var conditions string
+	conditions, successfulLoadsCount, err := c.buildListOfConditions()
+	if err == nil {
+		c.listOfConditions.Store(&conditions)
 	}
-	c.listOfConditions.Store(&conditions)
-	return nil
+	// NB: There are no relevant case of "failed loads" to monitor in the case of migration schemas
+	// at the moment, so we always return 0 for the failed loads count
+	return successfulLoadsCount, 0, err
 }
 
 func (c *migCuePart) getConditions() string {
@@ -82,15 +85,16 @@ func (c *migCuePart) getPlaceholder() string {
 	return c.placeholderText
 }
 
-func (c *migCuePart) buildListOfConditions() (string, error) {
+func (c *migCuePart) buildListOfConditions() (string, int, error) {
+	successfulLoadsCount := 0
+
 	files, err := os.ReadDir(c.schemasPath)
 	if err != nil {
-		return "", err
+		return "", successfulLoadsCount, err
 	}
 
+	// gather the content of all migration files found
 	var listOfConditions strings.Builder
-
-	// process each schema plugin to convert it into a CUE Value
 	for _, file := range files {
 		if !file.IsDir() {
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
@@ -102,9 +106,12 @@ func (c *migCuePart) buildListOfConditions() (string, error) {
 			logrus.WithError(readErr).Debugf("No migration file found at %s, plugin %s will be skipped", migFilePath, file.Name())
 			continue
 		}
+		// TODO: validate the content of the migration file (we expect a conditional block, or several ones separated by commas)
+		// and track the amount of validation errors in the schemas load monitoring
 
 		listOfConditions.WriteString(string(contentStr))
 		listOfConditions.WriteString("\n")
+		successfulLoadsCount++
 	}
 
 	// append a default conditional for any Grafana plugin that has no corresponding Perses plugin
@@ -114,5 +121,5 @@ func (c *migCuePart) buildListOfConditions() (string, error) {
 	}`, c.defaultValue))
 	listOfConditions.WriteString("\n")
 
-	return listOfConditions.String(), nil
+	return listOfConditions.String(), successfulLoadsCount, nil
 }

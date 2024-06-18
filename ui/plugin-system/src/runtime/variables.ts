@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,7 +15,7 @@ import { createContext, useContext, useMemo } from 'react';
 import { VariableValue } from '@perses-dev/core';
 import { immerable } from 'immer';
 import { VariableOption } from '../model';
-import { parseTemplateVariables, replaceTemplateVariables } from '../utils';
+import { parseVariables, replaceVariables } from '../utils';
 import { useBuiltinVariableValues } from './builtin-variables';
 
 export type VariableState = {
@@ -124,22 +124,22 @@ export class VariableStoreStateMap {
   }
 }
 
-export type TemplateVariableSrv = {
+export type VariableSrv = {
   state: VariableStateMap;
 };
 
-export const TemplateVariableContext = createContext<TemplateVariableSrv | undefined>(undefined);
+export const VariableContext = createContext<VariableSrv | undefined>(undefined);
 
-function useTemplateVariableContext() {
-  const ctx = useContext(TemplateVariableContext);
+function useVariableContext() {
+  const ctx = useContext(VariableContext);
   if (ctx === undefined) {
-    throw new Error('No TemplateVariableContext found. Did you forget a Provider?');
+    throw new Error('No VariableContext found. Did you forget a Provider?');
   }
   return ctx;
 }
 
-export function useTemplateVariableValues(names?: string[]): VariableStateMap {
-  const { state } = useTemplateVariableContext();
+export function useVariableValues(names?: string[]): VariableStateMap {
+  const { state } = useVariableContext();
 
   const values = useMemo(() => {
     const values: VariableStateMap = {};
@@ -159,19 +159,20 @@ export function useTemplateVariableValues(names?: string[]): VariableStateMap {
   return values;
 }
 
-export function useVariableValues(names?: string[]): VariableStateMap {
-  const templateVariableValues = useTemplateVariableValues(names);
+// useAllVariableValues wraps user-defined variables with built-in variables
+export function useAllVariableValues(names?: string[]): VariableStateMap {
+  const variableValues = useVariableValues(names);
   const builtinVariableValues = useBuiltinVariableValues(names);
 
   return useMemo(() => {
-    return { ...templateVariableValues, ...builtinVariableValues } as VariableStateMap;
-  }, [templateVariableValues, builtinVariableValues]);
+    return { ...variableValues, ...builtinVariableValues } as VariableStateMap;
+  }, [variableValues, builtinVariableValues]);
 }
 
-// Convenience hook for replacing template variables in a string
+// Convenience hook for replacing variables in a string
 export function useReplaceVariablesInString(str: string | undefined): string | undefined {
-  const variablesInString = str ? parseTemplateVariables(str) : [];
-  const variableValues = useVariableValues(variablesInString);
+  const variablesInString = str ? parseVariables(str) : [];
+  const variableValues = useAllVariableValues(variablesInString);
   if (!str) return undefined;
-  return replaceTemplateVariables(str, variableValues);
+  return replaceVariables(str, variableValues);
 }

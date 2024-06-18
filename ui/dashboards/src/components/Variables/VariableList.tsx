@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,16 +15,16 @@ import { Box } from '@mui/material';
 import { VariableDefinition, VariableSpec } from '@perses-dev/core';
 import {
   ExternalVariableDefinition,
-  useTemplateExternalVariableDefinitions,
-  useTemplateVariable,
-  useTemplateVariableDefinitions,
+  useExternalVariableDefinitions,
+  useVariable,
+  useVariableDefinitions,
 } from '../../context';
-import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
-import { TemplateVariable } from './TemplateVariable';
+import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
+import { Variable } from './Variable';
 
-export function TemplateVariableList() {
-  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
+export function VariableList() {
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
 
   return (
     <>
@@ -33,18 +33,18 @@ export function TemplateVariableList() {
         .reverse() // We reverse to have the most prioritized on top
         .map((def) =>
           def.definitions.map((v) => (
-            <TemplateVariableListItem key={v.spec.name + def.source} spec={v.spec} source={def.source} />
+            <VariableListItem key={v.spec.name + def.source} spec={v.spec} source={def.source} />
           ))
         )}
       {variableDefinitions.map((v) => (
-        <TemplateVariableListItem key={v.spec.name} spec={v.spec} />
+        <VariableListItem key={v.spec.name} spec={v.spec} />
       ))}
     </>
   );
 }
 
-export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
-  const ctx = useTemplateVariable(spec.name, source);
+export function VariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
+  const ctx = useVariable(spec.name, source);
   if (ctx.state?.overridden) {
     return null;
   }
@@ -52,12 +52,12 @@ export function TemplateVariableListItem({ spec, source }: { spec: VariableSpec;
     <Box
       key={spec.name + source ?? ''}
       display={spec.display?.hidden ? 'none' : undefined}
-      minWidth={`${MIN_TEMPLATE_VARIABLE_WIDTH}px`}
-      maxWidth={`${MAX_TEMPLATE_VARIABLE_WIDTH}px`}
+      minWidth={`${MIN_VARIABLE_WIDTH}px`}
+      maxWidth={`${MAX_VARIABLE_WIDTH}px`}
       flexShrink={0}
-      data-testid={'template-variable-' + spec.name}
+      data-testid={'variable-' + spec.name}
     >
-      <TemplateVariable key={spec.name + source ?? ''} name={spec.name} source={source} />
+      <Variable key={spec.name + source ?? ''} name={spec.name} source={source} />
     </Box>
   );
 }

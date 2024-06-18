@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import {
   WithDataQueries,
   WithPluginRegistry,
   WithTimeRange,
-  WithPluginSystemTemplateVariables,
+  WithPluginSystemVariables,
   WithPluginSystemDatasourceStore,
   WithPluginSystemBuiltinVariables,
 } from '@perses-dev/plugin-system/src/stories/shared-utils';
@@ -92,7 +92,7 @@ const meta: Meta<typeof BarChart.PanelComponent> = {
   decorators: [
     WithDataQueries,
     WithPluginSystemBuiltinVariables,
-    WithPluginSystemTemplateVariables,
+    WithPluginSystemVariables,
     WithPluginSystemDatasourceStore,
     WithPluginRegistry,
     WithTimeRange,

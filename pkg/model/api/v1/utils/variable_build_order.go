@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,19 +15,20 @@ package utils
 
 import (
 	"fmt"
-	"github.com/perses/perses/pkg/model/api/v1"
+	"reflect"
+	"regexp"
+	"strconv"
+
+	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"golang.org/x/exp/slices"
-	"reflect"
-	"regexp"
-	"strconv"
 )
 
 // Not similar to variable validation regex (\w*?[^0-9]\w*), because some PromQL expression may need variable name with only number
 // For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-var variableTemplateSyntaxRegexp = regexp.MustCompile(`\$(\w+)`)
+var variableSyntaxRegexp = regexp.MustCompile(`\$(\w+)`)
 
 type VariableGroup struct {
 	Variables []string
@@ -234,14 +235,14 @@ func extractVariableInStringOrInSomethingElse(v reflect.Value, matches *[][]stri
 }
 
 func parseVariableUsed(str string) [][]string {
-	matches := variableTemplateSyntaxRegexp.FindAllStringSubmatch(str, -1)
+	matches := variableSyntaxRegexp.FindAllStringSubmatch(str, -1)
 	var result [][]string
 	for _, match := range matches {
 		if _, err := strconv.Atoi(match[1]); err != nil {
 			// We want to keep only variables that are not only a number.
 			// A number that represents a variable is not meaningful, and so we don't want to consider it.
-			// It's also a way to avoid a collision in terms of variable template syntax.
-			// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
+			// It's also a way to avoid a collision in terms of variable syntax.
+			// For example in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
 			//
 			// If the string cannot be parsed as an integer, then we can keep it because that means it contains other characters than just numbers.
 			result = append(result, match)

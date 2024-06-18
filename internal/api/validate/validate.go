@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -28,9 +28,9 @@ import (
 
 // We want to keep only variables that are not only a number.
 // A number that represents a variable is not meaningful, and so we don't want to consider it.
-// It's also a way to avoid a collision in terms of variable template syntax.
-// For example in PromQL, in the function `label_replace`, it used the syntax $1, $2, for the placeholder.
-var variableTemplateNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
+// It's also a way to avoid a collision in terms of variable syntax.
+// For example in PromQL, the function `label_replace` uses the syntax "$1", "$2" for the placeholders.
+var variableNameRegexp = regexp.MustCompile(`^\w*?[^0-9]\w*$`)
 
 func DashboardSpec(spec modelV1.DashboardSpec, sch schemas.Schemas) error {
 	if _, err := utils.BuildVariableOrder(spec.Variables, nil, nil); err != nil {
@@ -87,7 +87,7 @@ func validateUnicityOfDefaultDTS[T modelV1.DatasourceInterface](entity T, list [
 }
 
 func validateVariableName(variable string) error {
-	valid := variableTemplateNameRegexp.MatchString(variable)
+	valid := variableNameRegexp.MatchString(variable)
 	if !valid {
 		return fmt.Errorf("variable name '%s' is not valid", variable)
 	}

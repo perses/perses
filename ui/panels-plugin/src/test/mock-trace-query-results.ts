@@ -22,8 +22,12 @@ export const MOCK_TRACE_DATA: TraceData = {
       startTimeUnixMs: 1702915645000, // unix epoch time in milliseconds
       durationMs: 100,
       serviceStats: {
-        serviceA: {
+        'service-name': {
           spanCount: 10,
+        },
+        'second-service-name': {
+          spanCount: 3,
+          errorCount: 2,
         },
       },
       traceId: '123',

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,33 +12,31 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { TemplateVariableProvider, TemplateVariableProviderProps } from '@perses-dev/dashboards';
+import { VariableProvider, VariableProviderProps } from '@perses-dev/dashboards';
 
 declare module '@storybook/react' {
   interface Parameters {
-    withTemplateVariables?: WithTemplateVariableParameter;
+    withVariables?: WithVariableParameter;
   }
 }
 
-export type WithTemplateVariableParameter = {
-  props: Partial<TemplateVariableProviderProps>;
+export type WithVariableParameter = {
+  props: Partial<VariableProviderProps>;
 };
 
 // Type guard because storybook types parameters as `any`
-function isWithTemplateVariableParameter(
-  parameter: unknown | WithTemplateVariableParameter
-): parameter is WithTemplateVariableParameter {
+function isWithVariableParameter(parameter: unknown | WithVariableParameter): parameter is WithVariableParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
-  const initParameter = context.parameters.withTemplateVariables;
-  const parameter = isWithTemplateVariableParameter(initParameter) ? initParameter : undefined;
+export const WithVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withVariables;
+  const parameter = isWithVariableParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;
 
   return (
-    <TemplateVariableProvider {...props}>
+    <VariableProvider {...props}>
       <Story />
-    </TemplateVariableProvider>
+    </VariableProvider>
   );
 };
