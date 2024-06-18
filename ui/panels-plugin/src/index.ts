@@ -18,3 +18,4 @@ export * from './plugins/markdown';
 export * from './plugins/bar-chart';
 export * from './plugins/scatterplot';
 export * from './plugins/time-series-table';
+export * from './plugins/trace-table';

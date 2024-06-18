@@ -60,6 +60,14 @@
           "name": "Scatter Chart",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "TraceTable",
+        "display": {
+          "name": "Trace Table",
+          "description": ""
+        }
       }
     ]
   }

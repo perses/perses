@@ -159,7 +159,7 @@ export function formatDuration(duration: Duration): DurationString {
     if (seconds) {
       result.push(`${seconds}s`);
     }
-    const ms = (duration.seconds - seconds) * 1000;
+    const ms = Math.round((duration.seconds - seconds) * 1000);
     if (ms) {
       result.push(`${ms}ms`);
     }
