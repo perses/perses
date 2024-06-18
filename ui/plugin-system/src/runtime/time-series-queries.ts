@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -22,7 +22,7 @@ import {
 } from '@tanstack/react-query';
 import { TimeSeriesQueryDefinition, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
-import { VariableStateMap, useVariableValues } from './template-variables';
+import { VariableStateMap, useAllVariableValues } from './variables';
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
@@ -165,7 +165,7 @@ export function useTimeSeriesQueries(
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   const { absoluteTimeRange, refreshKey } = useTimeRange();
-  const variableState = useVariableValues();
+  const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
 
   return {

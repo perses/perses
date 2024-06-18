@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -17,8 +17,8 @@ import {
   useDatasourceClient,
   VariableOption,
   VariablePlugin,
-  parseTemplateVariables,
-  replaceTemplateVariables,
+  parseVariables,
+  replaceVariables,
   GetVariableOptionsContext,
 } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
@@ -232,7 +232,7 @@ const stringArrayToVariableOptions = (values?: string[]): VariableOption[] => {
 export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVariableOptions> = {
   getVariableOptions: async (spec: PrometheusLabelNamesVariableOptions, ctx: GetVariableOptionsContext) => {
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
-    const match = spec.matchers ? spec.matchers.map((m) => replaceTemplateVariables(m, ctx.variables)) : undefined;
+    const match = spec.matchers ? spec.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
     const { data: options } = await client.labelNames({ 'match[]': match, ...timeRange });
@@ -241,7 +241,7 @@ export const PrometheusLabelNamesVariable: VariablePlugin<PrometheusLabelNamesVa
     };
   },
   dependsOn: (spec: PrometheusLabelNamesVariableOptions) => {
-    return { variables: spec.matchers?.map((m) => parseTemplateVariables(m)).flat() || [] };
+    return { variables: spec.matchers?.map((m) => parseVariables(m)).flat() || [] };
   },
   OptionsEditorComponent: PrometheusLabelNamesVariableEditor,
   createInitialOptions: () => ({}),
@@ -251,14 +251,12 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
   getVariableOptions: async (spec: PrometheusLabelValuesVariableOptions, ctx: GetVariableOptionsContext) => {
     const pluginDef = spec;
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
-    const match = pluginDef.matchers
-      ? pluginDef.matchers.map((m) => replaceTemplateVariables(m, ctx.variables))
-      : undefined;
+    const match = pluginDef.matchers ? pluginDef.matchers.map((m) => replaceVariables(m, ctx.variables)) : undefined;
 
     const timeRange = getPrometheusTimeRange(ctx.timeRange);
 
     const { data: options } = await client.labelValues({
-      labelName: replaceTemplateVariables(pluginDef.labelName, ctx.variables),
+      labelName: replaceVariables(pluginDef.labelName, ctx.variables),
       'match[]': match,
       ...timeRange,
     });
@@ -270,9 +268,9 @@ export const PrometheusLabelValuesVariable: VariablePlugin<PrometheusLabelValues
     return {
       variables:
         spec.matchers
-          ?.map((m) => parseTemplateVariables(m))
+          ?.map((m) => parseVariables(m))
           .flat()
-          .concat(parseTemplateVariables(spec.labelName)) || [],
+          .concat(parseVariables(spec.labelName)) || [],
     };
   },
   OptionsEditorComponent: PrometheusLabelValuesVariableEditor,
@@ -284,9 +282,9 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
     const client: PrometheusClient = await ctx.datasourceStore.getDatasourceClient(spec.datasource ?? DEFAULT_PROM);
     // TODO we may want to manage a range query as well.
     const { data: options } = await client.instantQuery({
-      query: replaceTemplateVariables(spec.expr, ctx.variables),
+      query: replaceVariables(spec.expr, ctx.variables),
     });
-    const labelName = replaceTemplateVariables(spec.labelName, ctx.variables);
+    const labelName = replaceVariables(spec.labelName, ctx.variables);
     let values: string[] = [];
     if (options?.resultType === 'matrix') {
       values = capturingMatrix(options, labelName);
@@ -299,7 +297,7 @@ export const PrometheusPromQLVariable: VariablePlugin<PrometheusPromQLVariableOp
     };
   },
   dependsOn: (spec: PrometheusPromQLVariableOptions) => {
-    return { variables: parseTemplateVariables(spec.expr).concat(parseTemplateVariables(spec.labelName)) };
+    return { variables: parseVariables(spec.expr).concat(parseVariables(spec.labelName)) };
   },
   OptionsEditorComponent: PrometheusPromQLVariableEditor,
   createInitialOptions: () => ({ expr: '', labelName: '' }),

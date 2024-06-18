@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,10 +24,10 @@ import {
 } from '@perses-dev/core';
 import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useTemplateVariable, useTemplateVariableActions } from '../../context';
-import { MAX_TEMPLATE_VARIABLE_WIDTH, MIN_TEMPLATE_VARIABLE_WIDTH } from '../../constants';
+import { useVariable, useVariableActions } from '../../context';
+import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
 
-type TemplateVariableProps = {
+type VariableProps = {
   name: VariableName;
   source?: string;
 };
@@ -44,8 +44,8 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
   return options.value;
 }
 
-export function TemplateVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+export function Variable({ name, source }: VariableProps) {
+  const ctx = useVariable(name, source);
   const kind = ctx.definition?.kind;
   switch (kind) {
     case 'TextVariable':
@@ -171,27 +171,27 @@ const LETTER_HSIZE = 8; // approximation
 const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
 const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
   const width = (inputValue.length + 1) * LETTER_HSIZE + (kind === 'list' ? ARROW_OFFSET : 0);
-  if (width < MIN_TEMPLATE_VARIABLE_WIDTH) {
-    return MIN_TEMPLATE_VARIABLE_WIDTH;
-  } else if (width > MAX_TEMPLATE_VARIABLE_WIDTH) {
-    return MAX_TEMPLATE_VARIABLE_WIDTH;
+  if (width < MIN_VARIABLE_WIDTH) {
+    return MIN_VARIABLE_WIDTH;
+  } else if (width > MAX_VARIABLE_WIDTH) {
+    return MAX_VARIABLE_WIDTH;
   } else {
     return width;
   }
 };
 
-function ListVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+function ListVariable({ name, source }: VariableProps) {
+  const ctx = useVariable(name, source);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
-  const { setVariableValue, setVariableLoading, setVariableOptions } = useTemplateVariableActions();
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useVariableActions();
   const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
     variablesOptionsQuery
   );
   const [inputValue, setInputValue] = useState<string>('');
-  const [inputWidth, setInputWidth] = useState(MIN_TEMPLATE_VARIABLE_WIDTH);
+  const [inputWidth, setInputWidth] = useState(MIN_VARIABLE_WIDTH);
 
   const title = definition?.spec.display?.name ?? name;
   const allowMultiple = definition?.spec.allowMultiple === true;
@@ -265,13 +265,13 @@ function ListVariable({ name, source }: TemplateVariableProps) {
   );
 }
 
-function TextVariable({ name, source }: TemplateVariableProps) {
-  const ctx = useTemplateVariable(name, source);
+function TextVariable({ name, source }: VariableProps) {
+  const ctx = useVariable(name, source);
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
-  const { setVariableValue } = useTemplateVariableActions();
+  const { setVariableValue } = useVariableActions();
 
   useEffect(() => {
     setTempValue(state?.value ?? '');

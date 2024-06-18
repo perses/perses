@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,8 +14,8 @@
 import { VariableValue } from '@perses-dev/core';
 import { VariableStateMap } from '@perses-dev/plugin-system';
 
-export function replaceTemplateVariables(text: string, variableState: VariableStateMap): string {
-  const variables = parseTemplateVariables(text);
+export function replaceVariables(text: string, variableState: VariableStateMap): string {
+  const variables = parseVariables(text);
   let finalText = text;
   variables
     // Sorting variables by their length.
@@ -25,43 +25,43 @@ export function replaceTemplateVariables(text: string, variableState: VariableSt
     .forEach((v) => {
       const variable = variableState[v];
       if (variable && variable?.value) {
-        finalText = replaceTemplateVariable(finalText, v, variable?.value);
+        finalText = replaceVariable(finalText, v, variable?.value);
       }
     });
 
   return finalText;
 }
 
-export function replaceTemplateVariable(text: string, varName: string, templateVariableValue: VariableValue) {
-  const variableTemplate = '$' + varName;
-  const bracketsVariableTemplate = '${' + varName + '}';
+export function replaceVariable(text: string, varName: string, variableValue: VariableValue) {
+  const variableSyntax = '$' + varName;
+  const alternativeVariableSyntax = '${' + varName + '}';
 
   let replaceString = '';
-  if (Array.isArray(templateVariableValue)) {
-    replaceString = `(${templateVariableValue.join('|')})`; // regex style
+  if (Array.isArray(variableValue)) {
+    replaceString = `(${variableValue.join('|')})`; // regex style
   }
-  if (typeof templateVariableValue === 'string') {
-    replaceString = templateVariableValue;
+  if (typeof variableValue === 'string') {
+    replaceString = variableValue;
   }
 
-  text = text.replaceAll(variableTemplate, replaceString);
-  return text.replaceAll(bracketsVariableTemplate, replaceString);
+  text = text.replaceAll(variableSyntax, replaceString);
+  return text.replaceAll(alternativeVariableSyntax, replaceString);
 }
 
-// This regular expression is designed to identify variable references in a template string.
+// This regular expression is designed to identify variable references in a string.
 // It supports two formats for referencing variables:
 // 1. $variableName - This is a simpler format, and the regular expression captures the variable name (\w+ matches one or more word characters).
 // 2. ${variableName} - This is a more complex format and the regular expression captures the variable name (\w+ matches one or more word characters) in the curly braces.
 // 3. [COMING SOON] ${variableName:value} - This is a more complex format that allows specifying a format function as well.
 // TODO: Fix this lint error
 // eslint-disable-next-line no-useless-escape
-const TEMPLATE_VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
+const VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^\}]+))?(?::([^\}]+))?}/gm;
 
 /**
- * Returns a list of template variables
+ * Returns a list of variables
  */
-export const parseTemplateVariables = (text: string) => {
-  const regex = TEMPLATE_VARIABLE_REGEX;
+export const parseVariables = (text: string) => {
+  const regex = VARIABLE_REGEX;
   const matches = new Set<string>();
   let match;
 

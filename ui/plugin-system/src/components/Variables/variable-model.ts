@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import { ListVariableDefinition } from '@perses-dev/core';
 import { useQuery } from '@tanstack/react-query';
 import { VariableOption } from '../../model';
-import { useDatasourceStore, usePlugin, useTimeRange, useVariableValues, VariableStateMap } from '../../runtime';
+import { useDatasourceStore, usePlugin, useTimeRange, useAllVariableValues, VariableStateMap } from '../../runtime';
 
 export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
   const result: VariableOption[] = [];
@@ -42,7 +42,7 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
 export function useListVariablePluginValues(definition: ListVariableDefinition) {
   const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
   const datasourceStore = useDatasourceStore();
-  const allVariables = useVariableValues();
+  const allVariables = useAllVariableValues();
   const { absoluteTimeRange: timeRange, refreshKey } = useTimeRange();
 
   const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
@@ -57,7 +57,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition) 
     dependsOnVariables = dependencies.variables;
   }
 
-  const variables = useVariableValues(dependsOnVariables);
+  const variables = useAllVariableValues(dependsOnVariables);
 
   let waitToLoad = false;
   if (dependsOnVariables) {

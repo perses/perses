@@ -38,7 +38,7 @@ import {
 import { TimeSeriesChart } from '@perses-dev/panels-plugin';
 import { ThemeProvider } from "@mui/material";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { DatasourceStoreProvider, TemplateVariableProvider } from "@perses-dev/dashboards";
+import { DatasourceStoreProvider, VariableProvider } from "@perses-dev/dashboards";
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
 import { DashboardResource, GlobalDatasource, ProjectDatasource } from '@perses-dev/core';
@@ -118,7 +118,7 @@ function App() {
           >
             <QueryClientProvider client={queryClient}>
               <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
-                <TemplateVariableProvider>
+                <VariableProvider>
                   <DatasourceStoreProvider dashboardResource={fakeDashboard} datasourceApi={fakeDatasourceApi}>
                     <DataQueriesProvider
                       definitions={[
@@ -142,7 +142,7 @@ function App() {
                       />
                     </DataQueriesProvider>
                   </DatasourceStoreProvider>
-                </TemplateVariableProvider>
+                </VariableProvider>
               </TimeRangeProvider>
             </QueryClientProvider>
           </PluginRegistry>
@@ -168,7 +168,7 @@ You should see a perses panel going to your browser
 - `DataQueriesProvider`: Provide the queries' definition, with the query type, the value. This is to be inside the
   chart below. For each query, one line will be displayed in the chart.
 - `DatasourceStoreProvider`: Provide the datasources. In other terms, the place from which the data will be collected.
-- `TemplateVariableProvider`: Provide the variables that can be used inside the chart.
+- `VariableProvider`: Provide the variables that can be used inside the chart.
   It will allow you to reference any variable into the queries thanks to the `${myVar}` syntax.
   Available variables will be either the builtin variables or the local/external variables that you can pass to the provider.
 - `TimeRangeProvider`: Provide `time range` of the query, but also the `refresh interval` (time between each query

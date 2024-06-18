@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -47,7 +47,7 @@ import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
-import { hydrateTemplateVariableStates } from '../../context/TemplateVariableProvider/hydrationUtils';
+import { hydrateVariableStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
 function getVariableLabelByKind(kind: string) {
@@ -84,7 +84,7 @@ export function VariableEditor(props: {
   const builtinVariableDefinitions = props.builtinVariableDefinitions;
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const [variableState] = useMemo(() => {
-    return [hydrateTemplateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
+    return [hydrateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
   }, [externalVariableDefinitions, variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 
