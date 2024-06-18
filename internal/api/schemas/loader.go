@@ -192,7 +192,7 @@ func (w *Watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 						}
 					}
 				}
-				MonitorLoadAttempts(totalSuccessfulLoads, totalFailedLoads, "model", "change")
+				MonitorLoadAttempts(totalSuccessfulLoads, totalFailedLoads, Model, Change)
 				if w.LoaderCallback != nil {
 					w.LoaderCallback()
 				}
@@ -231,7 +231,7 @@ func (r *Reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
 		logrus.Infof("canceled %s", r.String())
 		break
 	default:
-		err := RunLoaders(r.Loaders, "model", "full")
+		err := RunLoaders(r.Loaders, Model, Full)
 		if err != nil {
 			return err
 		}

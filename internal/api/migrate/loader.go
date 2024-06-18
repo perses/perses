@@ -65,15 +65,16 @@ func (c *migCuePart) GetSchemaPath() string {
 	return c.schemasPath
 }
 
-// NB There are no relevant case of "failed loads" in the case of migration schemas at the moment
-func (c *migCuePart) Load() (successfulLoadsCount, _ int, err error) {
+// Load will load the migration schemas from the filesystem
+func (c *migCuePart) Load() (int, int, error) {
 	var conditions string
-	conditions, successfulLoadsCount, err = c.buildListOfConditions()
-	if err != nil {
-		return
+	conditions, successfulLoadsCount, err := c.buildListOfConditions()
+	if err == nil {
+		c.listOfConditions.Store(&conditions)
 	}
-	c.listOfConditions.Store(&conditions)
-	return
+	// NB: There are no relevant case of "failed loads" to monitor in the case of migration schemas
+	// at the moment, so we always return 0 for the failed loads count
+	return successfulLoadsCount, 0, err
 }
 
 func (c *migCuePart) getConditions() string {
@@ -105,6 +106,8 @@ func (c *migCuePart) buildListOfConditions() (string, int, error) {
 			logrus.WithError(readErr).Debugf("No migration file found at %s, plugin %s will be skipped", migFilePath, file.Name())
 			continue
 		}
+		// TODO: validate the content of the migration file (we expect a conditional block, or several ones separated by commas)
+		// and track the amount of validation errors in the schemas load monitoring
 
 		listOfConditions.WriteString(string(contentStr))
 		listOfConditions.WriteString("\n")

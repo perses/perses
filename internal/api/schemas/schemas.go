@@ -269,10 +269,10 @@ func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName s
 }
 
 func (s *sch) init() error {
-	return RunLoaders(s.loaders, "model", "full")
+	return RunLoaders(s.loaders, Model, Full)
 }
 
-func RunLoaders(loaders []Loader, schemaType, loadType string) error {
+func RunLoaders(loaders []Loader, schemaType SchemaType, loadType LoadType) error {
 	totalSuccessfulLoads := 0
 	totalFailedLoads := 0
 	for _, l := range loaders {
