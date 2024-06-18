@@ -21,7 +21,7 @@ import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import {
   ExternalVariableDefinition,
   useExternalVariableDefinitions,
-  useVariableActions,
+  useVariableDefinitionActions,
   useVariableDefinitions,
 } from '../../context';
 import { VariableEditor } from './VariableEditor';
@@ -53,7 +53,7 @@ export function EditVariablesButton({
   const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
   const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
   const builtinVariableDefinitions: BuiltinVariableDefinition[] = useBuiltinVariableDefinitions();
-  const { setVariableDefinitions } = useVariableActions();
+  const { setVariableDefinitions } = useVariableDefinitionActions();
 
   const openVariableEditor = () => {
     setIsVariableEditorOpen(true);
