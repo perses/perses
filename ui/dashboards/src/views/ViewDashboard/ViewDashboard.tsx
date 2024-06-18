@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -24,15 +24,15 @@ import { useMemo } from 'react';
 import {
   DatasourceStoreProviderProps,
   DatasourceStoreProvider,
-  TemplateVariableProviderProps,
-  TemplateVariableProviderWithQueryParams,
+  VariableProviderProps,
+  VariableProviderWithQueryParams,
 } from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
-  externalVariableDefinitions?: TemplateVariableProviderProps['externalVariableDefinitions'];
+  externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
 }
@@ -110,7 +110,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           initialTimeRange={initialTimeRange}
           initialRefreshInterval={initialRefreshInterval}
         >
-          <TemplateVariableProviderWithQueryParams
+          <VariableProviderWithQueryParams
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
             builtinVariables={builtinVariables}
@@ -141,7 +141,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
                 />
               </ErrorBoundary>
             </Box>
-          </TemplateVariableProviderWithQueryParams>
+          </VariableProviderWithQueryParams>
         </TimeRangeProviderWithQueryParams>
       </DashboardProviderWithQueryParams>
     </DatasourceStoreProvider>

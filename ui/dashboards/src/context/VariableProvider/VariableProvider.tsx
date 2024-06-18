@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import { immer } from 'zustand/middleware/immer';
 import { devtools } from 'zustand/middleware';
 import produce from 'immer';
 import {
-  TemplateVariableContext,
+  VariableContext,
   VariableStateMap,
   VariableState,
   VariableStoreStateMap,
@@ -36,10 +36,10 @@ import {
   BuiltinVariableDefinition,
 } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
-import { hydrateTemplateVariableStates } from './hydrationUtils';
+import { hydrateVariableStates as hydrateVariableStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
 
-type TemplateVariableStore = {
+type VariableStore = {
   variableDefinitions: VariableDefinition[];
   externalVariableDefinitions: ExternalVariableDefinition[];
   variableState: VariableStoreStateMap;
@@ -51,19 +51,17 @@ type TemplateVariableStore = {
   getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
 };
 
-const TemplateVariableStoreContext = createContext<ReturnType<typeof createTemplateVariableSrvStore> | undefined>(
-  undefined
-);
-export function useTemplateVariableStoreCtx() {
-  const context = useContext(TemplateVariableStoreContext);
+const VariableStoreContext = createContext<ReturnType<typeof createVariableSrvStore> | undefined>(undefined);
+export function useVariableStoreCtx() {
+  const context = useContext(VariableStoreContext);
   if (!context) {
-    throw new Error('TemplateVariableStoreContext not initialized');
+    throw new Error('VariableStoreContext not initialized');
   }
   return context;
 }
 
-export function useTemplateVariableValues(variableNames?: string[]) {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableValues(variableNames?: string[]) {
+  const store = useVariableStoreCtx();
   return useStoreWithEqualityFn(
     store,
     (s) => {
@@ -101,12 +99,12 @@ export function useTemplateVariableValues(variableNames?: string[]) {
 }
 
 /**
- * Get the state and definition of a variable from the Template variables context.
+ * Get the state and definition of a variable from the variables context.
  * @param name name of the variable
  * @param source if given, it searches in the external variables
  */
-export function useTemplateVariable(name: string, source?: string) {
-  const store = useTemplateVariableStoreCtx();
+export function useVariable(name: string, source?: string) {
+  const store = useVariableStoreCtx();
   return useStore(store, (s) => {
     const state = s.variableState.get({ name, source });
     const definitions = source
@@ -118,8 +116,8 @@ export function useTemplateVariable(name: string, source?: string) {
   });
 }
 
-export function useTemplateVariableActions() {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableActions() {
+  const store = useVariableStoreCtx();
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
@@ -132,18 +130,18 @@ export function useTemplateVariableActions() {
   });
 }
 
-export function useTemplateVariableDefinitions() {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableDefinitions() {
+  const store = useVariableStoreCtx();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
-export function useTemplateExternalVariableDefinitions() {
-  const store = useTemplateVariableStoreCtx();
+export function useExternalVariableDefinitions() {
+  const store = useVariableStoreCtx();
   return useStore(store, (s) => s.externalVariableDefinitions);
 }
 
-export function useTemplateVariableStore() {
-  const store = useTemplateVariableStoreCtx();
+export function useVariableStore() {
+  const store = useVariableStoreCtx();
   return useStore(store);
 }
 
@@ -153,9 +151,9 @@ interface PluginProviderProps {
 }
 
 function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
-  const originalValues = useTemplateVariableValues();
-  const definitions = useTemplateVariableDefinitions();
-  const externalDefinitions = useTemplateExternalVariableDefinitions();
+  const originalValues = useVariableValues();
+  const definitions = useVariableDefinitions();
+  const externalDefinitions = useExternalVariableDefinitions();
   const { absoluteTimeRange } = useTimeRange();
 
   const values = useMemo(() => {
@@ -255,42 +253,34 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
 
   return (
     <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
-      <TemplateVariableContext.Provider value={{ state: values }}>{children}</TemplateVariableContext.Provider>
+      <VariableContext.Provider value={{ state: values }}>{children}</VariableContext.Provider>
     </BuiltinVariableContext.Provider>
   );
 }
 
-interface TemplateVariableSrvArgs {
+interface VariableSrvArgs {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   queryParams?: ReturnType<typeof useVariableQueryParams>;
 }
 
-function createTemplateVariableSrvStore({
+function createVariableSrvStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
-}: TemplateVariableSrvArgs) {
+}: VariableSrvArgs) {
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
-  const store = createStore<TemplateVariableStore>()(
+  const store = createStore<VariableStore>()(
     devtools(
       immer((set, get) => ({
-        variableState: hydrateTemplateVariableStates(
-          initialVariableDefinitions,
-          initialParams,
-          externalVariableDefinitions
-        ),
+        variableState: hydrateVariableStates(initialVariableDefinitions, initialParams, externalVariableDefinitions),
         variableDefinitions: initialVariableDefinitions,
         externalVariableDefinitions: externalVariableDefinitions,
         setVariableDefinitions(definitions: VariableDefinition[]) {
           set(
             (state) => {
               state.variableDefinitions = definitions;
-              state.variableState = hydrateTemplateVariableStates(
-                definitions,
-                initialParams,
-                externalVariableDefinitions
-              );
+              state.variableState = hydrateVariableStates(definitions, initialParams, externalVariableDefinitions);
             },
             false,
             '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
@@ -407,7 +397,7 @@ export type ExternalVariableDefinition = {
   definitions: VariableDefinition[];
 };
 
-export interface TemplateVariableProviderProps {
+export interface VariableProviderProps {
   children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
   /**
@@ -422,36 +412,36 @@ export interface TemplateVariableProviderProps {
   builtinVariables?: BuiltinVariableDefinition[];
 }
 
-export function TemplateVariableProvider({
+export function VariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariables = [],
-}: TemplateVariableProviderProps) {
-  const [store] = useState(createTemplateVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions }));
+}: VariableProviderProps) {
+  const [store] = useState(createVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions }));
 
   return (
-    <TemplateVariableStoreContext.Provider value={store}>
+    <VariableStoreContext.Provider value={store}>
       <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </TemplateVariableStoreContext.Provider>
+    </VariableStoreContext.Provider>
   );
 }
 
-export function TemplateVariableProviderWithQueryParams({
+export function VariableProviderWithQueryParams({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariables = [],
-}: TemplateVariableProviderProps) {
+}: VariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(
-    createTemplateVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
+    createVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
   );
 
   return (
-    <TemplateVariableStoreContext.Provider value={store}>
+    <VariableStoreContext.Provider value={store}>
       <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </TemplateVariableStoreContext.Provider>
+    </VariableStoreContext.Provider>
   );
 }

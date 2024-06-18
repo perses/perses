@@ -66,7 +66,7 @@ These packages are published to npm with the `@perses-dev` namespace.
 - [`panels-plugin`](./panels-plugin): a plugin module with `Panel` plugins for
   the core visualizations supported by Perses.
 - [`plugin-system`](./plugin-system): All the type definitions and components that power our plugins, also includes the
-  definitions for the runtime available to plugins (e.g. the current time range state, the current template variable
+  definitions for the runtime available to plugins (e.g. the current time range state, the current variable
   state).
 - [`prometheus-plugin`](./prometheus-plugin): a plugin module with multiple
   plugin types (e.g. `Variable`, `ChartQuery`, etc.) for supporting Prometheus

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,9 +13,9 @@
 
 import { DEFAULT_ALL_VALUE, VariableDefinition } from '@perses-dev/core';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { hydrateTemplateVariableStates } from './hydrationUtils';
+import { hydrateVariableStates } from './hydrationUtils';
 
-describe('hydrateTemplateVariableStates', () => {
+describe('hydrateVariableStates', () => {
   test('normalizes single "all" value in an array', () => {
     const definitions: VariableDefinition[] = [
       {
@@ -38,7 +38,7 @@ describe('hydrateTemplateVariableStates', () => {
         },
       },
     ];
-    const result = hydrateTemplateVariableStates(definitions, {});
+    const result = hydrateVariableStates(definitions, {});
     expect(result?.get({ name: 'instance' })?.value).toEqual(DEFAULT_ALL_VALUE);
   });
   test('external definitions overridden and overriding', () => {
@@ -106,7 +106,7 @@ describe('hydrateTemplateVariableStates', () => {
       },
     ];
 
-    const localStateResult = hydrateTemplateVariableStates(definitions, {}, externalDefinitions);
+    const localStateResult = hydrateVariableStates(definitions, {}, externalDefinitions);
 
     // Verify hydration of local variable state
     expect(localStateResult.get({ name: 'project_var' })).toEqual({

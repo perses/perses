@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 import { createPanelRef, DashboardResource, EphemeralDashboardResource, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
-import { useTemplateVariableActions, useTemplateVariableDefinitions } from './TemplateVariableProvider';
+import { useVariableActions, useVariableDefinitions } from './VariableProvider';
 
 export function useDashboard() {
   const {
@@ -55,8 +55,8 @@ export function useDashboard() {
       ttl,
     })
   );
-  const { setVariableDefinitions } = useTemplateVariableActions();
-  const variables = useTemplateVariableDefinitions();
+  const { setVariableDefinitions } = useVariableActions();
+  const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
   const dashboard =

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -15,8 +15,8 @@ import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-de
 import { VariableStoreStateMap, VariableState } from '@perses-dev/plugin-system';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 
-// TODO: move to TemplateVariableProvider/utils.ts
-function hydrateTemplateVariableState(variable: VariableDefinition, initialValue?: VariableValue): VariableState {
+// TODO: move to VariableProvider/utils.ts
+function hydrateVariableState(variable: VariableDefinition, initialValue?: VariableValue): VariableState {
   const varState: VariableState = {
     value: null,
     loading: false,
@@ -60,7 +60,7 @@ function hydrateTemplateVariableState(variable: VariableDefinition, initialValue
  * @param externalDefinitions external variables definitions. Static part.
  * @param initialValues values coming from query parameters
  */
-export function hydrateTemplateVariableStates(
+export function hydrateVariableStates(
   localDefinitions: VariableDefinition[],
   initialValues: Record<string, VariableValue>,
   externalDefinitions: ExternalVariableDefinition[] = []
@@ -89,7 +89,7 @@ export function hydrateTemplateVariableStates(
         state.set(
           { source, name },
           {
-            ...hydrateTemplateVariableState(v, initialValue),
+            ...hydrateVariableState(v, initialValue),
             overridden: !!overridingNames[name],
           }
         );
@@ -110,7 +110,7 @@ export function hydrateTemplateVariableStates(
     state.set(
       { name },
       {
-        ...hydrateTemplateVariableState(v, initialValue),
+        ...hydrateVariableState(v, initialValue),
         overriding: !!overriddenNames[name],
       }
     );

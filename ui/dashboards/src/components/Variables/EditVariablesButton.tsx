@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -20,9 +20,9 @@ import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import {
   ExternalVariableDefinition,
-  useTemplateExternalVariableDefinitions,
-  useTemplateVariableActions,
-  useTemplateVariableDefinitions,
+  useExternalVariableDefinitions,
+  useVariableActions,
+  useVariableDefinitions,
 } from '../../context';
 import { VariableEditor } from './VariableEditor';
 
@@ -50,10 +50,10 @@ export function EditVariablesButton({
   fullWidth,
 }: EditVariablesButtonProps) {
   const [isVariableEditorOpen, setIsVariableEditorOpen] = useState(false);
-  const variableDefinitions: VariableDefinition[] = useTemplateVariableDefinitions();
-  const externalVariableDefinitions: ExternalVariableDefinition[] = useTemplateExternalVariableDefinitions();
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
   const builtinVariableDefinitions: BuiltinVariableDefinition[] = useBuiltinVariableDefinitions();
-  const { setVariableDefinitions } = useTemplateVariableActions();
+  const { setVariableDefinitions } = useVariableActions();
 
   const openVariableEditor = () => {
     setIsVariableEditorOpen(true);

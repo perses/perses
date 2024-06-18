@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseTemplateVariables, replaceTemplateVariable, replaceTemplateVariables } from './variables';
+import { parseVariables, replaceVariable, replaceVariables } from './variables';
 
-describe('parseTemplateVariables()', () => {
+describe('parseVariables()', () => {
   const tests = [
     {
       text: 'hello $var1 world $var2',
@@ -23,12 +23,12 @@ describe('parseTemplateVariables()', () => {
 
   tests.forEach(({ text, variables }) => {
     it(`parses ${text}`, () => {
-      expect(parseTemplateVariables(text)).toEqual(variables);
+      expect(parseVariables(text)).toEqual(variables);
     });
   });
 });
 
-describe('replaceTemplateVariable()', () => {
+describe('replaceVariable()', () => {
   const tests = [
     {
       text: 'hello $var1',
@@ -58,12 +58,12 @@ describe('replaceTemplateVariable()', () => {
 
   tests.forEach(({ text, value, varName, expected }) => {
     it(`replaces ${text} ${value}`, () => {
-      expect(replaceTemplateVariable(text, varName, value)).toEqual(expected);
+      expect(replaceVariable(text, varName, value)).toEqual(expected);
     });
   });
 });
 
-describe('replaceTemplateVariables()', () => {
+describe('replaceVariables()', () => {
   const tests = [
     {
       text: 'hello $var1 $var2',
@@ -93,7 +93,7 @@ describe('replaceTemplateVariables()', () => {
 
   tests.forEach(({ text, state, expected }) => {
     it(`replaces ${text} ${JSON.stringify(state)}`, () => {
-      expect(replaceTemplateVariables(text, state)).toEqual(expected);
+      expect(replaceVariables(text, state)).toEqual(expected);
     });
   });
 });

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,42 +12,42 @@
 // limitations under the License.
 
 import { StoryFn, StoryContext } from '@storybook/react';
-import { TemplateVariableContext, TemplateVariableSrv } from '../../../runtime';
+import { VariableContext, VariableSrv } from '../../../runtime';
 
 declare module '@storybook/react' {
   interface Parameters {
-    withPluginSystemTemplateVariables?: WithPluginSystemTemplateVariableParameter;
+    withPluginSystemVariables?: WithPluginSystemVariableParameter;
   }
 }
 
-export type WithPluginSystemTemplateVariableParameter = {
-  props: TemplateVariableSrv;
+export type WithPluginSystemVariableParameter = {
+  props: VariableSrv;
 };
 
 // Type guard because storybook types parameters as `any`
-function isWithTemplateVariableParameter(
-  parameter: unknown | WithPluginSystemTemplateVariableParameter
-): parameter is WithPluginSystemTemplateVariableParameter {
+function isWithVariableParameter(
+  parameter: unknown | WithPluginSystemVariableParameter
+): parameter is WithPluginSystemVariableParameter {
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-// This decorator is used for non-dashboards package template variable needs.
+// This decorator is used for non-dashboards package variable needs.
 // Use the more specific decorator in the dashboards package when working with
 // dashboards.
 // This decorator includes "PluginSystem" in the name to differentiate it from
 // the datasource store decorator in the `dashboards` package.
-export const WithPluginSystemTemplateVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
-  const initParameter = context.parameters.withPluginSystemTemplateVariables;
-  const defaultValue: TemplateVariableSrv = {
+export const WithPluginSystemVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+  const initParameter = context.parameters.withPluginSystemVariables;
+  const defaultValue: VariableSrv = {
     state: {},
   };
-  const parameter = isWithTemplateVariableParameter(initParameter) ? initParameter : { props: defaultValue };
+  const parameter = isWithVariableParameter(initParameter) ? initParameter : { props: defaultValue };
 
   const props = parameter?.props;
 
   return (
-    <TemplateVariableContext.Provider value={props}>
+    <VariableContext.Provider value={props}>
       <Story />
-    </TemplateVariableContext.Provider>
+    </VariableContext.Provider>
   );
 };

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -26,7 +26,7 @@ import {
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
-import { TemplateVariableList } from '../Variables';
+import { VariableList } from '../Variables';
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
@@ -82,7 +82,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps) {
             }}
             gap={1}
           >
-            <TemplateVariableList />
+            <VariableList />
             {props.initialVariableIsSticky && (
               <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => setIsPin(!isPin)}>
                 {isPin ? <PinOutline /> : <PinOffOutline />}

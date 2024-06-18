@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
-import { TemplateVariableProvider } from '../../context';
+import { VariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
@@ -53,7 +53,7 @@ describe('Panel', () => {
 
     renderWithContext(
       <TimeRangeProvider timeRange={{ pastDuration: '1h' }}>
-        <TemplateVariableProvider
+        <VariableProvider
           initialVariableDefinitions={[
             {
               kind: 'TextVariable',
@@ -65,7 +65,7 @@ describe('Panel', () => {
           ]}
         >
           <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
-        </TemplateVariableProvider>
+        </VariableProvider>
       </TimeRangeProvider>
     );
   };

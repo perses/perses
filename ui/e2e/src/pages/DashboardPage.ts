@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -135,8 +135,8 @@ export class DashboardPage {
     });
   }
 
-  getTemplateVariable(name: string) {
-    return this.page.getByTestId('template-variable-' + name).getByRole('combobox');
+  getVariable(name: string) {
+    return this.page.getByTestId('variable-' + name).getByRole('combobox');
   }
 
   /**
