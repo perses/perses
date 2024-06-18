@@ -37,12 +37,25 @@ type KubernetesDiscovery struct {
 	// Kubernetes namespace to constraint the query to only one namespace.
 	// Leave empty if you are looking for datasource cross-namespace.
 	Namespace string `json:"namespace" yaml:"namespace"`
-	// The api name used to discover the datasources in Kubernetes (service, ingress, pod)
-	API KubernetesAPIRole `json:"api" yaml:"api"`
+	// The api name used to discover the datasources in Kubernetes (only service or pod is supported)
+	APIRole KubernetesAPIRole `json:"api_role" yaml:"api_role"`
 	// The labels used to filter the list of resource when contacting the Kubernetes API.
 	Labels     map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
 	PortName   string            `json:"port_name,omitempty" yaml:"port_name,omitempty"`
-	PortNumber uint              `json:"port_number,omitempty" yaml:"port_number,omitempty"`
+	PortNumber int32             `json:"port_number,omitempty" yaml:"port_number,omitempty"`
+}
+
+func (d *KubernetesDiscovery) Verify() error {
+	if len(d.DatasourcePluginKind) == 0 {
+		return fmt.Errorf("missing datasource plugin kind")
+	}
+	if len(d.APIRole) == 0 {
+		return fmt.Errorf("missing api")
+	}
+	if d.APIRole != Pod && d.APIRole != Service {
+		return fmt.Errorf("invalid api role %q", d.APIRole)
+	}
+	return nil
 }
 
 type GlobalDatasourceDiscovery struct {

@@ -17,7 +17,7 @@ import (
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/dependency"
 	httpsd "github.com/perses/perses/internal/api/discovery/http"
-	kubesd "github.com/perses/perses/internal/api/discovery/kube"
+	kubesd "github.com/perses/perses/internal/api/discovery/kubernetes"
 	"github.com/perses/perses/internal/api/discovery/service"
 	"github.com/perses/perses/pkg/model/api/config"
 )
@@ -31,7 +31,7 @@ func New(cfg config.Config, serviceManager dependency.ServiceManager, caseSensit
 		if c.HTTPDiscovery != nil {
 			helper, err = httpsd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.HTTPDiscovery, svc)
 		} else if c.KubernetesDiscovery != nil {
-			helper, err = kubesd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.KubernetesDiscovery, svc)
+			helper, err = kubesd.NewDiscovery(c.DiscoveryName, c.RefreshInterval, c.KubernetesDiscovery, svc, serviceManager.GetSchemas())
 		}
 		if err != nil {
 			return nil, err

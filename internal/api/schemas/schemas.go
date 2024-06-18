@@ -63,6 +63,60 @@ func retrieveSchemaForKind(modelKind, modelName string, panelVal cue.Value, sche
 	return schema, nil
 }
 
+func validatePlugin(plugin common.Plugin, modelKind string, modelName string, cueDefs *cueDefs) error {
+	pluginData, err := plugin.JSONMarshal()
+	if err != nil {
+		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
+		return err
+	}
+	// compile the JSON plugin into a CUE Value
+	cueContext := cueDefs.context.Load()
+	if cueContext == nil {
+		return fmt.Errorf("unable to validate the plugin %q %q, associated cue context not created", modelKind, modelName)
+	}
+	value := cueContext.CompileBytes(pluginData)
+
+	// retrieve the corresponding schema
+	schemas := cueDefs.schemas.Load()
+	if schemas == nil {
+		return fmt.Errorf("unable to validate the plugin %q %q, associated cue definition not loaded", modelKind, modelName)
+	}
+	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *schemas)
+	if err != nil {
+		return err
+	}
+
+	unified := value.Unify(pluginSchema)
+	err = unified.Validate(cueValidationOptions...)
+	if err != nil {
+		// retrieve the full error detail to provide better insights to the end user:
+		ex, errOs := os.Executable()
+		if errOs != nil {
+			logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
+		}
+		fullErrStr := errors.Details(err, &errors.Config{Cwd: filepath.Dir(ex)})
+		logrus.Debug(fullErrStr)
+
+		return fmt.Errorf("invalid %s %s: %s", modelKind, modelName, fullErrStr)
+	}
+	return nil
+}
+
+func getSchema(modelKind string, pluginKindName string, cueDefs *cueDefs) (cue.Value, error) {
+	if cueDefs == nil {
+		return cue.Value{}, fmt.Errorf("no %s schema available", modelKind)
+	}
+	schemas := cueDefs.schemas.Load()
+	if schemas == nil {
+		return cue.Value{}, fmt.Errorf("no %s schema available", modelKind)
+	}
+	schema, ok := (*schemas)[pluginKindName]
+	if !ok {
+		return cue.Value{}, fmt.Errorf("%s schema %q doesn't exist", modelKind, pluginKindName)
+	}
+	return schema, nil
+}
+
 type Schemas interface {
 	ValidateDatasource(plugin common.Plugin, dtsName string) error
 	ValidatePanels(panels map[string]*modelV1.Panel) error
@@ -71,6 +125,7 @@ type Schemas interface {
 	ValidateDashboardVariables([]dashboard.Variable) error
 	ValidateVariable(plugin common.Plugin, varName string) error
 	GetLoaders() []Loader
+	GetDatasourceSchema(pluginName string) (cue.Value, error)
 }
 
 func New(conf config.Schemas) (Schemas, error) {
@@ -129,12 +184,16 @@ func (s *sch) GetLoaders() []Loader {
 	return s.loaders
 }
 
+func (s *sch) GetDatasourceSchema(pluginName string) (cue.Value, error) {
+	return getSchema("datasource", pluginName, s.dts)
+}
+
 func (s *sch) ValidateDatasource(plugin common.Plugin, dtsName string) error {
 	if s.dts == nil {
 		logrus.Warning("datasource schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "datasource", dtsName, s.dts)
+	return validatePlugin(plugin, "datasource", dtsName, s.dts)
 }
 
 // ValidatePanels verify a list of panels.
@@ -167,7 +226,7 @@ func (s *sch) ValidatePanel(plugin common.Plugin, panelName string) error {
 		logrus.Warning("panel schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "panel", panelName, s.panels)
+	return validatePlugin(plugin, "panel", panelName, s.panels)
 }
 
 func (s *sch) ValidateQuery(plugin common.Plugin, queryName string) error {
@@ -175,7 +234,7 @@ func (s *sch) ValidateQuery(plugin common.Plugin, queryName string) error {
 		logrus.Warning("query schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "query", queryName, s.queries)
+	return validatePlugin(plugin, "query", queryName, s.queries)
 }
 
 func (s *sch) ValidateGlobalVariable(v modelV1.VariableSpec) error {
@@ -226,46 +285,7 @@ func (s *sch) ValidateVariable(plugin common.Plugin, variableName string) error 
 		logrus.Warning("variable schemas are not loaded")
 		return nil
 	}
-	return s.validatePlugin(plugin, "variable", variableName, s.vars)
-}
-
-func (s *sch) validatePlugin(plugin common.Plugin, modelKind string, modelName string, cueDefs *cueDefs) error {
-	pluginData, err := plugin.JSONMarshal()
-	if err != nil {
-		logrus.WithError(err).Debugf("unable to marshal the plugin %q", plugin.Kind)
-		return err
-	}
-	// compile the JSON plugin into a CUE Value
-	cueContext := cueDefs.context.Load()
-	if cueContext == nil {
-		return fmt.Errorf("unable to validate the plugin %q %q, associated cue context not created", modelKind, modelName)
-	}
-	value := cueContext.CompileBytes(pluginData)
-
-	// retrieve the corresponding schema
-	schemas := cueDefs.schemas.Load()
-	if schemas == nil {
-		return fmt.Errorf("unable to validate the plugin %q %q, associated cue definition not loaded", modelKind, modelName)
-	}
-	pluginSchema, err := retrieveSchemaForKind(modelKind, modelName, value, *schemas)
-	if err != nil {
-		return err
-	}
-
-	unified := value.Unify(pluginSchema)
-	err = unified.Validate(cueValidationOptions...)
-	if err != nil {
-		// retrieve the full error detail to provide better insights to the end user:
-		ex, errOs := os.Executable()
-		if errOs != nil {
-			logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
-		}
-		fullErrStr := errors.Details(err, &errors.Config{Cwd: filepath.Dir(ex)})
-		logrus.Debug(fullErrStr)
-
-		return fmt.Errorf("invalid %s %s: %s", modelKind, modelName, fullErrStr)
-	}
-	return nil
+	return validatePlugin(plugin, "variable", variableName, s.vars)
 }
 
 func (s *sch) init() error {

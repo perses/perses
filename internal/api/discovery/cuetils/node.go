@@ -47,7 +47,6 @@ func (n *Node) setConcreteValue(result map[string]interface{}) error {
 	switch n.Type {
 	case StringNodeType:
 		result[n.FieldName] = n.ConcreteValue
-		break
 	case IntegerNodeType:
 		var i int64
 		var err error
@@ -58,7 +57,6 @@ func (n *Node) setConcreteValue(result map[string]interface{}) error {
 			}
 		}
 		result[n.FieldName] = i
-		break
 	case FloatNodeType:
 		var i float64
 		var err error
@@ -69,7 +67,6 @@ func (n *Node) setConcreteValue(result map[string]interface{}) error {
 			}
 		}
 		result[n.FieldName] = i
-		break
 	case BoolNodeType:
 		var b = false
 		var err error
@@ -80,7 +77,6 @@ func (n *Node) setConcreteValue(result map[string]interface{}) error {
 			}
 		}
 		result[n.FieldName] = b
-		break
 	}
 	return nil
 }

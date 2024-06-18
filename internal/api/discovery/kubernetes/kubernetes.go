@@ -21,7 +21,9 @@ import (
 
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
+	"github.com/perses/perses/internal/api/discovery/cuetils"
 	"github.com/perses/perses/internal/api/discovery/service"
+	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/prometheus/common/model"
@@ -38,7 +40,7 @@ func buildLabelSelector(labels map[string]string) string {
 	return builder.String()
 }
 
-func NewDiscovery(cfg *config.KubernetesDiscovery, svc *service.ApplyService, discoveryName string, refreshInterval model.Duration) (taskhelper.Helper, error) {
+func NewDiscovery(discoveryName string, refreshInterval model.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schemas schemas.Schemas) (taskhelper.Helper, error) {
 	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get a kubeConfig: %w", err)
@@ -51,6 +53,7 @@ func NewDiscovery(cfg *config.KubernetesDiscovery, svc *service.ApplyService, di
 		kubeClient: kubeClient,
 		cfg:        cfg,
 		svc:        svc,
+		schemas:    schemas,
 		name:       discoveryName,
 	}
 	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
@@ -61,17 +64,22 @@ type discovery struct {
 	kubeClient *kubernetes.Clientset
 	cfg        *config.KubernetesDiscovery
 	svc        *service.ApplyService
+	schemas    schemas.Schemas
 	name       string
 }
 
 func (d *discovery) Execute(_ context.Context, _ context.Context) error {
+	decodedSchema, err := d.decodeSchema()
+	if err != nil {
+		logrus.WithError(err).Error("failed to decode schema")
+		return nil
+	}
 	var result []*v1.GlobalDatasource
-	var err error
-	switch d.cfg.API {
+	switch d.cfg.APIRole {
 	case config.Pod:
 		result, err = d.pods()
 	case config.Service:
-		result, err = d.services()
+		result, err = d.services(decodedSchema)
 	}
 	if err != nil {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
@@ -79,4 +87,13 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 	}
 	d.svc.Apply(result)
 	return nil
+}
+
+func (d *discovery) decodeSchema() ([]*cuetils.Node, error) {
+	schema, err := d.schemas.GetDatasourceSchema(d.cfg.DatasourcePluginKind)
+	if err != nil {
+		logrus.WithError(err).Error("failed to get datasource schema")
+		return nil, nil
+	}
+	return cuetils.NewFromSchema(schema)
 }
