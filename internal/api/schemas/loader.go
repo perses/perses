@@ -16,6 +16,7 @@ package schemas
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,7 +31,7 @@ import (
 )
 
 type Loader interface {
-	Load() error
+	Load() (int, int, error)
 	GetSchemaPath() string
 }
 
@@ -47,10 +48,11 @@ func (c *cueDefs) GetSchemaPath() string {
 }
 
 // Load the list of available plugins as CUE schemas
-func (c *cueDefs) Load() error {
-	files, err := os.ReadDir(c.schemasPath)
+func (c *cueDefs) Load() (successfulLoadsCount, failedLoadsCount int, err error) {
+	var files []fs.DirEntry
+	files, err = os.ReadDir(c.schemasPath)
 	if err != nil {
-		return err
+		return
 	}
 	// The Cue context is keeping track of loaded instances.
 	// Which means this context must be recreated every time Load is called to avoid a memory leak.
@@ -60,12 +62,10 @@ func (c *cueDefs) Load() error {
 	newSchemas := make(map[string]cue.Value)
 
 	// process each schema plugin to convert it into a CUE Value
-	isError := false
-	i := 0
-	for i < len(files) && !isError {
-		file := files[i]
+	for _, file := range files {
 		if !file.IsDir() {
-			logrus.Warningf("Plugin %s will not be loaded: it is not a folder", file.Name())
+			failedLoadsCount++
+			logrus.Errorf("Plugin %s will not be loaded: it is not a folder", file.Name())
 			continue
 		}
 
@@ -77,7 +77,7 @@ func (c *cueDefs) Load() error {
 		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 		// TODO can probably be improved
 		if len(buildInstances) != 1 {
-			isError = true
+			failedLoadsCount++
 			logrus.Errorf("Plugin %s will not be loaded: The number of build instances is != 1", schemaPath)
 			continue
 		}
@@ -85,7 +85,7 @@ func (c *cueDefs) Load() error {
 
 		// check for errors on the instances (these are typically parsing errors)
 		if buildInstance.Err != nil {
-			isError = true
+			failedLoadsCount++
 			logrus.WithError(buildInstance.Err).Errorf("Plugin %s will not be loaded: file loading error", schemaPath)
 			continue
 		}
@@ -93,7 +93,7 @@ func (c *cueDefs) Load() error {
 		// build Value from the Instance
 		schema := cueContext.BuildInstance(buildInstance)
 		if schema.Err() != nil {
-			isError = true
+			failedLoadsCount++
 			logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: build error", schemaPath)
 			continue
 		}
@@ -102,7 +102,7 @@ func (c *cueDefs) Load() error {
 			// unify with the base def to complete defaults + check if the plugin fulfils the base requirements
 			schema = c.baseDef.Unify(schema)
 			if schema.Err() != nil {
-				isError = true
+				failedLoadsCount++
 				logrus.WithError(schema.Err()).Errorf("Plugin %s will not be loaded: it doesn't meet the expected format for its plugin type", schemaPath)
 				continue
 			}
@@ -110,21 +110,27 @@ func (c *cueDefs) Load() error {
 		// check if another schema for the same Kind was already registered
 		kind, _ := schema.LookupPath(cue.ParsePath(kindPath)).String()
 		if _, ok := newSchemas[kind]; ok {
-			logrus.Warningf("Plugin %s will not be loaded: conflicting schema already exists for kind %s", schemaPath, kind)
+			failedLoadsCount++
+			logrus.Errorf("Plugin %s will not be loaded: conflicting schema already exists for kind %s", schemaPath, kind)
 			continue
 		}
 
 		newSchemas[kind] = schema
+		successfulLoadsCount++
 		logrus.Debugf("%s plugin loaded from file %s", kind, schemaPath)
-		i++
 	}
 
-	if !isError {
-		// in case there is no error, we are saving the schemas loaded and the cue context that will be used during the plugin validation phase
-		c.schemas.Store(&newSchemas)
-		c.context.Store(cueContext)
+	// If at this stage we got only errors (= no schemas registered), we consider that there is
+	// a general problem with the system, therefore we preserve the previous state of schemas.
+	if failedLoadsCount > 0 && len(newSchemas) == 0 {
+		logrus.Error("no schemas were loaded, keeping previous state")
+		return
 	}
-	return nil
+
+	c.schemas.Store(&newSchemas)
+	c.context.Store(cueContext)
+
+	return
 }
 
 func NewHotReloaders(loaders []Loader) (async.SimpleTask, async.SimpleTask, error) {
@@ -174,13 +180,19 @@ func (w *Watcher) Execute(ctx context.Context, cancel context.CancelFunc) error 
 			// NB room for improvement: the event fsnotify.Remove could be used to actually remove the CUE schema from the map
 			logrus.Tracef("%s event on %s", event.Op, event.Name)
 			if event.Has(fsnotify.Create) || event.Has(fsnotify.Write) || event.Has(fsnotify.Remove) {
+				totalSuccessfulLoads := 0
+				totalFailedLoads := 0
 				for _, l := range w.Loaders {
 					if strings.HasPrefix(event.Name, filepath.FromSlash(l.GetSchemaPath())) {
-						if err := l.Load(); err != nil {
+						successfulLoads, failedLoads, err := l.Load()
+						totalSuccessfulLoads += successfulLoads
+						totalFailedLoads += failedLoads
+						if err != nil {
 							logrus.WithError(err).Errorf("unable to load the schemas in %s", l.GetSchemaPath())
 						}
 					}
 				}
+				MonitorLoadAttempts(totalSuccessfulLoads, totalFailedLoads, Model, Change)
 				if w.LoaderCallback != nil {
 					w.LoaderCallback()
 				}
@@ -213,15 +225,15 @@ func (r *Reloader) String() string {
 }
 
 func (r *Reloader) Execute(ctx context.Context, _ context.CancelFunc) error {
+
 	select {
 	case <-ctx.Done():
 		logrus.Infof("canceled %s", r.String())
 		break
 	default:
-		for _, l := range r.Loaders {
-			if err := l.Load(); err != nil {
-				logrus.WithError(err).Errorf("unable to load a schema")
-			}
+		err := RunLoaders(r.Loaders, Model, Full)
+		if err != nil {
+			return err
 		}
 		if r.LoaderCallback != nil {
 			r.LoaderCallback()
