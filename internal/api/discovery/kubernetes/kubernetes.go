@@ -40,6 +40,10 @@ func buildLabelSelector(labels map[string]string) string {
 	return builder.String()
 }
 
+type clientDiscovery interface {
+	discover(decodedSchema []*cuetils.Node) ([]*v1.GlobalDatasource, error)
+}
+
 func NewDiscovery(discoveryName string, refreshInterval model.Duration, cfg *config.KubernetesDiscovery, svc *service.ApplyService, schemas schemas.Schemas) (taskhelper.Helper, error) {
 	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
@@ -49,23 +53,40 @@ func NewDiscovery(discoveryName string, refreshInterval model.Duration, cfg *con
 	if err != nil {
 		return nil, fmt.Errorf("unable to create the kube client: %w", err)
 	}
+	var d clientDiscovery
+	if cfg.ServiceConfiguration != nil {
+		d = &serviceDiscovery{
+			kubeClient:    kubeClient,
+			cfg:           cfg.ServiceConfiguration,
+			namespace:     cfg.Namespace,
+			labelSelector: buildLabelSelector(cfg.Labels),
+		}
+	} else {
+		d = &podDiscovery{
+			kubeClient:    kubeClient,
+			cfg:           cfg.PodConfiguration,
+			namespace:     cfg.Namespace,
+			labelSelector: buildLabelSelector(cfg.Labels),
+		}
+	}
+
 	sd := &discovery{
-		kubeClient: kubeClient,
-		cfg:        cfg,
-		svc:        svc,
-		schemas:    schemas,
-		name:       discoveryName,
+		cfg:       cfg,
+		svc:       svc,
+		schemas:   schemas,
+		name:      discoveryName,
+		discovery: d,
 	}
 	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
 }
 
 type discovery struct {
 	async.SimpleTask
-	kubeClient *kubernetes.Clientset
-	cfg        *config.KubernetesDiscovery
-	svc        *service.ApplyService
-	schemas    schemas.Schemas
-	name       string
+	cfg       *config.KubernetesDiscovery
+	discovery clientDiscovery
+	svc       *service.ApplyService
+	schemas   schemas.Schemas
+	name      string
 }
 
 func (d *discovery) Execute(_ context.Context, _ context.Context) error {
@@ -74,13 +95,7 @@ func (d *discovery) Execute(_ context.Context, _ context.Context) error {
 		logrus.WithError(err).Error("failed to decode schema")
 		return nil
 	}
-	var result []*v1.GlobalDatasource
-	switch d.cfg.APIRole {
-	case config.Pod:
-		result, err = d.pods()
-	case config.Service:
-		result, err = d.services(decodedSchema)
-	}
+	result, err := d.discovery.discover(decodedSchema)
 	if err != nil {
 		logrus.Errorf("failed to execute kube discovery %q: %v", d.name, err)
 		return nil

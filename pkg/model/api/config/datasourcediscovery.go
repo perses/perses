@@ -24,12 +24,23 @@ type HTTPDiscovery struct {
 	perseshttp.RestConfigClient `json:",inline" yaml:",inline"`
 }
 
-type KubernetesAPIRole string
+type KubeServiceDiscovery struct {
+	// Name of the service port for the target.
+	PortName string `json:"port_name,omitempty" yaml:"port_name,omitempty"`
+	// Number of the service port for the target.
+	PortNumber int32 `json:"port_number,omitempty" yaml:"port_number,omitempty"`
+	// The type of the service.
+	ServiceType string `json:"service_type,omitempty" yaml:"service_type,omitempty"`
+}
 
-const (
-	Pod     KubernetesAPIRole = "pod"
-	Service KubernetesAPIRole = "service"
-)
+type KubePodDiscovery struct {
+	// Name of the container the target address points to.
+	ContainerName string `json:"container_name,omitempty" yaml:"container_name,omitempty"`
+	// Name of the container port.
+	ContainerPortName string `json:"container_port_name,omitempty" yaml:"container_port_name,omitempty"`
+	// Number of the container port.
+	ContainerPortNumber int32 `json:"container_port_number,omitempty" yaml:"container_port_number,omitempty"`
+}
 
 type KubernetesDiscovery struct {
 	// DatasourcePluginKind is the name of the datasource plugin that should be filled when creating datasources found.
@@ -37,23 +48,17 @@ type KubernetesDiscovery struct {
 	// Kubernetes namespace to constraint the query to only one namespace.
 	// Leave empty if you are looking for datasource cross-namespace.
 	Namespace string `json:"namespace" yaml:"namespace"`
-	// The api name used to discover the datasources in Kubernetes (only service or pod is supported)
-	APIRole KubernetesAPIRole `json:"api_role" yaml:"api_role"`
+	// Configuration when you want to discover the services in Kubernetes
+	ServiceConfiguration *KubeServiceDiscovery `json:"service_configuration,omitempty" yaml:"service_configuration,omitempty"`
+	// Configuration when you want to discover the pods in Kubernetes
+	PodConfiguration *KubePodDiscovery `json:"pod_configuration,omitempty" yaml:"pod_configuration,omitempty"`
 	// The labels used to filter the list of resource when contacting the Kubernetes API.
-	Labels     map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
-	PortName   string            `json:"port_name,omitempty" yaml:"port_name,omitempty"`
-	PortNumber int32             `json:"port_number,omitempty" yaml:"port_number,omitempty"`
+	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
 }
 
 func (d *KubernetesDiscovery) Verify() error {
 	if len(d.DatasourcePluginKind) == 0 {
 		return fmt.Errorf("missing datasource plugin kind")
-	}
-	if len(d.APIRole) == 0 {
-		return fmt.Errorf("missing api")
-	}
-	if d.APIRole != Pod && d.APIRole != Service {
-		return fmt.Errorf("invalid api role %q", d.APIRole)
 	}
 	return nil
 }
