@@ -60,6 +60,9 @@ func (d *KubernetesDiscovery) Verify() error {
 	if len(d.DatasourcePluginKind) == 0 {
 		return fmt.Errorf("missing datasource plugin kind")
 	}
+	if d.ServiceConfiguration == nil && d.PodConfiguration == nil {
+		return fmt.Errorf("at least one of service_configuration or pod_configuration must be set")
+	}
 	return nil
 }
 
