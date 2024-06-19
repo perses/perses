@@ -17,7 +17,7 @@ import { TraceData } from '@perses-dev/core';
  * Mock data we get from getTraceData() in @perses/tempo-plugin.
  */
 export const MOCK_TRACE_DATA: TraceData = {
-  traces: [
+  searchResult: [
     {
       startTimeUnixMs: 1702915645000, // unix epoch time in milliseconds
       durationMs: 100,
@@ -41,7 +41,7 @@ export const MOCK_TRACE_DATA: TraceData = {
 };
 
 export const MOCK_EMPTY_TRACE_DATA: TraceData = {
-  traces: [],
+  searchResult: [],
   metadata: {
     executedQueryString: '{duration > 500ms}',
   },

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceData } from '@perses-dev/core';
+import { Span, TraceData } from '@perses-dev/core';
 import { SearchTraceIDResponse, SearchTraceQueryResponse } from '../model/api-types';
 
 export const MOCK_TRACE_RESPONSE: SearchTraceIDResponse = {
@@ -2075,6 +2075,151 @@ export const MOCK_TRACE_RESPONSE: SearchTraceIDResponse = {
   ],
 };
 
+export const MOCK_TRACE_RESPONSE_SMALL: SearchTraceIDResponse = {
+  batches: [
+    {
+      resource: {
+        attributes: [
+          {
+            key: 'service.name',
+            value: {
+              stringValue: 'shop-backend',
+            },
+          },
+        ],
+      },
+      scopeSpans: [
+        {
+          scope: {
+            name: 'k6',
+          },
+          spans: [
+            {
+              traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+              spanId: 'nCLrd8tcFMc=',
+              name: 'article-to-cart',
+              kind: 'SPAN_KIND_SERVER',
+              startTimeUnixNano: '1718122135898442804',
+              endTimeUnixNano: '1718122136696651946',
+              attributes: [
+                {
+                  key: 'http.url',
+                  value: {
+                    stringValue: 'https://shop-backend.local:8523/article-to-cart',
+                  },
+                },
+                {
+                  key: 'http.status_code',
+                  value: {
+                    intValue: '202',
+                  },
+                },
+              ],
+              status: {},
+            },
+            {
+              traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+              spanId: 'hGe8oRN3wWY=',
+              parentSpanId: 'nCLrd8tcFMc=',
+              name: 'authenticate',
+              kind: 'SPAN_KIND_CLIENT',
+              startTimeUnixNano: '1718122135954765948',
+              endTimeUnixNano: '1718122136154227489',
+              attributes: [
+                {
+                  key: 'net.transport',
+                  value: {
+                    stringValue: 'ip_tcp',
+                  },
+                },
+              ],
+              events: [
+                {
+                  timeUnixNano: '1718122136068613856',
+                  name: 'event_k6.7W272ywYih',
+                  attributes: [
+                    {
+                      key: 'k6.sJekvnAr5h7vJfK',
+                      value: {
+                        stringValue: 'SZ9vwpLkAzAm2Bju1VJroUlGD8u3pS',
+                      },
+                    },
+                    {
+                      key: 'k6.81JLO5NlT1lAeF1',
+                      value: {
+                        stringValue: '4AzrPTOML11aIN3dYgbKSaAe9HErnZ',
+                      },
+                    },
+                    {
+                      key: 'k6.tdj0bfOxLndyJuN',
+                      value: {
+                        stringValue: 'PeMAsdQ5469IjQgGtifBA7OgfFdoMb',
+                      },
+                    },
+                  ],
+                },
+              ],
+              status: {},
+            },
+            {
+              traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+              spanId: 'r2NxHHPjciM=',
+              parentSpanId: 'nCLrd8tcFMc=',
+              name: 'get-article',
+              kind: 'SPAN_KIND_CLIENT',
+              startTimeUnixNano: '1718122135965210897',
+              endTimeUnixNano: '1718122136520157839',
+              attributes: [
+                {
+                  key: 'http.method',
+                  value: {
+                    stringValue: 'DELETE',
+                  },
+                },
+              ],
+              status: {},
+            },
+          ],
+        },
+      ],
+    },
+    {
+      resource: {
+        attributes: [
+          {
+            key: 'service.name',
+            value: {
+              stringValue: 'auth-service',
+            },
+          },
+        ],
+      },
+      scopeSpans: [
+        {
+          scope: {
+            name: 'k6',
+          },
+          spans: [
+            {
+              traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+              spanId: 'AYBIFdTlycc=',
+              parentSpanId: 'hGe8oRN3wWY=',
+              name: 'authenticate',
+              kind: 'SPAN_KIND_SERVER',
+              startTimeUnixNano: '1718122135970602296',
+              endTimeUnixNano: '1718122136107740742',
+              status: {
+                message: "Forbidden",
+                code: "STATUS_CODE_ERROR"
+              }
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 export const MOCK_SEARCH_RESPONSE_VPARQUET3: SearchTraceQueryResponse = {
   traces: [
     {
@@ -2196,8 +2341,8 @@ export const MOCK_SEARCH_RESPONSE_VPARQUET4: SearchTraceQueryResponse = {
   ],
 };
 
-export const MOCK_TRACE_DATA: TraceData = {
-  traces: [
+export const MOCK_TRACE_DATA_SEARCHRESULT: TraceData = {
+  searchResult: [
     {
       startTimeUnixMs: 1718122135898.4426,
       durationMs: 798,
@@ -2224,4 +2369,166 @@ export const MOCK_TRACE_DATA: TraceData = {
     },
   ],
   metadata: { executedQueryString: 'duration > 900ms' },
+};
+
+const shopBackendResource = {
+  serviceName: 'shop-backend',
+  attributes: [
+    {
+      key: 'service.name',
+      value: {
+        stringValue: 'shop-backend',
+      },
+    },
+  ],
+};
+
+const authServiceResource = {
+  serviceName: 'auth-service',
+  attributes: [
+    {
+      key: 'service.name',
+      value: {
+        stringValue: 'auth-service',
+      },
+    },
+  ],
+};
+
+const k6scope = {
+  name: 'k6',
+};
+
+const span4: Span = {
+  resource: authServiceResource,
+  scope: k6scope,
+  childSpans: [],
+
+  traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+  spanId: 'AYBIFdTlycc=',
+  parentSpanId: 'hGe8oRN3wWY=',
+  name: 'authenticate',
+  kind: 'SPAN_KIND_SERVER',
+  startTimeUnixMs: 1718122135970.602,
+  endTimeUnixMs: 1718122136107.7405,
+  attributes: [],
+  events: [],
+  status: {
+    message: "Forbidden",
+    code: "STATUS_CODE_ERROR"
+  },
+};
+
+const span3: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  childSpans: [],
+
+  traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+  spanId: 'r2NxHHPjciM=',
+  parentSpanId: 'nCLrd8tcFMc=',
+  name: 'get-article',
+  kind: 'SPAN_KIND_CLIENT',
+  startTimeUnixMs: 1718122135965.2107,
+  endTimeUnixMs: 1718122136520.158,
+  attributes: [
+    {
+      key: 'http.method',
+      value: {
+        stringValue: 'DELETE',
+      },
+    },
+  ],
+  events: [],
+  status: {},
+};
+
+const span2: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  childSpans: [span4],
+
+  traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+  spanId: 'hGe8oRN3wWY=',
+  parentSpanId: 'nCLrd8tcFMc=',
+  name: 'authenticate',
+  kind: 'SPAN_KIND_CLIENT',
+  startTimeUnixMs: 1718122135954.7656,
+  endTimeUnixMs: 1718122136154.2273,
+  attributes: [
+    {
+      key: 'net.transport',
+      value: {
+        stringValue: 'ip_tcp',
+      },
+    },
+  ],
+  events: [
+    {
+      timeUnixMs: 1718122136068.6138,
+      name: 'event_k6.7W272ywYih',
+      attributes: [
+        {
+          key: 'k6.sJekvnAr5h7vJfK',
+          value: {
+            stringValue: 'SZ9vwpLkAzAm2Bju1VJroUlGD8u3pS',
+          },
+        },
+        {
+          key: 'k6.81JLO5NlT1lAeF1',
+          value: {
+            stringValue: '4AzrPTOML11aIN3dYgbKSaAe9HErnZ',
+          },
+        },
+        {
+          key: 'k6.tdj0bfOxLndyJuN',
+          value: {
+            stringValue: 'PeMAsdQ5469IjQgGtifBA7OgfFdoMb',
+          },
+        },
+      ],
+    },
+  ],
+  status: {},
+};
+
+const span1: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  childSpans: [span2, span3],
+
+  traceId: '+9N4RSCdQ83M1BjcX5/wIQ==',
+  spanId: 'nCLrd8tcFMc=',
+  parentSpanId: undefined,
+  name: 'article-to-cart',
+  kind: 'SPAN_KIND_SERVER',
+  startTimeUnixMs: 1718122135898.4426,
+  endTimeUnixMs: 1718122136696.6519,
+  attributes: [
+    {
+      key: 'http.url',
+      value: {
+        stringValue: 'https://shop-backend.local:8523/article-to-cart',
+      },
+    },
+    {
+      key: 'http.status_code',
+      value: {
+        intValue: '202',
+      },
+    },
+  ],
+  events: [],
+  status: {},
+};
+
+span4.parentSpan = span2;
+span2.parentSpan = span1;
+span3.parentSpan = span1;
+
+export const MOCK_TRACE_DATA_TRACE: TraceData = {
+  trace: { rootSpan: span1 },
+  metadata: {
+    executedQueryString: '61a1487c461d9e08',
+  },
 };

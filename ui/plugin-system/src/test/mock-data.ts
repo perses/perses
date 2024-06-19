@@ -38,7 +38,7 @@ export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
 };
 
 export const MOCK_TRACE_DATA: TraceData = {
-  traces: [
+  searchResult: [
     {
       durationMs: 1120,
       serviceStats: {
