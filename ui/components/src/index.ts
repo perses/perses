@@ -28,6 +28,7 @@ export * from './LineChart';
 export * from './LinksEditor';
 export * from './ModeSelector';
 export * from './OptionsEditorLayout';
+export * from './Overlay';
 export * from './SettingsAutocomplete';
 export * from './SortSelector';
 export * from './StatChart';

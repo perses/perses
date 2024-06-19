@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Typography } from '@mui/material';
+import { Stack } from '@mui/material';
 import {
   GridColDef,
   GridToolbarColumnsButton,
@@ -96,17 +96,4 @@ export interface DataGridProperties<T extends GridValidRowModel> {
 
 export interface DataGridPropertiesWithCallback<T extends GridValidRowModel> extends DataGridProperties<T> {
   onRowClick: (name: string, project?: string) => void;
-}
-export interface NoContentRowOverlayProps {
-  resource: string;
-}
-
-export function NoContentRowOverlay(props: NoContentRowOverlayProps) {
-  const { resource } = props;
-
-  return (
-    <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <Typography>No {resource}</Typography>
-    </Stack>
-  );
 }
