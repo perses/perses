@@ -11,7 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Avatar, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, styled } from '@mui/material';
+import {
+  Avatar,
+  Chip,
+  Link,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  styled,
+} from '@mui/material';
 import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import {
   ServiceStats,
@@ -23,6 +34,7 @@ import {
 } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
 import { ReactNode } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -78,12 +90,19 @@ function buildRow(theme: PersesChartsTheme, trace: TraceValue): ReactNode {
     totalErrorCount += stats.errorCount ?? 0;
   }
 
+  const traceLinkParams = new URLSearchParams({
+    explorer: "1",
+    queries: `[{"kind":"TraceQuery","spec":{"plugin":{"kind":"TempoTraceQuery","spec":{"query":"${trace.traceId}"}}}}]`,
+  });
+  const traceLink = `/explore/?${traceLinkParams}`;
+
   return (
     <StyledTableRow key={trace.traceId}>
       <StyledTableCell>
-        <Typography>
+        <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={traceLink}>
           <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
-        </Typography>
+        </Link>
+        <br />
         {buildServiceStatsChips(theme, trace.serviceStats)}
       </StyledTableCell>
       <StyledTableCell>
