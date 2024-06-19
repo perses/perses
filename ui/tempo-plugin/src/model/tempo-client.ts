@@ -13,7 +13,7 @@
 
 import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
-import { SearchTraceIDResponse, SearchTraceQueryResponse, ServiceStats } from './api-types';
+import { SearchTraceIDResponse, SearchTraceQueryResponse, ServiceStats, SpanStatusError } from './api-types';
 
 interface TempoClientOptions {
   datasourceUrl: string;
@@ -97,7 +97,7 @@ export async function searchTraceQueryFallback(
           for (const scopeSpan of batch.scopeSpans) {
             stats.spanCount += scopeSpan.spans.length;
             for (const span of scopeSpan.spans) {
-              if (span.status?.code) {
+              if (span.status?.code === SpanStatusError) {
                 stats.errorCount = (stats.errorCount ?? 0) + 1;
               }
             }
