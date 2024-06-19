@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Box, styled } from '@mui/material';
-import { formatTime, gridColor } from './utils';
-import { Span, Viewport } from './model';
+import { Span } from '@perses-dev/core';
+import { Viewport, formatDuration, gridColor } from './utils';
 
 interface TicksHeaderProps {
   rootSpan: Span;
@@ -26,17 +26,17 @@ interface TicksHeaderProps {
 export function TicksHeader(props: TicksHeaderProps) {
   const { rootSpan, viewport } = props;
 
-  const duration = viewport.endTimeUnixNano - viewport.startTimeUnixNano;
-  const startAt = viewport.startTimeUnixNano - rootSpan.startTimeUnixNano;
+  const duration = viewport.endTimeUnixMs - viewport.startTimeUnixMs;
+  const startAt = viewport.startTimeUnixMs - rootSpan.startTimeUnixMs;
 
   return (
     <>
-      <TickBox style={{ left: '0%' }}>{formatTime(startAt + duration * 0)}</TickBox>
-      <TickBox style={{ left: '25%' }}>{formatTime(startAt + duration * 0.25)}</TickBox>
-      <TickBox style={{ left: '50%' }}>{formatTime(startAt + duration * 0.5)}</TickBox>
-      <TickBox style={{ left: '75%' }}>{formatTime(startAt + duration * 0.75)}</TickBox>
+      <TickBox style={{ left: '0%' }}>{formatDuration(startAt + duration * 0)}</TickBox>
+      <TickBox style={{ left: '25%' }}>{formatDuration(startAt + duration * 0.25)}</TickBox>
+      <TickBox style={{ left: '50%' }}>{formatDuration(startAt + duration * 0.5)}</TickBox>
+      <TickBox style={{ left: '75%' }}>{formatDuration(startAt + duration * 0.75)}</TickBox>
       <TickBox style={{ left: '100%' }}>
-        <span style={{ position: 'absolute', right: '.75rem' }}>{formatTime(startAt + duration * 1)}</span>
+        <span style={{ position: 'absolute', right: '.75rem' }}>{formatDuration(startAt + duration * 1)}</span>
       </TickBox>
     </>
   );

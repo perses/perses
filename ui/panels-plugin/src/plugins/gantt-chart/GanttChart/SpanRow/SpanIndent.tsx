@@ -14,10 +14,10 @@
 import { Box, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import { useContext, MouseEvent } from 'react';
-import { Span } from './model';
-import { gridColor } from './utils';
-import { GanttChartContext } from './context';
+import { useContext, MouseEvent, useCallback } from 'react';
+import { Span } from '@perses-dev/core';
+import { gridColor } from '../utils';
+import { GanttChartContext } from '../context';
 
 export interface SpanIndentProps {
   span: Span;
@@ -34,14 +34,21 @@ export function SpanIndent(props: SpanIndentProps) {
   const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent } = useContext(GanttChartContext);
   const theme = useTheme();
 
-  const handleToggleClick = (e: MouseEvent) => {
-    e.stopPropagation();
-    if (collapsedSpans.includes(span.spanId)) {
-      setCollapsedSpans(collapsedSpans.filter((spanId) => spanId !== span.spanId));
-    } else {
-      setCollapsedSpans([...collapsedSpans, span.spanId]);
-    }
-  };
+  const handleToggleClick = useCallback(
+    (e: MouseEvent) => {
+      e.stopPropagation();
+      if (collapsedSpans.includes(span.spanId)) {
+        setCollapsedSpans(collapsedSpans.filter((spanId) => spanId !== span.spanId));
+      } else {
+        setCollapsedSpans([...collapsedSpans, span.spanId]);
+      }
+    },
+    [span, collapsedSpans, setCollapsedSpans]
+  );
+
+  const handleIconMouseEnter = useCallback(() => {
+    setHoveredParent(span.spanId);
+  }, [span, setHoveredParent]);
 
   const handleMouseEnter = () => {
     setHoveredParent(parentSpanId);
@@ -51,19 +58,22 @@ export function SpanIndent(props: SpanIndentProps) {
     setHoveredParent(undefined);
   };
 
-  const handleIconMouseEnter = () => {
-    setHoveredParent(span.spanId);
-  };
-
   return (
     <Box
-      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', width: 24, height: '100%' }}
+      sx={{
+        display: 'flex',
+        width: 24,
+        height: '100%',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        flexShrink: 0,
+      }}
       style={{ borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}` }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {isLastIndent &&
-        span.children.length > 0 &&
+        span.childSpans.length > 0 &&
         (collapsedSpans.includes(span.spanId) ? (
           <ChevronRightIcon onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
         ) : (

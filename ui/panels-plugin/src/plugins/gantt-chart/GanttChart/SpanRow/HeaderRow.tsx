@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Box, Stack, useTheme } from '@mui/material';
-import { rowHeaderColor, rowHeight } from './utils';
-import { TicksHeader } from './Ticks';
-import { Span, Viewport } from './model';
+import { Span } from '@perses-dev/core';
+import { Viewport, rowHeaderColor, rowHeight } from '../utils';
+import { TicksHeader } from '../Ticks';
 
 interface HeaderRowProps {
   rootSpan: Span;

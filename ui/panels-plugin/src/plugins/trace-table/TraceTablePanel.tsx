@@ -19,15 +19,10 @@ import { TraceTableOptions } from './trace-table-model';
 
 export type TraceTableProps = PanelProps<TraceTableOptions>;
 
-export function TraceTablePanel(props: TraceTableProps) {
-  const { contentDimensions } = props;
+export function TraceTablePanel() {
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
   const contentPadding = chartsTheme.container.padding.default;
-
-  if (contentDimensions === undefined) {
-    return null;
-  }
 
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
@@ -39,7 +34,7 @@ export function TraceTablePanel(props: TraceTableProps) {
   }
 
   return (
-    <Box sx={{ height: contentDimensions.height, padding: `${contentPadding}px`, overflowY: 'scroll' }}>
+    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
       <DataTable result={queryResults} />
     </Box>
   );

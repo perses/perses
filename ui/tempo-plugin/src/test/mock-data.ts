@@ -2209,9 +2209,9 @@ export const MOCK_TRACE_RESPONSE_SMALL: SearchTraceIDResponse = {
               startTimeUnixNano: '1718122135970602296',
               endTimeUnixNano: '1718122136107740742',
               status: {
-                message: "Forbidden",
-                code: "STATUS_CODE_ERROR"
-              }
+                message: 'Forbidden',
+                code: 'STATUS_CODE_ERROR',
+              },
             },
           ],
         },
@@ -2414,8 +2414,8 @@ const span4: Span = {
   attributes: [],
   events: [],
   status: {
-    message: "Forbidden",
-    code: "STATUS_CODE_ERROR"
+    message: 'Forbidden',
+    code: 'STATUS_CODE_ERROR',
   },
 };
 

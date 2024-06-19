@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Box, useTheme } from '@mui/material';
-import { formatTime } from './utils';
-import { Ticks } from './Ticks';
-import { Span, Viewport } from './model';
+import { Span } from '@perses-dev/core';
+import { Viewport, formatDuration, getConsistentSpanColor } from '../utils';
+import { Ticks } from '../Ticks';
 
 export interface SpanDurationProps {
   span: Span;
@@ -28,10 +28,10 @@ export function SpanDuration(props: SpanDurationProps) {
   const { span, viewport } = props;
   const theme = useTheme();
 
-  const spanDuration = span.endTimeUnixNano - span.startTimeUnixNano;
-  const viewportDuration = viewport.endTimeUnixNano - viewport.startTimeUnixNano;
+  const spanDuration = span.endTimeUnixMs - span.startTimeUnixMs;
+  const viewportDuration = viewport.endTimeUnixMs - viewport.startTimeUnixMs;
   const relativeDuration = spanDuration / viewportDuration;
-  const relativeStart = (span.startTimeUnixNano - viewport.startTimeUnixNano) / viewportDuration;
+  const relativeStart = (span.startTimeUnixMs - viewport.startTimeUnixMs) / viewportDuration;
 
   return (
     <Box sx={{ position: 'relative', height: '100%', flexGrow: 1, overflow: 'hidden' }}>
@@ -48,7 +48,7 @@ export function SpanDuration(props: SpanDurationProps) {
         style={{
           left: `${relativeStart * 100}%`,
           width: `${relativeDuration * 100}%`,
-          backgroundColor: span.resource.color,
+          backgroundColor: getConsistentSpanColor(span),
         }}
       />
       <Box
@@ -64,7 +64,7 @@ export function SpanDuration(props: SpanDurationProps) {
           left: `${(relativeStart + relativeDuration) * 100}%`,
         }}
       >
-        {formatTime(spanDuration)}
+        {formatDuration(spanDuration)}
       </Box>
     </Box>
   );

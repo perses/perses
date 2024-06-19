@@ -12,8 +12,28 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
+import { Span, SpanStatusError } from '@perses-dev/core';
+import { getConsistentColor } from '../../../model/palette';
+
+/**
+ * Viewport contains the current zoom, i.e. which timeframe of the trace should be visible
+ */
+export interface Viewport {
+  startTimeUnixMs: number;
+  endTimeUnixMs: number;
+}
 
 export const rowHeight = '30px';
 export const rowHeaderColor = (theme: Theme) => theme.palette.grey.A100;
 export const gridColor = (theme: Theme) => theme.palette.grey[100];
-export const formatTime = (timeNano: number) => `${(timeNano / 1000000).toFixed(2)}ms`;
+export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
+export const getConsistentServiceColor = (serviceName: string) => getConsistentColor(serviceName, false);
+export const getConsistentSpanColor = (span: Span) => getConsistentColor(span.resource.serviceName, spanHasError(span));
+
+export function formatDuration(timeMs: number) {
+  if (timeMs < 1) {
+    return `${(timeMs * 1000).toFixed(0)}μs`;
+  }
+
+  return `${timeMs.toFixed(0)}ms`;
+}

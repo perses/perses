@@ -11,30 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
+import { Span } from '@perses-dev/core';
+import { memo } from 'react';
+import { Viewport, gridColor, rowHeight } from '../utils';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
-import { gridColor, rowHeight } from './utils';
-import { Span, Viewport } from './model';
 
 interface SpanRowProps {
   span: Span;
   viewport: Viewport;
-  onClick: () => void;
+  onClick: (span: Span) => void;
 }
 
-export function SpanRow(props: SpanRowProps) {
+export const SpanRow = memo(function SpanRow(props: SpanRowProps) {
   const { span, viewport, onClick } = props;
 
+  const handleOnClick = () => {
+    onClick(span);
+  };
+
   return (
-    <SpanRowContainer direction="row" onClick={onClick}>
+    <SpanRowContainer onClick={handleOnClick}>
       <SpanName span={span} />
       <SpanDuration span={span} viewport={viewport} />
     </SpanRowContainer>
   );
-}
+});
 
-const SpanRowContainer = styled(Stack)(({ theme }) => ({
+const SpanRowContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
   height: rowHeight,
   '&:hover': {
     backgroundColor: theme.palette.grey.A200,

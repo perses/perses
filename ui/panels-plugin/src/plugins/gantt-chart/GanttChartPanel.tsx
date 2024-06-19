@@ -11,25 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelProps } from '@perses-dev/plugin-system';
-import { useChartsTheme } from '@perses-dev/components';
-import { GanttChartOptions, buildTree } from './gantt-chart-model';
+import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
+import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
+import { Box } from '@mui/material';
+import { GanttChartOptions } from './gantt-chart-model';
 import { GanttChart } from './GanttChart/GanttChart';
-import { traceResponse } from './traceResponse';
 
 export type GanttChartPanelProps = PanelProps<GanttChartOptions>;
 
-export function GanttChartPanel(props: GanttChartPanelProps) {
-  console.log(`fetching traceID=${props.spec.traceID}...`);
+export function GanttChartPanel() {
   const chartsTheme = useChartsTheme();
+  const contentPadding = chartsTheme.container.padding.default;
+  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
-  // TODO: fetch trace from Tempo API /api/traces/{props.spec.traceID}
-  const trace = traceResponse;
-
-  const tree = buildTree(trace, chartsTheme.echartsTheme.color as string[]);
-  if (!tree) {
-    return null;
+  if (queryResults.length > 1) {
+    return <TextOverlay message="This panel does not support more than one query." />;
   }
 
-  return <GanttChart rootSpan={tree} />;
+  if (isLoading || isFetching) {
+    return <LoadingOverlay />;
+  }
+
+  const trace = queryResults[0]?.data?.trace;
+  if (!trace) {
+    return <NoDataOverlay resource="trace" />;
+  }
+
+  return (
+    <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
+      <GanttChart rootSpan={trace.rootSpan} />
+    </Box>
+  );
 }

@@ -114,24 +114,3 @@ export interface TraceMetaData {
 export function isValidTraceId(traceId: string): boolean {
   return /^[a-z0-9]+$/.test(traceId);
 }
-
-function hashCode(str: string) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return hash;
-}
-
-/**
- * Assign a color based on the serviceName.
- * The same serviceName should always get the same color assigned.
- */
-export function traceServiceColor(serviceName: string, colors: string[]): string {
-  if (colors.length === 0) {
-    throw new Error('List of colors is empty.');
-  }
-
-  const hash = Math.abs(hashCode(serviceName));
-  return colors[hash % colors.length] as string;
-}

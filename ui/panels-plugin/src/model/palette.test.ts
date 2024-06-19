@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialGanttChartOptions, GanttChartOptions } from './gantt-chart-model';
-import { GanttChartPanel } from './GanttChartPanel';
+import { getConsistentColor } from './palette';
 
-export const GanttChart: PanelPlugin<GanttChartOptions> = {
-  PanelComponent: GanttChartPanel,
-  // TODO: add a chart options editor plugin, for example:
-  // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
-  supportedQueryTypes: ['TraceQuery'],
-  createInitialOptions: createInitialGanttChartOptions,
-};
+describe('getConsistentColor', () => {
+  it('should generate a consistent custom hsla color', () => {
+    const color = getConsistentColor('test', false);
+    const colorAlt = getConsistentColor('test', false);
+    const firstResult = 'hsla(289.38,35%,50%,0.9)';
+    // ensures generated color does not change on subsequent calls with same series name
+    expect(color).toEqual(firstResult);
+    expect(colorAlt).toEqual(firstResult);
+  });
+});

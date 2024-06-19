@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Stack } from '@mui/material';
-import { Span } from './model';
+import { Box } from '@mui/material';
+import { Span } from '@perses-dev/core';
+import AlertIcon from 'mdi-material-ui/AlertCircleOutline';
+import { spanHasError } from '../utils';
 import { SpanIndent } from './SpanIndent';
 
 export interface SpanNameProps {
@@ -25,19 +27,20 @@ export interface SpanNameProps {
 export function SpanName(props: SpanNameProps) {
   const { span } = props;
 
-  let parent = span.parent;
+  let parent = span.parentSpan;
   const indents = [<SpanIndent key="lastIndent" span={span} parentSpanId={parent?.spanId ?? ''} isLastIndent={true} />];
   while (parent) {
-    parent = parent.parent;
+    parent = parent.parentSpan;
     indents.unshift(<SpanIndent key={parent?.spanId ?? ''} span={span} parentSpanId={parent?.spanId ?? ''} />);
   }
 
   return (
-    <Stack direction="row" alignItems="center" sx={{ width: '25%' }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', width: '25%' }}>
       {indents}
-      <Box>
-        <strong style={{ color: span.resource.color }}>{span.resource.serviceName}:</strong> {span.spanName}
+      {spanHasError(span) && <AlertIcon color="error" sx={{ marginRight: '5px' }} />}
+      <Box sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
+        <strong>{span.resource.serviceName}:</strong> {span.name}
       </Box>
-    </Stack>
+    </Box>
   );
 }

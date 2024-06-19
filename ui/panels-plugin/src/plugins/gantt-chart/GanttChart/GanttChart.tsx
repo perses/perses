@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { Virtuoso } from 'react-virtuoso';
-import { useState } from 'react';
-import { Box, Stack } from '@mui/material';
-import { SpanRow } from './SpanRow';
-import { HeaderRow } from './HeaderRow';
-import { Span, Viewport } from './model';
+import { useMemo, useState } from 'react';
+import { Box } from '@mui/material';
+import { Span } from '@perses-dev/core';
+import { SpanRow } from './SpanRow/SpanRow';
+import { HeaderRow } from './SpanRow/HeaderRow';
 import { GanttChartContext } from './context';
-import { MiniGanttChart } from './MiniGanttChart';
-import { DetailPane } from './DetailPane';
+import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
+import { DetailPane } from './DetailPane/DetailPane';
+import { Viewport } from './utils';
 
 export interface GanttChart {
   rootSpan: Span;
@@ -32,40 +33,55 @@ export interface GanttChart {
 function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
   rows.push(span);
   if (!collapsedSpans.includes(span.spanId)) {
-    for (const child of span.children) {
+    for (const child of span.childSpans) {
       treeToRows(rows, child, collapsedSpans);
     }
   }
 }
 
+/**
+ * The core GanttChart panel for Perses.
+ *
+ * The UI/UX of this panel is based on Jaeger UI, licensed under Apache License, Version 2.0.
+ * https://github.com/jaegertracing/jaeger-ui
+ */
 export function GanttChart(props: GanttChart) {
   const { rootSpan } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
-  const [selectedSpan, setSelectedSpan] = useState<Span>(rootSpan);
+  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
   const [viewport, setViewport] = useState<Viewport>({
-    startTimeUnixNano: rootSpan.startTimeUnixNano,
-    endTimeUnixNano: rootSpan.endTimeUnixNano,
+    startTimeUnixMs: rootSpan.startTimeUnixMs,
+    endTimeUnixMs: rootSpan.endTimeUnixMs,
   });
 
-  const rows: Span[] = [];
-  treeToRows(rows, rootSpan, collapsedSpans);
+  const rows = useMemo(() => {
+    const rows: Span[] = [];
+    treeToRows(rows, rootSpan, collapsedSpans);
+    return rows;
+  }, [rootSpan, collapsedSpans]);
+
+  const handleDetailPaneCloseBtnClick = () => {
+    setSelectedSpan(undefined);
+  };
 
   return (
-    <Stack direction="row" gap={2} sx={{ height: '100%' }}>
-      <Stack sx={{ flexGrow: 1 }}>
+    <Box sx={{ display: 'flex', height: '100%', gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
+        <HeaderRow rootSpan={rootSpan} viewport={viewport} />
         <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
-          <HeaderRow rootSpan={rootSpan} viewport={viewport} />
           <Virtuoso
             data={rows}
-            itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={() => setSelectedSpan(span)} />}
+            itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={setSelectedSpan} />}
           />
         </GanttChartContext.Provider>
-      </Stack>
-      <Box sx={{ width: '17%', overflow: 'auto' }}>
-        <DetailPane span={selectedSpan} />
       </Box>
-    </Stack>
+      {selectedSpan && (
+        <Box sx={{ width: '280px', overflow: 'auto' }}>
+          <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={handleDetailPaneCloseBtnClick} />
+        </Box>
+      )}
+    </Box>
   );
 }
