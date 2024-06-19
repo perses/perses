@@ -16,6 +16,7 @@ package cuetils
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"testing"
 
 	"cuelang.org/go/cue"
@@ -134,6 +135,7 @@ func TestNewFromSchema(t *testing.T) {
 				t.Errorf("NewFromSchema() error = %v", err)
 				return
 			}
+			sortNodes(trees)
 			assert.Equal(t, tt.expected, trees)
 		})
 	}
@@ -175,6 +177,7 @@ spec:
 				t.Errorf("NewFromSchema() error = %v", err)
 				return
 			}
+			sortNodes(trees)
 			plugin, err := BuildPluginAndInjectProxy(trees, tt.proxy)
 			if err != nil {
 				t.Errorf("BuildPluginAndInjectProxy() error = %v", err)
@@ -198,4 +201,13 @@ func buildCUESchema(path string) (cue.Value, error) {
 	}
 	buildInstance := buildInstances[0]
 	return ctx.BuildInstance(buildInstance), nil
+}
+
+func sortNodes(nodes []*Node) {
+	sort.Slice(nodes, func(i, j int) bool {
+		return nodes[i].FieldName < nodes[j].FieldName
+	})
+	for _, node := range nodes {
+		node.sort()
+	}
 }

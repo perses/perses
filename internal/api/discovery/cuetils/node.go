@@ -15,6 +15,7 @@ package cuetils
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -41,6 +42,20 @@ type Node struct {
 	ConcreteValue string `json:"concrete_value" yaml:"concrete_value"`
 	// In case the type is a struct, then it will contain an array of node.
 	Nodes []*Node `json:"nodes" yaml:"nodes"`
+}
+
+func (n *Node) sort() {
+	if n.Nodes == nil {
+		return
+	}
+	sort.Slice(n.Nodes, func(i, j int) bool {
+		return n.Nodes[i].FieldName < n.Nodes[j].FieldName
+	})
+	for _, node := range n.Nodes {
+		if node.Type == StructNodeType {
+			node.sort()
+		}
+	}
 }
 
 func (n *Node) setConcreteValue(result map[string]interface{}) error {
