@@ -11,24 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface Span {
-  startTimeUnixNano: string;
-  spanId?: string; // Span from api/search/<query>
-  spanID?: string; // Span from api/traces/<traceID>
-  attributes?: Attribute[];
-  events?: Event[];
-  durationNanos?: string;
-  endTimeUnixNano?: string;
-  kind?: string;
-  name?: string;
-  parentSpanId?: string;
-  status?: {
-    code?: string;
-  };
-  traceId?: string;
+/**
+ * Common types
+ */
+export interface Attribute {
+  key: string;
+  value: AttributeValue;
 }
 
-export interface Trace {
+export type AttributeValue =
+  | { stringValue: string }
+  | { intValue: string }
+  | { boolValue: boolean }
+  | { arrayValue: { values: AttributeValue[] } };
+
+/**
+ * Response of Tempo HTTP API endpoint GET /api/search/<query>
+ */
+export interface SearchTraceQueryResponse {
+  traces: TraceSearchResult[];
+}
+
+export interface TraceSearchResult {
   traceID: string;
   rootServiceName: string;
   rootTraceName: string;
@@ -37,15 +41,23 @@ export interface Trace {
   durationMs?: number;
   /** @deprecated spanSet is deprecated in favor of spanSets */
   spanSet?: {
-    spans: Span[];
+    spans: SpanSearchResult[];
     matched: number;
   };
   spanSets?: Array<{
-    spans: Span[];
+    spans: SpanSearchResult[];
     matched: number;
   }>;
   /** ServiceStats are only available in Tempo vParquet4+ blocks */
   serviceStats?: Record<string, ServiceStats>;
+}
+
+export interface SpanSearchResult {
+  spanID: string;
+  name: string;
+  startTimeUnixNano: string;
+  durationNanos: string;
+  attributes: Attribute[];
 }
 
 export interface ServiceStats {
@@ -55,41 +67,55 @@ export interface ServiceStats {
 }
 
 /**
- * Response of Tempo HTTP API endpoint GET /api/search/<query>
- */
-export interface SearchTraceQueryResponse {
-  traces: Trace[];
-}
-
-export interface Attribute {
-  key: string;
-  value: AttributeValue;
-}
-
-export type AttributeValue =
-  | { stringValue: string }
-  | { intValue: string }
-  | { arrayValue: { values: AttributeValue[] } };
-
-export interface Event {}
-
-export interface ScopeSpan {
-  scope: {
-    name: string;
-  };
-  spans: Span[];
-}
-
-export interface Batch {
-  resource: {
-    attributes: Attribute[];
-  };
-  scopeSpans: ScopeSpan[];
-}
-
-/**
  * Response of Tempo HTTP API endpoint GET /api/traces/<traceID>
+ * OTEL trace proto: https://github.com/open-telemetry/opentelemetry-proto-go/blob/main/otlp/trace/v1/trace.pb.go
  */
 export interface SearchTraceIDResponse {
   batches: Batch[];
 }
+
+export interface Batch {
+  resource: Resource;
+  scopeSpans: ScopeSpan[];
+}
+
+export interface Resource {
+  attributes: Attribute[];
+}
+
+export interface ScopeSpan {
+  scope: Scope;
+  spans: Span[];
+}
+
+export interface Scope {
+  name: string;
+}
+
+export interface Span {
+  traceId: string;
+  spanId: string;
+  parentSpanId?: string;
+  name: string;
+  kind: string;
+  startTimeUnixNano: string;
+  endTimeUnixNano: string;
+  attributes?: Attribute[];
+  events?: SpanEvent[];
+  status?: SpanStatus;
+}
+
+export interface SpanEvent {
+  timeUnixNano: string;
+  name: string;
+  attributes?: Attribute[];
+}
+
+export interface SpanStatus {
+  code?: typeof SpanStatusUnset | typeof SpanStatusOk | typeof SpanStatusError;
+  message?: string;
+}
+
+export const SpanStatusUnset = 'STATUS_CODE_UNSET';
+export const SpanStatusOk = 'STATUS_CODE_OK';
+export const SpanStatusError = 'STATUS_CODE_ERROR';

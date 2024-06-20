@@ -13,7 +13,12 @@
 
 import { DatasourceSpec } from '@perses-dev/core';
 import { TraceQueryContext } from '@perses-dev/plugin-system';
-import { MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_DATA } from '../test';
+import {
+  MOCK_SEARCH_RESPONSE_VPARQUET4,
+  MOCK_TRACE_DATA_SEARCHRESULT,
+  MOCK_TRACE_DATA_TRACE,
+  MOCK_TRACE_RESPONSE_SMALL,
+} from '../test';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 import { TempoDatasource } from './tempo-datasource';
 import { TempoTraceQuery } from './tempo-trace-query/TempoTraceQuery';
@@ -25,6 +30,7 @@ const datasource: TempoDatasourceSpec = {
 };
 
 const tempoStubClient = TempoDatasource.createClient(datasource, {});
+tempoStubClient.searchTraceID = jest.fn(async () => MOCK_TRACE_RESPONSE_SMALL);
 tempoStubClient.searchTraceQueryFallback = jest.fn(async () => MOCK_SEARCH_RESPONSE_VPARQUET4);
 
 const getDatasourceClient: jest.Mock = jest.fn(() => {
@@ -66,6 +72,16 @@ describe('TempoTraceQuery', () => {
       },
       stubTempoContext
     );
-    expect(results).toEqual(MOCK_TRACE_DATA);
+    expect(results).toEqual(MOCK_TRACE_DATA_SEARCHRESULT);
+  });
+
+  it('should build a span tree', async () => {
+    const results = await TempoTraceQuery.getTraceData(
+      {
+        query: '61a1487c461d9e08',
+      },
+      stubTempoContext
+    );
+    expect(results).toEqual(MOCK_TRACE_DATA_TRACE);
   });
 });

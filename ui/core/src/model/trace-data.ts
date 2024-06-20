@@ -11,11 +11,74 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export interface TraceMetaData {
-  executedQueryString?: string;
+/**
+ * Common types
+ */
+export interface TraceAttribute {
+  key: string;
+  value: TraceAttributeValue;
 }
 
-export interface TraceValue {
+export type TraceAttributeValue =
+  | { stringValue: string }
+  | { intValue: string }
+  | { boolValue: boolean }
+  | { arrayValue: { values: TraceAttributeValue[] } };
+
+/**
+ * An entire trace
+ */
+export interface Trace {
+  rootSpan: Span;
+}
+
+export interface TraceResource {
+  serviceName: string;
+  attributes: TraceAttribute[];
+}
+
+export interface TraceScope {
+  name: string;
+}
+
+export interface Span {
+  resource: TraceResource;
+  scope: TraceScope;
+  parentSpan?: Span;
+  /** child spans, sorted by startTime */
+  childSpans: Span[];
+
+  traceId: string;
+  spanId: string;
+  parentSpanId?: string;
+  name: string;
+  kind: string;
+  startTimeUnixMs: number;
+  endTimeUnixMs: number;
+  attributes: TraceAttribute[];
+  events: SpanEvent[];
+  status?: SpanStatus;
+}
+
+export interface SpanEvent {
+  timeUnixMs: number;
+  name: string;
+  attributes: TraceAttribute[];
+}
+
+export interface SpanStatus {
+  code?: typeof SpanStatusUnset | typeof SpanStatusOk | typeof SpanStatusError;
+  message?: string;
+}
+
+export const SpanStatusUnset = 'STATUS_CODE_UNSET';
+export const SpanStatusOk = 'STATUS_CODE_OK';
+export const SpanStatusError = 'STATUS_CODE_ERROR';
+
+/**
+ * Partial trace information returned by search endpoint
+ */
+export interface TraceSearchResult {
   traceId: string;
   rootServiceName: string;
   rootTraceName: string;
@@ -33,10 +96,23 @@ export interface ServiceStats {
 /**
  * A generalized data-model that will be used by Panel components
  * to display traces.
+ *
+ * If the query contains a valid trace ID, the 'trace' attribute will contain the entire trace.
+ * If the query contains a TraceQL query, the 'searchResult' attribute will contain the search results.
  */
 export interface TraceData {
-  traces: TraceValue[];
+  trace?: Trace;
+  searchResult?: TraceSearchResult[];
+
   metadata?: TraceMetaData;
+}
+
+export interface TraceMetaData {
+  executedQueryString?: string;
+}
+
+export function isValidTraceId(traceId: string): boolean {
+  return /^[a-z0-9]+$/.test(traceId);
 }
 
 function hashCode(str: string) {
