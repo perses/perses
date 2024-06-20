@@ -19,7 +19,7 @@ import { TraceTableOptions } from './trace-table-model';
 
 export type TraceTableProps = PanelProps<TraceTableOptions>;
 
-export function TraceTablePanel() {
+export function TraceTablePanel(_props: TraceTableProps) {
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
   const contentPadding = chartsTheme.container.padding.default;

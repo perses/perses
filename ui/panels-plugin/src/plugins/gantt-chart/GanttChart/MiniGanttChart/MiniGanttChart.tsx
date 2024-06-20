@@ -28,7 +28,7 @@ export function MiniGanttChart(props: MiniGanttChartProps) {
   const theme = useTheme();
 
   return (
-    <Box sx={{ marginBottom: '20px', border: `1px solid ${rowHeaderColor(theme)}` }}>
+    <Box sx={{ marginBottom: 2, border: `1px solid ${rowHeaderColor(theme)}` }}>
       <Box sx={{ position: 'relative', height: rowHeight, backgroundColor: rowHeaderColor(theme) }}>
         <TicksHeader rootSpan={rootSpan} viewport={rootSpan} />
       </Box>
