@@ -73,8 +73,13 @@ Generic placeholders are defined as follows:
 [ schemas: <Schemas config> ]
 
 # If provided, Perses server will look to the different folders configured and populate the database based on what it is found
-# The data coming from the provisioning folder will totally override what exists in the database.
+# Be careful: the data coming from the provisioning folder will totally override what exists in the database.
 [ provisioning: <Provisioning config> ]
+
+# If provided, Perses server will generate a list of global datasource based on the discovery chosen.
+# Be careful: the data coming from the discovery will totally override what exists in the database.
+global_datasource_discovery:
+  [- <GlobalDatasourceDiscovery config> ]
 
 # The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 # This config is deprecated. Please use the config ephemeral_dashboard instead.
@@ -456,6 +461,110 @@ A TLS config allows configuring TLS connections.
 # Every known data found in the different folders will be injected in the database regardless what exist.
 folders:
   - <string>
+```
+
+### GlobalDatasourceDiscovery config
+
+```yaml
+# The name of the discovery config. It is used for logging purposes only
+discovery_name: <string>
+
+# Refresh interval to run the discovery
+[ refresh_interval: <duration> | default = 5m ]
+
+# HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
+# It fetches an HTTP endpoint containing a list of zero or more global datasources.
+# The target must reply with an HTTP 200 response.
+# The HTTP header Content-Type must be application/json, and the body must be valid array of JSON.
+[ http_sd: <HTTPSD Config> ]
+
+# Kubernetes SD configurations allow retrieving global datasource from Kubernetes' REST API
+# and always staying synchronized with the cluster state.
+[ kubernetes_sd: <KubernetesSD Config> ]
+```
+
+#### HTTPSD Config
+
+```yaml
+# URL of the HTTP server exposing the global datasource list to scrape.
+url: <url>
+
+[ basicAuth: <Basic Auth specification> ]
+
+# The HTTP authorization credentials for the targets.
+# Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
+[ authorization: <Authorization specification> ]
+
+# Config used to connect to the targets.
+[ tlsConfig: <TLS Config specification> ]
+
+headers:
+  [<string>:<string>]
+```
+
+##### Basic Auth specification
+
+See the [BasicAuth](../api/secret.md#basic-auth-specification) specification.
+
+##### Authorization specification
+
+See the [Authorization](../api/secret.md#authorization-specification) specification.
+
+##### TLS Config specification
+
+See the [TLS Config](../api/secret.md#tls-config-specification) specification.
+
+#### KubernetesSD Config
+
+```yaml
+# The name of the datasource plugin that should be filled when creating datasources found.
+datasource_plugin_kind: <string>
+
+# Kubernetes namespace to constraint the query to only one namespace.
+# Leave empty if you are looking for datasource cross-namespace.
+[ namespace: <string> ]
+
+# Configuration when you want to discover the services in Kubernetes
+[ service_configuration: <KubeServiceDiscovery Config> ]
+
+# Configuration when you want to discover the pods in Kubernetes
+[ pod_configuration: <KubePodDiscovery Config> ]
+
+# The labels used to filter the list of resource when contacting the Kubernetes API.
+labels:
+ [<string>:<string>]
+```
+
+##### KubeServiceDiscovery Config
+
+```yaml
+# If set to true, Perses server will discovery the service
+[ enable: <boolean> | default = false ]
+
+# Name of the service port for the target.
+[ port_name: <string> ]
+
+# Number of the service port for the target.
+[ port_number: <int32> ]
+
+# The type of the service.
+[ service_type: < enum | possibleValue = 'ClusterIP' | 'NodePort' | 'LoadBalancer' | 'ExternalName' > ]
+```
+
+##### KubePodDiscovery Config
+
+```yaml
+# If set to true, Perses server will discovery the pod
+[ enable: <boolean> | default = false ]
+
+# Name of the container the target address points to.
+[ container_name: <string> ]
+  
+# Name of the container port.
+[ container_port_name: <string> ]
+  
+# Number of the container port.
+[ container_port_number: <string> ]
 ```
 
 ### EphemeralDashboard config

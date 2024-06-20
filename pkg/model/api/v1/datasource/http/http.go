@@ -124,9 +124,9 @@ type Proxy struct {
 }
 
 const (
-	httpProxyKindField = "kind"
-	httpProxyKindName  = "httpproxy"
-	httpProxySpec      = "spec"
+	HTTPProxyKindField = "kind"
+	HTTPProxyKindName  = "httpproxy"
+	HTTPProxySpec      = "spec"
 )
 
 func ValidateAndExtract(pluginSpec interface{}) (*Config, error) {
@@ -219,9 +219,9 @@ func (c *configFinder) unmarshalConfig(spec reflect.Value) {
 
 func doesKindInStructExists(v reflect.Value) bool {
 	for i := 0; i < v.NumField(); i++ {
-		if strings.ToLower(v.Type().Field(i).Name) == httpProxyKindField &&
+		if strings.ToLower(v.Type().Field(i).Name) == HTTPProxyKindField &&
 			v.Field(i).Type().Kind() == reflect.String &&
-			strings.ToLower(v.Field(i).String()) == httpProxyKindName {
+			strings.ToLower(v.Field(i).String()) == HTTPProxyKindName {
 			return true
 		}
 	}
@@ -230,11 +230,11 @@ func doesKindInStructExists(v reflect.Value) bool {
 
 func doesKindInMapExists(v reflect.Value) bool {
 	for _, key := range v.MapKeys() {
-		if key.String() == httpProxyKindField {
+		if key.String() == HTTPProxyKindField {
 			value := v.MapIndex(key)
 			value = getNextElem(value)
 			if value.Kind() == reflect.String &&
-				strings.ToLower(value.String()) == httpProxyKindName {
+				strings.ToLower(value.String()) == HTTPProxyKindName {
 				return true
 			}
 		}
@@ -244,7 +244,7 @@ func doesKindInMapExists(v reflect.Value) bool {
 
 func getConfigSpecInStruct(v reflect.Value) reflect.Value {
 	for i := 0; i < v.NumField(); i++ {
-		if strings.ToLower(v.Type().Field(i).Name) == httpProxySpec {
+		if strings.ToLower(v.Type().Field(i).Name) == HTTPProxySpec {
 			return v.Field(i)
 		}
 	}
@@ -253,7 +253,7 @@ func getConfigSpecInStruct(v reflect.Value) reflect.Value {
 
 func getConfigSpecInMap(v reflect.Value) reflect.Value {
 	for _, key := range v.MapKeys() {
-		if key.String() == httpProxySpec {
+		if key.String() == HTTPProxySpec {
 			return v.MapIndex(key)
 		}
 	}
