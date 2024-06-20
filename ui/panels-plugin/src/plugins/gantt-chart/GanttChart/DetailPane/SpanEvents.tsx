@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Box, Typography } from '@mui/material';
 import { Span, SpanEvent } from '@perses-dev/core';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
 import { formatDuration } from '../utils';
@@ -24,6 +24,14 @@ export interface SpanEventListProps {
 
 export function SpanEventList(props: SpanEventListProps) {
   const { rootSpan, span } = props;
+
+  if (span.events.length === 0) {
+    return (
+      <Box sx={{ paddingTop: 1 }}>
+        <Typography>No events.</Typography>
+      </Box>
+    );
+  }
 
   return (
     <>

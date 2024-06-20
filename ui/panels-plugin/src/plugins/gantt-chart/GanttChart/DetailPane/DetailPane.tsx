@@ -46,8 +46,8 @@ export function DetailPane(props: DetailPaneProps) {
       </Box>
       {tab === 0 && (
         <>
-          <AttributeList attributes={span.attributes} />
-          <Divider />
+          {span.attributes.length > 0 && <AttributeList attributes={span.attributes} />}
+          {span.attributes.length > 0 && <Divider />}
           <AttributeList attributes={span.resource.attributes} />
         </>
       )}
