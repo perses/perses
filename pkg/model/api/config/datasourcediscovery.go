@@ -15,16 +15,21 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/prometheus/common/model"
 )
+
+const defaultRefreshInterval = model.Duration(time.Minute * 5)
 
 type HTTPDiscovery struct {
 	perseshttp.RestConfigClient `json:",inline" yaml:",inline"`
 }
 
 type KubeServiceDiscovery struct {
+	// If set to true, Perses server will discovery the service
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// Name of the service port for the target.
 	PortName string `json:"port_name,omitempty" yaml:"port_name,omitempty"`
 	// Number of the service port for the target.
@@ -34,6 +39,8 @@ type KubeServiceDiscovery struct {
 }
 
 type KubePodDiscovery struct {
+	// If set to true, Perses server will discovery the pod
+	Enable bool `json:"enable,omitempty" yaml:"enable,omitempty"`
 	// Name of the container the target address points to.
 	ContainerName string `json:"container_name,omitempty" yaml:"container_name,omitempty"`
 	// Name of the container port.
@@ -49,9 +56,9 @@ type KubernetesDiscovery struct {
 	// Leave empty if you are looking for datasource cross-namespace.
 	Namespace string `json:"namespace" yaml:"namespace"`
 	// Configuration when you want to discover the services in Kubernetes
-	ServiceConfiguration *KubeServiceDiscovery `json:"service_configuration,omitempty" yaml:"service_configuration,omitempty"`
+	ServiceConfiguration KubeServiceDiscovery `json:"service_configuration,omitempty" yaml:"service_configuration,omitempty"`
 	// Configuration when you want to discover the pods in Kubernetes
-	PodConfiguration *KubePodDiscovery `json:"pod_configuration,omitempty" yaml:"pod_configuration,omitempty"`
+	PodConfiguration KubePodDiscovery `json:"pod_configuration,omitempty" yaml:"pod_configuration,omitempty"`
 	// The labels used to filter the list of resource when contacting the Kubernetes API.
 	Labels map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`
 }
@@ -60,15 +67,18 @@ func (d *KubernetesDiscovery) Verify() error {
 	if len(d.DatasourcePluginKind) == 0 {
 		return fmt.Errorf("missing datasource plugin kind")
 	}
-	if d.ServiceConfiguration == nil && d.PodConfiguration == nil {
+	if !d.ServiceConfiguration.Enable && !d.PodConfiguration.Enable {
 		return fmt.Errorf("at least one of service_configuration or pod_configuration must be set")
+	}
+	if d.ServiceConfiguration.Enable && d.PodConfiguration.Enable {
+		return fmt.Errorf("at most one of service_configuration or pod_configuration must be set")
 	}
 	return nil
 }
 
 type GlobalDatasourceDiscovery struct {
-	// The name of the discovery config (optional)
-	DiscoveryName string `json:"discovery_name,omitempty" yaml:"discovery_name,omitempty"`
+	// The name of the discovery config. It is used for logging purposes only
+	DiscoveryName string `json:"discovery_name" yaml:"discovery_name"`
 	// Refresh interval to re-query the endpoint.
 	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
 	// HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
@@ -86,7 +96,7 @@ func (g *GlobalDatasourceDiscovery) Verify() error {
 		return fmt.Errorf("global datasource discovery name is empty")
 	}
 	if g.RefreshInterval == 0 {
-		return fmt.Errorf("global datasource discovery refresh_interval is zero")
+		g.RefreshInterval = defaultRefreshInterval
 	}
 	if g.HTTPDiscovery == nil && g.KubernetesDiscovery == nil {
 		return fmt.Errorf("no discovery has been defined for the global datasource discovery %q", g.DiscoveryName)

@@ -32,7 +32,7 @@ type podDiscovery struct {
 	discoveryName string
 	namespace     string
 	labelSelector string
-	cfg           *config.KubePodDiscovery
+	cfg           config.KubePodDiscovery
 	kubeClient    *kubernetes.Clientset
 }
 

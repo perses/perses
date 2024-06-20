@@ -32,7 +32,7 @@ type serviceDiscovery struct {
 	discoveryName string
 	namespace     string
 	labelSelector string
-	cfg           *config.KubeServiceDiscovery
+	cfg           config.KubeServiceDiscovery
 	kubeClient    *kubernetes.Clientset
 }
 

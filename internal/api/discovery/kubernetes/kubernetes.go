@@ -54,7 +54,7 @@ func NewDiscovery(discoveryName string, refreshInterval model.Duration, cfg *con
 		return nil, fmt.Errorf("unable to create the kube client: %w", err)
 	}
 	var d clientDiscovery
-	if cfg.ServiceConfiguration != nil {
+	if cfg.ServiceConfiguration.Enable {
 		d = &serviceDiscovery{
 			kubeClient:    kubeClient,
 			cfg:           cfg.ServiceConfiguration,
