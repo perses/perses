@@ -179,7 +179,8 @@ function parseTraceResponse(response: SearchTraceIDResponse): Trace {
     } else {
       const parent = lookup.get(span.parentSpanId);
       if (!parent) {
-        throw new Error(`span ${span.spanId} has parent ${span.parentSpanId} which does not exist`);
+        console.error(`span ${span.spanId} has parent ${span.parentSpanId} which has not been received yet`);
+        continue;
       }
 
       span.parentSpan = parent;
