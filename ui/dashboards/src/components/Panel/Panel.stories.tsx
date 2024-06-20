@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,7 +18,7 @@ import { Panel } from '@perses-dev/dashboards';
 import { PanelDefinition } from '@perses-dev/core';
 import { WithPluginRegistry, WithTimeRange, WithDataQueries } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
-import { WithTemplateVariables, WithDatasourceStore } from '../../stories/decorators';
+import { WithVariables, WithDatasourceStore } from '../../stories/decorators';
 
 const panelDefinition: PanelDefinition = {
   kind: 'Panel',
@@ -48,7 +48,7 @@ const meta: Meta<typeof Panel> = {
   component: Panel,
   decorators: [
     WithDataQueries,
-    WithTemplateVariables,
+    WithVariables,
     WithTimeRange,
     WithDatasourceStore,
     WithPluginRegistry,

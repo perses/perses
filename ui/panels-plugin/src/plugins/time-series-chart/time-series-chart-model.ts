@@ -89,7 +89,7 @@ export const Y_AXIS_CONFIG = {
   max: { label: 'Max' },
 };
 
-export const DEFAULT_LINE_WIDTH = 1.5;
+export const DEFAULT_LINE_WIDTH = 1.25;
 export const DEFAULT_AREA_OPACITY = 0;
 
 // How much larger datapoint symbols are than line width, also applied in VisualOptionsEditor.

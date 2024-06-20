@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -21,5 +21,5 @@ export const editButtonStyle: SxProps<Theme> = {
   },
 };
 
-export const MIN_TEMPLATE_VARIABLE_WIDTH = 120;
-export const MAX_TEMPLATE_VARIABLE_WIDTH = 500;
+export const MIN_VARIABLE_WIDTH = 120;
+export const MAX_VARIABLE_WIDTH = 500;

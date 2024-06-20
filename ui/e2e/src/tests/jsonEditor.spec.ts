@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -30,6 +30,6 @@ test.describe('Dashboard: EditJson', () => {
     await dashboardPage.saveChanges();
     await expect(page.url()).toContain('start=5m');
     await expect(dashboardPage.timePicker).toContainText('Last 5 minutes');
-    await expect(dashboardPage.page.getByTestId('template-variable-interval').getByRole('combobox')).toHaveValue('5m');
+    await expect(dashboardPage.page.getByTestId('variable-interval').getByRole('combobox')).toHaveValue('5m');
   });
 });

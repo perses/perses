@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -13,7 +13,7 @@
 
 import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
 import React, { useEffect, useMemo, useState } from 'react';
-import { DatasourceStoreProvider, TemplateVariableProviderWithQueryParams } from '@perses-dev/dashboards';
+import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginRegistry,
@@ -70,7 +70,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
         <PluginRegistry pluginLoader={bundledPluginLoader}>
           <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
             <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-              <TemplateVariableProviderWithQueryParams initialVariableDefinitions={[]}>
+              <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
                 <VariableEditorForm
                   initialVariableDefinition={variableDef}
                   initialAction={action}
@@ -80,7 +80,7 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                   onClose={onClose}
                   onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
                 />
-              </TemplateVariableProviderWithQueryParams>
+              </VariableProviderWithQueryParams>
             </TimeRangeProviderWithQueryParams>
           </DatasourceStoreProvider>
         </PluginRegistry>

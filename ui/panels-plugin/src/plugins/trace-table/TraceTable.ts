@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,17 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getTraceData } from './get-trace-data';
-import { TempoTraceQueryEditor } from './TempoTraceQueryEditor';
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { TraceTablePanel } from './TraceTablePanel';
+import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
 
 /**
- * The core Tempo TraceQuery plugin for Perses.
+ * The core TraceTable panel plugin for Perses.
  */
-export const TempoTraceQuery = {
-  getTraceData,
-  OptionsEditorComponent: TempoTraceQueryEditor,
-  createInitialOptions: () => ({
-    query: '',
-    datasource: undefined,
-  }),
+export const TraceTable: PanelPlugin<TraceTableOptions> = {
+  PanelComponent: TraceTablePanel,
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialTraceTableOptions,
 };

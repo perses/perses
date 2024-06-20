@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -18,18 +18,11 @@ import { action } from '@storybook/addon-actions';
 import ViewDashboardVariantOutline from 'mdi-material-ui/ViewDashboardVariantOutline';
 import { WithPluginRegistry, WithTimeRange } from '@perses-dev/plugin-system/src/stories/shared-utils';
 import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
-import { WithTemplateVariables, WithDashboard, EMPTY_DASHBOARD_RESOURCE } from '../../stories/decorators';
+import { WithVariables, WithDashboard, EMPTY_DASHBOARD_RESOURCE } from '../../stories/decorators';
 
 const meta: Meta<typeof EmptyDashboard> = {
   component: EmptyDashboard,
-  decorators: [
-    WithTemplateVariables,
-    WithTimeRange,
-    WithDashboard,
-    WithPluginRegistry,
-    WithQueryClient,
-    WithQueryParams,
-  ],
+  decorators: [WithVariables, WithTimeRange, WithDashboard, WithPluginRegistry, WithQueryClient, WithQueryParams],
 };
 
 export default meta;

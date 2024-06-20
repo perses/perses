@@ -11,19 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { DataQueriesProvider, MultiQueryEditor } from '@perses-dev/plugin-system';
 import { Box, Stack, Tab, Tabs } from '@mui/material';
-import { ScatterChart } from '@perses-dev/panels-plugin';
 import { QueryDefinition } from '@perses-dev/core';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import useResizeObserver from 'use-resize-observer';
-import { PANEL_PREVIEW_DEFAULT_WIDTH, PANEL_PREVIEW_HEIGHT } from './constants';
+import { Panel } from '@perses-dev/dashboards';
+import { PANEL_PREVIEW_HEIGHT, PANEL_PREVIEW_TRACES_SCATTERPLOT_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 function TracePanel({ queries }: { queries: QueryDefinition[] }) {
-  const { width, ref: boxRef } = useResizeObserver();
   const height = PANEL_PREVIEW_HEIGHT;
-  const suggestedStepMs = useSuggestedStepMs(width);
 
   // map TraceQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
@@ -36,12 +33,31 @@ function TracePanel({ queries }: { queries: QueryDefinition[] }) {
     : [];
 
   return (
-    <Box ref={boxRef} height={height}>
-      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs }}>
-        <ScatterChart.PanelComponent
-          contentDimensions={{ width: width ?? PANEL_PREVIEW_DEFAULT_WIDTH, height }}
-          spec={{}}
-        />
+    <Box height={height}>
+      <DataQueriesProvider definitions={definitions}>
+        <Stack height="100%">
+          <Box height={PANEL_PREVIEW_TRACES_SCATTERPLOT_HEIGHT}>
+            <Panel
+              panelOptions={{
+                hideHeader: true,
+              }}
+              definition={{
+                kind: 'Panel',
+                spec: { queries, display: { name: '' }, plugin: { kind: 'ScatterChart', spec: {} } },
+              }}
+            />
+          </Box>
+          <Panel
+            sx={{ flexGrow: 1, marginTop: '15px' }}
+            panelOptions={{
+              hideHeader: true,
+            }}
+            definition={{
+              kind: 'Panel',
+              spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: {} } },
+            }}
+          />
+        </Stack>
       </DataQueriesProvider>
     </Box>
   );
@@ -60,7 +76,7 @@ export function TracesExplorer() {
         variant="scrollable"
         sx={{ borderRight: 1, borderColor: 'divider' }}
       >
-        <Tab label="Graph" />
+        <Tab label="Table" />
       </Tabs>
       <Stack gap={1}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>{tab === 0 && <TracePanel queries={queries} />}</ErrorBoundary>

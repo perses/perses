@@ -175,7 +175,7 @@ export function getTimeSeries(
     symbolSize: pointRadius,
     lineStyle: {
       width: lineWidth,
-      opacity: 0.8,
+      opacity: 0.95,
     },
     areaStyle: {
       opacity: visual.areaOpacity ?? DEFAULT_AREA_OPACITY,
@@ -185,7 +185,7 @@ export function getTimeSeries(
       focus: 'series',
       disabled: visual.areaOpacity !== undefined && visual.areaOpacity > 0, // prevents flicker when moving cursor between shaded regions
       lineStyle: {
-        width: lineWidth + 1.5,
+        width: lineWidth + 1,
         opacity: 1,
       },
     },

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TimeRangeProvider } from '@perses-dev/plugin-system';
-import { DashboardProvider, DatasourceStoreProvider, TemplateVariableProvider } from '../../../context';
+import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
@@ -23,11 +23,11 @@ describe('Panel Groups', () => {
     renderWithContext(
       <DatasourceStoreProvider {...defaultDatasourceProps}>
         <TimeRangeProvider refreshInterval="0s" timeRange={{ pastDuration: '30m' }}>
-          <TemplateVariableProvider>
+          <VariableProvider>
             <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: true }}>
               <DashboardApp dashboardResource={getTestDashboard()} isReadonly={false} />
             </DashboardProvider>
-          </TemplateVariableProvider>
+          </VariableProvider>
         </TimeRangeProvider>
       </DatasourceStoreProvider>
     );

@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,8 +34,8 @@ test.describe('Dashboard: Defaults', () => {
     await expect(page.url()).toContain('start=6h');
 
     // Changed selected interval variable
-    await expect(dashboardPage.getTemplateVariable('interval')).toHaveValue('1m');
-    await dashboardPage.getTemplateVariable('interval').click();
+    await expect(dashboardPage.getVariable('interval')).toHaveValue('1m');
+    await dashboardPage.getVariable('interval').click();
     await page.getByRole('option', { name: '5m' }).click();
 
     // Change text variable
@@ -63,7 +63,7 @@ test.describe('Dashboard: Defaults', () => {
     await page.getByRole('button', { name: 'Refresh', exact: true }).click();
     await expect(page.url()).toContain('start=6h');
     await expect(dashboardPage.timePicker).toContainText('Last 6 hours');
-    await expect(dashboardPage.getTemplateVariable('interval')).toHaveValue('5m');
+    await expect(dashboardPage.getVariable('interval')).toHaveValue('5m');
 
     // Confirm text variable value is persisted
     const newTextVariableInput = await page.getByRole('textbox', { name: 'Text variable' });

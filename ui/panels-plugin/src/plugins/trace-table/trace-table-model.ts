@@ -11,17 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getTraceData } from './get-trace-data';
-import { TempoTraceQueryEditor } from './TempoTraceQueryEditor';
+/**
+ * The Options object type supported by the TraceTable panel plugin.
+ */
+// Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TraceTableOptions {}
 
 /**
- * The core Tempo TraceQuery plugin for Perses.
+ * Creates the initial/empty options for a TraceTable panel.
  */
-export const TempoTraceQuery = {
-  getTraceData,
-  OptionsEditorComponent: TempoTraceQueryEditor,
-  createInitialOptions: () => ({
-    query: '',
-    datasource: undefined,
-  }),
-};
+export function createInitialTraceTableOptions() {
+  return {};
+}
