@@ -31,6 +31,7 @@ export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: 
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
 
   const traceDuration = rootSpan.endTimeUnixMs - rootSpan.startTimeUnixMs;
+  const yChange = height / numSpans;
   let y = 0;
 
   const drawSpan = (span: Span) => {
@@ -40,12 +41,9 @@ export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: 
 
     ctx.fillStyle = getConsistentSpanColor(span);
     ctx.beginPath();
-    ctx.rect(Math.round(relativeStart * width), y, Math.round(relativeDuration * width), barHeight);
+    ctx.rect(Math.round(relativeStart * width), Math.round(y), Math.round(relativeDuration * width), barHeight);
     ctx.fill();
-    y += barHeight;
-
-    // stop painting when out of canvas
-    if (y > height) return;
+    y += yChange;
 
     for (const childSpan of span.childSpans) {
       drawSpan(childSpan);
