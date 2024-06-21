@@ -19,6 +19,9 @@ import { Span } from '@perses-dev/core';
 import { gridColor } from '../utils';
 import { GanttChartContext } from '../GanttChartProvider';
 
+const MIN_INDENT_WIDTH = 8;
+const MAX_INDENT_WIDTH = 24;
+
 export interface SpanIndentsProps {
   span: Span;
 }
@@ -32,7 +35,8 @@ export interface SpanIndentsProps {
  */
 export function SpanIndents(props: SpanIndentsProps) {
   const { span } = props;
-  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent } = useContext(GanttChartContext);
+  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel } =
+    useContext(GanttChartContext);
   const theme = useTheme();
 
   let parent = span.parentSpan;
@@ -63,7 +67,10 @@ export function SpanIndents(props: SpanIndentsProps) {
       {parentSpanIds.map((parentSpanId, i) => (
         <SpanIndentBox
           key={parentSpanId}
-          style={{ borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}` }}
+          style={{
+            width: i < minSpanLevel ? MIN_INDENT_WIDTH : MAX_INDENT_WIDTH,
+            borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}`,
+          }}
           onMouseEnter={() => setHoveredParent(parentSpanId)}
           onMouseLeave={() => setHoveredParent(undefined)}
         >
@@ -82,9 +89,9 @@ export function SpanIndents(props: SpanIndentsProps) {
 
 const SpanIndentBox = styled('div')({
   display: 'flex',
-  width: 24,
   height: '100%',
   alignItems: 'center',
   justifyContent: 'flex-end',
   flexShrink: 0,
+  transition: 'width 1s',
 });

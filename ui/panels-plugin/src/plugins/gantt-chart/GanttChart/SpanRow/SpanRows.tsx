@@ -28,31 +28,45 @@ interface SpanRowsProps {
 
 export function SpanRows(props: SpanRowsProps) {
   const { rootSpan, viewport, onSpanClick } = props;
-  const { collapsedSpans } = useContext(GanttChartContext);
+  const { collapsedSpans, setMinSpanLevel } = useContext(GanttChartContext);
 
-  const rows = useMemo(() => {
+  const [rows, levels] = useMemo(() => {
     const rows: Span[] = [];
-    treeToRows(rows, rootSpan, collapsedSpans);
-    return rows;
+    const levels: number[] = [];
+    treeToRows(rows, levels, rootSpan, 0, collapsedSpans);
+    return [rows, levels];
   }, [rootSpan, collapsedSpans]);
+
+  // calculate minimum span hierarchy level of all currently visible rows
+  function handleRangeChange({ startIndex, endIndex }: { startIndex: number; endIndex: number }) {
+    let min = levels[startIndex]!;
+    for (let i = startIndex + 1; i <= endIndex; i++) {
+      if (levels[i]! < min) {
+        min = levels[i]!;
+      }
+    }
+    setMinSpanLevel(min);
+  }
 
   return (
     <Virtuoso
       data={rows}
       itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={onSpanClick} />}
+      rangeChanged={handleRangeChange}
     />
   );
 }
 
 /**
- * treeToRows recursively transforms the span tree to a list of rows
- * and hides collapsed child spans.
+ * treeToRows recursively transforms the span tree to a list of rows,
+ * hides collapsed child spans and counts the span hierarchy level.
  */
-function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
+function treeToRows(rows: Span[], levels: number[], span: Span, level: number, collapsedSpans: string[]) {
   rows.push(span);
+  levels.push(level);
   if (!collapsedSpans.includes(span.spanId)) {
     for (const child of span.childSpans) {
-      treeToRows(rows, child, collapsedSpans);
+      treeToRows(rows, levels, child, level + 1, collapsedSpans);
     }
   }
 }

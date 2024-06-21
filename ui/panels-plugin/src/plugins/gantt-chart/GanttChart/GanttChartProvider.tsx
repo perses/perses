@@ -18,13 +18,17 @@ interface GanttChartContextType {
   setCollapsedSpans: (s: string[]) => void;
   hoveredParent?: string; // can be a spanId, an empty string for the root span or undefined for no hover
   setHoveredParent: (s?: string) => void;
+  minSpanLevel: number;
+  setMinSpanLevel: (n: number) => void;
 }
 
 export const GanttChartContext = createContext<GanttChartContextType>({
   collapsedSpans: [],
   setCollapsedSpans: () => null,
-  hoveredParent: '',
+  hoveredParent: undefined,
   setHoveredParent: () => null,
+  minSpanLevel: 0,
+  setMinSpanLevel: () => null,
 });
 
 interface GanttChartProviderProps {
@@ -35,9 +39,12 @@ export function GanttChartProvider(props: GanttChartProviderProps) {
   const { children } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
+  const [minSpanLevel, setMinSpanLevel] = useState<number>(0);
 
   return (
-    <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
+    <GanttChartContext.Provider
+      value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel, setMinSpanLevel }}
+    >
       {children}
     </GanttChartContext.Provider>
   );
