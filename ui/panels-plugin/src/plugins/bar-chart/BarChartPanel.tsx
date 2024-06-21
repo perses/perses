@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BarChart, BarChartData, LoadingOverlay, useChartsTheme } from '@perses-dev/components';
-import { Box } from '@mui/material';
+import { BarChart, BarChartData, useChartsTheme } from '@perses-dev/components';
+import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationType, CalculationsMap } from '@perses-dev/core';
 import { useDataQueries, PanelProps } from '@perses-dev/plugin-system';
@@ -61,7 +61,15 @@ export function BarChartPanel(props: BarChartPanelProps) {
   if (contentDimensions === undefined) return null;
 
   if (isLoading || isFetching) {
-    return <LoadingOverlay />;
+    return (
+      <Box
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        width={contentDimensions.width}
+        height={contentDimensions.height}
+      >
+        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
+      </Box>
+    );
   }
 
   return (

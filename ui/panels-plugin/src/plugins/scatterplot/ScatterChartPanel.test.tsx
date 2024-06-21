@@ -99,7 +99,7 @@ describe('ScatterChartPanel', () => {
       isFetching: false,
     });
     renderPanel();
-    expect(await screen.findByTestId('ScatterChartPanel_ScatterPlot')).toBeInTheDocument();
+    expect(await screen?.findByTestId('ScatterChartPanel_ScatterPlot')).toBeInTheDocument();
   });
 
   it('should not render a ScatterPlot because trace results are empty', async () => {
@@ -110,6 +110,6 @@ describe('ScatterChartPanel', () => {
     });
     renderPanel();
     // expect it to return a Alert because the query produces no trace results
-    expect(await screen.findByText('No traces')).toBeInTheDocument();
+    expect(await screen?.findByTestId('ScatterChartPanel_ErrorAlert')).toBeInTheDocument();
   });
 });

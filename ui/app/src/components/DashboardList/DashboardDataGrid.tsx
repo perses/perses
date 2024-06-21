@@ -15,12 +15,12 @@ import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import { memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
-import { NoDataOverlay } from '@perses-dev/components';
 import {
   DataGridProperties,
   CommonRow,
   DATA_GRID_INITIAL_STATE_SORT_BY_DISPLAY_NAME,
   GridToolbar,
+  NoContentRowOverlay,
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
 } from '../datagrid';
@@ -36,7 +36,7 @@ export interface Row extends CommonRow {
 }
 
 function NoDashboardRowOverlay() {
-  return <NoDataOverlay resource="dashboards" />;
+  return <NoContentRowOverlay resource="dashboards" />;
 }
 
 export function DashboardDataGrid(props: DataGridProperties<Row>) {
