@@ -14,10 +14,10 @@
 import { styled, useTheme } from '@mui/material';
 import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
-import { useContext, MouseEvent, useCallback } from 'react';
+import { MouseEvent, useCallback } from 'react';
 import { Span } from '@perses-dev/core';
 import { gridColor } from '../utils';
-import { GanttChartContext } from '../GanttChartProvider';
+import { useSpanRowsContext } from './SpanRowsProvider';
 
 const MIN_INDENT_WIDTH = 8;
 const MAX_INDENT_WIDTH = 24;
@@ -35,8 +35,7 @@ export interface SpanIndentsProps {
  */
 export function SpanIndents(props: SpanIndentsProps) {
   const { span } = props;
-  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel } =
-    useContext(GanttChartContext);
+  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel } = useSpanRowsContext();
   const theme = useTheme();
 
   let parent = span.parentSpan;

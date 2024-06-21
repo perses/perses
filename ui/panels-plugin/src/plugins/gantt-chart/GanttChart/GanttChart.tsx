@@ -16,7 +16,7 @@ import { Box, Stack } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { SpanRows } from './SpanRow/SpanRows';
 import { HeaderRow } from './SpanRow/HeaderRow';
-import { GanttChartProvider } from './GanttChartProvider';
+import { SpanRowsProvider } from './SpanRow/SpanRowsProvider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
@@ -45,9 +45,9 @@ export function GanttChart(props: GanttChart) {
       <Stack sx={{ flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <HeaderRow rootSpan={rootSpan} viewport={viewport} />
-        <GanttChartProvider>
+        <SpanRowsProvider>
           <SpanRows rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
-        </GanttChartProvider>
+        </SpanRowsProvider>
       </Stack>
       {selectedSpan && (
         <Box sx={{ width: '280px', overflow: 'auto' }}>

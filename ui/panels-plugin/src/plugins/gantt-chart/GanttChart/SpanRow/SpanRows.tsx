@@ -14,9 +14,9 @@
 import { Virtuoso } from 'react-virtuoso';
 import { Stack, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { memo, useContext, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { Viewport, gridColor, rowHeight } from '../utils';
-import { GanttChartContext } from '../GanttChartProvider';
+import { useSpanRowsContext } from './SpanRowsProvider';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 
@@ -28,7 +28,7 @@ interface SpanRowsProps {
 
 export function SpanRows(props: SpanRowsProps) {
   const { rootSpan, viewport, onSpanClick } = props;
-  const { collapsedSpans, setMinSpanLevel } = useContext(GanttChartContext);
+  const { collapsedSpans, setMinSpanLevel } = useSpanRowsContext();
 
   const [rows, levels] = useMemo(() => {
     const rows: Span[] = [];

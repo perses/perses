@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 
-interface GanttChartContextType {
+interface SpanRowsContextType {
   collapsedSpans: string[];
   setCollapsedSpans: (s: string[]) => void;
   hoveredParent?: string; // can be a spanId, an empty string for the root span or undefined for no hover
@@ -22,30 +22,36 @@ interface GanttChartContextType {
   setMinSpanLevel: (n: number) => void;
 }
 
-export const GanttChartContext = createContext<GanttChartContextType>({
-  collapsedSpans: [],
-  setCollapsedSpans: () => null,
-  hoveredParent: undefined,
-  setHoveredParent: () => null,
-  minSpanLevel: 0,
-  setMinSpanLevel: () => null,
-});
+/**
+ * SpanRowsContext stores UI state of the rows.
+ * Required for passing down state to deeply nested <SpanIndents>,
+ * without re-rendering intermediate components.
+ */
+export const SpanRowsContext = createContext<SpanRowsContextType | undefined>(undefined);
 
-interface GanttChartProviderProps {
+interface SpanRowsProviderProps {
   children?: React.ReactNode;
 }
 
-export function GanttChartProvider(props: GanttChartProviderProps) {
+export function SpanRowsProvider(props: SpanRowsProviderProps) {
   const { children } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
   const [minSpanLevel, setMinSpanLevel] = useState<number>(0);
 
   return (
-    <GanttChartContext.Provider
+    <SpanRowsContext.Provider
       value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel, setMinSpanLevel }}
     >
       {children}
-    </GanttChartContext.Provider>
+    </SpanRowsContext.Provider>
   );
+}
+
+export function useSpanRowsContext(): SpanRowsContextType {
+  const ctx = useContext(SpanRowsContext);
+  if (ctx === undefined) {
+    throw new Error('No SpanRowsContext found. Did you forget a Provider?');
+  }
+  return ctx;
 }
