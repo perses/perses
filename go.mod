@@ -28,7 +28,7 @@ require (
 	github.com/prometheus/common/assets v0.2.0
 	github.com/prometheus/promu v0.17.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/gjson v1.17.1
 	github.com/zitadel/oidc/v3 v3.25.1

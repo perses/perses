@@ -76,7 +76,7 @@ export const SpanStatusOk = 'STATUS_CODE_OK';
 export const SpanStatusError = 'STATUS_CODE_ERROR';
 
 /**
- * Partial trace returned by search endpoint
+ * Partial trace information returned by search endpoint
  */
 export interface TraceSearchResult {
   traceId: string;
