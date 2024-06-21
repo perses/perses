@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext } from 'react';
+import { createContext, useState } from 'react';
 
 interface GanttChartContextType {
   collapsedSpans: string[];
@@ -26,3 +26,19 @@ export const GanttChartContext = createContext<GanttChartContextType>({
   hoveredParent: '',
   setHoveredParent: () => null,
 });
+
+interface GanttChartProviderProps {
+  children?: React.ReactNode;
+}
+
+export function GanttChartProvider(props: GanttChartProviderProps) {
+  const { children } = props;
+  const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
+  const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
+
+  return (
+    <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
+      {children}
+    </GanttChartContext.Provider>
+  );
+}

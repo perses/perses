@@ -11,32 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Virtuoso } from 'react-virtuoso';
-import { useMemo, useState } from 'react';
-import { Box } from '@mui/material';
+import { useState } from 'react';
+import { Box, Stack } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { SpanRow } from './SpanRow/SpanRow';
+import { SpanRows } from './SpanRow/SpanRows';
 import { HeaderRow } from './SpanRow/HeaderRow';
-import { GanttChartContext } from './context';
+import { GanttChartProvider } from './GanttChartProvider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
 
 export interface GanttChart {
   rootSpan: Span;
-}
-
-/**
- * treeToRows recursively transforms the span tree to a list of rows
- * and hides collapsed child spans.
- */
-function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
-  rows.push(span);
-  if (!collapsedSpans.includes(span.spanId)) {
-    for (const child of span.childSpans) {
-      treeToRows(rows, child, collapsedSpans);
-    }
-  }
 }
 
 /**
@@ -47,41 +33,27 @@ function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
  */
 export function GanttChart(props: GanttChart) {
   const { rootSpan } = props;
-  const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
-  const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
+
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
   const [viewport, setViewport] = useState<Viewport>({
     startTimeUnixMs: rootSpan.startTimeUnixMs,
     endTimeUnixMs: rootSpan.endTimeUnixMs,
   });
 
-  const rows = useMemo(() => {
-    const rows: Span[] = [];
-    treeToRows(rows, rootSpan, collapsedSpans);
-    return rows;
-  }, [rootSpan, collapsedSpans]);
-
-  const handleDetailPaneCloseBtnClick = () => {
-    setSelectedSpan(undefined);
-  };
-
   return (
-    <Box sx={{ display: 'flex', height: '100%', gap: 2 }}>
-      <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+    <Stack direction="row" sx={{ height: '100%', gap: 2 }}>
+      <Stack sx={{ flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <HeaderRow rootSpan={rootSpan} viewport={viewport} />
-        <GanttChartContext.Provider value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent }}>
-          <Virtuoso
-            data={rows}
-            itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={setSelectedSpan} />}
-          />
-        </GanttChartContext.Provider>
-      </Box>
+        <GanttChartProvider>
+          <SpanRows rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
+        </GanttChartProvider>
+      </Stack>
       {selectedSpan && (
         <Box sx={{ width: '280px', overflow: 'auto' }}>
-          <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={handleDetailPaneCloseBtnClick} />
+          <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={() => setSelectedSpan(undefined)} />
         </Box>
       )}
-    </Box>
+    </Stack>
   );
 }

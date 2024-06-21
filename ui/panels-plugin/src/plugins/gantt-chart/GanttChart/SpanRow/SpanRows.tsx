@@ -11,12 +11,51 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, styled } from '@mui/material';
+import { Virtuoso } from 'react-virtuoso';
+import { Stack, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { memo } from 'react';
+import { memo, useContext, useMemo } from 'react';
 import { Viewport, gridColor, rowHeight } from '../utils';
+import { GanttChartContext } from '../GanttChartProvider';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
+
+interface SpanRowsProps {
+  rootSpan: Span;
+  viewport: Viewport;
+  onSpanClick: (span: Span) => void;
+}
+
+export function SpanRows(props: SpanRowsProps) {
+  const { rootSpan, viewport, onSpanClick } = props;
+  const { collapsedSpans } = useContext(GanttChartContext);
+
+  const rows = useMemo(() => {
+    const rows: Span[] = [];
+    treeToRows(rows, rootSpan, collapsedSpans);
+    return rows;
+  }, [rootSpan, collapsedSpans]);
+
+  return (
+    <Virtuoso
+      data={rows}
+      itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={onSpanClick} />}
+    />
+  );
+}
+
+/**
+ * treeToRows recursively transforms the span tree to a list of rows
+ * and hides collapsed child spans.
+ */
+function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
+  rows.push(span);
+  if (!collapsedSpans.includes(span.spanId)) {
+    for (const child of span.childSpans) {
+      treeToRows(rows, child, collapsedSpans);
+    }
+  }
+}
 
 interface SpanRowProps {
   span: Span;
@@ -32,15 +71,14 @@ export const SpanRow = memo(function SpanRow(props: SpanRowProps) {
   };
 
   return (
-    <SpanRowContainer onClick={handleOnClick}>
+    <SpanRowContainer direction="row" onClick={handleOnClick}>
       <SpanName span={span} />
       <SpanDuration span={span} viewport={viewport} />
     </SpanRowContainer>
   );
 });
 
-const SpanRowContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
+const SpanRowContainer = styled(Stack)(({ theme }) => ({
   height: rowHeight,
   '&:hover': {
     backgroundColor: theme.palette.grey.A200,
