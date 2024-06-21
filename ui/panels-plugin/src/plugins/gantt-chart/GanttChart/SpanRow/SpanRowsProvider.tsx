@@ -16,10 +16,11 @@ import { createContext, useContext, useState } from 'react';
 interface SpanRowsContextType {
   collapsedSpans: string[];
   setCollapsedSpans: (s: string[]) => void;
-  hoveredParent?: string; // can be a spanId, an empty string for the root span or undefined for no hover
+  visibleSpans: string[];
+  setVisibleSpans: (s: string[]) => void;
+  /** can be a spanId, an empty string for the root span or undefined for no hover */
+  hoveredParent?: string;
   setHoveredParent: (s?: string) => void;
-  minSpanLevel: number;
-  setMinSpanLevel: (n: number) => void;
 }
 
 /**
@@ -36,12 +37,12 @@ interface SpanRowsProviderProps {
 export function SpanRowsProvider(props: SpanRowsProviderProps) {
   const { children } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
+  const [visibleSpans, setVisibleSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
-  const [minSpanLevel, setMinSpanLevel] = useState<number>(0);
 
   return (
     <SpanRowsContext.Provider
-      value={{ collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel, setMinSpanLevel }}
+      value={{ collapsedSpans, setCollapsedSpans, visibleSpans, setVisibleSpans, hoveredParent, setHoveredParent }}
     >
       {children}
     </SpanRowsContext.Provider>

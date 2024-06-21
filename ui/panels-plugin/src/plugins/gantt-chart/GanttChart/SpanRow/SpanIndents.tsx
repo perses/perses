@@ -35,15 +35,8 @@ export interface SpanIndentsProps {
  */
 export function SpanIndents(props: SpanIndentsProps) {
   const { span } = props;
-  const { collapsedSpans, setCollapsedSpans, hoveredParent, setHoveredParent, minSpanLevel } = useSpanRowsContext();
+  const { collapsedSpans, setCollapsedSpans, visibleSpans, hoveredParent, setHoveredParent } = useSpanRowsContext();
   const theme = useTheme();
-
-  let parent = span.parentSpan;
-  const parentSpanIds = [parent?.spanId ?? ''];
-  while (parent) {
-    parent = parent.parentSpan;
-    parentSpanIds.unshift(parent?.spanId ?? '');
-  }
 
   const handleToggleClick = useCallback(
     (e: MouseEvent) => {
@@ -61,19 +54,30 @@ export function SpanIndents(props: SpanIndentsProps) {
     setHoveredParent(span.spanId);
   }, [span, setHoveredParent]);
 
+  const spans = [span];
+  let parent = span.parentSpan;
+  while (parent) {
+    spans.unshift(parent);
+    parent = parent.parentSpan;
+  }
+
+  // on first render visibleSpans is empty, therefore let's use MAX_INDENT_WIDTH to avoid an animation on page load.
   return (
     <>
-      {parentSpanIds.map((parentSpanId, i) => (
+      {spans.map((span, i) => (
         <SpanIndentBox
-          key={parentSpanId}
+          key={span.spanId}
           style={{
-            width: i < minSpanLevel ? MIN_INDENT_WIDTH : MAX_INDENT_WIDTH,
-            borderLeft: `${hoveredParent === parentSpanId ? 4 : 1}px solid ${gridColor(theme)}`,
+            width:
+              i === spans.length - 1 || visibleSpans.length === 0 || visibleSpans.includes(span.spanId)
+                ? MAX_INDENT_WIDTH
+                : MIN_INDENT_WIDTH,
+            borderLeft: `${hoveredParent === (span.parentSpanId ?? '') ? 4 : 1}px solid ${gridColor(theme)}`,
           }}
-          onMouseEnter={() => setHoveredParent(parentSpanId)}
+          onMouseEnter={() => setHoveredParent(span.parentSpanId ?? '')}
           onMouseLeave={() => setHoveredParent(undefined)}
         >
-          {i === parentSpanIds.length - 1 &&
+          {i === spans.length - 1 &&
             span.childSpans.length > 0 &&
             (collapsedSpans.includes(span.spanId) ? (
               <ChevronRightIcon onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />

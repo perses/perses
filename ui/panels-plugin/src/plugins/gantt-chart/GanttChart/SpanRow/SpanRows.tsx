@@ -28,24 +28,21 @@ interface SpanRowsProps {
 
 export function SpanRows(props: SpanRowsProps) {
   const { rootSpan, viewport, onSpanClick } = props;
-  const { collapsedSpans, setMinSpanLevel } = useSpanRowsContext();
+  const { collapsedSpans, setVisibleSpans } = useSpanRowsContext();
 
-  const [rows, levels] = useMemo(() => {
+  const rows = useMemo(() => {
     const rows: Span[] = [];
-    const levels: number[] = [];
-    treeToRows(rows, levels, rootSpan, 0, collapsedSpans);
-    return [rows, levels];
+    treeToRows(rows, rootSpan, collapsedSpans);
+    return rows;
   }, [rootSpan, collapsedSpans]);
 
-  // calculate minimum span hierarchy level of all currently visible rows
+  // update currently visible spans
   function handleRangeChange({ startIndex, endIndex }: { startIndex: number; endIndex: number }) {
-    let min = levels[startIndex]!;
-    for (let i = startIndex + 1; i <= endIndex; i++) {
-      if (levels[i]! < min) {
-        min = levels[i]!;
-      }
+    const visibleSpans: string[] = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      visibleSpans.push(rows[i]!.spanId);
     }
-    setMinSpanLevel(min);
+    setVisibleSpans(visibleSpans);
   }
 
   return (
@@ -58,15 +55,14 @@ export function SpanRows(props: SpanRowsProps) {
 }
 
 /**
- * treeToRows recursively transforms the span tree to a list of rows,
- * hides collapsed child spans and counts the span hierarchy level.
+ * treeToRows recursively transforms the span tree to a list of rows and
+ * hides collapsed child spans.
  */
-function treeToRows(rows: Span[], levels: number[], span: Span, level: number, collapsedSpans: string[]) {
+function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
   rows.push(span);
-  levels.push(level);
   if (!collapsedSpans.includes(span.spanId)) {
     for (const child of span.childSpans) {
-      treeToRows(rows, levels, child, level + 1, collapsedSpans);
+      treeToRows(rows, child, collapsedSpans);
     }
   }
 }
