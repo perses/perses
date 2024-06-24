@@ -24,6 +24,11 @@ import { DatasourceStoreProvider } from '../context';
 import { defaultDatasourceProps } from '../test';
 import { MOCK_PLUGINS } from './plugin-registry';
 
+// Mock the runtime plugin loader to render a fake panel content
+jest.mock('@perses-dev/plugin-runtime', () => ({
+  PluginLoader: jest.fn(() => <div>TimeSeriesChart panel</div>),
+}));
+
 interface CustomRouterProps {
   history: MemoryHistory;
   children: React.ReactNode;

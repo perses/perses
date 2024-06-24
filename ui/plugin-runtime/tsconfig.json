@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "paths": {
-      "@perses-dev/plugin-system": ["./src"]
+      "@perses-dev/plugin-runtime": ["./src"]
     }
   }
 }

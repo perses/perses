@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PersesPlugin, PersesPluginModule } from './PersesPlugin.types';
 import { usePluginRuntime } from './PluginRuntime';
 
@@ -31,7 +31,11 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>) {
   const [pluginModule, setPluginModule] = useState<PersesPluginModule | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
+  const name = `${plugin.name}-${plugin.moduleName}`;
+  const previousPluginName = useRef<string>(name);
+
   useEffect(() => {
+    previousPluginName.current = name;
     setError(null);
 
     load(plugin.name)
@@ -44,7 +48,7 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>) {
         setError(new Error(`PluginLoader: Error loading plugin ${plugin.name}`));
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plugin.name]);
+  }, [name]);
 
   if (error) {
     throw error;
@@ -62,5 +66,10 @@ export function PluginLoader<P>({ plugin, props }: PluginLoaderProps<P>) {
     throw new Error('PluginLoader: Plugin module default export is not a function');
   }
 
-  return <PluginContainer pluginFn={pluginModule.default} props={props} />;
+  // make sure to re mount the plugin when changes, to avoid mismatch in hooks ordering when re rendering
+  if (previousPluginName.current !== name) {
+    return null;
+  }
+
+  return <PluginContainer key={name} pluginFn={pluginModule.default} props={props} />;
 }
