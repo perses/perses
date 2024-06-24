@@ -28,7 +28,7 @@ import AddIcon from 'mdi-material-ui/Plus';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
-import { DatasourceEditorForm } from '@perses-dev/plugin-system';
+import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
 import { useState } from 'react';
 import { useImmer } from 'use-immer';
 import { useDiscardChangesConfirmationDialog } from '../../context';
@@ -96,21 +96,23 @@ export function DatasourceEditor(props: {
   return (
     <>
       {datasourceEdit ? (
-        <DatasourceEditorForm
-          initialDatasourceDefinition={datasourceEdit}
-          initialAction={datasourceFormAction}
-          isDraft={true}
-          onSave={(def: DatasourceDefinition) => {
-            setDatasources((draft) => {
-              delete draft[datasourceEdit.name]; // to tackle the case where datasource name has been changed
-              draft[def.name] = def.spec;
+        <ValidationProvider>
+          <DatasourceEditorForm
+            initialDatasourceDefinition={datasourceEdit}
+            initialAction={datasourceFormAction}
+            isDraft={true}
+            onSave={(def: DatasourceDefinition) => {
+              setDatasources((draft) => {
+                delete draft[datasourceEdit.name]; // to tackle the case where datasource name has been changed
+                draft[def.name] = def.spec;
+                setDatasourceEdit(null);
+              });
+            }}
+            onClose={() => {
               setDatasourceEdit(null);
-            });
-          }}
-          onClose={() => {
-            setDatasourceEdit(null);
-          }}
-        />
+            }}
+          />
+        </ValidationProvider>
       ) : (
         <>
           <Box
