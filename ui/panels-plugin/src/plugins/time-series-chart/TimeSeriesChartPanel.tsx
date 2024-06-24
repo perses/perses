@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useRef, useState } from 'react';
-import { Box, Skeleton, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import type { GridComponentOption } from 'echarts';
 import merge from 'lodash/merge';
 import {
@@ -47,6 +47,7 @@ import {
   TimeChartSeriesMapping,
   TooltipConfig,
   DEFAULT_TOOLTIP_CONFIG,
+  LoadingOverlay,
 } from '@perses-dev/components';
 import {
   TimeSeriesChartOptions,
@@ -347,20 +348,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
   }
 
   if (isLoading || isFetching) {
-    return (
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={adjustedContentDimensions.width}
-        height={adjustedContentDimensions.height}
-      >
-        <Skeleton
-          variant="text"
-          width={adjustedContentDimensions.width - 20}
-          height={adjustedContentDimensions.height / 2}
-          aria-label="Loading..."
-        />
-      </Box>
-    );
+    return <LoadingOverlay />;
   }
 
   // At this point, we have a response from the backend for all queries. (We're past loading === true).
