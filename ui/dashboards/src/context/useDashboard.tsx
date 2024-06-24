@@ -13,7 +13,7 @@
 
 import { createPanelRef, DashboardResource, EphemeralDashboardResource, GridDefinition } from '@perses-dev/core';
 import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
-import { useVariableActions, useVariableDefinitions } from './VariableProvider';
+import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
 export function useDashboard() {
   const {
@@ -55,7 +55,7 @@ export function useDashboard() {
       ttl,
     })
   );
-  const { setVariableDefinitions } = useVariableActions();
+  const { setVariableDefinitions } = useVariableDefinitionActions();
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
