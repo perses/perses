@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import { useState } from 'react';
-import { Box, Stack, TextField, Typography, Button } from '@mui/material';
-import { LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
+import { Box, Stack, Typography, Button } from '@mui/material';
+import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { AbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeZone } from '../context';
+import { ErrorBoundary } from '../ErrorBoundary';
+import { ErrorAlert } from '../ErrorAlert';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
 interface AbsoluteTimeFormProps {
@@ -170,28 +172,34 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
           </Box>
         )}
         <Stack direction="row" alignItems="center" gap={1} pl={1} pr={1}>
-          <TextField
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              // TODO: add helperText, fix validation after we decide on form state solution
-              onChangeStartTime(event.target.value);
-            }}
-            onBlur={() => updateDateRange()}
-            value={timeRangeInputs.start}
-            label="Start Time"
-            placeholder={DATE_TIME_FORMAT}
-            // tel used to match MUI DateTimePicker, may change in future: https://github.com/mui/material-ui/issues/27590
-            type="tel"
-          />
-          <TextField
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-              onChangeEndTime(event.target.value);
-            }}
-            onBlur={() => updateDateRange()}
-            value={timeRangeInputs.end}
-            label="End Time"
-            placeholder={DATE_TIME_FORMAT}
-            type="tel"
-          />
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <DateTimeField
+              label="Start Time"
+              // @ts-expect-error: because the value is a Date, but the component expects a string
+              value={new Date(timeRangeInputs.start)}
+              onChange={(event: string | null) => {
+                if (event) {
+                  onChangeStartTime(event);
+                }
+              }}
+              onBlur={() => updateDateRange()}
+              format={DATE_TIME_FORMAT}
+            />
+          </ErrorBoundary>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <DateTimeField
+              label="End Time"
+              // @ts-expect-error: because the value is a Date, but the component expects a string
+              value={new Date(timeRangeInputs.end)}
+              onChange={(event: string | null) => {
+                if (event) {
+                  onChangeEndTime(event);
+                }
+              }}
+              onBlur={() => updateDateRange()}
+              format={DATE_TIME_FORMAT}
+            />
+          </ErrorBoundary>
         </Stack>
         <Stack direction="row" sx={{ padding: (theme) => theme.spacing(0, 1) }} gap={1}>
           <Button variant="contained" onClick={() => onApply()} fullWidth>
