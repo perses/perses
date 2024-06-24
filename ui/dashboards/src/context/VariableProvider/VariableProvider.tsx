@@ -470,6 +470,7 @@ export interface VariableProviderProps {
   builtinVariableDefinitions?: BuiltinVariableDefinition[];
 }
 
+// TODO: merge the different providers related to Variables under a single one (and keep "VariableProvider" as a name)
 export function VariableProvider({
   children,
   initialVariableDefinitions = [],
