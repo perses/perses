@@ -45,19 +45,19 @@ export const pluginRuntime = init({
       },
     },
     '@perses-dev/components': {
-      version: '0.45.0',
+      version: '0.46.0',
       lib: () => require('@perses-dev/components'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.45.0',
+        requiredVersion: '^0.46.0',
       },
     },
     '@perses-dev/plugin-system': {
-      version: '0.45.0',
+      version: '0.46.0',
       lib: () => require('@perses-dev/plugin-system'),
       shareConfig: {
         singleton: true,
-        requiredVersion: '^0.45.0',
+        requiredVersion: '^0.46.0',
       },
     },
     // Below are the shared modules that are used by the plugins, this can be part of the SDK
