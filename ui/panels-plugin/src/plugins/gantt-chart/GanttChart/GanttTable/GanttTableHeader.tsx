@@ -16,13 +16,14 @@ import { Span } from '@perses-dev/core';
 import { Viewport, rowHeaderColor, rowHeight } from '../utils';
 import { TicksHeader } from '../Ticks';
 
-interface HeaderRowProps {
+interface GanttTableHeaderProps {
   rootSpan: Span;
   viewport: Viewport;
+  nameColumnWidth: number;
 }
 
-export function HeaderRow(props: HeaderRowProps) {
-  const { rootSpan, viewport } = props;
+export function GanttTableHeader(props: GanttTableHeaderProps) {
+  const { rootSpan, viewport, nameColumnWidth } = props;
   const theme = useTheme();
 
   return (
@@ -35,7 +36,7 @@ export function HeaderRow(props: HeaderRowProps) {
         fontSize: '0.9rem',
       }}
     >
-      <Box sx={{ width: '25%' }}>
+      <Box sx={{ width: `${nameColumnWidth * 100}%` }}>
         <span style={{ padding: '.25rem' }}>Service & Operation</span>
       </Box>
       <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>

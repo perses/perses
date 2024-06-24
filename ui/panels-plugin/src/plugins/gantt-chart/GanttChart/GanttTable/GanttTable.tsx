@@ -12,23 +12,23 @@
 // limitations under the License.
 
 import { Virtuoso } from 'react-virtuoso';
-import { Stack, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { memo, useMemo } from 'react';
-import { Viewport, gridColor, rowHeight } from '../utils';
-import { useSpanRowsContext } from './SpanRowsProvider';
-import { SpanName } from './SpanName';
-import { SpanDuration } from './SpanDuration';
+import { useMemo, useState } from 'react';
+import { Viewport } from '../utils';
+import { useGanttTableContext } from './GanttTableProvider';
+import { GanttTableRow } from './GanttTableRow';
+import { GanttTableHeader } from './GanttTableHeader';
 
-interface SpanRowsProps {
+interface GanttTableProps {
   rootSpan: Span;
   viewport: Viewport;
   onSpanClick: (span: Span) => void;
 }
 
-export function SpanRows(props: SpanRowsProps) {
+export function GanttTable(props: GanttTableProps) {
   const { rootSpan, viewport, onSpanClick } = props;
-  const { collapsedSpans, setVisibleSpans } = useSpanRowsContext();
+  const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
+  const [nameColumnWidth, _setNameColumnWidth] = useState<number>(0.25);
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
@@ -46,11 +46,14 @@ export function SpanRows(props: SpanRowsProps) {
   }
 
   return (
-    <Virtuoso
-      data={rows}
-      itemContent={(_, span) => <SpanRow span={span} viewport={viewport} onClick={onSpanClick} />}
-      rangeChanged={handleRangeChange}
-    />
+    <>
+      <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} />
+      <Virtuoso
+        data={rows}
+        itemContent={(_, span) => <GanttTableRow span={span} viewport={viewport} onClick={onSpanClick} />}
+        rangeChanged={handleRangeChange}
+      />
+    </>
   );
 }
 
@@ -66,33 +69,3 @@ function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
     }
   }
 }
-
-interface SpanRowProps {
-  span: Span;
-  viewport: Viewport;
-  onClick: (span: Span) => void;
-}
-
-export const SpanRow = memo(function SpanRow(props: SpanRowProps) {
-  const { span, viewport, onClick } = props;
-
-  const handleOnClick = () => {
-    onClick(span);
-  };
-
-  return (
-    <SpanRowContainer direction="row" onClick={handleOnClick}>
-      <SpanName span={span} />
-      <SpanDuration span={span} viewport={viewport} />
-    </SpanRowContainer>
-  );
-});
-
-const SpanRowContainer = styled(Stack)(({ theme }) => ({
-  height: rowHeight,
-  '&:hover': {
-    backgroundColor: theme.palette.grey.A200,
-    borderTop: `1px solid ${gridColor(theme)}`,
-    borderBottom: `1px solid ${gridColor(theme)}`,
-  },
-}));

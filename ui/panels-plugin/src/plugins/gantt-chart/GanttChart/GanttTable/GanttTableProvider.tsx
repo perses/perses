@@ -13,7 +13,7 @@
 
 import { createContext, useContext, useState } from 'react';
 
-interface SpanRowsContextType {
+interface GanttTableContextType {
   collapsedSpans: string[];
   setCollapsedSpans: (s: string[]) => void;
   visibleSpans: string[];
@@ -24,35 +24,35 @@ interface SpanRowsContextType {
 }
 
 /**
- * SpanRowsContext stores UI state of the rows.
+ * GanttTableContext stores UI state of the rows.
  * Required for passing down state to deeply nested <SpanIndents>,
  * without re-rendering intermediate components.
  */
-export const SpanRowsContext = createContext<SpanRowsContextType | undefined>(undefined);
+export const GanttTableContext = createContext<GanttTableContextType | undefined>(undefined);
 
-interface SpanRowsProviderProps {
+interface GanttTableProviderProps {
   children?: React.ReactNode;
 }
 
-export function SpanRowsProvider(props: SpanRowsProviderProps) {
+export function GanttTableProvider(props: GanttTableProviderProps) {
   const { children } = props;
   const [collapsedSpans, setCollapsedSpans] = useState<string[]>([]);
   const [visibleSpans, setVisibleSpans] = useState<string[]>([]);
   const [hoveredParent, setHoveredParent] = useState<string | undefined>(undefined);
 
   return (
-    <SpanRowsContext.Provider
+    <GanttTableContext.Provider
       value={{ collapsedSpans, setCollapsedSpans, visibleSpans, setVisibleSpans, hoveredParent, setHoveredParent }}
     >
       {children}
-    </SpanRowsContext.Provider>
+    </GanttTableContext.Provider>
   );
 }
 
-export function useSpanRowsContext(): SpanRowsContextType {
-  const ctx = useContext(SpanRowsContext);
+export function useGanttTableContext(): GanttTableContextType {
+  const ctx = useContext(GanttTableContext);
   if (ctx === undefined) {
-    throw new Error('No SpanRowsContext found. Did you forget a Provider?');
+    throw new Error('No GanttTableContext found. Did you forget a Provider?');
   }
   return ctx;
 }

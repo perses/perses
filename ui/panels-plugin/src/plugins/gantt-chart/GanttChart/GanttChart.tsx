@@ -14,12 +14,11 @@
 import { useState } from 'react';
 import { Box, Stack } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { SpanRows } from './SpanRow/SpanRows';
-import { HeaderRow } from './SpanRow/HeaderRow';
-import { SpanRowsProvider } from './SpanRow/SpanRowsProvider';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
+import { GanttTable } from './GanttTable/GanttTable';
+import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 
 export interface GanttChart {
   rootSpan: Span;
@@ -44,10 +43,9 @@ export function GanttChart(props: GanttChart) {
     <Stack direction="row" sx={{ height: '100%', gap: 2 }}>
       <Stack sx={{ flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
-        <HeaderRow rootSpan={rootSpan} viewport={viewport} />
-        <SpanRowsProvider>
-          <SpanRows rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
-        </SpanRowsProvider>
+        <GanttTableProvider>
+          <GanttTable rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
+        </GanttTableProvider>
       </Stack>
       {selectedSpan && (
         <Box sx={{ width: '280px', overflow: 'auto' }}>

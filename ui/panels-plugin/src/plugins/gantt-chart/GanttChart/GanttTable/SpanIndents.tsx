@@ -17,7 +17,7 @@ import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import { MouseEvent, useCallback } from 'react';
 import { Span } from '@perses-dev/core';
 import { gridColor } from '../utils';
-import { useSpanRowsContext } from './SpanRowsProvider';
+import { useGanttTableContext } from './GanttTableProvider';
 
 const MIN_INDENT_WIDTH = 8;
 const MAX_INDENT_WIDTH = 24;
@@ -35,7 +35,7 @@ export interface SpanIndentsProps {
  */
 export function SpanIndents(props: SpanIndentsProps) {
   const { span } = props;
-  const { collapsedSpans, setCollapsedSpans, visibleSpans, hoveredParent, setHoveredParent } = useSpanRowsContext();
+  const { collapsedSpans, setCollapsedSpans, visibleSpans, hoveredParent, setHoveredParent } = useGanttTableContext();
   const theme = useTheme();
 
   const handleToggleClick = useCallback(
