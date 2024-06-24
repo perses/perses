@@ -15,10 +15,16 @@ import { Definition, UnknownSpec } from './definitions';
 import { Metadata, ProjectMetadata } from './resource';
 import { Display } from './display';
 
+export interface DatasourceSpec<PluginSpec = UnknownSpec> {
+  display?: Display;
+  default: boolean;
+  plugin: Definition<PluginSpec>;
+}
+
 /**
  * A Datasource that's available across all projects.
  */
-export interface GlobalDatasource {
+export interface GlobalDatasourceResource {
   kind: 'GlobalDatasource';
   metadata: Metadata;
   spec: DatasourceSpec;
@@ -27,19 +33,13 @@ export interface GlobalDatasource {
 /**
  * A Datasource resource, that belongs to a project.
  */
-export interface ProjectDatasource {
+export interface DatasourceResource {
   kind: 'Datasource';
   metadata: ProjectMetadata;
   spec: DatasourceSpec;
 }
 
-export type Datasource = ProjectDatasource | GlobalDatasource;
-
-export interface DatasourceSpec<PluginSpec = UnknownSpec> {
-  display?: Display;
-  default: boolean;
-  plugin: Definition<PluginSpec>;
-}
+export type Datasource = DatasourceResource | GlobalDatasourceResource;
 
 /**
  * A selector for pointing at a specific Datasource.

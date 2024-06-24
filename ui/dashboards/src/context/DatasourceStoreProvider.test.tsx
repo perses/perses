@@ -28,8 +28,8 @@ import {
   DashboardSpec,
   Datasource,
   DatasourceSpec,
-  GlobalDatasource,
-  ProjectDatasource,
+  GlobalDatasourceResource,
+  DatasourceResource,
 } from '@perses-dev/core';
 
 const PROJECT = 'perses';
@@ -68,7 +68,7 @@ function definedInDashboard(props: { default: boolean }): DatasourceSpec {
   return { default: props.default, plugin: { kind: FAKE_PLUGIN_KIND, spec: {} } };
 }
 
-function definedInProject(props: { name: string; default: boolean }): ProjectDatasource {
+function definedInProject(props: { name: string; default: boolean }): DatasourceResource {
   return {
     kind: 'Datasource',
     metadata: { name: props.name, project: PROJECT },
@@ -76,7 +76,7 @@ function definedInProject(props: { name: string; default: boolean }): ProjectDat
   };
 }
 
-function definedGlobally(props: { name: string; default: boolean }): GlobalDatasource {
+function definedGlobally(props: { name: string; default: boolean }): GlobalDatasourceResource {
   return {
     kind: 'GlobalDatasource',
     metadata: { name: props.name },

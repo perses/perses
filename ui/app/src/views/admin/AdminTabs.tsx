@@ -18,7 +18,7 @@ import DatabaseIcon from 'mdi-material-ui/Database';
 import KeyIcon from 'mdi-material-ui/Key';
 import {
   getResourceDisplayName,
-  GlobalDatasource,
+  GlobalDatasourceResource,
   getResourceExtendedDisplayName,
   GlobalVariableResource,
   GlobalRoleResource,
@@ -84,9 +84,9 @@ function TabButton({ index, ...props }: TabButtonProps) {
   }, [data]);
 
   const handleGlobalDatasourceCreation = useCallback(
-    (datasource: GlobalDatasource) => {
+    (datasource: GlobalDatasourceResource) => {
       createGlobalDatasourceMutation.mutate(datasource, {
-        onSuccess: (createdDatasource: GlobalDatasource) => {
+        onSuccess: (createdDatasource: GlobalDatasourceResource) => {
           successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
           setDatasourceDrawerOpened(false);
         },

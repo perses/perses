@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
+import { nameSchema } from '@perses-dev/core';
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 
@@ -23,7 +23,7 @@ export const dashboardDisplayNameValidationSchema = z
   .max(75, 'Must be 75 or fewer characters long');
 
 export const createDashboardDialogValidationSchema = z.object({
-  projectName: resourceIdValidationSchema,
+  projectName: nameSchema,
   dashboardName: dashboardDisplayNameValidationSchema,
 });
 export type CreateDashboardValidationType = z.infer<typeof createDashboardDialogValidationSchema>;

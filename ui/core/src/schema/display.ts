@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DURATION_REGEX } from '@perses-dev/core';
 import { z } from 'zod';
 
-export const durationValidationSchema = z
-  .string()
-  .nonempty('Required')
-  .regex(DURATION_REGEX, 'Must be a valid duration string');
+export const displaySchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+});

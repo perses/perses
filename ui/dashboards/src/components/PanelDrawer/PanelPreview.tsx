@@ -14,7 +14,7 @@
 import { useRef } from 'react';
 import { Box } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
-import { PanelEditorValues } from '../../context';
+import { PanelEditorValues } from '@perses-dev/core';
 import { Panel } from '../Panel';
 
 const PANEL_PREVIEW_HEIGHT = 300;

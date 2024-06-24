@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/core';
+import { Action, UserResource } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { useCallback, useMemo, useState } from 'react';
@@ -29,7 +29,6 @@ import {
   UPDATED_AT_COL_DEF,
   VERSION_COL_DEF,
 } from '../list';
-import { UserResource } from '../../model/user-client';
 import { UserDataGrid, Row } from './UserDataGrid';
 import { UserDrawer } from './UserDrawer';
 

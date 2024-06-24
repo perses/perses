@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { z } from 'zod';
-import { resourceIdValidationSchema } from './resource';
+import { metadataSchema, projectMetadataSchema } from './metadata';
 
-const secretSpecSchema = z
+export const secretSpecSchema = z
   .object({
     basicAuth: z
       .object({
@@ -126,26 +126,18 @@ const secretSpecSchema = z
     }
   });
 
-export const secretValidationSchema = z.object({
+export const secretSchema = z.object({
   kind: z.literal('Secret'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-    project: resourceIdValidationSchema,
-  }),
+  metadata: projectMetadataSchema,
   spec: secretSpecSchema,
 });
 
-export const globalSecretValidationSchema = z.object({
+export const globalSecretSchema = z.object({
   kind: z.literal('GlobalSecret'),
-  metadata: z.object({
-    name: resourceIdValidationSchema,
-  }),
+  metadata: metadataSchema,
   spec: secretSpecSchema,
 });
 
-export const secretsEditorValidationSchema = z.discriminatedUnion('kind', [
-  secretValidationSchema,
-  globalSecretValidationSchema,
-]);
+export const secretsEditorSchema = z.discriminatedUnion('kind', [secretSchema, globalSecretSchema]);
 
-export type SecretsEditorValidationType = z.infer<typeof secretsEditorValidationSchema>;
+export type SecretsEditorSchemaType = z.infer<typeof secretsEditorSchema>;

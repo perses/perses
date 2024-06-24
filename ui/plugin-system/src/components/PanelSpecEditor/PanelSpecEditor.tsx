@@ -12,13 +12,15 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
-import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { Control, Controller } from 'react-hook-form';
 import { QueryCountProvider, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
 
 export interface PanelSpecEditorProps {
+  control: Control<PanelEditorValues>;
   panelDefinition: PanelDefinition;
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
@@ -26,7 +28,7 @@ export interface PanelSpecEditorProps {
 }
 
 export function PanelSpecEditor(props: PanelSpecEditorProps) {
-  const { panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
+  const { control, panelDefinition, onJSONChange, onQueriesChange, onPluginSpecChange } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -50,10 +52,19 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     tabs.push({
       label: 'Query',
       content: (
-        <MultiQueryEditor
-          queryTypes={plugin.supportedQueryTypes ?? []}
-          queries={panelDefinition.spec.queries ?? []}
-          onChange={onQueriesChange}
+        <Controller
+          control={control}
+          name="panelDefinition.spec.queries"
+          render={({ field }) => (
+            <MultiQueryEditor
+              queryTypes={plugin.supportedQueryTypes ?? []}
+              queries={panelDefinition.spec.queries ?? []}
+              onChange={(queries) => {
+                field.onChange(queries);
+                onQueriesChange(queries);
+              }}
+            />
+          )}
         />
       ),
     });
@@ -63,19 +74,48 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     tabs = tabs.concat(
       panelOptionsEditorComponents.map(({ label, content: OptionsEditorComponent }) => ({
         label,
-        content: <OptionsEditorComponent value={panelDefinition.spec.plugin.spec} onChange={onPluginSpecChange} />,
+        content: (
+          <Controller
+            control={control}
+            name="panelDefinition.spec.plugin.spec"
+            render={({ field }) => (
+              <OptionsEditorComponent
+                value={panelDefinition.spec.plugin.spec}
+                onChange={(spec) => {
+                  field.onChange(spec);
+                  onPluginSpecChange(spec);
+                }}
+              />
+            )}
+          />
+        ),
       }))
     );
   }
 
   // always show json editor and links editor by default
   tabs.push({
-    label: 'JSON',
-    content: <JSONEditor maxHeight="80vh" value={panelDefinition} onChange={onJSONChange} />,
+    label: 'Links',
+    content: <LinksEditor control={control} />,
   });
   tabs.push({
-    label: 'Links',
-    content: <LinksEditor />,
+    label: 'JSON',
+    content: (
+      <Controller
+        control={control}
+        name="panelDefinition.spec.plugin.spec"
+        render={({ field }) => (
+          <JSONEditor
+            maxHeight="80vh"
+            value={panelDefinition}
+            onChange={(json) => {
+              field.onChange(json);
+              onJSONChange(json);
+            }}
+          />
+        )}
+      />
+    ),
   });
 
   return (
