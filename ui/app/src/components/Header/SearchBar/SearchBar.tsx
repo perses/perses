@@ -113,7 +113,7 @@ export function SearchBar() {
             /* eslint-disable-next-line jsx-a11y/no-autofocus */
             autoFocus={open}
             variant="outlined"
-            placeholder="What are you looking for ?"
+            placeholder="What are you looking for?"
             fullWidth
             sx={{ justifyContent: 'flex-start', marginBottom: 1 }}
             value={query}
