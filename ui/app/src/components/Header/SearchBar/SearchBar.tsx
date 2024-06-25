@@ -126,7 +126,7 @@ export function SearchBar() {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <Chip label="esp" size="small" onClick={handleClose} />
+                  <Chip label="esc" size="small" onClick={handleClose} />
                 </InputAdornment>
               ),
             }}
