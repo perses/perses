@@ -152,7 +152,7 @@ export function Canvas(props: CanvasProps) {
       onMouseLeave={handleMouseUp}
     >
       <canvas ref={canvasRef} width={width} height={height} style={{ position: 'absolute' }} />
-      <Ticks skipFirstLast={true} />
+      <Ticks />
       <CutoffBox data-elem="cutoffBox" style={{ left: 0, width: `${relativeCutoffLeft * 100}%` }} />
       <Resizer data-elem="resizerLeft" style={{ left: `${relativeCutoffLeft * 100}%` }} />
       <Resizer data-elem="resizerRight" style={{ right: `${relativeCutoffRight * 100}%` }} />

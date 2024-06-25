@@ -21,19 +21,25 @@ import { SpanDuration } from './SpanDuration';
 interface GanttTableRowProps {
   span: Span;
   viewport: Viewport;
+  nameColumnWidth: number;
+  divider: React.ReactNode;
   onClick: (span: Span) => void;
 }
 
-export const GanttTableRow = memo(function SpanRow(props: GanttTableRowProps) {
-  const { span, viewport, onClick } = props;
+export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowProps) {
+  const { span, viewport, nameColumnWidth, divider, onClick } = props;
 
   const handleOnClick = () => {
+    // ignore event if triggered by selecting text
+    if (document.getSelection()?.type === 'Range') return;
+
     onClick(span);
   };
 
   return (
     <RowContainer direction="row" onClick={handleOnClick}>
-      <SpanName span={span} />
+      <SpanName span={span} nameColumnWidth={nameColumnWidth} />
+      {divider}
       <SpanDuration span={span} viewport={viewport} />
     </RowContainer>
   );

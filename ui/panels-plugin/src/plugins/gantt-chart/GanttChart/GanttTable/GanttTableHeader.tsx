@@ -20,10 +20,11 @@ interface GanttTableHeaderProps {
   rootSpan: Span;
   viewport: Viewport;
   nameColumnWidth: number;
+  divider: React.ReactNode;
 }
 
 export function GanttTableHeader(props: GanttTableHeaderProps) {
-  const { rootSpan, viewport, nameColumnWidth } = props;
+  const { rootSpan, viewport, nameColumnWidth, divider } = props;
   const theme = useTheme();
 
   return (
@@ -36,9 +37,10 @@ export function GanttTableHeader(props: GanttTableHeaderProps) {
         fontSize: '0.9rem',
       }}
     >
-      <Box sx={{ width: `${nameColumnWidth * 100}%` }}>
+      <Box style={{ width: `${nameColumnWidth * 100}%` }}>
         <span style={{ padding: '.25rem' }}>Service & Operation</span>
       </Box>
+      {divider}
       <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
         <TicksHeader rootSpan={rootSpan} viewport={viewport} />
       </Box>

@@ -31,7 +31,7 @@ export function TicksHeader(props: TicksHeaderProps) {
 
   return (
     <>
-      <TickBox style={{ left: '0%' }}>{formatDuration(startAt + duration * 0)}</TickBox>
+      <TickBox style={{ left: '0%', borderWidth: 0 }}>{formatDuration(startAt + duration * 0)}</TickBox>
       <TickBox style={{ left: '25%' }}>{formatDuration(startAt + duration * 0.25)}</TickBox>
       <TickBox style={{ left: '50%' }}>{formatDuration(startAt + duration * 0.5)}</TickBox>
       <TickBox style={{ left: '75%' }}>{formatDuration(startAt + duration * 0.75)}</TickBox>
@@ -42,23 +42,15 @@ export function TicksHeader(props: TicksHeaderProps) {
   );
 }
 
-interface TicksProps {
-  skipFirstLast?: boolean;
-}
-
 /**
  * Ticks renders all ticks in the span duration
  */
-export function Ticks(props: TicksProps) {
-  const { skipFirstLast } = props;
-
+export function Ticks() {
   return (
     <>
-      {!skipFirstLast && <TickBox style={{ left: '0%' }} />}
       <TickBox style={{ left: '25%' }} />
       <TickBox style={{ left: '50%' }} />
       <TickBox style={{ left: '75%' }} />
-      {!skipFirstLast && <TickBox style={{ left: '100%' }} />}
     </>
   );
 }

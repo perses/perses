@@ -13,11 +13,13 @@
 
 import { Virtuoso } from 'react-virtuoso';
 import { Span } from '@perses-dev/core';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
+import { Box } from '@mui/material';
 import { Viewport } from '../utils';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
+import { ResizableDivider } from './ResizableDivider';
 
 interface GanttTableProps {
   rootSpan: Span;
@@ -28,13 +30,18 @@ interface GanttTableProps {
 export function GanttTable(props: GanttTableProps) {
   const { rootSpan, viewport, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
-  const [nameColumnWidth, _setNameColumnWidth] = useState<number>(0.25);
+  const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
+  const tableRef = useRef<HTMLDivElement>();
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
     treeToRows(rows, rootSpan, collapsedSpans);
     return rows;
   }, [rootSpan, collapsedSpans]);
+
+  const divider = useMemo(() => {
+    return <ResizableDivider parentRef={tableRef} setNameColumnWidth={setNameColumnWidth} />;
+  }, [tableRef, setNameColumnWidth]);
 
   // update currently visible spans
   function handleRangeChange({ startIndex, endIndex }: { startIndex: number; endIndex: number }) {
@@ -46,14 +53,22 @@ export function GanttTable(props: GanttTableProps) {
   }
 
   return (
-    <>
-      <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} />
+    <Box ref={tableRef} sx={{ height: '100%' }}>
+      <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}
-        itemContent={(_, span) => <GanttTableRow span={span} viewport={viewport} onClick={onSpanClick} />}
+        itemContent={(_, span) => (
+          <GanttTableRow
+            span={span}
+            viewport={viewport}
+            nameColumnWidth={nameColumnWidth}
+            divider={divider}
+            onClick={onSpanClick}
+          />
+        )}
         rangeChanged={handleRangeChange}
       />
-    </>
+    </Box>
   );
 }
 

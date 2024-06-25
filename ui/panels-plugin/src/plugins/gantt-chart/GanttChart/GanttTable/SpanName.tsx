@@ -19,16 +19,17 @@ import { SpanIndents } from './SpanIndents';
 
 export interface SpanNameProps {
   span: Span;
+  nameColumnWidth: number;
 }
 
 /**
  * SpanName renders the entire left column of a SpanRow, i.e. the hierarchy and the service and span name
  */
 export function SpanName(props: SpanNameProps) {
-  const { span } = props;
+  const { span, nameColumnWidth } = props;
 
   return (
-    <Stack direction="row" sx={{ alignItems: 'center', width: '25%' }}>
+    <Stack direction="row" sx={{ alignItems: 'center' }} style={{ width: `${nameColumnWidth * 100}%` }}>
       <SpanIndents span={span} />
       {spanHasError(span) && <AlertIcon color="error" sx={{ marginRight: '5px' }} />}
       <Box sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
