@@ -15,7 +15,7 @@ import { Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography 
 import Magnify from 'mdi-material-ui/Magnify';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList } from '../../../model/dashboard-client';
@@ -47,12 +47,36 @@ function SearchDashboardList(props: { query: string; onClick: () => void }) {
   });
 }
 
+function useHandleShortCut(handleOpen: () => void) {
+  // handle what happens on key press
+  const handleKeyPress = useCallback(
+    (event: KeyboardEvent) => {
+      const ctrlKey = isAppleDevice() ? event.metaKey : event.ctrlKey;
+      if (ctrlKey && event.key === 'k') {
+        handleOpen();
+      }
+    },
+    [handleOpen]
+  );
+
+  useEffect(() => {
+    // attach the event listener
+    document.addEventListener('keydown', handleKeyPress);
+
+    // remove the event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [handleKeyPress]);
+}
+
 export function SearchBar() {
   const isMobileSize = useIsMobileSize();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  useHandleShortCut(handleOpen);
 
   return (
     <Paper sx={{ flexGrow: 2, maxWidth: isMobileSize ? '50%' : '30%' }}>
@@ -74,7 +98,7 @@ export function SearchBar() {
           elevation={0}
           sx={{
             height: '70%',
-            width: isMobileSize ? '95%' : '50%',
+            width: isMobileSize ? '95%' : '55%',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
