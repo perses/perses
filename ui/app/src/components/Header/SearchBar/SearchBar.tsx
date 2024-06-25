@@ -93,6 +93,7 @@ export function SearchBar() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         style={{ display: 'flex', justifyContent: 'center' }}
+        disableAutoFocus={true}
       >
         <Paper
           elevation={0}
@@ -109,6 +110,8 @@ export function SearchBar() {
         >
           <TextField
             size="medium"
+            /* eslint-disable-next-line jsx-a11y/no-autofocus */
+            autoFocus={open}
             variant="outlined"
             placeholder="What are you looking for ?"
             fullWidth
