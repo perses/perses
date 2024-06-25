@@ -26,7 +26,7 @@ import PersesLogoCropped from '../logo/PersesLogoCropped';
 import { ToolMenu } from './ToolMenu';
 import { AccountMenu } from './AccountMenu';
 import { ThemeSwitch } from './ThemeSwitch';
-import { SearchBar } from './SearchBar';
+import { SearchBar } from './SearchBar/SearchBar';
 
 export default function Header(): JSX.Element {
   const isLaptopSize = useIsLaptopSize();

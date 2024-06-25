@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { MouseEvent, useState } from 'react';
-import { Box, Divider, IconButton, ListItemIcon, Menu as MUIMenu, MenuItem } from '@mui/material';
+import { Box, Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
 import { useAuthToken } from '../../model/auth-client';
@@ -39,7 +39,7 @@ export function AccountMenu() {
       >
         <AccountCircle />
       </IconButton>
-      <MUIMenu
+      <Menu
         id="menu-account-list-appbar"
         anchorEl={anchorEl}
         anchorOrigin={{
@@ -64,7 +64,7 @@ export function AccountMenu() {
           </ListItemIcon>
           Logout
         </MenuItem>
-      </MUIMenu>
+      </Menu>
     </Box>
   );
 }
