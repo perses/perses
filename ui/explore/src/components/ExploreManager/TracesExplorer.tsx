@@ -22,13 +22,18 @@ import { useExplorerManagerContext } from './ExplorerManagerProvider';
 function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
+  // no query executed, show empty panel
+  if (queryResults.length === 0) {
+    return <></>;
+  }
+
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
   }
 
-  // no query executed, show empty panel
-  if (queryResults.length === 0) {
-    return <></>;
+  const queryError = queryResults.find(d => d.error);
+  if (queryError) {
+    throw queryError.error;
   }
 
   const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);

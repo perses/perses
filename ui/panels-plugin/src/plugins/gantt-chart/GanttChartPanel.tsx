@@ -32,6 +32,11 @@ export function GanttChartPanel() {
     return <LoadingOverlay />;
   }
 
+  const queryError = queryResults.find(d => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
   const trace = queryResults[0]?.data?.trace;
   if (!trace) {
     return <NoDataOverlay resource="trace" />;
