@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, PanelDefinition } from '@perses-dev/core';
+import { Action, PanelEditorValues, PanelGroupId } from '@perses-dev/core';
 import { StateCreator } from 'zustand';
-import { getYForNewRow, getValidPanelKey } from '../../utils/panelUtils';
+import { getYForNewRow, getValidPanelKey } from '../../utils';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import {
   PanelGroupSlice,
   PanelGroupItemId,
-  PanelGroupId,
   PanelGroupDefinition,
   PanelGroupItemLayout,
   addPanelGroup,
@@ -71,14 +70,6 @@ export interface PanelEditorState {
    * Close the editor.
    */
   close: () => void;
-}
-
-/**
- * Panel values that can be edited in the panel editor.
- */
-export interface PanelEditorValues {
-  groupId: PanelGroupId;
-  panelDefinition: PanelDefinition;
 }
 
 /**

@@ -13,9 +13,9 @@
 
 import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { UserResource } from '@perses-dev/core';
 import { DeleteResourceDialog } from '../dialogs';
 import { DrawerProps } from '../drawer';
-import { UserResource } from '../../model/user-client';
 import { UserEditorForm } from './UserEditorForm';
 
 interface UserDrawerProps extends DrawerProps<UserResource> {

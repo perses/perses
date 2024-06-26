@@ -14,7 +14,7 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry } from '@perses-dev/plugin-system';
+import { PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import { useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
@@ -87,25 +87,27 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
             TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
           }}
         >
-          <ErrorBoundary FallbackComponent={ErrorAlert}>
-            <ViewDashboard
-              dashboardResource={dashboardResource}
-              datasourceApi={datasourceApi}
-              externalVariableDefinitions={externalVariableDefinitions}
-              dashboardTitleComponent={
-                <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
-              }
-              emptyDashboardProps={{
-                additionalText: 'In order to save this dashboard, you need to add at least one panel!',
-              }}
-              onSave={onSave}
-              onDiscard={onDiscard}
-              initialVariableIsSticky={true}
-              isReadonly={isReadonly}
-              isEditing={isEditing}
-              isCreating={isCreating}
-            />
-          </ErrorBoundary>
+          <ValidationProvider>
+            <ErrorBoundary FallbackComponent={ErrorAlert}>
+              <ViewDashboard
+                dashboardResource={dashboardResource}
+                datasourceApi={datasourceApi}
+                externalVariableDefinitions={externalVariableDefinitions}
+                dashboardTitleComponent={
+                  <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
+                }
+                emptyDashboardProps={{
+                  additionalText: 'In order to save this dashboard, you need to add at least one panel!',
+                }}
+                onSave={onSave}
+                onDiscard={onDiscard}
+                initialVariableIsSticky={true}
+                isReadonly={isReadonly}
+                isEditing={isEditing}
+                isCreating={isCreating}
+              />
+            </ErrorBoundary>
+          </ValidationProvider>
         </PluginRegistry>
       </ErrorBoundary>
     </Box>

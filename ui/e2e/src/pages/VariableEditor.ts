@@ -72,12 +72,12 @@ export class VariableEditor {
 
   async setName(name: string) {
     await this.nameInput.clear();
-    await this.nameInput.type(name);
+    await this.nameInput.fill(name);
   }
 
   async setDisplayLabel(displayLabel: string) {
     await this.displayLabelInput.clear();
-    await this.displayLabelInput.type(displayLabel);
+    await this.displayLabelInput.fill(displayLabel);
   }
 
   async selectType(typeName: string) {
@@ -88,9 +88,16 @@ export class VariableEditor {
     await selectMenuItem(this.container, 'Source', source);
   }
 
+  async setListValue(value: string) {
+    const input = this.container.getByLabel('Values', { exact: true });
+    await input.clear();
+    await input.fill(value);
+    await input.press('Enter');
+  }
+
   async setTextValue(value: string) {
     const input = this.container.getByLabel('Value');
     await input.clear();
-    await input.type(value);
+    await input.fill(value);
   }
 }

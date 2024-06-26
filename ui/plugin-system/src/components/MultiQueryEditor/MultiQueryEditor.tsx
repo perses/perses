@@ -53,7 +53,7 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
 }
 
 /**
- * A component render a list of {@link QueryEditor} for the given query definitions.
+ * A component render a list of {@link QueryEditorContainer} for the given query definitions.
  * It allows adding, removing and editing queries.
  * @param queryTypes The list of query types that the underlying editor will propose
  * @param queries The list of query definitions to render

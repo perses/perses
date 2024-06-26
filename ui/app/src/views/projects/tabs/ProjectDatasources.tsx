@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
-import { getResourceDisplayName, ProjectDatasource } from '@perses-dev/core';
+import { getResourceDisplayName, DatasourceResource } from '@perses-dev/core';
 import {
   useCreateDatasourceMutation,
   useDatasourceList,
@@ -40,10 +40,10 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   const updateDatasourceMutation = useUpdateDatasourceMutation(projectName);
 
   const handleDatasourceCreate = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: DatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: ProjectDatasource) => {
+          onSuccess: (createdDatasource: DatasourceResource) => {
             successSnackbar(`Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`);
             resolve();
           },
@@ -59,10 +59,10 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   );
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: DatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: ProjectDatasource) => {
+          onSuccess: (updatedDatasource: DatasourceResource) => {
             successSnackbar(`Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`);
             resolve();
           },
@@ -78,10 +78,10 @@ export function ProjectDatasources(props: ProjectDatasourcesProps) {
   );
 
   const handleDatasourceDelete = useCallback(
-    (datasource: ProjectDatasource): Promise<void> => {
+    (datasource: DatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         deleteDatasourceMutation.mutate(datasource, {
-          onSuccess: (deletedDatasource: ProjectDatasource) => {
+          onSuccess: (deletedDatasource: DatasourceResource) => {
             successSnackbar(`Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`);
             resolve();
           },

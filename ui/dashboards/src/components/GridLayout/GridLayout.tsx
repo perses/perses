@@ -14,11 +14,11 @@ import { useMemo, useState } from 'react';
 import { Responsive, WidthProvider, Layouts, Layout } from 'react-grid-layout';
 import { Collapse, useTheme } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { PanelGroupId } from '@perses-dev/core';
 import {
   useEditMode,
   usePanelGroup,
   usePanelGroupActions,
-  PanelGroupId,
   PanelGroupItemLayout,
   useViewPanel,
   PanelGroupDefinition,

@@ -55,6 +55,7 @@ test.describe('Dashboard: Variables', () => {
     await variableEditor.setDisplayLabel('List Var');
     await variableEditor.selectType('list');
     await variableEditor.selectSource('Custom List');
+    await variableEditor.setListValue('Test');
     await variableEditor.addButton.click();
 
     // Includes one for the table header.
