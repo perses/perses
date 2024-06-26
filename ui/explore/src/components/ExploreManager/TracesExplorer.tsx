@@ -16,7 +16,7 @@ import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
-import { PANEL_PREVIEW_HEIGHT, PANEL_PREVIEW_TRACES_SCATTERPLOT_HEIGHT } from './constants';
+import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
@@ -37,8 +37,8 @@ function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
   }
 
   return (
-    <Stack height="100%">
-      <Box height={PANEL_PREVIEW_TRACES_SCATTERPLOT_HEIGHT}>
+    <Stack sx={{ height: '100%' }} gap={2}>
+      <Box sx={{ height: '35%', flexShrink: 0 }}>
         <Panel
           panelOptions={{
             hideHeader: true,
@@ -50,7 +50,7 @@ function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
         />
       </Box>
       <Panel
-        sx={{ flexGrow: 1, marginTop: '15px' }}
+        sx={{ flexGrow: 1 }}
         panelOptions={{
           hideHeader: true,
         }}
@@ -90,9 +90,12 @@ export function TracesExplorer() {
       })
     : [];
 
-  // TODO: how to access query string here?
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isSingleTrace = definitions.length === 1 && isValidTraceId((definitions[0]?.spec as any).query || '');
+  // Cannot cast to TempoTraceQuerySpec because 'tempo-plugin' types are not accessible in @perses-dev/explore
+  const isSingleTrace =
+    queries.length === 1 &&
+    queries[0]?.kind === 'TraceQuery' &&
+    queries[0]?.spec.plugin.kind === 'TempoTraceQuery' &&
+    isValidTraceId((queries[0]?.spec.plugin.spec as any).query ?? ''); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
