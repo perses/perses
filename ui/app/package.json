@@ -5,7 +5,7 @@
   "scripts": {
     "clean": "rimraf dist/",
     "start": "cross-env NODE_ENV=development rspack serve",
-    "build": "cross-env NODE_ENV=development rspack build",
+    "build": "rspack build",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
@@ -25,6 +25,7 @@
     "@perses-dev/explore": "0.46.0",
     "@perses-dev/panels-plugin": "0.46.0",
     "@perses-dev/plugin-system": "0.46.0",
+    "@perses-dev/plugin-runtime": "0.46.0",
     "@perses-dev/prometheus-plugin": "0.46.0",
     "@perses-dev/tempo-plugin": "0.46.0",
     "@tanstack/react-query": "^4.7.1",
@@ -49,7 +50,6 @@
   "devDependencies": {
     "@rspack/cli": "^0.6.5",
     "@rspack/core": "^0.6.5",
-    "@rspack/plugin-react-refresh": "^0.6.5",
-    "dotenv-defaults": "^5.0.2"
+    "@rspack/plugin-react-refresh": "^0.6.5"
   }
 }

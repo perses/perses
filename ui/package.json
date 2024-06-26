@@ -34,6 +34,7 @@
     "internal-utils",
     "panels-plugin",
     "plugin-system",
+    "plugin-runtime",
     "prometheus-plugin",
     "storybook",
     "tempo-plugin"
