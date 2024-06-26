@@ -11,13 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec, QueryDefinition } from '@perses-dev/core';
-
-export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
-
 /**
  * The Options object type supported by the GanttChart panel plugin.
  */
+// Note: The interface attributes must match cue/schemas/panels/gantt-chart/gantt-chart.cue
 export interface GanttChartOptions {}
 
 /**

@@ -94,7 +94,7 @@ function buildRow(trace: TraceSearchResult): ReactNode {
           color="inherit"
           underline="hover"
           component={RouterLink}
-          to={`?${traceLinkParams}`}
+          to={`/explore?${traceLinkParams}`}
           reloadDocument
         >
           <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
