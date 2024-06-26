@@ -32,7 +32,7 @@ export function GanttChartPanel() {
     return <LoadingOverlay />;
   }
 
-  const queryError = queryResults.find(d => d.error);
+  const queryError = queryResults.find((d) => d.error);
   if (queryError) {
     throw queryError.error;
   }
