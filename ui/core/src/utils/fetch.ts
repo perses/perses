@@ -17,12 +17,20 @@
 export async function fetch(...args: Parameters<typeof global.fetch>) {
   const response = await global.fetch(...args);
   if (response.ok === false) {
-    const json = await response.json();
-    if (json.error) {
-      throw new UserFriendlyError(json.error, response.status);
+    const contentType = response.headers.get('content-type');
+    if (contentType?.includes('application/json')) {
+      const json = await response.json();
+      if (json.error) {
+        throw new UserFriendlyError(json.error, response.status);
+      }
+      if (json.message) {
+        throw new UserFriendlyError(json.message, response.status);
+      }
     }
-    if (json.message) {
-      throw new UserFriendlyError(json.message, response.status);
+
+    const text = await response.text();
+    if (text) {
+      throw new UserFriendlyError(text, response.status);
     }
     throw new FetchError(response);
   }
