@@ -15,11 +15,13 @@ import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { DataTable } from './DataTable';
-import { TraceTableOptions } from './trace-table-model';
+import { TraceTableOptions, defaultTraceLink } from './trace-table-model';
 
 export type TraceTableProps = PanelProps<TraceTableOptions>;
 
-export function TraceTablePanel(_props: TraceTableProps) {
+export function TraceTablePanel(props: TraceTableProps) {
+  const { onTraceClick, traceLink = defaultTraceLink } = props.spec;
+
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
   const contentPadding = chartsTheme.container.padding.default;
@@ -35,7 +37,7 @@ export function TraceTablePanel(_props: TraceTableProps) {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable result={queryResults} />
+      <DataTable result={queryResults} onTraceClick={onTraceClick} traceLink={traceLink} />
     </Box>
   );
 }

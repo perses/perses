@@ -19,7 +19,12 @@ import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
-function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
+interface SearchResultsPanelProps {
+  queries: QueryDefinition[];
+  setQueries: (queries: QueryDefinition[]) => void;
+}
+
+function SearchResultsPanel({ queries, setQueries }: SearchResultsPanelProps) {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
@@ -39,6 +44,11 @@ function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
   const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
   if (!tracesFound) {
     return <NoDataOverlay resource="traces" />;
+  }
+
+  function onTraceClick(e: MouseEvent, traceId: string) {
+    e.preventDefault();
+    setQueries([{ kind: 'TraceQuery', spec: { plugin: { kind: 'TempoTraceQuery', spec: { query: traceId } } } }]);
   }
 
   return (
@@ -61,7 +71,7 @@ function SearchResultsPanel({ queries }: { queries: QueryDefinition[] }) {
         }}
         definition={{
           kind: 'Panel',
-          spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: {} } },
+          spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: { onTraceClick } } },
         }}
       />
     </Stack>
@@ -109,7 +119,11 @@ export function TracesExplorer() {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <DataQueriesProvider definitions={definitions}>
           <Box height={PANEL_PREVIEW_HEIGHT}>
-            {isSingleTrace ? <GanttChartPanel queries={queries} /> : <SearchResultsPanel queries={queries} />}
+            {isSingleTrace ? (
+              <GanttChartPanel queries={queries} />
+            ) : (
+              <SearchResultsPanel queries={queries} setQueries={setQueries} />
+            )}
           </Box>
         </DataQueriesProvider>
       </ErrorBoundary>

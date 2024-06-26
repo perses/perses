@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import { ServiceStats, TraceData, TraceSearchResult, formatDuration, msToPrometheusDuration } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { ReactNode } from 'react';
+import { MouseEvent, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { getConsistentServiceColor } from '../gantt-chart/GanttChart/utils';
@@ -38,15 +38,19 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).f
 
 export interface DataTableProps {
   result: Array<QueryData<TraceData>>;
+  onTraceClick?: (e: MouseEvent, traceId: string) => void;
+  traceLink?: (traceId: string) => string;
 }
 
-export function DataTable({ result }: DataTableProps) {
+export function DataTable(props: DataTableProps) {
+  const { result, onTraceClick, traceLink } = props;
+
   if (!result) {
     return null;
   }
 
   const traces = result.flatMap((d) => d.data).flatMap((d) => d?.searchResult || []);
-  const rows = traces.map(buildRow);
+  const rows = traces.map((trace) => buildRow(trace, onTraceClick, traceLink));
 
   return (
     <>
@@ -73,7 +77,11 @@ export function DataTable({ result }: DataTableProps) {
   );
 }
 
-function buildRow(trace: TraceSearchResult): ReactNode {
+function buildRow(
+  trace: TraceSearchResult,
+  onTraceClick?: (e: MouseEvent, traceId: string) => void,
+  traceLink?: (traceId: string) => string
+): ReactNode {
   let totalSpanCount = 0;
   let totalErrorCount = 0;
   for (const stats of Object.values(trace.serviceStats)) {
@@ -81,25 +89,10 @@ function buildRow(trace: TraceSearchResult): ReactNode {
     totalErrorCount += stats.errorCount ?? 0;
   }
 
-  const traceLinkParams = new URLSearchParams({
-    explorer: '1',
-    queries: `[{"kind":"TraceQuery","spec":{"plugin":{"kind":"TempoTraceQuery","spec":{"query":"${trace.traceId}"}}}}]`,
-  });
-
   return (
     <StyledTableRow key={trace.traceId}>
-      <StyledTableCell>
-        <Link
-          variant="body1"
-          color="inherit"
-          underline="hover"
-          component={RouterLink}
-          to={`/explore?${traceLinkParams}`}
-          reloadDocument
-        >
-          <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
-        </Link>
-        <br />
+      <StyledTableCell onClick={(e) => onTraceClick?.(e, trace.traceId)}>
+        {buildTraceName(trace, traceLink)}
         {buildServiceStatsChips(trace.serviceStats)}
       </StyledTableCell>
       <StyledTableCell>
@@ -124,6 +117,32 @@ function buildRow(trace: TraceSearchResult): ReactNode {
         <Typography>{DATE_FORMATTER(new Date(trace.startTimeUnixMs))}</Typography>
       </StyledTableCell>
     </StyledTableRow>
+  );
+}
+
+function buildTraceName(trace: TraceSearchResult, traceLink?: (traceId: string) => string) {
+  if (traceLink) {
+    return (
+      <>
+        <Link
+          variant="body1"
+          color="inherit"
+          underline="hover"
+          component={RouterLink}
+          to={traceLink(trace.traceId)}
+          reloadDocument
+        >
+          <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
+        </Link>
+        <br />
+      </>
+    );
+  }
+
+  return (
+    <Typography>
+      <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
+    </Typography>
   );
 }
 
