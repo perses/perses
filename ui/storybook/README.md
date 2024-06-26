@@ -29,7 +29,7 @@ Stories **SHOULD** live in the first entry in the list below that matches their 
 
 Stories for components should use [Component Story Format (CSF)](https://storybook.js.org/docs/react/api/csf) and follow the `PascalCaseName.stories.tsx` naming scheme.
 
-See [Writing stories in TypeScript](https://storybook.js.org/blog/writing-stories-in-typescript/) for some additional guidance on typing for stories.
+See [Writing stories in TypeScript](https://storybook.js.org/docs/writing-stories/typescript) for some additional guidance on typing for stories.
 
 #### Text-only documentation
 
