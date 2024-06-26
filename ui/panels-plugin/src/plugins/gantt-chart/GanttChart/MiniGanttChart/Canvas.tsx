@@ -13,8 +13,8 @@
 
 import { Box, styled } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
-import { useEffect, useRef, MouseEvent, useState } from 'react';
-import { Span } from '@perses-dev/core';
+import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState } from 'react';
+import { Span, useEvent } from '@perses-dev/core';
 import { Ticks } from '../Ticks';
 import { Viewport } from '../utils';
 import { drawSpans } from './draw';
@@ -54,19 +54,14 @@ export function Canvas(props: CanvasProps) {
     drawSpans(ctx, width, height, rootSpan);
   }, [width, height, rootSpan]);
 
-  const translatePxToTime = (px: number) => {
-    if (!width) return 0;
-    return (px / width) * traceDuration;
-  };
-
-  const translateCursorToTime = (e: MouseEvent) => {
-    if (!canvasRef.current) return 0;
+  const translateCursorToTime = (e: ReactMouseEvent | MouseEvent) => {
+    if (!canvasRef.current || !width) return 0;
     // e.nativeEvent.offsetX doesn't work when sliding over a tick box
     const offsetX = e.clientX - canvasRef.current.getBoundingClientRect().left;
-    return rootSpan.startTimeUnixMs + translatePxToTime(offsetX);
+    return rootSpan.startTimeUnixMs + (offsetX / width) * traceDuration;
   };
 
-  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+  const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (!(e.target instanceof HTMLElement)) return;
 
@@ -91,7 +86,8 @@ export function Canvas(props: CanvasProps) {
     }
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  // need stable reference for window.removeEventListener() in useEffect() below
+  const handleMouseMove = useEvent((e: MouseEvent) => {
     e.preventDefault();
 
     switch (mouseState.type) {
@@ -101,11 +97,20 @@ export function Canvas(props: CanvasProps) {
       case 'resize': {
         const pointA = mouseState.fixedPoint;
         const pointB = translateCursorToTime(e);
+
+        let start, end;
         if (pointA < pointB) {
-          setViewport({ startTimeUnixMs: pointA, endTimeUnixMs: pointB });
+          start = pointA;
+          end = pointB;
         } else {
-          setViewport({ startTimeUnixMs: pointB, endTimeUnixMs: pointA });
+          start = pointB;
+          end = pointA;
         }
+
+        setViewport({
+          startTimeUnixMs: Math.max(start, rootSpan.startTimeUnixMs),
+          endTimeUnixMs: Math.min(end, rootSpan.endTimeUnixMs),
+        });
         return;
       }
 
@@ -129,9 +134,10 @@ export function Canvas(props: CanvasProps) {
         return;
       }
     }
-  };
+  });
 
-  const handleMouseUp = (e: MouseEvent) => {
+  // need stable reference for window.removeEventListener() in useEffect() below
+  const handleMouseUp = useEvent((e: MouseEvent) => {
     e.preventDefault();
     setMouseState({ type: 'none' });
 
@@ -139,18 +145,33 @@ export function Canvas(props: CanvasProps) {
     if (viewport.startTimeUnixMs === viewport.endTimeUnixMs) {
       setViewport({ startTimeUnixMs: rootSpan.startTimeUnixMs, endTimeUnixMs: rootSpan.endTimeUnixMs });
     }
-  };
+  });
+
+  // capture mouseMove and mouseUp outside the element by attaching them to the window object
+  useEffect(() => {
+    function startMouseAction() {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = mouseState.type === 'resize' ? 'col-resize' : 'move';
+    }
+
+    function stopMouseAction() {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'inherit';
+    }
+
+    if (mouseState.type === 'none') {
+      stopMouseAction();
+    } else {
+      startMouseAction();
+    }
+
+    return stopMouseAction;
+  }, [mouseState, handleMouseMove, handleMouseUp]);
 
   return (
-    <Box
-      ref={wrapperRef}
-      sx={{ position: 'relative', height }}
-      style={{ cursor: mouseState.type === 'none' ? 'inherit' : mouseState.type === 'resize' ? 'col-resize' : 'move' }}
-      onMouseDown={handleMouseDown}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
+    <Box ref={wrapperRef} sx={{ position: 'relative', height }} onMouseDown={handleMouseDown}>
       <canvas ref={canvasRef} width={width} height={height} style={{ position: 'absolute' }} />
       <Ticks />
       <CutoffBox data-elem="cutoffBox" style={{ left: 0, width: `${relativeCutoffLeft * 100}%` }} />
@@ -173,4 +194,15 @@ const Resizer = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.grey[700],
   width: '2px',
   cursor: 'col-resize',
+
+  // increase clickable area from 2px to 8px
+  '&:before': {
+    position: 'absolute',
+    width: '8px',
+    left: '-3px',
+    top: 0,
+    bottom: 0,
+    content: '" "',
+    zIndex: 1, // without zIndex, the cutoff boxes partially hide this element
+  },
 }));
