@@ -238,9 +238,8 @@ function ListVariable({ name, source }: VariableProps) {
           '& .MuiInputBase-root': {
             minHeight: '38px',
           },
-          '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
-            paddingY: '5px',
-            paddingLeft: '5px',
+          '& .MuiAutocomplete-tag': {
+            margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
           },
         }}
         value={selectedOptions}
@@ -281,7 +280,6 @@ function TextVariable({ name, source }: VariableProps) {
     <TextField
       title={tempValue as string}
       value={tempValue}
-      //onChange={(e) => setTempValue(e.target.value)}
       onChange={(e) => {
         setTempValue(e.target.value);
         setInputWidth(getWidthPx(e.target.value, 'text'));
