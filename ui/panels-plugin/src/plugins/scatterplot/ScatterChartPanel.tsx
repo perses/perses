@@ -127,9 +127,17 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     return series;
   }, [dataset, defaultColor, maxSpanCount]);
 
-  // Error check: specify an alert if no traces are returned from the query
+  if (traceIsLoading) {
+    return <LoadingOverlay />;
+  }
+
+  const queryError = traceResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
   const tracesFound = traceResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
-  if (!traceIsLoading && !tracesFound) {
+  if (!tracesFound) {
     return <NoDataOverlay resource="traces" />;
   }
 
@@ -139,10 +147,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
   };
 
   if (contentDimensions === undefined) return null;
-
-  if (traceIsLoading === true) {
-    return <LoadingOverlay />;
-  }
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">
