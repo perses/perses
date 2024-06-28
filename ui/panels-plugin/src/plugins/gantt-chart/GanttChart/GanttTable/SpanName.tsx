@@ -31,7 +31,7 @@ export function SpanName(props: SpanNameProps) {
   return (
     <Stack direction="row" sx={{ alignItems: 'center' }} style={{ width: `${nameColumnWidth * 100}%` }}>
       <SpanIndents span={span} />
-      {spanHasError(span) && <AlertIcon color="error" sx={{ marginRight: '5px' }} />}
+      {spanHasError(span) && <AlertIcon titleAccess="Error" color="error" sx={{ marginRight: '5px' }} />}
       <Box sx={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
         <strong>{span.resource.serviceName}:</strong> {span.name}
       </Box>

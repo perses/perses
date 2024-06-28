@@ -22,4 +22,16 @@ describe('getConsistentColor', () => {
     expect(color).toEqual(firstResult);
     expect(colorAlt).toEqual(firstResult);
   });
+
+  it('should generate a consistent custom hsla color, depending on the error state', () => {
+    const color = getConsistentColor('test', false);
+    const color2 = getConsistentColor('test', false);
+    const colorErr = getConsistentColor('test', true);
+    const colorErr2 = getConsistentColor('test', true);
+    // ensures generated color does not change on subsequent calls
+    expect(color).toEqual(color2);
+    expect(colorErr).toEqual(colorErr2);
+    // expect colors to be different
+    expect(color).not.toEqual(colorErr);
+  });
 });

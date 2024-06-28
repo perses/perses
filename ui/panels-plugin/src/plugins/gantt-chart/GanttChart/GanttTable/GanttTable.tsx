@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Virtuoso } from 'react-virtuoso';
+import { Virtuoso, ListRange } from 'react-virtuoso';
 import { Span } from '@perses-dev/core';
 import { useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
@@ -44,7 +44,7 @@ export function GanttTable(props: GanttTableProps) {
   }, [tableRef, setNameColumnWidth]);
 
   // update currently visible spans
-  function handleRangeChange({ startIndex, endIndex }: { startIndex: number; endIndex: number }) {
+  function handleRangeChange({ startIndex, endIndex }: ListRange) {
     const visibleSpans: string[] = [];
     for (let i = startIndex; i <= endIndex; i++) {
       visibleSpans.push(rows[i]!.spanId);

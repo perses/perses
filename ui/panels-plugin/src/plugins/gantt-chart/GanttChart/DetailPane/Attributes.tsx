@@ -32,7 +32,7 @@ export function AttributeList(props: AttributeListProps) {
   );
 }
 
-export interface AttributeItemProps {
+interface AttributeItemProps {
   attribute: TraceAttribute;
 }
 

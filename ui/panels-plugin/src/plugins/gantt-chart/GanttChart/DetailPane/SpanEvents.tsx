@@ -44,7 +44,7 @@ export function SpanEventList(props: SpanEventListProps) {
   );
 }
 
-export interface SpanEventItemProps {
+interface SpanEventItemProps {
   rootSpan: Span;
   event: SpanEvent;
 }

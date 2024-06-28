@@ -40,7 +40,7 @@ export function GanttChart(props: GanttChart) {
   });
 
   return (
-    <Stack direction="row" sx={{ height: '100%', gap: 2 }}>
+    <Stack direction="row" sx={{ height: '100%', minHeight: '240px', gap: 2 }}>
       <Stack sx={{ flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
