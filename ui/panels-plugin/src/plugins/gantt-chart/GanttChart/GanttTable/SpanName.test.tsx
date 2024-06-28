@@ -18,23 +18,23 @@ import { SpanName, SpanNameProps } from './SpanName';
 import { GanttTableProvider } from './GanttTableProvider';
 
 describe('SpanName', () => {
-  const renderComponent = (props: SpanNameProps) => {
+  const renderComponent = (props: Omit<SpanNameProps, 'nameColumnWidth'>) => {
     return render(
       <GanttTableProvider>
-        <SpanName {...props} />
+        <SpanName {...props} nameColumnWidth={25} />
       </GanttTableProvider>
     );
   };
 
   it('render span without error', () => {
-    renderComponent({ span: trace1_root_child1_child1, nameColumnWidth: 25 });
+    renderComponent({ span: trace1_root_child1_child1 });
     expect(screen.getByText('testChildSpan3')).toBeInTheDocument();
-    expect(screen.queryByText('Error')).not.toBeInTheDocument();
+    expect(screen.queryByText('error')).not.toBeInTheDocument();
   });
 
   it('render span with error', () => {
-    renderComponent({ span: trace1_root_child1, nameColumnWidth: 25 });
+    renderComponent({ span: trace1_root_child1 });
     expect(screen.getByText('testChildSpan2')).toBeInTheDocument();
-    expect(screen.getByText('Error')).toBeInTheDocument();
+    expect(screen.getByText('error')).toBeInTheDocument();
   });
 });

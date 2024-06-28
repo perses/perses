@@ -21,7 +21,7 @@ import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
 import { ResizableDivider } from './ResizableDivider';
 
-interface GanttTableProps {
+export interface GanttTableProps {
   rootSpan: Span;
   viewport: Viewport;
   onSpanClick: (span: Span) => void;

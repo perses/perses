@@ -80,9 +80,9 @@ export function SpanIndents(props: SpanIndentsProps) {
           {i === spans.length - 1 &&
             span.childSpans.length > 0 &&
             (collapsedSpans.includes(span.spanId) ? (
-              <ChevronRightIcon onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
+              <ChevronRightIcon titleAccess="expand" onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
             ) : (
-              <ChevronDownIcon onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
+              <ChevronDownIcon titleAccess="collapse" onClick={handleToggleClick} onMouseEnter={handleIconMouseEnter} />
             ))}
         </SpanIndentBox>
       ))}
