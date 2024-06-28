@@ -45,7 +45,7 @@ function AttributeItem(props: AttributeItemProps) {
         primary={attribute.key}
         secondary={renderAttributeValue(attribute.value)}
         primaryTypographyProps={{ variant: 'h5' }}
-        secondaryTypographyProps={{ variant: 'body1', sx: { wordBreak: 'break-all' } }}
+        secondaryTypographyProps={{ variant: 'body1', sx: { wordBreak: 'break-word' } }}
       />
     </ListItem>
   );

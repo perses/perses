@@ -36,8 +36,10 @@ export function DetailPane(props: DetailPaneProps) {
       <IconButton sx={{ float: 'right' }} onClick={onCloseBtnClick}>
         <CloseIcon />
       </IconButton>
-      <Typography>{span.resource.serviceName}</Typography>
-      <Typography variant="h2">{span.name}</Typography>
+      <Typography sx={{ wordBreak: 'break-word' }}>{span.resource.serviceName}</Typography>
+      <Typography variant="h2" sx={{ wordBreak: 'break-word' }}>
+        {span.name}
+      </Typography>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
           <Tab sx={{ p: 0 }} value={0} label="Attributes" />
