@@ -26,13 +26,13 @@ describe('SpanName', () => {
     );
   };
 
-  it('render span without error', () => {
+  it('render span name without error', () => {
     renderComponent({ span: trace1_root_child1_child1 });
     expect(screen.getByText('testChildSpan3')).toBeInTheDocument();
     expect(screen.queryByText('error')).not.toBeInTheDocument();
   });
 
-  it('render span with error', () => {
+  it('render span name with error', () => {
     renderComponent({ span: trace1_root_child1 });
     expect(screen.getByText('testChildSpan2')).toBeInTheDocument();
     expect(screen.getByText('error')).toBeInTheDocument();

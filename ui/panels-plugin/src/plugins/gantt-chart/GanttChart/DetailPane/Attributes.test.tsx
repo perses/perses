@@ -13,26 +13,29 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { AttributeList } from './Attributes';
+import { AttributeList, AttributeListProps } from './Attributes';
 
 describe('Attributes', () => {
+  const renderComponent = (props: AttributeListProps) => {
+    return render(<AttributeList {...props} />);
+  };
+
   it('render stringValues', () => {
     const attributes = [{ key: 'attrkey', value: { stringValue: 'str' } }];
-    render(<AttributeList attributes={attributes} />);
-
+    renderComponent({ attributes });
     expect(screen.getByText('attrkey')).toBeInTheDocument();
     expect(screen.getByText('str')).toBeInTheDocument();
   });
 
   it('render intValue', () => {
     const attributes = [{ key: 'attrkey', value: { intValue: '123' } }];
-    render(<AttributeList attributes={attributes} />);
+    renderComponent({ attributes });
     expect(screen.getByText('123')).toBeInTheDocument();
   });
 
   it('render boolValue', () => {
     const attributes = [{ key: 'attrkey', value: { boolValue: false } }];
-    render(<AttributeList attributes={attributes} />);
+    renderComponent({ attributes });
     expect(screen.getByText('false')).toBeInTheDocument();
   });
 
@@ -40,7 +43,7 @@ describe('Attributes', () => {
     const attributes = [
       { key: 'attrkey', value: { arrayValue: { values: [{ stringValue: 'abc' }, { boolValue: true }] } } },
     ];
-    render(<AttributeList attributes={attributes} />);
+    renderComponent({ attributes });
     expect(screen.getByText('abc, true')).toBeInTheDocument();
   });
 });

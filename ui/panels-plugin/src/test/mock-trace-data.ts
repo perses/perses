@@ -189,7 +189,7 @@ export const trace1_root_child1_child1: Span = {
   name: 'testChildSpan3',
   kind: 'SPAN_KIND_CLIENT',
   startTimeUnixMs: 1300,
-  endTimeUnixMs: 1400,
+  endTimeUnixMs: 1450,
   attributes: [
     {
       key: 'http.method',

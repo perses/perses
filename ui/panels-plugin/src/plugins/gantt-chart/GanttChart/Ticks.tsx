@@ -15,7 +15,7 @@ import { Box, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { Viewport, formatDuration, gridColor } from './utils';
 
-interface TicksHeaderProps {
+export interface TicksHeaderProps {
   rootSpan: Span;
   viewport: Viewport;
 }

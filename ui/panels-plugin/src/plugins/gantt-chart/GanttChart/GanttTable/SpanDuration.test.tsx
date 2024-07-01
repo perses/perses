@@ -13,20 +13,24 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { trace1_root, trace1_root_child1 } from '../../../../test';
-import { SpanEventList, SpanEventListProps } from './SpanEvents';
+import { trace1_root, trace1_root_child1_child1 } from '../../../../test';
+import { GanttTableProvider } from './GanttTableProvider';
+import { SpanDuration, SpanDurationProps } from './SpanDuration';
 
-describe('SpanEvents', () => {
-  const renderComponent = (props: SpanEventListProps) => {
-    return render(<SpanEventList {...props} />);
+describe('SpanDuration', () => {
+  const renderComponent = (props: SpanDurationProps) => {
+    return render(
+      <GanttTableProvider>
+        <SpanDuration {...props} />
+      </GanttTableProvider>
+    );
   };
 
-  it('render', () => {
-    renderComponent({ rootSpan: trace1_root, span: trace1_root_child1 });
-
+  it('render span bar', () => {
+    renderComponent({
+      span: trace1_root_child1_child1,
+      viewport: { startTimeUnixMs: trace1_root.startTimeUnixMs, endTimeUnixMs: trace1_root.endTimeUnixMs },
+    });
     expect(screen.getByText('150ms')).toBeInTheDocument();
-    expect(screen.getByText('event1_name')).toBeInTheDocument();
-    expect(screen.getByText('event1_key')).toBeInTheDocument();
-    expect(screen.getByText('event1_value')).toBeInTheDocument();
   });
 });

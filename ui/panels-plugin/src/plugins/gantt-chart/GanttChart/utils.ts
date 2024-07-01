@@ -32,8 +32,10 @@ export const getConsistentSpanColor = (span: Span) => getConsistentColor(span.re
 
 export function formatDuration(timeMs: number) {
   if (timeMs < 1) {
-    return `${(timeMs * 1000).toFixed(0)}μs`;
+    return `${Math.round(timeMs * 1000)}μs`;
   }
-
-  return `${timeMs.toFixed(0)}ms`;
+  if (timeMs < 1000) {
+    return `${timeMs.toFixed(0)}ms`;
+  }
+  return `${+(timeMs / 1000).toFixed(2)}s`;
 }
