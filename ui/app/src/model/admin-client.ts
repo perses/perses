@@ -89,10 +89,14 @@ export function useGlobalDatasource(name: string) {
  * Used to get global datasources from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalDatasourceList() {
-  return useQuery<GlobalDatasource[], Error>([globalDatasourceResource], () => {
-    return getGlobalDatasources();
-  });
+export function useGlobalDatasourceList(refetchOnMount = true) {
+  return useQuery<GlobalDatasource[], Error>(
+    [globalDatasourceResource],
+    () => {
+      return getGlobalDatasources();
+    },
+    { refetchOnMount: refetchOnMount }
+  );
 }
 
 export function createGlobalDatasource(entity: GlobalDatasource) {
