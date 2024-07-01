@@ -117,7 +117,7 @@ export function useDatasource(project: string, name: string) {
  * Used to get datasources in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasourceList(project: string) {
+export function useDatasourceList(project?: string) {
   return useQuery<ProjectDatasource[], Error>(buildQueryKey({ resource, parent: project }), () => {
     return getDatasources(project);
   });
