@@ -112,5 +112,5 @@ export interface TraceMetaData {
 }
 
 export function isValidTraceId(traceId: string): boolean {
-  return /^[a-z0-9]+$/.test(traceId);
+  return /^[0-9a-fA-F]+$/.test(traceId);
 }
