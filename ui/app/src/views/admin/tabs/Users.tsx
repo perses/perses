@@ -14,6 +14,7 @@
 import { Card } from '@mui/material';
 import { useCallback, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
+import { UserResource } from '@perses-dev/core';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { UserList } from '../../../components/users/UserList';
 import {
@@ -21,7 +22,6 @@ import {
   useDeleteUserMutation,
   useUserList,
   useUpdateUserMutation,
-  UserResource,
 } from '../../../model/user-client';
 
 interface UsersProps {

@@ -36,36 +36,91 @@ import {
   BuiltinVariableDefinition,
 } from '@perses-dev/core';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
-import { hydrateVariableStates as hydrateVariableStates } from './hydrationUtils';
+import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
 
-type VariableStore = {
+/**
+ * This store is used to manipulate and read the definition of the variables and their state.
+ * - being local or external variables.
+ * - being text or list variables.
+ * - being of any state (value, options, loading, error, ...) check {@VariableState}
+ * Go and read each property documentation for more details.
+ */
+type VariableDefinitionStore = {
+  /**
+   * List of local variables definitions.
+   * This is typically the variable definition that can be modified through the setVariableDefinition setter.
+   *
+   * In Perses App ecosystem, this is typically the dashboard scope variables, that's why we call them local.
+   * Note that depending on the form, we can reuse this store to modify higher scope variables. For example,
+   * when we modify the variable of a project, we'll set this field with project scope variables. To be able to modify
+   * them.
+   */
   variableDefinitions: VariableDefinition[];
+  /**
+   * List of external variable definitions.
+   * This is static variable definitions that won´t be modified under this context.
+   * You'll have to set one list of external variable definition by scope. See {@link ExternalVariableDefinition} for
+   * more details.
+   *
+   * In Perses App ecosystem, this is typically the project or global scope variables.
+   * Note that depending on the form, we can reuse this store to modify higher scope variables. For example,
+   * when we modify the variable of a project, we'll set this field with global scope variables. Which means we
+   * won't be able to modify them from this form.
+   */
   externalVariableDefinitions: ExternalVariableDefinition[];
+  /**
+   * Additionally to definitions, we need to associate to each variable a state. That's what this map is meant for.
+   * This can be heavily modified under this context, using the different setters available.
+   * Note that the state of local AND external variables can be modified.
+   */
   variableState: VariableStoreStateMap;
+  /**
+   * Allow to modify the `value` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param value new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableValue: (variableName: VariableName, value: VariableValue, source?: string) => void;
+  /**
+   * Allow to modify the `options` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param options new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableOptions: (name: VariableName, options: VariableOption[], source?: string) => void;
+  /**
+   * Allow to modify the `loading` property of a variable in the state map.
+   * @param variableName identify the variable
+   * @param laoding new value
+   * @param source identify the variable source if this is an external variable. See {@link ExternalVariableDefinition}
+   */
   setVariableLoading: (name: VariableName, loading: boolean, source?: string) => void;
   setVariableDefinitions: (definitions: VariableDefinition[]) => void;
   setVariableDefaultValues: () => VariableDefinition[];
   getSavedVariablesStatus: () => { isSavedVariableModified: boolean; modifiedVariableNames: string[] };
 };
 
-const VariableStoreContext = createContext<ReturnType<typeof createVariableSrvStore> | undefined>(undefined);
-export function useVariableStoreCtx() {
-  const context = useContext(VariableStoreContext);
+/**
+ * Context object for {@link VariableDefinitionStore}.
+ */
+const VariableDefinitionStoreContext = createContext<ReturnType<typeof createVariableDefinitionStore> | undefined>(
+  undefined
+);
+export function useVariableDefinitionStoreCtx() {
+  const context = useContext(VariableDefinitionStoreContext);
   if (!context) {
     throw new Error('VariableStoreContext not initialized');
   }
   return context;
 }
 
-export function useVariableValues(variableNames?: string[]) {
-  const store = useVariableStoreCtx();
+export function useVariableDefinitionStates(variableNames?: string[]): VariableStateMap {
+  const store = useVariableDefinitionStoreCtx();
   return useStoreWithEqualityFn(
     store,
     (s) => {
-      const vars: VariableStateMap = {};
+      const varStates: VariableStateMap = {};
 
       // Collect values of local variables, from the variable state
       const names = variableNames ?? s.variableDefinitions.map((value) => value.spec.name);
@@ -74,7 +129,7 @@ export function useVariableValues(variableNames?: string[]) {
         if (!varState || varState.overridden) {
           return;
         }
-        vars[name] = varState;
+        varStates[name] = varState;
       });
 
       // Collect values of external variables, from the variable state
@@ -86,11 +141,11 @@ export function useVariableValues(variableNames?: string[]) {
           if (!varState || varState.overridden) {
             return;
           }
-          vars[name] = varState;
+          varStates[name] = varState;
         });
       });
 
-      return vars;
+      return varStates;
     },
     (left, right) => {
       return JSON.stringify(left) === JSON.stringify(right);
@@ -103,8 +158,8 @@ export function useVariableValues(variableNames?: string[]) {
  * @param name name of the variable
  * @param source if given, it searches in the external variables
  */
-export function useVariable(name: string, source?: string) {
-  const store = useVariableStoreCtx();
+export function useVariableDefinitionAndState(name: string, source?: string) {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     const state = s.variableState.get({ name, source });
     const definitions = source
@@ -116,8 +171,8 @@ export function useVariable(name: string, source?: string) {
   });
 }
 
-export function useVariableActions() {
-  const store = useVariableStoreCtx();
+export function useVariableDefinitionActions() {
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => {
     return {
       setVariableValue: s.setVariableValue,
@@ -131,18 +186,13 @@ export function useVariableActions() {
 }
 
 export function useVariableDefinitions() {
-  const store = useVariableStoreCtx();
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.variableDefinitions);
 }
 
 export function useExternalVariableDefinitions() {
-  const store = useVariableStoreCtx();
+  const store = useVariableDefinitionStoreCtx();
   return useStore(store, (s) => s.externalVariableDefinitions);
-}
-
-export function useVariableStore() {
-  const store = useVariableStoreCtx();
-  return useStore(store);
 }
 
 interface PluginProviderProps {
@@ -151,7 +201,7 @@ interface PluginProviderProps {
 }
 
 function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
-  const originalValues = useVariableValues();
+  const originalValues = useVariableDefinitionStates();
   const definitions = useVariableDefinitions();
   const externalDefinitions = useExternalVariableDefinitions();
   const { absoluteTimeRange } = useTimeRange();
@@ -258,29 +308,37 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps) {
   );
 }
 
-interface VariableSrvArgs {
+interface VariableDefinitionStoreArgs {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   queryParams?: ReturnType<typeof useVariableQueryParams>;
 }
 
-function createVariableSrvStore({
+function createVariableDefinitionStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
-}: VariableSrvArgs) {
+}: VariableDefinitionStoreArgs) {
   const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
-  const store = createStore<VariableStore>()(
+  const store = createStore<VariableDefinitionStore>()(
     devtools(
       immer((set, get) => ({
-        variableState: hydrateVariableStates(initialVariableDefinitions, initialParams, externalVariableDefinitions),
+        variableState: hydrateVariableDefinitionStates(
+          initialVariableDefinitions,
+          initialParams,
+          externalVariableDefinitions
+        ),
         variableDefinitions: initialVariableDefinitions,
         externalVariableDefinitions: externalVariableDefinitions,
         setVariableDefinitions(definitions: VariableDefinition[]) {
           set(
             (state) => {
               state.variableDefinitions = definitions;
-              state.variableState = hydrateVariableStates(definitions, initialParams, externalVariableDefinitions);
+              state.variableState = hydrateVariableDefinitionStates(
+                definitions,
+                initialParams,
+                externalVariableDefinitions
+              );
             },
             false,
             '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
@@ -387,6 +445,14 @@ function createVariableSrvStore({
   return store;
 }
 
+/**
+ * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.
+ * It means that you won´t be able to update them from the dashboard itself, but you will see them appear and will be able
+ * to modify their runtime value as any other variable.
+ * If one of the external variable has the same name as a local one, it will be marked as overridden.
+ * You can define one list of variable definition by source and as many source as you want.
+ * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
+ */
 export type ExternalVariableDefinition = {
   source: string;
   tooltip?: {
@@ -400,30 +466,23 @@ export type ExternalVariableDefinition = {
 export interface VariableProviderProps {
   children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
-  /**
-   * The external variables allow you to give to the provider some additional variables, not defined in the dashboard and static.
-   * It means that you won´t be able to update them from the dashboard itself, but you will see them appear and will be able
-   * to modify their runtime value as any other variable.
-   * If one of the external variable has the same name as a local one, it will be marked as overridden.
-   * You can define one list of variable definition by source and as many source as you want.
-   * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
-   */
   externalVariableDefinitions?: ExternalVariableDefinition[];
-  builtinVariables?: BuiltinVariableDefinition[];
+  builtinVariableDefinitions?: BuiltinVariableDefinition[];
 }
 
+// TODO: merge the different providers related to Variables under a single one (and keep "VariableProvider" as a name)
 export function VariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  builtinVariables = [],
+  builtinVariableDefinitions = [],
 }: VariableProviderProps) {
-  const [store] = useState(createVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions }));
+  const [store] = useState(createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions }));
 
   return (
-    <VariableStoreContext.Provider value={store}>
-      <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </VariableStoreContext.Provider>
+    <VariableDefinitionStoreContext.Provider value={store}>
+      <PluginProvider builtinVariables={builtinVariableDefinitions}>{children}</PluginProvider>
+    </VariableDefinitionStoreContext.Provider>
   );
 }
 
@@ -431,17 +490,17 @@ export function VariableProviderWithQueryParams({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  builtinVariables = [],
+  builtinVariableDefinitions: builtinVariables = [],
 }: VariableProviderProps) {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(
-    createVariableSrvStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
   );
 
   return (
-    <VariableStoreContext.Provider value={store}>
+    <VariableDefinitionStoreContext.Provider value={store}>
       <PluginProvider builtinVariables={builtinVariables}>{children}</PluginProvider>
-    </VariableStoreContext.Provider>
+    </VariableDefinitionStoreContext.Provider>
   );
 }

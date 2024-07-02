@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { useCallback, useMemo } from 'react';
+import { PanelGroupId } from '@perses-dev/core';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
-import { PanelGroupItemId, PanelGroupId, PanelGroupItemLayout } from './panel-group-slice';
+import { PanelGroupItemId, PanelGroupItemLayout } from './panel-group-slice';
 
 const selectEditMode = ({ isEditMode, setEditMode }: DashboardStoreState) => ({ isEditMode, setEditMode });
 export function useEditMode() {

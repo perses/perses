@@ -15,10 +15,10 @@ import { ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
   DashboardSpec,
-  ProjectDatasource,
+  DatasourceResource,
   DatasourceSelector,
   DatasourceSpec,
-  GlobalDatasource,
+  GlobalDatasourceResource,
   useEvent,
   EphemeralDashboardResource,
   DatasourceDefinition,
@@ -55,13 +55,13 @@ export type BuildDatasourceProxyUrlFunc = (p: BuildDatasourceProxyUrlParams) => 
 export interface DatasourceApi {
   buildProxyUrl?: BuildDatasourceProxyUrlFunc;
 
-  getDatasource: (project: string, selector: DatasourceSelector) => Promise<ProjectDatasource | undefined>;
+  getDatasource: (project: string, selector: DatasourceSelector) => Promise<DatasourceResource | undefined>;
 
-  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasource | undefined>;
+  getGlobalDatasource: (selector: DatasourceSelector) => Promise<GlobalDatasourceResource | undefined>;
 
-  listDatasources: (project: string, pluginKind?: string) => Promise<ProjectDatasource[]>;
+  listDatasources: (project: string, pluginKind?: string) => Promise<DatasourceResource[]>;
 
-  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasource[]>;
+  listGlobalDatasources: (pluginKind?: string) => Promise<GlobalDatasourceResource[]>;
 }
 
 /**

@@ -44,10 +44,10 @@ import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
-import { VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import { ValidationProvider, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { ExternalVariableDefinition, useDiscardChangesConfirmationDialog } from '../../context';
-import { hydrateVariableStates } from '../../context/VariableProvider/hydrationUtils';
+import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
 function getVariableLabelByKind(kind: string) {
@@ -84,7 +84,7 @@ export function VariableEditor(props: {
   const builtinVariableDefinitions = props.builtinVariableDefinitions;
   const validation = useMemo(() => getValidation(variableDefinitions), [variableDefinitions]);
   const [variableState] = useMemo(() => {
-    return [hydrateVariableStates(variableDefinitions, {}, externalVariableDefinitions)];
+    return [hydrateVariableDefinitionStates(variableDefinitions, {}, externalVariableDefinitions)];
   }, [externalVariableDefinitions, variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
 
@@ -180,23 +180,25 @@ export function VariableEditor(props: {
   return (
     <>
       {currentEditingVariableDefinition && (
-        <VariableEditorForm
-          initialVariableDefinition={currentEditingVariableDefinition}
-          initialAction={variableFormAction}
-          isDraft={true}
-          onSave={(definition: VariableDefinition) => {
-            setVariableDefinitions((draft) => {
-              draft[variableEditIdx] = definition;
+        <ValidationProvider>
+          <VariableEditorForm
+            initialVariableDefinition={currentEditingVariableDefinition}
+            initialAction={variableFormAction}
+            isDraft={true}
+            onSave={(definition: VariableDefinition) => {
+              setVariableDefinitions((draft) => {
+                draft[variableEditIdx] = definition;
+                setVariableEditIdx(null);
+              });
+            }}
+            onClose={() => {
+              if (variableFormAction === 'create') {
+                removeVariable(variableEditIdx);
+              }
               setVariableEditIdx(null);
-            });
-          }}
-          onClose={() => {
-            if (variableFormAction === 'create') {
-              removeVariable(variableEditIdx);
-            }
-            setVariableEditIdx(null);
-          }}
-        />
+            }}
+          />
+        </ValidationProvider>
       )}
       {!currentEditingVariableDefinition && (
         <>

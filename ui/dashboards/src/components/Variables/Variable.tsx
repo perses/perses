@@ -24,7 +24,7 @@ import {
 } from '@perses-dev/core';
 import { useListVariablePluginValues, VariableOption, VariableState } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useVariable, useVariableActions } from '../../context';
+import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
 
 type VariableProps = {
@@ -45,7 +45,7 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
 }
 
 export function Variable({ name, source }: VariableProps) {
-  const ctx = useVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const kind = ctx.definition?.kind;
   switch (kind) {
     case 'TextVariable':
@@ -181,10 +181,10 @@ const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
 };
 
 function ListVariable({ name, source }: VariableProps) {
-  const ctx = useVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const definition = ctx.definition as ListVariableDefinition;
   const variablesOptionsQuery = useListVariablePluginValues(definition);
-  const { setVariableValue, setVariableLoading, setVariableOptions } = useVariableActions();
+  const { setVariableValue, setVariableLoading, setVariableOptions } = useVariableDefinitionActions();
   const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
@@ -238,9 +238,8 @@ function ListVariable({ name, source }: VariableProps) {
           '& .MuiInputBase-root': {
             minHeight: '38px',
           },
-          '& .MuiInputBase-root.MuiOutlinedInput-root.MuiInputBase-sizeSmall': {
-            paddingY: '5px',
-            paddingLeft: '5px',
+          '& .MuiAutocomplete-tag': {
+            margin: '1px 2px', // Default margin of 2px (Y axis) make min height of the autocomplete 40px
           },
         }}
         value={selectedOptions}
@@ -266,12 +265,12 @@ function ListVariable({ name, source }: VariableProps) {
 }
 
 function TextVariable({ name, source }: VariableProps) {
-  const ctx = useVariable(name, source);
+  const ctx = useVariableDefinitionAndState(name, source);
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
   const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
-  const { setVariableValue } = useVariableActions();
+  const { setVariableValue } = useVariableDefinitionActions();
 
   useEffect(() => {
     setTempValue(state?.value ?? '');
@@ -281,7 +280,6 @@ function TextVariable({ name, source }: VariableProps) {
     <TextField
       title={tempValue as string}
       value={tempValue}
-      //onChange={(e) => setTempValue(e.target.value)}
       onChange={(e) => {
         setTempValue(e.target.value);
         setInputWidth(getWidthPx(e.target.value, 'text'));

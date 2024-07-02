@@ -16,7 +16,7 @@ import { VariableDefinition, VariableSpec } from '@perses-dev/core';
 import {
   ExternalVariableDefinition,
   useExternalVariableDefinitions,
-  useVariable,
+  useVariableDefinitionAndState,
   useVariableDefinitions,
 } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
@@ -44,7 +44,7 @@ export function VariableList() {
 }
 
 export function VariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
-  const ctx = useVariable(spec.name, source);
+  const ctx = useVariableDefinitionAndState(spec.name, source);
   if (ctx.state?.overridden) {
     return null;
   }

@@ -14,7 +14,8 @@
 
 import { useState } from 'react';
 import { Drawer } from '@perses-dev/components';
-import { PanelEditorValues, usePanelEditor } from '../../context';
+import { PanelEditorValues } from '@perses-dev/core';
+import { usePanelEditor } from '../../context';
 import { PanelEditorForm } from './PanelEditorForm';
 
 /**
