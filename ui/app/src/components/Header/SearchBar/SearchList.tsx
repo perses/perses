@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, ProjectMetadata, Resource } from '@perses-dev/core';
+import { isProjectMetadata, Resource } from '@perses-dev/core';
 import React, { useMemo } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
+import { ProjectRoute } from '../../../model/route';
 
 const kvSearchConfig: KVSearchConfiguration = {
   indexedKeys: [['metadata', 'name']],
@@ -26,10 +27,6 @@ const kvSearchConfig: KVSearchConfiguration = {
 
 const sizeList = 10;
 
-function isProjectMetadata(metadata: Metadata | ProjectMetadata): metadata is ProjectMetadata {
-  return 'project' in metadata;
-}
-
 function buildBoxSearchKey(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
     ? `${resource.kind}-${resource.metadata.project}-${resource.metadata.name}`
@@ -38,7 +35,7 @@ function buildBoxSearchKey(resource: Resource): string {
 
 function buildRouting(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
-    ? `/projects/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
+    ? `${ProjectRoute}/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
     : `/${resource.kind.toLowerCase()}s/${resource.metadata.name}`;
 }
 
@@ -70,6 +67,7 @@ export function SearchList(props: SearchListProps) {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-start',
+          marginTop: 0.5,
           marginBottom: 1,
           marginLeft: 0.5,
         }}
