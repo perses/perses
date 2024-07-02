@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { isProjectMetadata, Resource } from '@perses-dev/core';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
@@ -49,6 +49,7 @@ export interface SearchListProps {
 }
 
 export function SearchList(props: SearchListProps) {
+  const [currentSizeList, setCurrentSizeList] = useState<number>(sizeList);
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
   const filteredList: Array<KVSearchResult<Resource>> = useMemo(() => {
     if (props.query) {
@@ -57,6 +58,12 @@ export function SearchList(props: SearchListProps) {
       return [];
     }
   }, [kvSearch, props.list, props.query]);
+  useEffect(() => {
+    // Reset the size of the filtered list when query or the actual list change.
+    // Otherwise, we would keep the old size that can have been changed using the button to see more data.
+    setCurrentSizeList(sizeList);
+  }, [props.query, props.list]);
+
   return filteredList.length === 0 ? (
     <></>
   ) : (
@@ -76,7 +83,7 @@ export function SearchList(props: SearchListProps) {
         <Typography variant="h3">{filteredList[0]?.original.kind}s</Typography>
       </Box>
 
-      {filteredList.slice(0, sizeList).map((search) => (
+      {filteredList.slice(0, currentSizeList).map((search) => (
         <Button
           variant="outlined"
           sx={{
@@ -107,6 +114,9 @@ export function SearchList(props: SearchListProps) {
           )}
         </Button>
       ))}
+      {filteredList.length > currentSizeList && (
+        <Button onClick={() => setCurrentSizeList(currentSizeList + 10)}> see more...</Button>
+      )}
     </Box>
   );
 }
