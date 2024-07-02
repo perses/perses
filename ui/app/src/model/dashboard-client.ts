@@ -57,10 +57,14 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(project?: string, metadataOnly: boolean = false) {
-  return useQuery<DashboardResource[], Error>([resource, project, metadataOnly], () => {
-    return getDashboards(project, metadataOnly);
-  });
+export function useDashboardList(project?: string, metadataOnly: boolean = false, refetchOnMount = true) {
+  return useQuery<DashboardResource[], Error>(
+    [resource, project, metadataOnly],
+    () => {
+      return getDashboards(project, metadataOnly);
+    },
+    { refetchOnMount: refetchOnMount }
+  );
 }
 
 export interface DatedDashboards {

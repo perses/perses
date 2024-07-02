@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, ProjectMetadata, Resource } from '@perses-dev/core';
-import React, { useMemo } from 'react';
+import { isProjectMetadata, Resource } from '@perses-dev/core';
+import React, { useEffect, useMemo, useState } from 'react';
 import { KVSearch, KVSearchConfiguration, KVSearchResult } from '@nexucis/kvsearch';
 import { Box, Button, Chip, Typography } from '@mui/material';
 import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
+import { ProjectRoute } from '../../../model/route';
 
 const kvSearchConfig: KVSearchConfiguration = {
   indexedKeys: [['metadata', 'name']],
@@ -26,10 +27,6 @@ const kvSearchConfig: KVSearchConfiguration = {
 
 const sizeList = 10;
 
-function isProjectMetadata(metadata: Metadata | ProjectMetadata): metadata is ProjectMetadata {
-  return 'project' in metadata;
-}
-
 function buildBoxSearchKey(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
     ? `${resource.kind}-${resource.metadata.project}-${resource.metadata.name}`
@@ -38,7 +35,7 @@ function buildBoxSearchKey(resource: Resource): string {
 
 function buildRouting(resource: Resource): string {
   return isProjectMetadata(resource.metadata)
-    ? `/projects/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
+    ? `${ProjectRoute}/${resource.metadata.project}/${resource.kind.toLowerCase()}s/${resource.metadata.name}`
     : `/${resource.kind.toLowerCase()}s/${resource.metadata.name}`;
 }
 
@@ -52,6 +49,7 @@ export interface SearchListProps {
 }
 
 export function SearchList(props: SearchListProps) {
+  const [currentSizeList, setCurrentSizeList] = useState<number>(sizeList);
   const kvSearch = useMemo(() => new KVSearch<Resource>(kvSearchConfig), []);
   const filteredList: Array<KVSearchResult<Resource>> = useMemo(() => {
     if (props.query) {
@@ -60,6 +58,12 @@ export function SearchList(props: SearchListProps) {
       return [];
     }
   }, [kvSearch, props.list, props.query]);
+  useEffect(() => {
+    // Reset the size of the filtered list when query or the actual list change.
+    // Otherwise, we would keep the old size that can have been changed using the button to see more data.
+    setCurrentSizeList(sizeList);
+  }, [props.query, props.list]);
+
   return filteredList.length === 0 ? (
     <></>
   ) : (
@@ -70,6 +74,7 @@ export function SearchList(props: SearchListProps) {
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'flex-start',
+          marginTop: 0.5,
           marginBottom: 1,
           marginLeft: 0.5,
         }}
@@ -78,7 +83,7 @@ export function SearchList(props: SearchListProps) {
         <Typography variant="h3">{filteredList[0]?.original.kind}s</Typography>
       </Box>
 
-      {filteredList.slice(0, sizeList).map((search) => (
+      {filteredList.slice(0, currentSizeList).map((search) => (
         <Button
           variant="outlined"
           sx={{
@@ -109,6 +114,9 @@ export function SearchList(props: SearchListProps) {
           )}
         </Button>
       ))}
+      {filteredList.length > currentSizeList && (
+        <Button onClick={() => setCurrentSizeList(currentSizeList + 10)}> see more...</Button>
+      )}
     </Box>
   );
 }

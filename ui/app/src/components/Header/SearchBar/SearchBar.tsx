@@ -15,19 +15,29 @@ import { Box, Button, Chip, InputAdornment, Modal, Paper, TextField, Typography 
 import Magnify from 'mdi-material-ui/Magnify';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
+import DatabaseIcon from 'mdi-material-ui/Database';
 import React, { useCallback, useEffect, useState } from 'react';
+import { isProjectMetadata } from '@perses-dev/core';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { useProjectList } from '../../../model/project-client';
+import { useGlobalDatasourceList } from '../../../model/admin-client';
+import { AdminRoute, ProjectRoute } from '../../../model/route';
+import { useDatasourceList } from '../../../model/datasource-client';
 import { SearchList } from './SearchList';
 
 function shortcutCTRL() {
   return isAppleDevice() ? '⌘' : 'ctrl';
 }
 
-function SearchProjectList(props: { query: string; onClick: () => void }) {
-  const projectsQueryResult = useProjectList();
+interface ResourceListProps {
+  query: string;
+  onClick: () => void;
+}
+
+function SearchProjectList(props: ResourceListProps) {
+  const projectsQueryResult = useProjectList({ refetchOnMount: false });
   return SearchList({
     list: projectsQueryResult.data ?? [],
     query: props.query,
@@ -36,14 +46,38 @@ function SearchProjectList(props: { query: string; onClick: () => void }) {
   });
 }
 
-function SearchDashboardList(props: { query: string; onClick: () => void }) {
-  const dashboardQueryResult = useDashboardList(undefined, true);
+function SearchGlobalDatasource(props: ResourceListProps) {
+  const globalDatasourceQueryResult = useGlobalDatasourceList(false);
+  return SearchList({
+    list: globalDatasourceQueryResult.data ?? [],
+    query: props.query,
+    onClick: props.onClick,
+    icon: DatabaseIcon,
+    buildRouting: () => `${AdminRoute}/datasources`,
+  });
+}
+
+function SearchDashboardList(props: ResourceListProps) {
+  const dashboardQueryResult = useDashboardList(undefined, true, false);
   return SearchList({
     list: dashboardQueryResult.data ?? [],
     query: props.query,
     onClick: props.onClick,
     icon: ViewDashboardIcon,
     chip: true,
+  });
+}
+
+function SearchDatasourceList(props: ResourceListProps) {
+  const datasourceQueryResult = useDatasourceList(undefined, false);
+  return SearchList({
+    list: datasourceQueryResult.data ?? [],
+    query: props.query,
+    onClick: props.onClick,
+    icon: DatabaseIcon,
+    chip: true,
+    buildRouting: (resource) =>
+      `${ProjectRoute}/${isProjectMetadata(resource.metadata) ? resource.metadata.project : ''}/datasources`,
   });
 }
 
@@ -103,8 +137,8 @@ export function SearchBar() {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
-            position: 'fixed',
             overflowY: 'scroll',
+            scrollbarWidth: 'none',
           }}
           variant="outlined"
         >
@@ -133,6 +167,8 @@ export function SearchBar() {
           />
           <SearchDashboardList query={query} onClick={handleClose} />
           <SearchProjectList query={query} onClick={handleClose} />
+          <SearchGlobalDatasource query={query} onClick={handleClose} />
+          <SearchDatasourceList query={query} onClick={handleClose} />
         </Paper>
       </Modal>
     </Paper>
