@@ -12,19 +12,21 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
+import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
-import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { DataTable } from './DataTable';
-import { TraceTableOptions, defaultTraceLink } from './trace-table-model';
+import { GanttChartOptions } from './gantt-chart-model';
+import { GanttChart } from './GanttChart/GanttChart';
 
-export type TraceTableProps = PanelProps<TraceTableOptions>;
+export type GanttChartPanelProps = PanelProps<GanttChartOptions>;
 
-export function TraceTablePanel(props: TraceTableProps) {
-  const { onTraceClick, traceLink = defaultTraceLink } = props.spec;
-
+export function GanttChartPanel() {
   const chartsTheme = useChartsTheme();
-  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
   const contentPadding = chartsTheme.container.padding.default;
+  const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
+
+  if (queryResults.length > 1) {
+    return <TextOverlay message="This panel does not support more than one query." />;
+  }
 
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
@@ -35,14 +37,14 @@ export function TraceTablePanel(props: TraceTableProps) {
     throw queryError.error;
   }
 
-  const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
-  if (!tracesFound) {
-    return <NoDataOverlay resource="traces" />;
+  const trace = queryResults[0]?.data?.trace;
+  if (!trace) {
+    return <NoDataOverlay resource="trace" />;
   }
 
   return (
-    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable result={queryResults} onTraceClick={onTraceClick} traceLink={traceLink} />
+    <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
+      <GanttChart rootSpan={trace.rootSpan} />
     </Box>
   );
 }

@@ -11,5 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+/**
+ * The Options object type supported by the GanttChart panel plugin.
+ */
+// Note: The interface attributes must match cue/schemas/panels/gantt-chart/gantt-chart.cue
+export interface GanttChartOptions {}
+
+/**
+ * Creates the initial/empty options for a GanttChart panel.
+ */
+export function createInitialGanttChartOptions() {
+  return {};
+}

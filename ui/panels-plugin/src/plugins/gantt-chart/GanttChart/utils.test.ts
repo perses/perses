@@ -11,5 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+import { formatDuration } from './utils';
+
+describe('utils', () => {
+  it.each([
+    [0.1, '100μs'],
+    [100, '100ms'],
+    [1000, '1s'],
+    [1500, '1.5s'],
+    [1550, '1.55s'],
+    [1555, '1.55s'],
+  ])('formatDuration(%f)', (x, expected) => {
+    expect(formatDuration(x)).toEqual(expected);
+  });
+});

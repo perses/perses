@@ -11,19 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Avatar, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography, styled } from '@mui/material';
-import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import {
-  ServiceStats,
-  TraceData,
-  TraceSearchResult,
-  formatDuration,
-  msToPrometheusDuration,
-  traceServiceColor,
-} from '@perses-dev/core';
+  Avatar,
+  Chip,
+  Link,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+  styled,
+} from '@mui/material';
+import { ServiceStats, TraceData, TraceSearchResult, formatDuration, msToPrometheusDuration } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { ReactNode } from 'react';
+import { MouseEvent, ReactNode } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
+import { getConsistentServiceColor } from '../gantt-chart/GanttChart/utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',
@@ -33,17 +38,19 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).f
 
 export interface DataTableProps {
   result: Array<QueryData<TraceData>>;
+  onTraceClick?: (e: MouseEvent, traceId: string) => void;
+  traceLink?: (traceId: string) => string;
 }
 
-export function DataTable({ result }: DataTableProps) {
-  const theme = useChartsTheme();
+export function DataTable(props: DataTableProps) {
+  const { result, onTraceClick, traceLink } = props;
 
   if (!result) {
     return null;
   }
 
   const traces = result.flatMap((d) => d.data).flatMap((d) => d?.searchResult || []);
-  const rows = traces.map((trace) => buildRow(theme, trace));
+  const rows = traces.map((trace) => buildRow(trace, onTraceClick, traceLink));
 
   return (
     <>
@@ -70,7 +77,11 @@ export function DataTable({ result }: DataTableProps) {
   );
 }
 
-function buildRow(theme: PersesChartsTheme, trace: TraceSearchResult): ReactNode {
+function buildRow(
+  trace: TraceSearchResult,
+  onTraceClick?: (e: MouseEvent, traceId: string) => void,
+  traceLink?: (traceId: string) => string
+): ReactNode {
   let totalSpanCount = 0;
   let totalErrorCount = 0;
   for (const stats of Object.values(trace.serviceStats)) {
@@ -80,11 +91,9 @@ function buildRow(theme: PersesChartsTheme, trace: TraceSearchResult): ReactNode
 
   return (
     <StyledTableRow key={trace.traceId}>
-      <StyledTableCell>
-        <Typography>
-          <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
-        </Typography>
-        {buildServiceStatsChips(theme, trace.serviceStats)}
+      <StyledTableCell onClick={(e) => onTraceClick?.(e, trace.traceId)}>
+        {buildTraceName(trace, traceLink)}
+        {buildServiceStatsChips(trace.serviceStats)}
       </StyledTableCell>
       <StyledTableCell>
         <Typography display="inline">{totalSpanCount} spans</Typography>
@@ -111,7 +120,33 @@ function buildRow(theme: PersesChartsTheme, trace: TraceSearchResult): ReactNode
   );
 }
 
-function buildServiceStatsChips(theme: PersesChartsTheme, serviceStats: Record<string, ServiceStats>) {
+function buildTraceName(trace: TraceSearchResult, traceLink?: (traceId: string) => string) {
+  if (traceLink) {
+    return (
+      <>
+        <Link
+          variant="body1"
+          color="inherit"
+          underline="hover"
+          component={RouterLink}
+          to={traceLink(trace.traceId)}
+          reloadDocument
+        >
+          <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
+        </Link>
+        <br />
+      </>
+    );
+  }
+
+  return (
+    <Typography>
+      <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
+    </Typography>
+  );
+}
+
+function buildServiceStatsChips(serviceStats: Record<string, ServiceStats>) {
   return Object.entries(serviceStats).map(([serviceName, stats]) => (
     <Chip
       key={serviceName}
@@ -119,11 +154,7 @@ function buildServiceStatsChips(theme: PersesChartsTheme, serviceStats: Record<s
       sx={{ marginTop: '5px', marginRight: '5px' }}
       variant="outlined"
       size="small"
-      avatar={
-        <Avatar sx={{ backgroundColor: traceServiceColor(serviceName, theme.echartsTheme.color as string[]) }}>
-          {stats.spanCount}
-        </Avatar>
-      }
+      avatar={<Avatar sx={{ backgroundColor: getConsistentServiceColor(serviceName) }}>{stats.spanCount}</Avatar>}
     />
   ));
 }

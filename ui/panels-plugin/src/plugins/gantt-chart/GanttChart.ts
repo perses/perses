@@ -11,5 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialGanttChartOptions, GanttChartOptions } from './gantt-chart-model';
+import { GanttChartPanel } from './GanttChartPanel';
+
+export const GanttChart: PanelPlugin<GanttChartOptions> = {
+  PanelComponent: GanttChartPanel,
+  // TODO: add a chart options editor plugin, for example:
+  // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialGanttChartOptions,
+};

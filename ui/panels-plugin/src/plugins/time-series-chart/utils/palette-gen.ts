@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import ColorHash from 'color-hash';
+import { getConsistentColor } from '../../../model/palette';
 import { QuerySettingsOptions, TimeSeriesChartVisualOptions } from '../time-series-chart-model';
 
 export interface SeriesColorProps {
@@ -86,36 +86,9 @@ export function getCategoricalPaletteColor(palette: string[], seriesIndex: numbe
   return seriesColor;
 }
 
-// Valid hue values are 0 to 360 and can be adjusted to control the generated colors.
-// More info: https://github.com/zenozeng/color-hash#custom-hue
-// Picked min of 20 and max of 360 to exclude common threshold colors (red).
-// Series names with "error" in them will always be generated as red.
-const ERROR_HUE_CUTOFF = 20;
-const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 360 } });
-const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
-
-// To check whether a color has already been generated for a given string.
-// TODO: Predefined color aliases will be defined here
-const seriesNameToColorLookup: Record<string, string> = {};
-
 /*
- * Check whether a color was already generated for a given series name and if not,
- * generate a new color (if series name includes 'error', it will have a red hue).
+ * Generate a consistent series name color (if series name includes 'error', it will have a red hue).
  */
-export const getConsistentSeriesNameColor = (() => {
-  return (inputString: string) => {
-    // Check whether color has already been generated for a given series name.
-    // Ensures colors are consistent across panels.
-    if (!seriesNameToColorLookup[inputString]) {
-      const seriesNameContainsError = inputString.toLowerCase().includes('error');
-      const [hue, saturation, lightness] = seriesNameContainsError
-        ? redColorGenerator.hsl(inputString)
-        : colorGenerator.hsl(inputString);
-      const saturationPercent = `${(saturation * 100).toFixed(0)}%`;
-      const lightnessPercent = `${(lightness * 100).toFixed(0)}%`;
-      const colorString = `hsla(${hue.toFixed(2)},${saturationPercent},${lightnessPercent},0.9)`;
-      seriesNameToColorLookup[inputString] = colorString;
-    }
-    return seriesNameToColorLookup[inputString];
-  };
-})();
+export function getConsistentSeriesNameColor(inputString: string) {
+  return getConsistentColor(inputString, inputString.toLowerCase().includes('error'));
+}

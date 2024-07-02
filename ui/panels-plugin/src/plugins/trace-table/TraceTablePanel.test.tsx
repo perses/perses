@@ -23,6 +23,7 @@ import { TimeRangeValue, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/co
 import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { MemoryRouter } from 'react-router-dom';
 import { MOCK_TRACE_QUERY_RESULT } from '../../test';
 import { TraceTablePanel, TraceTableProps } from './TraceTablePanel';
 
@@ -74,15 +75,17 @@ describe('TraceTablePanel', () => {
     };
 
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin())}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} />
-            </TimeRangeContext.Provider>
-          </ChartsProvider>
-        </PluginRegistry>
-      </VirtuosoMockContext.Provider>
+      <MemoryRouter>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+          <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin())}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TimeRangeContext.Provider value={mockTimeRangeContext}>
+                <TraceTablePanel {...TEST_TRACE_TABLE_PROPS} />
+              </TimeRangeContext.Provider>
+            </ChartsProvider>
+          </PluginRegistry>
+        </VirtuosoMockContext.Provider>
+      </MemoryRouter>
     );
   };
 

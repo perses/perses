@@ -12,13 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesChartVisualOptions } from '../time-series-chart-model';
-import {
-  getSeriesColor,
-  getAutoPaletteColor,
-  getCategoricalPaletteColor,
-  getConsistentSeriesNameColor,
-  SeriesColorProps,
-} from './palette-gen';
+import { getSeriesColor, getAutoPaletteColor, getCategoricalPaletteColor, SeriesColorProps } from './palette-gen';
 
 describe('getSeriesColor', () => {
   const fallbackColor = '#000';
@@ -237,16 +231,5 @@ describe('getAutoPaletteColor', () => {
       fallbackColor
     );
     expect(generatedColor).toEqual('hsla(128.97,50%,35%,0.9)');
-  });
-});
-
-describe('getConsistentSeriesNameColor', () => {
-  it('should generate a consistent custom hsla color', () => {
-    const color = getConsistentSeriesNameColor('test');
-    const colorAlt = getConsistentSeriesNameColor('test');
-    const firstResult = 'hsla(289.38,35%,50%,0.9)';
-    // ensures generated color does not change on subsequent calls with same series name
-    expect(color).toEqual(firstResult);
-    expect(colorAlt).toEqual(firstResult);
   });
 });
