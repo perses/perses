@@ -87,6 +87,7 @@ function useHandleShortCut(handleOpen: () => void) {
     (event: KeyboardEvent) => {
       const ctrlKey = isAppleDevice() ? event.metaKey : event.ctrlKey;
       if (ctrlKey && event.key === 'k') {
+        event.preventDefault();
         handleOpen();
       }
     },
