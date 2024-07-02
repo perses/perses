@@ -150,7 +150,7 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         valueGetter: (_, row) => `$${row.name}`,
         renderCell: (params) => (
           <>
-            <pre>{params.value}</pre>
+            <span style={{ fontFamily: 'monospace' }}>{params.value}</span>
             <Tooltip title="Copy variable to clipboard" placement="top">
               <IconButton
                 onClick={async ($event) => {

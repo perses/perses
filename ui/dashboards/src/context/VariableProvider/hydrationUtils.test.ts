@@ -13,7 +13,7 @@
 
 import { DEFAULT_ALL_VALUE, VariableDefinition } from '@perses-dev/core';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
-import { hydrateVariableStates } from './hydrationUtils';
+import { hydrateVariableDefinitionStates } from './hydrationUtils';
 
 describe('hydrateVariableStates', () => {
   test('normalizes single "all" value in an array', () => {
@@ -38,7 +38,7 @@ describe('hydrateVariableStates', () => {
         },
       },
     ];
-    const result = hydrateVariableStates(definitions, {});
+    const result = hydrateVariableDefinitionStates(definitions, {});
     expect(result?.get({ name: 'instance' })?.value).toEqual(DEFAULT_ALL_VALUE);
   });
   test('external definitions overridden and overriding', () => {
@@ -106,7 +106,7 @@ describe('hydrateVariableStates', () => {
       },
     ];
 
-    const localStateResult = hydrateVariableStates(definitions, {}, externalDefinitions);
+    const localStateResult = hydrateVariableDefinitionStates(definitions, {}, externalDefinitions);
 
     // Verify hydration of local variable state
     expect(localStateResult.get({ name: 'project_var' })).toEqual({

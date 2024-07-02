@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupDefinition, PanelGroupId, PanelGroupItemId } from '@perses-dev/dashboards';
+import { PanelGroupDefinition, PanelGroupItemId } from '@perses-dev/dashboards';
+import { PanelGroupId } from '@perses-dev/core';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 

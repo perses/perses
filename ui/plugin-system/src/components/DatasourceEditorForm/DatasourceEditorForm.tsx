@@ -11,42 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useImmer } from 'use-immer';
-import { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
+import { Action, DatasourceDefinition } from '@perses-dev/core';
 import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import { DispatchWithoutAction, useCallback, useState } from 'react';
+import { DispatchWithoutAction, useState } from 'react';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
 import { getSubmitText, getTitleAction } from '../../utils';
-import { datasourceEditValidationSchema, DatasourceEditValidationType } from '../../validation';
-
-/**
- * This preprocessing ensures that we always have a defined object for the `display` property
- * @param datasource
- */
-function getInitialState(datasourceDefinition: DatasourceDefinition) {
-  const patchedDisplay = {
-    name: datasourceDefinition.spec.display?.name ?? '',
-    description: datasourceDefinition.spec.display?.description ?? '',
-  };
-
-  return {
-    name: datasourceDefinition.name,
-    spec: {
-      ...datasourceDefinition.spec,
-      display: patchedDisplay,
-    },
-  };
-}
+import { useValidationSchemas } from '../../context';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;
   initialAction: Action;
   isDraft: boolean;
   isReadonly?: boolean;
-  onSave: (name: string, spec: DatasourceSpec) => void;
+  onSave: (def: DatasourceDefinition) => void;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
@@ -54,46 +34,44 @@ interface DatasourceEditorFormProps {
 export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   const { initialDatasourceDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
 
-  const initialState = getInitialState(initialDatasourceDefinition);
-  const [state, setState] = useImmer(initialState);
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<DatasourceEditValidationType>({
-    resolver: zodResolver(datasourceEditValidationSchema),
+  const { datasourceEditorSchema } = useValidationSchemas();
+  const form = useForm<DatasourceDefinition>({
+    resolver: zodResolver(datasourceEditorSchema),
     mode: 'onBlur',
-    defaultValues: {
-      name: state.name,
-      title: state.spec.display?.name,
-      description: state.spec.display?.description,
-      default: state.spec.default,
-    },
+    defaultValues: initialDatasourceDefinition,
   });
 
-  const processForm: SubmitHandler<DatasourceEditValidationType> = () => {
-    // reset display attributes to undefined when empty, because we don't want to save empty strings
-    onSave(state.name, {
-      ...state.spec,
-      display: {
-        name: state.spec.display?.name === '' ? undefined : state.spec.display?.name,
-        description: state.spec.display?.description === '' ? undefined : state.spec.display?.description,
-      },
-    });
+  /*
+   * Remove empty fields that are optional
+   */
+  function clearFormData(data: DatasourceDefinition): DatasourceDefinition {
+    const result = { ...data };
+    if (result.spec.display?.name === undefined && result.spec.display?.description === undefined) {
+      delete result.spec.display;
+    }
+    return result;
+  }
+
+  const processForm: SubmitHandler<DatasourceDefinition> = (data: DatasourceDefinition) => {
+    onSave(clearFormData(data));
   };
 
   // When user click on cancel, several possibilities:
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  const handleCancel = useCallback(() => {
-    if (JSON.stringify(initialState) !== JSON.stringify(state)) {
+  function handleCancel() {
+    if (JSON.stringify(initialDatasourceDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
     }
-  }, [state, initialState, setDiscardDialogOpened, onClose]);
+  }
 
   return (
     <FormProvider {...form}>
@@ -146,6 +124,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
         <Grid container spacing={2} mb={2}>
           <Grid item xs={4}>
             <Controller
+              control={form.control}
               name="name"
               render={({ field, fieldState }) => (
                 <TextField
@@ -161,11 +140,9 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
-                    setState((draft) => {
-                      draft.name = event.target.value;
-                    });
                   }}
                 />
               )}
@@ -173,7 +150,8 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           </Grid>
           <Grid item xs={8}>
             <Controller
-              name="title"
+              control={form.control}
+              name="spec.display.name"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -186,13 +164,9 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
-                    setState((draft) => {
-                      field.onChange(event);
-                      if (draft.spec.display) {
-                        draft.spec.display.name = event.target.value;
-                      }
-                    });
+                    field.onChange(event);
                   }}
                 />
               )}
@@ -200,7 +174,8 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           </Grid>
           <Grid item xs={12}>
             <Controller
-              name="description"
+              control={form.control}
+              name="spec.display.description"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -213,13 +188,9 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
                   }}
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
-                    setState((draft) => {
-                      if (draft.spec.display) {
-                        draft.spec.display.description = event.target.value;
-                      }
-                    });
                   }}
                 />
               )}
@@ -228,29 +199,27 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
           <Grid item xs={6} sx={{ paddingTop: '5px !important' }}>
             <Stack>
               <Controller
-                name="default"
+                control={form.control}
+                name="spec.default"
                 render={({ field }) => (
                   <FormControlLabel
-                    {...field}
+                    label="Set as default"
                     control={
                       <Switch
-                        checked={state.spec.default}
+                        {...field}
+                        checked={!!field.value}
                         readOnly={action === 'read'}
                         onChange={(event) => {
                           if (action === 'read') return; // ReadOnly prop is not blocking user interaction...
                           field.onChange(event);
-                          setState((draft) => {
-                            draft.spec.default = event.target.checked;
-                          });
                         }}
                       />
                     }
-                    label="Set as default"
                   />
                 )}
               />
               <Typography variant="caption">
-                Whether this datasource should be the default {state.spec.plugin.kind} to be used
+                Whether this datasource should be the default {form.getValues().spec.plugin.kind} to be used
               </Typography>
             </Stack>
           </Grid>
@@ -259,24 +228,27 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
         <Typography py={1} variant="h3">
           Plugin Options
         </Typography>
-        <PluginEditor
-          width="100%"
-          pluginTypes={['Datasource']}
-          pluginKindLabel="Source"
-          value={{
-            selection: {
-              kind: state.spec.plugin.kind,
-              type: 'Datasource',
-            },
-            spec: state.spec.plugin.spec,
-          }}
-          isReadonly={action === 'read'}
-          onChange={(v) => {
-            setState((draft) => {
-              draft.spec.plugin.kind = v.selection.kind;
-              draft.spec.plugin.spec = v.spec;
-            });
-          }}
+        <Controller
+          control={form.control}
+          name="spec.plugin"
+          render={({ field }) => (
+            <PluginEditor
+              width="100%"
+              pluginTypes={['Datasource']}
+              pluginKindLabel="Source"
+              value={{
+                selection: {
+                  type: 'Datasource',
+                  kind: field.value.kind,
+                },
+                spec: field.value.spec,
+              }}
+              isReadonly={action === 'read'}
+              onChange={(v) => {
+                field.onChange({ kind: v.selection.kind, spec: v.spec });
+              }}
+            />
+          )}
         />
       </Box>
       <DiscardChangesConfirmationDialog

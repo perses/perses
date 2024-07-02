@@ -20,6 +20,7 @@ import {
   TimeRangeProviderWithQueryParams,
   VariableEditorForm,
   useInitialTimeRange,
+  ValidationProvider,
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
@@ -68,21 +69,23 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="variable-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={bundledPluginLoader}>
-          <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
-            <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
-              <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
-                <VariableEditorForm
-                  initialVariableDefinition={variableDef}
-                  initialAction={action}
-                  isDraft={false}
-                  isReadonly={isReadonly}
-                  onSave={handleSave}
-                  onClose={onClose}
-                  onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
-                />
-              </VariableProviderWithQueryParams>
-            </TimeRangeProviderWithQueryParams>
-          </DatasourceStoreProvider>
+          <ValidationProvider>
+            <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
+              <TimeRangeProviderWithQueryParams initialTimeRange={initialTimeRange}>
+                <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
+                  <VariableEditorForm
+                    initialVariableDefinition={variableDef}
+                    initialAction={action}
+                    isDraft={false}
+                    isReadonly={isReadonly}
+                    onSave={handleSave}
+                    onClose={onClose}
+                    onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
+                  />
+                </VariableProviderWithQueryParams>
+              </TimeRangeProviderWithQueryParams>
+            </DatasourceStoreProvider>
+          </ValidationProvider>
         </PluginRegistry>
         {onDelete && (
           <DeleteResourceDialog

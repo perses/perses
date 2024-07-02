@@ -13,13 +13,13 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { durationValidationSchema, resourceIdValidationSchema } from '@perses-dev/plugin-system';
+import { durationValidationSchema, nameSchema } from '@perses-dev/core';
 import { generateMetadataName } from '../utils/metadata';
 import { useEphemeralDashboardList } from '../model/ephemeral-dashboard-client';
 import { dashboardDisplayNameValidationSchema } from './dashboard';
 
 export const createEphemeralDashboardDialogValidationSchema = z.object({
-  projectName: resourceIdValidationSchema,
+  projectName: nameSchema,
   dashboardName: dashboardDisplayNameValidationSchema,
   ttl: durationValidationSchema,
 });

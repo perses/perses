@@ -12,32 +12,19 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { Box, Skeleton } from '@mui/material';
 import { useMemo } from 'react';
-import { TraceValue } from '@perses-dev/core';
+import { TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
-import { ErrorAlert, useChartsTheme } from '@perses-dev/components';
+import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { Scatterplot } from './Scatterplot';
 import { ScatterChartOptions } from './scatter-chart-model';
 
-export interface EChartTraceValue extends Omit<TraceValue, 'startTimeUnixMs' | 'serviceStats'> {
+export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {
   name: string;
   startTime: Date;
   spanCount: number;
   errorCount: number;
 }
-
-const generateErrorAlert = (message: string) => {
-  const alertMessage = {
-    name: message,
-    message: message,
-  };
-  return (
-    <div data-testid="ScatterChartPanel_ErrorAlert">
-      <ErrorAlert error={alertMessage} />
-    </div>
-  );
-};
 
 export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
 
@@ -73,8 +60,8 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     const dataset = [];
     let maxSpanCount = 1;
     for (const result of traceResults) {
-      if (result.isLoading || result.data === undefined) continue;
-      const dataSeries = result.data.traces.map((trace) => {
+      if (result.isLoading || result.data === undefined || result.data.searchResult === undefined) continue;
+      const dataSeries = result.data.searchResult.map((trace) => {
         let spanCount = 0;
         let errorCount = 0;
         for (const stats of Object.values(trace.serviceStats)) {
@@ -140,11 +127,18 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     return series;
   }, [dataset, defaultColor, maxSpanCount]);
 
-  // Error check: specify an alert if no traces are returned from the query
-  const traceData = traceResults[0]?.data;
-  if (!traceIsLoading && traceData?.traces.length === 0) {
-    const query = traceData?.metadata?.executedQueryString;
-    return generateErrorAlert(`No traces found for the query: " ${query} " .`);
+  if (traceIsLoading) {
+    return <LoadingOverlay />;
+  }
+
+  const queryError = traceResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
+  const tracesFound = traceResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
+  if (!tracesFound) {
+    return <NoDataOverlay resource="traces" />;
   }
 
   const options: EChartsOption = {
@@ -153,18 +147,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
   };
 
   if (contentDimensions === undefined) return null;
-
-  if (traceIsLoading === true) {
-    return (
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
-      >
-        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
-      </Box>
-    );
-  }
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">

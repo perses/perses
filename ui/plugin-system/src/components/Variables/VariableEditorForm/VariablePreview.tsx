@@ -76,7 +76,7 @@ export function VariablePreview(props: VariablePreviewProps) {
               <CircularProgress />
             </Stack>
           )}
-          {values?.slice(0, maxValues).map((val) => <Chip size="small" key={val} label={val} />)}
+          {values?.slice(0, maxValues).map((val, index) => <Chip size="small" key={index} label={val} />)}
           {notShown > 0 && <Chip onClick={showAll} variant="outlined" size="small" label={`+${notShown} more`} />}
         </Box>
       </Card>

@@ -11,14 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role } from '@perses-dev/core';
+import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm, UseFormReturn } from 'react-hook-form';
+import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Box, Button, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { rolesEditorValidationSchema, RolesEditorValidationType } from '@perses-dev/plugin-system/dist/validation/role';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 
@@ -41,13 +40,13 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<RolesEditorValidationType>({
-    resolver: zodResolver(rolesEditorValidationSchema),
+  const form = useForm<Role>({
+    resolver: zodResolver(rolesEditorSchema),
     mode: 'onBlur',
     defaultValues: initialRole,
   });
 
-  const processForm: SubmitHandler<RolesEditorValidationType> = (data: Role) => {
+  const processForm: SubmitHandler<Role> = (data: Role) => {
     onSave(data);
   };
 
@@ -123,6 +122,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
           <Controller
+            control={form.control}
             name="metadata.name"
             render={({ field, fieldState }) => (
               <TextField
@@ -153,7 +153,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
             fields.map((field, index) => (
               <Fragment key={field.id}>
                 <Stack key={field.id} direction="row" gap={1} alignItems="end">
-                  <PermissionControl form={form} index={index} action={action} />
+                  <PermissionControl control={form.control} index={index} action={action} />
                   <IconButton
                     disabled={isReadonly || action === 'read'}
                     style={{ width: 'fit-content', height: 'fit-content' }}
@@ -195,24 +195,23 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   );
 }
 
-function PermissionControl({
-  form,
-  index,
-  action,
-}: {
-  form: UseFormReturn<RolesEditorValidationType>;
+interface PermissionControl {
+  control: Control<Role>;
   index: number;
   action: Action;
-}) {
+}
+
+function PermissionControl({ control, index, action }: PermissionControl) {
+  const kind = useWatch({ control, name: 'kind' });
   // Role and GlobalRole don't have same scopes
   const availableScopes = useMemo(() => {
-    if (form.getValues('kind') === 'Role') {
+    if (kind === 'Role') {
       return PROJECT_SCOPES;
     } else {
       // Else GlobalRole
       return PROJECT_SCOPES.concat(GLOBAL_SCOPES).sort();
     }
-  }, [form]);
+  }, [kind]);
 
   return (
     <Stack direction="row" width="100%" gap={2}>
@@ -222,6 +221,7 @@ function PermissionControl({
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.permissions.${index}.actions`}
           render={({ field, fieldState }) => (
             <TextField
@@ -258,6 +258,7 @@ function PermissionControl({
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.permissions.${index}.scopes`}
           render={({ field, fieldState }) => (
             <TextField

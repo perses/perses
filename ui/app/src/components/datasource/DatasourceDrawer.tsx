@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DatasourceSpec } from '@perses-dev/core';
+import { Datasource, DatasourceDefinition } from '@perses-dev/core';
 import { useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DatasourceEditorForm, PluginRegistry } from '@perses-dev/plugin-system';
+import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { DrawerProps } from '../drawer';
 import { DeleteResourceDialog } from '../dialogs';
@@ -33,9 +33,9 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     /* do nothing */
   };
 
-  const handleSave = (name: string, spec: DatasourceSpec) => {
-    datasource.spec = spec;
-    datasource.metadata.name = name;
+  const handleSave = (def: DatasourceDefinition) => {
+    datasource.spec = def.spec;
+    datasource.metadata.name = def.name;
     if (onSave) {
       onSave(datasource);
     }
@@ -45,17 +45,19 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <PluginRegistry pluginLoader={bundledPluginLoader}>
-          {isOpen && (
-            <DatasourceEditorForm
-              initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
-              initialAction={action}
-              isDraft={false}
-              isReadonly={isReadonly}
-              onSave={handleSave}
-              onClose={onClose}
-              onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
-            />
-          )}
+          <ValidationProvider>
+            {isOpen && (
+              <DatasourceEditorForm
+                initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
+                initialAction={action}
+                isDraft={false}
+                isReadonly={isReadonly}
+                onSave={handleSave}
+                onClose={onClose}
+                onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+              />
+            )}
+          </ValidationProvider>
         </PluginRegistry>
         {onDelete && (
           <DeleteResourceDialog

@@ -19,11 +19,13 @@ export type VariableName = string;
 
 export type VariableValue = string | string[] | null;
 
+export interface VariableDisplay extends Display {
+  hidden?: boolean;
+}
+
 export interface VariableSpec {
   name: VariableName;
-  display?: Display & {
-    hidden?: boolean;
-  };
+  display?: VariableDisplay;
 }
 
 export interface TextVariableDefinition extends Definition<TextVariableSpec> {
@@ -35,14 +37,14 @@ export interface TextVariableSpec extends VariableSpec {
   constant?: boolean;
 }
 
-export interface ListVariableDefinition<PluginSpec = UnknownSpec> extends Definition<ListVariableSpec<PluginSpec>> {
+export interface ListVariableDefinition extends Definition<ListVariableSpec> {
   kind: 'ListVariable';
 }
 
-export interface ListVariableSpec<PluginSpec> extends VariableSpec {
+export interface ListVariableSpec<PluginSpec = UnknownSpec> extends VariableSpec {
   defaultValue?: VariableValue;
-  allowMultiple?: boolean;
-  allowAllValue?: boolean;
+  allowMultiple: boolean;
+  allowAllValue: boolean;
   customAllValue?: string;
   capturingRegexp?: string;
   sort?: string;
@@ -58,7 +60,7 @@ export interface BuiltinVariableSpec extends VariableSpec {
   source: string;
 }
 
-export type VariableDefinition = TextVariableDefinition | ListVariableDefinition | BuiltinVariableDefinition;
+export type VariableDefinition = TextVariableDefinition | ListVariableDefinition;
 
 /**
  * A variable that belongs to a project.

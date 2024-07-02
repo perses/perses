@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { TitleComponentOption } from 'echarts';
-import { StatChart, StatChartData, useChartsTheme, GraphSeries } from '@perses-dev/components';
-import { Box, Stack, Skeleton, Typography, SxProps } from '@mui/material';
+import { StatChart, StatChartData, useChartsTheme, GraphSeries, LoadingOverlay } from '@perses-dev/components';
+import { Stack, Typography, SxProps } from '@mui/material';
 import { useMemo } from 'react';
 import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
@@ -42,15 +42,7 @@ export function StatChartPanel(props: StatChartPanelProps) {
   if (contentDimensions === undefined) return null;
 
   if (isLoading || isFetching) {
-    return (
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
-      >
-        <Skeleton variant="text" width={contentDimensions.width - 20} height={contentDimensions.height / 2} />
-      </Box>
-    );
+    return <LoadingOverlay />;
   }
 
   // Calculates chart width
