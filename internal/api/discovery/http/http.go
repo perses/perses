@@ -23,10 +23,11 @@ import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
-func NewDiscovery(cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
+func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
 	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err
@@ -34,9 +35,9 @@ func NewDiscovery(cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhel
 	sd := &discovery{
 		restClient: client,
 		svc:        svc,
-		name:       cfg.Name,
+		name:       Name,
 	}
-	return taskhelper.NewTick(sd, time.Duration(cfg.RefreshInterval))
+	return taskhelper.NewTick(sd, time.Duration(refreshInterval))
 }
 
 type discovery struct {
