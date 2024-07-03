@@ -138,8 +138,7 @@ export function SearchBar() {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
-            overflowY: 'scroll',
-            scrollbarWidth: 'none',
+            overflowY: 'auto',
           }}
           variant="outlined"
         >
