@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { GlobalDatasourceResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { fetch, fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
+
+type GlobalDatasourceListOptions = Omit<UseQueryOptions<GlobalDatasourceResource[], Error>, 'queryKey' | 'queryFn'>;
 
 /**
  * Used to create a new global datasource in the API.
@@ -89,13 +91,13 @@ export function useGlobalDatasource(name: string) {
  * Used to get global datasources from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalDatasourceList(refetchOnMount = true) {
+export function useGlobalDatasourceList(options: GlobalDatasourceListOptions) {
   return useQuery<GlobalDatasourceResource[], Error>(
     [globalDatasourceResource],
     () => {
       return getGlobalDatasources();
     },
-    { refetchOnMount: refetchOnMount }
+    options
   );
 }
 

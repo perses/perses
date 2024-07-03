@@ -31,7 +31,7 @@ interface ProjectDatasourcesProps {
 
 export function ProjectDatasources(props: ProjectDatasourcesProps) {
   const { projectName, hideToolbar, id } = props;
-  const { data, isLoading } = useDatasourceList(projectName);
+  const { data, isLoading } = useDatasourceList({ project: projectName });
 
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
