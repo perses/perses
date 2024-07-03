@@ -58,7 +58,7 @@ func (n *Node) sort() {
 	}
 }
 
-func (n *Node) setConcreteValue(result map[string]interface{}) error {
+func (n *Node) setPrimitiveValue(result map[string]interface{}) error {
 	switch n.Type {
 	case StringNodeType:
 		result[n.FieldName] = n.ConcreteValue
@@ -117,7 +117,7 @@ type iteratorQueue struct {
 	parent    *Node
 }
 
-func (q *iteratorQueue) setConcreteValue(node *Node) error {
+func (q *iteratorQueue) setPritiveValue(node *Node) error {
 	switch q.value.Kind() {
 	case cue.BoolKind:
 		node.Type = BoolNodeType
@@ -170,7 +170,7 @@ func buildTree(queue []iteratorQueue) error {
 		// Easy case: it's a concrete value (a string, a boolean, a number).
 		// We can already create the associated Node
 		if value.IsConcrete() && value.Kind() != cue.StructKind && value.Kind() != cue.ListKind {
-			if setErr := el.setConcreteValue(node); setErr != nil {
+			if setErr := el.setPritiveValue(node); setErr != nil {
 				return setErr
 			}
 			continue

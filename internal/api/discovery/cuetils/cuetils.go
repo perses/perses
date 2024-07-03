@@ -130,7 +130,7 @@ func buildPluginSpecWithProxy(spec *Node, proxy http.Config) (map[string]interfa
 				queue = append(queue, queueElement{node: node, val: newResult})
 			}
 		} else {
-			if setErr := el.node.setConcreteValue(el.val); setErr != nil {
+			if setErr := el.node.setPrimitiveValue(el.val); setErr != nil {
 				return nil, setErr
 			}
 		}

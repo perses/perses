@@ -486,7 +486,7 @@ discovery_name: <string>
 #### HTTPSD Config
 
 ```yaml
-# URL of the HTTP server exposing the global datasource list to scrape.
+# URL of the HTTP server exposing the global datasource list to retrieve.
 url: <url>
 
 [ basicAuth: <Basic Auth specification> ]
@@ -554,7 +554,7 @@ labels:
 ##### KubePodDiscovery Config
 
 ```yaml
-# If set to true, Perses server will discovery the pod
+# If set to true, Perses server will discover the pods
 [ enable: <boolean> | default = false ]
 
 # Name of the container the target address points to.
