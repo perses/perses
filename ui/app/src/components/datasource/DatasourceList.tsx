@@ -14,7 +14,7 @@
 import { getResourceDisplayName, getMetadataProject, Datasource, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -143,7 +143,7 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         headerName: 'Name',
         type: 'string',
         flex: 2,
-        renderCell: (params) => <pre>{params.value}</pre>,
+        renderCell: (params) => <span style={{ fontFamily: 'monospace' }}>{params.value}</span>,
       },
       VERSION_COL_DEF,
       DESCRIPTION_COL_DEF,

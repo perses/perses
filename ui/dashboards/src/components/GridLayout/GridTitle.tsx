@@ -21,8 +21,9 @@ import ArrowDownIcon from 'mdi-material-ui/ArrowDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { PanelGroupId } from '@perses-dev/core';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
-import { usePanelGroupActions, useEditMode, PanelGroupId, useDeletePanelGroupDialog } from '../../context';
+import { usePanelGroupActions, useEditMode, useDeletePanelGroupDialog } from '../../context';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;

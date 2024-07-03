@@ -11,18 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/core';
+import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
-import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
+import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Alert, Box, Button, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { userEditorValidationSchema, UserEditorValidationType } from '@perses-dev/plugin-system/dist/validation/user';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { UserResource } from '../../model/user-client';
 import { useIsExternalProviderEnabled, useIsNativeProviderEnabled } from '../../context/Config';
 
 interface UserEditorFormProps {
@@ -55,8 +53,8 @@ export function UserEditorForm(props: UserEditorFormProps) {
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
-  const form = useForm<UserEditorValidationType>({
-    resolver: zodResolver(userEditorValidationSchema),
+  const form = useForm<UserEditorSchemaType>({
+    resolver: zodResolver(userSchema),
     mode: 'onBlur',
     defaultValues: initialUserClean,
   });
@@ -68,7 +66,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
     name: 'spec.oauthProviders',
   });
 
-  const processForm: SubmitHandler<UserEditorValidationType> = (data: UserResource) => {
+  const processForm: SubmitHandler<UserEditorSchemaType> = (data: UserResource) => {
     onSave(data);
   };
 
@@ -139,6 +137,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
           <Controller
+            control={form.control}
             name="metadata.name"
             render={({ field, fieldState }) => (
               <TextField
@@ -168,6 +167,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
           <FormControl>
             <Stack gap={2} direction="row">
               <Controller
+                control={form.control}
                 name="spec.firstName"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -187,6 +187,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
                 )}
               />
               <Controller
+                control={form.control}
                 name="spec.lastName"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -229,6 +230,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
               )}
               <Stack direction="row" gap={1} alignItems="end">
                 <Controller
+                  control={form.control}
                   name="spec.nativeProvider.password"
                   render={({ field, fieldState }) => (
                     <TextField
@@ -272,7 +274,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
               fields.map((field, index) => (
                 <Fragment key={field.id}>
                   <Stack key={field.id} direction="row" gap={1} alignItems="end">
-                    <OAuthProvider index={index} action={action} />
+                    <OAuthProvider control={form.control} index={index} action={action} />
                     <IconButton
                       disabled={isReadonly || action === 'read'}
                       style={{ width: 'fit-content', height: 'fit-content' }}
@@ -315,7 +317,7 @@ export function UserEditorForm(props: UserEditorFormProps) {
   );
 }
 
-function OAuthProvider({ index, action }: { index: number; action: Action }) {
+function OAuthProvider({ control, index, action }: { control: Control<UserResource>; index: number; action: Action }) {
   return (
     <Stack direction="row" width="100%" gap={2}>
       <Stack gap={1} width="100%">
@@ -324,6 +326,7 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.oauthProviders.${index}.issuer`}
           render={({ field, fieldState }) => (
             <TextField
@@ -349,6 +352,7 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.oauthProviders.${index}.email`}
           render={({ field, fieldState }) => (
             <TextField
@@ -374,6 +378,7 @@ function OAuthProvider({ index, action }: { index: number; action: Action }) {
         </Typography>
 
         <Controller
+          control={control}
           name={`spec.oauthProviders.${index}.subject`}
           render={({ field, fieldState }) => (
             <TextField

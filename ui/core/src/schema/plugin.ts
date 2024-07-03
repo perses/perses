@@ -11,10 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DURATION_REGEX } from '@perses-dev/core';
 import { z } from 'zod';
 
-export const durationValidationSchema = z
-  .string()
-  .nonempty('Required')
-  .regex(DURATION_REGEX, 'Must be a valid duration string');
+export const pluginSchema = z.object({
+  kind: z.string().min(1, 'Required'),
+  spec: z.record(z.string(), z.any()),
+});
+
+export type PluginSchemaType = z.infer<typeof pluginSchema>;
+export type PluginSchema = typeof pluginSchema;

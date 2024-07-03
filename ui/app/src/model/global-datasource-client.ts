@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasource } from '@perses-dev/core';
+import { GlobalDatasourceResource } from '@perses-dev/core';
 import buildURL from './url-builder';
 import { buildDatasourceQueryParameters } from './datasource-client';
 import { fetchJson } from './fetch';
@@ -23,5 +23,5 @@ export function fetchGlobalDatasourceList(kind?: string, defaultDatasource?: boo
     resource: globalDatasourceResource,
     queryParams: buildDatasourceQueryParameters(kind, defaultDatasource, name),
   });
-  return fetchJson<GlobalDatasource[]>(url);
+  return fetchJson<GlobalDatasourceResource[]>(url);
 }

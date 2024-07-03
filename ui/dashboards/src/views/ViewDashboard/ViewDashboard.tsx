@@ -113,7 +113,7 @@ export function ViewDashboard(props: ViewDashboardProps) {
           <VariableProviderWithQueryParams
             initialVariableDefinitions={spec.variables}
             externalVariableDefinitions={externalVariableDefinitions}
-            builtinVariables={builtinVariables}
+            builtinVariableDefinitions={builtinVariables}
           >
             <Box
               sx={combineSx(

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Metadata, Permission } from '@perses-dev/core';
+import { Permission, UserResource } from '@perses-dev/core';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
@@ -20,23 +20,6 @@ import { fetch, fetchJson } from './fetch';
 
 const resource = 'users';
 export const userKey = 'user';
-
-export interface UserResource {
-  kind: 'User';
-  metadata: Metadata;
-  spec: {
-    firstName?: string;
-    lastName?: string;
-    nativeProvider?: {
-      password?: string;
-    };
-    oauthProviders?: Array<{
-      issuer?: string;
-      email?: string;
-      subject?: string;
-    }>;
-  };
-}
 
 function createUser(entity: UserResource) {
   const url = buildURL({ resource });

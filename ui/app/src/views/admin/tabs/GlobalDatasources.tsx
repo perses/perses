@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card } from '@mui/material';
-import { getResourceDisplayName, GlobalDatasource } from '@perses-dev/core';
+import { getResourceDisplayName, GlobalDatasourceResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useCallback } from 'react';
 import { DatasourceList } from '../../../components/datasource/DatasourceList';
@@ -38,10 +38,10 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
   const updateDatasourceMutation = useUpdateGlobalDatasourceMutation();
 
   const handleDatasourceCreate = useCallback(
-    (datasource: GlobalDatasource): Promise<void> => {
+    (datasource: GlobalDatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         createDatasourceMutation.mutate(datasource, {
-          onSuccess: (createdDatasource: GlobalDatasource) => {
+          onSuccess: (createdDatasource: GlobalDatasourceResource) => {
             successSnackbar(
               `Global Datasource ${getResourceDisplayName(createdDatasource)} has been successfully created`
             );
@@ -59,10 +59,10 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
   );
 
   const handleDatasourceUpdate = useCallback(
-    (datasource: GlobalDatasource): Promise<void> => {
+    (datasource: GlobalDatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         updateDatasourceMutation.mutate(datasource, {
-          onSuccess: (updatedDatasource: GlobalDatasource) => {
+          onSuccess: (updatedDatasource: GlobalDatasourceResource) => {
             successSnackbar(
               `Global Datasource ${getResourceDisplayName(updatedDatasource)} has been successfully updated`
             );
@@ -80,10 +80,10 @@ export function GlobalDatasources(props: GlobalDatasourcesProps) {
   );
 
   const handleDatasourceDelete = useCallback(
-    (datasource: GlobalDatasource): Promise<void> => {
+    (datasource: GlobalDatasourceResource): Promise<void> => {
       return new Promise((resolve, reject) => {
         deleteDatasourceMutation.mutate(datasource, {
-          onSuccess: (deletedDatasource: GlobalDatasource) => {
+          onSuccess: (deletedDatasource: GlobalDatasourceResource) => {
             successSnackbar(
               `Global Datasource ${getResourceDisplayName(deletedDatasource)} has been successfully deleted`
             );

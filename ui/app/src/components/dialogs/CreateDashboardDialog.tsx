@@ -120,6 +120,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
           <Stack gap={1}>
             {!hideProjectSelect && (
               <Controller
+                control={dashboardForm.control}
                 name="projectName"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -145,6 +146,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
               />
             )}
             <Controller
+              control={dashboardForm.control}
               name="dashboardName"
               render={({ field, fieldState }) => (
                 <TextField
@@ -209,6 +211,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
           <Stack gap={1}>
             {!hideProjectSelect && (
               <Controller
+                control={ephemeralDashboardForm.control}
                 name="projectName"
                 render={({ field, fieldState }) => (
                   <TextField
@@ -234,6 +237,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
               />
             )}
             <Controller
+              control={ephemeralDashboardForm.control}
               name="dashboardName"
               render={({ field, fieldState }) => (
                 <TextField
@@ -250,6 +254,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
               )}
             />
             <Controller
+              control={ephemeralDashboardForm.control}
               name="ttl"
               render={({ field, fieldState }) => (
                 <TextField

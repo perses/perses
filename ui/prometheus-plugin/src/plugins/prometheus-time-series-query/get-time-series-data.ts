@@ -54,6 +54,8 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
     milliseconds(parseDurationString(datasource.plugin.spec.scrapeInterval ?? DEFAULT_SCRAPE_INTERVAL)) / 1000
   );
 
+  // Min step is the lower bound of the interval between data points
+  // If no value is provided for it, it should default to the scrape interval of the datasource
   const minStep =
     getDurationStringSeconds(
       // resolve any variable that may have been provided
@@ -73,7 +75,7 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   end = alignedEnd;
 
   // Replace variable placeholders in PromQL query
-  const intervalMs = context.suggestedStepMs ?? step * 1000; // Step is in seconds
+  const intervalMs = step * 1000; // step is in seconds
   let query = replaceVariable(spec.query, '__interval_ms', intervalMs.toString());
   query = replaceVariable(spec.query, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
 

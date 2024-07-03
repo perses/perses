@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef, LayoutDefinition } from '@perses-dev/core';
+import { getPanelKeyFromRef, LayoutDefinition, PanelGroupId } from '@perses-dev/core';
 import { WritableDraft } from 'immer/dist/internal';
 import { Layout } from 'react-grid-layout';
 import { StateCreator } from 'zustand';
@@ -41,8 +41,6 @@ export interface PanelGroupSlice {
    */
   updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
 }
-
-export type PanelGroupId = number;
 
 export interface PanelGroupDefinition {
   id: PanelGroupId;

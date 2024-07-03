@@ -36,4 +36,5 @@ export * from './time-series-data';
 export * from './time-series-queries';
 export * from './trace-data';
 export * from './units';
+export * from './user';
 export * from './variables';

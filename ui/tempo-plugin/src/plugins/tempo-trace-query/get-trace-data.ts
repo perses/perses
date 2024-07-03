@@ -12,11 +12,27 @@
 // limitations under the License.
 
 import { TraceQueryPlugin } from '@perses-dev/plugin-system';
-import { TraceData, TraceValue, AbsoluteTimeRange } from '@perses-dev/core';
+import {
+  TraceSearchResult,
+  AbsoluteTimeRange,
+  Trace,
+  Span,
+  isValidTraceId,
+  TraceResource,
+  SpanEvent,
+} from '@perses-dev/core';
 import { getUnixTime } from 'date-fns';
+import { sortedIndexBy } from 'lodash';
 import { TempoTraceQuerySpec } from '../../model/trace-query-model';
 import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/tempo-selectors';
 import { TempoClient } from '../../model/tempo-client';
+import {
+  SearchTraceIDResponse,
+  SearchTraceQueryResponse,
+  Resource as TempoResource,
+  Span as TempoSpan,
+  SpanEvent as TempoSpanEvent,
+} from '../../model/api-types';
 
 export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
   const { start, end } = timeRange;
@@ -30,7 +46,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
   if (spec.query === undefined || spec.query === null || spec.query === '') {
     // Do not make a request to the backend, instead return an empty TraceData
     console.error('TempoTraceQuery is undefined, null, or an empty string.');
-    return { traces: [] };
+    return { searchResult: [] };
   }
 
   const defaultTempoDatasource: TempoDatasourceSelector = {
@@ -44,7 +60,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
   const datasourceUrl = client?.options?.datasourceUrl;
   if (datasourceUrl === undefined || datasourceUrl === null || datasourceUrl === '') {
     console.error('TempoDatasource is undefined, null, or an empty string.');
-    return { traces: [] };
+    return { searchResult: [] };
   }
 
   const getQuery = () => {
@@ -64,9 +80,126 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return queryWithTimeRange;
   };
 
-  const searchResultResponse = await client.searchTraceQueryFallback(getQuery(), datasourceUrl);
+  /**
+   * determine type of query:
+   * if the query is a valid traceId, fetch the trace by traceId
+   * otherwise, execute a TraceQL query
+   */
+  if (isValidTraceId(spec.query)) {
+    const response = await client.searchTraceID(spec.query, datasourceUrl);
+    return {
+      trace: parseTraceResponse(response),
+      metadata: {
+        executedQueryString: spec.query,
+      },
+    };
+  } else {
+    const response = await client.searchTraceQueryFallback(getQuery(), datasourceUrl);
+    return {
+      searchResult: parseSearchResponse(response),
+      metadata: {
+        executedQueryString: spec.query,
+      },
+    };
+  }
+};
 
-  const traces: TraceValue[] = searchResultResponse.traces.map((trace) => ({
+function parseResource(resource: TempoResource): TraceResource {
+  let serviceName = 'unknown';
+  for (const attr of resource.attributes) {
+    if (attr.key === 'service.name' && 'stringValue' in attr.value) {
+      serviceName = attr.value.stringValue;
+      break;
+    }
+  }
+
+  return {
+    serviceName,
+    attributes: resource.attributes,
+  };
+}
+
+function parseEvent(event: TempoSpanEvent): SpanEvent {
+  return {
+    timeUnixMs: parseInt(event.timeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
+    name: event.name,
+    attributes: event.attributes || [],
+  };
+}
+
+/**
+ * parseSpan parses the Span API type to the internal representation
+ * i.e. convert strings to numbers etc.
+ */
+function parseSpan(span: TempoSpan) {
+  return {
+    traceId: span.traceId,
+    spanId: span.spanId,
+    parentSpanId: span.parentSpanId,
+    name: span.name,
+    kind: span.kind,
+    startTimeUnixMs: parseInt(span.startTimeUnixNano) * 1e-6, // convert to milliseconds because JS cannot handle numbers larger than 9007199254740991
+    endTimeUnixMs: parseInt(span.endTimeUnixNano) * 1e-6,
+    attributes: span.attributes || [],
+    events: (span.events || []).map(parseEvent),
+    status: span.status,
+  };
+}
+
+/**
+ * parseTraceResponse builds a tree of spans from the Tempo API response
+ * time complexity: O(2n)
+ */
+function parseTraceResponse(response: SearchTraceIDResponse): Trace {
+  // first pass: build lookup table <spanId, Span>
+  const lookup = new Map<string, Span>();
+  for (const batch of response.batches) {
+    const resource = parseResource(batch.resource);
+
+    for (const scopeSpan of batch.scopeSpans) {
+      const scope = scopeSpan.scope;
+
+      for (const tempoSpan of scopeSpan.spans) {
+        const span: Span = {
+          resource,
+          scope,
+          childSpans: [],
+          ...parseSpan(tempoSpan),
+        };
+        lookup.set(tempoSpan.spanId, span);
+      }
+    }
+  }
+
+  // second pass: build tree based on parentSpanId property
+  let rootSpan: Span | null = null;
+  for (const [, span] of lookup) {
+    if (!span.parentSpanId) {
+      rootSpan = span;
+    } else {
+      const parent = lookup.get(span.parentSpanId);
+      if (!parent) {
+        console.error(`span ${span.spanId} has parent ${span.parentSpanId} which has not been received yet`);
+        continue;
+      }
+
+      span.parentSpan = parent;
+      const insertChildSpanAt = sortedIndexBy(parent.childSpans, span, (s) => s.startTimeUnixMs);
+      parent.childSpans.splice(insertChildSpanAt, 0, span);
+    }
+  }
+
+  if (!rootSpan) {
+    throw new Error('root span not found');
+  }
+
+  return {
+    rootSpan,
+  };
+}
+
+function parseSearchResponse(response: SearchTraceQueryResponse): TraceSearchResult[] {
+  return response.traces.map((trace) => ({
     startTimeUnixMs: parseInt(trace.startTimeUnixNano) * 1e-6, // convert to millisecond for eChart time format,
     durationMs: trace.durationMs ?? 0, // Tempo API doesn't return 0 values
     traceId: trace.traceID,
@@ -74,13 +207,4 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     rootTraceName: trace.rootTraceName,
     serviceStats: trace.serviceStats || {},
   }));
-
-  const traceData: TraceData = {
-    traces,
-    metadata: {
-      executedQueryString: spec.query,
-    },
-  };
-
-  return traceData;
-};
+}

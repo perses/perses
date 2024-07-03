@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,10 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
-
-export const resourceIdValidationSchema = z
-  .string()
-  .min(1, 'Required')
-  .max(75, 'Must be 75 or fewer characters long')
-  .regex(/^[a-zA-Z0-9_.-]+$/, 'Must only contains alphanumerical characters and special characters _ . -');
+export * from './datasource';
+export * from './display';
+export * from './duration';
+export * from './metadata';
+export * from './panel';
+export * from './plugin';
+export * from './role';
+export * from './rolebinding';
+export * from './secret';
+export * from './user';
+export * from './variable';

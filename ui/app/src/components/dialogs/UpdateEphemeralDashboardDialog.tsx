@@ -94,6 +94,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Controller
+              control={form.control}
               name="dashboardName"
               render={({ field, fieldState }) => (
                 <TextField
@@ -110,6 +111,7 @@ export const UpdateEphemeralDashboardDialog = (props: UpdateEphemeralDashboardDi
               )}
             />
             <Controller
+              control={form.control}
               name="ttl"
               render={({ field, fieldState }) => (
                 <TextField

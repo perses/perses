@@ -11,9 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardResource, EphemeralDashboardResource, GridDefinition } from '@perses-dev/core';
-import { PanelGroupDefinition, PanelGroupId, useDashboardStore } from './DashboardProvider';
-import { useVariableActions, useVariableDefinitions } from './VariableProvider';
+import {
+  createPanelRef,
+  DashboardResource,
+  EphemeralDashboardResource,
+  GridDefinition,
+  PanelGroupId,
+} from '@perses-dev/core';
+import { PanelGroupDefinition, useDashboardStore } from './DashboardProvider';
+import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
 export function useDashboard() {
   const {
@@ -55,7 +61,7 @@ export function useDashboard() {
       ttl,
     })
   );
-  const { setVariableDefinitions } = useVariableActions();
+  const { setVariableDefinitions } = useVariableDefinitionActions();
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 

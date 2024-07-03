@@ -16,7 +16,7 @@ import { PersesChartsTheme, useChartsTheme } from '@perses-dev/components';
 import {
   ServiceStats,
   TraceData,
-  TraceValue,
+  TraceSearchResult,
   formatDuration,
   msToPrometheusDuration,
   traceServiceColor,
@@ -42,7 +42,7 @@ export function DataTable({ result }: DataTableProps) {
     return null;
   }
 
-  const traces = result.flatMap((d) => d.data).flatMap((d) => d?.traces || []);
+  const traces = result.flatMap((d) => d.data).flatMap((d) => d?.searchResult || []);
   const rows = traces.map((trace) => buildRow(theme, trace));
 
   return (
@@ -70,7 +70,7 @@ export function DataTable({ result }: DataTableProps) {
   );
 }
 
-function buildRow(theme: PersesChartsTheme, trace: TraceValue): ReactNode {
+function buildRow(theme: PersesChartsTheme, trace: TraceSearchResult): ReactNode {
   let totalSpanCount = 0;
   let totalErrorCount = 0;
   for (const stats of Object.values(trace.serviceStats)) {
