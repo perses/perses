@@ -139,6 +139,7 @@ export function SearchBar() {
             flexDirection: 'column',
             justifyContent: 'flex-start',
             overflowY: 'scroll',
+            scrollbarWidth: 'none',
           }}
           variant="outlined"
         >
