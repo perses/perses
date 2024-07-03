@@ -37,7 +37,7 @@ interface ResourceListProps {
 }
 
 function SearchProjectList(props: ResourceListProps) {
-  const projectsQueryResult = useProjectList();
+  const projectsQueryResult = useProjectList({ refetchOnMount: false });
   return SearchList({
     list: projectsQueryResult.data ?? [],
     query: props.query,
@@ -47,7 +47,7 @@ function SearchProjectList(props: ResourceListProps) {
 }
 
 function SearchGlobalDatasource(props: ResourceListProps) {
-  const globalDatasourceQueryResult = useGlobalDatasourceList();
+  const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
   return SearchList({
     list: globalDatasourceQueryResult.data ?? [],
     query: props.query,
@@ -58,7 +58,7 @@ function SearchGlobalDatasource(props: ResourceListProps) {
 }
 
 function SearchDashboardList(props: ResourceListProps) {
-  const dashboardQueryResult = useDashboardList(undefined, true);
+  const dashboardQueryResult = useDashboardList({ metadataOnly: true, refetchOnMount: false });
   return SearchList({
     list: dashboardQueryResult.data ?? [],
     query: props.query,
@@ -69,7 +69,7 @@ function SearchDashboardList(props: ResourceListProps) {
 }
 
 function SearchDatasourceList(props: ResourceListProps) {
-  const datasourceQueryResult = useDatasourceList(undefined);
+  const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
   return SearchList({
     list: datasourceQueryResult.data ?? [],
     query: props.query,
