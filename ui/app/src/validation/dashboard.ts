@@ -35,7 +35,7 @@ export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialog
 
 // Validate dashboard name and check if it doesn't already exist
 export function useDashboardValidationSchema(projectName?: string) {
-  const dashboards = useDashboardList(projectName);
+  const dashboards = useDashboardList({ project: projectName });
 
   return useMemo(() => {
     return createDashboardDialogValidationSchema.refine(
