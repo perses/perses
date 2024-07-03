@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { GlobalDatasourceResource } from '@perses-dev/core';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { fetch, fetchJson } from './fetch';
 
 const globalDatasourceResource = 'globaldatasources';
+
+type GlobalDatasourceListOptions = Omit<UseQueryOptions<GlobalDatasourceResource[], Error>, 'queryKey' | 'queryFn'>;
 
 /**
  * Used to create a new global datasource in the API.
@@ -26,9 +28,9 @@ const globalDatasourceResource = 'globaldatasources';
 export function useCreateGlobalDatasourceMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<GlobalDatasource, Error, GlobalDatasource>({
+  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
-    mutationFn: (datasource: GlobalDatasource) => {
+    mutationFn: (datasource: GlobalDatasourceResource) => {
       return createGlobalDatasource(datasource);
     },
     onSuccess: () => {
@@ -44,9 +46,9 @@ export function useCreateGlobalDatasourceMutation() {
 export function useUpdateGlobalDatasourceMutation() {
   const queryClient = useQueryClient();
 
-  return useMutation<GlobalDatasource, Error, GlobalDatasource>({
+  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
-    mutationFn: (datasource: GlobalDatasource) => {
+    mutationFn: (datasource: GlobalDatasourceResource) => {
       return updateGlobalDatasource(datasource);
     },
     onSuccess: () => {
@@ -61,9 +63,9 @@ export function useUpdateGlobalDatasourceMutation() {
  */
 export function useDeleteGlobalDatasourceMutation() {
   const queryClient = useQueryClient();
-  return useMutation<GlobalDatasource, Error, GlobalDatasource>({
+  return useMutation<GlobalDatasourceResource, Error, GlobalDatasourceResource>({
     mutationKey: [globalDatasourceResource],
-    mutationFn: (entity: GlobalDatasource) => {
+    mutationFn: (entity: GlobalDatasourceResource) => {
       return deleteGlobalDatasource(entity).then(() => {
         return entity;
       });
@@ -80,7 +82,7 @@ export function useDeleteGlobalDatasourceMutation() {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasource(name: string) {
-  return useQuery<GlobalDatasource, Error>([globalDatasourceResource, name], () => {
+  return useQuery<GlobalDatasourceResource, Error>([globalDatasourceResource, name], () => {
     return getGlobalDatasource(name);
   });
 }
@@ -89,19 +91,19 @@ export function useGlobalDatasource(name: string) {
  * Used to get global datasources from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalDatasourceList(refetchOnMount = true) {
-  return useQuery<GlobalDatasource[], Error>(
+export function useGlobalDatasourceList(options: GlobalDatasourceListOptions) {
+  return useQuery<GlobalDatasourceResource[], Error>(
     [globalDatasourceResource],
     () => {
       return getGlobalDatasources();
     },
-    { refetchOnMount: refetchOnMount }
+    options
   );
 }
 
-export function createGlobalDatasource(entity: GlobalDatasource) {
+export function createGlobalDatasource(entity: GlobalDatasourceResource) {
   const url = buildURL({ resource: globalDatasourceResource });
-  return fetchJson<GlobalDatasource>(url, {
+  return fetchJson<GlobalDatasourceResource>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(entity),
@@ -110,7 +112,7 @@ export function createGlobalDatasource(entity: GlobalDatasource) {
 
 export function getGlobalDatasource(name: string) {
   const url = buildURL({ resource: globalDatasourceResource, name: name });
-  return fetchJson<GlobalDatasource>(url, {
+  return fetchJson<GlobalDatasourceResource>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });
@@ -118,22 +120,22 @@ export function getGlobalDatasource(name: string) {
 
 export function getGlobalDatasources() {
   const url = buildURL({ resource: globalDatasourceResource });
-  return fetchJson<GlobalDatasource[]>(url, {
+  return fetchJson<GlobalDatasourceResource[]>(url, {
     method: HTTPMethodGET,
     headers: HTTPHeader,
   });
 }
 
-export function updateGlobalDatasource(entity: GlobalDatasource) {
+export function updateGlobalDatasource(entity: GlobalDatasourceResource) {
   const url = buildURL({ resource: globalDatasourceResource, name: entity.metadata.name });
-  return fetchJson<GlobalDatasource>(url, {
+  return fetchJson<GlobalDatasourceResource>(url, {
     method: HTTPMethodPUT,
     headers: HTTPHeader,
     body: JSON.stringify(entity),
   });
 }
 
-export function deleteGlobalDatasource(entity: GlobalDatasource) {
+export function deleteGlobalDatasource(entity: GlobalDatasourceResource) {
   const url = buildURL({ resource: globalDatasourceResource, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,

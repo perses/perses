@@ -14,6 +14,7 @@
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
 import { memo, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
+import { NoDataOverlay } from '@perses-dev/components';
 import {
   CommonRow,
   DATA_GRID_INITIAL_STATE_SORT_BY_NAME,
@@ -21,7 +22,6 @@ import {
   DataGridPropertiesWithCallback,
   PAGE_SIZE_OPTIONS,
   DATA_GRID_STYLES,
-  NoContentRowOverlay,
 } from '../datagrid';
 
 // https://mui.com/x/react-data-grid/performance/
@@ -34,7 +34,7 @@ export interface Row extends CommonRow {
 }
 
 function NoRoleRowOverlay() {
-  return <NoContentRowOverlay resource="roles" />;
+  return <NoDataOverlay resource="roles" />;
 }
 
 export function RoleDataGrid(props: DataGridPropertiesWithCallback<Row>) {

@@ -78,6 +78,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
         <form onSubmit={form.handleSubmit(processForm)}>
           <Dialog.Content sx={{ width: '100%' }}>
             <Controller
+              control={form.control}
               name="dashboardName"
               render={({ field, fieldState }) => (
                 <TextField

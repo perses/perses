@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { Box, Skeleton, Stack, Typography } from '@mui/material';
-import { useChartsTheme } from '@perses-dev/components';
+import { Box } from '@mui/material';
+import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { DataTable } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -30,29 +30,17 @@ export function TraceTablePanel(props: TraceTableProps) {
   }
 
   if (isLoading || isFetching) {
-    return (
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        width={contentDimensions.width}
-        height={contentDimensions.height}
-      >
-        <Skeleton
-          variant="text"
-          width={contentDimensions.width - 20}
-          height={contentDimensions.height / 2}
-          aria-label="Loading..."
-        />
-      </Box>
-    );
+    return <LoadingOverlay />;
   }
 
-  const tracesFound = queryResults.some((traceData) => (traceData.data?.traces ?? []).length > 0);
+  const queryError = queryResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
+  const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
   if (!tracesFound) {
-    return (
-      <Stack sx={{ alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-        <Typography>No traces found</Typography>
-      </Stack>
-    );
+    return <NoDataOverlay resource="traces" />;
   }
 
   return (

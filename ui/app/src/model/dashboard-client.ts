@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { DashboardResource } from '@perses-dev/core';
 import { useMemo } from 'react';
 import { useNavHistory } from '../context/DashboardNavHistory';
@@ -21,6 +21,11 @@ import buildURL from './url-builder';
 import { fetch, fetchJson } from './fetch';
 
 export const resource = 'dashboards';
+
+type DashboardListOptions = Omit<UseQueryOptions<DashboardResource[], Error>, 'queryKey' | 'queryFn'> & {
+  project?: string;
+  metadataOnly?: boolean;
+};
 
 /**
  * Used to create a dashboard in the API.
@@ -57,13 +62,13 @@ export function useDashboard(project: string, name: string) {
  * Used to get dashboards in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDashboardList(project?: string, metadataOnly: boolean = false, refetchOnMount = true) {
+export function useDashboardList(options: DashboardListOptions) {
   return useQuery<DashboardResource[], Error>(
-    [resource, project, metadataOnly],
+    [resource, options.project, options.metadataOnly],
     () => {
-      return getDashboards(project, metadataOnly);
+      return getDashboards(options.project, options.metadataOnly);
     },
-    { refetchOnMount: refetchOnMount }
+    options
   );
 }
 
@@ -77,7 +82,7 @@ export interface DatedDashboards {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useRecentDashboardList(project?: string, maxSize?: number) {
-  const { data, isLoading } = useDashboardList(project, true);
+  const { data, isLoading } = useDashboardList({ project: project, metadataOnly: true });
   const history = useNavHistory();
 
   const result = useMemo(() => {
@@ -110,7 +115,7 @@ export function useRecentDashboardList(project?: string, maxSize?: number) {
  * Will automatically be refreshed when cache is invalidated or history modified
  */
 export function useImportantDashboardList(project?: string) {
-  const { data: dashboards, isLoading } = useDashboardList(project, true);
+  const { data: dashboards, isLoading } = useDashboardList({ project: project, metadataOnly: true });
   const importantDashboardSelectors = useImportantDashboardSelectors();
 
   const importantDashboards = useMemo(() => {

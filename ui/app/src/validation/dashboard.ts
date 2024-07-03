@@ -13,7 +13,7 @@
 
 import { z } from 'zod';
 import { useMemo } from 'react';
-import { resourceIdValidationSchema } from '@perses-dev/plugin-system';
+import { nameSchema } from '@perses-dev/core';
 import { useDashboardList } from '../model/dashboard-client';
 import { generateMetadataName } from '../utils/metadata';
 
@@ -23,7 +23,7 @@ export const dashboardDisplayNameValidationSchema = z
   .max(75, 'Must be 75 or fewer characters long');
 
 export const createDashboardDialogValidationSchema = z.object({
-  projectName: resourceIdValidationSchema,
+  projectName: nameSchema,
   dashboardName: dashboardDisplayNameValidationSchema,
 });
 export type CreateDashboardValidationType = z.infer<typeof createDashboardDialogValidationSchema>;
@@ -35,7 +35,7 @@ export type RenameDashboardValidationType = z.infer<typeof renameDashboardDialog
 
 // Validate dashboard name and check if it doesn't already exist
 export function useDashboardValidationSchema(projectName?: string) {
-  const dashboards = useDashboardList(projectName);
+  const dashboards = useDashboardList({ project: projectName });
 
   return useMemo(() => {
     return createDashboardDialogValidationSchema.refine(

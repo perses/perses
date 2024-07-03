@@ -13,7 +13,7 @@
 
 import { useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { Action, PanelDefinition } from '@perses-dev/core';
+import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginKindSelect,
@@ -21,12 +21,11 @@ import {
   PanelSpecEditor,
   getTitleAction,
   getSubmitText,
+  useValidationSchemas,
 } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';
-import { PanelEditorValues } from '../../context/DashboardProvider/panel-editor-slice';
-import { panelEditorValidationSchema, PanelEditorValidationType } from '../../validation';
 import { PanelPreview } from './PanelPreview';
 import { usePanelEditor } from './usePanelEditor';
 
@@ -38,16 +37,10 @@ export interface PanelEditorFormProps {
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps) {
-  const {
-    initialValues: { panelDefinition: initialPanelDef, groupId: initialGroupId },
-    initialAction,
-    onSave,
-    onClose,
-  } = props;
+  const { initialValues, initialAction, onSave, onClose } = props;
   const panelGroups = useListPanelGroups();
-  const [groupId, setGroupId] = useState(initialGroupId);
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
-    usePanelEditor(initialPanelDef);
+    usePanelEditor(initialValues.panelDefinition);
   const { plugin } = panelDefinition.spec;
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
@@ -69,26 +62,20 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   const titleAction = getTitleAction(initialAction, true);
   const submitText = getSubmitText(initialAction, true);
 
-  const form = useForm<PanelEditorValidationType>({
-    resolver: zodResolver(panelEditorValidationSchema),
+  const { panelEditorSchema } = useValidationSchemas();
+  const form = useForm<PanelEditorValues>({
+    resolver: zodResolver(panelEditorSchema),
     mode: 'onBlur',
-    defaultValues: {
-      name: initialPanelDef.spec.display.name,
-      groupId: initialGroupId,
-      description: initialPanelDef.spec.display.description,
-      selection: pluginEditor.pendingSelection ? pluginEditor.pendingSelection : { type: 'Panel', kind: plugin.kind },
-      links: initialPanelDef.spec.links,
-    },
+    defaultValues: initialValues,
   });
 
-  const links = useWatch({ control: form.control, name: 'links' });
+  const links = useWatch({ control: form.control, name: 'panelDefinition.spec.links' });
   useEffect(() => {
     setLinks(links);
   }, [setLinks, links]);
 
-  const processForm: SubmitHandler<PanelEditorValidationType> = () => {
-    const values: PanelEditorValues = { groupId, panelDefinition };
-    onSave(values);
+  const processForm: SubmitHandler<PanelEditorValues> = (data) => {
+    onSave(data);
   };
 
   // When user click on cancel, several possibilities:
@@ -96,10 +83,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (
-      JSON.stringify({ groupId: initialGroupId, panelDefinition: initialPanelDef }) !==
-      JSON.stringify({ groupId, panelDefinition })
-    ) {
+    if (JSON.stringify(initialValues) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -143,7 +127,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
         <Grid container spacing={2}>
           <Grid item xs={8}>
             <Controller
-              name="name"
+              control={form.control}
+              name="panelDefinition.spec.display.name"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -152,6 +137,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   label="Name"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setName(event.target.value);
@@ -162,6 +148,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           </Grid>
           <Grid item xs={4}>
             <Controller
+              control={form.control}
               name="groupId"
               render={({ field, fieldState }) => (
                 <TextField
@@ -174,7 +161,6 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   helperText={fieldState.error?.message}
                   onChange={(event) => {
                     field.onChange(event);
-                    setGroupId(+event.target.value);
                   }}
                 >
                   {panelGroups.map((panelGroup, index) => (
@@ -188,7 +174,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           </Grid>
           <Grid item xs={8}>
             <Controller
-              name="description"
+              control={form.control}
+              name="panelDefinition.spec.display.description"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -196,6 +183,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   label="Description"
                   error={!!fieldState.error}
                   helperText={fieldState.error?.message}
+                  value={field.value ?? ''}
                   onChange={(event) => {
                     field.onChange(event);
                     setDescription(event.target.value);
@@ -206,7 +194,8 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           </Grid>
           <Grid item xs={4}>
             <Controller
-              name="selection"
+              control={form.control}
+              name="panelDefinition.spec.plugin.kind"
               render={({ field, fieldState }) => (
                 <PluginKindSelect
                   {...field}
@@ -217,8 +206,9 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
                   disabled={pluginEditor.isLoading}
                   error={!!pluginEditor.error || !!fieldState.error}
                   helperText={pluginEditor.error?.message ?? fieldState.error?.message}
+                  value={{ type: 'Panel', kind: field.value }}
                   onChange={(event) => {
-                    field.onChange(event);
+                    field.onChange(event.kind);
                     pluginEditor.onSelectionChange(event);
                   }}
                 />
@@ -236,6 +226,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
           <Grid item xs={12}>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <PanelSpecEditor
+                control={form.control}
                 panelDefinition={panelDefinition}
                 onJSONChange={handlePanelDefinitionChange}
                 onQueriesChange={(queries) => {

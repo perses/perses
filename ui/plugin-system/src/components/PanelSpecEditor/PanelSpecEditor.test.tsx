@@ -12,12 +12,21 @@
 // limitations under the License.
 
 import { screen } from '@testing-library/react';
+import { useForm } from 'react-hook-form';
+import { PanelEditorValues } from '@perses-dev/core';
 import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {
-  const renderComponent = (props: PanelSpecEditorProps) => {
-    renderWithContext(<PanelSpecEditor {...props} />);
+  const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+    // Intermediary component to wrap the PanelSpecEditor with a form
+    const Component = (props: Omit<PanelSpecEditorProps, 'control'>) => {
+      const form = useForm<PanelEditorValues>();
+
+      return <PanelSpecEditor {...props} control={form.control} />;
+    };
+
+    renderWithContext(<Component {...props} />);
   };
 
   it('should show query, options and json editors', async () => {

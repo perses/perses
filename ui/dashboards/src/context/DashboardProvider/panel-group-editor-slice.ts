@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+import { PanelGroupId } from '@perses-dev/core';
 import { Middleware } from './common';
-import { PanelGroupSlice, PanelGroupId, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
+import { PanelGroupSlice, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 
 export interface PanelGroupEditor {
   mode: 'Add' | 'Edit';
