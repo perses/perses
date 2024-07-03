@@ -78,6 +78,7 @@ Generic placeholders are defined as follows:
 
 # If provided, Perses server will generate a list of global datasource based on the discovery chosen.
 # Be careful: the data coming from the discovery will totally override what exists in the database.
+# Note that this is an experimental feature. Behavior and config may change in the future.
 global_datasource_discovery:
   [- <GlobalDatasourceDiscovery config> ]
 
