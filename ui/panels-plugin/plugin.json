@@ -15,9 +15,25 @@
       },
       {
         "pluginType": "Panel",
+        "kind": "Table",
+        "display": {
+          "name": "Table",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
         "kind": "TimeSeriesTable",
         "display": {
           "name": "Time Series Table",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "TimeSeriesReactTable",
+        "display": {
+          "name": "Time Series React Table",
           "description": ""
         }
       },
