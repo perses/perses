@@ -12,6 +12,9 @@
 // limitations under the License.
 
 import { Definition } from '@perses-dev/core';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { TableDensity } from '@perses-dev/components';
+import { SortDirection } from '@perses-dev/components/dist/Table/model/table-model';
 
 /**
  * The schema for a Table panel.
@@ -23,11 +26,19 @@ export interface TableDefinition extends Definition<TableOptions> {
 /**
  * The Options object type supported by the Table panel plugin.
  */
-export interface TableOptions {}
+export interface TableOptions {
+  density?: TableDensity;
+  sort?: SortDirection;
+}
 
 /**
  * Creates the initial/empty options for a Table panel.
  */
 export function createInitialTableOptions(): TableOptions {
-  return {};
+  return {
+    density: 'standard',
+    sort: 'asc',
+  };
 }
+
+export type TableOptionsEditorProps = OptionsEditorProps<TableOptions>;

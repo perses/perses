@@ -38,8 +38,7 @@
     "echarts": "5.5.0",
     "immer": "^9.0.15",
     "lodash": "^4.17.21",
-    "marked": "^4.2.12",
-    "@tanstack/react-table": "^8.19.2"
+    "marked": "^4.2.12"
   },
   "peerDependencies": {
     "@mui/material": "^5.15.20",
