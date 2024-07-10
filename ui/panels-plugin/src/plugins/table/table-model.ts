@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
-import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ColumnOptions, Definition } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 import { SortDirection } from '@perses-dev/components/dist/Table/model/table-model';
 
@@ -29,6 +28,7 @@ export interface TableDefinition extends Definition<TableOptions> {
 export interface TableOptions {
   density?: TableDensity;
   sort?: SortDirection;
+  columns?: ColumnOptions[];
 }
 
 /**
@@ -40,5 +40,3 @@ export function createInitialTableOptions(): TableOptions {
     sort: 'asc',
   };
 }
-
-export type TableOptionsEditorProps = OptionsEditorProps<TableOptions>;

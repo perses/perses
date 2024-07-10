@@ -14,4 +14,19 @@
 package model
 
 kind: "Table"
-spec: close({})
+spec: close({
+	density?: "compact" | "standard" | "comfortable"
+	sort?: 'asc' | 'desc'
+	columns?: [...#columns]
+})
+
+#columns: {
+	name: string
+	header?: string
+	headerDescription?: string
+	cellDescription?: string
+	align?: "left" | "center" | "right"
+	enableSorting?: bool
+	width?: number | "auto"
+	hide?: bool
+}

@@ -1,13 +1,14 @@
-import { OptionsEditorColumn, OptionsEditorGrid } from '@perses-dev/components';
-import { Typography } from '@mui/material';
-import { TableOptionsEditorProps } from './table-model';
+import { ColumnsEditor } from '@perses-dev/components';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ColumnOptions } from '@perses-dev/core';
+import { TableOptions } from './table-model';
 
-export function TableOptionsEditor({}: TableOptionsEditorProps) {
-  return (
-    <OptionsEditorGrid>
-      <OptionsEditorColumn>
-        <Typography>Test</Typography>
-      </OptionsEditorColumn>
-    </OptionsEditorGrid>
-  );
+export type TableOptionsEditorProps = OptionsEditorProps<TableOptions>;
+
+export function TableOptionsEditor({ onChange, value }: TableOptionsEditorProps) {
+  function handleColumnChange(columns: ColumnOptions[]): void {
+    onChange({ ...value, columns: columns });
+  }
+
+  return <ColumnsEditor columnOptions={value.columns ?? []} onChange={handleColumnChange} />;
 }

@@ -13,6 +13,7 @@
 
 export * from './BarChart';
 export * from './ColorPicker';
+export * from './ColumnsEditor';
 export * from './ContentWithLegend';
 export * from './Dialog';
 export * from './Drawer';
