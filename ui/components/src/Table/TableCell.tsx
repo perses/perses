@@ -74,6 +74,7 @@ export function TableCell({
   isFirstColumn,
   isLastColumn,
   description,
+  align,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -145,6 +146,7 @@ export function TableCell({
           flexDirection: 'inherit',
         }}
         title={description}
+        textAlign={align}
       >
         {children}
       </Box>

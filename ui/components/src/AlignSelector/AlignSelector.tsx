@@ -27,7 +27,7 @@ export function AlignSelector({ onChange, value = 'left', size }: AlignSelectorP
   };
 
   return (
-    <ButtonGroup size={size} aria-label="Alignement" sx={{ margin: 1 }}>
+    <ButtonGroup size={size} aria-label="Alignement" sx={{ marginX: 1 }}>
       <Button key="left" onClick={() => handleSortChange('left')} variant={value === 'left' ? 'contained' : 'outlined'}>
         Left
       </Button>

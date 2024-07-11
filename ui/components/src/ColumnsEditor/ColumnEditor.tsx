@@ -1,5 +1,5 @@
 import { ColumnDefinition } from '@perses-dev/core';
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { AlignSelector } from '../AlignSelector';
 
@@ -17,7 +17,12 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
 
   return (
     <Stack gap={2} {...others}>
-      <TextField label="Name" value={column.name} onChange={(e) => onChange({ ...column, name: e.target.value })} />
+      <TextField
+        label="Name"
+        value={column.name}
+        onChange={(e) => onChange({ ...column, name: e.target.value })}
+        required
+      />
       <Stack gap={2} direction="row">
         <TextField
           label="Header"
@@ -41,11 +46,16 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
         />
       </Stack>
       <Stack gap={2} direction="row" justifyContent="space-between">
-        <AlignSelector
-          size="small"
-          value={column.align ?? 'left'}
-          onChange={(align) => onChange({ ...column, align: align })}
-        />
+        <Stack>
+          <Typography variant="body2" align="center">
+            Alignment
+          </Typography>
+          <AlignSelector
+            size="small"
+            value={column.align ?? 'left'}
+            onChange={(align) => onChange({ ...column, align: align })}
+          />
+        </Stack>
 
         <Divider orientation="vertical" flexItem />
 

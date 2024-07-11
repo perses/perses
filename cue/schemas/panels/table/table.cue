@@ -13,6 +13,8 @@
 
 package model
 
+import "strings"
+
 kind: "Table"
 spec: close({
 	density?: "compact" | "standard" | "comfortable"
@@ -21,7 +23,7 @@ spec: close({
 })
 
 #columns: {
-	name: string
+	name: strings.MinRunes(1) // TODO: min 1 char
 	header?: string
 	headerDescription?: string
 	cellDescription?: string

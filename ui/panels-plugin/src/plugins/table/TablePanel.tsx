@@ -36,9 +36,10 @@ function generateColumnConfig(
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: (_) => `Cell description for ${name}`,
+        cellDescription: (_) => `${column.cellDescription}`, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
+        align: column.align,
       };
     }
   }
