@@ -11,39 +11,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { OptionsEditorControl } from '../OptionsEditorLayout';
-import { SettingsAutocomplete } from '../SettingsAutocomplete';
-
-const ALIGN_OPTIONS: Array<{ id: AlignOption; label: string }> = [
-  { id: 'left', label: 'Left' },
-  { id: 'center', label: 'Center' },
-  { id: 'right', label: 'Right' },
-];
+import { Button, ButtonGroup } from '@mui/material';
 
 export type AlignOption = 'left' | 'center' | 'right';
 
 export interface AlignSelectorProps {
   onChange: (align: AlignOption) => void;
   value?: AlignOption;
+  size?: 'small' | 'medium' | 'large';
 }
 
-export function AlignSelector({ onChange, value = 'left' }: AlignSelectorProps) {
-  const handleSortChange = (_: unknown, { id }: { id: AlignOption }) => {
-    onChange(id);
+export function AlignSelector({ onChange, value = 'left', size }: AlignSelectorProps) {
+  const handleSortChange = (option: AlignOption) => {
+    onChange(option);
   };
 
   return (
-    <OptionsEditorControl
-      label="Align"
-      control={
-        <SettingsAutocomplete
-          value={ALIGN_OPTIONS.find((o) => o.id === value)}
-          options={ALIGN_OPTIONS}
-          getOptionLabel={(o) => o.label}
-          onChange={handleSortChange}
-          disableClearable
-        />
-      }
-    />
+    <ButtonGroup size={size} aria-label="Alignement" sx={{ margin: 1 }}>
+      <Button key="left" onClick={() => handleSortChange('left')} variant={value === 'left' ? 'contained' : 'outlined'}>
+        Left
+      </Button>
+      <Button
+        key="center"
+        onClick={() => handleSortChange('center')}
+        variant={value === 'center' ? 'contained' : 'outlined'}
+      >
+        Center
+      </Button>
+      <Button
+        key="right"
+        onClick={() => handleSortChange('right')}
+        variant={value === 'right' ? 'contained' : 'outlined'}
+      >
+        Right
+      </Button>
+    </ButtonGroup>
   );
 }

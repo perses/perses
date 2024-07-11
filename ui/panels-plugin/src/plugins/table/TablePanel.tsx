@@ -14,13 +14,44 @@
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
 import { useMemo } from 'react';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { ColumnDefinition, TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { TableOptions } from './table-model';
+
+/*
+ * Generate column config from column definitions, if a column has multiple definitions, the first one will be used.
+ * If column is hidden, return undefined.
+ * If column do not have a definition, return a default column config.
+ */
+function generateColumnConfig(
+  name: string,
+  columnDefinitions: ColumnDefinition[]
+): TableColumnConfig<unknown> | undefined {
+  for (const column of columnDefinitions) {
+    if (column.name === name) {
+      if (column.hide) {
+        return undefined;
+      }
+
+      return {
+        accessorKey: name,
+        header: column.header ?? name,
+        headerDescription: column.headerDescription,
+        cellDescription: (_) => `Cell description for ${name}`,
+        enableSorting: column.enableSorting,
+        width: column.width,
+      };
+    }
+  }
+
+  return {
+    accessorKey: name,
+    header: name,
+  };
+}
 
 export type TableProps = PanelProps<TableOptions>;
 
-export function TablePanel(props: TableProps) {
-  const { contentDimensions } = props;
+export function TablePanel({ contentDimensions, spec }: TableProps) {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
@@ -53,13 +84,13 @@ export function TablePanel(props: TableProps) {
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
     for (const key of keys) {
-      columns.push({
-        accessorKey: key,
-        header: key,
-      });
+      const columnConfig = generateColumnConfig(key, spec.columns ?? []);
+      if (columnConfig !== undefined) {
+        columns.push(columnConfig);
+      }
     }
     return columns;
-  }, [keys]);
+  }, [keys, spec.columns]);
 
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
@@ -69,5 +100,13 @@ export function TablePanel(props: TableProps) {
     return null;
   }
 
-  return <Table data={data} columns={columns} height={contentDimensions.height} width={contentDimensions.width} />;
+  return (
+    <Table
+      data={data}
+      columns={columns}
+      height={contentDimensions.height}
+      width={contentDimensions.width}
+      density={spec.density}
+    />
+  );
 }
