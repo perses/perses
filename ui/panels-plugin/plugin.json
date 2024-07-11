@@ -31,14 +31,6 @@
       },
       {
         "pluginType": "Panel",
-        "kind": "TimeSeriesReactTable",
-        "display": {
-          "name": "Time Series React Table",
-          "description": ""
-        }
-      },
-      {
-        "pluginType": "Panel",
         "kind": "BarChart",
         "display": {
           "name": "Bar Chart",
