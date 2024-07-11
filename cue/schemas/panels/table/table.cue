@@ -18,7 +18,7 @@ import "strings"
 kind: "Table"
 spec: close({
 	density?: "compact" | "standard" | "comfortable"
-	sort?: 'asc' | 'desc'
+	sort?: "asc" | "desc"
 	columns?: [...#columns]
 })
 
