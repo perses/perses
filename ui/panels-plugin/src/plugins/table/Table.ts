@@ -14,7 +14,8 @@
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialTableOptions, TableOptions } from './table-model';
 import { TablePanel } from './TablePanel';
-import { TableOptionsEditor } from './TableOptionsEditor';
+import { TableColumnsEditor } from './TableColumnsEditor';
+import { TableSettingsEditor } from './TableSettingsEditor';
 
 /**
  * The core TimeSeriesTable panel plugin for Perses.
@@ -25,6 +26,9 @@ export const Table: PanelPlugin<TableOptions> = {
   queryOptions: {
     mode: 'instant',
   },
-  panelOptionsEditorComponents: [{ label: 'Settings', content: TableOptionsEditor }],
+  panelOptionsEditorComponents: [
+    { label: 'Columns', content: TableColumnsEditor },
+    { label: 'Settings', content: TableSettingsEditor },
+  ],
   createInitialOptions: createInitialTableOptions,
 };

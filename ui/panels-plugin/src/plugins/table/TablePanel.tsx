@@ -32,7 +32,7 @@ export function TablePanel(props: TableProps) {
         if (ts.values[0] === undefined) {
           return { ...ts.labels };
         }
-        return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels };
+        return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels }; // TODO: support multiple values and timestamps
       });
   }, [queryResults]);
 

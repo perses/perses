@@ -1,4 +1,4 @@
-export interface ColumnOptions {
+export interface ColumnDefinition {
   name: string;
 
   // Text to display in the header for the column.

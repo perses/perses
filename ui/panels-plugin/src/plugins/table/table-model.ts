@@ -11,9 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ColumnOptions, Definition } from '@perses-dev/core';
-import { TableDensity } from '@perses-dev/components';
-import { SortDirection } from '@perses-dev/components/dist/Table/model/table-model';
+import { ColumnDefinition, Definition } from '@perses-dev/core';
+import { SortOption, TableDensity } from '@perses-dev/components';
 
 /**
  * The schema for a Table panel.
@@ -27,8 +26,8 @@ export interface TableDefinition extends Definition<TableOptions> {
  */
 export interface TableOptions {
   density?: TableDensity;
-  sort?: SortDirection;
-  columns?: ColumnOptions[];
+  sort?: SortOption;
+  columns?: ColumnDefinition[];
 }
 
 /**

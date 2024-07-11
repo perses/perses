@@ -1,11 +1,12 @@
-import { ColumnOptions } from '@perses-dev/core';
-import { FormControlLabel, MenuItem, Select, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { ColumnDefinition } from '@perses-dev/core';
+import { FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { AlignSelector } from '../AlignSelector';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
 export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
-  column: ColumnOptions;
-  onChange: (column: ColumnOptions) => void;
+  column: ColumnDefinition;
+  onChange: (column: ColumnDefinition) => void;
 }
 
 export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps) {
@@ -47,17 +48,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             />
           }
         />
-        <Select
-          label="Alignment"
-          size="small"
-          value={column.align ?? 'left'}
-          fullWidth
-          onChange={(e) => onChange({ ...column, align: e.target.value as 'left' | 'center' | 'right' })}
-        >
-          <MenuItem value="left">Left</MenuItem>
-          <MenuItem value="center">Center</MenuItem>
-          <MenuItem value="right">Right</MenuItem>
-        </Select>
+        <AlignSelector value={column.align} onChange={(align) => onChange({ ...column, align: align })} />
       </Stack>
 
       <Stack gap={2} direction="row">

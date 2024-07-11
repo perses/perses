@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './AlignSelector';
 export * from './BarChart';
 export * from './ColorPicker';
 export * from './ColumnsEditor';
 export * from './ContentWithLegend';
 export * from './Dialog';
+export * from './DensitySelector';
 export * from './Drawer';
 export * from './EChart';
 export * from './ErrorAlert';

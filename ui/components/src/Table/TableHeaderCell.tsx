@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TableSortLabel, Typography, tableSortLabelClasses } from '@mui/material';
-import { SortDirection } from './model/table-model';
+import { SortOption } from '@perses-dev/components';
 import { TableCell, TableCellProps } from './TableCell';
 
 export interface TableHeaderCellProps extends TableCellProps {
@@ -25,7 +25,7 @@ export interface TableHeaderCellProps extends TableCellProps {
   /**
    * The current direction the header is sorted.
    */
-  sortDirection?: SortDirection;
+  sortDirection?: SortOption;
 
   /**
    * The next direction the header will be sorted when another sort action
@@ -33,7 +33,7 @@ export interface TableHeaderCellProps extends TableCellProps {
    * the direction of the sort arrow on hover f the column is currently
    * unsorted.)
    */
-  nextSortDirection?: SortDirection;
+  nextSortDirection?: SortOption;
 }
 
 export function TableHeaderCell({
