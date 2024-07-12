@@ -23,7 +23,7 @@ spec: close({
 })
 
 #columns: {
-	name: strings.MinRunes(1) // TODO: min 1 char
+	name: strings.MinRunes(1)
 	header?: string
 	headerDescription?: string
 	cellDescription?: string

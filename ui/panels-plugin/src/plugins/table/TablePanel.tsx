@@ -13,8 +13,9 @@
 
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ColumnDefinition, TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { SortingState } from '@tanstack/react-table';
 import { TableOptions } from './table-model';
 
 /*
@@ -56,6 +57,8 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const data: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
       .flatMap((d: QueryData<TimeSeriesData>) => d.data)
@@ -93,6 +96,10 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return columns;
   }, [keys, spec.columns]);
 
+  function handleSortingChange(sorting: SortingState) {
+    setSorting(sorting);
+  }
+
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
   }
@@ -105,9 +112,11 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     <Table
       data={data}
       columns={columns}
+      sorting={sorting}
       height={contentDimensions.height}
       width={contentDimensions.width}
       density={spec.density}
+      onSortingChange={handleSortingChange}
     />
   );
 }
