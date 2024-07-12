@@ -2,7 +2,6 @@
   "kind": "Table",
   "spec": {
     "density": "compact",
-    "sort": "asc",
     "columns" : [
       {
         "name": "value",

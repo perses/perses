@@ -33,6 +33,9 @@ export interface ColumnDefinition {
 
   // When `true`, the column will be sortable.
   enableSorting?: boolean;
+
+  // TODO: Allow user to set default sort => sort?: 'asc' | 'desc';
+
   /**
    * Width of the column when rendered in a table. It should be a number in pixels
    * or "auto" to allow the table to automatically adjust the width to fill

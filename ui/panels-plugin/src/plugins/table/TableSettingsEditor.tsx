@@ -16,8 +16,6 @@ import {
   OptionsEditorColumn,
   OptionsEditorGrid,
   OptionsEditorGroup,
-  SortOption,
-  SortSelector,
   TableDensity,
 } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
@@ -30,16 +28,11 @@ export function TableSettingsEditor({ onChange, value }: TableSettingsEditorProp
     onChange({ ...value, density: density });
   }
 
-  function handleSortChange(sort: SortOption): void {
-    onChange({ ...value, sort: sort });
-  }
-
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Display">
           <DensitySelector value={value.density} onChange={handleDensityChange} />
-          <SortSelector value={value.sort} onChange={handleSortChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
     </OptionsEditorGrid>

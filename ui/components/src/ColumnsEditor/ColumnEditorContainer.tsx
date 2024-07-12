@@ -50,8 +50,15 @@ export function ColumnEditorContainer({
           <IconButton size="small" onClick={() => onCollapse(!isCollapsed)}>
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
-          <Typography variant="overline" component="h4">
-            Column: {column.name}
+          <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
+            COLUMN:{' '}
+            {column.header ? (
+              <span>
+                <strong>{column.header}</strong> ({column.name})
+              </span>
+            ) : (
+              <strong>{column.name}</strong>
+            )}
           </Typography>
         </Stack>
 

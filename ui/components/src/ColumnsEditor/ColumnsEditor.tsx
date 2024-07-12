@@ -25,7 +25,7 @@ export interface ColumnsEditorProps {
 export function ColumnsEditor({ columnDefinitions, onChange }: ColumnsEditorProps) {
   const [columns, setColumns] = useState<ColumnDefinition[]>(columnDefinitions);
 
-  const [columnsCollapsed, setColumnsCollapsed] = useState(columns.map(() => false));
+  const [columnsCollapsed, setColumnsCollapsed] = useState(columns.map(() => true));
 
   function handleColumnChange(index: number, column: ColumnDefinition): void {
     const updatedColumns = [...columns];
@@ -70,7 +70,7 @@ export function ColumnsEditor({ columnDefinitions, onChange }: ColumnsEditorProp
         <ColumnEditorContainer
           key={i}
           column={column}
-          isCollapsed={columnsCollapsed[i] ?? false}
+          isCollapsed={columnsCollapsed[i] ?? true}
           onChange={(updatedColumn: ColumnDefinition) => handleColumnChange(i, updatedColumn)}
           onDelete={() => handleColumnDelete(i)}
           onCollapse={(collapsed) => handleColumnCollapseExpand(i, collapsed)}

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ColumnDefinition } from '@perses-dev/core';
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
+import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { useState } from 'react';
 import { AlignSelector } from '../AlignSelector';
 
@@ -29,14 +29,16 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
   );
 
   return (
-    <Stack gap={2} {...others}>
-      <TextField
-        label="Name"
-        value={column.name}
-        onChange={(e) => onChange({ ...column, name: e.target.value })}
-        required
-      />
-      <Stack gap={2} direction="row">
+    <Stack gap={2} direction="row" {...others}>
+      <Stack gap={2} sx={{ width: '100%' }}>
+        <TextField
+          label="Name"
+          value={column.name}
+          onChange={(e) => onChange({ ...column, name: e.target.value })}
+          required
+        />
+        <Divider orientation="horizontal" flexItem variant="middle" />
+
         <TextField
           label="Header"
           value={column.header ?? ''}
@@ -49,8 +51,6 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           fullWidth
           onChange={(e) => onChange({ ...column, headerDescription: e.target.value ? e.target.value : undefined })}
         />
-      </Stack>
-      <Stack gap={2} direction="row">
         <TextField
           label="Cell Description"
           value={column.cellDescription ?? ''}
@@ -58,23 +58,27 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           onChange={(e) => onChange({ ...column, cellDescription: e.target.value ? e.target.value : undefined })}
         />
       </Stack>
-      <Stack gap={2} direction="row" justifyContent="space-between">
-        <Stack>
-          <Typography variant="body2" align="center">
-            Alignment
-          </Typography>
-          <AlignSelector
-            size="small"
-            value={column.align ?? 'left'}
-            onChange={(align) => onChange({ ...column, align: align })}
-          />
-        </Stack>
 
-        <Divider orientation="vertical" flexItem />
+      <Divider orientation="vertical" flexItem />
+
+      <Stack gap={2} justifyContent="space-between" alignItems="start">
+        <FormControlLabel
+          label="Alignment"
+          sx={{ width: '100%', alignItems: 'start' }}
+          labelPlacement="top"
+          control={
+            <AlignSelector
+              size="medium"
+              value={column.align ?? 'left'}
+              onChange={(align) => onChange({ ...column, align: align })}
+            />
+          }
+        />
 
         <FormControlLabel
           label="Enable sorting"
-          sx={{ width: '100%' }}
+          sx={{ width: '100%', alignItems: 'start' }}
+          labelPlacement="top"
           control={
             <Switch
               checked={column.enableSorting ?? true}
@@ -82,31 +86,33 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             />
           }
         />
-        <Divider orientation="vertical" flexItem />
 
-        <FormControlLabel
-          label="Custom width"
-          sx={{ width: '100%' }}
-          control={
-            <Switch
-              checked={column.width !== undefined && column.width !== 'auto'}
-              onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
-            />
-          }
-        />
-        <TextField
-          label="Width"
-          type="number"
-          value={width}
-          fullWidth
-          // set visibility instead of wrapping in a if condition, in order to keep same layout
-          sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible' }}
-          InputProps={{ inputProps: { min: 1 } }}
-          onChange={(e) => {
-            setWidth(+e.target.value);
-            onChange({ ...column, width: +e.target.value });
-          }}
-        />
+        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
+          <FormControlLabel
+            label="Custom width"
+            sx={{ width: '100%', alignItems: 'start' }}
+            labelPlacement="top"
+            control={
+              <Switch
+                checked={column.width !== undefined && column.width !== 'auto'}
+                onChange={(e) => onChange({ ...column, width: e.target.checked ? width : 'auto' })}
+              />
+            }
+          />
+          <TextField
+            label="Width"
+            type="number"
+            value={width}
+            fullWidth
+            // set visibility instead of wrapping in a if condition, in order to keep same layout
+            sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible' }}
+            InputProps={{ inputProps: { min: 1 } }}
+            onChange={(e) => {
+              setWidth(+e.target.value);
+              onChange({ ...column, width: +e.target.value });
+            }}
+          />
+        </Stack>
       </Stack>
     </Stack>
   );

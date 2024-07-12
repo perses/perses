@@ -11,23 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup } from '@mui/material';
+import { Button, ButtonGroup, ButtonGroupProps } from '@mui/material';
 
 export type AlignOption = 'left' | 'center' | 'right';
 
-export interface AlignSelectorProps {
+export interface AlignSelectorProps extends Omit<ButtonGroupProps, 'onChange'> {
   onChange: (align: AlignOption) => void;
   value?: AlignOption;
-  size?: 'small' | 'medium' | 'large';
 }
 
-export function AlignSelector({ onChange, value = 'left', size }: AlignSelectorProps) {
+export function AlignSelector({ onChange, value = 'left', ...props }: AlignSelectorProps) {
   const handleSortChange = (option: AlignOption) => {
     onChange(option);
   };
 
   return (
-    <ButtonGroup size={size} aria-label="Alignement" sx={{ marginX: 1 }}>
+    <ButtonGroup aria-label="Alignement" sx={{ margin: 1 }} {...props}>
       <Button key="left" onClick={() => handleSortChange('left')} variant={value === 'left' ? 'contained' : 'outlined'}>
         Left
       </Button>

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ColumnDefinition, Definition } from '@perses-dev/core';
-import { SortOption, TableDensity } from '@perses-dev/components';
+import { TableDensity } from '@perses-dev/components';
 
 /**
  * The schema for a Table panel.
@@ -26,7 +26,6 @@ export interface TableDefinition extends Definition<TableOptions> {
  */
 export interface TableOptions {
   density?: TableDensity;
-  sort?: SortOption;
   columns?: ColumnDefinition[];
 }
 
@@ -36,6 +35,5 @@ export interface TableOptions {
 export function createInitialTableOptions(): TableOptions {
   return {
     density: 'standard',
-    sort: 'asc',
   };
 }

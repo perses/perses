@@ -17,18 +17,17 @@ import "strings"
 
 kind: "Table"
 spec: close({
-	density?: "compact" | "standard" | "comfortable"
-	sort?: "asc" | "desc"
+	density?: "compact" | "standard"
 	columns?: [...#columns]
 })
 
 #columns: {
-	name: strings.MinRunes(1)
-	header?: string
+	name:               strings.MinRunes(1)
+	header?:            string
 	headerDescription?: string
-	cellDescription?: string
-	align?: "left" | "center" | "right"
-	enableSorting?: bool
-	width?: number | "auto"
-	hide?: bool
+	cellDescription?:   string
+	align?:             "left" | "center" | "right"
+	enableSorting?:     bool
+	width?:             number | "auto"
+	hide?:              bool
 }
