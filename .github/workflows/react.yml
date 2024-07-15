@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -47,7 +47,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
