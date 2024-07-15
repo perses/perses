@@ -138,7 +138,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "1w",
         "2w"
       ]
-    }
+    },
+    "plugins_path": "plugins"
   }
 }`,
 		},
@@ -216,7 +217,8 @@ func TestUnmarshalJSONConfig(t *testing.T) {
         "dashboard": "Dashboard"
       }
     ],
-    "information": "# Hello World\n## File Database setup"
+    "information": "# Hello World\n## File Database setup",
+		"plugins_path": "plugins"
   },
   "provisioning": {
     "folders": [
@@ -281,6 +283,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 						},
 					},
 					Information: "# Hello World\n## File Database setup",
+					PluginsPath: "plugins",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -352,6 +355,8 @@ frontend:
       dashboard: "DuplicatePanels"
     - project: "Unknown"
       dashboard: "Dashboard"
+
+  plugins_path: "custom/plugins"
   
   information: |-
     # Hello World
@@ -431,6 +436,7 @@ ephemeral_dashboards_cleanup_interval: "2h"
 						DisableCustomTimeRange: false,
 						Options:                defaultTimeRangeOptions,
 					},
+					PluginsPath: "custom/plugins",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{

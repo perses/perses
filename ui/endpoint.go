@@ -22,6 +22,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -41,15 +42,20 @@ var (
 
 type frontend struct {
 	echoUtils.Register
+	pluginsPath string
 }
 
-func NewPersesFrontend() echoUtils.Register {
-	return &frontend{}
+func NewPersesFrontend(cfg config.Frontend) echoUtils.Register {
+	return &frontend{
+		pluginsPath: cfg.PluginsPath,
+	}
 }
 
 func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
+
+	e.Static("/plugins", f.pluginsPath)
 	e.GET("/*", contentHandler, routerMiddleware(), contentRewrite)
 }
 

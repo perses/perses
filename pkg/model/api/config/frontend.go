@@ -19,6 +19,10 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+const (
+	defaultPluginsPath = "plugins"
+)
+
 var defaultTimeRangeOptions = []model.Duration{
 	model.Duration(5 * time.Minute),
 	model.Duration(15 * time.Minute),
@@ -47,6 +51,13 @@ func (t *TimeRange) Verify() error {
 	return nil
 }
 
+func (f *Frontend) Verify() error {
+	if len(f.PluginsPath) == 0 {
+		f.PluginsPath = defaultPluginsPath
+	}
+	return nil
+}
+
 type Frontend struct {
 	// When it is true, Perses won't serve the frontend anymore, and any other config set here will be ignored
 	Disable bool `json:"disable" yaml:"disable"`
@@ -59,4 +70,6 @@ type Frontend struct {
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	// PluginsPath is the path to the directory containing the runtime plugins
+	PluginsPath string `json:"plugins_path,omitempty" yaml:"plugins_path,omitempty"`
 }
