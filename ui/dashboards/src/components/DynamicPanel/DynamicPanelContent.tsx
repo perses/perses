@@ -26,7 +26,10 @@ export function DynamicPanelContent({ definition, contentDimensions }: DynamicPa
 
   return (
     <PluginLoader<DynamicPanelContentProps>
-      plugin={{ name: definition.spec.plugin.kind, moduleName: 'Chart', baseURL: 'plugins-dev' }}
+      plugin={{
+        name: definition.spec.plugin.kind,
+        moduleName: 'Chart',
+      }}
       props={{ definition, contentDimensions }}
     />
   );

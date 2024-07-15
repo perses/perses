@@ -156,7 +156,7 @@ build-cli:
 	CGO_ENABLED=0 GOARCH=${GOARCH} GOOS=${GOOS} $(GO) build -ldflags "${LDFLAGS}" -o ./bin/percli ./cmd/percli
 
 .PHONY: generate
-generate: assets-compress
+generate: assets-compress install-default-plugins
 	GOARCH=${GOHOSTARCH} GOOS=${GOHOSTOS} $(GO) generate ./internal/api
 
 .PHONY: extract-changelog
@@ -203,3 +203,8 @@ upgrade-npm-deps:
 update-helm-readme:
 	@docker run --rm --volume "$$(pwd)/charts/perses:/helm-docs" -u $$(id -u) jnorwood/helm-docs:latest
 	@make fmt-docs
+
+.PHONY: install-default-plugins
+install-default-plugins:
+	@echo ">> install default plugins"
+	./scripts/install_default_plugins.sh

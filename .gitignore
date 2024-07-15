@@ -37,3 +37,5 @@ dev/local_db
 /.github/perses-ci/
 
 *.ignore.*
+
+plugins/*

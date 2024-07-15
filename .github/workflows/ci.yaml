@@ -79,7 +79,7 @@ jobs:
         with:
           name: storybook
           path: ui/storybook/storybook-static
-  
+
   build-typedoc:
     name: "build-typedoc"
     runs-on: ubuntu-latest
@@ -99,7 +99,7 @@ jobs:
         with:
           name: typedoc
           path: ui/typedoc
-  
+
   libs-release:
     name: "libs-release"
     needs: "build-frontend"
