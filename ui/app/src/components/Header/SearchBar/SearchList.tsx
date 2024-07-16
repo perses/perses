@@ -23,6 +23,8 @@ const kvSearchConfig: KVSearchConfiguration = {
   indexedKeys: [['metadata', 'name']],
   shouldSort: true,
   includeMatches: true,
+  shouldRender: false,
+  excludedChars: [' '],
 };
 
 const sizeList = 10;
