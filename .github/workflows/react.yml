@@ -21,10 +21,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
+          nvmrc_path: "./ui/.nvmrc"
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run lint
@@ -34,10 +35,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
+          nvmrc_path: "./ui/.nvmrc"
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run type-check
@@ -47,10 +49,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.4.0
+      - uses: perses/github-actions@v0.5.2
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
+          nvmrc_path: "./ui/.nvmrc"
       - name: install deps
         run: cd ./ui && npm ci
       - run: cd ./ui && npm run test
