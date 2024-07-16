@@ -7,6 +7,10 @@ updates:
   open-pull-requests-limit: 10
   schedule:
     interval: "weekly"
+  groups:
+    k8s.io:
+      patterns:
+        - "k8s.io/*"
   # Raise all gomod pull requests with custom labels
   labels:
     - "dependencies"

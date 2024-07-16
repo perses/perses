@@ -21,7 +21,7 @@ interface ProjectDashboardsProps extends CardProps {
 }
 
 export function ProjectDashboards({ projectName, hideToolbar, ...props }: ProjectDashboardsProps) {
-  const { data, isLoading } = useDashboardList(projectName);
+  const { data, isLoading } = useDashboardList({ project: projectName });
 
   return (
     <Card {...props}>

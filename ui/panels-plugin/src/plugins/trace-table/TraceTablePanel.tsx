@@ -33,6 +33,11 @@ export function TraceTablePanel(props: TraceTableProps) {
     return <LoadingOverlay />;
   }
 
+  const queryError = queryResults.find((d) => d.error);
+  if (queryError) {
+    throw queryError.error;
+  }
+
   const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
   if (!tracesFound) {
     return <NoDataOverlay resource="traces" />;

@@ -207,7 +207,7 @@ function mergeQueryResults(first: UseQueryResult, ...others: UseQueryResult[]): 
 
 export function useProjectsWithDashboards(): UseQueryResult<ProjectWithDashboards[]> {
   const projectsQueryResult = useProjectList();
-  const dashboardsQueryResult = useDashboardList(undefined, true);
+  const dashboardsQueryResult = useDashboardList({ project: undefined, metadataOnly: true });
 
   return {
     ...mergeQueryResults(projectsQueryResult, dashboardsQueryResult),
