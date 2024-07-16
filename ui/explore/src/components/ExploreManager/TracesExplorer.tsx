@@ -78,7 +78,7 @@ function SearchResultsPanel({ queries, setQueries }: SearchResultsPanelProps) {
   );
 }
 
-function GanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
+function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
   return (
     <Panel
       panelOptions={{
@@ -86,7 +86,7 @@ function GanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
       }}
       definition={{
         kind: 'Panel',
-        spec: { queries, display: { name: '' }, plugin: { kind: 'GanttChart', spec: {} } },
+        spec: { queries, display: { name: '' }, plugin: { kind: 'TracingGanttChart', spec: {} } },
       }}
     />
   );
@@ -120,7 +120,7 @@ export function TracesExplorer() {
         <DataQueriesProvider definitions={definitions}>
           <Box height={PANEL_PREVIEW_HEIGHT}>
             {isSingleTrace ? (
-              <GanttChartPanel queries={queries} />
+              <TracingGanttChartPanel queries={queries} />
             ) : (
               <SearchResultsPanel queries={queries} setQueries={setQueries} />
             )}

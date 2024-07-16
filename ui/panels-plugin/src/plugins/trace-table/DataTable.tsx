@@ -28,7 +28,7 @@ import { QueryData } from '@perses-dev/plugin-system';
 import { MouseEvent, ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
-import { getConsistentServiceColor } from '../gantt-chart/GanttChart/utils';
+import { getConsistentServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',

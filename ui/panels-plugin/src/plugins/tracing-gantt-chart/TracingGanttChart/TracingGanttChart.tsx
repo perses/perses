@@ -20,7 +20,7 @@ import { Viewport } from './utils';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 
-export interface GanttChart {
+export interface TracingGanttChartProps {
   rootSpan: Span;
 }
 
@@ -30,7 +30,7 @@ export interface GanttChart {
  * The UI/UX of this panel is based on Jaeger UI, licensed under Apache License, Version 2.0.
  * https://github.com/jaegertracing/jaeger-ui
  */
-export function GanttChart(props: GanttChart) {
+export function TracingGanttChart(props: TracingGanttChartProps) {
   const { rootSpan } = props;
 
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);

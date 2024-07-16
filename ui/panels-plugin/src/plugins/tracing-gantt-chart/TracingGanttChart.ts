@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './gantt-chart-model';
+import { TracingGanttChartPanel } from './TracingGanttChartPanel';
 
-kind: "GanttChart"
-spec: close({})
+export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions> = {
+  PanelComponent: TracingGanttChartPanel,
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialTracingGanttChartOptions,
+};

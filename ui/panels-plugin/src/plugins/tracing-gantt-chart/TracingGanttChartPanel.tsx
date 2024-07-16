@@ -14,12 +14,12 @@
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
-import { GanttChartOptions } from './gantt-chart-model';
-import { GanttChart } from './GanttChart/GanttChart';
+import { TracingGanttChartOptions } from './gantt-chart-model';
+import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
-export type GanttChartPanelProps = PanelProps<GanttChartOptions>;
+export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions>;
 
-export function GanttChartPanel() {
+export function TracingGanttChartPanel() {
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -44,7 +44,7 @@ export function GanttChartPanel() {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <GanttChart rootSpan={trace.rootSpan} />
+      <TracingGanttChart rootSpan={trace.rootSpan} />
     </Box>
   );
 }

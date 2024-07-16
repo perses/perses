@@ -11,15 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * The Options object type supported by the GanttChart panel plugin.
- */
-// Note: The interface attributes must match cue/schemas/panels/gantt-chart/gantt-chart.cue
-export interface GanttChartOptions {}
+import type { Meta, StoryObj } from '@storybook/react';
+import { trace1_root } from '../../../test';
+import { TracingGanttChart } from './TracingGanttChart';
 
-/**
- * Creates the initial/empty options for a GanttChart panel.
- */
-export function createInitialGanttChartOptions() {
-  return {};
-}
+const exampleTraces = {
+  Demo: trace1_root,
+};
+
+const meta: Meta<typeof TracingGanttChart> = {
+  component: TracingGanttChart,
+  argTypes: {
+    rootSpan: {
+      options: Object.keys(exampleTraces),
+      mapping: exampleTraces,
+    },
+  },
+};
+
+export default meta;
+
+type Story = StoryObj<typeof TracingGanttChart>;
+
+export const Primary: Story = {
+  args: {
+    rootSpan: trace1_root,
+  },
+};

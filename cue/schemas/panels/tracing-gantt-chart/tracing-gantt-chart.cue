@@ -11,14 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelPlugin } from '@perses-dev/plugin-system';
-import { createInitialGanttChartOptions, GanttChartOptions } from './gantt-chart-model';
-import { GanttChartPanel } from './GanttChartPanel';
+package model
 
-export const GanttChart: PanelPlugin<GanttChartOptions> = {
-  PanelComponent: GanttChartPanel,
-  // TODO: add a chart options editor plugin, for example:
-  // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
-  supportedQueryTypes: ['TraceQuery'],
-  createInitialOptions: createInitialGanttChartOptions,
-};
+kind: "TracingGanttChart"
+spec: close({})

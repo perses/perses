@@ -71,9 +71,9 @@
       },
       {
         "pluginType": "Panel",
-        "kind": "GanttChart",
+        "kind": "TracingGanttChart",
         "display": {
-          "name": "Gantt Chart",
+          "name": "Tracing Gantt Chart",
           "description": ""
         }
       }
