@@ -13,6 +13,10 @@
 
 import { Kind } from './kind';
 
+export function isProjectMetadata(metadata: Metadata | ProjectMetadata): metadata is ProjectMetadata {
+  return 'project' in metadata;
+}
+
 export interface Metadata {
   name: string;
   createdAt?: string;

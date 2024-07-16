@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/goreleaser/goreleaser/pkg/config"
+	"github.com/goreleaser/goreleaser/v2/pkg/config"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )

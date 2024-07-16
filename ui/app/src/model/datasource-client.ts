@@ -12,13 +12,17 @@
 // limitations under the License.
 
 import { DatasourceResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryOptions } from '@tanstack/react-query';
 import { HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT, HTTPMethodDELETE, HTTPHeader } from './http';
 import buildQueryKey from './querykey-builder';
 import buildURL from './url-builder';
 import { fetch, fetchJson } from './fetch';
 
 export const resource = 'datasources';
+
+type DatasourceListOptions = Omit<UseQueryOptions<DatasourceResource[], Error>, 'queryKey' | 'queryFn'> & {
+  project?: string;
+};
 
 export function buildDatasourceQueryParameters(kind?: string, defaultDatasource?: boolean, name?: string) {
   const q = new URLSearchParams();
@@ -117,10 +121,14 @@ export function useDatasource(project: string, name: string) {
  * Used to get datasources in the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useDatasourceList(project: string) {
-  return useQuery<DatasourceResource[], Error>(buildQueryKey({ resource, parent: project }), () => {
-    return getDatasources(project);
-  });
+export function useDatasourceList(options: DatasourceListOptions) {
+  return useQuery<DatasourceResource[], Error>(
+    buildQueryKey({ resource, parent: options.project }),
+    () => {
+      return getDatasources(options.project);
+    },
+    options
+  );
 }
 
 export function createDatasource(entity: DatasourceResource) {

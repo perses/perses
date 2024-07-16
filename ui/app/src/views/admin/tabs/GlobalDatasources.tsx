@@ -30,7 +30,7 @@ interface GlobalDatasourcesProps {
 
 export function GlobalDatasources(props: GlobalDatasourcesProps) {
   const { hideToolbar, id } = props;
-  const { data, isLoading } = useGlobalDatasourceList();
+  const { data, isLoading } = useGlobalDatasourceList({});
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
 
   const createDatasourceMutation = useCreateGlobalDatasourceMutation();
