@@ -108,7 +108,7 @@ export class AppProjectPage {
   async navigateToDashboard(projectName: string, dashboardName: string) {
     await this.goto(projectName);
 
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL(`/projects/${projectName}`, { waitUntil: 'domcontentloaded' });
     await this.clickDashboardItemInList(dashboardName, mainDashboardListId);
     await navigationPromise;
   }
@@ -121,7 +121,7 @@ export class AppProjectPage {
   async navigateToDashboardFromRecentDashboards(projectName: string, dashboardName: string) {
     await this.goto(projectName);
 
-    const navigationPromise = this.page.waitForNavigation();
+    const navigationPromise = this.page.waitForURL(`/projects/${projectName}`);
     await this.clickDashboardItemInList(dashboardName, recentDashboardListId);
     await navigationPromise;
   }
@@ -135,7 +135,14 @@ export class AppProjectPage {
 
   async clickDashboardItemInList(dashboardName: string, dashboardListId: string) {
     const dashboardButton = this.page.locator(`#${dashboardListId}`).getByText(new RegExp(`^${dashboardName}$`, 'i'));
+
+    const navigationPromise = this.page.waitForURL(new RegExp(`.*/dashboards/${dashboardName}.*`, 'i'));
+
     await dashboardButton.click();
+
+    await this.page.getByTestId('panel-group-header').first().waitFor();
+
+    return navigationPromise;
   }
 
   getDatasourceEditor() {

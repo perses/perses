@@ -392,7 +392,7 @@ export class DashboardPage {
 
   async goBackToProjectPage(projectName: string) {
     const navigationPromise = this.page.waitForNavigation();
-    await this.page.getByRole('link', { name: projectName }).click();
+    await this.page.getByRole('link', { name: projectName }).first().click();
     await navigationPromise;
   }
 }
