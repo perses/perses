@@ -27,6 +27,7 @@ import { TempoTraceQuerySpec } from '../../model/trace-query-model';
 import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/tempo-selectors';
 import { TempoClient } from '../../model/tempo-client';
 import {
+  SearchRequestParameters,
   SearchTraceIDResponse,
   SearchTraceQueryResponse,
   Resource as TempoResource,
@@ -63,21 +64,18 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     return { searchResult: [] };
   }
 
-  const getQuery = () => {
+  const getQuery = (): SearchRequestParameters => {
     // if time range not defined -- only return the query from the spec
     if (context.absoluteTimeRange === undefined) {
-      return spec.query;
-    }
-    // if the query already contains a time range (i.e.start and end times)
-    if (spec.query.includes('start=') || spec.query.includes('end=')) {
-      return spec.query;
+      return { q: spec.query };
     }
     // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
     const { start, end } = getUnixTimeRange(context?.absoluteTimeRange);
-    const queryStartTime = '&start=' + start;
-    const queryEndTime = '&end=' + end;
-    const queryWithTimeRange = encodeURI(spec.query) + queryStartTime + queryEndTime;
-    return queryWithTimeRange;
+    return {
+      q: spec.query,
+      start,
+      end,
+    };
   };
 
   /**
@@ -86,7 +84,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    * otherwise, execute a TraceQL query
    */
   if (isValidTraceId(spec.query)) {
-    const response = await client.searchTraceID(spec.query, datasourceUrl);
+    const response = await client.searchTraceID(spec.query, { datasourceUrl });
     return {
       trace: parseTraceResponse(response),
       metadata: {
@@ -94,7 +92,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
       },
     };
   } else {
-    const response = await client.searchTraceQueryFallback(getQuery(), datasourceUrl);
+    const response = await client.searchTraceQueryFallback(getQuery(), { datasourceUrl });
     return {
       searchResult: parseSearchResponse(response),
       metadata: {
