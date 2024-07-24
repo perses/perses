@@ -110,7 +110,7 @@ export function TracesExplorer() {
     <Stack gap={2} sx={{ width: '100%' }}>
       <MultiQueryEditor queryTypes={['TraceQuery']} onChange={setQueries} queries={queries} />
 
-      <ErrorBoundary FallbackComponent={ErrorAlert}>
+      <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
         <DataQueriesProvider definitions={definitions}>
           <Box height={PANEL_PREVIEW_HEIGHT}>
             {isSingleTrace ? <TracingGanttChartPanel queries={queries} /> : <SearchResultsPanel queries={queries} />}
