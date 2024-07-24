@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Theme } from '@mui/material';
 import { Span, SpanStatusError } from '@perses-dev/core';
 import { getConsistentColor } from '../../../model/palette';
 
@@ -23,9 +22,7 @@ export interface Viewport {
   endTimeUnixMs: number;
 }
 
-export const rowHeight = '30px';
-export const rowHeaderColor = (theme: Theme) => theme.palette.grey.A100;
-export const gridColor = (theme: Theme) => theme.palette.grey[100];
+export const rowHeight = '2rem';
 export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
 export const getConsistentServiceColor = (serviceName: string) => getConsistentColor(serviceName, false);
 export const getConsistentSpanColor = (span: Span) => getConsistentColor(span.resource.serviceName, spanHasError(span));

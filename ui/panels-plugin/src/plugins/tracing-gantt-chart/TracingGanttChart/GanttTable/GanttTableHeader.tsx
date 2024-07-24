@@ -13,7 +13,7 @@
 
 import { Box, Stack, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { Viewport, rowHeaderColor, rowHeight } from '../utils';
+import { Viewport, rowHeight } from '../utils';
 import { TicksHeader } from '../Ticks';
 
 interface GanttTableHeaderProps {
@@ -33,8 +33,8 @@ export function GanttTableHeader(props: GanttTableHeaderProps) {
       alignItems="center"
       sx={{
         height: rowHeight,
-        backgroundColor: rowHeaderColor(theme),
         fontSize: '0.9rem',
+        borderBottom: `1px solid ${theme.palette.divider}`,
       }}
     >
       <Box style={{ width: `${nameColumnWidth * 100}%` }}>

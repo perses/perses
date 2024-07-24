@@ -161,7 +161,7 @@ function buildServiceStatsChips(serviceStats: Record<string, ServiceStats>) {
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   '&:hover': {
-    backgroundColor: theme.palette.grey.A100,
+    backgroundColor: theme.palette.action.hover,
   },
 }));
 

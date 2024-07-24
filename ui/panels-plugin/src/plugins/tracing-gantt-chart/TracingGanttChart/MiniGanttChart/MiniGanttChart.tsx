@@ -14,7 +14,7 @@
 import { Box, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { TicksHeader } from '../Ticks';
-import { Viewport, rowHeaderColor, rowHeight } from '../utils';
+import { Viewport, rowHeight } from '../utils';
 import { Canvas } from './Canvas';
 
 interface MiniGanttChartProps {
@@ -28,8 +28,14 @@ export function MiniGanttChart(props: MiniGanttChartProps) {
   const theme = useTheme();
 
   return (
-    <Box sx={{ marginBottom: 2, border: `1px solid ${rowHeaderColor(theme)}` }}>
-      <Box sx={{ position: 'relative', height: rowHeight, backgroundColor: rowHeaderColor(theme) }}>
+    <Box
+      sx={{
+        marginBottom: 2,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: `${theme.shape.borderRadius}px`,
+      }}
+    >
+      <Box sx={{ position: 'relative', height: rowHeight, borderBottom: `1px solid ${theme.palette.divider}` }}>
         <TicksHeader rootSpan={rootSpan} viewport={rootSpan} />
       </Box>
       <Canvas rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />

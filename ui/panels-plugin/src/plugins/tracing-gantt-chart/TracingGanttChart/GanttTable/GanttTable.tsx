@@ -14,7 +14,7 @@
 import { Virtuoso, ListRange } from 'react-virtuoso';
 import { Span } from '@perses-dev/core';
 import { useMemo, useRef, useState } from 'react';
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
@@ -32,6 +32,7 @@ export function GanttTable(props: GanttTableProps) {
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>();
+  const theme = useTheme();
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
@@ -53,7 +54,16 @@ export function GanttTable(props: GanttTableProps) {
   }
 
   return (
-    <Box ref={tableRef} sx={{ height: '100%' }}>
+    <Box
+      ref={tableRef}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        flexGrow: 1,
+        border: `1px solid ${theme.palette.divider}`,
+        borderRadius: `${theme.shape.borderRadius}px`,
+      }}
+    >
       <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}

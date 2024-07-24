@@ -13,7 +13,7 @@
 
 import { Box, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { Viewport, formatDuration, gridColor } from './utils';
+import { Viewport, formatDuration } from './utils';
 
 export interface TicksHeaderProps {
   rootSpan: Span;
@@ -58,6 +58,6 @@ export function Ticks() {
 const TickBox = styled(Box)(({ theme }) => ({
   position: 'absolute',
   height: '100%',
-  borderLeft: `1px solid ${gridColor(theme)}`,
+  borderLeft: `1px solid ${theme.palette.divider}`,
   padding: '.25rem',
 }));

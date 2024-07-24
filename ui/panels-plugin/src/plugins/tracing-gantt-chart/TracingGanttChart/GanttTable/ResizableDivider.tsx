@@ -14,7 +14,6 @@
 import { MouseEvent as ReactMouseEvent, useEffect, useState } from 'react';
 import { Box, styled } from '@mui/material';
 import { useEvent } from '@perses-dev/core';
-import { gridColor } from '../utils';
 
 interface ResizableDividerProps {
   parentRef: React.RefObject<HTMLDivElement | undefined>;
@@ -80,7 +79,7 @@ const ResizableDividerBox = styled(Box)(({ theme }) => ({
   position: 'relative',
   width: '1px',
   height: '100%',
-  backgroundColor: gridColor(theme),
+  backgroundColor: theme.palette.divider,
   cursor: 'col-resize',
 
   // increase clickable area from 1px to 7px

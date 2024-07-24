@@ -16,7 +16,6 @@ import ChevronDownIcon from 'mdi-material-ui/ChevronDown';
 import ChevronRightIcon from 'mdi-material-ui/ChevronRight';
 import { MouseEvent, useCallback } from 'react';
 import { Span } from '@perses-dev/core';
-import { gridColor } from '../utils';
 import { useGanttTableContext } from './GanttTableProvider';
 
 const MIN_INDENT_WIDTH = 8;
@@ -72,7 +71,7 @@ export function SpanIndents(props: SpanIndentsProps) {
               i === spans.length - 1 || visibleSpans.length === 0 || visibleSpans.includes(span.spanId)
                 ? MAX_INDENT_WIDTH
                 : MIN_INDENT_WIDTH,
-            borderLeft: `${hoveredParent === (span.parentSpanId ?? '') ? 4 : 1}px solid ${gridColor(theme)}`,
+            borderLeft: `${hoveredParent === (span.parentSpanId ?? '') ? 3 : 1}px solid ${theme.palette.divider}`,
           }}
           onMouseEnter={() => setHoveredParent(span.parentSpanId ?? '')}
           onMouseLeave={() => setHoveredParent(undefined)}

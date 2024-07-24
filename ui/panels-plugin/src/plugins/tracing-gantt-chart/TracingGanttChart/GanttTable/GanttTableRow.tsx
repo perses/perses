@@ -14,7 +14,7 @@
 import { Stack, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { memo } from 'react';
-import { Viewport, gridColor, rowHeight } from '../utils';
+import { Viewport, rowHeight } from '../utils';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 
@@ -48,8 +48,8 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
 const RowContainer = styled(Stack)(({ theme }) => ({
   height: rowHeight,
   '&:hover': {
-    backgroundColor: theme.palette.grey.A200,
-    borderTop: `1px solid ${gridColor(theme)}`,
-    borderBottom: `1px solid ${gridColor(theme)}`,
+    backgroundColor: theme.palette.action.hover,
+    borderTop: `1px solid ${theme.palette.divider}`,
+    borderBottom: `1px solid ${theme.palette.divider}`,
   },
 }));

@@ -191,7 +191,7 @@ const CutoffBox = styled(Box)({
 const Resizer = styled(Box)(({ theme }) => ({
   position: 'absolute',
   height: '100%',
-  backgroundColor: theme.palette.grey[700],
+  backgroundColor: theme.palette.divider,
   width: '2px',
   cursor: 'col-resize',
 
