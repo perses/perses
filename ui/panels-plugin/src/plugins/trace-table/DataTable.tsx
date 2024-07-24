@@ -60,7 +60,7 @@ export function DataTable(props: DataTableProps) {
   const rows: ReactNode[] = [];
   for (const query of result) {
     const traceLinkWithQuery = traceLink
-      ? (traceId: string) => traceLink({ query: query.definition, traceId })
+      ? (traceId: string) => traceLink({ query: JSON.parse(JSON.stringify(query.definition)), traceId })
       : undefined;
     for (const trace of query.data?.searchResult || []) {
       rows.push(buildRow(trace, traceLinkWithQuery));
