@@ -30,7 +30,6 @@ export function MiniGanttChart(props: MiniGanttChartProps) {
   return (
     <Box
       sx={{
-        marginBottom: 2,
         border: `1px solid ${theme.palette.divider}`,
         borderRadius: `${theme.shape.borderRadius}px`,
       }}

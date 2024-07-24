@@ -49,7 +49,7 @@ export function TracingGanttChart(props: TracingGanttChartProps) {
 
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
-      <Stack sx={{ flexGrow: 1 }}>
+      <Stack sx={{ flexGrow: 1, gap }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
           <GanttTable rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
