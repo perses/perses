@@ -43,7 +43,7 @@ export function DetailPane(props: DetailPaneProps) {
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
           <Tab sx={{ p: 0 }} value={0} label="Attributes" />
-          <Tab value={1} label="Events" />
+          {span.events.length > 0 && <Tab value={1} label="Events" />}
         </Tabs>
       </Box>
       {tab === 0 && (
