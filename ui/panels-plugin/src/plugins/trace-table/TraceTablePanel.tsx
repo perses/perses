@@ -14,13 +14,27 @@
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
-import { DataTable } from './DataTable';
-import { TraceTableOptions, defaultTraceLink } from './trace-table-model';
+import { QueryDefinition } from '@perses-dev/core';
+import { DataTable, TraceLink } from './DataTable';
+import { TraceTableOptions } from './trace-table-model';
 
-export type TraceTableProps = PanelProps<TraceTableOptions>;
+export interface TraceTableProps extends PanelProps<TraceTableOptions> {
+  traceLink?: TraceLink;
+}
+
+export function defaultTraceLink({ query, traceId }: { query: QueryDefinition; traceId: string }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (query.spec.plugin.spec as any).query = traceId;
+
+  const traceLinkParams = new URLSearchParams({
+    explorer: '1',
+    queries: JSON.stringify([query]),
+  });
+  return `/explore?${traceLinkParams}`;
+}
 
 export function TraceTablePanel(props: TraceTableProps) {
-  const { onTraceClick, traceLink = defaultTraceLink } = props.spec;
+  const { traceLink = defaultTraceLink } = props;
 
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -42,7 +56,7 @@ export function TraceTablePanel(props: TraceTableProps) {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable result={queryResults} onTraceClick={onTraceClick} traceLink={traceLink} />
+      <DataTable result={queryResults} traceLink={traceLink} />
     </Box>
   );
 }

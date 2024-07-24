@@ -21,10 +21,9 @@ import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 interface SearchResultsPanelProps {
   queries: QueryDefinition[];
-  setQueries: (queries: QueryDefinition[]) => void;
 }
 
-function SearchResultsPanel({ queries, setQueries }: SearchResultsPanelProps) {
+function SearchResultsPanel({ queries }: SearchResultsPanelProps) {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
@@ -44,11 +43,6 @@ function SearchResultsPanel({ queries, setQueries }: SearchResultsPanelProps) {
   const tracesFound = queryResults.some((traceData) => (traceData.data?.searchResult ?? []).length > 0);
   if (!tracesFound) {
     return <NoDataOverlay resource="traces" />;
-  }
-
-  function onTraceClick(e: MouseEvent, traceId: string) {
-    e.preventDefault();
-    setQueries([{ kind: 'TraceQuery', spec: { plugin: { kind: 'TempoTraceQuery', spec: { query: traceId } } } }]);
   }
 
   return (
@@ -71,7 +65,7 @@ function SearchResultsPanel({ queries, setQueries }: SearchResultsPanelProps) {
         }}
         definition={{
           kind: 'Panel',
-          spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: { onTraceClick } } },
+          spec: { queries, display: { name: '' }, plugin: { kind: 'TraceTable', spec: {} } },
         }}
       />
     </Stack>
@@ -119,11 +113,7 @@ export function TracesExplorer() {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         <DataQueriesProvider definitions={definitions}>
           <Box height={PANEL_PREVIEW_HEIGHT}>
-            {isSingleTrace ? (
-              <TracingGanttChartPanel queries={queries} />
-            ) : (
-              <SearchResultsPanel queries={queries} setQueries={setQueries} />
-            )}
+            {isSingleTrace ? <TracingGanttChartPanel queries={queries} /> : <SearchResultsPanel queries={queries} />}
           </Box>
         </DataQueriesProvider>
       </ErrorBoundary>

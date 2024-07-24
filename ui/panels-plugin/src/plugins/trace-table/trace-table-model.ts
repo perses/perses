@@ -11,29 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MouseEvent } from 'react';
-
 /**
  * The Options object type supported by the TraceTable panel plugin.
  */
 // Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface TraceTableOptions {
-  onTraceClick?: (e: MouseEvent, traceId: string) => void;
-  traceLink?: (traceId: string) => string;
-}
+export interface TraceTableOptions {}
 
 /**
  * Creates the initial/empty options for a TraceTable panel.
  */
 export function createInitialTraceTableOptions(): TraceTableOptions {
   return {};
-}
-
-export function defaultTraceLink(traceId: string) {
-  const traceLinkParams = new URLSearchParams({
-    explorer: '1',
-    queries: `[{"kind":"TraceQuery","spec":{"plugin":{"kind":"TempoTraceQuery","spec":{"query":"${traceId}"}}}}]`,
-  });
-  return `/explore?${traceLinkParams}`;
 }

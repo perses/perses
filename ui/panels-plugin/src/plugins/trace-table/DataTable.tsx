@@ -23,9 +23,16 @@ import {
   Typography,
   styled,
 } from '@mui/material';
-import { ServiceStats, TraceData, TraceSearchResult, formatDuration, msToPrometheusDuration } from '@perses-dev/core';
+import {
+  QueryDefinition,
+  ServiceStats,
+  TraceData,
+  TraceSearchResult,
+  formatDuration,
+  msToPrometheusDuration,
+} from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { MouseEvent, ReactNode } from 'react';
+import { ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { getConsistentServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
@@ -36,21 +43,29 @@ const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format;
 
+export type TraceLink = (params: { query: QueryDefinition; traceId: string }) => string;
+
 export interface DataTableProps {
   result: Array<QueryData<TraceData>>;
-  onTraceClick?: (e: MouseEvent, traceId: string) => void;
-  traceLink?: (traceId: string) => string;
+  traceLink?: TraceLink;
 }
 
 export function DataTable(props: DataTableProps) {
-  const { result, onTraceClick, traceLink } = props;
+  const { result, traceLink } = props;
 
   if (!result) {
     return null;
   }
 
-  const traces = result.flatMap((d) => d.data).flatMap((d) => d?.searchResult || []);
-  const rows = traces.map((trace) => buildRow(trace, onTraceClick, traceLink));
+  const rows: ReactNode[] = [];
+  for (const query of result) {
+    const traceLinkWithQuery = traceLink
+      ? (traceId: string) => traceLink({ query: structuredClone(query.definition), traceId })
+      : undefined;
+    for (const trace of query.data?.searchResult || []) {
+      rows.push(buildRow(trace, traceLinkWithQuery));
+    }
+  }
 
   return (
     <>
@@ -77,11 +92,7 @@ export function DataTable(props: DataTableProps) {
   );
 }
 
-function buildRow(
-  trace: TraceSearchResult,
-  onTraceClick?: (e: MouseEvent, traceId: string) => void,
-  traceLink?: (traceId: string) => string
-): ReactNode {
+function buildRow(trace: TraceSearchResult, traceLink?: (traceId: string) => string): ReactNode {
   let totalSpanCount = 0;
   let totalErrorCount = 0;
   for (const stats of Object.values(trace.serviceStats)) {
@@ -91,7 +102,7 @@ function buildRow(
 
   return (
     <StyledTableRow key={trace.traceId}>
-      <StyledTableCell onClick={(e) => onTraceClick?.(e, trace.traceId)}>
+      <StyledTableCell>
         {buildTraceName(trace, traceLink)}
         {buildServiceStatsChips(trace.serviceStats)}
       </StyledTableCell>
