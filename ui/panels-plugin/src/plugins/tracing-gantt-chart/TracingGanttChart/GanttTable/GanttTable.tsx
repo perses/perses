@@ -31,7 +31,7 @@ export function GanttTable(props: GanttTableProps) {
   const { rootSpan, viewport, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
-  const tableRef = useRef<HTMLDivElement>();
+  const tableRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
 
   const rows = useMemo(() => {
@@ -40,9 +40,7 @@ export function GanttTable(props: GanttTableProps) {
     return rows;
   }, [rootSpan, collapsedSpans]);
 
-  const divider = useMemo(() => {
-    return <ResizableDivider parentRef={tableRef} setNameColumnWidth={setNameColumnWidth} />;
-  }, [tableRef, setNameColumnWidth]);
+  const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
   // update currently visible spans
   function handleRangeChange({ startIndex, endIndex }: ListRange) {

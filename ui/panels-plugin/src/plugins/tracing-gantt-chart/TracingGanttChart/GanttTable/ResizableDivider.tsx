@@ -16,12 +16,13 @@ import { Box, styled } from '@mui/material';
 import { useEvent } from '@perses-dev/core';
 
 interface ResizableDividerProps {
-  parentRef: React.RefObject<HTMLDivElement | undefined>;
-  setNameColumnWidth: (x: number) => void;
+  parentRef: React.RefObject<Element>;
+  spacing?: number;
+  onMove: (left: number) => void;
 }
 
 export function ResizableDivider(props: ResizableDividerProps) {
-  const { parentRef, setNameColumnWidth } = props;
+  const { parentRef, spacing = 0, onMove } = props;
   const [isResizing, setResizing] = useState(false);
 
   const handleMouseDown = (e: ReactMouseEvent) => {
@@ -35,11 +36,11 @@ export function ResizableDivider(props: ResizableDividerProps) {
   const handleMouseMove = useEvent((e: MouseEvent) => {
     if (!parentRef.current) return;
 
-    const offsetX = e.clientX - parentRef.current.getBoundingClientRect().left;
-    const newNameColumnWidth = offsetX / parentRef.current.getBoundingClientRect().width;
+    const offsetX = e.clientX - parentRef.current.getBoundingClientRect().left + spacing;
+    const leftPercent = offsetX / parentRef.current.getBoundingClientRect().width;
 
-    if (0.05 <= newNameColumnWidth && newNameColumnWidth <= 0.95) {
-      setNameColumnWidth(newNameColumnWidth);
+    if (0.05 <= leftPercent && leftPercent <= 0.95) {
+      onMove(leftPercent);
     }
   });
 
@@ -71,8 +72,10 @@ export function ResizableDivider(props: ResizableDividerProps) {
     return stopMouseAction;
   }, [isResizing, handleMouseMove, handleMouseUp]);
 
-  // prevent onClick event from row when clicking on a divider
-  return <ResizableDividerBox onMouseDown={handleMouseDown} onClick={(e) => e.stopPropagation()} />;
+  // prevent onClick event when clicking on a divider
+  const stopEventPropagation = (e: ReactMouseEvent) => e.stopPropagation();
+
+  return <ResizableDividerBox onMouseDown={handleMouseDown} onClick={stopEventPropagation} />;
 }
 
 const ResizableDividerBox = styled(Box)(({ theme }) => ({

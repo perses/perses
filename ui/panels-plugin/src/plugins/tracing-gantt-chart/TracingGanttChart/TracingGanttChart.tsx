@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
-import { Box, Stack } from '@mui/material';
+import { useRef, useState } from 'react';
+import { Box, Stack, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
+import { ResizableDivider } from './GanttTable/ResizableDivider';
 
 export interface TracingGanttChartProps {
   rootSpan: Span;
@@ -33,14 +34,21 @@ export interface TracingGanttChartProps {
 export function TracingGanttChart(props: TracingGanttChartProps) {
   const { rootSpan } = props;
 
+  const theme = useTheme();
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
   const [viewport, setViewport] = useState<Viewport>({
     startTimeUnixMs: rootSpan.startTimeUnixMs,
     endTimeUnixMs: rootSpan.endTimeUnixMs,
   });
 
+  const ganttChart = useRef<HTMLDivElement>(null);
+  // tableWidth only comes to effect if the detail pane is visible.
+  // setTableWidth() is only called by <ResizableDivider />
+  const [tableWidth, setTableWidth] = useState<number>(0.82);
+  const gap = 2;
+
   return (
-    <Stack direction="row" sx={{ height: '100%', minHeight: '240px', gap: 2 }}>
+    <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
       <Stack sx={{ flexGrow: 1 }}>
         <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
@@ -48,9 +56,12 @@ export function TracingGanttChart(props: TracingGanttChartProps) {
         </GanttTableProvider>
       </Stack>
       {selectedSpan && (
-        <Box sx={{ width: '280px', overflow: 'auto' }}>
-          <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={() => setSelectedSpan(undefined)} />
-        </Box>
+        <>
+          <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
+          <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
+            <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={() => setSelectedSpan(undefined)} />
+          </Box>
+        </>
       )}
     </Stack>
   );
