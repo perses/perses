@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ColumnDefinition } from '@perses-dev/core';
-import { Autocomplete, Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { useState } from 'react';
 import { AlignSelector } from '../AlignSelector';
 
