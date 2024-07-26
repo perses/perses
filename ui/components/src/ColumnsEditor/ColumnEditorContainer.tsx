@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Stack, Typography } from '@mui/material';
+import { Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -47,7 +47,11 @@ export function ColumnEditorContainer({
         gap={4}
       >
         <Stack direction="row" gap={1}>
-          <IconButton size="small" onClick={() => onCollapse(!isCollapsed)}>
+          <IconButton
+            data-testid={`column-toggle#${column.name}`}
+            size="small"
+            onClick={() => onCollapse(!isCollapsed)}
+          >
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
@@ -63,12 +67,17 @@ export function ColumnEditorContainer({
         </Stack>
 
         <Stack direction="row" gap={1}>
-          <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={handleHideColumn}>
-            {column.hide ? <EyeOffIcon /> : <EyeIcon />}
-          </IconButton>
-          <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
-            <DeleteIcon />
-          </IconButton>
+          <Tooltip title={column.hide ? 'Show' : 'Hide'} placement="top">
+            <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={handleHideColumn}>
+              {column.hide ? <EyeOffIcon /> : <EyeIcon />}
+            </IconButton>
+          </Tooltip>
+          <Divider flexItem orientation="vertical" variant="middle" />
+          <Tooltip title="Remove" placement="top">
+            <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Stack>
       {!isCollapsed && <ColumnEditor column={column} onChange={onChange} />}

@@ -146,6 +146,7 @@ export function TableCell({
           flexDirection: 'inherit',
         }}
         title={description}
+        aria-label={description}
         textAlign={align}
       >
         {children}

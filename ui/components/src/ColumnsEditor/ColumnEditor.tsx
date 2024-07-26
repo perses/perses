@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ColumnDefinition } from '@perses-dev/core';
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
+import { Autocomplete, Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { useState } from 'react';
 import { AlignSelector } from '../AlignSelector';
 
@@ -37,6 +37,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           onChange={(e) => onChange({ ...column, name: e.target.value })}
           required
         />
+
         <Divider orientation="horizontal" flexItem variant="middle" />
 
         <TextField
@@ -75,17 +76,33 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
           }
         />
 
-        <FormControlLabel
-          label="Enable sorting"
-          sx={{ width: '100%', alignItems: 'start' }}
-          labelPlacement="top"
-          control={
-            <Switch
-              checked={column.enableSorting ?? true}
-              onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
-            />
-          }
-        />
+        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
+          <FormControlLabel
+            label="Hide column"
+            sx={{ width: '100%', alignItems: 'start' }}
+            labelPlacement="top"
+            control={
+              <Switch
+                value={column.hide ?? false}
+                checked={column.hide ?? false}
+                onChange={(e) => onChange({ ...column, hide: e.target.checked })}
+              />
+            }
+          />
+
+          <FormControlLabel
+            label="Enable sorting"
+            sx={{ width: '100%', alignItems: 'start' }}
+            labelPlacement="top"
+            control={
+              <Switch
+                value={column.enableSorting ?? false}
+                checked={column.enableSorting ?? false}
+                onChange={(e) => onChange({ ...column, enableSorting: e.target.checked })}
+              />
+            }
+          />
+        </Stack>
 
         <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
           <FormControlLabel

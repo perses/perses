@@ -78,7 +78,7 @@ export function ColumnsEditor({ columnDefinitions, onChange }: ColumnsEditorProp
       ))}
 
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddColumnEditor}>
-        Add Column
+        Add Column Settings
       </Button>
     </Stack>
   );
