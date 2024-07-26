@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
+import { createEnumParam, JsonParam, NumberParam, useQueryParams, withDefault } from 'use-query-params';
 
 interface ExplorerState {
   tab: number;
@@ -20,72 +21,54 @@ interface ExplorerState {
 }
 
 interface ExplorerManagerContextType {
-  explorer: number;
+  /** observability signal, for example metrics or traces */
+  explorer: string;
   tab: number;
   queries: QueryDefinition[];
-  setExplorer: (explorer: number) => void;
+  setExplorer: (explorer: string) => void;
   setTab: (tab: number) => void;
   setQueries: (queries: QueryDefinition[]) => void;
-}
-
-interface ExplorerManagerInitialState {
-  explorer?: number;
-  tab?: number;
-  queries?: QueryDefinition[];
-  setExplorer: (explorer: number | undefined) => void;
-  setTab: (tab: number | undefined) => void;
-  setQueries: (queries: QueryDefinition[] | undefined) => void;
 }
 
 const ExplorerManagerContext = createContext<ExplorerManagerContextType | undefined>(undefined);
 
 interface ExplorerManagerProviderProps {
   children: ReactNode;
-  initialState?: ExplorerManagerInitialState;
 }
 
-function initExplorerStates(initialState?: ExplorerManagerInitialState): ExplorerState[] {
-  const result: ExplorerState[] = [];
-  if (initialState?.explorer || initialState?.tab || initialState?.queries) {
-    result[initialState?.explorer ?? 0] = {
-      tab: initialState?.tab ?? 0,
-      queries: initialState?.queries ?? [],
-    };
-  }
-  return result;
-}
+const exploreQueryConfig = {
+  explorer: withDefault(createEnumParam(['metrics', 'traces']), 'metrics'),
+  tab: withDefault(NumberParam, 0),
+  queries: withDefault(JsonParam, []),
+};
 
-export function ExplorerManagerProvider({ children, initialState }: ExplorerManagerProviderProps) {
-  const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initExplorerStates(initialState));
-  const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 0);
-  const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 0, [explorer, explorerStates]);
-  const queries: QueryDefinition[] = useMemo(() => explorerStates[explorer]?.queries ?? [], [explorer, explorerStates]);
+export function ExplorerManagerProvider({ children }: ExplorerManagerProviderProps) {
+  const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig);
+  const [explorerStates, setExplorerStates] = useState<Record<string, ExplorerState>>({});
+  const { explorer, tab, queries } = queryParams;
 
-  function setExplorer(explorer: number) {
-    setInternalExplorer(explorer);
-    if (initialState?.setExplorer) {
-      initialState.setExplorer(explorer);
-      initialState.setTab(explorerStates[explorer]?.tab);
-      initialState.setQueries(explorerStates[explorer]?.queries);
-    }
+  function setExplorer(newExplorer: string) {
+    // store current explorer state
+    explorerStates[explorer] = { tab, queries };
+    setExplorerStates(explorerStates);
+
+    // restore previous explorer state (if any)
+    const state = explorerStates[newExplorer] ?? { tab: 0, queries: [] };
+    setQueryParams({ explorer: newExplorer, tab: state.tab, queries: state.queries });
   }
 
-  function setTab(tab: number) {
-    const state = [...explorerStates];
-    state[explorer] = { tab, queries: state[explorer]?.queries ?? [] };
-    setExplorerStates(state);
-    if (initialState?.setTab) {
-      initialState.setTab(tab);
-    }
+  function setTab(newTab: number) {
+    setQueryParams({ explorer, tab: newTab, queries });
   }
 
-  function setQueries(queries: QueryDefinition[]) {
-    const state = [...explorerStates];
-    state[explorer] = { tab: state[explorer]?.tab ?? 0, queries: queries };
-    setExplorerStates(state);
-    if (initialState?.setQueries) {
-      initialState?.setQueries(queries);
-    }
+  function setQueries(newQueries: QueryDefinition[]) {
+    // If the previous query was empty, skip it in the browser history.
+    // For example, when navigating from metrics explorer -> traces (empty query) -> traces (some query) -> traces (gantt chart),
+    // pressing the back button should navigate to traces (some query) -> metrics, skipping the traces page with an empty query.
+    const updateUrl = queries.length === 0 ? 'replaceIn' : 'pushIn';
+
+    // Be explicit and always set all query parameters in the URL.
+    setQueryParams({ explorer, tab, queries: newQueries }, updateUrl);
   }
 
   return (
