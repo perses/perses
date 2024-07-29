@@ -14,7 +14,7 @@
 import { ColumnDefinition } from '@perses-dev/core';
 import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { useState } from 'react';
-import { AlignSelector } from '../AlignSelector';
+import { AlignSelector } from '@perses-dev/components';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 

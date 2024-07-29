@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ColumnsEditor } from '@perses-dev/components';
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
 import { ColumnDefinition } from '@perses-dev/core';
 import { TableOptions } from './table-model';
+import { ColumnsEditor } from './ColumnsEditor';
 
 export type TableColumnsEditorProps = OptionsEditorProps<TableOptions>;
 

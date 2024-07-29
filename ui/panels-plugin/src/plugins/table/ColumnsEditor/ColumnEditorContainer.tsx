@@ -67,13 +67,17 @@ export function ColumnEditorContainer({
         </Stack>
 
         <Stack direction="row" gap={1}>
-          <Tooltip title={column.hide ? 'Show' : 'Hide'} placement="top">
-            <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={handleHideColumn}>
-              {column.hide ? <EyeOffIcon /> : <EyeIcon />}
-            </IconButton>
-          </Tooltip>
-          <Divider flexItem orientation="vertical" variant="middle" />
-          <Tooltip title="Remove" placement="top">
+          {isCollapsed && (
+            <>
+              <Tooltip title={column.hide ? 'Show column' : 'Hide column'} placement="top">
+                <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={handleHideColumn}>
+                  {column.hide ? <EyeOffIcon /> : <EyeIcon />}
+                </IconButton>
+              </Tooltip>
+              <Divider flexItem orientation="vertical" variant="middle" />
+            </>
+          )}
+          <Tooltip title="Remove column settings" placement="top">
             <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
               <DeleteIcon />
             </IconButton>
