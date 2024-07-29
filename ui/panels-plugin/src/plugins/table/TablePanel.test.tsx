@@ -109,7 +109,7 @@ describe('TablePanel', () => {
     expect(await screen.findByRole('columnheader', { name: 'mountpoint' })).toBeInTheDocument();
 
     expect(await screen.findAllByRole('cell')).toHaveLength(16); // 2 time series with 8 columns
-  });
+  }, 15000); // Github Actions is slow
 
   it('should apply column settings', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({

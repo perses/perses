@@ -145,7 +145,7 @@ export function TableCell({
           // in headers.
           flexDirection: 'inherit',
         }}
-        title={description === undefined ? '' : description} // Browser display undefined...
+        title={description}
         aria-label={description}
         textAlign={align}
       >
