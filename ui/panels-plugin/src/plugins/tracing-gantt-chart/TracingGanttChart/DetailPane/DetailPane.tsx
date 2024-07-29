@@ -29,7 +29,13 @@ export interface DetailPaneProps {
  */
 export function DetailPane(props: DetailPaneProps) {
   const { rootSpan, span, onCloseBtnClick } = props;
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<'attributes' | 'events'>('attributes');
+
+  // if the events tab is selected, and then a span without events is clicked,
+  // we need to switch the current selected tab back to the attributes tab.
+  if (tab === 'events' && span.events.length === 0) {
+    setTab('attributes');
+  }
 
   return (
     <Box>
@@ -42,18 +48,18 @@ export function DetailPane(props: DetailPaneProps) {
       </Typography>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={tab} onChange={(_, tab) => setTab(tab)}>
-          <Tab sx={{ p: 0 }} value={0} label="Attributes" />
-          {span.events.length > 0 && <Tab value={1} label="Events" />}
+          <Tab sx={{ p: 0 }} value="attributes" label="Attributes" />
+          {span.events.length > 0 && <Tab value="events" label="Events" />}
         </Tabs>
       </Box>
-      {tab === 0 && (
+      {tab === 'attributes' && (
         <>
           {span.attributes.length > 0 && <AttributeList attributes={span.attributes} />}
           {span.attributes.length > 0 && <Divider />}
           <AttributeList attributes={span.resource.attributes} />
         </>
       )}
-      {tab === 1 && <SpanEventList rootSpan={rootSpan} span={span} />}
+      {tab === 'events' && <SpanEventList rootSpan={rootSpan} span={span} />}
     </Box>
   );
 }
