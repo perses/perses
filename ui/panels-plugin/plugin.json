@@ -68,6 +68,14 @@
           "name": "Trace Table",
           "description": ""
         }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "TracingGanttChart",
+        "display": {
+          "name": "Tracing Gantt Chart",
+          "description": ""
+        }
       }
     ]
   }

@@ -11,5 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+import { PanelPlugin } from '@perses-dev/plugin-system';
+import { createInitialTracingGanttChartOptions, TracingGanttChartOptions } from './gantt-chart-model';
+import { TracingGanttChartPanel } from './TracingGanttChartPanel';
+
+export const TracingGanttChart: PanelPlugin<TracingGanttChartOptions> = {
+  PanelComponent: TracingGanttChartPanel,
+  supportedQueryTypes: ['TraceQuery'],
+  createInitialOptions: createInitialTracingGanttChartOptions,
+};

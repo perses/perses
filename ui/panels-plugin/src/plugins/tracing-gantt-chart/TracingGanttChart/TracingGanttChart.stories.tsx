@@ -11,5 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+import type { Meta, StoryObj } from '@storybook/react';
+import { trace1_root } from '../../../test';
+import { TracingGanttChart } from './TracingGanttChart';
+
+const exampleTraces = {
+  Demo: trace1_root,
+};
+
+const meta: Meta<typeof TracingGanttChart> = {
+  component: TracingGanttChart,
+  argTypes: {
+    rootSpan: {
+      options: Object.keys(exampleTraces),
+      mapping: exampleTraces,
+    },
+  },
+};
+
+export default meta;
+
+type Story = StoryObj<typeof TracingGanttChart>;
+
+export const Primary: Story = {
+  args: {
+    rootSpan: trace1_root,
+  },
+};

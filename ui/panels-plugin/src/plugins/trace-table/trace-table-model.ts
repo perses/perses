@@ -21,6 +21,6 @@ export interface TraceTableOptions {}
 /**
  * Creates the initial/empty options for a TraceTable panel.
  */
-export function createInitialTraceTableOptions() {
+export function createInitialTraceTableOptions(): TraceTableOptions {
   return {};
 }

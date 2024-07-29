@@ -11,5 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const PANEL_PREVIEW_HEIGHT = 700;
-export const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
+/**
+ * The Options object type supported by the TracingGanttChart panel plugin.
+ */
+// Note: The interface attributes must match cue/schemas/panels/tracing-gantt-chart/tracing-gantt-chart.cue
+export interface TracingGanttChartOptions {}
+
+/**
+ * Creates the initial/empty options for a TracingGanttChart panel.
+ */
+export function createInitialTracingGanttChartOptions() {
+  return {};
+}
