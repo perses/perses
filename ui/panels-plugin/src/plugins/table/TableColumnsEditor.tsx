@@ -12,16 +12,15 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
-import { ColumnDefinition } from '@perses-dev/core';
-import { TableOptions } from './table-model';
+import { ColumnSettings, TableOptions } from './table-model';
 import { ColumnsEditor } from './ColumnsEditor';
 
 export type TableColumnsEditorProps = OptionsEditorProps<TableOptions>;
 
 export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps) {
-  function handleColumnChange(columns: ColumnDefinition[]): void {
-    onChange({ ...value, columns: columns });
+  function handleColumnChange(columns: ColumnSettings[]): void {
+    onChange({ ...value, columnSettings: columns });
   }
 
-  return <ColumnsEditor columnDefinitions={value.columns ?? []} onChange={handleColumnChange} />;
+  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnChange} />;
 }

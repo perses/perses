@@ -11,23 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package table
 
-import "strings"
+func WithDensity(density Density) Option {
+	return func(builder *Builder) error {
+		builder.Density = density
+		return nil
+	}
+}
 
-kind: "Table"
-spec: close({
-	density?: "compact" | "standard"
-	columnSettings?: [...#columnSettings]
-})
-
-#columnSettings: {
-	name:               strings.MinRunes(1)
-	header?:            string
-	headerDescription?: string
-	cellDescription?:   string
-	align?:             "left" | "center" | "right"
-	enableSorting?:     bool
-	width?:             number | "auto"
-	hide?:              bool
+func WithColumnSettings(settings []ColumnSettings) Option {
+	return func(builder *Builder) error {
+		builder.ColumnSettings = settings
+		return nil
+	}
 }

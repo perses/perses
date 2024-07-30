@@ -22,15 +22,15 @@ describe('TableColumnsEditor', () => {
 
   it('can add a new column settings', () => {
     const onChange = jest.fn();
-    renderTableColumnsEditor({ columns: [] }, onChange);
+    renderTableColumnsEditor({ columnSettings: [] }, onChange);
     const addColumnButton = screen.getByRole('button', { name: /Add Column Settings/i });
     fireEvent.click(addColumnButton);
-    expect(onChange).toHaveBeenCalledWith({ columns: [{ name: 'column_0' }] });
+    expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0' }] });
   });
 
   it('can update a column width', () => {
     const onChange = jest.fn();
-    renderTableColumnsEditor({ columns: [{ name: 'column_0' }] }, onChange);
+    renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
 
     // Expand the column settings editor for column_0
     const collapseIcon = screen.getByTestId('column-toggle#column_0');
@@ -40,12 +40,12 @@ describe('TableColumnsEditor', () => {
 
     const widthInput = screen.getByRole('spinbutton', { name: /Width/i });
     fireEvent.change(widthInput, { target: { value: '200' } });
-    expect(onChange).toHaveBeenCalledWith({ columns: [{ name: 'column_0', width: 200 }] });
+    expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0', width: 200 }] });
   });
 
   it('can rename a column', () => {
     const onChange = jest.fn();
-    renderTableColumnsEditor({ columns: [{ name: 'column_0' }] }, onChange);
+    renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
 
     // Expand the column settings editor for column_0
     const collapseIcon = screen.getByTestId('column-toggle#column_0');
@@ -53,6 +53,6 @@ describe('TableColumnsEditor', () => {
 
     const nameInput = screen.getByRole('textbox', { name: /Name/i });
     fireEvent.change(nameInput, { target: { value: 'MySuperName' } });
-    expect(onChange).toHaveBeenCalledWith({ columns: [{ name: 'MySuperName' }] });
+    expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'MySuperName' }] });
   });
 });

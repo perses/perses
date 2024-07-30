@@ -14,20 +14,17 @@
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
 import { useMemo, useState } from 'react';
-import { ColumnDefinition, TimeSeries, TimeSeriesData } from '@perses-dev/core';
+import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
-import { TableOptions } from './table-model';
+import { ColumnSettings, TableOptions } from './table-model';
 
 /*
  * Generate column config from column definitions, if a column has multiple definitions, the first one will be used.
  * If column is hidden, return undefined.
  * If column do not have a definition, return a default column config.
  */
-function generateColumnConfig(
-  name: string,
-  columnDefinitions: ColumnDefinition[]
-): TableColumnConfig<unknown> | undefined {
-  for (const column of columnDefinitions) {
+function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): TableColumnConfig<unknown> | undefined {
+  for (const column of columnSettings) {
     if (column.name === name) {
       if (column.hide) {
         return undefined;
@@ -88,13 +85,13 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
     for (const key of keys) {
-      const columnConfig = generateColumnConfig(key, spec.columns ?? []);
+      const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
       }
     }
     return columns;
-  }, [keys, spec.columns]);
+  }, [keys, spec.columnSettings]);
 
   function handleSortingChange(sorting: SortingState) {
     setSorting(sorting);

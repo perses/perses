@@ -118,7 +118,7 @@ describe('TablePanel', () => {
       isFetching: false,
     });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
-      columns: [
+      columnSettings: [
         { name: 'value', header: 'Value', headerDescription: 'Timeseries Value' },
         { name: 'device', width: 200 },
         { name: 'env', hide: true },

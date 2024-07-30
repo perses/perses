@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './calculations';
-export * from './columns';
 export * from './dashboard';
 export * from './datasource';
 export * from './definitions';

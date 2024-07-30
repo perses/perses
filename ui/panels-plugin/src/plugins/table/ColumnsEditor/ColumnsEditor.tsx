@@ -11,23 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ColumnDefinition } from '@perses-dev/core';
 import { Button, Stack } from '@mui/material';
 import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
+import { ColumnSettings } from '../table-model';
 import { ColumnEditorContainer } from './ColumnEditorContainer';
 
 export interface ColumnsEditorProps {
-  columnDefinitions: ColumnDefinition[];
-  onChange: (columnOptions: ColumnDefinition[]) => void;
+  columnSettings: ColumnSettings[];
+  onChange: (columnOptions: ColumnSettings[]) => void;
 }
 
-export function ColumnsEditor({ columnDefinitions, onChange }: ColumnsEditorProps) {
-  const [columns, setColumns] = useState<ColumnDefinition[]>(columnDefinitions);
+export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) {
+  const [columns, setColumns] = useState<ColumnSettings[]>(columnSettings);
 
   const [columnsCollapsed, setColumnsCollapsed] = useState(columns.map(() => true));
 
-  function handleColumnChange(index: number, column: ColumnDefinition): void {
+  function handleColumnChange(index: number, column: ColumnSettings): void {
     const updatedColumns = [...columns];
     updatedColumns[index] = column;
     setColumns(updatedColumns);
@@ -71,7 +71,7 @@ export function ColumnsEditor({ columnDefinitions, onChange }: ColumnsEditorProp
           key={i}
           column={column}
           isCollapsed={columnsCollapsed[i] ?? true}
-          onChange={(updatedColumn: ColumnDefinition) => handleColumnChange(i, updatedColumn)}
+          onChange={(updatedColumn: ColumnSettings) => handleColumnChange(i, updatedColumn)}
           onDelete={() => handleColumnDelete(i)}
           onCollapse={(collapsed) => handleColumnCollapseExpand(i, collapsed)}
         />

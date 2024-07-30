@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ColumnDefinition } from '@perses-dev/core';
 import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
 import { useState } from 'react';
 import { AlignSelector } from '@perses-dev/components';
+import { ColumnSettings } from '../table-model';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
 
 export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
-  column: ColumnDefinition;
-  onChange: (column: ColumnDefinition) => void;
+  column: ColumnSettings;
+  onChange: (column: ColumnSettings) => void;
 }
 
 export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps) {
