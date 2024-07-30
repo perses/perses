@@ -135,14 +135,7 @@ function buildTraceName(trace: TraceSearchResult, traceLink?: (traceId: string) 
   if (traceLink) {
     return (
       <>
-        <Link
-          variant="body1"
-          color="inherit"
-          underline="hover"
-          component={RouterLink}
-          to={traceLink(trace.traceId)}
-          reloadDocument
-        >
+        <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={traceLink(trace.traceId)}>
           <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
         </Link>
         <br />
