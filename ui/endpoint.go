@@ -22,6 +22,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	echoUtils "github.com/perses/common/echo"
 	apiinterface "github.com/perses/perses/internal/api/interface"
+	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/prometheus/common/assets"
 	"github.com/sirupsen/logrus"
 )
@@ -41,16 +42,17 @@ var (
 
 type frontend struct {
 	echoUtils.Register
+	apiPrefix string
 }
 
-func NewPersesFrontend() echoUtils.Register {
-	return &frontend{}
+func NewPersesFrontend(cfg config.Config) echoUtils.Register {
+	return &frontend{apiPrefix: cfg.APIPrefix}
 }
 
 func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
-	e.GET("/*", contentHandler, routerMiddleware(), contentRewrite)
+	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(), contentRewrite)
 }
 
 // routerMiddleware is here to serve properly the react app.
