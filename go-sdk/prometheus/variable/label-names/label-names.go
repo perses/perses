@@ -29,7 +29,7 @@ type PluginSpec struct {
 
 type Option func(plugin *Builder) error
 
-func New(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	var builder = &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -50,7 +50,7 @@ func New(options ...Option) (Builder, error) {
 func PrometheusLabelNames(options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
 		options = append([]Option{Filter(builder.Filters...)}, options...)
-		t, err := New(options...)
+		t, err := create(options...)
 		if err != nil {
 			return err
 		}

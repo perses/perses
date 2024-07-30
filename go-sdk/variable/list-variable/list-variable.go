@@ -27,7 +27,7 @@ type Builder struct {
 	Filters          []v1.Variable              `json:"-" yaml:"-"`
 }
 
-func New(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	var builder = &Builder{
 		ListVariableSpec: dashboard.ListVariableSpec{
 			ListSpec: variable2.ListSpec{},
@@ -50,7 +50,7 @@ func New(options ...Option) (Builder, error) {
 func List(options ...Option) variable.Option {
 	return func(builder *variable.Builder) error {
 		options = append([]Option{Filter(builder.Filters...)}, options...)
-		t, err := New(options...)
+		t, err := create(options...)
 		if err != nil {
 			return err
 		}
