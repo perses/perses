@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { getBasePathName } from './route';
+
 const apiPrefix = '/api/v1';
 
 export type URLParams = {
@@ -23,6 +25,7 @@ export type URLParams = {
 };
 
 export default function buildURL(params: URLParams): string {
+  const basePath = getBasePathName();
   let url = params.apiPrefix === undefined ? apiPrefix : params.apiPrefix;
   if (params.project !== undefined && params.project.length > 0) {
     url = `${url}/projects/${encodeURIComponent(params.project)}`;
@@ -39,5 +42,5 @@ export default function buildURL(params: URLParams): string {
   if (params.queryParams !== undefined) {
     url = `${url}?${params.queryParams.toString()}`;
   }
-  return url;
+  return basePath + url;
 }

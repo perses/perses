@@ -46,6 +46,8 @@ type dashboardSelector struct {
 	Dashboard string `json:"dashboard" yaml:"dashboard"`
 }
 type Config struct {
+	// Use it in case you want prefix the API path.
+	APIPrefix string `json:"api_prefix,omitempty" yaml:"api_prefix,omitempty"`
 	// Security contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
 	Security Security `json:"security,omitempty" yaml:"security,omitempty"`
 	// Database contains the different configuration depending on the database you want to use
