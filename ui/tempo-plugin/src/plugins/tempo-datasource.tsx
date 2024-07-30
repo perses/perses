@@ -32,9 +32,9 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
     options: {
       datasourceUrl,
     },
-    searchTraceQuery: (query: string) => searchTraceQuery(query, datasourceUrl),
-    searchTraceQueryFallback: (query: string) => searchTraceQueryFallback(query, datasourceUrl),
-    searchTraceID: (traceID: string) => searchTraceID(traceID, datasourceUrl),
+    searchTraceQuery: (params, queryOptions) => searchTraceQuery(params, queryOptions),
+    searchTraceQueryFallback: (params, queryOptions) => searchTraceQueryFallback(params, queryOptions),
+    searchTraceID: (traceID, queryOptions) => searchTraceID(traceID, queryOptions),
   };
 };
 

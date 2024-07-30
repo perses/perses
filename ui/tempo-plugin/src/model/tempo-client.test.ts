@@ -20,7 +20,7 @@ describe('tempo-client', () => {
   it('should return query results as-is when serviceStats are present', async () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET4) });
 
-    const results = await searchTraceQueryFallback('{}', '');
+    const results = await searchTraceQueryFallback({ q: '{}' }, { datasourceUrl: '' });
     expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
   });
 
@@ -28,7 +28,7 @@ describe('tempo-client', () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET3) });
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_TRACE_RESPONSE) });
 
-    const results = await searchTraceQueryFallback('{}', '');
+    const results = await searchTraceQueryFallback({ q: '{}' }, { datasourceUrl: '' });
     expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
   });
 });

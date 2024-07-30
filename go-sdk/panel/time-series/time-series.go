@@ -125,7 +125,7 @@ type QuerySettingsItem struct {
 
 type Option func(plugin *Builder) error
 
-func New(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -145,7 +145,7 @@ type Builder struct {
 
 func Chart(options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
-		plugin, err := New(options...)
+		plugin, err := create(options...)
 		if err != nil {
 			return err
 		}
