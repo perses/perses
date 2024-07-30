@@ -14,6 +14,7 @@
 package toolbox
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/brunoga/deep"
@@ -106,7 +107,7 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 			}
 		case [][]byte:
 			for _, entity := range typedList {
-				result = append(result, entity)
+				result = append(result, json.RawMessage(entity))
 			}
 		}
 	}
@@ -122,29 +123,35 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext ap
 	// Last case, we want the list of the project that matches what the user has access to.
 	// So we get the list from the database, and then we keep only that one that matches the list extracted from the permission.
 	// The usage of the map is just to avoid having the o(n2) complexity by looping over two lists to make the intersection.
-	var result []any
 	projectList, listErr := t.metadataOrFullList(persesContext, parameters, query)
 	if listErr != nil {
 		return nil, listErr
 	}
+
 	switch typedList := projectList.(type) {
 	case []K:
+		result := make([]K, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
 			result = append(result, buildMap[project])
 		}
+		return result, nil
 	case []api.Entity:
+		result := make([]api.Entity, 0, len(typedList))
 		buildMap := buildMapFromList(typedList)
 		for _, project := range projects {
 			result = append(result, buildMap[project])
 		}
+		return result, nil
 	case [][]byte:
+		result := make([][]byte, 0, len(typedList))
 		buildMap := buildRawMapFromList(typedList)
 		for _, project := range projects {
 			result = append(result, buildMap[project])
 		}
+		return result, nil
 	}
-	return result, nil
+	return []interface{}{}, nil
 }
 
 func (t *toolbox[T, K, V]) metadataOrFullList(persesContext apiInterface.PersesContext, parameters apiInterface.Parameters, query V) (any, error) {

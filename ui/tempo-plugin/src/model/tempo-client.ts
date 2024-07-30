@@ -13,7 +13,13 @@
 
 import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
-import { SearchTraceIDResponse, SearchTraceQueryResponse, ServiceStats, SpanStatusError } from './api-types';
+import {
+  SearchRequestParameters,
+  SearchTraceIDResponse,
+  SearchTraceQueryResponse,
+  ServiceStats,
+  SpanStatusError,
+} from './api-types';
 
 interface TempoClientOptions {
   datasourceUrl: string;
@@ -22,34 +28,52 @@ interface TempoClientOptions {
 
 export interface TempoClient extends DatasourceClient {
   options: TempoClientOptions;
-  searchTraceQuery(query: string, datasourceUrl: string): Promise<SearchTraceQueryResponse>;
-  searchTraceQueryFallback(query: string, datasourceUrl: string): Promise<SearchTraceQueryResponse>;
-  searchTraceID(traceID: string, datasourceUrl: string): Promise<SearchTraceIDResponse>;
+  searchTraceQuery(params: SearchRequestParameters, queryOptions: QueryOptions): Promise<SearchTraceQueryResponse>;
+  searchTraceQueryFallback(
+    params: SearchRequestParameters,
+    queryOptions: QueryOptions
+  ): Promise<SearchTraceQueryResponse>;
+  searchTraceID(traceID: string, queryOptions: QueryOptions): Promise<SearchTraceIDResponse>;
 }
 
-export const executeRequest = async <T>(url: string): Promise<T> => {
-  const response = await fetch(url);
+export interface QueryOptions {
+  datasourceUrl: string;
+  headers?: RequestHeaders;
+}
+
+export const executeRequest = async <T>(...args: Parameters<typeof global.fetch>): Promise<T> => {
+  const response = await fetch(...args);
   const jsonData = await response.json();
   return jsonData;
 };
 
-function fetchWithGet<TResponse>(apiURI: string, datasourceUrl: string) {
-  const url = `${datasourceUrl}${apiURI}`;
-  return executeRequest<TResponse>(url);
+function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptions: QueryOptions) {
+  const { datasourceUrl, headers = {} } = queryOptions;
+
+  let url = `${datasourceUrl}${apiURI}`;
+  if (params) {
+    url += '?' + new URLSearchParams(params);
+  }
+  const init = {
+    method: 'GET',
+    headers,
+  };
+
+  return executeRequest<TResponse>(url, init);
 }
 
 /**
  * Returns a summary report of traces that satisfy the query.
  */
-export function searchTraceQuery(query: string, datasourceUrl: string) {
-  return fetchWithGet<SearchTraceQueryResponse>(`/api/search?q=${query}`, datasourceUrl);
+export function searchTraceQuery(params: SearchRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithGet<SearchRequestParameters, SearchTraceQueryResponse>(`/api/search`, params, queryOptions);
 }
 
 /**
  * Returns a detailed report, including all the spans, for a given trace.
  */
-export function searchTraceID(traceID: string, datasourceUrl: string) {
-  return fetchWithGet<SearchTraceIDResponse>(`/api/traces/${traceID}`, datasourceUrl);
+export function searchTraceID(traceID: string, queryOptions: QueryOptions) {
+  return fetchWithGet<null, SearchTraceIDResponse>(`/api/traces/${traceID}`, null, queryOptions);
 }
 
 /**
@@ -62,11 +86,11 @@ export function searchTraceID(traceID: string, datasourceUrl: string) {
  * this fallback is required for older block formats.
  */
 export async function searchTraceQueryFallback(
-  query: string,
-  datasourceUrl: string
+  params: SearchRequestParameters,
+  queryOptions: QueryOptions
 ): Promise<SearchTraceQueryResponse> {
   // Get a list of traces that satisfy the query.
-  const searchResponse = await searchTraceQuery(query, datasourceUrl);
+  const searchResponse = await searchTraceQuery(params, queryOptions);
   if (!searchResponse.traces || searchResponse.traces.length === 0) {
     return { traces: [] };
   }
@@ -81,7 +105,7 @@ export async function searchTraceQueryFallback(
     traces: await Promise.all(
       searchResponse.traces.map(async (trace) => {
         const serviceStats: Record<string, ServiceStats> = {};
-        const searchTraceIDResponse = await searchTraceID(trace.traceID, datasourceUrl);
+        const searchTraceIDResponse = await searchTraceID(trace.traceID, queryOptions);
 
         // For every trace, get the full trace, and find the number of spans and errors.
         for (const batch of searchTraceIDResponse.batches) {

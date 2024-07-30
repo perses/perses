@@ -26,6 +26,15 @@ export type AttributeValue =
   | { arrayValue: { values: AttributeValue[] } };
 
 /**
+ * Parameters of Tempo HTTP API endpoint GET /api/search
+ */
+export interface SearchRequestParameters {
+  q: string;
+  start?: number;
+  end?: number;
+}
+
+/**
  * Response of Tempo HTTP API endpoint GET /api/search/<query>
  */
 export interface SearchTraceQueryResponse {

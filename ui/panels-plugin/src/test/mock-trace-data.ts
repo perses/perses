@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TraceData } from '@perses-dev/core';
+import { Span, TraceData } from '@perses-dev/core';
 
 /**
  * Mock data we get from getTraceData() in @perses/tempo-plugin.
@@ -61,6 +61,21 @@ export const MOCK_TRACE_QUERY_RESULT = [
     isError: false,
     data: MOCK_TRACE_DATA,
     dataUpdatedAt: 1666500979895,
+    definition: {
+      kind: 'TraceQuery',
+      spec: {
+        plugin: {
+          kind: 'TempoTraceQuery',
+          spec: {
+            query: '{}',
+            datasource: {
+              kind: 'TempoDatasource',
+              name: 'tempolocal',
+            },
+          },
+        },
+      },
+    },
     error: null,
     errorUpdatedAt: 0,
     failureCount: 0,
@@ -103,3 +118,101 @@ export const MOCK_EMPTY_TRACE_QUERY_RESULT = [
     isStale: true,
   },
 ];
+
+export const shopBackendResource = {
+  serviceName: 'shop-backend',
+  attributes: [
+    {
+      key: 'service.name',
+      value: {
+        stringValue: 'shop-backend',
+      },
+    },
+  ],
+};
+
+export const k6scope = {
+  name: 'k6',
+};
+
+export const trace1_root: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  childSpans: [],
+
+  traceId: 'tid1',
+  spanId: 'sid1',
+  name: 'testRootSpan',
+  kind: 'SPAN_KIND_SERVER',
+  startTimeUnixMs: 1000,
+  endTimeUnixMs: 2000,
+  attributes: [],
+  events: [],
+};
+
+export const trace1_root_child1: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  parentSpan: trace1_root,
+  childSpans: [],
+
+  traceId: 'tid1',
+  spanId: 'sid2',
+  parentSpanId: 'sid1',
+  name: 'testChildSpan2',
+  kind: 'SPAN_KIND_CLIENT',
+  startTimeUnixMs: 1100,
+  endTimeUnixMs: 1200,
+  attributes: [
+    {
+      key: 'http.method',
+      value: {
+        stringValue: 'DELETE',
+      },
+    },
+  ],
+  events: [
+    {
+      timeUnixMs: 1150,
+      name: 'event1_name',
+      attributes: [
+        {
+          key: 'event1_key',
+          value: {
+            stringValue: 'event1_value',
+          },
+        },
+      ],
+    },
+  ],
+  status: {
+    message: 'Forbidden',
+    code: 'STATUS_CODE_ERROR',
+  },
+};
+trace1_root.childSpans = [trace1_root_child1];
+
+export const trace1_root_child1_child1: Span = {
+  resource: shopBackendResource,
+  scope: k6scope,
+  parentSpan: trace1_root_child1,
+  childSpans: [],
+
+  traceId: 'tid1',
+  spanId: 'sid3',
+  parentSpanId: 'sid2',
+  name: 'testChildSpan3',
+  kind: 'SPAN_KIND_CLIENT',
+  startTimeUnixMs: 1300,
+  endTimeUnixMs: 1450,
+  attributes: [
+    {
+      key: 'http.method',
+      value: {
+        stringValue: 'PUT',
+      },
+    },
+  ],
+  events: [],
+};
+trace1_root_child1.childSpans = [trace1_root_child1_child1];
