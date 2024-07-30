@@ -25,7 +25,7 @@ type Builder struct {
 	PluginSpec `json:",inline" yaml:",inline"`
 }
 
-func New(text string, options ...Option) (Builder, error) {
+func create(text string, options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -45,7 +45,7 @@ func New(text string, options ...Option) (Builder, error) {
 
 func Markdown(text string, options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
-		r, err := New(text, options...)
+		r, err := create(text, options...)
 		if err != nil {
 			return err
 		}

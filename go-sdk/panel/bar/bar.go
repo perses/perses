@@ -45,7 +45,7 @@ type Builder struct {
 	PluginSpec `json:",inline" yaml:",inline"`
 }
 
-func New(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -65,7 +65,7 @@ func New(options ...Option) (Builder, error) {
 
 func Chart(options ...Option) panel.Option {
 	return func(builder *panel.Builder) error {
-		r, err := New(options...)
+		r, err := create(options...)
 		if err != nil {
 			return err
 		}
