@@ -17,9 +17,10 @@ import { SettingsAutocomplete } from '../SettingsAutocomplete';
 const DENSITY_OPTIONS: Array<{ id: DensityOption; label: string }> = [
   { id: 'compact', label: 'Compact' },
   { id: 'standard', label: 'Standard' },
+  { id: 'comfortable', label: 'Comfortable' },
 ];
 
-export type DensityOption = 'compact' | 'standard';
+export type DensityOption = 'compact' | 'standard' | 'comfortable';
 
 export interface DensitySelectorProps {
   onChange: (density: DensityOption) => void;

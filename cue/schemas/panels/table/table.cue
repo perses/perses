@@ -17,7 +17,7 @@ import "strings"
 
 kind: "Table"
 spec: close({
-	density?: "compact" | "standard"
+	density?: "compact" | "standard" | "comfortable"
 	columnSettings?: [...#columnSettings]
 })
 

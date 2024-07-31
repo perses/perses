@@ -23,7 +23,7 @@ import {
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
-export type TableDensity = 'compact' | 'standard';
+export type TableDensity = 'compact' | 'standard' | 'comfortable';
 export type SortDirection = 'asc' | 'desc' | undefined;
 
 export type TableRowEventOpts = {
@@ -163,36 +163,39 @@ export function getTableCellLayout(
   density: TableDensity,
   { isLastColumn, isFirstColumn }: GetTableCellLayoutOpts = {}
 ): TableCellLayout {
+  // Density Standard
+  let paddingY = theme.spacing(1);
+  let basePaddingX = theme.spacing(1.25);
+  let edgePaddingX = theme.spacing(2);
+  let paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
+  let paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
+  let lineHeight = theme.typography.body1.lineHeight;
+  let fontSize = theme.typography.body1.fontSize;
+
   if (density === 'compact') {
-    const paddingY = theme.spacing(0.5);
-
-    const basePaddingX = theme.spacing(0.5);
-    const edgePaddingX = theme.spacing(1);
-    const paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
-    const paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
-
-    const lineHeight = theme.typography.body2.lineHeight;
-
-    return {
-      padding: `${paddingY} ${paddingRight} ${paddingY} ${paddingLeft}`,
-      height: calculateTableCellHeight(lineHeight, paddingY),
-      fontSize: theme.typography.body2.fontSize,
-      lineHeight: lineHeight,
-    };
+    paddingY = theme.spacing(0.5);
+    basePaddingX = theme.spacing(0.5);
+    edgePaddingX = theme.spacing(1);
+    paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
+    paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
+    lineHeight = theme.typography.body2.lineHeight;
+    fontSize = theme.typography.body2.fontSize;
   }
 
-  // standard density
-  const paddingY = theme.spacing(1);
-  const basePaddingX = theme.spacing(1.25);
-  const edgePaddingX = theme.spacing(2);
-  const paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
-  const paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
-  const lineHeight = theme.typography.body1.lineHeight;
+  if (density === 'comfortable') {
+    paddingY = theme.spacing(2);
+    basePaddingX = theme.spacing(1.5);
+    edgePaddingX = theme.spacing(2);
+    paddingLeft = isFirstColumn ? edgePaddingX : basePaddingX;
+    paddingRight = isLastColumn ? edgePaddingX : basePaddingX;
+    lineHeight = theme.typography.body1.lineHeight;
+    fontSize = theme.typography.body1.fontSize;
+  }
 
   return {
     padding: `${paddingY} ${paddingRight} ${paddingY} ${paddingLeft}`,
     height: calculateTableCellHeight(lineHeight, paddingY),
-    fontSize: theme.typography.body1.fontSize,
+    fontSize: fontSize,
     lineHeight: lineHeight,
   };
 }
