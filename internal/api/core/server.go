@@ -51,6 +51,7 @@ type api struct {
 	apiEndpoints   []route.Endpoint
 	proxyEndpoint  route.Endpoint
 	jwtMiddleware  echo.MiddlewareFunc
+	apiPrefix      string
 }
 
 func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager dependency.PersistenceManager, cfg config.Config) echoUtils.Register {
@@ -98,6 +99,7 @@ func NewPersesAPI(serviceManager dependency.ServiceManager, persistenceManager d
 		jwtMiddleware: serviceManager.GetJWT().Middleware(func(_ echo.Context) bool {
 			return !cfg.Security.EnableAuth
 		}),
+		apiPrefix: cfg.APIPrefix,
 	}
 }
 
@@ -146,15 +148,15 @@ func (a *api) RegisterRoute(e *echo.Echo) {
 }
 
 func (a *api) collectRoutes() []*route.Group {
-	apiGroup := &route.Group{Path: utils.APIPrefix}
+	apiGroup := &route.Group{Path: a.apiPrefix + utils.APIPrefix}
 	for _, ept := range a.apiEndpoints {
 		ept.CollectRoutes(apiGroup)
 	}
-	apiV1Group := &route.Group{Path: utils.APIV1Prefix}
+	apiV1Group := &route.Group{Path: a.apiPrefix + utils.APIV1Prefix}
 	for _, ept := range a.apiV1Endpoints {
 		ept.CollectRoutes(apiV1Group)
 	}
-	proxyGroup := &route.Group{Path: "/proxy"}
+	proxyGroup := &route.Group{Path: a.apiPrefix + "/proxy"}
 	a.proxyEndpoint.CollectRoutes(proxyGroup)
 	return []*route.Group{apiGroup, apiV1Group, proxyGroup}
 }

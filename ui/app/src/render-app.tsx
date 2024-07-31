@@ -23,6 +23,7 @@ import { DarkModeContextProvider } from './context/DarkMode';
 import App from './App';
 import { NavHistoryProvider } from './context/DashboardNavHistory';
 import { ConfigContextProvider } from './context/Config';
+import { getBasePathName } from './model/route';
 
 /**
  * Renders the Perses application in the target container.
@@ -45,10 +46,11 @@ export function renderApp(container: Element | null) {
   });
 
   const root = ReactDOM.createRoot(container);
+  const basePath = getBasePathName();
 
   root.render(
     <React.StrictMode>
-      <BrowserRouter>
+      <BrowserRouter basename={basePath}>
         <CookiesProvider>
           <QueryClientProvider client={queryClient}>
             <ConfigContextProvider>
