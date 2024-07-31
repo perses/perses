@@ -3405,6 +3405,130 @@
   {
     "kind": "Dashboard",
     "metadata": {
+      "name": "table",
+      "createdAt": "2024-07-30T15:42:53.788183Z",
+      "updatedAt": "2024-07-30T15:42:53.788183Z",
+      "version": 0,
+      "project": "testing"
+    },
+    "spec": {
+      "display": {
+        "name": "table"
+      },
+      "panels": {
+        "Table": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Table"
+            },
+            "plugin": {
+              "kind": "Table",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "up"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "Table-1": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Customised Table"
+            },
+            "plugin": {
+              "kind": "Table",
+              "spec": {
+                "columnSettings": [
+                  {
+                    "header": "Timestamp",
+                    "name": "timestamp"
+                  },
+                  {
+                    "align": "left",
+                    "enableSorting": true,
+                    "name": "value"
+                  },
+                  {
+                    "hide": true,
+                    "name": "env"
+                  },
+                  {
+                    "align": "center",
+                    "name": "__name__",
+                    "width": 80
+                  }
+                ]
+              }
+            },
+            "queries": [
+              {
+                "kind": "TimeSeriesQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "PrometheusTimeSeriesQuery",
+                    "spec": {
+                      "query": "up"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Panel Group",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/Table"
+                }
+              },
+              {
+                "x": 0,
+                "y": 9,
+                "width": 24,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/Table-1"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "variables": [],
+      "duration": "1h",
+      "refreshInterval": "0s"
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
       "name": "NodeExporter",
       "createdAt": "2023-07-26T00:00:00Z",
       "updatedAt": "2023-07-26T00:00:00Z",

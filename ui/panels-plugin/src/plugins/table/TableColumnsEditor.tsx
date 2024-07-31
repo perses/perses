@@ -11,5 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './SortSelector';
-export * from './SortSelectorButtons';
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ColumnSettings, TableOptions } from './table-model';
+import { ColumnsEditor } from './ColumnsEditor';
+
+export type TableColumnsEditorProps = OptionsEditorProps<TableOptions>;
+
+export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps) {
+  function handleColumnChange(columns: ColumnSettings[]): void {
+    onChange({ ...value, columnSettings: columns });
+  }
+
+  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnChange} />;
+}
