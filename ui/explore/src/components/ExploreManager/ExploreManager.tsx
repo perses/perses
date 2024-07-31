@@ -44,12 +44,12 @@ export function ExploreManager(props: ExploreManagerProps) {
             minWidth: '100px',
           }}
         >
-          <Tab label="Metrics" />
-          <Tab label="Traces" />
+          <Tab value="metrics" label="Metrics" />
+          <Tab value="traces" label="Traces" />
         </Tabs>
         <Card sx={{ padding: '10px', width: '100%' }}>
-          {explorer === 0 && <MetricsExplorer />}
-          {explorer === 1 && <TracesExplorer />}
+          {explorer === 'metrics' && <MetricsExplorer />}
+          {explorer === 'traces' && <TracesExplorer />}
         </Card>
       </Stack>
     </Stack>
