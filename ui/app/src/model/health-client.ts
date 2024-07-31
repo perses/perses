@@ -29,12 +29,12 @@ type HealthOptions = Omit<UseQueryOptions<HealthModel, Error>, 'queryKey' | 'que
  * Gets version information from the Perses server API.
  */
 export function useHealth(options?: HealthOptions) {
-  return useQuery<HealthModel, Error>(
-    [resource],
-    () => {
+  return useQuery<HealthModel, Error>({
+    queryKey: [resource],
+    queryFn: () => {
       const url = buildURL({ resource });
       return fetchJson<HealthModel>(url);
     },
-    options
-  );
+    ...options,
+  });
 }

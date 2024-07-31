@@ -163,13 +163,13 @@ export interface ConfigModel {
 type ConfigOptions = Omit<UseQueryOptions<ConfigModel, Error>, 'queryKey' | 'queryFn'>;
 
 export function useConfig(options?: ConfigOptions) {
-  return useQuery<ConfigModel, Error>(
-    [resource],
-    () => {
+  return useQuery<ConfigModel, Error>({
+    queryKey: [resource],
+    queryFn: () => {
       return fetchConfig();
     },
-    options
-  );
+    ...options,
+  });
 }
 
 export function fetchConfig() {

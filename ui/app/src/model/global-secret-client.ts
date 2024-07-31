@@ -69,8 +69,11 @@ export function deleteGlobalSecret(entity: GlobalSecretResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalSecret(name: string) {
-  return useQuery<GlobalSecretResource, Error>(buildQueryKey({ resource, name }), () => {
-    return getGlobalSecret(name);
+  return useQuery<GlobalSecretResource, Error>({
+    queryKey: buildQueryKey({ resource, name }),
+    queryFn: () => {
+      return getGlobalSecret(name);
+    },
   });
 }
 
@@ -79,8 +82,11 @@ export function useGlobalSecret(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalSecretList() {
-  return useQuery<GlobalSecretResource[], Error>(buildQueryKey({ resource }), () => {
-    return getGlobalSecrets();
+  return useQuery<GlobalSecretResource[], Error>({
+    queryKey: buildQueryKey({ resource }),
+    queryFn: () => {
+      return getGlobalSecrets();
+    },
   });
 }
 
@@ -98,7 +104,7 @@ export function useCreateGlobalSecretMutation() {
       return createGlobalSecret(entity);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(queryKey);
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -118,8 +124,8 @@ export function useUpdateGlobalSecretMutation() {
     },
     onSuccess: (entity: GlobalSecretResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -140,8 +146,8 @@ export function useDeleteGlobalSecretMutation() {
       return entity;
     },
     onSuccess: (entity: GlobalSecretResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

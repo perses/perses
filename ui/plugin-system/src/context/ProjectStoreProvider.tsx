@@ -29,8 +29,11 @@ export interface ProjectStoreProviderProps {
 export const ProjectStoreContext = createContext<ProjectStore | undefined>(undefined);
 
 export function useProjectList(): UseQueryResult<ProjectResource[], Error> {
-  return useQuery<ProjectResource[], Error>(['projects'], () => {
-    return fetchJson<ProjectResource[]>('/api/v1/projects');
+  return useQuery<ProjectResource[], Error>({
+    queryKey: ['projects'],
+    queryFn: () => {
+      return fetchJson<ProjectResource[]>('/api/v1/projects');
+    },
   });
 }
 

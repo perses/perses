@@ -56,7 +56,11 @@ export function usePlugin<T extends PluginType>(
     enabled: (options?.enabled ?? true) && pluginType !== undefined && kind !== '',
   };
   const { getPlugin } = usePluginRegistry();
-  return useQuery(['getPlugin', pluginType, kind], () => getPlugin(pluginType!, kind), options);
+  return useQuery({
+    queryKey: ['getPlugin', pluginType, kind],
+    queryFn: () => getPlugin(pluginType!, kind),
+    ...options,
+  });
 }
 
 /**
@@ -85,22 +89,29 @@ type UseListPluginMetadataOptions = Omit<
  */
 export function useListPluginMetadata(pluginTypes: PluginType[], options?: UseListPluginMetadataOptions) {
   const { listPluginMetadata } = usePluginRegistry();
-  return useQuery(['listPluginMetadata', pluginTypes], () => listPluginMetadata(pluginTypes), options);
+  return useQuery({
+    queryKey: ['listPluginMetadata', pluginTypes],
+    queryFn: () => listPluginMetadata(pluginTypes),
+    ...options,
+  });
 }
 
 export function usePluginBuiltinVariableDefinitions() {
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
-  return useQuery(['usePluginBuiltinVariableDefinitions'], async () => {
-    const datasources = await listPluginMetadata(['Datasource']);
-    const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
-    const result: BuiltinVariableDefinition[] = [];
-    for (const kind of datasourceKinds) {
-      const plugin = await getPlugin('Datasource', kind);
-      if (plugin.getBuiltinVariableDefinitions) {
-        plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
+  return useQuery({
+    queryKey: ['usePluginBuiltinVariableDefinitions'],
+    queryFn: async () => {
+      const datasources = await listPluginMetadata(['Datasource']);
+      const datasourceKinds = new Set(datasources.map((datasource) => datasource.kind));
+      const result: BuiltinVariableDefinition[] = [];
+      for (const kind of datasourceKinds) {
+        const plugin = await getPlugin('Datasource', kind);
+        if (plugin.getBuiltinVariableDefinitions) {
+          plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
+        }
       }
-    }
-    return result;
+      return result;
+    },
   });
 }

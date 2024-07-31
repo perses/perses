@@ -68,8 +68,11 @@ export function deleteGlobalRole(entity: GlobalRoleResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalRole(name: string) {
-  return useQuery<GlobalRoleResource, Error>(buildQueryKey({ resource, name }), () => {
-    return getGlobalRole(name);
+  return useQuery<GlobalRoleResource, Error>({
+    queryKey: buildQueryKey({ resource, name }),
+    queryFn: () => {
+      return getGlobalRole(name);
+    },
   });
 }
 
@@ -78,8 +81,11 @@ export function useGlobalRole(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalRoleList() {
-  return useQuery<GlobalRoleResource[], Error>(buildQueryKey({ resource }), () => {
-    return getGlobalRoles();
+  return useQuery<GlobalRoleResource[], Error>({
+    queryKey: buildQueryKey({ resource }),
+    queryFn: () => {
+      return getGlobalRoles();
+    },
   });
 }
 
@@ -97,7 +103,7 @@ export function useCreateGlobalRoleMutation() {
       return createGlobalRole(globalRole);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
     },
   });
 }
@@ -116,8 +122,8 @@ export function useUpdateGlobalRoleMutation() {
     },
     onSuccess: (entity: GlobalRoleResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -138,8 +144,8 @@ export function useDeleteGlobalRoleMutation() {
       return entity;
     },
     onSuccess: (entity: GlobalRoleResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

@@ -68,8 +68,11 @@ export function deleteGlobalRoleBinding(entity: GlobalRoleBindingResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalRoleBinding(name: string) {
-  return useQuery<GlobalRoleBindingResource, Error>(buildQueryKey({ resource, name }), () => {
-    return getGlobalRoleBinding(name);
+  return useQuery<GlobalRoleBindingResource, Error>({
+    queryKey: buildQueryKey({ resource, name }),
+    queryFn: () => {
+      return getGlobalRoleBinding(name);
+    },
   });
 }
 
@@ -78,8 +81,11 @@ export function useGlobalRoleBinding(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalRoleBindingList() {
-  return useQuery<GlobalRoleBindingResource[], Error>(buildQueryKey({ resource }), () => {
-    return getGlobalRoleBindings();
+  return useQuery<GlobalRoleBindingResource[], Error>({
+    queryKey: buildQueryKey({ resource }),
+    queryFn: () => {
+      return getGlobalRoleBindings();
+    },
   });
 }
 
@@ -97,7 +103,7 @@ export function useCreateGlobalRoleBindingMutation() {
       return createGlobalRoleBinding(globalRoleBinding);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
     },
   });
 }
@@ -116,8 +122,8 @@ export function useUpdateGlobalRoleBindingMutation() {
     },
     onSuccess: (entity: GlobalRoleBindingResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -138,8 +144,8 @@ export function useDeleteGlobalRoleBindingMutation() {
       return entity;
     },
     onSuccess: (entity: GlobalRoleBindingResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

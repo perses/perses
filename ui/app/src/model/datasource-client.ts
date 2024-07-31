@@ -61,7 +61,7 @@ export function useCreateDatasourceMutation(projectName: string) {
       return createDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(key);
+      return queryClient.invalidateQueries({ queryKey: key });
     },
   });
 }
@@ -80,7 +80,7 @@ export function useUpdateDatasourceMutation(projectName: string) {
       return updateDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(key);
+      return queryClient.invalidateQueries({ queryKey: key });
     },
   });
 }
@@ -101,8 +101,8 @@ export function useDeleteDatasourceMutation(projectName: string) {
       });
     },
     onSuccess: (datasource) => {
-      queryClient.removeQueries([...key, datasource.metadata.name]);
-      return queryClient.invalidateQueries(key);
+      queryClient.removeQueries({ queryKey: [...key, datasource.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: key });
     },
   });
 }
@@ -112,8 +112,11 @@ export function useDeleteDatasourceMutation(projectName: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDatasource(project: string, name: string) {
-  return useQuery<DatasourceResource, Error>(buildQueryKey({ resource, parent: project, name }), () => {
-    return getDatasource(project, name);
+  return useQuery<DatasourceResource, Error>({
+    queryKey: buildQueryKey({ resource, parent: project, name }),
+    queryFn: () => {
+      return getDatasource(project, name);
+    },
   });
 }
 
@@ -122,13 +125,13 @@ export function useDatasource(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDatasourceList(options: DatasourceListOptions) {
-  return useQuery<DatasourceResource[], Error>(
-    buildQueryKey({ resource, parent: options.project }),
-    () => {
+  return useQuery<DatasourceResource[], Error>({
+    queryKey: buildQueryKey({ resource, parent: options.project }),
+    queryFn: () => {
       return getDatasources(options.project);
     },
-    options
-  );
+    ...options,
+  });
 }
 
 export function createDatasource(entity: DatasourceResource) {
