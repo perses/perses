@@ -29,6 +29,7 @@ type InnerTableProps = Omit<MuiTableProps, 'size'> & {
 const TABLE_DENSITY_CONFIG: Record<TableDensity, MuiTableProps['size']> = {
   compact: 'small',
   standard: 'medium',
+  comfortable: 'medium',
 };
 
 export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function InnerTable(

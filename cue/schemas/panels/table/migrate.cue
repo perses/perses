@@ -5,7 +5,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 			density: [
 				if #panel.options.cellHeight == "sm" { "compact" },
 				if #panel.options.cellHeight == "md" { "standard" },
-				if #panel.options.cellHeight == "lg" { "standard" }
+				if #panel.options.cellHeight == "lg" { "comfortable" }
 			][0]
 		}
 
