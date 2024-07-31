@@ -114,7 +114,7 @@ export function SearchBar() {
   useHandleShortCut(handleOpen);
 
   return (
-    <Paper sx={{ flexGrow: 2, maxWidth: isMobileSize ? '50%' : '30%' }}>
+    <Paper sx={{ width: '100%', flexShrink: 1 }}>
       <Button size="small" fullWidth sx={{ display: 'flex', justifyContent: 'space-between' }} onClick={handleOpen}>
         <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
