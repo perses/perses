@@ -34,7 +34,7 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
         accessorKey: name,
         header: column.header ?? name,
         headerDescription: column.headerDescription,
-        cellDescription: (_) => `${column.cellDescription}`, // TODO: variable rendering + cell value
+        cellDescription: column.cellDescription ? (_) => `${column.cellDescription}` : undefined, // TODO: variable rendering + cell value
         enableSorting: column.enableSorting,
         width: column.width,
         align: column.align,
