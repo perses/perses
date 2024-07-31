@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { MouseEvent, useState } from 'react';
-import { Box, Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
+import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
 import { useAuthToken } from '../../model/auth-client';
@@ -29,7 +29,7 @@ export function AccountMenu() {
     setAnchorEl(null);
   };
   return (
-    <Box>
+    <>
       <IconButton
         aria-label="Account menu"
         aria-controls="menu-account-list-appbar"
@@ -65,6 +65,6 @@ export function AccountMenu() {
           Logout
         </MenuItem>
       </Menu>
-    </Box>
+    </>
   );
 }
