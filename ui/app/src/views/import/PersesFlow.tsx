@@ -31,7 +31,7 @@ function PersesFlow({ dashboard }: PersesFlowProps) {
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
-  const { data } = useProjectList({ onError: exceptionSnackbar });
+  const { data, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
@@ -40,6 +40,10 @@ function PersesFlow({ dashboard }: PersesFlowProps) {
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };
+
+  if (error) {
+    exceptionSnackbar(error);
+  }
 
   return (
     <>

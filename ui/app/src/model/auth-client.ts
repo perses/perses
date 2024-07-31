@@ -52,7 +52,11 @@ export function useAuthToken(): UseQueryResult<Payload | null> {
   // It doesn't need the accurate signature to decode the payload.
   // That's why we are creating a fake signature.
   const fakeSignature = 'SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
-  return useQuery(['jwt'], () => decodeToken<Payload>(`${partialToken}.${fakeSignature}`), { enabled: !!partialToken });
+  return useQuery({
+    queryKey: ['jwt'],
+    queryFn: () => decodeToken<Payload>(`${partialToken}.${fakeSignature}`),
+    enabled: !!partialToken,
+  });
 }
 
 export function useNativeAuthMutation() {
@@ -63,7 +67,7 @@ export function useNativeAuthMutation() {
       return nativeAuth(body);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([authResource]);
+      return queryClient.invalidateQueries({ queryKey: [authResource] });
     },
   });
 }

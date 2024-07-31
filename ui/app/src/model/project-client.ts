@@ -86,8 +86,11 @@ function deleteProject(entity: ProjectResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useProject(name: string) {
-  return useQuery<ProjectResource, Error>([resource, name], () => {
-    return getProject(name);
+  return useQuery<ProjectResource, Error>({
+    queryKey: [resource, name],
+    queryFn: () => {
+      return getProject(name);
+    },
   });
 }
 
@@ -98,13 +101,13 @@ export function useProject(name: string) {
 export function useProjectList(options?: ProjectListOptions) {
   const queryKey = buildQueryKey({ resource });
 
-  return useQuery<ProjectResource[], Error>(
-    queryKey,
-    () => {
+  return useQuery<ProjectResource[], Error>({
+    queryKey: queryKey,
+    queryFn: () => {
       return getProjects();
     },
-    options
-  );
+    ...options,
+  });
 }
 
 /**
@@ -121,7 +124,10 @@ export function useCreateProjectMutation() {
       return createProject(project);
     },
     onSuccess: () => {
-      return Promise.all([queryClient.invalidateQueries([...queryKey]), queryClient.invalidateQueries([userKey])]);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: [...queryKey] }),
+        queryClient.invalidateQueries({ queryKey: [userKey] }),
+      ]);
     },
   });
 }
@@ -140,8 +146,8 @@ export function useUpdateProjectMutation() {
     },
     onSuccess: (entity: ProjectResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -168,15 +174,15 @@ export function useDeleteProjectMutation() {
       return entity;
     },
     onSuccess: (entity: ProjectResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
 
       const dependingKeys = dependingResources.map((resource) => buildQueryKey({ resource }));
-      dependingKeys.forEach((k) => queryClient.removeQueries([...k, entity.metadata.name]));
+      dependingKeys.forEach((k) => queryClient.removeQueries({ queryKey: [...k, entity.metadata.name] }));
 
       return Promise.all([
-        ...dependingKeys.map((k) => queryClient.invalidateQueries(k)),
-        queryClient.invalidateQueries([userKey]),
-        queryClient.invalidateQueries(queryKey),
+        ...dependingKeys.map((k) => queryClient.invalidateQueries({ queryKey: k })),
+        queryClient.invalidateQueries({ queryKey: [userKey] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });

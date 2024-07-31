@@ -6,6 +6,7 @@
     "clean": "rimraf dist/",
     "start": "webpack serve --config webpack.dev.ts",
     "build": "webpack --config webpack.prod.ts",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",
