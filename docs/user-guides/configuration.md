@@ -63,6 +63,10 @@ Generic placeholders are defined as follows:
 * `<kind>`: a string that can take the values `Dashboard`, `Datasource`, `Folder`, `GlobalDatasource`, `GlobalRole`, `GlobalRoleBinding`, `GlobalVariable`, `GlobalSecret`, `Project`, `Role`, `RoleBinding`, `User` or `Variable` (not case-sensitive)
 
 ```yaml
+# Use it in case you want to prefix the API path. By default the API is served with the path /api. 
+# With this config, it will be served with the path <api_prefix>/api
+[ api_prefix: <string> ]
+  
 # It contains any configuration that changes the API behavior like the endpoints exposed or if the permissions are activated.
 [ security: <Security config> ]
 
