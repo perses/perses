@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.47.0-rc0 / 2024-07-31
+
+- [FEATURE] Add Table panel (#2113) (#2138)
+- [FEATURE] TracingGanttChart panel (#2047)
+- [FEATURE] TraceTable panel (#2061)
+- [FEATURE] Provide a way to prefix the API (#2135) (#2141)
+- [FEATURE] Add a new search bar (#2090) (#2097) (#2099) (#2104) (#2107) (#2119) (#2142)
+- [FEATURE] Improve validation on form editors (#2044)
+- [FEATURE] TimeRange configurable #2055 (#2071)
+- [FEATURE] TimeSeries chart: add query-level settings for color override (#2046)
+- [FEATURE] Provide a way to configure the cookie parameters `samesite` and `secure` (#2069)
+- [FEATURE] Provide a way by config to activate the explorer feature (#2067)
+- [FEATURE] Provide a way by config to activate the ephemeral dashboard feature (#2060)
+- [FEATURE] Provide datasource discovery (KubeSD & HTTPSD supported) (#2021) (#2081)
+- [ENHANCEMENT] GO-SDK: add missing chart definition on tracing subject and for the time-series-table (#2133)
+- [ENHANCEMENT] Use DateTimeField in DateTimeRangePicker (#2093)
+- [ENHANCEMENT] Schemas loading: avoid breaking too early in case of error + add monitoring for it (#2073)
+- [ENHANCEMENT] Dashboards lists - improve metadataOnly safety (#2065)
+- [ENHANCEMENT] update tracing data model (#2058)
+- [ENHANCEMENT] use relative bubble size in scatter plot (#2059)
+- [ENHANCEMENT] Migrate DataGrid to v7 (#2048)
+- [ENHANCEMENT] Reduce default line width, more subtle hover effect (#2075)
+- [ENHANCEMENT] Increase empty dashboard message width (#2074)
+- [BUGFIX] Fix issue where Base64 string is returned in List endpoint (#2122)
+- [BUGFIX] Fix TraceQL query escaping (#2128)
+- [BUGFIX] Check content-type header before parsing error message as JSON (#2096)
+- [BUGFIX] Autocomplete shouldn't resize when hovering + align variable input height (#2095)
+- [BUGFIX] Fix misaligned in some resource datagrids (#2092)
+- [BUGFIX] Fix `$__interval` not taking datasource scrape interval as lower bound (#2089)
+- [BUGFIX] Remove semicolon under queries (#2076)
+- [BUGFIX] Fix dashboard delete + fix dialog width with long name (#2068)
+- [BUGFIX] Load only once dashboards in home page (#2064)
+- [BUGFIX] Fix proxy endpoint that shouldn't be anonymous (#2062)
+- [BREAKINGCHANGE] GO-SDK: remove the possibility to create the plugin builder (#2132)
+- [BREAKINGCHANGE] Reword "Template Variable" as "Variable" everywhere (#2080)
+- [BREAKINGCHANGE] Rename various config to use the same wording (#2070)
+- [BREAKINGCHANGE] Refactor DateTimeRangePicker -> TimeRangeSelector + AbsoluteTimePicker -> DateTimeRangePicker (#2048)
+
 ## 0.46.0 / 2024-06-12
 
 - [FEATURE] Explorer is sharable (#2000)
