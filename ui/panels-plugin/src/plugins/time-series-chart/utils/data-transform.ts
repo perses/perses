@@ -288,7 +288,10 @@ function findMax(data: LegacyTimeSeries[] | TimeSeries[]) {
  */
 export function convertPanelYAxis(inputAxis: TimeSeriesChartYAxisOptions = {}): YAXisComponentOption {
   const yAxis: YAXisComponentOption = {
-    show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    show: true,
+    axisLabel: {
+      show: inputAxis?.show ?? DEFAULT_Y_AXIS.show,
+    },
     min: inputAxis?.min,
     max: inputAxis?.max,
   };
