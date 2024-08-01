@@ -10,9 +10,19 @@ if #panel.type != _|_ if #panel.type == "table" {
 		}
 
 		// TODO: Implement the logic to have a unique colum settings for each columns. Currently a migrated column can have multiple column settings
-    #excluded: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName if value { name: excludedColumn, hide: true	}]
-    #renamed: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for renamedColumn, value in transformation.options.renameByName {	name: renamedColumn, header: value }]
-    #customWidth: [if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" { name: override.matcher.options, width: property.value }]
-		columnSettings: #excluded + #renamed + #customWidth
+		_excluded: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName if value {
+			name: excludedColumn,
+			hide: true
+		}]
+		_renamed: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for renamedColumn, value in transformation.options.renameByName {
+			name: renamedColumn,
+			header: value
+		}]
+		_customWidth: [if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" {
+			name: override.matcher.options,
+			width: property.value
+		}]
+
+		columnSettings: _excluded + _renamed + _customWidth
 	}
 }
