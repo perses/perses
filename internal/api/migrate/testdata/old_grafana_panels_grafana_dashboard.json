@@ -1,29 +1,31 @@
 {
   "annotations": {
-    "list": [{
-      "builtIn": 1,
-      "datasource": {
-        "type": "grafana",
-        "uid": "-- Grafana --"
-      },
-      "enable": true,
-      "hide": true,
-      "iconColor": "rgba(0, 211, 255, 1)",
-      "name": "Annotations & Alerts",
-      "target": {
-        "limit": 100,
-        "matchAny": false,
-        "tags": [],
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
         "type": "dashboard"
-      },
-      "type": "dashboard"
-    }]
+      }
+    ]
   },
   "description": "This dashboard provides informatiomn about message queues.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
-  "id": 34726,
+  "id": 40382,
   "links": [
     {
       "asDropdown": true,
@@ -89,7 +91,6 @@
       "id": 2,
       "panels": [
         {
-          "content": "<p>This dashboard provides information on OTF Front-End queues.<br/>Minimum OTF FE version required: 18.0.0.68 / 19.0.0.29<br/>\nMore information on FE metrics used here: <a href=\"https://rndwww.nce.amadeus.net/confluence/display/OTFTeam/OTF+Monitoring+-+FE+metrics\">Confluence link</a>\n</p>",
           "datasource": {
             "type": "prometheus",
             "uid": "argos-world"
@@ -98,15 +99,23 @@
             "h": 8,
             "w": 12,
             "x": 0,
-            "y": 0
+            "y": 1
           },
           "id": 3,
-          "mode": "html",
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "This dashboard does have some purpose, let me reminder... uuuuh...",
+            "mode": "html"
+          },
+          "pluginVersion": "10.1.8",
           "title": "Purpose of the Dashboard",
           "type": "text"
         },
         {
-          "content": "<p>In case of issue with the dashboard, please contact the OTF team<br/><old><ol><li>Chorus Team: TPE-OTP-AFC-CPF</li><li>Win@proach Group: DAOTF</li><li>MS Teams: <a href=\"https://teams.microsoft.com/l/channel/19%3ac3e958d9e7ca4ff2b46b7e19fe971d48%40thread.skype/OTF%2520Monitoring%2520-%2520Prometheus?groupId=a690f775-792a-44f1-9b9b-35763376cf50&tenantId=b3f4f7c2-72ce-4192-aba4-d6c7719b5766\">Channel Link</a></li></ol></p>",
           "datasource": {
             "type": "prometheus",
             "uid": "argos-world"
@@ -115,29 +124,40 @@
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 0
+            "y": 1
           },
           "id": 4,
-          "mode": "html",
+          "options": {
+            "code": {
+              "language": "plaintext",
+              "showLineNumbers": false,
+              "showMiniMap": false
+            },
+            "content": "<p>In case of issue with the dashboard, you're on your own mate</p>",
+            "mode": "html"
+          },
+          "pluginVersion": "10.1.8",
           "title": "Point of Contact",
           "type": "text"
         }
       ],
       "showTitle": true,
-      "targets": [{
-        "datasource": {
-          "type": "prometheus",
-          "uid": "argos-world"
-        },
-        "refId": "A"
-      }],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "refId": "A"
+        }
+      ],
       "title": "Dashboard Info",
       "titleSize": "h6",
       "type": "row"
     },
     {
       "collapse": true,
-      "collapsed": true,
+      "collapsed": false,
       "datasource": {
         "type": "prometheus",
         "uid": "argos-world"
@@ -149,140 +169,7 @@
         "y": 1
       },
       "id": 5,
-      "panels": [
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {
-            "type": "prometheus",
-            "uid": "$datasource"
-          },
-          "description": "Messages Enqueued-Dequeued per second.\n\n - Queueing rate: Rate of messages enqueued (no BE instance ready)\n - Dequeueing rate (negative): Rate of messages dequeued (a BE instance became available)",
-          "fieldConfig": {
-            "defaults": {
-              "unit": "msg/s"
-            },
-            "overrides": []
-          },
-          "fill": 0,
-          "fillGradient": 0,
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 0,
-            "y": 2
-          },
-          "hiddenSeries": false,
-          "id": 6,
-          "legend": {
-            "alignAsTable": true,
-            "avg": true,
-            "current": false,
-            "max": true,
-            "min": true,
-            "rightSide": false,
-            "show": true,
-            "sort": "avg",
-            "sortDesc": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "links": [],
-          "nullPointMode": "null",
-          "options": {
-            "alertThreshold": true
-          },
-          "paceLength": 10,
-          "percentage": false,
-          "pluginVersion": "9.2.6",
-          "pointradius": 5,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [{
-              "alias": "Queueing rate",
-              "color": "#F2CC0C",
-              "fill": 1,
-              "zindex": "-1"
-            },
-            {
-              "alias": "Dequeueing rate (negative)",
-              "color": "#56A64B",
-              "fill": 1,
-              "zindex": "0"
-            },
-            {
-              "alias": "Queue growing rate",
-              "color": "#FF780A",
-              "fill": 1,
-              "zindex": "1"
-            }
-          ],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
-          "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "editorMode": "code",
-              "exemplar": false,
-              "expr": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))",
-              "format": "time_series",
-              "hide": false,
-              "instant": false,
-              "interval": "2m",
-              "intervalFactor": 1,
-              "legendFormat": "Queueing rate",
-              "refId": "queue"
-            }
-          ],
-          "thresholds": [],
-          "timeRegions": [],
-          "title": "Queueing rate",
-          "tooltip": {
-            "msResolution": true,
-            "shared": true,
-            "sort": 2,
-            "value_type": "individual"
-          },
-          "transformations": [
-            {
-              "id": "organize",
-              "options": {
-                "excludeByName": {},
-                "indexByName": {},
-                "renameByName": {}
-              }
-            }
-          ],
-          "type": "graph",
-          "xaxis": {
-            "mode": "time",
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "msg/s",
-              "logBase": 1,
-              "show": true
-            },
-            {
-              "format": "short",
-              "logBase": 1,
-              "show": false
-            }
-          ],
-          "yaxis": {
-            "align": false
-          }
-        }
-      ],
+      "panels": [],
       "showTitle": true,
       "targets": [
         {
@@ -296,10 +183,217 @@
       "title": "Overview",
       "titleSize": "h6",
       "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "Messages Enqueued-Dequeued per second.\n\n - Queueing rate: Rate of messages enqueued (no BE instance ready)\n - Dequeueing rate (negative): Rate of messages dequeued (a BE instance became available)",
+      "fieldConfig": {
+        "defaults": {
+          "unit": "msg/s"
+        },
+        "overrides": []
+      },
+      "fill": 0,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 0,
+        "y": 2
+      },
+      "hiddenSeries": false,
+      "id": 6,
+      "legend": {
+        "alignAsTable": true,
+        "avg": true,
+        "current": false,
+        "max": true,
+        "min": true,
+        "rightSide": false,
+        "show": true,
+        "sort": "avg",
+        "sortDesc": true,
+        "total": false,
+        "values": true
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "paceLength": 10,
+      "percentage": false,
+      "pluginVersion": "10.1.8",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [
+        {
+          "$$hashKey": "object:62",
+          "alias": "Queueing rate",
+          "color": "#F2CC0C",
+          "fill": 1,
+          "zindex": "-1"
+        },
+        {
+          "$$hashKey": "object:63",
+          "alias": "Dequeueing rate (negative)",
+          "color": "#56A64B",
+          "fill": 1,
+          "zindex": "0"
+        },
+        {
+          "$$hashKey": "object:64",
+          "alias": "Queue growing rate",
+          "color": "#FF780A",
+          "fill": 1,
+          "zindex": "1"
+        }
+      ],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum (rate(otf_fe_queue_be_messages_enqueued_total[$__rate_interval]))",
+          "format": "time_series",
+          "hide": false,
+          "instant": false,
+          "interval": "2m",
+          "intervalFactor": 1,
+          "legendFormat": "Queueing rate",
+          "refId": "queue"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Queueing rate",
+      "tooltip": {
+        "msResolution": true,
+        "shared": true,
+        "sort": 2,
+        "value_type": "individual"
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "indexByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:95",
+          "format": "msg/s",
+          "logBase": 1,
+          "show": true
+        },
+        {
+          "$$hashKey": "object:96",
+          "format": "short",
+          "logBase": 1,
+          "show": false
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
+    },
+    {
+      "columns": [],
+      "datasource": {
+        "type": "prometheus",
+        "uid": "$datasource"
+      },
+      "description": "This is a table panel using the legacy model",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 2
+      },
+      "id": 7,
+      "links": [],
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "$$hashKey": "object:35",
+          "alias": "Time",
+          "align": "auto",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "hidden"
+        },
+        {
+          "$$hashKey": "object:282",
+          "alias": "APP Component",
+          "align": "right",
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "mappingType": 1,
+          "pattern": "app_component",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum by (app_component, namespace, stack) (storage_scrape_collector_success{stack=~\"muc10\"})",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{app_component}}",
+          "refId": "A"
+        }
+      ],
+      "title": "My table-old panel",
+      "transform": "table",
+      "type": "table-old"
     }
   ],
   "refresh": "",
-  "schemaVersion": 37,
+  "revision": 1,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
@@ -355,7 +449,7 @@
   },
   "timezone": "utc",
   "title": "queues-test",
-  "uid": "ELftRcK4z",
-  "version": 5,
+  "uid": "bhxw4yB4k",
+  "version": 10,
   "weekStart": ""
 }
