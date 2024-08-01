@@ -1,7 +1,7 @@
 {
   "kind": "Dashboard",
   "metadata": {
-    "name": "ELftRcK4z",
+    "name": "bhxw4yB4k",
     "createdAt": "0001-01-01T00:00:00Z",
     "updatedAt": "0001-01-01T00:00:00Z",
     "version": 0,
@@ -46,7 +46,7 @@
           "plugin": {
             "kind": "Markdown",
             "spec": {
-              "text": "<p>This dashboard provides information on OTF Front-End queues.<br/>Minimum OTF FE version required: 18.0.0.68 / 19.0.0.29<br/>\nMore information on FE metrics used here: <a href=\"https://rndwww.nce.amadeus.net/confluence/display/OTFTeam/OTF+Monitoring+-+FE+metrics\">Confluence link</a>\n</p>"
+              "text": "This dashboard does have some purpose, let me reminder... uuuuh..."
             }
           }
         }
@@ -60,7 +60,7 @@
           "plugin": {
             "kind": "Markdown",
             "spec": {
-              "text": "<p>In case of issue with the dashboard, please contact the OTF team<br/><old><ol><li>Chorus Team: TPE-OTP-AFC-CPF</li><li>Win@proach Group: DAOTF</li><li>MS Teams: <a href=\"https://teams.microsoft.com/l/channel/19%3ac3e958d9e7ca4ff2b46b7e19fe971d48%40thread.skype/OTF%2520Monitoring%2520-%2520Prometheus?groupId=a690f775-792a-44f1-9b9b-35763376cf50&tenantId=b3f4f7c2-72ce-4192-aba4-d6c7719b5766\">Channel Link</a></li></ol></p>"
+              "text": "<p>In case of issue with the dashboard, you're on your own mate</p>"
             }
           }
         }
@@ -98,6 +98,40 @@
             }
           ]
         }
+      },
+      "1_1": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "My table-old panel",
+            "description": "This is a table panel using the legacy model"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "**Migration from Grafana not supported !**"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "$datasource"
+                    },
+                    "minStep": "",
+                    "query": "sum by (app_component, namespace, stack) (storage_scrape_collector_success{stack=~\"muc10\"})",
+                    "seriesNameFormat": "{{app_component}}"
+                  }
+                }
+              }
+            }
+          ]
+        }
       }
     },
     "layouts": [
@@ -113,7 +147,7 @@
           "items": [
             {
               "x": 0,
-              "y": 0,
+              "y": 1,
               "width": 12,
               "height": 8,
               "content": {
@@ -122,7 +156,7 @@
             },
             {
               "x": 12,
-              "y": 0,
+              "y": 1,
               "width": 12,
               "height": 8,
               "content": {
@@ -138,7 +172,7 @@
           "display": {
             "title": "Overview",
             "collapse": {
-              "open": false
+              "open": true
             }
           },
           "items": [
@@ -149,6 +183,15 @@
               "height": 10,
               "content": {
                 "$ref": "#/spec/panels/1_0"
+              }
+            },
+            {
+              "x": 12,
+              "y": 2,
+              "width": 12,
+              "height": 11,
+              "content": {
+                "$ref": "#/spec/panels/1_1"
               }
             }
           ]
