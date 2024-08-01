@@ -10,5 +10,5 @@ schemas:
   variables_path: "/etc/perses/cue/schemas/variables"
   interval: "6h"
 
-frontend:
-  plugins_path: "/etc/perses/plugins"
+plugins:
+  path: "/etc/perses/plugins"

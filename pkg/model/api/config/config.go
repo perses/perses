@@ -62,6 +62,8 @@ type Config struct {
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`
 	// Frontend contains any config that will be used by the frontend itself.
 	Frontend Frontend `json:"frontend,omitempty" yaml:"frontend,omitempty"`
+	// Plugins contains the config for runtime plugins.
+	Plugins Plugins `json:"plugins,omitempty" yaml:"plugins,omitempty"`
 }
 
 func (c *Config) Verify() error {

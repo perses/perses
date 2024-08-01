@@ -45,9 +45,9 @@ type frontend struct {
 	pluginsPath string
 }
 
-func NewPersesFrontend(cfg config.Frontend) echoUtils.Register {
+func NewPersesFrontend(cfg config.Plugins) echoUtils.Register {
 	return &frontend{
-		pluginsPath: cfg.PluginsPath,
+		pluginsPath: cfg.Path,
 	}
 }
 
