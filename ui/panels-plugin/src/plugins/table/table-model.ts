@@ -49,6 +49,36 @@ export interface ColumnSettings {
   hide?: boolean;
 }
 
+export interface ValueCondition {
+  kind: 'Value';
+  value: string;
+}
+
+export interface RangeCondition {
+  kind: 'Range';
+  min?: string;
+  max?: string;
+}
+
+export interface RegexCondition {
+  kind: 'Regex';
+  regex: string;
+}
+
+export interface MiscCondition {
+  kind: 'Misc';
+  value: 'empty' | 'null' | 'NaN' | 'true' | 'false';
+}
+
+export type Condition = ValueCondition | RangeCondition | RegexCondition | MiscCondition;
+
+export interface CellSettings {
+  condition: Condition;
+  text?: string;
+  textColor?: `#${string}`;
+  backgroundColor?: `#${string}`;
+}
+
 /**
  * The schema for a Table panel.
  */
@@ -62,6 +92,7 @@ export interface TableDefinition extends Definition<TableOptions> {
 export interface TableOptions {
   density?: TableDensity;
   columnSettings?: ColumnSettings[];
+  cellSettings?: CellSettings[];
 }
 
 /**
