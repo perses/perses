@@ -79,7 +79,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.5.8",
+      "pluginVersion": "10.1.8",
       "targets": [
         {
           "editorMode": "code",
@@ -140,7 +140,7 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
-      "pluginVersion": "9.5.8",
+      "pluginVersion": "10.1.8",
       "targets": [
         {
           "datasource": {
@@ -182,6 +182,7 @@
               "tooltip": false,
               "viz": false
             },
+            "insertNulls": false,
             "lineInterpolation": "linear",
             "lineWidth": 1,
             "pointSize": 5,
@@ -260,6 +261,117 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "argos-world"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "API server"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 300
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 14,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true
+      },
+      "pluginVersion": "10.1.8",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "argos-world"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "up{stack=\"ccp-ne-ogob01a\", prometheus=\"platform\"}",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "UP"
+        }
+      ],
+      "title": "UP status",
+      "transformations": [
+        {
+          "disabled": true,
+          "id": "seriesToRows",
+          "options": {}
+        },
+        {
+          "id": "labelsToFields",
+          "options": {}
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true,
+              "__name__": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Time": "",
+              "apiserver": "API server"
+            }
+          }
+        }
+      ],
+      "type": "table"
+    },
+    {
       "collapsed": true,
       "gridPos": {
         "h": 1,
@@ -294,6 +406,7 @@
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -315,7 +428,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -420,7 +534,7 @@
               "reverse": false
             }
           },
-          "pluginVersion": "9.4.3",
+          "pluginVersion": "10.1.8",
           "title": "Empty heatmap",
           "type": "heatmap"
         },
@@ -446,7 +560,7 @@
             "content": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)",
             "mode": "markdown"
           },
-          "pluginVersion": "9.4.3",
+          "pluginVersion": "10.1.8",
           "title": "My Text panel",
           "type": "text"
         }
@@ -764,8 +878,8 @@
       {
         "current": {
           "selected": false,
-          "text": "{type=\"OBE\"} 1 1694769404000",
-          "value": "{type=\"OBE\"} 1 1694769404000"
+          "text": "{type=\"TSL\"} 1 1722509708000",
+          "value": "{type=\"TSL\"} 1 1722509708000"
         },
         "datasource": {
           "type": "prometheus",
@@ -846,6 +960,6 @@
   "timezone": "",
   "title": "Perses testing / Simple grafana dashboard",
   "uid": "xRV24sBVk",
-  "version": 6,
+  "version": 7,
   "weekStart": ""
 }
