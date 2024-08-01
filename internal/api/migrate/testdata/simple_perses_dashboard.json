@@ -429,7 +429,61 @@
           ]
         }
       },
-      "3_0": {
+      "3": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "UP status"
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "columnSettings": [
+                {
+                  "hide": true,
+                  "name": "Time"
+                },
+                {
+                  "hide": true,
+                  "name": "__name__"
+                },
+                {
+                  "header": "",
+                  "name": "Time"
+                },
+                {
+                  "header": "API server",
+                  "name": "apiserver",
+                  "width": 300
+                },
+                {
+                  "name": "endpoint",
+                  "width": 75
+                }
+              ],
+              "density": "compact"
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "argos-world"
+                    },
+                    "query": "up{stack=\"ccp-ne-ogob01a\", prometheus=\"platform\"}"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "4_0": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -466,7 +520,7 @@
           ]
         }
       },
-      "3_1": {
+      "4_1": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -480,7 +534,7 @@
           }
         }
       },
-      "3_2": {
+      "4_2": {
         "kind": "Panel",
         "spec": {
           "display": {
@@ -526,6 +580,15 @@
               "content": {
                 "$ref": "#/spec/panels/2"
               }
+            },
+            {
+              "x": 12,
+              "y": 8,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/3"
+              }
             }
           ]
         }
@@ -546,7 +609,7 @@
               "width": 12,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/3_0"
+                "$ref": "#/spec/panels/4_0"
               }
             },
             {
@@ -555,7 +618,7 @@
               "width": 6,
               "height": 5,
               "content": {
-                "$ref": "#/spec/panels/3_1"
+                "$ref": "#/spec/panels/4_1"
               }
             },
             {
@@ -564,7 +627,7 @@
               "width": 6,
               "height": 8,
               "content": {
-                "$ref": "#/spec/panels/3_2"
+                "$ref": "#/spec/panels/4_2"
               }
             }
           ]
