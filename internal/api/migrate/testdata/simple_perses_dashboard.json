@@ -453,11 +453,12 @@
                 },
                 {
                   "header": "API server",
-                  "name": "apiserver"
+                  "name": "apiserver",
+                  "width": 300
                 },
                 {
-                  "name": "API server",
-                  "width": 300
+                  "name": "endpoint",
+                  "width": 75
                 }
               ],
               "density": "compact"

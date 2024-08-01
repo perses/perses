@@ -304,6 +304,18 @@
                 "value": 300
               }
             ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "endpoint"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 75
+              }
+            ]
           }
         ]
       },
@@ -960,6 +972,6 @@
   "timezone": "",
   "title": "Perses testing / Simple grafana dashboard",
   "uid": "xRV24sBVk",
-  "version": 7,
+  "version": 8,
   "weekStart": ""
 }
