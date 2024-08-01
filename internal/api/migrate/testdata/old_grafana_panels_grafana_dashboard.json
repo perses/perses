@@ -355,7 +355,7 @@
         {
           "$$hashKey": "object:282",
           "alias": "APP Component",
-          "align": "auto",
+          "align": "right",
           "colors": [
             "rgba(245, 54, 54, 0.9)",
             "rgba(237, 129, 40, 0.89)",
@@ -450,6 +450,6 @@
   "timezone": "utc",
   "title": "queues-test",
   "uid": "bhxw4yB4k",
-  "version": 9,
+  "version": 10,
   "weekStart": ""
 }

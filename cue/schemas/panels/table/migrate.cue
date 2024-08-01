@@ -37,4 +37,23 @@ if #panel.type != _|_ if #panel.type == "table" {
 
 		columnSettings: _excludedColumns + _prettifiedColumns
 	}
-}
+},
+if #panel.type != _|_ if #panel.type == "table-old" {
+	kind: "Table"
+	spec: {
+		if #panel.styles != _|_ {
+			columnSettings: [for style in #panel.styles {
+				name: style.pattern
+				if style.type == "hidden" {
+					hide: true
+				}
+				if style.alias != _|_ {
+					header: style.alias
+				}
+				if style.align != _|_ if style.align != "auto" {
+					align: style.align
+				}
+			}]
+		}
+	}
+},

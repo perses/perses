@@ -107,9 +107,20 @@
             "description": "This is a table panel using the legacy model"
           },
           "plugin": {
-            "kind": "Markdown",
+            "kind": "Table",
             "spec": {
-              "text": "**Migration from Grafana not supported !**"
+              "columnSettings": [
+                {
+                  "header": "Time",
+                  "hide": true,
+                  "name": "Time"
+                },
+                {
+                  "align": "right",
+                  "header": "APP Component",
+                  "name": "app_component"
+                }
+              ]
             }
           },
           "queries": [
