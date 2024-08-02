@@ -24,8 +24,8 @@ export type PanelOptionsEditorComponent<T> = Pick<OptionsEditorTab, 'label'> & {
 /**
  * Plugin the provides custom visualizations inside a Panel.
  */
-export interface PanelPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  PanelComponent: React.ComponentType<PanelProps<Spec>>;
+export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>> extends Plugin<Spec> {
+  PanelComponent: React.ComponentType<TPanelProps>;
   /**
    * React components for custom tabs
    */
