@@ -14,6 +14,8 @@
 package apiinterface
 
 import (
+	"encoding/json"
+
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
@@ -61,7 +63,7 @@ type Service[T api.Entity, K api.Entity, V databaseModel.Query] interface {
 	Delete(ctx PersesContext, parameters Parameters) error
 	Get(ctx PersesContext, parameters Parameters) (K, error)
 	List(ctx PersesContext, query V, parameters Parameters) ([]K, error)
-	RawList(ctx PersesContext, query V, parameters Parameters) ([][]byte, error)
+	RawList(ctx PersesContext, query V, parameters Parameters) ([]json.RawMessage, error)
 	MetadataList(ctx PersesContext, query V, parameters Parameters) ([]api.Entity, error)
-	RawMetadataList(ctx PersesContext, query V, parameters Parameters) ([][]byte, error)
+	RawMetadataList(ctx PersesContext, query V, parameters Parameters) ([]json.RawMessage, error)
 }

@@ -35,8 +35,8 @@ func buildMapFromList[T api.Entity](list []T) map[string]T {
 	return result
 }
 
-func buildRawMapFromList(rows [][]byte) map[string][]byte {
-	result := make(map[string][]byte)
+func buildRawMapFromList(rows []json.RawMessage) map[string]json.RawMessage {
+	result := make(map[string]json.RawMessage)
 	for _, item := range rows {
 		result[gjson.GetBytes(item, "metadata.name").String()] = item
 	}
@@ -105,9 +105,9 @@ func (t *toolbox[T, K, V]) listWhenPermissionIsActivated(ctx echo.Context, param
 			for _, entity := range typedList {
 				result = append(result, entity)
 			}
-		case [][]byte:
+		case []json.RawMessage:
 			for _, entity := range typedList {
-				result = append(result, json.RawMessage(entity))
+				result = append(result, entity)
 			}
 		}
 	}
@@ -143,8 +143,8 @@ func (t *toolbox[T, K, V]) listProjectWhenPermissionIsActivated(persesContext ap
 			result = append(result, buildMap[project])
 		}
 		return result, nil
-	case [][]byte:
-		result := make([][]byte, 0, len(typedList))
+	case []json.RawMessage:
+		result := make([]json.RawMessage, 0, len(typedList))
 		buildMap := buildRawMapFromList(typedList)
 		for _, project := range projects {
 			result = append(result, buildMap[project])

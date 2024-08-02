@@ -14,7 +14,9 @@
 package variable
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
@@ -113,7 +115,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *variable.Query, params a
 	return s.dao.List(query)
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -129,7 +131,7 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *variable.Query, 
 	return s.dao.MetadataList(query)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *variable.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err

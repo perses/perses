@@ -14,6 +14,8 @@
 package variable
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
@@ -50,9 +52,9 @@ type DAO interface {
 	DeleteAll(project string) error
 	Get(project string, name string) (*v1.Variable, error)
 	List(q *Query) ([]*v1.Variable, error)
-	RawList(q *Query) ([][]byte, error)
+	RawList(q *Query) ([]json.RawMessage, error)
 	MetadataList(q *Query) ([]api.Entity, error)
-	RawMetadataList(q *Query) ([][]byte, error)
+	RawMetadataList(q *Query) ([]json.RawMessage, error)
 }
 
 type Service interface {

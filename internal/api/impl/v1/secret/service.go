@@ -14,7 +14,9 @@
 package secret
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/brunoga/deep"
 	"github.com/perses/perses/internal/api/crypto"
 	apiInterface "github.com/perses/perses/internal/api/interface"
@@ -123,7 +125,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *secret.Query, params api
 	return result, nil
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, _ *secret.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, _ *secret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -135,7 +137,7 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *secret.Query, pa
 	return s.dao.MetadataList(query)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *secret.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err

@@ -15,11 +15,13 @@ package database
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"time"
+
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/tidwall/gjson"
-	"time"
 
 	"github.com/go-sql-driver/mysql"
 	databaseFile "github.com/perses/perses/internal/api/database/file"
@@ -57,16 +59,16 @@ func (d *dao) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 func (d *dao) Query(query databaseModel.Query, slice interface{}) error {
 	return d.client.Query(query, slice)
 }
-func (d *dao) RawQuery(query databaseModel.Query) ([][]byte, error) {
+func (d *dao) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	return d.client.RawQuery(query)
 }
-func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([][]byte, error) {
+func (d *dao) RawMetadataQuery(query databaseModel.Query, kind modelV1.Kind) ([]json.RawMessage, error) {
 	raws, err := d.client.RawQuery(query)
 	if err != nil {
 		return nil, err
 	}
 	// now let's extract the metadata and the kind
-	result := make([][]byte, 0, len(raws))
+	result := make([]json.RawMessage, 0, len(raws))
 	for _, raw := range raws {
 		metadata := gjson.GetBytes(raw, "metadata").String()
 		result = append(result, []byte(fmt.Sprintf(`{"kind":"%s","metadata":%s,"spec":{}}`, kind, metadata)))

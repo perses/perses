@@ -14,7 +14,9 @@
 package folder
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/folder"
@@ -99,7 +101,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *folder.Query, params api
 	return s.dao.List(query)
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err
@@ -115,7 +117,7 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *folder.Query, pa
 	return s.dao.MetadataList(query)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *folder.Query, params apiInterface.Parameters) ([]json.RawMessage, error) {
 	query, err := manageQuery(q, params)
 	if err != nil {
 		return nil, err

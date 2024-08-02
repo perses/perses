@@ -14,6 +14,8 @@
 package globalsecret
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
@@ -47,7 +49,7 @@ type DAO interface {
 	Get(name string) (*v1.GlobalSecret, error)
 	List(q *Query) ([]*v1.GlobalSecret, error)
 	MetadataList(q *Query) ([]api.Entity, error)
-	RawMetadataList(q *Query) ([][]byte, error)
+	RawMetadataList(q *Query) ([]json.RawMessage, error)
 }
 
 type Service interface {
