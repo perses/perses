@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { TableSortLabel, Typography, tableSortLabelClasses } from '@mui/material';
-import { SortDirection } from './model/table-model';
 import { TableCell, TableCellProps } from './TableCell';
+import { SortDirection } from './model/table-model';
 
 export interface TableHeaderCellProps extends TableCellProps {
   /**

@@ -27,7 +27,7 @@ type Builder struct {
 	PluginSpec
 }
 
-func New(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	var builder = &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -45,7 +45,7 @@ func New(options ...Option) (Builder, error) {
 
 func StaticList(options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
-		t, err := New(options...)
+		t, err := create(options...)
 		if err != nil {
 			return err
 		}

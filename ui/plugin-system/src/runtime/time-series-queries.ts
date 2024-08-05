@@ -97,7 +97,7 @@ function getQueryOptions({
 export const useTimeSeriesQuery = (
   definition: TimeSeriesQueryDefinition,
   options?: UseTimeSeriesQueryOptions,
-  queryOptions?: QueryObserverOptions
+  queryOptions?: QueryObserverOptions<TimeSeriesData>
 ) => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
@@ -124,7 +124,7 @@ export const useTimeSeriesQuery = (
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
-  queryOptions?: QueryObserverOptions
+  queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
 ) {
   const { getPlugin } = usePluginRegistry();
   const context = {

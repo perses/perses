@@ -43,7 +43,7 @@ export function useCreateDashboardMutation(
     },
     onSuccess: onSuccess,
     onSettled: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -53,8 +53,11 @@ export function useCreateDashboardMutation(
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboard(project: string, name: string) {
-  return useQuery<DashboardResource, Error>([resource, project, name], () => {
-    return getDashboard(project, name);
+  return useQuery<DashboardResource, Error>({
+    queryKey: [resource, project, name],
+    queryFn: () => {
+      return getDashboard(project, name);
+    },
   });
 }
 
@@ -63,13 +66,13 @@ export function useDashboard(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useDashboardList(options: DashboardListOptions) {
-  return useQuery<DashboardResource[], Error>(
-    [resource, options.project, options.metadataOnly],
-    () => {
+  return useQuery<DashboardResource[], Error>({
+    queryKey: [resource, options.project, options.metadataOnly],
+    queryFn: () => {
       return getDashboards(options.project, options.metadataOnly);
     },
-    options
-  );
+    ...options,
+  });
 }
 
 export interface DatedDashboards {
@@ -147,7 +150,7 @@ export function useUpdateDashboardMutation() {
       return updateDashboard(dashboard);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -166,8 +169,8 @@ export function useDeleteDashboardMutation() {
       });
     },
     onSuccess: (dashboard) => {
-      queryClient.removeQueries([resource, dashboard.metadata.project, dashboard.metadata.name]);
-      return queryClient.invalidateQueries([resource]);
+      queryClient.removeQueries({ queryKey: [resource, dashboard.metadata.project, dashboard.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }

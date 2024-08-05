@@ -26,7 +26,7 @@ type PluginSpec struct {
 
 type Option func(plugin *Builder) error
 
-func New(expr string, options ...Option) (Builder, error) {
+func create(expr string, options ...Option) (Builder, error) {
 	var builder = &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -46,7 +46,7 @@ func New(expr string, options ...Option) (Builder, error) {
 
 func PrometheusPromQL(expr string, options ...Option) list_variable.Option {
 	return func(builder *list_variable.Builder) error {
-		t, err := New(expr, options...)
+		t, err := create(expr, options...)
 		if err != nil {
 			return err
 		}

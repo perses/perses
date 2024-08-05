@@ -15,6 +15,14 @@
       },
       {
         "pluginType": "Panel",
+        "kind": "Table",
+        "display": {
+          "name": "Table",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
         "kind": "TimeSeriesTable",
         "display": {
           "name": "Time Series Table",

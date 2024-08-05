@@ -42,12 +42,14 @@ var (
 
 type frontend struct {
 	echoUtils.Register
+	apiPrefix string
 	pluginsPath string
 }
 
-func NewPersesFrontend(cfg config.Plugins) echoUtils.Register {
+func NewPersesFrontend(cfg config.Config) echoUtils.Register {
 	return &frontend{
-		pluginsPath: cfg.Path,
+		apiPrefix: cfg.APIPrefix,
+		pluginsPath: cfg.Plugins.Path,
 	}
 }
 
@@ -55,8 +57,8 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
 
-	e.Static("/plugins", f.pluginsPath)
-	e.GET("/*", contentHandler, routerMiddleware(), contentRewrite)
+	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(), contentRewrite)
+	e.Static(f.apiPrefix+"/plugins", f.pluginsPath)
 }
 
 // routerMiddleware is here to serve properly the react app.

@@ -16,9 +16,10 @@ package dashboard
 import (
 	"context"
 	"encoding/json"
-	"github.com/perses/perses/pkg/model/api"
 	"testing"
 	"time"
+
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/perses/perses/internal/api/interface/v1/ephemeraldashboard"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -34,8 +35,8 @@ func (d *mockDAO) List(_ *ephemeraldashboard.Query) ([]*v1.EphemeralDashboard, e
 	return d.dashboards, nil
 }
 
-func (d *mockDAO) RawList(_ *ephemeraldashboard.Query) ([][]byte, error) {
-	result := make([][]byte, 0, len(d.dashboards))
+func (d *mockDAO) RawList(_ *ephemeraldashboard.Query) ([]json.RawMessage, error) {
+	result := make([]json.RawMessage, 0, len(d.dashboards))
 	for _, dash := range d.dashboards {
 		b, _ := json.Marshal(dash)
 		result = append(result, b)
@@ -55,8 +56,8 @@ func (d *mockDAO) MetadataList(_ *ephemeraldashboard.Query) ([]api.Entity, error
 	return result, nil
 }
 
-func (d *mockDAO) RawMetadataList(_ *ephemeraldashboard.Query) ([][]byte, error) {
-	result := make([][]byte, 0, len(d.dashboards))
+func (d *mockDAO) RawMetadataList(_ *ephemeraldashboard.Query) ([]json.RawMessage, error) {
+	result := make([]json.RawMessage, 0, len(d.dashboards))
 	for _, dash := range d.dashboards {
 		partial := &v1.PartialProjectEntity{
 			Kind:     dash.Kind,

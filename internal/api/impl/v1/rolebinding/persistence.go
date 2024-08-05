@@ -14,6 +14,8 @@
 package rolebinding
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/rolebinding"
 	"github.com/perses/perses/pkg/model/api"
@@ -60,7 +62,7 @@ func (d *dao) List(q *rolebinding.Query) ([]*v1.RoleBinding, error) {
 	return result, err
 }
 
-func (d *dao) RawList(q *rolebinding.Query) ([][]byte, error) {
+func (d *dao) RawList(q *rolebinding.Query) ([]json.RawMessage, error) {
 	return d.client.RawQuery(q)
 }
 
@@ -74,6 +76,6 @@ func (d *dao) MetadataList(q *rolebinding.Query) ([]api.Entity, error) {
 	return result, err
 }
 
-func (d *dao) RawMetadataList(q *rolebinding.Query) ([][]byte, error) {
+func (d *dao) RawMetadataList(q *rolebinding.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
 }

@@ -11,81 +11,57 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { QueryDefinition } from '@perses-dev/core';
 
 interface ExplorerState {
+  explorer: string;
   tab: number;
   queries: QueryDefinition[];
 }
 
 interface ExplorerManagerContextType {
-  explorer: number;
+  /** observability signal, for example metrics or traces */
+  explorer: string;
   tab: number;
   queries: QueryDefinition[];
-  setExplorer: (explorer: number) => void;
+  setExplorer: (explorer: string) => void;
   setTab: (tab: number) => void;
   setQueries: (queries: QueryDefinition[]) => void;
-}
-
-interface ExplorerManagerInitialState {
-  explorer?: number;
-  tab?: number;
-  queries?: QueryDefinition[];
-  setExplorer: (explorer: number | undefined) => void;
-  setTab: (tab: number | undefined) => void;
-  setQueries: (queries: QueryDefinition[] | undefined) => void;
 }
 
 const ExplorerManagerContext = createContext<ExplorerManagerContextType | undefined>(undefined);
 
 interface ExplorerManagerProviderProps {
   children: ReactNode;
-  initialState?: ExplorerManagerInitialState;
+  store?: [ExplorerState, (state: ExplorerState) => void];
 }
 
-function initExplorerStates(initialState?: ExplorerManagerInitialState): ExplorerState[] {
-  const result: ExplorerState[] = [];
-  if (initialState?.explorer || initialState?.tab || initialState?.queries) {
-    result[initialState?.explorer ?? 0] = {
-      tab: initialState?.tab ?? 0,
-      queries: initialState?.queries ?? [],
-    };
-  }
-  return result;
-}
+export function ExplorerManagerProvider({ children, store: externalStore }: ExplorerManagerProviderProps) {
+  // cache the state of currently not rendered explore UIs
+  const [explorerStateCache, setExplorerStateCache] = useState<Record<string, Omit<ExplorerState, 'explorer'>>>({});
+  // local store in case external store is not provided by prop
+  const localStore = useState<ExplorerState>({ explorer: 'metrics', tab: 0, queries: [] });
+  // use store provided by 'store' prop if available, otherwise use local store
+  const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
+  const { explorer, tab, queries } = explorerState;
 
-export function ExplorerManagerProvider({ children, initialState }: ExplorerManagerProviderProps) {
-  const [explorerStates, setExplorerStates] = useState<ExplorerState[]>(initExplorerStates(initialState));
-  const [explorer, setInternalExplorer] = useState<number>(initialState?.explorer ?? 0);
-  const tab: number = useMemo(() => explorerStates[explorer]?.tab ?? 0, [explorer, explorerStates]);
-  const queries: QueryDefinition[] = useMemo(() => explorerStates[explorer]?.queries ?? [], [explorer, explorerStates]);
+  function setExplorer(newExplorer: string) {
+    // store current explorer state
+    explorerStateCache[explorer] = { tab, queries };
+    setExplorerStateCache(explorerStateCache);
 
-  function setExplorer(explorer: number) {
-    setInternalExplorer(explorer);
-    if (initialState?.setExplorer) {
-      initialState.setExplorer(explorer);
-      initialState.setTab(explorerStates[explorer]?.tab);
-      initialState.setQueries(explorerStates[explorer]?.queries);
-    }
+    // restore previous explorer state (if any)
+    const state = explorerStateCache[newExplorer] ?? { tab: 0, queries: [] };
+    setExplorerState({ explorer: newExplorer, tab: state.tab, queries: state.queries });
   }
 
-  function setTab(tab: number) {
-    const state = [...explorerStates];
-    state[explorer] = { tab, queries: state[explorer]?.queries ?? [] };
-    setExplorerStates(state);
-    if (initialState?.setTab) {
-      initialState.setTab(tab);
-    }
+  function setTab(newTab: number) {
+    setExplorerState({ explorer, tab: newTab, queries });
   }
 
-  function setQueries(queries: QueryDefinition[]) {
-    const state = [...explorerStates];
-    state[explorer] = { tab: state[explorer]?.tab ?? 0, queries: queries };
-    setExplorerStates(state);
-    if (initialState?.setQueries) {
-      initialState?.setQueries(queries);
-    }
+  function setQueries(newQueries: QueryDefinition[]) {
+    setExplorerState({ explorer, tab, queries: newQueries });
   }
 
   return (

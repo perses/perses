@@ -14,12 +14,14 @@
 package view
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/perses/perses/pkg/model/api"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -88,7 +90,7 @@ func (*mockDashboardService) List(_ apiInterface.PersesContext, _ *dashboard.Que
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (*mockDashboardService) RawList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 
@@ -96,7 +98,7 @@ func (*mockDashboardService) MetadataList(_ apiInterface.PersesContext, _ *dashb
 	panic("unimplemented")
 }
 
-func (*mockDashboardService) RawMetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (*mockDashboardService) RawMetadataList(_ apiInterface.PersesContext, _ *dashboard.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	panic("unimplemented")
 }
 

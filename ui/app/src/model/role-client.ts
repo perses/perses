@@ -72,8 +72,11 @@ export function deleteRole(entity: RoleResource) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useRole(name: string, project: string) {
-  return useQuery<RoleResource, Error>(buildQueryKey({ resource, name, parent: project }), () => {
-    return getRole(name, project);
+  return useQuery<RoleResource, Error>({
+    queryKey: buildQueryKey({ resource, name, parent: project }),
+    queryFn: () => {
+      return getRole(name, project);
+    },
   });
 }
 
@@ -82,8 +85,11 @@ export function useRole(name: string, project: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useRoleList(project?: string) {
-  return useQuery<RoleResource[], Error>(buildQueryKey({ resource, parent: project }), () => {
-    return getRoles(project);
+  return useQuery<RoleResource[], Error>({
+    queryKey: buildQueryKey({ resource, parent: project }),
+    queryFn: () => {
+      return getRoles(project);
+    },
   });
 }
 
@@ -104,7 +110,7 @@ export function useCreateRoleMutation(project: string) {
       return createRole(role);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([...queryKey]);
+      return queryClient.invalidateQueries({ queryKey: [...queryKey] });
     },
   });
 }
@@ -126,8 +132,8 @@ export function useUpdateRoleMutation(project: string) {
     },
     onSuccess: (entity: RoleResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -151,8 +157,8 @@ export function useDeleteRoleMutation(project: string) {
       return entity;
     },
     onSuccess: (entity: RoleResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }

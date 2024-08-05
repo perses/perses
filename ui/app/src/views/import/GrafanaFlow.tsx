@@ -48,7 +48,7 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
   const { exceptionSnackbar } = useSnackbar();
   const [projectName, setProjectName] = useState<string>('');
   const [grafanaInput, setGrafanaInput] = useState<Record<string, string>>({});
-  const { data, isLoading } = useProjectList({ onError: exceptionSnackbar });
+  const { data, isLoading, error } = useProjectList();
   const dashboardMutation = useCreateDashboardMutation((data) => {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
@@ -71,6 +71,10 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };
+
+  if (error) {
+    exceptionSnackbar(error);
+  }
 
   return (
     <>

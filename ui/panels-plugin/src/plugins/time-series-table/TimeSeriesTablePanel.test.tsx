@@ -23,7 +23,7 @@ import { TimeRangeValue, TimeSeriesData, toAbsoluteTimeRange, UnknownSpec } from
 import { TimeSeriesTableProps } from '@perses-dev/panels-plugin';
 import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
@@ -83,15 +83,17 @@ describe('TimeSeriesTablePanel', () => {
     };
 
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin(data))}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <TimeSeriesTablePanel {...TEST_TIME_SERIES_TABLE_PROPS} />
-            </TimeRangeContext.Provider>
-          </ChartsProvider>
-        </PluginRegistry>
-      </VirtuosoMockContext.Provider>
+      <SnackbarProvider>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+          <PluginRegistry {...mockPluginRegistry(buildMockQueryPlugin(data))}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TimeRangeContext.Provider value={mockTimeRangeContext}>
+                <TimeSeriesTablePanel {...TEST_TIME_SERIES_TABLE_PROPS} />
+              </TimeRangeContext.Provider>
+            </ChartsProvider>
+          </PluginRegistry>
+        </VirtuosoMockContext.Provider>
+      </SnackbarProvider>
     );
   };
 
@@ -102,11 +104,14 @@ describe('TimeSeriesTablePanel', () => {
       isFetching: false,
     });
     renderPanel(MOCK_TIME_SERIES_DATA_MULTIVALUE);
+
     expect(
-      await screen.findByText(
-        'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"'
-      )
-    ).toBeInTheDocument();
+      screen.getAllByText(
+        (_, element) =>
+          element?.textContent ===
+          '{device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"}'
+      ).length
+    ).toBeGreaterThan(0);
 
     expect(await screen.findAllByRole('cell')).toHaveLength(4); // 2 lines with 2 column
     expect(await screen.findAllByText('@1666479357903')).toHaveLength(2); // first timestamp appear once per line
@@ -120,11 +125,14 @@ describe('TimeSeriesTablePanel', () => {
       isFetching: false,
     });
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE);
+
     expect(
-      await screen.findByText(
-        'device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"'
-      )
-    ).toBeInTheDocument();
+      screen.getAllByText(
+        (_, element) =>
+          element?.textContent ===
+          '{device="/dev/vda1", env="demo", fstype="ext4", instance="demo.do.prometheus.io:9100", job="node", mountpoint="/"}'
+      ).length
+    ).toBeGreaterThan(0);
 
     expect(await screen.findAllByRole('cell')).toHaveLength(4); // 2 lines with 2 column
     expect(screen.queryByText('@')).toBeNull(); // No @ as no timestamp

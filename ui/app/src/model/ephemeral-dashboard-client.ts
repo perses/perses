@@ -35,7 +35,7 @@ export function useCreateEphemeralDashboardMutation(
     },
     onSuccess: onSuccess,
     onSettled: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -53,7 +53,7 @@ export function useUpdateEphemeralDashboardMutation() {
       return updateEphemeralDashboard(ephemeralDashboard);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([resource]);
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -72,8 +72,10 @@ export function useDeleteEphemeralDashboardMutation() {
       });
     },
     onSuccess: (ephemeralDashboard) => {
-      queryClient.removeQueries([resource, ephemeralDashboard.metadata.project, ephemeralDashboard.metadata.name]);
-      return queryClient.invalidateQueries([resource]);
+      queryClient.removeQueries({
+        queryKey: [resource, ephemeralDashboard.metadata.project, ephemeralDashboard.metadata.name],
+      });
+      return queryClient.invalidateQueries({ queryKey: [resource] });
     },
   });
 }
@@ -83,8 +85,11 @@ export function useDeleteEphemeralDashboardMutation() {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useEphemeralDashboard(project: string, name: string) {
-  return useQuery<EphemeralDashboardResource, Error>([resource, project, name], () => {
-    return getEphemeralDashboard(project, name);
+  return useQuery<EphemeralDashboardResource, Error>({
+    queryKey: [resource, project, name],
+    queryFn: () => {
+      return getEphemeralDashboard(project, name);
+    },
   });
 }
 
@@ -93,8 +98,11 @@ export function useEphemeralDashboard(project: string, name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useEphemeralDashboardList(project?: string) {
-  return useQuery<EphemeralDashboardResource[], Error>([resource, project], () => {
-    return getEphemeralDashboards(project);
+  return useQuery<EphemeralDashboardResource[], Error>({
+    queryKey: [resource, project],
+    queryFn: () => {
+      return getEphemeralDashboards(project);
+    },
   });
 }
 
