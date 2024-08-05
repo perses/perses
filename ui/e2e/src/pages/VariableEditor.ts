@@ -50,14 +50,25 @@ export class VariableEditor {
   async isVisible() {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates in.
-    await waitForAnimations(this.container);
+    const isContainerVisible = await this.container.isVisible();
+
+    if (isContainerVisible) {
+      await waitForAnimations(this.container);
+    }
+
     await this.container.isVisible();
   }
 
   async isClosed() {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates out.
-    await waitForAnimations(this.container);
+
+    const isContainerVisible = await this.container.isVisible();
+
+    if (isContainerVisible) {
+      await waitForAnimations(this.container);
+    }
+
     await expect(this.container).toHaveCount(0);
   }
 

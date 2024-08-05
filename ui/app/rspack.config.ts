@@ -25,9 +25,9 @@ module.exports = {
     path: path.resolve(__dirname, './dist'),
     publicPath: '/',
   },
-  entry: {
-    main: './src/bundle.ts',
-  },
+  mode: isDev ? 'development' : 'production',
+  devtool: isDev ? 'cheap-module-source-map' : false,
+  entry: path.resolve(__dirname, './src/bundle.ts'),
   resolve: {
     extensions: ['...', '.ts', '.tsx', '.jsx'],
   },
@@ -69,24 +69,26 @@ module.exports = {
       },
     ],
   },
-  devServer: {
-    historyApiFallback: true,
-    port: parseInt(process.env.PORT ?? '3000'),
-    allowedHosts: 'all',
-    proxy: [
-      {
-        context: ['/api', '/proxy'],
-        target: 'http://localhost:8080',
-      },
-    ],
-    client: {
-      // By default, the error overlay is not shown because it can get in the
-      // way of e2e tests and can be annoying for some developer workflows.
-      // If you like the overlay, you can enable it by setting the the specified
-      // env var.
-      overlay: process.env.ERROR_OVERLAY === 'true' ?? false,
-    },
-  },
+  devServer: isDev
+    ? {
+        historyApiFallback: true,
+        port: parseInt(process.env.PORT ?? '3000'),
+        allowedHosts: 'all',
+        proxy: [
+          {
+            context: ['/api', '/proxy', '/plugins'],
+            target: 'http://localhost:8080',
+          },
+        ],
+        client: {
+          // By default, the error overlay is not shown because it can get in the
+          // way of e2e tests and can be annoying for some developer workflows.
+          // If you like the overlay, you can enable it by setting the the specified
+          // env var.
+          overlay: process.env.ERROR_OVERLAY === 'true' ?? false,
+        },
+      }
+    : undefined,
   plugins: [
     new rspack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
@@ -94,6 +96,7 @@ module.exports = {
     new rspack.ProgressPlugin({}),
     new rspack.HtmlRspackPlugin({
       template: './index.html',
+      favicon: './favicon.ico',
     }),
     isDev ? new refreshPlugin() : null,
   ].filter(Boolean),

@@ -75,6 +75,11 @@ const pkgConfig: PkgConfig[] = [
     directory: path.resolve(uiRoot, 'prometheus-plugin/src'),
     title: 'Prometheus Plugin',
   },
+  {
+    pkg: '@perses-dev/plugin-runtime',
+    directory: path.resolve(uiRoot, 'plugin-runtime/src'),
+    title: 'Perses Plugin runtime',
+  },
 ];
 
 // File selector for stories.

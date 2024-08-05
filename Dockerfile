@@ -13,6 +13,7 @@ COPY --chown=nobody:nobody percli                            /bin/percli
 COPY --chown=nobody:nobody LICENSE                           /LICENSE
 COPY --chown=nobody:nobody cue/schemas/                      /etc/perses/cue/schemas/
 COPY --chown=nobody:nobody cue.mod/                          /etc/perses/cue.mod/
+COPY --chown=nobody:nobody plugins/                          /etc/perses/plugins/
 COPY --chown=nobody:nobody docs/examples/config.docker.yaml  /etc/perses/config.yaml
 COPY --from=build-env --chown=nobody:nobody                  /perses /perses
 COPY --from=build-env --chown=nobody:nobody                  /etc/mime.types /etc/mime.types

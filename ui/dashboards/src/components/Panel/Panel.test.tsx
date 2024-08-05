@@ -18,6 +18,7 @@ import { TimeRangeProvider } from '@perses-dev/plugin-system';
 import { renderWithContext } from '../../test';
 import { VariableProvider } from '../../context';
 import { Panel, PanelProps } from './Panel';
+
 describe('Panel', () => {
   const createTestPanel = (): PanelDefinition => ({
     kind: 'Panel',

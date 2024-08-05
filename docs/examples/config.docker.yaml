@@ -9,3 +9,6 @@ schemas:
   datasources_path: "/etc/perses/cue/schemas/datasources"
   variables_path: "/etc/perses/cue/schemas/variables"
   interval: "6h"
+
+plugins:
+  path: "/etc/perses/plugins"
