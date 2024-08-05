@@ -17,14 +17,6 @@ import { PluginRegistry } from '../components/PluginRegistry';
 import { DefaultPluginKinds } from '../model';
 import { testPluginLoader } from './test-plugins';
 
-const testLogger = {
-  log: console.log,
-  warn: console.warn,
-  error: () => {
-    // Don't log network errors in tests to the console
-  },
-};
-
 type ContextOptions = {
   defaultPluginKinds?: DefaultPluginKinds;
 };
@@ -41,7 +33,6 @@ export function renderWithContext(
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
-    logger: testLogger,
   });
   return render(
     <QueryClientProvider client={queryClient}>

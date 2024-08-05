@@ -26,7 +26,7 @@ type Builder struct {
 	Filters          []v1.Variable              `json:"-" yaml:"-"`
 }
 
-func New(value string, options ...Option) (Builder, error) {
+func create(value string, options ...Option) (Builder, error) {
 	var builder = &Builder{
 		TextVariableSpec: dashboard.TextVariableSpec{
 			//Name:     "", // TODO: handle conversion
@@ -48,7 +48,7 @@ func New(value string, options ...Option) (Builder, error) {
 func Text(value string, options ...Option) variable.Option {
 	return func(builder *variable.Builder) error {
 		options = append([]Option{Filter(builder.Filters...)}, options...)
-		t, err := New(value, options...)
+		t, err := create(value, options...)
 		if err != nil {
 			return err
 		}

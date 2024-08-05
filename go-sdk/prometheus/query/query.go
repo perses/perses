@@ -29,7 +29,7 @@ type PluginSpec struct {
 
 type Option func(plugin *Builder) error
 
-func NewPlugin(query string, options ...Option) (Builder, error) {
+func create(query string, options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -53,7 +53,7 @@ type Builder struct {
 
 func PromQL(expr string, options ...Option) query.Option {
 	return func(builder *query.Builder) error {
-		plugin, err := NewPlugin(expr, options...)
+		plugin, err := create(expr, options...)
 		if err != nil {
 			return err
 		}

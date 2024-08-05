@@ -14,6 +14,8 @@
 package dashboard
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/pkg/model/api"
@@ -60,7 +62,7 @@ func (d *dao) List(q *dashboard.Query) ([]*v1.Dashboard, error) {
 	return result, err
 }
 
-func (d *dao) RawList(q *dashboard.Query) ([][]byte, error) {
+func (d *dao) RawList(q *dashboard.Query) ([]json.RawMessage, error) {
 	return d.client.RawQuery(q)
 }
 
@@ -74,6 +76,6 @@ func (d *dao) MetadataList(q *dashboard.Query) ([]api.Entity, error) {
 	return result, err
 }
 
-func (d *dao) RawMetadataList(q *dashboard.Query) ([][]byte, error) {
+func (d *dao) RawMetadataList(q *dashboard.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
 }

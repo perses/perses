@@ -6,6 +6,7 @@
     "clean": "rimraf dist/",
     "start": "cross-env NODE_ENV=development rspack serve",
     "build": "rspack build",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx",

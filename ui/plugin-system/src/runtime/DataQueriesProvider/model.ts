@@ -21,7 +21,7 @@ export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
   definitions: Array<Definition<QueryPluginSpec>>;
   children?: ReactNode;
   options?: QueryOptions;
-  queryOptions?: QueryObserverOptions;
+  queryOptions?: Omit<QueryObserverOptions, 'queryKey'>;
 }
 
 export interface DataQueriesContextType {

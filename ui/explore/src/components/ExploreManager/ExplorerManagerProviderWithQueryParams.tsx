@@ -13,14 +13,13 @@
 
 import React, { ReactNode } from 'react';
 
-import { JsonParam, NumberParam, useQueryParams } from 'use-query-params';
-import { QueryDefinition } from '@perses-dev/core';
+import { createEnumParam, JsonParam, NumberParam, useQueryParams, withDefault } from 'use-query-params';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
 const exploreQueryConfig = {
-  explorer: NumberParam,
-  tab: NumberParam,
-  queries: JsonParam,
+  explorer: withDefault(createEnumParam(['metrics', 'traces']), 'metrics'),
+  tab: withDefault(NumberParam, 0),
+  queries: withDefault(JsonParam, []),
 };
 
 interface ExplorerManagerProviderWithQueryParamsProps {
@@ -28,18 +27,7 @@ interface ExplorerManagerProviderWithQueryParamsProps {
 }
 
 export function ExplorerManagerProviderWithQueryParams({ children }: ExplorerManagerProviderWithQueryParamsProps) {
-  const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig, { updateType: 'replaceIn' });
+  const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig);
 
-  const initialState = {
-    explorer: queryParams.explorer ?? undefined, // can be null, forcing to undefined
-    tab: queryParams.tab ?? undefined, // can be null, forcing to undefined
-    queries: queryParams.queries ? (queryParams.queries as QueryDefinition[]) : undefined,
-    setExplorer: (explorer: number | undefined) => {
-      setQueryParams({ explorer, queries: undefined, tab: undefined });
-    },
-    setTab: (tab: number | undefined) => setQueryParams({ tab }),
-    setQueries: (queries: QueryDefinition[] | undefined) => setQueryParams({ queries }),
-  };
-
-  return <ExplorerManagerProvider initialState={initialState}>{children}</ExplorerManagerProvider>;
+  return <ExplorerManagerProvider store={[queryParams, setQueryParams]}>{children}</ExplorerManagerProvider>;
 }

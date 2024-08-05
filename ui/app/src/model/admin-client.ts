@@ -34,7 +34,7 @@ export function useCreateGlobalDatasourceMutation() {
       return createGlobalDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -52,7 +52,7 @@ export function useUpdateGlobalDatasourceMutation() {
       return updateGlobalDatasource(datasource);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -71,8 +71,8 @@ export function useDeleteGlobalDatasourceMutation() {
       });
     },
     onSuccess: (datasource) => {
-      queryClient.removeQueries([globalDatasourceResource, datasource.metadata.name]);
-      return queryClient.invalidateQueries([globalDatasourceResource]);
+      queryClient.removeQueries({ queryKey: [globalDatasourceResource, datasource.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey: [globalDatasourceResource] });
     },
   });
 }
@@ -82,8 +82,11 @@ export function useDeleteGlobalDatasourceMutation() {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasource(name: string) {
-  return useQuery<GlobalDatasourceResource, Error>([globalDatasourceResource, name], () => {
-    return getGlobalDatasource(name);
+  return useQuery<GlobalDatasourceResource, Error>({
+    queryKey: [globalDatasourceResource, name],
+    queryFn: () => {
+      return getGlobalDatasource(name);
+    },
   });
 }
 
@@ -92,13 +95,13 @@ export function useGlobalDatasource(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useGlobalDatasourceList(options: GlobalDatasourceListOptions) {
-  return useQuery<GlobalDatasourceResource[], Error>(
-    [globalDatasourceResource],
-    () => {
+  return useQuery<GlobalDatasourceResource[], Error>({
+    queryKey: [globalDatasourceResource],
+    queryFn: () => {
       return getGlobalDatasources();
     },
-    options
-  );
+    ...options,
+  });
 }
 
 export function createGlobalDatasource(entity: GlobalDatasourceResource) {

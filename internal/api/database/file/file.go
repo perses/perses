@@ -111,18 +111,18 @@ func (d *DAO) Get(kind modelV1.Kind, metadata modelAPI.Metadata, entity modelAPI
 	return nil
 }
 
-func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([][]byte, error) {
+func (d *DAO) RawMetadataQuery(_ databaseModel.Query, _ modelV1.Kind) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("raw metadata query not implemented")
 }
 
-func (d *DAO) RawQuery(query databaseModel.Query) ([][]byte, error) {
+func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 	folder, prefix, isExist, err := d.buildQuery(query)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build the query: %s", err)
 	}
 	if !isExist {
 		// There is nothing to return. So let's initialize the slice just to avoid returning a nil slice
-		return make([][]byte, 0), nil
+		return make([]json.RawMessage, 0), nil
 	}
 	// so now we have the proper folder to looking for and potentially a filter to use
 	var files []string
@@ -131,9 +131,9 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([][]byte, error) {
 	}
 	if len(files) <= 0 {
 		// in case the result is empty, let's initialize the slice just to avoid returning a nil slice
-		return make([][]byte, 0), nil
+		return make([]json.RawMessage, 0), nil
 	}
-	var result [][]byte
+	result := []json.RawMessage{}
 
 	for _, file := range files {
 		// now read all files and append them to the final result

@@ -81,8 +81,11 @@ function getUserPermissions(username: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useUser(name: string) {
-  return useQuery<UserResource, Error>(buildQueryKey({ resource, name }), () => {
-    return getUser(name);
+  return useQuery<UserResource, Error>({
+    queryKey: buildQueryKey({ resource, name }),
+    queryFn: () => {
+      return getUser(name);
+    },
   });
 }
 
@@ -91,8 +94,11 @@ export function useUser(name: string) {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useUserList() {
-  return useQuery<UserResource[], Error>(buildQueryKey({ resource }), () => {
-    return getUsers();
+  return useQuery<UserResource[], Error>({
+    queryKey: buildQueryKey({ resource }),
+    queryFn: () => {
+      return getUsers();
+    },
   });
 }
 
@@ -110,7 +116,7 @@ export function useCreateUserMutation() {
       return createUser(entity);
     },
     onSuccess: () => {
-      return queryClient.invalidateQueries(queryKey);
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -130,8 +136,8 @@ export function useUpdateUserMutation() {
     },
     onSuccess: (entity: UserResource) => {
       return Promise.all([
-        queryClient.invalidateQueries([...queryKey, entity.metadata.name]),
-        queryClient.invalidateQueries(queryKey),
+        queryClient.invalidateQueries({ queryKey: [...queryKey, entity.metadata.name] }),
+        queryClient.invalidateQueries({ queryKey }),
       ]);
     },
   });
@@ -152,8 +158,8 @@ export function useDeleteUserMutation() {
       return entity;
     },
     onSuccess: (entity: UserResource) => {
-      queryClient.removeQueries([...queryKey, entity.metadata.name]);
-      return queryClient.invalidateQueries(queryKey);
+      queryClient.removeQueries({ queryKey: [...queryKey, entity.metadata.name] });
+      return queryClient.invalidateQueries({ queryKey });
     },
   });
 }
@@ -163,7 +169,10 @@ export function useDeleteUserMutation() {
  * Will automatically be refreshed when cache is invalidated
  */
 export function useUserPermissions(username: string) {
-  return useQuery<Record<string, Permission[]>, Error>([userKey, username, 'permissions'], () => {
-    return getUserPermissions(username);
+  return useQuery<Record<string, Permission[]>, Error>({
+    queryKey: [userKey, username, 'permissions'],
+    queryFn: () => {
+      return getUserPermissions(username);
+    },
   });
 }

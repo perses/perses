@@ -53,7 +53,6 @@ export default function Header(): JSX.Element {
             paddingLeft: 0,
             paddingRight: 0.75,
           },
-          justifyContent: 'space-between',
         }}
       >
         <Box
@@ -61,6 +60,8 @@ export default function Header(): JSX.Element {
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
+            width: '100%',
+            flexShrink: isMobileSize ? 2 : 1,
           }}
         >
           <Button
@@ -119,7 +120,16 @@ export default function Header(): JSX.Element {
           )}
         </Box>
         <SearchBar />
-        {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
+        <Box
+          sx={{
+            width: '100%',
+            flexShrink: isMobileSize ? 2 : 1,
+            display: 'flex',
+            justifyContent: 'end',
+          }}
+        >
+          {isAuthEnabled ? <AccountMenu /> : <ThemeSwitch isAuthEnabled={false} />}
+        </Box>
       </Toolbar>
     </AppBar>
   );

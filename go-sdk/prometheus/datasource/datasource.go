@@ -70,7 +70,7 @@ func (s *PluginSpec) validate() error {
 
 type Option func(plugin *Builder) error
 
-func NewPlugin(options ...Option) (Builder, error) {
+func create(options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
@@ -92,7 +92,7 @@ type Builder struct {
 
 func Prometheus(options ...Option) datasource.Option {
 	return func(builder *datasource.Builder) error {
-		plugin, err := NewPlugin(options...)
+		plugin, err := create(options...)
 		if err != nil {
 			return err
 		}

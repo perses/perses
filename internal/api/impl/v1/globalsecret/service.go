@@ -14,7 +14,9 @@
 package globalsecret
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
@@ -114,7 +116,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *globalsecret.Query, _ ap
 	return result, nil
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, _ *globalsecret.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, _ *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -122,6 +124,6 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalsecret.Que
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalsecret.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }
