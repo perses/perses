@@ -207,4 +207,4 @@ update-helm-readme:
 .PHONY: install-default-plugins
 install-default-plugins:
 	@echo ">> install default plugins"
-	./scripts/install_default_plugins.sh
+	./scripts/plugin/install_plugins.sh

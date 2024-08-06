@@ -142,7 +142,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     }
   },
   "plugins": {
-    "path": "plugins"
+    "path": "plugins",
+    "archive_path": "plugins-archive"
   }
 }`,
 		},
@@ -223,7 +224,8 @@ func TestUnmarshalJSONConfig(t *testing.T) {
     "information": "# Hello World\n## File Database setup"
   },
   "plugins": { 
-    "path": "plugins"
+    "path": "plugins",
+    "archive_path": "plugins-archive"
 	},
   "provisioning": {
     "folders": [
@@ -290,7 +292,8 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					Information: "# Hello World\n## File Database setup",
 				},
 				Plugins: Plugins{
-					Path: "plugins",
+					Path:        "plugins",
+					ArchivePath: "plugins-archive",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
@@ -371,6 +374,7 @@ ephemeral_dashboards_cleanup_interval: "2h"
 
 plugins:
   path: "custom/plugins"
+  archive_path: "custom/plugins/archive"
 `,
 			result: Config{
 				Security: Security{
@@ -446,7 +450,8 @@ plugins:
 					},
 				},
 				Plugins: Plugins{
-					Path: "custom/plugins",
+					Path:        "custom/plugins",
+					ArchivePath: "custom/plugins/archive",
 				},
 				Provisioning: ProvisioningConfig{
 					Folders: []string{
