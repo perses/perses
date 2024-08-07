@@ -49,7 +49,7 @@ func Markdown(text string, options ...Option) panel.Option {
 		if err != nil {
 			return err
 		}
-		builder.Spec.Plugin.Kind = "Markdown"
+		builder.Spec.Plugin.Kind = "MarkdownChart"
 		builder.Spec.Plugin.Spec = r.PluginSpec
 		return nil
 	}
