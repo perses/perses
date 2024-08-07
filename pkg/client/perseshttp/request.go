@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 )
 
@@ -326,8 +325,7 @@ type Response struct {
 }
 
 type errorResponse struct {
-	Message    string          `json:"message"`
-	OAuthError *api.OAuthError `json:"oauth_error,omitempty"`
+	Message string `json:"message"`
 }
 
 // Error returns the error executing the request, nil if no error occurred.
@@ -353,13 +351,6 @@ func (r *Response) Error() error {
 				e.Err = fmt.Errorf("something horrible occured when the client tried to decode the error message: %w", err)
 			} else {
 				e.Message = response.Message
-				// This check has been done with conscious.
-				// This is to avoid the issue where e.Err != nil is true and then e.Err.Error() panics with the error "nil pointer".
-				// If you want to understand more about it, please check fat pointer in Golang and this nice article around the nil value in Go:
-				// https://jeremymikkola.com/posts/2017_03_29_know_your_nil.html
-				if response.OAuthError != nil {
-					e.Err = response.OAuthError
-				}
 			}
 		}
 		e.StatusCode = r.statusCode
