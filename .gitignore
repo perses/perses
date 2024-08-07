@@ -38,4 +38,5 @@ dev/local_db
 
 *.ignore.*
 
-plugins/*
+/plugins
+/plugins-archive

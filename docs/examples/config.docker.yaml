@@ -12,3 +12,4 @@ schemas:
 
 plugins:
   path: "/etc/perses/plugins"
+  archive_path: "/etc/perses/plugins-archive"
