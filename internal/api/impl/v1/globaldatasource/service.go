@@ -14,7 +14,9 @@
 package globaldatasource
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
@@ -108,11 +110,11 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, _ *globaldatasource
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *globaldatasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

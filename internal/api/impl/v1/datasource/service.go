@@ -14,7 +14,9 @@
 package datasource
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/brunoga/deep"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
@@ -112,7 +114,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *datasource.Query, params
 	return v1.FilterDatasource(query.Kind, query.Default, dtsList), nil
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -120,7 +122,7 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, _ *datasource.Query
 	return nil, fmt.Errorf("not implemented")
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, _ *datasource.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return nil, fmt.Errorf("not implemented")
 }
 

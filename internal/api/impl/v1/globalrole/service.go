@@ -14,7 +14,9 @@
 package globalrole
 
 import (
+	"encoding/json"
 	"fmt"
+
 	"github.com/perses/perses/pkg/model/api"
 
 	"github.com/brunoga/deep"
@@ -112,7 +114,7 @@ func (s *service) List(_ apiInterface.PersesContext, q *globalrole.Query, _ apiI
 	return s.dao.List(q)
 }
 
-func (s *service) RawList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawList(q)
 }
 
@@ -120,6 +122,6 @@ func (s *service) MetadataList(_ apiInterface.PersesContext, q *globalrole.Query
 	return s.dao.MetadataList(q)
 }
 
-func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([][]byte, error) {
+func (s *service) RawMetadataList(_ apiInterface.PersesContext, q *globalrole.Query, _ apiInterface.Parameters) ([]json.RawMessage, error) {
 	return s.dao.RawMetadataList(q)
 }

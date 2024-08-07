@@ -14,6 +14,8 @@
 package globalrolebinding
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/globalrolebinding"
 	"github.com/perses/perses/pkg/model/api"
@@ -56,7 +58,7 @@ func (d *dao) List(q *globalrolebinding.Query) ([]*v1.GlobalRoleBinding, error) 
 	return result, err
 }
 
-func (d *dao) RawList(q *globalrolebinding.Query) ([][]byte, error) {
+func (d *dao) RawList(q *globalrolebinding.Query) ([]json.RawMessage, error) {
 	return d.client.RawQuery(q)
 }
 
@@ -70,6 +72,6 @@ func (d *dao) MetadataList(q *globalrolebinding.Query) ([]api.Entity, error) {
 	return result, err
 }
 
-func (d *dao) RawMetadataList(q *globalrolebinding.Query) ([][]byte, error) {
+func (d *dao) RawMetadataList(q *globalrolebinding.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
 }

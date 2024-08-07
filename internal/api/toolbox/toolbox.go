@@ -43,22 +43,6 @@ func ExtractParameters(ctx echo.Context, caseSensitive bool) apiInterface.Parame
 	}
 }
 
-func buildJSONBlob(raws [][]byte) []byte {
-	var result []byte
-	if len(raws) == 0 {
-		return []byte(`[]`)
-	}
-	result = append(result, '[')
-	i := 0
-	for i < len(raws)-1 {
-		result = append(result, raws[i]...)
-		result = append(result, ',')
-		i++
-	}
-	result = append(result, raws[len(raws)-1]...)
-	return append(result, ']')
-}
-
 // Toolbox is an interface that defines the different methods that can be used in the different endpoint of the API.
 // This is a way to align the code of the different endpoint.
 type Toolbox[T api.Entity, K databaseModel.Query] interface {
@@ -218,9 +202,6 @@ func (t *toolbox[T, K, V]) List(ctx echo.Context, query V) error {
 		return listErr
 	}
 
-	if blob, ok := list.([][]byte); ok {
-		return ctx.JSONBlob(http.StatusOK, buildJSONBlob(blob))
-	}
 	return ctx.JSON(http.StatusOK, list)
 }
 

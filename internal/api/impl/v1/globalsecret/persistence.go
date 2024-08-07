@@ -14,6 +14,8 @@
 package globalsecret
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/globalsecret"
 	"github.com/perses/perses/pkg/model/api"
@@ -69,6 +71,6 @@ func (d *dao) MetadataList(q *globalsecret.Query) ([]api.Entity, error) {
 	return result, err
 }
 
-func (d *dao) RawMetadataList(q *globalsecret.Query) ([][]byte, error) {
+func (d *dao) RawMetadataList(q *globalsecret.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
 }

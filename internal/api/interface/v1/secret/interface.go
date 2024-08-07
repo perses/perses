@@ -14,6 +14,8 @@
 package secret
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	apiInterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/pkg/model/api"
@@ -51,7 +53,7 @@ type DAO interface {
 	Get(project string, name string) (*v1.Secret, error)
 	List(q *Query) ([]*v1.Secret, error)
 	MetadataList(q *Query) ([]api.Entity, error)
-	RawMetadataList(q *Query) ([][]byte, error)
+	RawMetadataList(q *Query) ([]json.RawMessage, error)
 }
 
 type Service interface {

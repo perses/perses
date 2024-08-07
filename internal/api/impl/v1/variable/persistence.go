@@ -14,6 +14,8 @@
 package variable
 
 import (
+	"encoding/json"
+
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/pkg/model/api"
@@ -60,7 +62,7 @@ func (d *dao) List(q *variable.Query) ([]*v1.Variable, error) {
 	return result, err
 }
 
-func (d *dao) RawList(q *variable.Query) ([][]byte, error) {
+func (d *dao) RawList(q *variable.Query) ([]json.RawMessage, error) {
 	return d.client.RawQuery(q)
 }
 
@@ -74,6 +76,6 @@ func (d *dao) MetadataList(q *variable.Query) ([]api.Entity, error) {
 	return result, err
 }
 
-func (d *dao) RawMetadataList(q *variable.Query) ([][]byte, error) {
+func (d *dao) RawMetadataList(q *variable.Query) ([]json.RawMessage, error) {
 	return d.client.RawMetadataQuery(q, d.kind)
 }
