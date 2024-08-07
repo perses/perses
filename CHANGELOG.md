@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.47.0-rc0 / 2024-07-31
+## 0.47.0 / 2024-08-07
 
 - [FEATURE] Add Table panel (#2113) (#2138)
 - [FEATURE] TracingGanttChart panel (#2047)
@@ -14,6 +14,8 @@
 - [FEATURE] Provide a way by config to activate the explorer feature (#2067)
 - [FEATURE] Provide a way by config to activate the ephemeral dashboard feature (#2060)
 - [FEATURE] Provide datasource discovery (KubeSD & HTTPSD supported) (#2021) (#2081)
+- [ENHANCEMENT] Support migration of grafana's legacy `table-old` panel into Perses `Table` (#2145)
+- [ENHANCEMENT] Improve migration logic for the `Table` panel (#2144)
 - [ENHANCEMENT] GO-SDK: add missing chart definition on tracing subject and for the time-series-table (#2133)
 - [ENHANCEMENT] Use DateTimeField in DateTimeRangePicker (#2093)
 - [ENHANCEMENT] Schemas loading: avoid breaking too early in case of error + add monitoring for it (#2073)
@@ -23,6 +25,7 @@
 - [ENHANCEMENT] Migrate DataGrid to v7 (#2048)
 - [ENHANCEMENT] Reduce default line width, more subtle hover effect (#2075)
 - [ENHANCEMENT] Increase empty dashboard message width (#2074)
+- [BUGFIX] Timeseries Panel should have same left/right margin when yAxis is disabled (#2143)
 - [BUGFIX] Fix issue where Base64 string is returned in List endpoint (#2122)
 - [BUGFIX] Fix TraceQL query escaping (#2128)
 - [BUGFIX] Check content-type header before parsing error message as JSON (#2096)
