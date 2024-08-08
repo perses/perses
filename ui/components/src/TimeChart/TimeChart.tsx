@@ -133,29 +133,25 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
     timeScale = timeScaleProp;
   }
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        highlightSeries({ name }: ChartInstanceFocusOpts) {
-          if (!chartRef.current) {
-            // when chart undef, do not highlight series when hovering over legend
-            return;
-          }
+  useImperativeHandle(ref, () => {
+    return {
+      highlightSeries({ name }: ChartInstanceFocusOpts) {
+        if (!chartRef.current) {
+          // when chart undef, do not highlight series when hovering over legend
+          return;
+        }
 
-          chartRef.current.dispatchAction({ type: 'highlight', seriesId: name });
-        },
-        clearHighlightedSeries: () => {
-          if (!chartRef.current) {
-            // when chart undef, do not clear highlight series
-            return;
-          }
-          clearHighlightedSeries(chartRef.current);
-        },
-      };
-    },
-    []
-  );
+        chartRef.current.dispatchAction({ type: 'highlight', seriesId: name });
+      },
+      clearHighlightedSeries: () => {
+        if (!chartRef.current) {
+          // when chart undef, do not clear highlight series
+          return;
+        }
+        clearHighlightedSeries(chartRef.current);
+      },
+    };
+  }, []);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {

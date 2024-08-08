@@ -47,7 +47,7 @@ func TestMigrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
-			title:                       "dashboard embeddind a library panel",
+			title:                       "dashboard embedding a library panel",
 			inputGrafanaDashboardFile:   "library_panel_grafana_dashboard.json",
 			expectedPersesDashboardFile: "library_panel_perses_dashboard.json",
 			expectedErrorStr:            "",
