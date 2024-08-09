@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-runtime",
-  "version": "0.46.0",
+  "version": "0.47.0",
   "description": "The Perses plugins runtime",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",

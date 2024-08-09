@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
-import { TraceTablePanel } from './TraceTablePanel';
+import { TraceTablePanel, TraceTableProps } from './TraceTablePanel';
 import { TraceTableOptions, createInitialTraceTableOptions } from './trace-table-model';
 
 /**
  * The core TraceTable panel plugin for Perses.
  */
-export const TraceTable: PanelPlugin<TraceTableOptions> = {
+export const TraceTable: PanelPlugin<TraceTableOptions, TraceTableProps> = {
   PanelComponent: TraceTablePanel,
   supportedQueryTypes: ['TraceQuery'],
   createInitialOptions: createInitialTraceTableOptions,

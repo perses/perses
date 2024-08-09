@@ -101,9 +101,6 @@ export function QuerySettingsEditor({ querySettingsList, onChange }: QuerySettin
     return allQueryIndexes.filter((_, queryIndex) => !bookedQueryIndexes.includes(queryIndex));
   }, [querySettingsList, queryCount]);
 
-  console.log('availableQueryIndexes');
-  console.log(availableQueryIndexes);
-
   const firstAvailableQueryIndex = useMemo(() => {
     return availableQueryIndexes[0] ?? NO_INDEX_AVAILABLE;
   }, [availableQueryIndexes]);
