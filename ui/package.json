@@ -72,9 +72,11 @@
     "react-dom": "^18.2.0",
     "rimraf": "^5.0.5",
     "swc-loader": "^0.2.6",
-    "turbo": "^1.13.2",
+    "ts-node": "^10.9.2",
+    "turbo": "^2.0.12",
     "typedoc": "^0.25.8",
     "typescript": "^4.7.4",
     "wait-on": "^7.0.1"
-  }
+  },
+  "packageManager": "npm@10.8.2"
 }

@@ -139,7 +139,7 @@ export interface TableProps<TableData> {
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
   // Doing a bunch of math to enforce height to avoid weirdness with mismatched
   // heights based on customization of cell contents.
-  const lineHeightNum = typeof lineHeight === 'string' ? parseInt(lineHeight, 10) : lineHeight ?? 0;
+  const lineHeightNum = typeof lineHeight === 'string' ? parseInt(lineHeight, 10) : (lineHeight ?? 0);
   const verticalPaddingNum = typeof paddingY === 'string' ? parseInt(paddingY, 10) : paddingY;
 
   return lineHeightNum + verticalPaddingNum * 2;

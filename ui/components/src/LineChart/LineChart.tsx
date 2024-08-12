@@ -106,29 +106,25 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
 
-  useImperativeHandle(
-    ref,
-    () => {
-      return {
-        highlightSeries({ id }: ChartInstanceFocusOpts) {
-          if (!chartRef.current) {
-            // when chart undef, do not highlight series when hovering over legend
-            return;
-          }
+  useImperativeHandle(ref, () => {
+    return {
+      highlightSeries({ id }: ChartInstanceFocusOpts) {
+        if (!chartRef.current) {
+          // when chart undef, do not highlight series when hovering over legend
+          return;
+        }
 
-          chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
-        },
-        clearHighlightedSeries: () => {
-          if (!chartRef.current) {
-            // when chart undef, do not clear highlight series
-            return;
-          }
-          clearHighlightedSeries(chartRef.current);
-        },
-      };
-    },
-    []
-  );
+        chartRef.current.dispatchAction({ type: 'highlight', seriesId: id });
+      },
+      clearHighlightedSeries: () => {
+        if (!chartRef.current) {
+          // when chart undef, do not clear highlight series
+          return;
+        }
+        clearHighlightedSeries(chartRef.current);
+      },
+    };
+  }, []);
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
