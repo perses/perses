@@ -30,7 +30,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
-	github.com/tidwall/gjson v1.17.1
+	github.com/tidwall/gjson v1.17.3
 	github.com/zitadel/oidc/v3 v3.26.0
 	golang.org/x/crypto v0.26.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
