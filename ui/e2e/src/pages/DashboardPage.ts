@@ -228,7 +228,7 @@ export class DashboardPage {
   async addMarkdownPanel(panelName: string) {
     await this.editNewPanel(async (panelEditor) => {
       await panelEditor.nameInput.type(panelName);
-      await panelEditor.selectType('Markdown');
+      await panelEditor.selectType('MarkdownChart');
     });
   }
 
