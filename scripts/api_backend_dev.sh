@@ -16,7 +16,7 @@ if [[ $1 == "--e2e" ]]; then
   rm ${previous_file}
 
   # install and overwrite the default plugins
-  ./scripts/install_default_plugins.sh --overwrite true
+  ./scripts/plugin/install_plugins.sh --overwrite true
 fi
 
 # Run backend server
