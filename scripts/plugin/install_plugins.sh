@@ -19,7 +19,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-mkdir "./plugins-archive"
+
+mkdir -p "./plugins-archive"
 
 while IFS=$'\t' read -r name version _; do
   echo "downloading plugin ${name}-${version}"

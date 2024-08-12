@@ -70,6 +70,7 @@ func (a *archive) unzip(archiveFileName string) error {
 		logrus.Debugf("skipping unarchive file %s", archiveFileName)
 		return nil
 	}
+	logrus.Debugf("unzipping archive %s", archiveFileName)
 	archiveFile := path.Join(a.folder, archiveFileName)
 	stream, archiveOpenErr := os.Open(archiveFile)
 	defer func() {
@@ -94,9 +95,6 @@ func (a *archive) unzip(archiveFileName string) error {
 }
 
 func (a *archive) extractArchiveFileHandler(_ context.Context, f archiver.File) error {
-	// TODO remove the unnecessary folder `markdown-chart` in the archive (to be done in perses/perses-plugins)
-	// TODO add in the archive name the version
-	// TODO rename the archive name with the name of the plugin like markdown-chart instead of Markdown
 	if f.IsDir() {
 		return nil
 	}
