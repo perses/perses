@@ -25,6 +25,7 @@ import (
         bytes: "bytes"
         decbytes: "bytes"
         // throughput units
+        bps: "bits/sec"
         Bps: "bytes/sec"
         // TODO add mappings for all throughput units
     }
