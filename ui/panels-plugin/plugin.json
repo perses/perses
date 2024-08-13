@@ -55,7 +55,7 @@
       },
       {
         "pluginType": "Panel",
-        "kind": "Markdown",
+        "kind": "MarkdownChart",
         "display": {
           "name": "Markdown",
           "description": ""

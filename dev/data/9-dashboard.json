@@ -68,7 +68,7 @@
             }
           }
         },
-        { 
+        {
           "kind": "TextVariable",
           "spec": {
             "name": "text",
@@ -3081,7 +3081,10 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "MarkdownChart", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "MarkdownChart",
+              "spec": { "text": "## Example" }
+            }
           }
         }
       },
@@ -3183,7 +3186,10 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "MarkdownChart", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "MarkdownChart",
+              "spec": { "text": "## Example" }
+            }
           }
         }
       },
