@@ -44,7 +44,7 @@
             "name": "Purpose of the Dashboard"
           },
           "plugin": {
-            "kind": "Markdown",
+            "kind": "MarkdownChart",
             "spec": {
               "text": "<p>This dashboard provides information on OTF Front-End queues.<br/>Minimum OTF FE version required: 18.0.0.68 / 19.0.0.29<br/>\nMore information on FE metrics used here: <a href=\"https://rndwww.nce.amadeus.net/confluence/display/OTFTeam/OTF+Monitoring+-+FE+metrics\">Confluence link</a>\n</p>"
             }
@@ -58,7 +58,7 @@
             "name": "Point of Contact"
           },
           "plugin": {
-            "kind": "Markdown",
+            "kind": "MarkdownChart",
             "spec": {
               "text": "<p>In case of issue with the dashboard, please contact the OTF team<br/><old><ol><li>Chorus Team: TPE-OTP-AFC-CPF</li><li>Win@proach Group: DAOTF</li><li>MS Teams: <a href=\"https://teams.microsoft.com/l/channel/19%3ac3e958d9e7ca4ff2b46b7e19fe971d48%40thread.skype/OTF%2520Monitoring%2520-%2520Prometheus?groupId=a690f775-792a-44f1-9b9b-35763376cf50&tenantId=b3f4f7c2-72ce-4192-aba4-d6c7719b5766\">Channel Link</a></li></ol></p>"
             }
