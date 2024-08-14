@@ -44,9 +44,11 @@ jobs:
         run: ./scripts/ui_release.sh --snapshot-version "${{ github.ref_name }}" "${{ github.sha }}"
 
       - name: Install UI deps
-        run: cd ./ui && npm install
+        working-directory: ./ui
+        run: npm ci
       - name: Build the app and all packages
-        run: cd ./ui && npm run build
+        working-directory: ./ui
+        run: npm run build
       - name: store react production build
         uses: actions/upload-artifact@v4
         with:

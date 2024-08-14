@@ -35,6 +35,7 @@ const (
 	PercentDecimalUnit     PercentageUnit = "percent-decimal"
 	DecimalUnit            string         = "decimal"
 	BytesUnit              string         = "bytes"
+	BitsPerSecondsUnit     ThroughputUnit = "bits/sec"
 	BytesPerSecondsUnit    ThroughputUnit = "bytes/sec"
 	CountsPerSecondsUnit   ThroughputUnit = "counts/sec"
 	EventsPerSecondsUnit   ThroughputUnit = "events/sec"
@@ -85,7 +86,7 @@ func (f *Format) validate() error {
 	case string(MilliSecondsUnit), string(SecondsUnit), string(MinutesUnit),
 		string(HoursUnit), string(DaysUnit), string(WeeksUnit), string(MonthsUnit),
 		string(YearsUnit), string(PercentUnit), string(PercentDecimalUnit), DecimalUnit, BytesUnit,
-		string(BytesPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
+		string(BitsPerSecondsUnit), string(BytesPerSecondsUnit), string(CountsPerSecondsUnit), string(EventsPerSecondsUnit),
 		string(MessagesPerSecondsUnit), string(OpsPerSecondsUnit), string(PacketsPerSecondsUnit),
 		string(ReadsPerSecondsUnit), string(RecordsPerSecondsUnit), string(RequestsPerSecondsUnit),
 		string(RowsPerSecondsUnit), string(WritesPerSecondsUnit):

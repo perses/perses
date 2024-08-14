@@ -33,15 +33,7 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: [
-    // Start UI server
-    {
-      command: 'npm run start',
-      port: 3000,
-      cwd: path.resolve(__dirname, '../../../'),
-      reuseExistingServer: true,
-      timeout: 5 * 60 * 1000,
-    },
-    // Start backend server
+    // Start the binary
     {
       command: './scripts/api_backend_dev.sh --e2e',
       port: 8080,
@@ -50,5 +42,9 @@ const config: PlaywrightTestConfig = {
       timeout: 5 * 60 * 1000,
     },
   ],
+  use: {
+    ...baseConfig.use,
+    baseURL: 'http://localhost:8080',
+  },
 };
 export default config;
