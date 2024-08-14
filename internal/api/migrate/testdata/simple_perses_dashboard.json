@@ -527,7 +527,7 @@
             "name": "Empty heatmap"
           },
           "plugin": {
-            "kind": "Markdown",
+            "kind": "MarkdownChart",
             "spec": {
               "text": "**Migration from Grafana not supported !**"
             }
@@ -541,7 +541,7 @@
             "name": "My Text panel"
           },
           "plugin": {
-            "kind": "Markdown",
+            "kind": "MarkdownChart",
             "spec": {
               "text": "# Title\n\nFor markdown syntax help: [commonmark.org/help](https://commonmark.org/help/)"
             }

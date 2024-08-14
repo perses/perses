@@ -68,7 +68,7 @@
             }
           }
         },
-        { 
+        {
           "kind": "TextVariable",
           "spec": {
             "name": "text",
@@ -863,7 +863,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "# First header\n\nFirst header\n=========\n\n## Second header\n\nSecond header\n---------\n\n### Third header\n\n#### Fourth header\n\n*Italic*\n\n_Italic_\n\n**Bold**\n\n__Bold__\n\n[Link](http://a.com)\n\n[Link][1]\n\n[1]: http://b.org\n\n> Blockquote\n\n* List\n* List\n* List\n\n- List\n- List\n- List\n\n1. One\n2. Two\n3. Three\n\n1) One\n2) Two\n3) Three\n\n---\n\n***\n\n`Inline code` with backticks\n\n```\n# code block\nprint '3 backticks or'\nprint 'indent 4 spaces'\n```\n\n| Name | Data |\n| -- | -- |\n| Row 1 | Hi |\n| Row 2 | Hi |\n\n## Attempts at XSS\n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h3>When inlining HTML, will this header be here?</h3><a href='www.google.com'>Will this regular link be here?</a><br/><a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\nUse variables such as job: $job"
               }
@@ -1599,7 +1599,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Dashboard Team!\nOn this page, you'll find charts used by the dashboard team.\n\nHere is `some inline code`.\n\n```\n{ look: 'at this code' }\n```\n\n1. One\n2. Two\n3. Three\n\n* two bullet\n* points\n\nDo you want to [visit the google](https://www.google.com)?\n| Dashboard | Link |\n| :----------- | :----------- |\n| Dashboard 1 | [link](www.google.com) |\n| Dashboard 2 | [link](www.google.com) | \n\n<script>alert('xss');</script>\n> Will this <a \n> href='javascript:alert()'>block-quote attack work?</a>\n\n<h1>When inlining HTML, will this header be here?</h1><a href='www.google.com'>Will this regular link be here?</a> <a href='javascript:alert('xss')>Will this javascript link be here?</a>\n\n"
               }
@@ -1654,7 +1654,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Example"
               }
@@ -1721,7 +1721,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Example"
               }
@@ -1787,7 +1787,7 @@
               "description": "Markdown code formatting"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "`Inline code` with backticks\n\n```\n# code block\nprint '3 backticks or'\nprint 'indent 4 spaces'\n```"
               }
@@ -1802,7 +1802,7 @@
               "description": "Markdown headings"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "# First header\n\nFirst header\n=========\n\n## Second header\n\nSecond header\n---------\n\n### Third header\n\n#### Fourth header"
               }
@@ -1817,7 +1817,7 @@
               "description": "Markdown links"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "\n[Link](http://a.com)\n\n[Link][1]\n\n[1]: http://b.org"
               }
@@ -1832,7 +1832,7 @@
               "description": "Markdown lists"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "* List\n* List\n* List\n\n- List\n- List\n- List\n\n1. One\n2. Two\n3. Three\n\n1) One\n2) Two\n3) Three"
               }
@@ -1847,7 +1847,7 @@
               "description": "Markdown table"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "| Name | Data |\n| -- | -- |\n| Row 1 | Hi |\n| Row 2 | Hi |"
               }
@@ -1862,7 +1862,7 @@
               "description": "Markdown text formatting"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "Unformatted\n\n*Italic*\n\n_Italic_\n\n**Bold**\n\n__Bold__\n\n> Blockquote\n\n---\n\n***"
               }
@@ -2515,7 +2515,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2530,7 +2530,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2544,7 +2544,7 @@
               "name": "other panel 8"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 8"
               }
@@ -2559,7 +2559,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2574,7 +2574,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2589,7 +2589,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2603,7 +2603,7 @@
               "name": "other panel 1"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 1"
               }
@@ -2618,7 +2618,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -2632,7 +2632,7 @@
               "name": "other panel 1"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 1"
               }
@@ -2646,7 +2646,7 @@
               "name": "other panel 1"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 1"
               }
@@ -2660,7 +2660,7 @@
               "name": "other panel 2"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 2"
               }
@@ -2674,7 +2674,7 @@
               "name": "other panel 3"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 3"
               }
@@ -2688,7 +2688,7 @@
               "name": "other panel 4"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 4"
               }
@@ -2702,7 +2702,7 @@
               "name": "other panel 5"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 5"
               }
@@ -2716,7 +2716,7 @@
               "name": "other panel 6"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 6"
               }
@@ -2730,7 +2730,7 @@
               "name": "other panel 7"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## another panel 7"
               }
@@ -2745,7 +2745,7 @@
               "description": "This panel will be duplicated"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Duplicate me"
               }
@@ -3081,7 +3081,10 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "MarkdownChart",
+              "spec": { "text": "## Example" }
+            }
           }
         }
       },
@@ -3183,7 +3186,10 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "MarkdownChart",
+              "spec": { "text": "## Example" }
+            }
           }
         }
       },

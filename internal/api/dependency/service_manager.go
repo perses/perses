@@ -52,6 +52,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/variable"
 	"github.com/perses/perses/internal/api/interface/v1/view"
 	"github.com/perses/perses/internal/api/migrate"
+	"github.com/perses/perses/internal/api/plugin"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/perses/perses/pkg/model/api/config"
@@ -71,6 +72,7 @@ type ServiceManager interface {
 	GetHealth() health.Service
 	GetJWT() crypto.JWT
 	GetMigration() migrate.Migration
+	GetPlugin() plugin.Plugin
 	GetProject() project.Service
 	GetSchemas() schemas.Schemas
 	GetRBAC() rbac.RBAC
@@ -97,6 +99,7 @@ type service struct {
 	health             health.Service
 	jwt                crypto.JWT
 	migrate            migrate.Migration
+	plugin             plugin.Plugin
 	project            project.Service
 	schemas            schemas.Schemas
 	rbac               rbac.RBAC
@@ -136,6 +139,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 	globalSecret := globalSecretImpl.NewService(dao.GetGlobalSecret(), cryptoService)
 	globalVariableService := globalVariableImpl.NewService(dao.GetGlobalVariable(), schemasService)
 	healthService := healthImpl.NewService(dao.GetHealth())
+	pluginService := plugin.New(conf.Plugins)
 	projectService := projectImpl.NewService(dao.GetProject(), dao.GetFolder(), dao.GetDatasource(), dao.GetDashboard(), dao.GetRole(), dao.GetRoleBinding(), dao.GetSecret(), dao.GetVariable(), rbacService)
 	roleService := roleImpl.NewService(dao.GetRole(), rbacService, schemasService)
 	roleBindingService := roleBindingImpl.NewService(dao.GetRoleBinding(), dao.GetRole(), dao.GetUser(), rbacService, schemasService)
@@ -157,6 +161,7 @@ func NewServiceManager(dao PersistenceManager, conf config.Config) (ServiceManag
 		health:             healthService,
 		jwt:                jwtService,
 		migrate:            migrateService,
+		plugin:             pluginService,
 		project:            projectService,
 		rbac:               rbacService,
 		role:               roleService,
@@ -220,6 +225,10 @@ func (s *service) GetJWT() crypto.JWT {
 
 func (s *service) GetMigration() migrate.Migration {
 	return s.migrate
+}
+
+func (s *service) GetPlugin() plugin.Plugin {
+	return s.plugin
 }
 
 func (s *service) GetProject() project.Service {

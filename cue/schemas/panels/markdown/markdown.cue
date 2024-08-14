@@ -13,7 +13,7 @@
 
 package model
 
-kind: "Markdown"
+kind: "MarkdownChart"
 spec: close({
 	text: string
 })

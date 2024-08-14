@@ -14,17 +14,22 @@
 package config
 
 const (
-	defaultPath = "plugins"
+	defaultPluginPath        = "plugins"
+	defaultArchivePluginPath = "plugins-archive"
 )
 
 func (f *Plugins) Verify() error {
 	if len(f.Path) == 0 {
-		f.Path = defaultPath
+		f.Path = defaultPluginPath
+	}
+	if len(f.ArchivePath) == 0 {
+		f.ArchivePath = defaultArchivePluginPath
 	}
 	return nil
 }
 
 type Plugins struct {
 	// Path is the path to the directory containing the runtime plugins
-	Path string `json:"path,omitempty" yaml:"path,omitempty"`
+	Path        string `json:"path,omitempty" yaml:"path,omitempty"`
+	ArchivePath string `json:"archive_path,omitempty" yaml:"archive_path,omitempty"`
 }

@@ -16,10 +16,10 @@ if [[ $1 == "--e2e" ]]; then
   rm ${previous_file}
 
   # install and overwrite the default plugins
-  ./scripts/install_default_plugins.sh --overwrite true
+  ./scripts/plugin/install_plugins.sh --overwrite true
 fi
 
 # Run backend server
 echo ">> start the api server"
 echo '>> Log in with user: `admin` and password: `password`'
-./bin/perses -config ./dev/config.yaml
+./bin/perses --config ./dev/config.yaml --log.level=debug

@@ -9,15 +9,15 @@ Brackets indicate that a parameter is optional.
 
 Generic placeholders are defined as follows:
 
-* `<boolean>`: a boolean that can take the values `true` or `false`
-* `<duration>`: a duration matching the regular
+- `<boolean>`: a boolean that can take the values `true` or `false`
+- `<duration>`: a duration matching the regular
   expression `((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)`,
   e.g. `1d`, `1h30m`, `5m`, `10s`
-* `<filename>`: a valid path in the current working directory
-* `<path>`: a valid URL path
-* `<int>`: an integer value
-* `<secret>`: a regular string that is a secret, such as a password
-* `<string>`: a regular string
+- `<filename>`: a valid path in the current working directory
+- `<path>`: a valid URL path
+- `<int>`: an integer value
+- `<secret>`: a regular string that is a secret, such as a password
+- `<string>`: a regular string
 
 ## Table of contents
 
@@ -54,7 +54,7 @@ Generic placeholders are defined as follows:
     1. [Panel](../plugin/panel.md)
        1. [BarChart](../plugin/panel.md#barchart)
        2. [GaugeChart](../plugin/panel.md#gaugechart)
-       3. [Markdown](../plugin/panel.md#markdown)
+       3. [Markdown](../plugin/panel.md#markdownchart)
        4. [StatChart](../plugin/panel.md#statchart)
        5. [TimeSeriesChart](../plugin/panel.md#timeserieschart)
     2. [Prometheus](../plugin/prometheus.md)

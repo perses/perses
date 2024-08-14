@@ -24,10 +24,10 @@ spec:
   [ max: <int> ]
 ```
 
-## Markdown
+## MarkdownChart
 
 ```yaml
-kind: "Markdown"
+kind: "MarkdownChart"
 spec:
   text: <string>
 ```
@@ -85,7 +85,7 @@ values:
 ### Tooltip specification
 
 ```yaml
-[ enablePinning: <boolean | default = false> ]
+[enablePinning: <boolean | default = false>]
 ```
 
 ### YAxis specification

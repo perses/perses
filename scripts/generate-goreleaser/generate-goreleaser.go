@@ -129,7 +129,7 @@ func (g *goreleaserGenerator) generateDockerConfig() {
 					"LICENSE",
 					"cue/schemas/",
 					"cue.mod/",
-					"plugins/",
+					"plugins-archive/",
 					"docs/examples/config.docker.yaml",
 				},
 			})

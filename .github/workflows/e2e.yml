@@ -34,9 +34,6 @@ jobs:
       - name: Build the app and all packages
         working-directory: ./ui
         run: npm run build
-      - name: Install the default plugins
-        working-directory: ./
-        run: ./scripts/install_default_plugins.sh --overwrite true
       - name: Install Playwright Browsers
         working-directory: ./ui
         run: npx playwright install --with-deps chromium

@@ -94,6 +94,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.WithTimerTasks(time.Duration(conf.Security.Authorization.CheckLatestUpdateInterval), rbacTask)
 	}
 
+	// extract the plugin archive
+	serviceManager.GetPlugin().UnzipArchives()
+
 	// register the API
 	runner.HTTPServerBuilder().
 		ActivatePprof(enablePprof).

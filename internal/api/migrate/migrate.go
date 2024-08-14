@@ -46,7 +46,7 @@ const (
 	variablePlaceholderText = "%(conditional_variables)"
 
 	panelDefaultValue = `
-		kind: "Markdown"
+		kind: "MarkdownChart"
 		spec: {
 			text: "**Migration from Grafana not supported !**"
 		}
