@@ -44,6 +44,18 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				}
 			}
 		}
+		#min: *#panel.fieldConfig.defaults.min | null
+		if #min != null {
+			yAxis: {
+				min: #min
+			}
+		}
+		#max: *#panel.fieldConfig.defaults.max | null
+		if #max != null {
+			yAxis: {
+				max: #max
+			}
+		}
 		// thresholds
 		// -> migrate thresholds only if they are visible
 		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle.mode != "off" {
