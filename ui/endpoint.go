@@ -51,8 +51,9 @@ func NewPersesFrontend(cfg config.Config) echoUtils.Register {
 
 func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
-	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
-	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(), contentRewrite)
+	contentRewrite := middleware.Rewrite(map[string]string{f.apiPrefix + "/*": "/app/dist/$1"})
+	e.GET(f.apiPrefix, serveASTFiles)
+	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(f.apiPrefix), contentRewrite)
 }
 
 // routerMiddleware is here to serve properly the react app.
@@ -80,27 +81,31 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 // - /api/v1/projects/perses/dashboards/* will be served by the first route
 // - /api/v1/projects/test will be served by the second route
 // - /api/v1/foo will be served by the last route.
-func routerMiddleware() echo.MiddlewareFunc {
+func routerMiddleware(apiPrefix string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			for _, route := range reactRoutes {
-				if !strings.HasPrefix(c.Request().URL.Path, route) {
+				if !strings.HasPrefix(c.Request().URL.Path, apiPrefix+route) {
 					continue
 				}
-				f, err := asts.Open("/app/dist/index.html")
-				if err != nil {
-					logrus.WithError(err).Error("Unable to open the React index.html")
-					return apiinterface.HandleError(err)
-				}
-				idx, err := io.ReadAll(f)
-				if err != nil {
-					logrus.WithError(err).Error("Error reading React index.html")
-					return apiinterface.HandleError(err)
-				}
-				_, err = c.Response().Write(idx)
-				return apiinterface.HandleError(err)
+				return serveASTFiles(c)
 			}
 			return next(c)
 		}
 	}
+}
+
+func serveASTFiles(c echo.Context) error {
+	f, err := asts.Open("/app/dist/index.html")
+	if err != nil {
+		logrus.WithError(err).Error("Unable to open the React index.html")
+		return apiinterface.HandleError(err)
+	}
+	idx, err := io.ReadAll(f)
+	if err != nil {
+		logrus.WithError(err).Error("Error reading React index.html")
+		return apiinterface.HandleError(err)
+	}
+	_, err = c.Response().Write(idx)
+	return apiinterface.HandleError(err)
 }

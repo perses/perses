@@ -107,5 +107,8 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	if !conf.Frontend.Disable {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
 	}
+	if len(conf.APIPrefix) > 0 {
+		runner.HTTPServerBuilder().PreMiddleware(middleware.HandleAPIPrefix(conf.APIPrefix))
+	}
 	return runner, persistenceManager, nil
 }
