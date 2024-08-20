@@ -12,5 +12,4 @@
 // limitations under the License.
 
 export * from './CellEditor';
-export * from './CellEditorContainer';
 export * from './CellsEditor';

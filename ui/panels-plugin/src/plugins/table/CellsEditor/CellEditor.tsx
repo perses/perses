@@ -11,124 +11,198 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
-import { useState } from 'react';
-import { AlignSelector } from '@perses-dev/components';
-import { CellSettings } from '../table-model';
+import { IconButton, MenuItem, Stack, StackProps, TextField, Tooltip, Typography } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { OptionsColorPicker } from '@perses-dev/components';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { CellSettings, Condition } from '../table-model';
 
-type OmittedMuiProps = 'children' | 'value' | 'onChange';
-
-export interface CellEditorProps extends Omit<StackProps, OmittedMuiProps> {
-  cell: CellSettings;
-  onChange: (cell: CellSettings) => void;
+interface ConditionEditorProps extends Omit<StackProps, 'onChange'> {
+  condition: Condition;
+  onChange: (condition: Condition) => void;
 }
 
-export function CellEditor({ cell, onChange, ...others }: CellEditorProps) {
-  const [width, setWidth] = useState<number>(cell.width === undefined || cell.width === 'auto' ? 100 : cell.width);
+function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps) {
+  if (condition.kind === 'Value') {
+    return (
+      <Stack gap={1} direction="row" {...props}>
+        <TextField
+          label="Value"
+          placeholder="Exact value"
+          value={condition.spec?.value ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          fullWidth
+        />
+      </Stack>
+    );
+  } else if (condition.kind === 'Range') {
+    return (
+      <Stack gap={1} direction="row" {...props}>
+        <TextField
+          label="From"
+          placeholder="Start of range"
+          value={condition.spec?.min ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { min: e.target.value } } as Condition)}
+          fullWidth
+        />
+        <TextField
+          label="To"
+          placeholder="End of range (inclusive)"
+          value={condition.spec?.max ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { max: e.target.value } } as Condition)}
+          fullWidth
+        />
+      </Stack>
+    );
+  } else if (condition.kind === 'Regex') {
+    return (
+      <Stack gap={1} direction="row" {...props}>
+        <TextField
+          label="Regular Expression"
+          placeholder="JavaScript regular expression"
+          value={condition.spec?.regex ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { regex: e.target.value } } as Condition)}
+          fullWidth
+        />
+      </Stack>
+    );
+  } else if (condition.kind === 'Misc') {
+    return (
+      <Stack gap={1} direction="row" {...props}>
+        <TextField
+          select
+          label="Value"
+          value={condition.spec?.value ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { value: e.target.value } } as Condition)}
+          fullWidth
+        >
+          <MenuItem value="empty">
+            <Stack>
+              <Typography>Empty</Typography>
+              <Typography variant="caption">Matches empty string</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="null">
+            <Stack>
+              <Typography>Null</Typography>
+              <Typography variant="caption">Matches null or undefined</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="nan">
+            <Stack>
+              <Typography>NaN</Typography>
+              <Typography variant="caption">Matches Not a Number value</Typography>
+            </Stack>
+          </MenuItem>
+        </TextField>
+      </Stack>
+    );
+  }
+  return null;
+}
 
+export interface CellEditorProps {
+  cell: CellSettings;
+  onChange: (cell: CellSettings) => void;
+  onDelete: () => void;
+}
+
+export function CellEditor({ cell, onChange, onDelete }: CellEditorProps) {
   return (
-    <Stack gap={2} direction="row" {...others}>
-      <Stack gap={2} sx={{ width: '100%' }}>
-        <TextField
-          label="Name"
-          value={cell.name}
-          onChange={(e) => onChange({ ...cell, name: e.target.value })}
-          required
-        />
-
-        <Divider orientation="horizontal" flexItem variant="middle" />
-
-        <TextField
-          label="Header"
-          value={cell.header ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...cell, header: e.target.value ? e.target.value : undefined })}
-        />
-        <TextField
-          label="Header Description"
-          value={cell.headerDescription ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...cell, headerDescription: e.target.value ? e.target.value : undefined })}
-        />
-        <TextField
-          label="Cell Description"
-          value={cell.cellDescription ?? ''}
-          fullWidth
-          onChange={(e) => onChange({ ...cell, cellDescription: e.target.value ? e.target.value : undefined })}
-        />
-      </Stack>
-
-      <Divider orientation="vertical" flexItem />
-
-      <Stack gap={2} justifyContent="space-between" alignItems="start">
-        <FormControlLabel
-          label="Alignment"
-          sx={{ width: '100%', alignItems: 'start' }}
-          labelPlacement="top"
-          control={
-            <AlignSelector
-              size="medium"
-              value={cell.align ?? 'left'}
-              onChange={(align) => onChange({ ...cell, align: align })}
-            />
-          }
-        />
-
-        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
-          <FormControlLabel
-            label="Hide cell"
-            sx={{ width: '100%', alignItems: 'start' }}
-            labelPlacement="top"
-            control={
-              <Switch
-                value={cell.hide ?? false}
-                checked={cell.hide ?? false}
-                onChange={(e) => onChange({ ...cell, hide: e.target.checked })}
-              />
-            }
-          />
-
-          <FormControlLabel
-            label="Enable sorting"
-            sx={{ width: '100%', alignItems: 'start' }}
-            labelPlacement="top"
-            control={
-              <Switch
-                value={cell.enableSorting ?? false}
-                checked={cell.enableSorting ?? false}
-                onChange={(e) => onChange({ ...cell, enableSorting: e.target.checked })}
-              />
-            }
-          />
-        </Stack>
-
-        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
-          <FormControlLabel
-            label="Custom width"
-            sx={{ width: '100%', alignItems: 'start' }}
-            labelPlacement="top"
-            control={
-              <Switch
-                checked={cell.width !== undefined && cell.width !== 'auto'}
-                onChange={(e) => onChange({ ...cell, width: e.target.checked ? width : 'auto' })}
-              />
-            }
-          />
+    <Grid container spacing={2}>
+      <Grid xs={5}>
+        <Stack direction="row" gap={1} width="100%">
           <TextField
-            label="Width"
-            type="number"
-            value={width}
-            fullWidth
-            // set visibility instead of wrapping in a if condition, in order to keep same layout
-            sx={{ visibility: cell.width === 'auto' || cell.width === undefined ? 'hidden' : 'visible' }}
-            InputProps={{ inputProps: { min: 1 } }}
-            onChange={(e) => {
-              setWidth(+e.target.value);
-              onChange({ ...cell, width: +e.target.value });
-            }}
+            select
+            label="Type"
+            value={cell.condition.kind}
+            onChange={(e) => onChange({ ...cell, condition: { kind: e.target.value } } as CellSettings)}
+            required
+            sx={{ width: '120px' }}
+          >
+            <MenuItem value="Value">
+              <Stack>
+                <Typography>Value</Typography>
+                {cell.condition.kind !== 'Value' && (
+                  <Typography variant="caption">Matches an exact text value</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Range">
+              <Stack>
+                <Typography>Range</Typography>
+                {cell.condition.kind !== 'Range' && (
+                  <Typography variant="caption">Matches against a numerical range</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Regex">
+              <Stack>
+                <Typography>Regex</Typography>
+                {cell.condition.kind !== 'Regex' && (
+                  <Typography variant="caption">Matches against a regular expression</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+            <MenuItem value="Misc">
+              <Stack>
+                <Typography>Misc</Typography>
+                {cell.condition.kind !== 'Misc' && (
+                  <Typography variant="caption">Matches against empty, null and NaN values</Typography>
+                )}
+              </Stack>
+            </MenuItem>
+          </TextField>
+          <ConditionEditor
+            width="100%"
+            condition={cell.condition}
+            onChange={(updatedCondition) => onChange({ ...cell, condition: updatedCondition })}
           />
         </Stack>
-      </Stack>
-    </Stack>
+      </Grid>
+      <Grid xs={4}>
+        <TextField value={cell.text} onChange={(e) => onChange({ ...cell, text: e.target.value })} fullWidth />
+      </Grid>
+      <Grid xs={1}>
+        <Stack direction="row" justifyContent="center" gap={1}>
+          {cell.textColor ? (
+            <OptionsColorPicker
+              label="Text Color"
+              color={cell.textColor ?? '#000'}
+              onColorChange={(color) => onChange({ ...cell, textColor: color } as CellSettings)}
+              onClear={() => onChange({ ...cell, textColor: undefined } as CellSettings)}
+            />
+          ) : (
+            <IconButton onClick={() => onChange({ ...cell, textColor: '#000' })}>
+              <PlusIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </Grid>
+      <Grid xs={1}>
+        <Stack direction="row" justifyContent="center">
+          {cell.backgroundColor ? (
+            <OptionsColorPicker
+              label="Background Color"
+              color={cell.backgroundColor ?? '#fff'}
+              onColorChange={(color) => onChange({ ...cell, backgroundColor: color } as CellSettings)}
+              onClear={() => onChange({ ...cell, backgroundColor: undefined } as CellSettings)}
+            />
+          ) : (
+            <IconButton onClick={() => onChange({ ...cell, backgroundColor: '#000' })}>
+              <PlusIcon />
+            </IconButton>
+          )}
+        </Stack>
+      </Grid>
+      <Grid xs={1} textAlign="end">
+        <Tooltip title="Remove cell settings" placement="top">
+          <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      </Grid>
+    </Grid>
   );
 }

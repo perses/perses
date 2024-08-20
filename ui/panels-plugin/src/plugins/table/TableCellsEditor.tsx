@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { CellsEditor } from './CellsEditor';
 import { CellSettings, TableOptions } from './table-model';
 
 export type TableCellsEditorProps = OptionsEditorProps<TableOptions>;
