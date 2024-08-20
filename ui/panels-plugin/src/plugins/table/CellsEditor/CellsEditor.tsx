@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Stack } from '@mui/material';
+import { Button, Divider, Stack, Typography } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
+
 import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { CellSettings } from '../table-model';
-import { CellEditorContainer } from './CellEditorContainer';
+import { CellEditor } from './CellEditor';
 
 export interface CellsEditorProps {
   cellSettings: CellSettings[];
@@ -25,8 +27,6 @@ export interface CellsEditorProps {
 export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
   const [cells, setCells] = useState<CellSettings[]>(cellSettings);
 
-  const [cellsCollapsed, setCellsCollapsed] = useState(cells.map(() => true));
-
   function handleCellChange(index: number, cell: CellSettings): void {
     const updatedCells = [...cells];
     updatedCells[index] = cell;
@@ -35,15 +35,10 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
   }
 
   function handleAddCellEditor(): void {
-    const cellName: string = `cell_${Object.keys(cells).length}`;
     const updatedCells = [...cells];
-    updatedCells.push({ name: cellName });
+    updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
     setCells(updatedCells);
     onChange(updatedCells);
-    setCellsCollapsed((prev) => {
-      prev.push(false);
-      return [...prev];
-    });
   }
 
   function handleCellDelete(index: number): void {
@@ -51,30 +46,35 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
     updatedCells.splice(index, 1);
     setCells(updatedCells);
     onChange(updatedCells);
-    setCellsCollapsed((prev) => {
-      prev.splice(index, 1);
-      return [...prev];
-    });
-  }
-
-  function handleCellCollapseExpand(index: number, collapsed: boolean): void {
-    setCellsCollapsed((prev) => {
-      prev[index] = collapsed;
-      return [...prev];
-    });
   }
 
   return (
     <Stack spacing={1}>
+      <Grid container spacing={2}>
+        <Grid xs={5}>
+          <Typography variant="subtitle1">Condition</Typography>
+        </Grid>
+        <Grid xs={4}>
+          <Typography variant="subtitle1">Display Text</Typography>
+        </Grid>
+        <Grid xs={1} textAlign="center">
+          <Typography variant="subtitle1">Color</Typography>
+        </Grid>
+        <Grid xs={1} textAlign="center">
+          <Typography variant="subtitle1">Background</Typography>
+        </Grid>
+        <Grid xs={1}></Grid>
+      </Grid>
       {cells.map((cell, i) => (
-        <CellEditorContainer
-          key={i}
-          cell={cell}
-          isCollapsed={cellsCollapsed[i] ?? true}
-          onChange={(updatedCell: CellSettings) => handleCellChange(i, updatedCell)}
-          onDelete={() => handleCellDelete(i)}
-          onCollapse={(collapsed) => handleCellCollapseExpand(i, collapsed)}
-        />
+        <>
+          <CellEditor
+            key={i}
+            cell={cell}
+            onChange={(updatedCell: CellSettings) => handleCellChange(i, updatedCell)}
+            onDelete={() => handleCellDelete(i)}
+          />
+          {i !== cells.length && <Divider flexItem orientation="horizontal" />}
+        </>
       ))}
 
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddCellEditor}>

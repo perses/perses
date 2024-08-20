@@ -21,9 +21,10 @@ export interface OptionsColorPickerProps {
   label: string;
   color: string;
   onColorChange: (color: string) => void;
+  onClear?: () => void;
 }
 
-export function OptionsColorPicker({ color, onColorChange, label }: OptionsColorPickerProps) {
+export function OptionsColorPicker({ label, color, onColorChange, onClear }: OptionsColorPickerProps) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -65,7 +66,7 @@ export function OptionsColorPicker({ color, onColorChange, label }: OptionsColor
           horizontal: 'right',
         }}
       >
-        <ColorPicker color={color} onChange={onColorChange} palette={[defaultColor, ...palette]} />
+        <ColorPicker color={color} onChange={onColorChange} onClear={onClear} palette={[defaultColor, ...palette]} />
       </Popover>
     </>
   );

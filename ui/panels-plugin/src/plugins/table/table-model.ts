@@ -51,23 +51,31 @@ export interface ColumnSettings {
 
 export interface ValueCondition {
   kind: 'Value';
-  value: string;
+  spec: {
+    value: string;
+  };
 }
 
 export interface RangeCondition {
   kind: 'Range';
-  min?: string;
-  max?: string;
+  spec: {
+    min?: string;
+    max?: string;
+  };
 }
 
 export interface RegexCondition {
   kind: 'Regex';
-  regex: string;
+  spec: {
+    regex: string;
+  };
 }
 
 export interface MiscCondition {
   kind: 'Misc';
-  value: 'empty' | 'null' | 'NaN' | 'true' | 'false';
+  spec: {
+    value: 'empty' | 'null' | 'NaN';
+  };
 }
 
 export type Condition = ValueCondition | RangeCondition | RegexCondition | MiscCondition;

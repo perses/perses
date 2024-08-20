@@ -63,7 +63,7 @@ spec: close({
 }
 
 #condition: {
-		#valueSpec | #rangeSpec | #regexSpec | #miscSpec
+		#valueCondition | #rangeCondition | #regexCondition | #miscCondition
 }
 
 #cellSettings: {
