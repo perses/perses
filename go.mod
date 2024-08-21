@@ -1,6 +1,7 @@
 module github.com/perses/perses
 
-go 1.22.4
+go 1.22.5
+
 require (
 	cuelang.org/go v0.10.0
 	github.com/brunoga/deep v1.2.4
