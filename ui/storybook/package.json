@@ -34,7 +34,7 @@
     "@storybook/jest": "^0.1.0",
     "@storybook/react": "^7.0.2",
     "@storybook/react-webpack5": "^7.0.2",
-    "@storybook/test-runner": "^0.10.0",
+    "@storybook/test-runner": "^0.19.1",
     "@storybook/testing-library": "^0.1.0",
     "babel-loader": "^8.3.0",
     "babel-plugin-react-require": "^3.1.3",
