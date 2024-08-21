@@ -40,8 +40,8 @@ _sort=#sort?:                       v1Variable.#Sort
 filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
-		if #query != _|_ {#query},
-		{#metric + "{" + filter + "}"},
+	if #query != _|_ {#query},
+	{#metric + "{" + filter + "}"},
 ][0]
 
 variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple, #customAllValue: _customAllValue, #capturingRegexp: _capturingRegexp, #sort: _sort}}.variable & {

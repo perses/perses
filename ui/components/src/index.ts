@@ -48,3 +48,4 @@ export * from './model';
 export * from './test-utils';
 export * from './theme';
 export * from './RefreshIntervalPicker';
+export * from './PieChart';

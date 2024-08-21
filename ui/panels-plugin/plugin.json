@@ -37,6 +37,14 @@
           "description": ""
         }
       },
+         {
+        "pluginType": "Panel",
+        "kind": "PieChart",
+        "display": {
+          "name": "Pie Chart",
+          "description": ""
+        }
+      },
       {
         "pluginType": "Panel",
         "kind": "StatChart",
