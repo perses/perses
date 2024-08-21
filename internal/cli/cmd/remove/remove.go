@@ -14,6 +14,7 @@
 package remove
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -25,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
@@ -98,6 +100,12 @@ func (o *option) Execute() error {
 			return svcErr
 		}
 		if err := svc.DeleteResource(name); err != nil {
+			if errors.Is(err, perseshttp.RequestNotFoundError) {
+				if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q is not found", kind, name)); outputError != nil {
+					return outputError
+				}
+				continue
+			}
 			return err
 		}
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been deleted", kind, name)); outputError != nil {

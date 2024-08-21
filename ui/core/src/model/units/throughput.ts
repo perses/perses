@@ -17,6 +17,7 @@ import { UnitGroupConfig, UnitConfig } from './types';
 import { hasDecimalPlaces, limitDecimalPlaces, shouldShortenValues } from './utils';
 
 const throughputUnits = [
+  'bits/sec',
   'bytes/sec',
   'counts/sec',
   'events/sec',
@@ -41,6 +42,10 @@ export const THROUGHPUT_GROUP_CONFIG: UnitGroupConfig = {
 };
 const THROUGHPUT_GROUP = 'Throughput';
 export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>> = {
+  'bits/sec': {
+    group: THROUGHPUT_GROUP,
+    label: 'Bits/sec',
+  },
   'bytes/sec': {
     group: THROUGHPUT_GROUP,
     label: 'Bytes/sec',
