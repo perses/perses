@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.47.1 / 2024-08-21
+
+- [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
+- [BUGFIX] Fix api_prefix not correctly handled to serve the UI (#2185)
+- [BUGFIX] Fix automatic detection of the API prefix in the UI (#2183)
+
 ## 0.47.0 / 2024-08-07
 
 - [FEATURE] Add Table panel (#2113) (#2138)
