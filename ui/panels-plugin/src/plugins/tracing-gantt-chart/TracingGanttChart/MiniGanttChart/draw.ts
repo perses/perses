@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Span } from '@perses-dev/core';
-import { getConsistentSpanColor } from '../utils';
 
 const MIN_BAR_HEIGHT = 1;
 const MAX_BAR_HEIGHT = 7;
@@ -25,7 +24,13 @@ function countSpans(span: Span) {
   return n;
 }
 
-export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: number, rootSpan: Span) {
+export function drawSpans(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  rootSpan: Span,
+  spanColorGenerator: (span: Span) => string
+) {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
   const numSpans = countSpans(rootSpan);
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
@@ -39,7 +44,7 @@ export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: 
     const relativeDuration = spanDuration / traceDuration;
     const relativeStart = (span.startTimeUnixMs - rootSpan.startTimeUnixMs) / traceDuration;
 
-    ctx.fillStyle = getConsistentSpanColor(span);
+    ctx.fillStyle = spanColorGenerator(span);
     ctx.beginPath();
     ctx.rect(Math.round(relativeStart * width), Math.round(y), Math.round(relativeDuration * width), barHeight);
     ctx.fill();

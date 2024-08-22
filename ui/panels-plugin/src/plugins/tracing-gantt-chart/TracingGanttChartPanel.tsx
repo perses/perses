@@ -19,7 +19,7 @@ import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 
 export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions>;
 
-export function TracingGanttChartPanel() {
+export function TracingGanttChartPanel({ spec }: TracingGanttChartPanelProps) {
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -44,7 +44,7 @@ export function TracingGanttChartPanel() {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart rootSpan={trace.rootSpan} />
+      <TracingGanttChart options={spec} rootSpan={trace.rootSpan} />
     </Box>
   );
 }
