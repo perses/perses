@@ -24,6 +24,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption } from 'echarts';
+import { formatValue } from '@perses-dev/core';
 
 use([
   DatasetComponent,
@@ -66,7 +67,7 @@ export function Scatterplot(props: ScatterplotProps) {
       type: 'value',
       name: 'Duration',
       axisLabel: {
-        formatter: '{value} ms',
+        formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },
     },
     animation: false,
