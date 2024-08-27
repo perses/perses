@@ -68,7 +68,7 @@
             }
           }
         },
-        { 
+        {
           "kind": "TextVariable",
           "spec": {
             "name": "text",
@@ -81,7 +81,9 @@
         "defaultTimeSeriesChart": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Default Time Series Panel" },
+            "display": {
+              "name": "Default Time Series Panel"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {}
@@ -137,12 +139,16 @@
         "basicEx": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Single Query" },
+            "display": {
+              "name": "Single Query"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "format": { "unit": "decimal" }
+                  "format": {
+                    "unit": "decimal"
+                  }
                 },
                 "legend": {
                   "position": "right"
@@ -168,7 +174,9 @@
         "legendEx": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Legend Example" },
+            "display": {
+              "name": "Legend Example"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -247,7 +255,10 @@
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "format": { "unit": "decimal", "decimalPlaces": 2 }
+                  "format": {
+                    "unit": "decimal",
+                    "decimalPlaces": 2
+                  }
                 },
                 "legend": {
                   "position": "right"
@@ -284,7 +295,10 @@
                   "position": "right"
                 },
                 "yAxis": {
-                  "format": { "unit": "percent-decimal", "decimalPlaces": 1 }
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 1
+                  }
                 },
                 "thresholds": {
                   "steps": [
@@ -337,7 +351,14 @@
                   "position": "bottom"
                 },
                 "thresholds": {
-                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                  "steps": [
+                    {
+                      "value": 0.2
+                    },
+                    {
+                      "value": 0.35
+                    }
+                  ]
                 }
               }
             },
@@ -368,9 +389,18 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "percent-decimal" },
+                "format": {
+                  "unit": "percent-decimal"
+                },
                 "thresholds": {
-                  "steps": [{ "value": 0.2 }, { "value": 0.35 }]
+                  "steps": [
+                    {
+                      "value": 0.2
+                    },
+                    {
+                      "value": 0.35
+                    }
+                  ]
                 }
               }
             },
@@ -393,7 +423,9 @@
         "statSm": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Stat Sm" },
+            "display": {
+              "name": "Stat Sm"
+            },
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -431,8 +463,19 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "percent" },
-                "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
+                "format": {
+                  "unit": "percent"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 85
+                    },
+                    {
+                      "value": 95
+                    }
+                  ]
+                }
               }
             },
             "queries": [
@@ -461,7 +504,9 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "percent" }
+                "format": {
+                  "unit": "percent"
+                }
               }
             },
             "queries": [
@@ -490,7 +535,10 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "bytes", "decimalPlaces": 1 }
+                "format": {
+                  "unit": "bytes",
+                  "decimalPlaces": 1
+                }
               }
             },
             "queries": [
@@ -511,7 +559,9 @@
         "statMd": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Stat Md" },
+            "display": {
+              "name": "Stat Md"
+            },
             "plugin": {
               "kind": "StatChart",
               "spec": {
@@ -521,7 +571,10 @@
                   "decimalPlaces": 2,
                   "shortValues": true
                 },
-                "sparkline": { "color": "#e65013", "width": 1.5 }
+                "sparkline": {
+                  "color": "#e65013",
+                  "width": 1.5
+                }
               }
             },
             "queries": [
@@ -550,7 +603,9 @@
               "kind": "StatChart",
               "spec": {
                 "calculation": "mean",
-                "format": { "unit": "percent" }
+                "format": {
+                  "unit": "percent"
+                }
               }
             },
             "queries": [
@@ -579,8 +634,19 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "percent" },
-                "thresholds": { "steps": [{ "value": 85 }, { "value": 95 }] }
+                "format": {
+                  "unit": "percent"
+                },
+                "thresholds": {
+                  "steps": [
+                    {
+                      "value": 85
+                    },
+                    {
+                      "value": 95
+                    }
+                  ]
+                }
               }
             },
             "queries": [
@@ -609,7 +675,10 @@
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "percent-decimal", "decimalPlaces": 1 },
+                "format": {
+                  "unit": "percent-decimal",
+                  "decimalPlaces": 1
+                },
                 "thresholds": {
                   "steps": [
                     {
@@ -642,15 +711,26 @@
         "gaugeFormatTest": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Gauge Format Test" },
+            "display": {
+              "name": "Gauge Format Test"
+            },
             "plugin": {
               "kind": "GaugeChart",
               "spec": {
                 "calculation": "last-number",
-                "format": { "unit": "bytes" },
+                "format": {
+                  "unit": "bytes"
+                },
                 "max": 95000000,
                 "thresholds": {
-                  "steps": [{ "value": 71000000 }, { "value": 82000000 }]
+                  "steps": [
+                    {
+                      "value": 71000000
+                    },
+                    {
+                      "value": 82000000
+                    }
+                  ]
                 }
               }
             },
@@ -674,49 +754,66 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": { "title": "Row 1", "collapse": { "open": true } },
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 2,
                 "height": 3,
-                "content": { "$ref": "#/spec/panels/statRAM" }
+                "content": {
+                  "$ref": "#/spec/panels/statRAM"
+                }
               },
               {
                 "x": 0,
                 "y": 4,
                 "width": 2,
                 "height": 3,
-                "content": { "$ref": "#/spec/panels/statTotalRAM" }
+                "content": {
+                  "$ref": "#/spec/panels/statTotalRAM"
+                }
               },
               {
                 "x": 2,
                 "y": 0,
                 "width": 4,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/statMd" }
+                "content": {
+                  "$ref": "#/spec/panels/statMd"
+                }
               },
               {
                 "x": 6,
                 "y": 0,
                 "width": 10,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/statLg" }
+                "content": {
+                  "$ref": "#/spec/panels/statLg"
+                }
               },
               {
                 "x": 16,
                 "y": 0,
                 "width": 4,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/gaugeFormatTest" }
+                "content": {
+                  "$ref": "#/spec/panels/gaugeFormatTest"
+                }
               },
               {
                 "x": 20,
                 "y": 0,
                 "width": 4,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/gaugeRAM" }
+                "content": {
+                  "$ref": "#/spec/panels/gaugeRAM"
+                }
               }
             ]
           }
@@ -724,21 +821,30 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": { "title": "Row 2", "collapse": { "open": true } },
+            "display": {
+              "title": "Row 2",
+              "collapse": {
+                "open": true
+              }
+            },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 12,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/legendEx" }
+                "content": {
+                  "$ref": "#/spec/panels/legendEx"
+                }
               },
               {
                 "x": 12,
                 "y": 0,
                 "width": 12,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/basicEx" }
+                "content": {
+                  "$ref": "#/spec/panels/basicEx"
+                }
               }
             ]
           }
@@ -746,28 +852,39 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": { "title": "Row 3", "collapse": { "open": false } },
+            "display": {
+              "title": "Row 3",
+              "collapse": {
+                "open": false
+              }
+            },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 24,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/cpuGauge" }
+                "content": {
+                  "$ref": "#/spec/panels/cpuGauge"
+                }
               },
               {
                 "x": 0,
                 "y": 6,
                 "width": 12,
                 "height": 8,
-                "content": { "$ref": "#/spec/panels/cpuLine" }
+                "content": {
+                  "$ref": "#/spec/panels/cpuLine"
+                }
               },
               {
                 "x": 12,
                 "y": 0,
                 "width": 12,
                 "height": 8,
-                "content": { "$ref": "#/spec/panels/defaultTimeSeriesChart" }
+                "content": {
+                  "$ref": "#/spec/panels/defaultTimeSeriesChart"
+                }
               }
             ]
           }
@@ -835,7 +952,9 @@
         "defaultTimeSeriesChart": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Default Time Series Panel" },
+            "display": {
+              "name": "Default Time Series Panel"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {}
@@ -938,7 +1057,9 @@
         "legendEx": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "Legend Example" },
+            "display": {
+              "name": "Legend Example"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
@@ -1066,18 +1187,31 @@
         "cpu": {
           "kind": "Panel",
           "spec": {
-            "display": { "name": "CPU", "description": "This is a line chart" },
+            "display": {
+              "name": "CPU",
+              "description": "This is a line chart"
+            },
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
                 "yAxis": {
-                  "format": { "unit": "percent-decimal", "decimalPlaces": 0 }
+                  "format": {
+                    "unit": "percent-decimal",
+                    "decimalPlaces": 0
+                  }
                 },
                 "legend": {
                   "position": "bottom"
                 },
                 "thresholds": {
-                  "steps": [{ "value": 0.01 }, { "value": 0.02 }]
+                  "steps": [
+                    {
+                      "value": 0.01
+                    },
+                    {
+                      "value": 0.02
+                    }
+                  ]
                 }
               }
             },
@@ -2061,7 +2195,9 @@
             "plugin": {
               "kind": "TimeSeriesChart",
               "spec": {
-                "legend": { "position": "bottom" }
+                "legend": {
+                  "position": "bottom"
+                }
               }
             },
             "queries": [
@@ -2209,14 +2345,18 @@
                 "y": 7,
                 "width": 8,
                 "height": 7,
-                "content": { "$ref": "#/spec/panels/LegendRight" }
+                "content": {
+                  "$ref": "#/spec/panels/LegendRight"
+                }
               },
               {
                 "x": 16,
                 "y": 7,
                 "width": 8,
                 "height": 10,
-                "content": { "$ref": "#/spec/panels/LegendTallFormatted" }
+                "content": {
+                  "$ref": "#/spec/panels/LegendTallFormatted"
+                }
               }
             ]
           }
@@ -3040,7 +3180,10 @@
           "kind": "ListVariable",
           "spec": {
             "name": "NewListVariable",
-            "display": { "name": "Test display name", "hidden": false },
+            "display": {
+              "name": "Test display name",
+              "hidden": false
+            },
             "defaultValue": "second value",
             "allowAllValue": true,
             "allowMultiple": false,
@@ -3048,13 +3191,22 @@
               "kind": "StaticListVariable",
               "spec": {
                 "values": [
-                  { "label": "test list value", "value": "test list value" },
-                  { "label": "second value", "value": "second value" },
+                  {
+                    "label": "test list value",
+                    "value": "test list value"
+                  },
+                  {
+                    "label": "second value",
+                    "value": "second value"
+                  },
                   {
                     "label": "another list value",
                     "value": "another list value"
                   },
-                  { "label": "final value", "value": "final value" }
+                  {
+                    "label": "final value",
+                    "value": "final value"
+                  }
                 ]
               }
             }
@@ -3081,7 +3233,12 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Example"
+              }
+            }
           }
         }
       },
@@ -3089,14 +3246,21 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": { "title": "Row 1", "collapse": { "open": true } },
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 12,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/markdownEx" }
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
               }
             ]
           }
@@ -3143,7 +3307,10 @@
           "kind": "ListVariable",
           "spec": {
             "name": "NewListVariable",
-            "display": { "name": "Test display name", "hidden": false },
+            "display": {
+              "name": "Test display name",
+              "hidden": false
+            },
             "defaultValue": "second value",
             "allowAllValue": true,
             "allowMultiple": false,
@@ -3151,13 +3318,22 @@
               "kind": "StaticListVariable",
               "spec": {
                 "values": [
-                  { "label": "test list value", "value": "test list value" },
-                  { "label": "second value", "value": "second value" },
+                  {
+                    "label": "test list value",
+                    "value": "test list value"
+                  },
+                  {
+                    "label": "second value",
+                    "value": "second value"
+                  },
                   {
                     "label": "another list value",
                     "value": "another list value"
                   },
-                  { "label": "final value", "value": "final value" }
+                  {
+                    "label": "final value",
+                    "value": "final value"
+                  }
                 ]
               }
             }
@@ -3183,7 +3359,12 @@
               "name": "Markdown Example Zero",
               "description": "This is a markdown panel"
             },
-            "plugin": { "kind": "Markdown", "spec": { "text": "## Example" } }
+            "plugin": {
+              "kind": "Markdown",
+              "spec": {
+                "text": "## Example"
+              }
+            }
           }
         }
       },
@@ -3191,14 +3372,21 @@
         {
           "kind": "Grid",
           "spec": {
-            "display": { "title": "Row 1", "collapse": { "open": true } },
+            "display": {
+              "title": "Row 1",
+              "collapse": {
+                "open": true
+              }
+            },
             "items": [
               {
                 "x": 0,
                 "y": 0,
                 "width": 12,
                 "height": 6,
-                "content": { "$ref": "#/spec/panels/markdownEx" }
+                "content": {
+                  "$ref": "#/spec/panels/markdownEx"
+                }
               }
             ]
           }
@@ -3605,7 +3793,9 @@
             "allowMultiple": false,
             "plugin": {
               "kind": "StaticListVariable",
-              "spec": { "values": ["1m", "5m"] }
+              "spec": {
+                "values": ["1m", "5m"]
+              }
             },
             "name": "interval"
           }
@@ -12061,6 +12251,141 @@
           }
         }
       ]
+    }
+  },
+  {
+    "kind": "Dashboard",
+    "metadata": {
+      "name": "tracing",
+      "createdAt": "2024-06-26T13:52:39.316639179Z",
+      "updatedAt": "2024-06-26T13:58:50.143902169Z",
+      "version": 4,
+      "project": "testing"
+    },
+    "spec": {
+      "display": {
+        "name": "tracing"
+      },
+      "panels": {
+        "Foundtraces": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Table"
+            },
+            "plugin": {
+              "kind": "TraceTable",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TraceQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "TempoTraceQuery",
+                    "spec": {
+                      "query": "{}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "ScatterChart": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Scatter Chart"
+            },
+            "plugin": {
+              "kind": "ScatterChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TraceQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "TempoTraceQuery",
+                    "spec": {
+                      "query": "{}"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "Trace": {
+          "kind": "Panel",
+          "spec": {
+            "display": {
+              "name": "Gantt"
+            },
+            "plugin": {
+              "kind": "TracingGanttChart",
+              "spec": {}
+            },
+            "queries": [
+              {
+                "kind": "TraceQuery",
+                "spec": {
+                  "plugin": {
+                    "kind": "TempoTraceQuery",
+                    "spec": {
+                      "query": "4cb71a3852a4eb5f"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "layouts": [
+        {
+          "kind": "Grid",
+          "spec": {
+            "display": {
+              "title": "Tracing",
+              "collapse": {
+                "open": true
+              }
+            },
+            "items": [
+              {
+                "x": 0,
+                "y": 0,
+                "width": 12,
+                "height": 6,
+                "content": {
+                  "$ref": "#/spec/panels/ScatterChart"
+                }
+              },
+              {
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 9,
+                "content": {
+                  "$ref": "#/spec/panels/Foundtraces"
+                }
+              },
+              {
+                "x": 12,
+                "y": 0,
+                "width": 12,
+                "height": 15,
+                "content": {
+                  "$ref": "#/spec/panels/Trace"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "duration": "1h"
     }
   }
 ]
