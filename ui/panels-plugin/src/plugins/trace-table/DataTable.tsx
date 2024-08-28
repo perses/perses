@@ -22,6 +22,7 @@ import {
   TableRow,
   Typography,
   styled,
+  useTheme,
 } from '@mui/material';
 import {
   QueryDefinition,
@@ -32,10 +33,11 @@ import {
   msToPrometheusDuration,
 } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { ReactNode } from 'react';
+import { ReactNode, useCallback } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
-import { getConsistentServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
+import { useChartsTheme } from '@perses-dev/components';
+import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 
 const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
   dateStyle: 'long',
@@ -52,6 +54,13 @@ export interface DataTableProps {
 
 export function DataTable(props: DataTableProps) {
   const { result, traceLink } = props;
+  const muiTheme = useTheme();
+  const chartsTheme = useChartsTheme();
+
+  const serviceColorGenerator = useCallback(
+    (serviceName: string) => getServiceColor(muiTheme, chartsTheme, undefined, serviceName),
+    [muiTheme, chartsTheme]
+  );
 
   if (!result) {
     return null;
@@ -63,7 +72,7 @@ export function DataTable(props: DataTableProps) {
       ? (traceId: string) => traceLink({ query: JSON.parse(JSON.stringify(query.definition)), traceId })
       : undefined;
     for (const trace of query.data?.searchResult || []) {
-      rows.push(buildRow(trace, traceLinkWithQuery));
+      rows.push(buildRow(trace, serviceColorGenerator, traceLinkWithQuery));
     }
   }
 
@@ -92,7 +101,11 @@ export function DataTable(props: DataTableProps) {
   );
 }
 
-function buildRow(trace: TraceSearchResult, traceLink?: (traceId: string) => string): ReactNode {
+function buildRow(
+  trace: TraceSearchResult,
+  serviceColorGenerator: (serviceName: string) => string,
+  traceLink?: (traceId: string) => string
+): ReactNode {
   let totalSpanCount = 0;
   let totalErrorCount = 0;
   for (const stats of Object.values(trace.serviceStats)) {
@@ -104,7 +117,7 @@ function buildRow(trace: TraceSearchResult, traceLink?: (traceId: string) => str
     <StyledTableRow key={trace.traceId}>
       <StyledTableCell>
         {buildTraceName(trace, traceLink)}
-        {buildServiceStatsChips(trace.serviceStats)}
+        {buildServiceStatsChips(trace.serviceStats, serviceColorGenerator)}
       </StyledTableCell>
       <StyledTableCell>
         <Typography display="inline">{totalSpanCount} spans</Typography>
@@ -150,7 +163,10 @@ function buildTraceName(trace: TraceSearchResult, traceLink?: (traceId: string) 
   );
 }
 
-function buildServiceStatsChips(serviceStats: Record<string, ServiceStats>) {
+function buildServiceStatsChips(
+  serviceStats: Record<string, ServiceStats>,
+  serviceColorGenerator: (serviceName: string) => string
+) {
   return Object.entries(serviceStats).map(([serviceName, stats]) => (
     <Chip
       key={serviceName}
@@ -158,7 +174,7 @@ function buildServiceStatsChips(serviceStats: Record<string, ServiceStats>) {
       sx={{ marginTop: '5px', marginRight: '5px' }}
       variant="outlined"
       size="small"
-      avatar={<Avatar sx={{ backgroundColor: getConsistentServiceColor(serviceName) }}>{stats.spanCount}</Avatar>}
+      avatar={<Avatar sx={{ backgroundColor: serviceColorGenerator(serviceName) }}>{stats.spanCount}</Avatar>}
     />
   ));
 }

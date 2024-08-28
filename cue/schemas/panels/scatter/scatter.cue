@@ -14,4 +14,6 @@
 package model
 
 kind: "ScatterChart"
-spec: close({})
+spec: close({
+	sizeRange?: [number, number]
+})

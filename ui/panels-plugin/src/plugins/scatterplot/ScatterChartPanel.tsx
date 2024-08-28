@@ -37,6 +37,9 @@ export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> 
   onClick?: ((data: EChartTraceValue) => void) | null;
 }
 
+/** default size range of the circles diameter */
+const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
+
 /**
  * ScatterChartPanel receives data from the DataQueriesProvider and transforms it
  * into a `dataset` object that Apache ECharts can consume. Additionally,
@@ -53,22 +56,24 @@ export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> 
  * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps) {
-  const { contentDimensions, onClick } = props;
+  const { spec, contentDimensions, onClick } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
   const chartsTheme = useChartsTheme();
   const navigate = useNavigate();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
+  const sizeRange = spec.sizeRange || DEFAULT_SIZE_RANGE;
 
   // Generate dataset
   // Transform Tempo API response to fit 'dataset' structure from Apache ECharts
   // https://echarts.apache.org/handbook/en/concepts/dataset
-  const { dataset, maxSpanCount } = useMemo(() => {
+  const { dataset, minSpanCount, maxSpanCount } = useMemo(() => {
     if (traceIsLoading) {
-      return { dataset: [], maxSpanCount: 1 };
+      return { dataset: [], minSpanCount: 0, maxSpanCount: 0 };
     }
 
     const dataset = [];
-    let maxSpanCount = 1;
+    let minSpanCount: number | undefined;
+    let maxSpanCount: number | undefined;
     for (const result of traceResults) {
       if (result.isLoading || result.data === undefined || result.data.searchResult === undefined) continue;
       const dataSeries = result.data.searchResult.map((trace) => {
@@ -78,7 +83,11 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
           spanCount += stats.spanCount;
           errorCount += stats.errorCount ?? 0;
         }
-        if (spanCount > maxSpanCount) {
+
+        if (minSpanCount === undefined || spanCount < minSpanCount) {
+          minSpanCount = spanCount;
+        }
+        if (maxSpanCount === undefined || spanCount > maxSpanCount) {
           maxSpanCount = spanCount;
         }
 
@@ -96,7 +105,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
         source: dataSeries,
       });
     }
-    return { dataset, maxSpanCount };
+    return { dataset, minSpanCount: minSpanCount ?? 0, maxSpanCount: maxSpanCount ?? 0 };
   }, [traceIsLoading, traceResults]);
 
   // Formatting for the dataset
@@ -113,9 +122,8 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
         y: 'durationMs',
       },
       symbolSize: function (data) {
-        // Changes datapoint to correspond to number of spans in a trace
-        const maxScaleSymbolSize = 80;
-        return (data.spanCount / maxSpanCount) * maxScaleSymbolSize;
+        // returns the diameter of the circles
+        return getSymbolSize(data.spanCount, [minSpanCount, maxSpanCount], sizeRange);
       },
       itemStyle: {
         color: function (params) {
@@ -136,7 +144,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       series.push({ ...seriesTemplate2, datasetIndex: i });
     }
     return series;
-  }, [dataset, defaultColor, maxSpanCount]);
+  }, [dataset, defaultColor, minSpanCount, maxSpanCount, sizeRange]);
 
   // Navigate to the Gantt Chart on the explore page by default
   const defaultClickHandler = useCallback(
@@ -185,4 +193,19 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
       />
     </div>
   );
+}
+
+// exported for tests
+export function getSymbolSize(spanCount: number, spanCountRange: [number, number], sizeRange: [number, number]) {
+  const [minSize, maxSize] = sizeRange;
+  const [minSpanCount, maxSpanCount] = spanCountRange;
+
+  // catch divison by zero
+  if (maxSpanCount - minSpanCount === 0) {
+    return maxSize;
+  }
+
+  // apply linear scale of spanCount from range [minSpanCount,maxSpanCount] to a value from range [minSize,maxSize]
+  const rel = (spanCount - minSpanCount) / (maxSpanCount - minSpanCount);
+  return minSize + (maxSize - minSize) * rel;
 }
