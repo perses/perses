@@ -15,10 +15,12 @@ import { Stack, styled } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { memo } from 'react';
 import { Viewport, rowHeight } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 
 interface GanttTableRowProps {
+  options: TracingGanttChartOptions;
   span: Span;
   viewport: Viewport;
   nameColumnWidth: number;
@@ -27,7 +29,7 @@ interface GanttTableRowProps {
 }
 
 export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowProps) {
-  const { span, viewport, nameColumnWidth, divider, onClick } = props;
+  const { options, span, viewport, nameColumnWidth, divider, onClick } = props;
 
   const handleOnClick = () => {
     // ignore event if triggered by selecting text
@@ -40,7 +42,7 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
     <RowContainer direction="row" onClick={handleOnClick}>
       <SpanName span={span} nameColumnWidth={nameColumnWidth} />
       {divider}
-      <SpanDuration span={span} viewport={viewport} />
+      <SpanDuration options={options} span={span} viewport={viewport} />
     </RowContainer>
   );
 });

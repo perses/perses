@@ -35,6 +35,13 @@ type Story = StoryObj<typeof TracingGanttChart>;
 
 export const Primary: Story = {
   args: {
+    options: {
+      visual: {
+        palette: {
+          mode: 'auto',
+        },
+      },
+    },
     rootSpan: trace1_root,
   },
 };

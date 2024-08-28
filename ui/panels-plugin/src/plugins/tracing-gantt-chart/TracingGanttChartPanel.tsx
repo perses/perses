@@ -30,7 +30,7 @@ export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChar
 }
 
 export function TracingGanttChartPanel(props: TracingGanttChartPanelProps) {
-  const { attributeLinks } = props;
+  const { spec, attributeLinks } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -55,7 +55,7 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps) {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart attributeLinks={attributeLinks} rootSpan={trace.rootSpan} />
+      <TracingGanttChart options={spec} attributeLinks={attributeLinks} rootSpan={trace.rootSpan} />
     </Box>
   );
 }

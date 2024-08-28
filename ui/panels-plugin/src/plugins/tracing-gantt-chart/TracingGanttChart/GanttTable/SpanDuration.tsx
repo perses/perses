@@ -13,10 +13,13 @@
 
 import { Box, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { Viewport, formatDuration, getConsistentSpanColor } from '../utils';
+import { useChartsTheme } from '@perses-dev/components';
+import { Viewport, formatDuration, getSpanColor } from '../utils';
 import { Ticks } from '../Ticks';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
 
 export interface SpanDurationProps {
+  options: TracingGanttChartOptions;
   span: Span;
   viewport: Viewport;
 }
@@ -25,8 +28,9 @@ export interface SpanDurationProps {
  * SpanDuration renders the right column of a SpanRow, i.e. the span bar and span duration
  */
 export function SpanDuration(props: SpanDurationProps) {
-  const { span, viewport } = props;
-  const theme = useTheme();
+  const { options, span, viewport } = props;
+  const muiTheme = useTheme();
+  const chartsTheme = useChartsTheme();
 
   const spanDuration = span.endTimeUnixMs - span.startTimeUnixMs;
   const viewportDuration = viewport.endTimeUnixMs - viewport.startTimeUnixMs;
@@ -37,18 +41,19 @@ export function SpanDuration(props: SpanDurationProps) {
     <Box sx={{ position: 'relative', height: '100%', flexGrow: 1, overflow: 'hidden' }}>
       <Ticks />
       <Box
+        data-testid="span-duration-bar"
         sx={{
           position: 'absolute',
           top: 0,
           bottom: 0,
           margin: 'auto',
           height: '8px',
-          borderRadius: theme.shape.borderRadius,
+          borderRadius: muiTheme.shape.borderRadius,
         }}
         style={{
           left: `${relativeStart * 100}%`,
           width: `${relativeDuration * 100}%`,
-          backgroundColor: getConsistentSpanColor(span),
+          backgroundColor: getSpanColor(muiTheme, chartsTheme, options.visual?.palette?.mode, span),
         }}
       />
       <Box
@@ -57,7 +62,7 @@ export function SpanDuration(props: SpanDurationProps) {
           top: '50%',
           transform: 'translateY(-50%)',
           marginLeft: '8px',
-          color: theme.palette.grey[700],
+          color: muiTheme.palette.grey[700],
           fontSize: '.7rem',
         }}
         style={{

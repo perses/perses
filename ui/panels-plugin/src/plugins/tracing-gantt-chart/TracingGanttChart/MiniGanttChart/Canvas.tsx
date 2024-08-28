@@ -11,17 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, styled } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
-import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState } from 'react';
+import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback } from 'react';
 import { Span, useEvent } from '@perses-dev/core';
+import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
-import { Viewport } from '../utils';
+import { getSpanColor, Viewport } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { drawSpans } from './draw';
 
 const CANVAS_HEIGHT = 60;
 
 interface CanvasProps {
+  options: TracingGanttChartOptions;
   rootSpan: Span;
   viewport: Viewport;
   setViewport: (v: Viewport) => void;
@@ -33,7 +36,9 @@ type MouseState =
   | { type: 'drag'; start: number; end: number };
 
 export function Canvas(props: CanvasProps) {
-  const { rootSpan, viewport, setViewport } = props;
+  const { options, rootSpan, viewport, setViewport } = props;
+  const muiTheme = useTheme();
+  const chartsTheme = useChartsTheme();
   // the <canvas> element must have an absolute width and height to avoid rendering problems
   // the wrapper box is required to get the available dimensions for the <canvas> element
   const { width, ref: wrapperRef } = useResizeObserver();
@@ -45,14 +50,19 @@ export function Canvas(props: CanvasProps) {
   const relativeCutoffLeft = (viewport.startTimeUnixMs - rootSpan.startTimeUnixMs) / traceDuration;
   const relativeCutoffRight = (rootSpan.endTimeUnixMs - viewport.endTimeUnixMs) / traceDuration;
 
+  const spanColorGenerator = useCallback(
+    (span: Span) => getSpanColor(muiTheme, chartsTheme, options.visual?.palette?.mode, span),
+    [muiTheme, chartsTheme, options.visual?.palette?.mode]
+  );
+
   useEffect(() => {
     if (!canvasRef.current || !width || !height) return;
 
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
 
-    drawSpans(ctx, width, height, rootSpan);
-  }, [width, height, rootSpan]);
+    drawSpans(ctx, width, height, rootSpan, spanColorGenerator);
+  }, [width, height, rootSpan, spanColorGenerator]);
 
   const translateCursorToTime = (e: ReactMouseEvent | MouseEvent) => {
     if (!canvasRef.current || !width) return 0;
