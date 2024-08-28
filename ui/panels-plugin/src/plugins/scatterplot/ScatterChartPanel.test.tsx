@@ -21,6 +21,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { UnknownSpec, TimeRangeValue, toAbsoluteTimeRange } from '@perses-dev/core';
 import { screen, render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MOCK_TRACE_DATA, MOCK_TRACE_QUERY_RESULT, MOCK_EMPTY_TRACE_QUERY_RESULT } from '../../test/';
@@ -68,15 +69,17 @@ describe('ScatterChartPanel', () => {
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
     };
     render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
-        <PluginRegistry {...mockPluginRegistry(MOCK_TRACE_QUERY_PLUGIN)}>
-          <ChartsProvider chartsTheme={testChartsTheme}>
-            <TimeRangeContext.Provider value={mockTimeRangeContext}>
-              <ScatterChartPanel {...TEST_SCATTER_PANEL} />
-            </TimeRangeContext.Provider>
-          </ChartsProvider>
-        </PluginRegistry>
-      </VirtuosoMockContext.Provider>
+      <MemoryRouter>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
+          <PluginRegistry {...mockPluginRegistry(MOCK_TRACE_QUERY_PLUGIN)}>
+            <ChartsProvider chartsTheme={testChartsTheme}>
+              <TimeRangeContext.Provider value={mockTimeRangeContext}>
+                <ScatterChartPanel {...TEST_SCATTER_PANEL} />
+              </TimeRangeContext.Provider>
+            </ChartsProvider>
+          </PluginRegistry>
+        </VirtuosoMockContext.Provider>
+      </MemoryRouter>
     );
   };
 

@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChart, useChartsTheme } from '@perses-dev/components';
+import { useMemo } from 'react';
+import { EChart, OnEventsType, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
@@ -23,7 +24,7 @@ import {
   TooltipComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChartsOption } from 'echarts';
+import { EChartsOption, ScatterSeriesOption } from 'echarts';
 import { formatValue } from '@perses-dev/core';
 import { EChartTraceValue } from './ScatterChartPanel';
 
@@ -38,10 +39,11 @@ use([
   CanvasRenderer,
 ]);
 
-interface ScatterplotProps {
+interface ScatterplotProps<T> {
   width: number;
   height: number;
   options: EChartsOption;
+  onClick?: (data: T) => void;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
@@ -49,8 +51,8 @@ const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   timeStyle: 'medium',
 }).format;
 
-export function Scatterplot(props: ScatterplotProps) {
-  const { width, height, options } = props;
+export function Scatterplot<T>(props: ScatterplotProps<T>) {
+  const { width, height, options, onClick } = props;
   const chartsTheme = useChartsTheme();
 
   // Apache EChart Options Docs: https://echarts.apache.org/en/option.html
@@ -105,6 +107,14 @@ export function Scatterplot(props: ScatterplotProps) {
     },
   };
 
+  const handleEvents: OnEventsType<ScatterSeriesOption['data'] | unknown> = useMemo(() => {
+    const handlers: OnEventsType<ScatterSeriesOption['data'] | unknown> = {};
+    if (onClick) {
+      handlers.click = (params) => onClick(params.data as T);
+    }
+    return handlers;
+  }, [onClick]);
+
   return (
     <EChart
       sx={{
@@ -113,6 +123,7 @@ export function Scatterplot(props: ScatterplotProps) {
       }}
       option={eChartOptions}
       theme={chartsTheme.echartsTheme}
+      onEvents={handleEvents}
     />
   );
 }
