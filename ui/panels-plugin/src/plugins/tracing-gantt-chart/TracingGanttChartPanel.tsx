@@ -16,10 +16,21 @@ import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@per
 import { Box } from '@mui/material';
 import { TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
+import { AttributeLinks } from './TracingGanttChart/DetailPane/Attributes';
 
-export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions>;
+export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions> {
+  /**
+   * Allows custom links for each attribute in the detail pane.
+   * Example:
+   * {
+   *   'k8s.pod.name': (attrs) => `/my/console/namespace/${attrs['k8s.namespace.name']?.stringValue}/${attrs['k8s.pod.name']?.stringValue}/detail`
+   * }
+   */
+  attributeLinks?: AttributeLinks;
+}
 
-export function TracingGanttChartPanel({ spec }: TracingGanttChartPanelProps) {
+export function TracingGanttChartPanel(props: TracingGanttChartPanelProps) {
+  const { spec, attributeLinks } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -44,7 +55,7 @@ export function TracingGanttChartPanel({ spec }: TracingGanttChartPanelProps) {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart options={spec} rootSpan={trace.rootSpan} />
+      <TracingGanttChart options={spec} attributeLinks={attributeLinks} rootSpan={trace.rootSpan} />
     </Box>
   );
 }
