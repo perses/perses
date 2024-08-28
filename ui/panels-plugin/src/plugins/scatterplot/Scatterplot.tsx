@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useMemo } from 'react';
 import { EChart, OnEventsType, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
@@ -24,7 +25,8 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { EChartsOption, ScatterSeriesOption } from 'echarts';
-import { useMemo } from 'react';
+import { formatValue } from '@perses-dev/core';
+import { EChartTraceValue } from './ScatterChartPanel';
 
 use([
   DatasetComponent,
@@ -43,6 +45,11 @@ interface ScatterplotProps<T> {
   options: EChartsOption;
   onClick?: (data: T) => void;
 }
+
+const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'long',
+  timeStyle: 'medium',
+}).format;
 
 export function Scatterplot<T>(props: ScatterplotProps<T>) {
   const { width, height, options, onClick } = props;
@@ -82,13 +89,13 @@ export function Scatterplot<T>(props: ScatterplotProps<T>) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: function (params: any) {
         // TODO: import type from ECharts instead of using any
-        params = params[0];
+        const data = params[0].data as EChartTraceValue;
         return [
-          '<b>time</b>: ' + params.data.startTime + '<br/>',
-          '<b>duration (miliseconds)</b>: ' + params.data.durationMs + '<br/>',
-          '<b>spanCount</b>: ' + params.data.spanCount + '<br/>',
-          '<b>errorCount</b>: ' + params.data.errorCount + '<br/>',
-          '<b>name</b>: ' + params.data.name + '<br/>',
+          `<b>Service name</b>: ${data.rootServiceName}<br/>`,
+          `<b>Span name</b>: ${data.rootTraceName}<br/>`,
+          `<b>Time</b>: ${DATE_FORMATTER(data.startTime)}<br/>`,
+          `<b>Duration</b>: ${formatValue(data.durationMs, { unit: 'milliseconds' })}<br/>`,
+          `<b>Span count</b>: ${data.spanCount} (${data.errorCount} errors)<br/>`,
         ].join('');
       },
     },
