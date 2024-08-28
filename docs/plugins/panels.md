@@ -1,6 +1,6 @@
-# Panel Plugin
+# Panel plugins
 
-This is the list of every panel plugin we are supporting.
+This documentation provides an exhaustive list of the panel plugins supported by Perses.
 
 ## BarChart
 
