@@ -24,7 +24,7 @@ import { screen, render } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MOCK_TRACE_DATA, MOCK_TRACE_QUERY_RESULT, MOCK_EMPTY_TRACE_QUERY_RESULT } from '../../test/';
-import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
+import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -51,19 +51,7 @@ const TEST_SCATTER_PANEL: ScatterChartPanelProps = {
     width: 500,
     height: 500,
   },
-  spec: {
-    query: {
-      kind: 'TraceQuery',
-      spec: {
-        plugin: {
-          kind: 'TempoTraceQuery',
-          spec: {
-            query: '{duration>500ms}',
-          },
-        },
-      },
-    },
-  },
+  spec: {},
 };
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
@@ -111,5 +99,15 @@ describe('ScatterChartPanel', () => {
     renderPanel();
     // expect it to return a Alert because the query produces no trace results
     expect(await screen.findByText('No traces')).toBeInTheDocument();
+  });
+
+  it('should scale the circles', () => {
+    // apply linear scale from range [1,5] to a value from range [10,20]
+    expect(getSymbolSize(1, [1, 5], [10, 20])).toEqual(10);
+    expect(getSymbolSize(3, [1, 5], [10, 20])).toEqual(15);
+    expect(getSymbolSize(5, [1, 5], [10, 20])).toEqual(20);
+
+    // use max size if all span counts are same
+    expect(getSymbolSize(5, [5, 5], [10, 20])).toEqual(20);
   });
 });
