@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { useMemo } from 'react';
-import { TraceSearchResult } from '@perses-dev/core';
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { QueryDefinition, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { Scatterplot } from './Scatterplot';
@@ -21,12 +22,20 @@ import { ScatterChartOptions } from './scatter-chart-model';
 
 export interface EChartTraceValue extends Omit<TraceSearchResult, 'startTimeUnixMs' | 'serviceStats'> {
   name: string;
+  query: QueryDefinition;
   startTime: Date;
   spanCount: number;
   errorCount: number;
 }
 
-export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
+export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> {
+  /**
+   * Custom onClick event handler.
+   * If this field is unset or undefined, a default handler which links to the Gantt chart on the explore page is configured.
+   * Set this field explicitly to null to disable handling the click event.
+   */
+  onClick?: ((data: EChartTraceValue) => void) | null;
+}
 
 /**
  * ScatterChartPanel receives data from the DataQueriesProvider and transforms it
@@ -44,9 +53,10 @@ export type ScatterChartPanelProps = PanelProps<ScatterChartOptions>;
  * visualization of the data.
  */
 export function ScatterChartPanel(props: ScatterChartPanelProps) {
-  const { contentDimensions } = props;
+  const { contentDimensions, onClick } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
   const chartsTheme = useChartsTheme();
+  const navigate = useNavigate();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
 
   // Generate dataset
@@ -74,6 +84,7 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
 
         const newTraceValue: EChartTraceValue = {
           ...trace,
+          query: result.definition,
           name: `${trace.rootServiceName}: ${trace.rootTraceName}`,
           startTime: new Date(trace.startTimeUnixMs), // convert unix epoch time to Date
           spanCount,
@@ -127,6 +138,22 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     return series;
   }, [dataset, defaultColor, maxSpanCount]);
 
+  // Navigate to the Gantt Chart on the explore page by default
+  const defaultClickHandler = useCallback(
+    (data: EChartTraceValue) => {
+      // clone the original query spec (including the datasource) and replace the query value with the trace id
+      const query: QueryDefinition = JSON.parse(JSON.stringify(data.query));
+      query.spec.plugin.spec.query = data.traceId;
+
+      const exploreParams = new URLSearchParams({
+        explorer: 'traces',
+        queries: JSON.stringify([query]),
+      });
+      navigate(`/explore?${exploreParams}`);
+    },
+    [navigate]
+  );
+
   if (traceIsLoading) {
     return <LoadingOverlay />;
   }
@@ -150,7 +177,12 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
 
   return (
     <div data-testid="ScatterChartPanel_ScatterPlot">
-      <Scatterplot width={contentDimensions.width} height={contentDimensions.height} options={options} />
+      <Scatterplot
+        width={contentDimensions.width}
+        height={contentDimensions.height}
+        options={options}
+        onClick={onClick === null ? undefined : (onClick ?? defaultClickHandler)}
+      />
     </div>
   );
 }

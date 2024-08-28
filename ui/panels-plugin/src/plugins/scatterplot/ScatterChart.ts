@@ -13,12 +13,12 @@
 
 import { PanelPlugin } from '@perses-dev/plugin-system';
 import { createInitialScatterChartOptions, ScatterChartOptions } from './scatter-chart-model';
-import { ScatterChartPanel } from './ScatterChartPanel';
+import { ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
 /**
  * The core ScatterChart panel plugin for Perses.
  */
-export const ScatterChart: PanelPlugin<ScatterChartOptions> = {
+export const ScatterChart: PanelPlugin<ScatterChartOptions, ScatterChartPanelProps> = {
   PanelComponent: ScatterChartPanel,
   // TODO: add a chart options editor plugin, for example:
   // panelOptionsEditorComponents: [{ label: 'Settings', content: ScatterChartOptionsEditorSettings }],
