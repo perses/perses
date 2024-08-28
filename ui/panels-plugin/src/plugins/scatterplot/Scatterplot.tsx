@@ -75,7 +75,7 @@ export function Scatterplot<T>(props: ScatterplotProps<T>) {
       type: 'value',
       name: 'Duration',
       axisLabel: {
-        formatter: '{value} ms',
+        formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },
     },
     animation: false,
