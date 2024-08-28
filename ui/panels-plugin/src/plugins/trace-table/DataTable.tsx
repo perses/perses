@@ -20,6 +20,7 @@ import {
   TableCell,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
   styled,
   useTheme,
@@ -39,11 +40,15 @@ import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 
-const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'long',
   timeStyle: 'medium',
-};
-const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, DATE_FORMAT_OPTIONS).format;
+}).format;
+const UTC_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'long',
+  timeStyle: 'long',
+  timeZone: 'UTC',
+}).format;
 
 export type TraceLink = (params: { query: QueryDefinition; traceId: string }) => string;
 
@@ -138,7 +143,9 @@ function buildRow(
         </Typography>
       </StyledTableCell>
       <StyledTableCell>
-        <Typography>{DATE_FORMATTER(new Date(trace.startTimeUnixMs))}</Typography>
+        <Tooltip title={UTC_DATE_FORMATTER(new Date(trace.startTimeUnixMs))} placement="top" arrow>
+          <Typography display="inline">{DATE_FORMATTER(new Date(trace.startTimeUnixMs))}</Typography>
+        </Tooltip>
       </StyledTableCell>
     </StyledTableRow>
   );
