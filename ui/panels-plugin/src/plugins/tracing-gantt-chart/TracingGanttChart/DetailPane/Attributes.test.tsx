@@ -13,11 +13,17 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { AttributeList, AttributeListProps } from './Attributes';
+import { MemoryRouter } from 'react-router-dom';
+import { TraceAttributeValue } from '@perses-dev/core';
+import { AttributeLinks, AttributeList, AttributeListProps } from './Attributes';
 
 describe('Attributes', () => {
   const renderComponent = (props: AttributeListProps) => {
-    return render(<AttributeList {...props} />);
+    return render(
+      <MemoryRouter>
+        <AttributeList {...props} />
+      </MemoryRouter>
+    );
   };
 
   it('render stringValues', () => {
@@ -45,5 +51,24 @@ describe('Attributes', () => {
     ];
     renderComponent({ attributes });
     expect(screen.getByText('abc, true')).toBeInTheDocument();
+  });
+
+  it('render an attribute with a link', () => {
+    const stringValue = (val?: TraceAttributeValue) => (val && 'stringValue' in val ? val.stringValue : '');
+    const attributeLinks: AttributeLinks = {
+      'k8s.pod.name': (attrs) =>
+        `/console/ns/${stringValue(attrs['k8s.namespace.name'])}/pod/${stringValue(attrs['k8s.pod.name'])}/detail`,
+    };
+    const attributes = [
+      { key: 'k8s.namespace.name', value: { stringValue: 'testing' } },
+      { key: 'k8s.pod.name', value: { stringValue: 'hotrod' } },
+    ];
+
+    renderComponent({ attributeLinks, attributes });
+    expect(screen.getByText('testing')).not.toHaveAttribute('href');
+    expect(screen.getByRole('link', { name: 'hotrod' })).toHaveAttribute(
+      'href',
+      '/console/ns/testing/pod/hotrod/detail'
+    );
   });
 });
