@@ -20,8 +20,10 @@ import { Viewport } from './utils';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
+import { AttributeLinks } from './DetailPane/Attributes';
 
 export interface TracingGanttChartProps {
+  attributeLinks?: AttributeLinks;
   rootSpan: Span;
 }
 
@@ -32,7 +34,7 @@ export interface TracingGanttChartProps {
  * https://github.com/jaegertracing/jaeger-ui
  */
 export function TracingGanttChart(props: TracingGanttChartProps) {
-  const { rootSpan } = props;
+  const { attributeLinks, rootSpan } = props;
 
   const theme = useTheme();
   const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
@@ -59,7 +61,12 @@ export function TracingGanttChart(props: TracingGanttChartProps) {
         <>
           <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
           <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
-            <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={() => setSelectedSpan(undefined)} />
+            <DetailPane
+              attributeLinks={attributeLinks}
+              rootSpan={rootSpan}
+              span={selectedSpan}
+              onCloseBtnClick={() => setSelectedSpan(undefined)}
+            />
           </Box>
         </>
       )}
