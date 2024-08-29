@@ -40,6 +40,7 @@ import {
   DEFAULT_PROM,
   PROM_DATASOURCE_KIND,
   LabelValuesRequestParameters,
+  LabelNamesRequestParameters,
 } from '@perses-dev/prometheus-plugin';
 import { useMemo, useState } from 'react';
 import EyeOutlineIcon from 'mdi-material-ui/EyeOutline';
@@ -57,11 +58,15 @@ export interface LabelFilter {
 
 export interface FilterInputsProps {
   value: LabelFilter;
+  labelOptions?: string[];
+  labelValuesOptions?: string[];
+  isLabelOptionsLoading?: boolean;
+  isLabelValuesOptionsLoading?: boolean;
   onChange: (next: LabelFilter) => void;
   onDelete: () => void;
 }
 
-export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
+export function FilterInputs({ value, labelOptions, labelValuesOptions, onChange, onDelete }: FilterInputsProps) {
   const [isEditingLabelName, setIsEditingLabelName] = useState(true);
 
   function handleKeyPress(event: { key: string }) {
@@ -76,10 +81,8 @@ export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
       <Autocomplete
         freeSolo
         disableClearable
-        options={[]}
+        options={labelOptions ?? []}
         value={value.label}
-        // forcePopupIcon={false}
-        // getOptionLabel={(option) => option.title}
         sx={{ width: 250, display: isEditingLabelName ? 'block' : 'none' }}
         renderInput={(params) => {
           return (
@@ -106,7 +109,7 @@ export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
           );
         }}
         onKeyDown={handleKeyPress}
-        onInputChange={(event: React.SyntheticEvent, newValue: string | null) => {
+        onInputChange={(_: React.SyntheticEvent, newValue: string | null) => {
           onChange({ label: newValue ?? '', labelValues: value.labelValues });
         }}
       />
@@ -115,10 +118,8 @@ export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
         multiple
         limitTags={1}
         disableClearable
-        options={['test']}
-        value={value.labelValues} // TODO: fix
-        // forcePopupIcon={false}
-        // getOptionLabel={(option) => option.title}
+        options={labelValuesOptions ?? []}
+        value={value.labelValues}
         sx={{ width: 250, display: isEditingLabelName ? 'none' : 'block' }}
         renderInput={(params) => {
           return (
@@ -140,7 +141,7 @@ export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
             />
           );
         }}
-        onChange={(event: React.SyntheticEvent, newValue: string[] | null) => {
+        onChange={(_: React.SyntheticEvent, newValue: string[] | null) => {
           if (Array.isArray(newValue)) {
             onChange({ label: value.label, labelValues: newValue });
           }
@@ -150,9 +151,62 @@ export function FilterInputs({ value, onChange, onDelete }: FilterInputsProps) {
   );
 }
 
+export interface LabelFilterInputProps {
+  datasource: DatasourceSelector;
+  value: LabelFilter;
+  filters: LabelFilter[];
+  onChange: (next: LabelFilter) => void;
+  onDelete: () => void;
+}
+
+export function LabelFilterInput({ datasource, value, filters, onChange, onDelete }: LabelFilterInputProps) {
+  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+
+  const filtersWithoutCurrent = filters.filter((filter) => filter.label !== value.label);
+
+  const { data: labelOptions, isLoading: isLabelOptionsLoading } = useQuery<LabelValuesResponse>({
+    enabled: !!client,
+    queryKey: ['labels', 'datasource', datasource.name, 'filters', filtersWithoutCurrent],
+    queryFn: async () => {
+      const params: LabelNamesRequestParameters = {};
+      if (filters.length) {
+        params['match[]'] = [`{${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`)}}`];
+      }
+
+      return await client!.labelNames(params);
+    },
+  });
+
+  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useQuery<LabelValuesResponse>({
+    enabled: !!client,
+    queryKey: ['labelValues', value.label, 'datasource', datasource.name, 'filters', filtersWithoutCurrent],
+    queryFn: async () => {
+      const params: LabelValuesRequestParameters = { labelName: value.label };
+      if (filters.length) {
+        params['match[]'] = [`{${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`)}}`];
+      }
+
+      return await client!.labelValues(params);
+    },
+  });
+
+  return (
+    <FilterInputs
+      value={value}
+      labelOptions={labelOptions?.data ?? []}
+      labelValuesOptions={labelValuesOptions?.data ?? []}
+      isLabelOptionsLoading={isLabelOptionsLoading}
+      isLabelValuesOptionsLoading={isLabelValuesOptionsLoading}
+      onChange={onChange}
+      onDelete={onDelete}
+    />
+  );
+}
+
 export interface ExplorerFiltersProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  filteredFilters: LabelFilter[];
   onDatasourceChange: (next: DatasourceSelector) => void;
   onFiltersChange: (next: LabelFilter[]) => void;
 }
@@ -160,6 +214,7 @@ export interface ExplorerFiltersProps extends StackProps {
 export function FinderFilters({
   datasource,
   filters,
+  filteredFilters,
   onDatasourceChange,
   onFiltersChange,
   ...props
@@ -180,8 +235,10 @@ export function FinderFilters({
         />
       </FormControl>
       {filters.map((filter, index) => (
-        <FilterInputs
+        <LabelFilterInput
           key={index}
+          datasource={datasource}
+          filters={filteredFilters}
           value={filter}
           onChange={(next) => {
             const nextFilters = [...filters];
@@ -210,9 +267,10 @@ export function FinderFilters({
 export interface MetricCardPanelProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
+  filters: LabelFilter[];
 }
 
-export function MetricCardPanel({ metricName, datasource, ...props }: MetricCardPanelProps) {
+export function MetricCardPanel({ metricName, datasource, filters, ...props }: MetricCardPanelProps) {
   const { width, ref: firstBoxRef } = useResizeObserver();
 
   const { ref: secondBoxRef, inView } = useInView({
@@ -229,7 +287,7 @@ export function MetricCardPanel({ metricName, datasource, ...props }: MetricCard
           kind: 'PrometheusTimeSeriesQuery',
           spec: {
             datasource: datasource,
-            query: `{__name__="${metricName}"}`, // TODO: filters
+            query: `{__name__="${metricName}", ${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`).join(',')}}`,
           },
         },
       },
@@ -271,7 +329,7 @@ export function MetricCardPanel({ metricName, datasource, ...props }: MetricCard
                           kind: 'PrometheusTimeSeriesQuery',
                           spec: {
                             datasource: datasource,
-                            query: `{__name__="${metricName}"}`, // TODO: filters
+                            query: `{__name__="${metricName}", ${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`).join(',')}}`,
                           },
                         },
                       },
@@ -292,17 +350,18 @@ export function MetricCardPanel({ metricName, datasource, ...props }: MetricCard
 export interface MetricCardProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
+  filters: LabelFilter[];
   showPanel?: boolean;
 }
 
-export function MetricCard({ metricName, datasource, showPanel, ...props }: MetricCardProps) {
+export function MetricCard({ metricName, datasource, filters, showPanel, ...props }: MetricCardProps) {
   const [isPanelEnabled, setIsPanelEnabled] = useState(showPanel ?? true);
 
   return (
     <Stack {...props}>
       <p>{metricName}</p>
       {isPanelEnabled ? (
-        <MetricCardPanel datasource={datasource} metricName={metricName} />
+        <MetricCardPanel metricName={metricName} datasource={datasource} filters={filters} />
       ) : (
         <Card
           variant="outlined"
@@ -342,9 +401,10 @@ export function MetricCard({ metricName, datasource, showPanel, ...props }: Metr
 export interface MetricNameExplorerProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  showPanelByDefault?: boolean;
 }
 
-export function MetricNameExplorer({ datasource, filters, ...props }: MetricNameExplorerProps) {
+export function MetricNameExplorer({ datasource, filters, showPanelByDefault, ...props }: MetricNameExplorerProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data } = useQuery<LabelValuesResponse>({
@@ -395,8 +455,9 @@ export function MetricNameExplorer({ datasource, filters, ...props }: MetricName
             <MetricCard
               metricName={row.col1}
               datasource={datasource}
+              filters={filters}
               height="250px"
-              showPanel={false}
+              showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
             >
               {row.col1}
@@ -406,8 +467,9 @@ export function MetricNameExplorer({ datasource, filters, ...props }: MetricName
             <MetricCard
               metricName={row.col2}
               datasource={datasource}
+              filters={filters}
               height="250px"
-              showPanel={false}
+              showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
             >
               {row.col2}
@@ -417,8 +479,9 @@ export function MetricNameExplorer({ datasource, filters, ...props }: MetricName
             <MetricCard
               metricName={row.col3}
               datasource={datasource}
+              filters={filters}
               height="250px"
-              showPanel={false}
+              showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
             >
               {row.col3}
@@ -428,8 +491,9 @@ export function MetricNameExplorer({ datasource, filters, ...props }: MetricName
             <MetricCard
               metricName={row.col4}
               datasource={datasource}
+              filters={filters}
               height="250px"
-              showPanel={false}
+              showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
             >
               {row.col4}
@@ -441,29 +505,13 @@ export function MetricNameExplorer({ datasource, filters, ...props }: MetricName
   );
 }
 
-export interface PrometheusMetricsFinderProps extends StackProps {}
+export interface PrometheusMetricsFinderProps extends StackProps {
+  hidePanelByDefault?: boolean;
+}
 
-export function PrometheusMetricsFinder({ ...props }: PrometheusMetricsFinderProps) {
+export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: PrometheusMetricsFinderProps) {
   const [datasource, setDatasource] = useState<DatasourceSelector>(DEFAULT_PROM); // TODO: retrieve from context
   const [filters, setFilters] = useState<LabelFilter[]>([]);
-
-  // const filteredFilters: LabelFilter[] = useMemo(() => {
-  //   const usableFilters = filters.filter((filter) => filter.label && filter.labelValues.length);
-  //   const result: Map<string, Set<string>> = new Map();
-  //
-  //   for (const filter of usableFilters) {
-  //     if (!result.has(filter.label)) {
-  //       result.set(filter.label, new Set());
-  //     }
-  //     for (const labelValue of filter.labelValues) {
-  //       result.get(filter.label)!.add(labelValue);
-  //     }
-  //   }
-  //
-  //   return Object.entries(result).map(([label, labelValues]) => {
-  //     return { label, labelValues: Array.from(labelValues) };
-  //   });
-  // }, [filters]);
 
   // Remove duplicated filters and filters without label or labelValues
   const filteredFilters: LabelFilter[] = useMemo(() => {
@@ -500,10 +548,11 @@ export function PrometheusMetricsFinder({ ...props }: PrometheusMetricsFinderPro
       <FinderFilters
         datasource={datasource}
         filters={filters}
+        filteredFilters={filteredFilters}
         onDatasourceChange={setDatasource}
         onFiltersChange={setFilters}
       />
-      <MetricNameExplorer datasource={datasource} filters={filteredFilters} />
+      <MetricNameExplorer datasource={datasource} filters={filteredFilters} showPanelByDefault={!hidePanelByDefault} />
     </Stack>
   );
 }
