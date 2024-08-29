@@ -15,7 +15,6 @@
  * The Options object type supported by the TraceTable panel plugin.
  */
 // Note: The interface attributes must match cue/schemas/panels/trace-table/trace-table.cue
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TraceTableOptions {
   visual?: TraceTableVisualOptions;
 }
