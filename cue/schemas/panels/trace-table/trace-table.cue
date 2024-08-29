@@ -18,10 +18,10 @@ package model
 }
 
 #visual: {
-	palette?:      #palette
+	palette?: #palette
 }
 
 kind: "TraceTable"
 spec: close({
-	visual?:        #visual
+	visual?: #visual
 })
