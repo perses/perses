@@ -55,7 +55,7 @@ export function ColumnEditorContainer({
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
-            COLUMN:{' '}
+            COLUMN:
             {column.header ? (
               <span>
                 <strong>{column.header}</strong> ({column.name})

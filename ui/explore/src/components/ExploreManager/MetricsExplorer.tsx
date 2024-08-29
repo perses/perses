@@ -16,6 +16,7 @@ import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
+import { PrometheusMetricsFinder } from '../PrometheusMetricsFinder';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
@@ -85,8 +86,6 @@ export function MetricsExplorer() {
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
-      <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
-
       <Tabs
         value={tab}
         onChange={(_, state) => setTab(state)}
@@ -95,10 +94,26 @@ export function MetricsExplorer() {
       >
         <Tab label="Table" />
         <Tab label="Graph" />
+        <Tab label="Finder" />
       </Tabs>
       <Stack gap={1}>
-        {tab === 0 && <MetricDataTable queries={queries} />}
-        {tab === 1 && <TimeSeriesPanel queries={queries} />}
+        {tab === 0 && (
+          <Stack>
+            <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
+            <MetricDataTable queries={queries} />
+          </Stack>
+        )}
+        {tab === 1 && (
+          <Stack>
+            <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
+            <TimeSeriesPanel queries={queries} />
+          </Stack>
+        )}
+        {tab === 2 && (
+          <Stack>
+            <PrometheusMetricsFinder />
+          </Stack>
+        )}
       </Stack>
     </Stack>
   );

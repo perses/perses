@@ -29,7 +29,7 @@ export class HTTPDatasourceAPI implements DatasourceApi {
    * correspond to nothing.
    * @param name
    * @param dashboard
-   * @param project
+   * @param project²
    */
   buildProxyUrl({ project, dashboard, name }: { project?: string; dashboard?: string; name: string }): string {
     let url = `${!project && !dashboard ? 'globaldatasources' : 'datasources'}/${encodeURIComponent(name)}`;
