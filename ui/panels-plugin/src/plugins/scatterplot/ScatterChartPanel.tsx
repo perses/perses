@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
-import { useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 import { QueryDefinition, TraceSearchResult } from '@perses-dev/core';
 import { EChartsOption, SeriesOption } from 'echarts';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
@@ -40,6 +39,21 @@ export interface ScatterChartPanelProps extends PanelProps<ScatterChartOptions> 
 /** default size range of the circles diameter */
 const DEFAULT_SIZE_RANGE: [number, number] = [6, 20];
 
+// Navigate to the Gantt Chart on the explore page by default
+function defaultClickHandler(data: EChartTraceValue) {
+  // clone the original query spec (including the datasource) and replace the query value with the trace id
+  const query: QueryDefinition = JSON.parse(JSON.stringify(data.query));
+  query.spec.plugin.spec.query = data.traceId;
+
+  const exploreParams = new URLSearchParams({
+    explorer: 'traces',
+    queries: JSON.stringify([query]),
+  });
+
+  // do not use react-router here, as downstream products, which embed this panel, may not have a compatible version of it
+  window.location.href = `/explore?${exploreParams}`;
+}
+
 /**
  * ScatterChartPanel receives data from the DataQueriesProvider and transforms it
  * into a `dataset` object that Apache ECharts can consume. Additionally,
@@ -59,7 +73,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
   const { spec, contentDimensions, onClick } = props;
   const { queryResults: traceResults, isLoading: traceIsLoading } = useDataQueries('TraceQuery');
   const chartsTheme = useChartsTheme();
-  const navigate = useNavigate();
   const defaultColor = chartsTheme.thresholds.defaultColor || 'blue';
   const sizeRange = spec.sizeRange || DEFAULT_SIZE_RANGE;
 
@@ -145,22 +158,6 @@ export function ScatterChartPanel(props: ScatterChartPanelProps) {
     }
     return series;
   }, [dataset, defaultColor, minSpanCount, maxSpanCount, sizeRange]);
-
-  // Navigate to the Gantt Chart on the explore page by default
-  const defaultClickHandler = useCallback(
-    (data: EChartTraceValue) => {
-      // clone the original query spec (including the datasource) and replace the query value with the trace id
-      const query: QueryDefinition = JSON.parse(JSON.stringify(data.query));
-      query.spec.plugin.spec.query = data.traceId;
-
-      const exploreParams = new URLSearchParams({
-        explorer: 'traces',
-        queries: JSON.stringify([query]),
-      });
-      navigate(`/explore?${exploreParams}`);
-    },
-    [navigate]
-  );
 
   if (traceIsLoading) {
     return <LoadingOverlay />;
