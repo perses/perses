@@ -1,6 +1,6 @@
-# Prometheus Plugin
+# Prometheus-related plugins
 
-This documentation is providing the definition of the different plugin related to Prometheus
+This documentation provides the definition of the different plugins related to Prometheus.
 
 ## Datasource
 
@@ -106,7 +106,7 @@ spec:
 
 ## Query
 
-We are only supporting one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
+Perses currently supports only one kind of query for Prometheus: `PrometheusTimeSeriesQuery`. Others will come in the future.
 
 ```yaml
 kind: "PrometheusTimeSeriesQuery"

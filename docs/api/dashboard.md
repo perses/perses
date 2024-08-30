@@ -100,7 +100,7 @@ kind: <string>
 spec: <Plugin specification>
 ```
 
-See the [panel](../plugin/panel.md) documentation to know more about the different panel plugins supported by Perses.
+See the [Panel plugins](../plugins/panels.md) documentation to know more about the different panels supported by Perses.
 
 #### Query specification
 
@@ -121,8 +121,8 @@ kind: <string>
 spec: <Plugin specification>
 ```
 
-We are supporting only prometheus for the `TimeSeriesQuery` for the moment.
-Please look at the [Prometheus plugin documentation](../plugin/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
+Perses supports only Prometheus for the `TimeSeriesQuery` for the moment.
+Please look at the [Prometheus documentation](../plugins/prometheus.md#datasource) to know the spec for the `PrometheusTimeSeriesQuery`.
 
 ### Layout specification
 
