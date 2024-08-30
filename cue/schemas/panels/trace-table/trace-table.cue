@@ -13,5 +13,15 @@
 
 package model
 
+#palette: {
+	mode: "auto" | "categorical"
+}
+
+#visual: {
+	palette?: #palette
+}
+
 kind: "TraceTable"
-spec: close({})
+spec: close({
+	visual?: #visual
+})

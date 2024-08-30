@@ -39,6 +39,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
 import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
+import { TraceTableOptions } from './trace-table-model';
 
 const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
   dateStyle: 'long',
@@ -53,18 +54,20 @@ const UTC_DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
 export type TraceLink = (params: { query: QueryDefinition; traceId: string }) => string;
 
 export interface DataTableProps {
+  options: TraceTableOptions;
   result: Array<QueryData<TraceData>>;
   traceLink?: TraceLink;
 }
 
 export function DataTable(props: DataTableProps) {
-  const { result, traceLink } = props;
+  const { options, result, traceLink } = props;
   const muiTheme = useTheme();
   const chartsTheme = useChartsTheme();
 
+  const paletteMode = options.visual?.palette?.mode;
   const serviceColorGenerator = useCallback(
-    (serviceName: string) => getServiceColor(muiTheme, chartsTheme, undefined, serviceName),
-    [muiTheme, chartsTheme]
+    (serviceName: string) => getServiceColor(muiTheme, chartsTheme, paletteMode, serviceName),
+    [muiTheme, chartsTheme, paletteMode]
   );
 
   if (!result) {
@@ -87,7 +90,7 @@ export function DataTable(props: DataTableProps) {
         <TableHead>
           <TableRow>
             <StyledTableCell>
-              <Typography>Trace Name</Typography>
+              <Typography>Trace name</Typography>
             </StyledTableCell>
             <StyledTableCell>
               <Typography>Spans</Typography>

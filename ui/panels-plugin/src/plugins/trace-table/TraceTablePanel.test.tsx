@@ -25,7 +25,7 @@ import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MemoryRouter } from 'react-router-dom';
 import { MOCK_TRACE_QUERY_RESULT } from '../../test';
-import { TraceTablePanel, TraceTableProps } from './TraceTablePanel';
+import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -53,7 +53,7 @@ function buildMockQueryPlugin(): MockPlugin {
   };
 }
 
-const TEST_TRACE_TABLE_PROPS: TraceTableProps = {
+const TEST_TRACE_TABLE_PROPS: TraceTablePanelProps = {
   contentDimensions: {
     width: 500,
     height: 500,
