@@ -608,6 +608,7 @@ important_dashboards:
 # Allow you to disable the custom time range (absolute time range)
 [ disable_custom:  <bool> | default = false ]
 ```
+
 #### Dashboard Selector config
 
 ```yaml
