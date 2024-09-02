@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Autocomplete, IconButton, InputAdornment, TextField } from '@mui/material';
 import CheckIcon from 'mdi-material-ui/Check';
 import * as React from 'react';
@@ -12,7 +12,7 @@ import {
   PrometheusClient,
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
-import { LabelFilter } from '../types';
+import { computeFilterExpr, LabelFilter } from '../types';
 
 export interface LabelFilterInputProps {
   datasource: DatasourceSelector;
@@ -22,10 +22,14 @@ export interface LabelFilterInputProps {
   onDelete: () => void;
 }
 
+// TODO: fix when a filter is deleted => refresh data
 export function LabelFilterInput({ datasource, value, filters, onChange, onDelete }: LabelFilterInputProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  const filtersWithoutCurrent = filters.filter((filter) => filter.label !== value.label);
+  const filtersWithoutCurrent = useMemo(
+    () => filters.filter((filter) => filter.label !== value.label),
+    [filters, value.label]
+  );
 
   const { data: labelOptions, isLoading: isLabelOptionsLoading } = useQuery<LabelValuesResponse>({
     enabled: !!client,
@@ -33,7 +37,7 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
     queryFn: async () => {
       const params: LabelNamesRequestParameters = {};
       if (filters.length) {
-        params['match[]'] = [`{${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`)}}`];
+        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
 
       return await client!.labelNames(params);
@@ -46,7 +50,7 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
     queryFn: async () => {
       const params: LabelValuesRequestParameters = { labelName: value.label };
       if (filters.length) {
-        params['match[]'] = [`{${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`)}}`];
+        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
 
       return await client!.labelValues(params);

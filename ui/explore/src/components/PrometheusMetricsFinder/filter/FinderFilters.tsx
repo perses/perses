@@ -1,4 +1,4 @@
-import { FormControl, IconButton, InputLabel, Stack, StackProps } from '@mui/material';
+import { Button, FormControl, IconButton, InputLabel, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { DatasourceSelect } from '@perses-dev/plugin-system';
 import { PROM_DATASOURCE_KIND } from '@perses-dev/prometheus-plugin';
@@ -56,14 +56,15 @@ export function FinderFilters({
           }}
         />
       ))}
-      <IconButton
+      <Button
+        startIcon={<PlusIcon />}
         aria-label="add filter"
         onClick={() => {
           onFiltersChange([...filters, { label: '', labelValues: [] }]);
         }}
       >
-        <PlusIcon />
-      </IconButton>
+        Add filter
+      </Button>
     </Stack>
   );
 }

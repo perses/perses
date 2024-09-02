@@ -11,23 +11,95 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, StackProps } from '@mui/material';
+import { Button, ButtonGroup, ButtonGroupProps, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
-import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
+import {
+  DEFAULT_PROM,
+  LabelValuesRequestParameters,
+  LabelValuesResponse,
+  PrometheusClient,
+} from '@perses-dev/prometheus-plugin';
 import { useMemo, useState } from 'react';
 import * as React from 'react';
-import { LabelFilter } from './types';
+import { useDatasourceClient } from '@perses-dev/plugin-system';
+import { useQuery } from '@tanstack/react-query';
+import ViewListIcon from 'mdi-material-ui/ViewList';
+import GridIcon from 'mdi-material-ui/Grid';
+import { computeFilterExpr, LabelFilter } from './types';
 import { FinderFilters } from './filter/FinderFilters';
 import { MetricGrid } from './display/grid/MetricGrid';
+import { MetricList } from './display/list/MetricList';
+
+type DisplayMode = 'grid' | 'list';
+
+export interface ToggleDisplayButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {
+  value: DisplayMode;
+  onChange: (value: DisplayMode) => void;
+}
+
+export function ToggleDisplayButtons({ value, onChange, ...props }: ToggleDisplayButtonsProps) {
+  return (
+    <ButtonGroup variant="contained" aria-label="change current metric finder display" disableElevation {...props}>
+      <Button
+        variant={value === 'grid' ? 'contained' : 'outlined'}
+        startIcon={<GridIcon />}
+        onClick={() => onChange('grid')}
+      >
+        Grid
+      </Button>
+      <Button
+        variant={value === 'list' ? 'contained' : 'outlined'}
+        startIcon={<ViewListIcon />}
+        onClick={() => onChange('list')}
+      >
+        List
+      </Button>
+    </ButtonGroup>
+  );
+}
 
 export interface MetricNameExplorerProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  display: DisplayMode;
   showPanelByDefault?: boolean;
 }
 
-export function MetricNameExplorer({ datasource, filters, showPanelByDefault, ...props }: MetricNameExplorerProps) {
-  return <MetricGrid datasource={datasource} filters={filters} showPanelByDefault={showPanelByDefault} {...props} />;
+export function MetricNameExplorer({
+  datasource,
+  filters,
+  display,
+  showPanelByDefault,
+  ...props
+}: MetricNameExplorerProps) {
+  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
+
+  const { data } = useQuery<LabelValuesResponse>({
+    enabled: !!client,
+    queryKey: ['labelValues', '__name__', 'datasource', datasource.name, 'filters', filters],
+    queryFn: async () => {
+      const params: LabelValuesRequestParameters = { labelName: '__name__' };
+      if (filters.length) {
+        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
+      }
+
+      return await client!.labelValues(params);
+    },
+  });
+
+  if (display === 'list') {
+    return <MetricList metricNames={data?.data ?? []} datasource={datasource} filters={filters} {...props} />;
+  }
+
+  return (
+    <MetricGrid
+      metricNames={data?.data ?? []}
+      datasource={datasource}
+      filters={filters}
+      showPanelByDefault={showPanelByDefault}
+      {...props}
+    />
+  );
 }
 
 export interface PrometheusMetricsFinderProps extends StackProps {
@@ -35,6 +107,7 @@ export interface PrometheusMetricsFinderProps extends StackProps {
 }
 
 export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: PrometheusMetricsFinderProps) {
+  const [display, setDisplay] = useState<'grid' | 'list'>('list');
   const [datasource, setDatasource] = useState<DatasourceSelector>(DEFAULT_PROM); // TODO: retrieve from context
   const [filters, setFilters] = useState<LabelFilter[]>([]);
 
@@ -69,15 +142,23 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
   }, [filters]);
 
   return (
-    <Stack {...props}>
-      <FinderFilters
+    <Stack {...props} gap={1}>
+      <Stack direction="row" gap={2} justifyContent="space-between">
+        <FinderFilters
+          datasource={datasource}
+          filters={filters}
+          filteredFilters={filteredFilters}
+          onDatasourceChange={setDatasource}
+          onFiltersChange={setFilters}
+        />
+        <ToggleDisplayButtons value={display} onChange={setDisplay} />
+      </Stack>
+      <MetricNameExplorer
         datasource={datasource}
-        filters={filters}
-        filteredFilters={filteredFilters}
-        onDatasourceChange={setDatasource}
-        onFiltersChange={setFilters}
+        filters={filteredFilters}
+        showPanelByDefault={!hidePanelByDefault}
+        display={display}
       />
-      <MetricNameExplorer datasource={datasource} filters={filteredFilters} showPanelByDefault={!hidePanelByDefault} />
     </Stack>
   );
 }

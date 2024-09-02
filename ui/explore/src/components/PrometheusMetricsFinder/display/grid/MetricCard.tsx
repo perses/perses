@@ -7,7 +7,7 @@ import { Panel } from '@perses-dev/dashboards';
 import { useState } from 'react';
 import EyeOutlineIcon from 'mdi-material-ui/EyeOutline';
 import * as React from 'react';
-import { LabelFilter } from '../../types';
+import { computeFilterExpr, LabelFilter } from '../../types';
 
 export interface MetricCardPanelProps extends StackProps {
   metricName: string;
@@ -32,7 +32,7 @@ export function MetricCardPanel({ metricName, datasource, filters, ...props }: M
           kind: 'PrometheusTimeSeriesQuery',
           spec: {
             datasource: datasource,
-            query: `{__name__="${metricName}", ${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`).join(',')}}`,
+            query: `{__name__="${metricName}", ${computeFilterExpr(filters)}}`,
           },
         },
       },
@@ -74,7 +74,7 @@ export function MetricCardPanel({ metricName, datasource, filters, ...props }: M
                           kind: 'PrometheusTimeSeriesQuery',
                           spec: {
                             datasource: datasource,
-                            query: `{__name__="${metricName}", ${filters.map((filter) => `${filter.label}=~"${filter.labelValues.join('|')}"`).join(',')}}`,
+                            query: `{__name__="${metricName}", ${computeFilterExpr(filters)}}`,
                           },
                         },
                       },
