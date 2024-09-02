@@ -26,11 +26,12 @@ export interface GanttTableProps {
   options: TracingGanttChartOptions;
   rootSpan: Span;
   viewport: Viewport;
+  selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
 }
 
 export function GanttTable(props: GanttTableProps) {
-  const { options, rootSpan, viewport, onSpanClick } = props;
+  const { options, rootSpan, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -72,6 +73,7 @@ export function GanttTable(props: GanttTableProps) {
             options={options}
             span={span}
             viewport={viewport}
+            selected={span === selectedSpan}
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}
