@@ -70,7 +70,7 @@ spec: {
     display: {
         name: #grafanaDashboard.title
     }
-    variables: [ for _, grafanaVar in #grafanaDashboard.templating.list {
+    variables: [ for _, grafanaVar in #grafanaDashboard.templating.list if grafanaVar.type != "adhoc" {
         _displayConversion: {
             #var: _
 
