@@ -146,7 +146,6 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "interval",
             "description": "ad hoc filter",
             "hidden": false
           },
@@ -236,7 +235,6 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "queryResVarVolatile",
             "description": "query result var for volatile series (relies $__range global var)",
             "hidden": false
           },
@@ -257,7 +255,6 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "queryResVarOther",
             "description": "query result var with no <aggr> by clause",
             "hidden": false
           },

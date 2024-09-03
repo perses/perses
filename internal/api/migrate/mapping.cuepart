@@ -74,22 +74,14 @@ spec: {
         _displayConversion: {
             #var: _
 
-            name: [ // switch
-                if #var.label != _|_ if #var.label != "" {
-                    #var.label
-                },
-                #var.name
-            ][0]
-            if #var.description != _|_ {
-                description: #var.description
+            if #var.label != _|_ if #var.label != "" {
+                display: name: #var.label
             }
-            if #var.hide != _|_ {
-                hidden: [ // switch
-                    if #var.hide > 0 {
-                        true
-                    },
-                    false
-                ][0]
+            if #var.description != _|_ {
+                display: description: #var.description
+            }
+            if #var.hide != _|_ if #var.hide > 0 {
+                display: hidden: true
             }
         }
         _singleVarConversion: this={
@@ -99,7 +91,7 @@ spec: {
             kind: "TextVariable"
             spec: {
                 name: #var.name
-                display: _displayConversion & {#var: this.#var}
+                _displayConversion & {#var: this.#var}
                 constant: #constant
                 value: #var.query
             }
@@ -114,9 +106,7 @@ spec: {
             kind: "ListVariable"
             spec: {
                 name: grafanaVar.name
-                if grafanaVar.label != _|_ || grafanaVar.description != _|_ || grafanaVar.hide > 0 {
-                    display: _displayConversion & {#var: grafanaVar}
-                }
+                _displayConversion & {#var: grafanaVar}
                 allowAllValue: *grafanaVar.includeAll | false // the default value tackles the case of variables of type `interval` that don't have such field
                 allowMultiple: *grafanaVar.multi | false      // the default value tackles the case of variables of type `interval` that don't have such field
                 if allowAllValue if grafanaVar.allValue != _|_ {
