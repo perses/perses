@@ -14,9 +14,7 @@
 
 ## Overview
 
-Perses is part of the [CoreDash community](https://github.com/coredashio/community). It belongs to the Linux Foundation.
-At a later stage, we want to promote the project to the [Cloud Native Computing Foundation](https://www.cncf.io/) and be
-part of the monitoring tools like Prometheus or Thanos.
+Perses, a [Cloud Native Computing Foundation](https://cncf.io) sandbox project, is a dashboard tool to visualize observability data from Prometheus/Thanos/Jaeger.
 
 | ![img.png](https://github.com/perses/perses/assets/5657041/3bd8ae57-da7b-4447-9478-cefe19d61a71) | ![img.png](https://github.com/perses/perses/assets/5657041/ba46beab-c8fb-4583-bc2f-71c9893f7906) |
 |:------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------:|
