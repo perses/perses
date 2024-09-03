@@ -901,7 +901,6 @@
         },
         "definition": "query_result(group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range])))",
         "description": "query result var for volatile series (relies $__range global var)",
-        "hide": 0,
         "includeAll": false,
         "multi": false,
         "name": "queryResVarVolatile",
