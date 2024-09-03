@@ -176,7 +176,7 @@ It mainly consists in adding the CUE sources from Perses as external dependencie
 percli dac setup
 
 # DaC setup when you are not connected to a server, you need to provide the Perses version to consider for dependencies retrieval
-percli dac setup --version 0.42.1
+percli dac setup --version 0.47.1 # any version you'd like above v0.44.0-rc0
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)

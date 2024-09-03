@@ -50,7 +50,7 @@ See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-in
 Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentioned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
 
 ```
-percli dac setup --version 0.42.1
+percli dac setup --version 0.47.1 # any version you'd like above v0.44.0-rc0
 ```
 
 You can omit the version flag if you are connected to a Perses server (it will retrieve its version). Otherwise, unless you have a specific case, better to pass the latest version available.
