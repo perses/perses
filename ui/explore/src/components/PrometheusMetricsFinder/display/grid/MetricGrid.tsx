@@ -11,9 +11,17 @@ export interface MetricGridProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   showPanelByDefault?: boolean;
+  onExplore: (metricName: string) => void;
 }
 
-export function MetricGrid({ metricNames, datasource, filters, showPanelByDefault, ...props }: MetricGridProps) {
+export function MetricGrid({
+  metricNames,
+  datasource,
+  filters,
+  showPanelByDefault,
+  onExplore,
+  ...props
+}: MetricGridProps) {
   // Formatting data to be displayed in a row of a table with 4 cells
   const formattedData: Array<{ col1?: string; col2?: string; col3?: string; col4?: string }> = useMemo(() => {
     const result = [];
@@ -44,6 +52,7 @@ export function MetricGrid({ metricNames, datasource, filters, showPanelByDefaul
               height="250px"
               showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
+              onExplore={onExplore}
             >
               {row.col1}
             </MetricCard>
@@ -56,6 +65,7 @@ export function MetricGrid({ metricNames, datasource, filters, showPanelByDefaul
               height="250px"
               showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
+              onExplore={onExplore}
             >
               {row.col2}
             </MetricCard>
@@ -68,6 +78,7 @@ export function MetricGrid({ metricNames, datasource, filters, showPanelByDefaul
               height="250px"
               showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
+              onExplore={onExplore}
             >
               {row.col3}
             </MetricCard>
@@ -80,6 +91,7 @@ export function MetricGrid({ metricNames, datasource, filters, showPanelByDefaul
               height="250px"
               showPanel={showPanelByDefault}
               sx={{ width: '100%' }}
+              onExplore={onExplore}
             >
               {row.col4}
             </MetricCard>

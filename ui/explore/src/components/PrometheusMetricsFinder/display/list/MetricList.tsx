@@ -1,5 +1,5 @@
 import { DatasourceSelector } from '@perses-dev/core';
-import { Button, Chip, Divider, Grid2Props, Skeleton, Stack, TableCell, Typography } from '@mui/material';
+import { Button, Chip, ChipProps, Divider, Grid2Props, Skeleton, Stack, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
 import * as React from 'react';
 import { useDatasourceClient } from '@perses-dev/plugin-system';
@@ -14,13 +14,31 @@ import { useMemo } from 'react';
 import EyeOutlineIcon from 'mdi-material-ui/EyeOutline';
 import { LabelFilter } from '../../types';
 
+export function MetricChip({ label, ...props }: ChipProps) {
+  if (label === 'gauge') {
+    return <Chip label={label} color="success" {...props} />;
+  }
+  if (label === 'counter') {
+    return <Chip label={label} color="primary" {...props} />;
+  }
+  if (label === 'histogram') {
+    return <Chip label={label} color="warning" {...props} />;
+  }
+  if (label === 'summary') {
+    return <Chip label={label} color="info" {...props} />;
+  }
+
+  return <Chip label={label} {...props} />;
+}
+
 export interface MetricRowProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  onExplore: (metricName: string) => void;
 }
 
-export function MetricRow({ metricName, datasource, filters }: MetricRowProps) {
+export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data, isLoading } = useQuery<MetricMetadataResponse>({
@@ -44,7 +62,11 @@ export function MetricRow({ metricName, datasource, filters }: MetricRowProps) {
       </TableCell>
 
       <TableCell style={{ minWidth: 'fit-content' }}>
-        {isLoading ? <Skeleton variant="rounded" width={50} /> : <Chip label={metadata ? metadata.type : 'unknown'} />}
+        {isLoading ? (
+          <Skeleton variant="rounded" width={50} />
+        ) : (
+          <MetricChip label={metadata ? metadata.type : 'unknown'} />
+        )}
       </TableCell>
       <TableCell style={{ width: '100%' }}>
         {isLoading ? (
@@ -57,9 +79,9 @@ export function MetricRow({ metricName, datasource, filters }: MetricRowProps) {
         <Button
           aria-label={`explore metric ${metricName}`}
           variant="contained"
-          size="small"
           startIcon={<EyeOutlineIcon />}
           style={{ textWrap: 'nowrap' }}
+          onClick={() => onExplore(metricName)}
         >
           Explore
         </Button>
@@ -72,15 +94,18 @@ export interface MetricListProps extends Grid2Props {
   metricNames: string[];
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  onExplore: (metricName: string) => void;
 }
 
-export function MetricList({ metricNames, datasource, filters, ...props }: MetricListProps) {
+export function MetricList({ metricNames, datasource, filters, onExplore, ...props }: MetricListProps) {
   return (
     <Stack gap={2} width="100%" divider={<Divider orientation="horizontal" flexItem />} {...props}>
       <TableVirtuoso
         style={{ height: '70vh', width: '100%' }}
         data={metricNames}
-        itemContent={(_, metricName) => <MetricRow metricName={metricName} datasource={datasource} filters={filters} />}
+        itemContent={(_, metricName) => (
+          <MetricRow metricName={metricName} datasource={datasource} filters={filters} onExplore={onExplore} />
+        )}
       />
     </Stack>
   );

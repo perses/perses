@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { cloneElement, forwardRef, HTMLAttributes, ReactElement, useMemo, useRef, useState } from 'react';
 import { Autocomplete, IconButton, InputAdornment, TextField } from '@mui/material';
 import CheckIcon from 'mdi-material-ui/Check';
 import * as React from 'react';
@@ -12,6 +12,7 @@ import {
   PrometheusClient,
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
+import { Virtuoso } from 'react-virtuoso';
 import { computeFilterExpr, LabelFilter } from '../types';
 
 export interface LabelFilterInputProps {
@@ -70,6 +71,43 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
   );
 }
 
+// https://stackoverflow.com/questions/69060738/material-ui-autocomplete-virtualization-w-react-virtuoso
+const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListElement>>(
+  ({ children, ...rest }, ref) => {
+    const data = children as ReactElement[];
+    const localRef = useRef<string>('500px');
+
+    const [height, setHeight] = useState(0);
+
+    return (
+      <ul
+        style={{ overflow: 'hidden', padding: '0', height: height ? `min(40vh, ${height}px)` : '40vh' }}
+        ref={(reference) => {
+          const maxHeight = reference ? getComputedStyle(reference).maxHeight : null;
+          if (maxHeight && maxHeight !== localRef.current) {
+            localRef.current = maxHeight;
+          }
+
+          if (typeof ref === 'function') {
+            ref(reference);
+          }
+        }}
+        {...rest}
+      >
+        <Virtuoso
+          style={{ height: localRef.current, padding: '10px 0' }}
+          data={data}
+          totalListHeightChanged={setHeight}
+          itemContent={(index, child) => {
+            return cloneElement(child, { index });
+          }}
+        />
+      </ul>
+    );
+  }
+);
+ListboxComponent.displayName = 'ListboxComponent';
+
 export interface RawFilterInputProps {
   value: LabelFilter;
   labelOptions?: string[];
@@ -98,6 +136,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         options={labelOptions ?? []}
         value={value.label}
         sx={{ width: 250, display: isEditingLabelName ? 'block' : 'none' }}
+        ListboxComponent={ListboxComponent}
         renderInput={(params) => {
           return (
             <TextField
@@ -134,6 +173,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         disableClearable
         options={labelValuesOptions ?? []}
         value={value.labelValues}
+        ListboxComponent={ListboxComponent}
         sx={{ width: 250, display: isEditingLabelName ? 'none' : 'block' }}
         renderInput={(params) => {
           return (

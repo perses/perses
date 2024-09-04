@@ -25,10 +25,12 @@ import { useDatasourceClient } from '@perses-dev/plugin-system';
 import { useQuery } from '@tanstack/react-query';
 import ViewListIcon from 'mdi-material-ui/ViewList';
 import GridIcon from 'mdi-material-ui/Grid';
+import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import { computeFilterExpr, LabelFilter } from './types';
 import { FinderFilters } from './filter/FinderFilters';
 import { MetricGrid } from './display/grid/MetricGrid';
 import { MetricList } from './display/list/MetricList';
+import { MetricOverview } from './overview/MetricOverview';
 
 type DisplayMode = 'grid' | 'list';
 
@@ -63,6 +65,7 @@ export interface MetricNameExplorerProps extends StackProps {
   filters: LabelFilter[];
   display: DisplayMode;
   showPanelByDefault?: boolean;
+  onExplore: (metricName: string) => void;
 }
 
 export function MetricNameExplorer({
@@ -70,6 +73,7 @@ export function MetricNameExplorer({
   filters,
   display,
   showPanelByDefault,
+  onExplore,
   ...props
 }: MetricNameExplorerProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
@@ -88,7 +92,15 @@ export function MetricNameExplorer({
   });
 
   if (display === 'list') {
-    return <MetricList metricNames={data?.data ?? []} datasource={datasource} filters={filters} {...props} />;
+    return (
+      <MetricList
+        metricNames={data?.data ?? []}
+        datasource={datasource}
+        filters={filters}
+        onExplore={onExplore}
+        {...props}
+      />
+    );
   }
 
   return (
@@ -97,6 +109,7 @@ export function MetricNameExplorer({
       datasource={datasource}
       filters={filters}
       showPanelByDefault={showPanelByDefault}
+      onExplore={onExplore}
       {...props}
     />
   );
@@ -107,9 +120,10 @@ export interface PrometheusMetricsFinderProps extends StackProps {
 }
 
 export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: PrometheusMetricsFinderProps) {
-  const [display, setDisplay] = useState<'grid' | 'list'>('list');
+  const [display, setDisplay] = useState<DisplayMode>('list');
   const [datasource, setDatasource] = useState<DatasourceSelector>(DEFAULT_PROM); // TODO: retrieve from context
   const [filters, setFilters] = useState<LabelFilter[]>([]);
+  const [exploredMetric, setExploredMetric] = useState<string | undefined>(undefined);
 
   // Remove duplicated filters and filters without label or labelValues
   const filteredFilters: LabelFilter[] = useMemo(() => {
@@ -151,14 +165,36 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
           onDatasourceChange={setDatasource}
           onFiltersChange={setFilters}
         />
-        <ToggleDisplayButtons value={display} onChange={setDisplay} />
+        <Stack direction="row" gap={1}>
+          {exploredMetric && (
+            <Button
+              variant="contained"
+              aria-label="back to metric explorer"
+              startIcon={<ArrowLeftIcon />}
+              onClick={() => setExploredMetric(undefined)}
+            >
+              Back
+            </Button>
+          )}
+          <ToggleDisplayButtons value={display} onChange={setDisplay} />
+        </Stack>
       </Stack>
-      <MetricNameExplorer
-        datasource={datasource}
-        filters={filteredFilters}
-        showPanelByDefault={!hidePanelByDefault}
-        display={display}
-      />
+      {exploredMetric ? (
+        <MetricOverview
+          metricName={exploredMetric}
+          datasource={datasource}
+          filters={filteredFilters}
+          onExplore={setExploredMetric}
+        />
+      ) : (
+        <MetricNameExplorer
+          datasource={datasource}
+          filters={filteredFilters}
+          showPanelByDefault={!hidePanelByDefault}
+          display={display}
+          onExplore={setExploredMetric}
+        />
+      )}
     </Stack>
   );
 }

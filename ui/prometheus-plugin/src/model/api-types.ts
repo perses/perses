@@ -81,8 +81,8 @@ export type RangeQueryResponse = ApiResponse<MatrixData>;
 
 export interface SeriesRequestParameters {
   'match[]': string[];
-  start: UnixTimestampSeconds;
-  end: UnixTimestampSeconds;
+  start?: UnixTimestampSeconds;
+  end?: UnixTimestampSeconds;
   limit?: number;
 }
 

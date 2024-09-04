@@ -17,6 +17,7 @@ export interface MetricCardPanelProps extends StackProps {
 
 export function MetricCardPanel({ metricName, datasource, filters, ...props }: MetricCardPanelProps) {
   const { width, ref: firstBoxRef } = useResizeObserver();
+  const suggestedStepMs = useSuggestedStepMs(width);
 
   const { ref: secondBoxRef, inView } = useInView({
     threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
@@ -39,16 +40,12 @@ export function MetricCardPanel({ metricName, datasource, filters, ...props }: M
     },
   ];
 
-  const definitions = queries.length
-    ? queries.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      })
-    : [];
-
-  const suggestedStepMs = useSuggestedStepMs(width);
+  const definitions = queries.map((query) => {
+    return {
+      kind: query.spec.plugin.kind,
+      spec: query.spec.plugin.spec,
+    };
+  });
 
   return (
     <Box ref={firstBoxRef} sx={{ width: '100%', height: '100%' }} {...props}>
@@ -66,20 +63,7 @@ export function MetricCardPanel({ metricName, datasource, filters, ...props }: M
               definition={{
                 kind: 'Panel',
                 spec: {
-                  queries: [
-                    {
-                      kind: 'TimeSeriesQuery',
-                      spec: {
-                        plugin: {
-                          kind: 'PrometheusTimeSeriesQuery',
-                          spec: {
-                            datasource: datasource,
-                            query: `{__name__="${metricName}", ${computeFilterExpr(filters)}}`,
-                          },
-                        },
-                      },
-                    },
-                  ],
+                  queries: queries,
                   display: { name: '' },
                   plugin: { kind: 'TimeSeriesChart', spec: {} },
                 },
@@ -97,9 +81,10 @@ export interface MetricCardProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   showPanel?: boolean;
+  onExplore: (metricName: string) => void;
 }
 
-export function MetricCard({ metricName, datasource, filters, showPanel, ...props }: MetricCardProps) {
+export function MetricCard({ metricName, datasource, filters, showPanel, onExplore, ...props }: MetricCardProps) {
   const [isPanelEnabled, setIsPanelEnabled] = useState(showPanel ?? true);
 
   return (
@@ -133,7 +118,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, ...prop
             variant="contained"
             size="large"
             startIcon={<EyeOutlineIcon />}
-            onClick={() => setIsPanelEnabled(true)}
+            onClick={() => onExplore(metricName)}
           >
             Explore metric
           </Button>
