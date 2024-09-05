@@ -51,7 +51,7 @@ export function MetricGrid({
               filters={filters}
               height="250px"
               showPanel={showPanelByDefault}
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', mt: 2 }}
               onExplore={onExplore}
             >
               {row.col1}
@@ -64,7 +64,7 @@ export function MetricGrid({
               filters={filters}
               height="250px"
               showPanel={showPanelByDefault}
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', mt: 2 }}
               onExplore={onExplore}
             >
               {row.col2}
@@ -77,7 +77,7 @@ export function MetricGrid({
               filters={filters}
               height="250px"
               showPanel={showPanelByDefault}
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', mt: 2 }}
               onExplore={onExplore}
             >
               {row.col3}
@@ -90,7 +90,7 @@ export function MetricGrid({
               filters={filters}
               height="250px"
               showPanel={showPanelByDefault}
-              sx={{ width: '100%' }}
+              sx={{ width: '100%', mt: 2 }}
               onExplore={onExplore}
             >
               {row.col4}

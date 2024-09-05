@@ -28,7 +28,7 @@ export function MetricChip({ label, ...props }: ChipProps) {
     return <Chip label={label} color="info" {...props} />;
   }
 
-  return <Chip label={label} {...props} />;
+  return <Chip label={label} sx={{ fontStyle: label === 'unknown' ? 'italic' : 'initial' }} {...props} />;
 }
 
 export interface MetricRowProps {
@@ -58,21 +58,19 @@ export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps)
   return (
     <>
       <TableCell style={{ width: '300px' }}>
-        <Typography>{metricName}</Typography>
+        <Typography sx={{ fontFamily: 'monospace' }}>{metricName}</Typography>
       </TableCell>
 
       <TableCell style={{ minWidth: 'fit-content' }}>
-        {isLoading ? (
-          <Skeleton variant="rounded" width={50} />
-        ) : (
-          <MetricChip label={metadata ? metadata.type : 'unknown'} />
-        )}
+        {isLoading ? <Skeleton variant="rounded" width={50} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
       </TableCell>
       <TableCell style={{ width: '100%' }}>
         {isLoading ? (
           <Skeleton variant="rounded" width={180} />
         ) : (
-          <Typography>{metadata ? metadata.help : 'unknown'}</Typography>
+          <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
+            {metadata ? metadata.help : 'unknown'}
+          </Typography>
         )}
       </TableCell>
       <TableCell style={{ minWidth: 'fit-content' }}>

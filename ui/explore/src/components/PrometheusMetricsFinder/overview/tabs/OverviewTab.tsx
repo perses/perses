@@ -9,9 +9,10 @@ import {
   SeriesResponse,
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 import { Divider, Stack, StackProps, Typography } from '@mui/material';
 import * as React from 'react';
+import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
 import { MetricChip } from '../../display/list/MetricList';
 import { computeFilterExpr, LabelFilter } from '../../types';
 
@@ -87,10 +88,12 @@ export function OverviewTab({ metricName, datasource, filters, ...props }: Overv
   }, [labelValueCounters]);
 
   return (
-    <Stack {...props}>
+    <Stack gap={2} {...props}>
       <Stack direction="row" alignItems="center" gap={3} mt={1} justifyContent="space-between">
         <Stack gap={1}>
-          <Typography variant="h1">{metricName}</Typography>
+          <Typography variant="h1" sx={{ fontFamily: 'monospace' }}>
+            {metricName}
+          </Typography>
           <Typography>
             Description: <span style={{ fontWeight: 'bold' }}>{metadata?.help ?? 'unknown'}</span> {/* TODO loading */}
           </Typography>
@@ -104,26 +107,33 @@ export function OverviewTab({ metricName, datasource, filters, ...props }: Overv
       </Stack>
       <Stack divider={<Divider flexItem orientation="horizontal" />} gap={2}>
         <Typography variant="h2">Labels</Typography>
-        {labels.map((label) => (
-          <Stack key={label} direction="row" justifyContent="space-between">
-            <Stack alignItems="center">
-              <Typography>{label}</Typography>
-            </Stack>
-            <Stack>
-              {(labelValueCounters.get(label) ?? []).map((labelValueCounter) => (
-                <Stack
-                  key={`${label}-${labelValueCounter.labelValue}`}
-                  direction="row"
-                  gap={2}
-                  justifyContent="space-between"
-                >
-                  <Typography>{labelValueCounter.labelValue}</Typography>
-                  <Typography>({labelValueCounter.counter} series)</Typography>
+        <Grid container spacing={2}>
+          {labels.map((label) => (
+            <Fragment key={label}>
+              <Grid xs={6}>
+                <Stack alignItems="center">
+                  <Typography sx={{ fontFamily: 'monospace' }}>{label}</Typography>
                 </Stack>
-              ))}
-            </Stack>
-          </Stack>
-        ))}
+              </Grid>
+              <Grid xs={6}>
+                <Typography>{labelValueCounters.get(label)?.length ?? 0} values</Typography>
+                <Stack>
+                  {(labelValueCounters.get(label) ?? []).map((labelValueCounter) => (
+                    <Stack
+                      key={`${label}-${labelValueCounter.labelValue}`}
+                      direction="row"
+                      gap={2}
+                      justifyContent="space-between"
+                    >
+                      <Typography sx={{ fontFamily: 'monospace' }}>{labelValueCounter.labelValue}</Typography>
+                      <Typography>({labelValueCounter.counter} series)</Typography>
+                    </Stack>
+                  ))}
+                </Stack>
+              </Grid>
+            </Fragment>
+          ))}
+        </Grid>
       </Stack>
     </Stack>
   );

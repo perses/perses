@@ -1,4 +1,4 @@
-import { Box, Button, Card, Stack, StackProps } from '@mui/material';
+import { Box, Button, Card, Stack, StackProps, Typography } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import useResizeObserver from 'use-resize-observer';
 import { useInView } from 'react-intersection-observer';
@@ -89,7 +89,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
 
   return (
     <Stack {...props}>
-      <p>{metricName}</p>
+      <Typography sx={{ fontFamily: 'monospace' }}>{metricName}</Typography>
       {isPanelEnabled ? (
         <MetricCardPanel metricName={metricName} datasource={datasource} filters={filters} />
       ) : (
