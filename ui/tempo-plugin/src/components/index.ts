@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,23 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTheme } from '@mui/material';
-import CodeMirror from '@uiw/react-codemirror';
-
-export function TraceQLEditor({ ...rest }) {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-
-  return (
-    <CodeMirror
-      {...rest}
-      style={{ border: `1px solid ${theme.palette.divider}` }}
-      theme={isDarkMode ? 'dark' : 'light'}
-      basicSetup={{
-        highlightActiveLine: false,
-        highlightActiveLineGutter: false,
-        foldGutter: false,
-      }}
-    />
-  );
-}
+export * from './TraceQLEditor';

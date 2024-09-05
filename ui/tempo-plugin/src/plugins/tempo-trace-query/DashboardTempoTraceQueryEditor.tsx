@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Stack, FormControl, InputLabel } from '@mui/material';
-import { DatasourceSelect } from '@perses-dev/plugin-system';
+import { DatasourceSelect, useDatasourceClient } from '@perses-dev/plugin-system';
 import { DatasourceSelector } from '@perses-dev/core';
 import { TempoDatasourceSelector, TEMPO_DATASOURCE_KIND } from '../../model/tempo-selectors';
-import { TraceQLEditor } from './TraceQLEditor';
+import { TraceQLEditor } from '../../components';
+import { TempoClient } from '../../model/tempo-client';
 
 interface DashboardTempoTraceQueryEditorProps {
   selectedDatasource: TempoDatasourceSelector;
@@ -28,6 +29,7 @@ interface DashboardTempoTraceQueryEditorProps {
 
 export function DashboardTempoTraceQueryEditor(props: DashboardTempoTraceQueryEditorProps) {
   const { selectedDatasource, handleDatasourceChange, query, handleQueryChange, handleQueryBlur } = props;
+  const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
 
   return (
     <Stack spacing={2}>
@@ -43,7 +45,7 @@ export function DashboardTempoTraceQueryEditor(props: DashboardTempoTraceQueryEd
           label="Tempo Datasource"
         />
       </FormControl>
-      <TraceQLEditor value={query} onChange={handleQueryChange} onBlur={handleQueryBlur} />
+      <TraceQLEditor completeConfig={{ client }} value={query} onChange={handleQueryChange} onBlur={handleQueryBlur} />
     </Stack>
   );
 }
