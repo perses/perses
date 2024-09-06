@@ -56,7 +56,13 @@ export function TracingGanttChart(props: TracingGanttChartProps) {
       <Stack sx={{ flexGrow: 1, gap }}>
         <MiniGanttChart options={options} rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
-          <GanttTable options={options} rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
+          <GanttTable
+            options={options}
+            rootSpan={rootSpan}
+            viewport={viewport}
+            selectedSpan={selectedSpan}
+            onSpanClick={setSelectedSpan}
+          />
         </GanttTableProvider>
       </Stack>
       {selectedSpan && (
