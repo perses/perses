@@ -61,12 +61,12 @@ export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps)
         <Typography sx={{ fontFamily: 'monospace' }}>{metricName}</Typography>
       </TableCell>
 
-      <TableCell style={{ minWidth: 'fit-content' }}>
-        {isLoading ? <Skeleton variant="rounded" width={50} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
+      <TableCell style={{ minWidth: 'fit-content', textAlign: 'center' }}>
+        {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
       </TableCell>
       <TableCell style={{ width: '100%' }}>
         {isLoading ? (
-          <Skeleton variant="rounded" width={180} />
+          <Skeleton variant="text" width={180} />
         ) : (
           <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
             {metadata ? metadata.help : 'unknown'}

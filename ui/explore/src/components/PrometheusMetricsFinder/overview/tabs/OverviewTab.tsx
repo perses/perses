@@ -1,6 +1,7 @@
 import { DatasourceSelector } from '@perses-dev/core';
 import { useDatasourceClient } from '@perses-dev/plugin-system';
 import {
+  Metric,
   MetricMetadata,
   MetricMetadataRequestParameters,
   MetricMetadataResponse,
@@ -13,11 +14,13 @@ import { useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
+  CircularProgress,
   Divider,
   IconButton,
   MenuItem,
   Select,
   SelectChangeEvent,
+  Skeleton,
   Stack,
   StackProps,
   TextField,
@@ -28,10 +31,18 @@ import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import { MetricChip } from '../../display/list/MetricList';
-import { computeFilterExpr, LabelFilter, Operator } from '../../types';
+import { computeFilterExpr, LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { ListboxComponent } from '../../filter/FilterInputs';
 
-export function useSeriesStates(datasource: DatasourceSelector, metricName: string, filters: LabelFilter[]) {
+export function useSeriesStates(
+  datasource: DatasourceSelector,
+  metricName: string,
+  filters: LabelFilter[]
+): {
+  series: Metric[] | undefined;
+  labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;
+  isLoading: boolean;
+} {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data: seriesData, isLoading } = useQuery<SeriesResponse>({
@@ -45,7 +56,7 @@ export function useSeriesStates(datasource: DatasourceSelector, metricName: stri
   });
 
   const labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>> = useMemo(() => {
-    const result = new Map<string, Array<{ labelValue: string; counter: number }>>();
+    const result = new Map<string, LabelValueCounter[]>();
     if (seriesData?.data === undefined) {
       return result;
     }
@@ -75,7 +86,7 @@ export function useSeriesStates(datasource: DatasourceSelector, metricName: stri
 
 export interface LabelValuesRowProps extends StackProps {
   label: string;
-  valueCounters: Array<{ labelValue: string; counter: number }>;
+  valueCounters: LabelValueCounter[];
   onFilterAdd: (filter: LabelFilter) => void;
   orderBy?: 'asc' | 'amount';
 }
@@ -180,6 +191,47 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
   );
 }
 
+export interface LabelValuesTableProps extends StackProps {
+  labelValueCounters: Map<string, LabelValueCounter[]>;
+  isLoading?: boolean;
+  onFilterAdd: (filter: LabelFilter) => void;
+}
+
+export function LabelValuesTable({ labelValueCounters, isLoading, onFilterAdd, ...props }: LabelValuesTableProps) {
+  const labels: string[] = useMemo(() => {
+    return [...labelValueCounters.keys()];
+  }, [labelValueCounters]);
+
+  if (isLoading) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack sx={{ width: '100%' }} divider={<Divider flexItem orientation="horizontal" />} gap={2} {...props}>
+      <Stack gap={2} direction="row" sx={{ width: '100%' }}>
+        <Stack sx={{ width: '100%' }}>
+          <Typography variant="h3">Label</Typography>
+        </Stack>
+        <Stack sx={{ width: '100%' }}>
+          <Typography variant="h3">Values</Typography>
+        </Stack>
+      </Stack>
+      {labels.map((label) => (
+        <LabelValuesRow
+          key={label}
+          label={label}
+          valueCounters={labelValueCounters.get(label) ?? []}
+          onFilterAdd={onFilterAdd}
+        />
+      ))}
+    </Stack>
+  );
+}
+
 export interface OverviewTabProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
@@ -206,10 +258,6 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
 
   const { series, labelValueCounters, isLoading } = useSeriesStates(datasource, metricName, filters);
 
-  const labels: string[] = useMemo(() => {
-    return [...labelValueCounters.keys()];
-  }, [labelValueCounters]);
-
   return (
     <Stack gap={2} {...props}>
       <Stack direction="row" alignItems="center" gap={3} mt={1} justifyContent="space-between">
@@ -218,35 +266,30 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
             {metricName}
           </Typography>
           <Typography>
-            Description: <span style={{ fontWeight: 'bold' }}>{metadata?.help ?? 'unknown'}</span> {/* TODO loading */}
+            Description:
+            {isMetricLoading ? (
+              <Skeleton variant="text" width={180} />
+            ) : (
+              <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
+                {metadata ? metadata.help : 'unknown'}
+              </Typography>
+            )}
           </Typography>
         </Stack>
         <Stack gap={1}>
-          <MetricChip label={metadata ? metadata.type : 'unknown'} />
+          {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
           <Typography>
-            Result: <span style={{ fontWeight: 'bold' }}>{series?.length ?? 'Loading'} series</span>
+            Result:{' '}
+            {isLoading ? (
+              <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />
+            ) : (
+              <Typography sx={{ fontWeight: 'bold' }}>{series?.length ?? 0} series</Typography>
+            )}
           </Typography>
         </Stack>
       </Stack>
 
-      <Stack sx={{ width: '100%' }} divider={<Divider flexItem orientation="horizontal" />} gap={2}>
-        <Stack gap={2} direction="row" sx={{ width: '100%' }}>
-          <Stack sx={{ width: '100%' }}>
-            <Typography variant="h3">Label</Typography>
-          </Stack>
-          <Stack sx={{ width: '100%' }}>
-            <Typography variant="h3">Values</Typography>
-          </Stack>
-        </Stack>
-        {labels.map((label) => (
-          <LabelValuesRow
-            key={label}
-            label={label}
-            valueCounters={labelValueCounters.get(label) ?? []}
-            onFilterAdd={onFilterAdd}
-          />
-        ))}
-      </Stack>
+      <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isLoading} />
     </Stack>
   );
 }

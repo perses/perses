@@ -208,8 +208,8 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
   );
 }
 
-// TODO: others tab
 // TODO: url query params (share link)
 // TODO: theme colors
+// TODO: others tab
 // TODO: tests
 // TODO: put virtualized autocomplete in components

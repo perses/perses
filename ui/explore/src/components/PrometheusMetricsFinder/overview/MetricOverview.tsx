@@ -80,9 +80,9 @@ export function MetricOverview({ metricName, datasource, filters, onFiltersChang
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Overview" />
-        <Tab label="Labels" />
-        <Tab label="Job related metrics" />
-        <Tab label="Filter related metrics" />
+        {/*<Tab label="Labels" />*/}
+        {/*<Tab label="Job related metrics" />*/}
+        {/*<Tab label="Filter related metrics" />*/}
       </Tabs>
       <Stack gap={1}>
         {tab === 0 && (
@@ -93,9 +93,9 @@ export function MetricOverview({ metricName, datasource, filters, onFiltersChang
             onFilterAdd={handleFilterAdd}
           />
         )}
-        {tab === 1 && <Stack></Stack>}
-        {tab === 2 && <Stack></Stack>}
-        {tab === 3 && <Stack></Stack>}
+        {/*{tab === 1 && <Stack></Stack>}*/}
+        {/*{tab === 2 && <Stack></Stack>}*/}
+        {/*{tab === 3 && <Stack></Stack>}*/}
       </Stack>
     </Stack>
   );
