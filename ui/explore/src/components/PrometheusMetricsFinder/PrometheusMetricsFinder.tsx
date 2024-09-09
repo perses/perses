@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, ButtonGroup, ButtonGroupProps, Stack, StackProps } from '@mui/material';
+import { Button, ButtonGroup, ButtonGroupProps, CircularProgress, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import {
   DEFAULT_PROM,
@@ -78,9 +78,9 @@ export function MetricNameExplorer({
 }: MetricNameExplorerProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
-  const { data } = useQuery<LabelValuesResponse>({
+  const { data, isLoading } = useQuery<LabelValuesResponse>({
     enabled: !!client,
-    queryKey: ['labelValues', '__name__', 'datasource', datasource.name, 'filters', filters],
+    queryKey: ['labelValues', '__name__', 'datasource', datasource.name, 'filters', ...filters],
     queryFn: async () => {
       const params: LabelValuesRequestParameters = { labelName: '__name__' };
       if (filters.length) {
@@ -90,6 +90,14 @@ export function MetricNameExplorer({
       return await client!.labelValues(params);
     },
   });
+
+  if (isLoading) {
+    return (
+      <Stack width="100%" sx={{ alignItems: 'center', justifyContent: 'center' }}>
+        <CircularProgress />
+      </Stack>
+    );
+  }
 
   if (display === 'list') {
     return (
@@ -165,7 +173,7 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
           onDatasourceChange={setDatasource}
           onFiltersChange={setFilters}
         />
-        <Stack direction="row" gap={1}>
+        <Stack direction="row" gap={1} alignItems="center">
           {exploredMetric && (
             <Button
               variant="contained"
@@ -176,7 +184,7 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
               Back
             </Button>
           )}
-          <ToggleDisplayButtons value={display} onChange={setDisplay} />
+          <ToggleDisplayButtons value={display} onChange={setDisplay} sx={{ height: 32 }} />
         </Stack>
       </Stack>
       {exploredMetric ? (
@@ -185,6 +193,7 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
           datasource={datasource}
           filters={filteredFilters}
           onExplore={setExploredMetric}
+          onFiltersChange={setFilters}
         />
       ) : (
         <MetricNameExplorer
@@ -198,3 +207,9 @@ export function PrometheusMetricsFinder({ hidePanelByDefault, ...props }: Promet
     </Stack>
   );
 }
+
+// TODO: others tab
+// TODO: url query params (share link)
+// TODO: theme colors
+// TODO: tests
+// TODO: put virtualized autocomplete in components

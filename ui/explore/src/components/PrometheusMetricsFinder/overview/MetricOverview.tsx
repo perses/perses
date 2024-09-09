@@ -14,9 +14,10 @@ export interface MetricOverviewProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   onExplore: (metricName: string) => void;
+  onFiltersChange: (filters: LabelFilter[]) => void;
 }
 
-export function MetricOverview({ metricName, datasource, filters, ...props }: MetricOverviewProps) {
+export function MetricOverview({ metricName, datasource, filters, onFiltersChange, ...props }: MetricOverviewProps) {
   const [tab, setTab] = useState(0);
   const { width, ref: panelRef } = useResizeObserver();
   const suggestedStepMs = useSuggestedStepMs(width);
@@ -49,6 +50,10 @@ export function MetricOverview({ metricName, datasource, filters, ...props }: Me
     };
   });
 
+  function handleFilterAdd(filter: LabelFilter) {
+    onFiltersChange([...filters, filter]);
+  }
+
   return (
     <Stack sx={{ width: '100%' }} {...props}>
       <Stack ref={panelRef} height="250px">
@@ -80,7 +85,14 @@ export function MetricOverview({ metricName, datasource, filters, ...props }: Me
         <Tab label="Filter related metrics" />
       </Tabs>
       <Stack gap={1}>
-        {tab === 0 && <OverviewTab metricName={metricName} datasource={datasource} filters={filtersWithMetricName} />}
+        {tab === 0 && (
+          <OverviewTab
+            metricName={metricName}
+            datasource={datasource}
+            filters={filtersWithMetricName}
+            onFilterAdd={handleFilterAdd}
+          />
+        )}
         {tab === 1 && <Stack></Stack>}
         {tab === 2 && <Stack></Stack>}
         {tab === 3 && <Stack></Stack>}

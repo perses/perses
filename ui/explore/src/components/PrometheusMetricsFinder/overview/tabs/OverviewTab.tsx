@@ -9,19 +9,34 @@ import {
   SeriesResponse,
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
-import { Fragment, useMemo } from 'react';
-import { Divider, Stack, StackProps, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
+import {
+  Autocomplete,
+  Button,
+  Divider,
+  IconButton,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Stack,
+  StackProps,
+  TextField,
+  Typography,
+} from '@mui/material';
 import * as React from 'react';
-import Grid from '@mui/material/Unstable_Grid2'; // Grid version 2
+import PlusIcon from 'mdi-material-ui/Plus';
+import CheckIcon from 'mdi-material-ui/Check';
+import CloseIcon from 'mdi-material-ui/Close';
 import { MetricChip } from '../../display/list/MetricList';
-import { computeFilterExpr, LabelFilter } from '../../types';
+import { computeFilterExpr, LabelFilter, Operator } from '../../types';
+import { ListboxComponent } from '../../filter/FilterInputs';
 
 export function useSeriesStates(datasource: DatasourceSelector, metricName: string, filters: LabelFilter[]) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data: seriesData, isLoading } = useQuery<SeriesResponse>({
     enabled: !!client,
-    queryKey: ['series', metricName],
+    queryKey: ['series', metricName, 'filters', ...filters],
     queryFn: async () => {
       const params: SeriesRequestParameters = { 'match[]': [`{${computeFilterExpr(filters)}}`] };
 
@@ -58,13 +73,121 @@ export function useSeriesStates(datasource: DatasourceSelector, metricName: stri
   return { series: seriesData?.data, labelValueCounters, isLoading };
 }
 
+export interface LabelValuesRowProps extends StackProps {
+  label: string;
+  valueCounters: Array<{ labelValue: string; counter: number }>;
+  onFilterAdd: (filter: LabelFilter) => void;
+  orderBy?: 'asc' | 'amount';
+}
+
+export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: LabelValuesRowProps) {
+  const [isAddingFilter, setIsAddingFilter] = useState(false);
+  const [operator, setOperator] = useState<Operator>('=');
+  const [value, setValue] = useState('');
+  const [showAllValues, setShowAllValues] = useState(false); // TODO
+
+  return (
+    <Stack key={label} sx={{ width: '100%' }} direction="row" alignItems="center" gap={2} {...props}>
+      <Stack
+        sx={{ width: '100%', height: '100%' }}
+        justifyContent="space-between"
+        alignContent="center"
+        direction="row"
+      >
+        <Typography sx={{ fontFamily: 'monospace' }} pl={1}>
+          {label}
+        </Typography>
+        <Stack direction="row" gap={1} alignItems="center">
+          {isAddingFilter ? (
+            <>
+              <Select
+                size="small"
+                value={operator}
+                variant="outlined"
+                onChange={(event: SelectChangeEvent) => {
+                  setOperator(event.target.value as Operator);
+                }}
+              >
+                <MenuItem value="=">=</MenuItem>
+                <MenuItem value="!=">!=</MenuItem>
+                <MenuItem value="=~">=~</MenuItem>
+                <MenuItem value="!~">!~</MenuItem>
+              </Select>
+              <Autocomplete
+                freeSolo
+                limitTags={1}
+                disableClearable
+                options={valueCounters.map((counters) => counters.labelValue)}
+                value={value}
+                ListboxComponent={ListboxComponent}
+                sx={{ width: 250 }}
+                renderInput={(params) => {
+                  return <TextField {...params} label="Value" variant="outlined" fullWidth size="small" />;
+                }}
+                onInputChange={(_, newValue) => {
+                  setValue(newValue);
+                }}
+              />
+              <IconButton
+                aria-label="confirm"
+                onClick={() => {
+                  onFilterAdd({ label, labelValues: [value], operator });
+                  setIsAddingFilter(false);
+                }}
+              >
+                <CheckIcon />
+              </IconButton>
+              <IconButton
+                aria-label="cancel"
+                onClick={() => {
+                  setIsAddingFilter(false);
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </>
+          ) : (
+            <Button startIcon={<PlusIcon />} aria-label="add filter" onClick={() => setIsAddingFilter(true)}>
+              Add filter
+            </Button>
+          )}
+        </Stack>
+      </Stack>
+
+      <Stack sx={{ width: '100%' }}>
+        <Typography variant="subtitle1" sx={{ paddingBottom: 1 }}>
+          {valueCounters.length} values
+        </Typography>
+        <Stack>
+          {valueCounters.map((labelValueCounter) => (
+            <Stack key={`${label}-${labelValueCounter.labelValue}`} direction="row" gap={2}>
+              <Typography
+                sx={{
+                  fontFamily: 'monospace',
+                  ':hover': { backgroundColor: 'rgba(127,127,127,0.35)', cursor: 'pointer' },
+                }}
+                color="rgb(89, 204, 141)"
+                onClick={() => onFilterAdd({ label, labelValues: [labelValueCounter.labelValue], operator: '=' })}
+              >
+                {labelValueCounter.labelValue}
+              </Typography>
+              <Typography>({labelValueCounter.counter} series)</Typography>
+            </Stack>
+          ))}
+        </Stack>
+      </Stack>
+    </Stack>
+  );
+}
+
 export interface OverviewTabProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  onFilterAdd: (filter: LabelFilter) => void;
 }
 
-export function OverviewTab({ metricName, datasource, filters, ...props }: OverviewTabProps) {
+export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...props }: OverviewTabProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data: metricData, isLoading: isMetricLoading } = useQuery<MetricMetadataResponse>({
@@ -101,39 +224,28 @@ export function OverviewTab({ metricName, datasource, filters, ...props }: Overv
         <Stack gap={1}>
           <MetricChip label={metadata ? metadata.type : 'unknown'} />
           <Typography>
-            Series total: <span style={{ fontWeight: 'bold' }}>{series?.length ?? 'Loading'}</span>
+            Result: <span style={{ fontWeight: 'bold' }}>{series?.length ?? 'Loading'} series</span>
           </Typography>
         </Stack>
       </Stack>
-      <Stack divider={<Divider flexItem orientation="horizontal" />} gap={2}>
-        <Typography variant="h2">Labels</Typography>
-        <Grid container spacing={2}>
-          {labels.map((label) => (
-            <Fragment key={label}>
-              <Grid xs={6}>
-                <Stack alignItems="center">
-                  <Typography sx={{ fontFamily: 'monospace' }}>{label}</Typography>
-                </Stack>
-              </Grid>
-              <Grid xs={6}>
-                <Typography>{labelValueCounters.get(label)?.length ?? 0} values</Typography>
-                <Stack>
-                  {(labelValueCounters.get(label) ?? []).map((labelValueCounter) => (
-                    <Stack
-                      key={`${label}-${labelValueCounter.labelValue}`}
-                      direction="row"
-                      gap={2}
-                      justifyContent="space-between"
-                    >
-                      <Typography sx={{ fontFamily: 'monospace' }}>{labelValueCounter.labelValue}</Typography>
-                      <Typography>({labelValueCounter.counter} series)</Typography>
-                    </Stack>
-                  ))}
-                </Stack>
-              </Grid>
-            </Fragment>
-          ))}
-        </Grid>
+
+      <Stack sx={{ width: '100%' }} divider={<Divider flexItem orientation="horizontal" />} gap={2}>
+        <Stack gap={2} direction="row" sx={{ width: '100%' }}>
+          <Stack sx={{ width: '100%' }}>
+            <Typography variant="h3">Label</Typography>
+          </Stack>
+          <Stack sx={{ width: '100%' }}>
+            <Typography variant="h3">Values</Typography>
+          </Stack>
+        </Stack>
+        {labels.map((label) => (
+          <LabelValuesRow
+            key={label}
+            label={label}
+            valueCounters={labelValueCounters.get(label) ?? []}
+            onFilterAdd={onFilterAdd}
+          />
+        ))}
       </Stack>
     </Stack>
   );

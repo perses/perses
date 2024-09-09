@@ -1,7 +1,9 @@
+export type Operator = '=' | '!=' | '=~' | '!~';
+
 export interface LabelFilter {
   label: string;
   labelValues: string[];
-  operator?: '=' | '!=' | '=~' | '!~';
+  operator?: Operator;
 }
 
 export function computeFilterExpr(filters: LabelFilter[]): string {

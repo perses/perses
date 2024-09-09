@@ -34,7 +34,7 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
 
   const { data: labelOptions, isLoading: isLabelOptionsLoading } = useQuery<LabelValuesResponse>({
     enabled: !!client,
-    queryKey: ['labels', 'datasource', datasource.name, 'filters', filtersWithoutCurrent],
+    queryKey: ['labels', 'datasource', datasource.name, 'filters', ...filtersWithoutCurrent],
     queryFn: async () => {
       const params: LabelNamesRequestParameters = {};
       if (filters.length) {
@@ -46,8 +46,8 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
   });
 
   const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useQuery<LabelValuesResponse>({
-    enabled: !!client,
-    queryKey: ['labelValues', value.label, 'datasource', datasource.name, 'filters', filtersWithoutCurrent],
+    enabled: !!client && !!value.label,
+    queryKey: ['labelValues', value.label, 'datasource', datasource.name, 'filters', ...filtersWithoutCurrent],
     queryFn: async () => {
       const params: LabelValuesRequestParameters = { labelName: value.label };
       if (filters.length) {
@@ -72,7 +72,7 @@ export function LabelFilterInput({ datasource, value, filters, onChange, onDelet
 }
 
 // https://stackoverflow.com/questions/69060738/material-ui-autocomplete-virtualization-w-react-virtuoso
-const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListElement>>(
+export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTMLUListElement>>(
   ({ children, ...rest }, ref) => {
     const data = children as ReactElement[];
     const localRef = useRef<string>('500px');
@@ -119,12 +119,17 @@ export interface RawFilterInputProps {
 }
 
 export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChange, onDelete }: RawFilterInputProps) {
-  const [isEditingLabelName, setIsEditingLabelName] = useState(true);
+  const [isEditingLabelName, setIsEditingLabelName] = useState(value.labelValues.length === 0);
+  const [labelName, setLabelName] = useState(value.label);
+
+  function handleLabelConfirmation() {
+    setIsEditingLabelName(false);
+    onChange({ label: labelName, labelValues: [] });
+  }
 
   function handleKeyPress(event: { key: string }) {
     if (isEditingLabelName && event.key === 'Enter') {
-      setIsEditingLabelName(false);
-      onChange({ label: value.label, labelValues: [] });
+      handleLabelConfirmation();
     }
   }
 
@@ -135,7 +140,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         disableClearable
         options={labelOptions ?? []}
         value={value.label}
-        sx={{ width: 250, display: isEditingLabelName ? 'block' : 'none' }}
+        sx={{ minWidth: 250, display: isEditingLabelName ? 'block' : 'none' }}
         ListboxComponent={ListboxComponent}
         renderInput={(params) => {
           return (
@@ -148,11 +153,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
                 ...params.InputProps,
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      aria-label="validate label name"
-                      onClick={() => setIsEditingLabelName(false)}
-                      edge="end"
-                    >
+                    <IconButton aria-label="validate label name" onClick={() => handleLabelConfirmation()} edge="end">
                       <CheckIcon />
                     </IconButton>
                   </InputAdornment>
@@ -163,7 +164,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         }}
         onKeyDown={handleKeyPress}
         onInputChange={(_: React.SyntheticEvent, newValue: string | null) => {
-          onChange({ label: newValue ?? '', labelValues: value.labelValues });
+          setLabelName(newValue ?? '');
         }}
       />
       <Autocomplete
@@ -174,7 +175,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         options={labelValuesOptions ?? []}
         value={value.labelValues}
         ListboxComponent={ListboxComponent}
-        sx={{ width: 250, display: isEditingLabelName ? 'none' : 'block' }}
+        sx={{ minWidth: 250, display: isEditingLabelName ? 'none' : 'block' }}
         renderInput={(params) => {
           return (
             <TextField
