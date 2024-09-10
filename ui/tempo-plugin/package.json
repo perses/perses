@@ -29,6 +29,7 @@
         "lint:fix": "eslint --fix src --ext .ts,.tsx"
     },
     "dependencies": {
+        "@codemirror/autocomplete": "^6.17.0",
         "@lezer/highlight": "^1.0.0",
         "@grafana/lezer-traceql": "^0.0.18",
         "@perses-dev/components": "0.47.1",

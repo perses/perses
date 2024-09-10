@@ -13,8 +13,10 @@
 
 import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
+import { CompletionContext } from '@codemirror/autocomplete';
 import { TempoClient } from '../model/tempo-client';
 import { traceQLHighlight } from './highlight';
+import { complete } from './complete';
 
 export function traceQLLanguage(): LRLanguage {
   return LRLanguage.define({
@@ -32,7 +34,11 @@ export interface CompletionConfig {
   client?: TempoClient;
 }
 
-export function TraceQLExtension({ client: _client }: CompletionConfig) {
+export function TraceQLExtension({ client }: CompletionConfig) {
   const language = traceQLLanguage();
-  return [language];
+  const completion = language.data.of({
+    autocomplete: (ctx: CompletionContext) =>
+      complete(ctx, client).catch((e) => console.error('error during TraceQL auto-complete', e)),
+  });
+  return [language, completion];
 }
