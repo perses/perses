@@ -15,10 +15,11 @@ import { LRLanguage } from '@codemirror/language';
 import { parser } from '@grafana/lezer-traceql';
 import { CompletionContext } from '@codemirror/autocomplete';
 import { TempoClient } from '../model/tempo-client';
+import { TempoDatasource } from '../plugins/tempo-datasource';
 import { traceQLHighlight } from './highlight';
 import { complete } from './complete';
 
-export function traceQLLanguage(): LRLanguage {
+function traceQLLanguage(): LRLanguage {
   return LRLanguage.define({
     parser: parser.configure({
       props: [traceQLHighlight],
@@ -30,15 +31,27 @@ export function traceQLLanguage(): LRLanguage {
   });
 }
 
-export interface CompletionConfig {
-  client?: TempoClient;
+function getTempoClient(completionCfg: CompletionConfig): TempoClient | undefined {
+  if (completionCfg.client) {
+    return completionCfg.client;
+  }
+  if (completionCfg.endpoint) {
+    return TempoDatasource.createClient({ directUrl: completionCfg.endpoint }, {});
+  }
+  return undefined;
 }
 
-export function TraceQLExtension({ client }: CompletionConfig) {
+export interface CompletionConfig {
+  client?: TempoClient;
+  endpoint?: string;
+}
+
+export function TraceQLExtension(completionCfg: CompletionConfig) {
+  const tempoClient = getTempoClient(completionCfg);
   const language = traceQLLanguage();
   const completion = language.data.of({
     autocomplete: (ctx: CompletionContext) =>
-      complete(ctx, client).catch((e) => console.error('error during TraceQL auto-complete', e)),
+      complete(ctx, tempoClient).catch((e) => console.error('error during TraceQL auto-complete', e)),
   });
   return [language, completion];
 }
