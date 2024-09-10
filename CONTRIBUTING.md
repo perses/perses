@@ -13,7 +13,7 @@ We are using GitHub as our main development and discussion forum.
 - Be sure to add [DCO signoffs](https://github.com/probot/dco#how-it-works) to all of your commits.
 
 If you are unsure about what to do, and you are eager to contribute, you can reach us on the development
-channel [#perses-dev](https://matrix.to/#/#perses-dev:matrix.org) on [Matrix](https://matrix.org/).
+channel `#perses-dev` on [CNCF slack](https://slack.cncf.io/).
 
 ## Opening a PR
 
