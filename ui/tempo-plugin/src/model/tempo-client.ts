@@ -14,11 +14,16 @@
 import { fetch, RequestHeaders } from '@perses-dev/core';
 import { DatasourceClient } from '@perses-dev/plugin-system';
 import {
+  QueryRequestParameters,
   SearchRequestParameters,
-  SearchTraceIDResponse,
-  SearchTraceQueryResponse,
+  SearchTagsRequestParameters,
+  SearchTagsResponse,
+  QueryResponse,
   ServiceStats,
   SpanStatusError,
+  SearchResponse,
+  SearchTagValuesRequestParameters,
+  SearchTagValuesResponse,
 } from './api-types';
 
 interface TempoClientOptions {
@@ -28,12 +33,12 @@ interface TempoClientOptions {
 
 export interface TempoClient extends DatasourceClient {
   options: TempoClientOptions;
-  searchTraceQuery(params: SearchRequestParameters, queryOptions: QueryOptions): Promise<SearchTraceQueryResponse>;
-  searchTraceQueryFallback(
-    params: SearchRequestParameters,
-    queryOptions: QueryOptions
-  ): Promise<SearchTraceQueryResponse>;
-  searchTraceID(traceID: string, queryOptions: QueryOptions): Promise<SearchTraceIDResponse>;
+  // https://grafana.com/docs/tempo/latest/api_docs/
+  query(params: QueryRequestParameters, headers?: RequestHeaders): Promise<QueryResponse>;
+  search(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
+  searchWithFallback(params: SearchRequestParameters, headers?: RequestHeaders): Promise<SearchResponse>;
+  searchTags(params: SearchTagsRequestParameters, headers?: RequestHeaders): Promise<SearchTagsResponse>;
+  searchTagValues(params: SearchTagValuesRequestParameters, headers?: RequestHeaders): Promise<SearchTagValuesResponse>;
 }
 
 export interface QueryOptions {
@@ -65,15 +70,15 @@ function fetchWithGet<T, TResponse>(apiURI: string, params: T | null, queryOptio
 /**
  * Returns a summary report of traces that satisfy the query.
  */
-export function searchTraceQuery(params: SearchRequestParameters, queryOptions: QueryOptions) {
-  return fetchWithGet<SearchRequestParameters, SearchTraceQueryResponse>(`/api/search`, params, queryOptions);
+export function search(params: SearchRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithGet<SearchRequestParameters, SearchResponse>('/api/search', params, queryOptions);
 }
 
 /**
- * Returns a detailed report, including all the spans, for a given trace.
+ * Returns an entire trace.
  */
-export function searchTraceID(traceID: string, queryOptions: QueryOptions) {
-  return fetchWithGet<null, SearchTraceIDResponse>(`/api/traces/${traceID}`, null, queryOptions);
+export function query(params: QueryRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithGet<null, QueryResponse>(`/api/traces/${params.traceId}`, null, queryOptions);
 }
 
 /**
@@ -85,12 +90,12 @@ export function searchTraceID(traceID: string, queryOptions: QueryOptions) {
  * Tempo computes the serviceStats field during ingestion since vParquet4,
  * this fallback is required for older block formats.
  */
-export async function searchTraceQueryFallback(
+export async function searchWithFallback(
   params: SearchRequestParameters,
   queryOptions: QueryOptions
-): Promise<SearchTraceQueryResponse> {
+): Promise<SearchResponse> {
   // Get a list of traces that satisfy the query.
-  const searchResponse = await searchTraceQuery(params, queryOptions);
+  const searchResponse = await search(params, queryOptions);
   if (!searchResponse.traces || searchResponse.traces.length === 0) {
     return { traces: [] };
   }
@@ -105,7 +110,7 @@ export async function searchTraceQueryFallback(
     traces: await Promise.all(
       searchResponse.traces.map(async (trace) => {
         const serviceStats: Record<string, ServiceStats> = {};
-        const searchTraceIDResponse = await searchTraceID(trace.traceID, queryOptions);
+        const searchTraceIDResponse = await query({ traceId: trace.traceID }, queryOptions);
 
         // For every trace, get the full trace, and find the number of spans and errors.
         for (const batch of searchTraceIDResponse.batches) {
@@ -136,4 +141,23 @@ export async function searchTraceQueryFallback(
       })
     ),
   };
+}
+
+/**
+ * Returns a list of all tag names for a given scope.
+ */
+export function searchTags(params: SearchTagsRequestParameters, queryOptions: QueryOptions) {
+  return fetchWithGet<SearchTagsRequestParameters, SearchTagsResponse>('/api/v2/search/tags', params, queryOptions);
+}
+
+/**
+ * Returns a list of all tag values for a given tag.
+ */
+export function searchTagValues(params: SearchTagValuesRequestParameters, queryOptions: QueryOptions) {
+  const { tag, ...rest } = params;
+  return fetchWithGet<Omit<SearchTagValuesRequestParameters, 'tag'>, SearchTagValuesResponse>(
+    `/api/v2/search/tag/${tag}/values`,
+    rest,
+    queryOptions
+  );
 }
