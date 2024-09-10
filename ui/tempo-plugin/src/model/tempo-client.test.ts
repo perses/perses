@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MOCK_SEARCH_RESPONSE_VPARQUET3, MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_RESPONSE } from '../test';
-import { searchTraceQueryFallback } from './tempo-client';
+import { searchWithFallback } from './tempo-client';
 
 const fetchMock = (global.fetch = jest.fn());
 
@@ -20,7 +20,7 @@ describe('tempo-client', () => {
   it('should return query results as-is when serviceStats are present', async () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET4) });
 
-    const results = await searchTraceQueryFallback({ q: '{}' }, { datasourceUrl: '' });
+    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
     expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
   });
 
@@ -28,7 +28,7 @@ describe('tempo-client', () => {
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_VPARQUET3) });
     fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_TRACE_RESPONSE) });
 
-    const results = await searchTraceQueryFallback({ q: '{}' }, { datasourceUrl: '' });
+    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
     expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
   });
 });

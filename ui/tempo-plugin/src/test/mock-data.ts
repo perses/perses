@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Span, TraceData } from '@perses-dev/core';
-import { SearchTraceIDResponse, SearchTraceQueryResponse } from '../model/api-types';
+import { QueryResponse, SearchResponse } from '../model/api-types';
 
-export const MOCK_TRACE_RESPONSE: SearchTraceIDResponse = {
+export const MOCK_TRACE_RESPONSE: QueryResponse = {
   batches: [
     {
       resource: {
@@ -2075,7 +2075,7 @@ export const MOCK_TRACE_RESPONSE: SearchTraceIDResponse = {
   ],
 };
 
-export const MOCK_TRACE_RESPONSE_SMALL: SearchTraceIDResponse = {
+export const MOCK_TRACE_RESPONSE_SMALL: QueryResponse = {
   batches: [
     {
       resource: {
@@ -2220,7 +2220,7 @@ export const MOCK_TRACE_RESPONSE_SMALL: SearchTraceIDResponse = {
   ],
 };
 
-export const MOCK_SEARCH_RESPONSE_VPARQUET3: SearchTraceQueryResponse = {
+export const MOCK_SEARCH_RESPONSE_VPARQUET3: SearchResponse = {
   traces: [
     {
       traceID: 'fbd37845209d43cdccd418dc5f9ff021',
@@ -2272,7 +2272,7 @@ export const MOCK_SEARCH_RESPONSE_VPARQUET3: SearchTraceQueryResponse = {
   ],
 };
 
-export const MOCK_SEARCH_RESPONSE_VPARQUET4: SearchTraceQueryResponse = {
+export const MOCK_SEARCH_RESPONSE_VPARQUET4: SearchResponse = {
   traces: [
     {
       traceID: 'fbd37845209d43cdccd418dc5f9ff021',

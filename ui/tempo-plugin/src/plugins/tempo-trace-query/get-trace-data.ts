@@ -28,8 +28,8 @@ import { TEMPO_DATASOURCE_KIND, TempoDatasourceSelector } from '../../model/temp
 import { TempoClient } from '../../model/tempo-client';
 import {
   SearchRequestParameters,
-  SearchTraceIDResponse,
-  SearchTraceQueryResponse,
+  QueryResponse,
+  SearchResponse,
   Resource as TempoResource,
   Span as TempoSpan,
   SpanEvent as TempoSpanEvent,
@@ -58,12 +58,6 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
     spec.datasource ?? defaultTempoDatasource
   );
 
-  const datasourceUrl = client?.options?.datasourceUrl;
-  if (datasourceUrl === undefined || datasourceUrl === null || datasourceUrl === '') {
-    console.error('TempoDatasource is undefined, null, or an empty string.');
-    return { searchResult: [] };
-  }
-
   const getQuery = (): SearchRequestParameters => {
     // if time range not defined -- only return the query from the spec
     if (context.absoluteTimeRange === undefined) {
@@ -84,7 +78,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
    * otherwise, execute a TraceQL query
    */
   if (isValidTraceId(spec.query)) {
-    const response = await client.searchTraceID(spec.query, { datasourceUrl });
+    const response = await client.query({ traceId: spec.query });
     return {
       trace: parseTraceResponse(response),
       metadata: {
@@ -92,7 +86,7 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
       },
     };
   } else {
-    const response = await client.searchTraceQueryFallback(getQuery(), { datasourceUrl });
+    const response = await client.searchWithFallback(getQuery());
     return {
       searchResult: parseSearchResponse(response),
       metadata: {
@@ -148,7 +142,7 @@ function parseSpan(span: TempoSpan) {
  * parseTraceResponse builds a tree of spans from the Tempo API response
  * time complexity: O(2n)
  */
-function parseTraceResponse(response: SearchTraceIDResponse): Trace {
+function parseTraceResponse(response: QueryResponse): Trace {
   // first pass: build lookup table <spanId, Span>
   const lookup = new Map<string, Span>();
   for (const batch of response.batches) {
@@ -196,7 +190,7 @@ function parseTraceResponse(response: SearchTraceIDResponse): Trace {
   };
 }
 
-function parseSearchResponse(response: SearchTraceQueryResponse): TraceSearchResult[] {
+function parseSearchResponse(response: SearchResponse): TraceSearchResult[] {
   return response.traces.map((trace) => ({
     startTimeUnixMs: parseInt(trace.startTimeUnixNano) * 1e-6, // convert to millisecond for eChart time format,
     durationMs: trace.durationMs ?? 0, // Tempo API doesn't return 0 values
