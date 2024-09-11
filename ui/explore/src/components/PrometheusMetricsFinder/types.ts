@@ -1,4 +1,15 @@
+import { DatasourceSelector } from '@perses-dev/core';
+
 export type Operator = '=' | '!=' | '=~' | '!~';
+
+export type DisplayMode = 'grid' | 'list';
+
+export interface FinderQueryParams {
+  display?: DisplayMode;
+  datasource?: DatasourceSelector;
+  filters?: LabelFilter[];
+  exploredMetric?: string;
+}
 
 export interface LabelFilter {
   label: string;

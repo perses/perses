@@ -16,9 +16,16 @@ import { Box, Stack, Tab, Tabs } from '@mui/material';
 import { DataQueriesProvider, MultiQueryEditor, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import useResizeObserver from 'use-resize-observer';
 import { Panel } from '@perses-dev/dashboards';
+import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
 import { PrometheusMetricsFinder } from '../PrometheusMetricsFinder';
+import { FinderQueryParams } from '../PrometheusMetricsFinder/types';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
+
+interface MetricsExplorerQueryParams extends FinderQueryParams {
+  tab?: number;
+  queries?: QueryDefinition[];
+}
 
 function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   const { width, ref: boxRef } = useResizeObserver();
@@ -53,11 +60,11 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
+function MetricDataTable({ queries = [] }: { queries: QueryDefinition[] }) {
   const height = PANEL_PREVIEW_HEIGHT;
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
-  const definitions = (queries ?? []).map((query) => {
+  const definitions = queries.map((query) => {
     return {
       kind: query.spec.plugin.kind,
       spec: query.spec.plugin.spec,
@@ -82,13 +89,23 @@ function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
 }
 
 export function MetricsExplorer() {
-  const { tab, queries, setTab, setQueries } = useExplorerManagerContext();
+  const {
+    data: {
+      tab = 0,
+      queries = [],
+      display = 'list',
+      datasource = DEFAULT_PROM,
+      filters = [],
+      exploredMetric = undefined,
+    },
+    setData,
+  } = useExplorerManagerContext<MetricsExplorerQueryParams>();
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
       <Tabs
         value={tab}
-        onChange={(_, state) => setTab(state)}
+        onChange={(_, state) => setData({ tab: state, queries })}
         variant="scrollable"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
@@ -99,19 +116,30 @@ export function MetricsExplorer() {
       <Stack gap={1}>
         {tab === 0 && (
           <Stack>
-            <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
+            <MultiQueryEditor
+              queryTypes={['TimeSeriesQuery']}
+              onChange={(state) => setData({ tab, queries: state })}
+              queries={queries as QueryDefinition[]}
+            />
             <MetricDataTable queries={queries} />
           </Stack>
         )}
         {tab === 1 && (
           <Stack>
-            <MultiQueryEditor queryTypes={['TimeSeriesQuery']} onChange={setQueries} queries={queries} />
+            <MultiQueryEditor
+              queryTypes={['TimeSeriesQuery']}
+              onChange={(state) => setData({ tab, queries: state })}
+              queries={queries as QueryDefinition[]}
+            />
             <TimeSeriesPanel queries={queries} />
           </Stack>
         )}
         {tab === 2 && (
           <Stack>
-            <PrometheusMetricsFinder />
+            <PrometheusMetricsFinder
+              onChange={(state) => setData({ tab, ...state })}
+              value={{ display, datasource, filters, exploredMetric }}
+            />
           </Stack>
         )}
       </Stack>

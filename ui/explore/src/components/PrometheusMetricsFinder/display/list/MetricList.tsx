@@ -11,8 +11,10 @@ import {
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import EyeOutlineIcon from 'mdi-material-ui/EyeOutline';
+import { Link as RouterLink } from 'react-router-dom';
+import CompassIcon from 'mdi-material-ui/Compass';
 import { LabelFilter } from '../../types';
+import { encodeQueryData } from '../../utils';
 
 export function MetricChip({ label, ...props }: ChipProps) {
   if (label === 'gauge') {
@@ -38,7 +40,7 @@ export interface MetricRowProps {
   onExplore: (metricName: string) => void;
 }
 
-export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps) {
+export function MetricRow({ metricName, datasource, filters, onExplore }: MetricRowProps) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data, isLoading } = useQuery<MetricMetadataResponse>({
@@ -54,6 +56,14 @@ export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps)
   const metadata: MetricMetadata | undefined = useMemo(() => {
     return data?.data?.[metricName]?.[0];
   }, [data, metricName]);
+
+  const searchParams = useMemo(() => {
+    return encodeQueryData({
+      datasource,
+      filters,
+      exploredMetric: metricName,
+    });
+  }, [datasource, filters, metricName]);
 
   return (
     <>
@@ -77,9 +87,11 @@ export function MetricRow({ metricName, datasource, onExplore }: MetricRowProps)
         <Button
           aria-label={`explore metric ${metricName}`}
           variant="contained"
-          startIcon={<EyeOutlineIcon />}
+          startIcon={<CompassIcon />}
           style={{ textWrap: 'nowrap' }}
           onClick={() => onExplore(metricName)}
+          component={RouterLink}
+          to={`?${searchParams}`}
         >
           Explore
         </Button>

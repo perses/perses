@@ -123,7 +123,7 @@ export function metricMetadata(
  */
 export function series(params: SeriesRequestParameters, queryOptions: QueryOptions): Promise<SeriesResponse> {
   const apiURI = `/api/v1/series`;
-  return fetchWithGet<SeriesRequestParameters, SeriesResponse>(apiURI, params, queryOptions);
+  return fetchWithPost<SeriesRequestParameters, SeriesResponse>(apiURI, params, queryOptions);
 }
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
