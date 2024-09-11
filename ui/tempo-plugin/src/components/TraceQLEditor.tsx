@@ -14,6 +14,7 @@
 import { useMemo } from 'react';
 import { useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import { isValidTraceId } from '@perses-dev/core';
 import { CompletionConfig, TraceQLExtension } from './TraceQLExtension';
 
 export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
@@ -37,6 +38,9 @@ export function TraceQLEditor({ completeConfig, ...rest }: TraceQLEditorProps) {
         highlightActiveLine: false,
         highlightActiveLineGutter: false,
         foldGutter: false,
+        // The explore view accepts either a TraceQL query or a Trace ID as input. The lezer grammar marks Trace IDs as invalid,
+        // therefore let's disable syntax highlighting if the input is a Trace ID.
+        syntaxHighlighting: !isValidTraceId(rest.value ?? ''),
       }}
       extensions={[EditorView.lineWrapping, traceQLExtension]}
     />
