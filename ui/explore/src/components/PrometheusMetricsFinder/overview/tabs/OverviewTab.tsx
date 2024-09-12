@@ -1,15 +1,4 @@
 import { DatasourceSelector } from '@perses-dev/core';
-import { useDatasourceClient } from '@perses-dev/plugin-system';
-import {
-  Metric,
-  MetricMetadata,
-  MetricMetadataRequestParameters,
-  MetricMetadataResponse,
-  PrometheusClient,
-  SeriesRequestParameters,
-  SeriesResponse,
-} from '@perses-dev/prometheus-plugin';
-import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import {
   Autocomplete,
@@ -31,58 +20,9 @@ import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
 import { MetricChip } from '../../display/list/MetricList';
-import { computeFilterExpr, LabelFilter, LabelValueCounter, Operator } from '../../types';
+import { LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { ListboxComponent } from '../../filter/FilterInputs';
-
-export function useSeriesStates(
-  datasource: DatasourceSelector,
-  metricName: string,
-  filters: LabelFilter[]
-): {
-  series: Metric[] | undefined;
-  labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;
-  isLoading: boolean;
-} {
-  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
-
-  const { data: seriesData, isLoading } = useQuery<SeriesResponse>({
-    enabled: !!client,
-    queryKey: ['series', metricName, 'filters', ...filters],
-    queryFn: async () => {
-      const params: SeriesRequestParameters = { 'match[]': [`{${computeFilterExpr(filters)}}`] };
-
-      return await client!.series(params);
-    },
-  });
-
-  const labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>> = useMemo(() => {
-    const result = new Map<string, LabelValueCounter[]>();
-    if (seriesData?.data === undefined) {
-      return result;
-    }
-
-    for (const series of seriesData.data) {
-      for (const [label, value] of Object.entries(series)) {
-        const labelCounters = result.get(label);
-        if (labelCounters === undefined) {
-          result.set(label, [{ labelValue: value, counter: 1 }]);
-          continue;
-        }
-
-        const labelValueCounter = labelCounters.find((counter) => counter.labelValue === value);
-        if (labelValueCounter === undefined) {
-          labelCounters.push({ labelValue: value, counter: 1 });
-        } else {
-          labelValueCounter.counter += 1;
-        }
-      }
-    }
-
-    return result;
-  }, [seriesData]);
-
-  return { series: seriesData?.data, labelValueCounters, isLoading };
-}
+import { useMetricMetadata, useSeriesStates } from '../../utils';
 
 export interface LabelValuesRowProps extends StackProps {
   label: string;
@@ -240,23 +180,8 @@ export interface OverviewTabProps extends StackProps {
 }
 
 export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...props }: OverviewTabProps) {
-  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
-
-  const { data: metricData, isLoading: isMetricLoading } = useQuery<MetricMetadataResponse>({
-    enabled: !!client,
-    queryKey: ['metricMetadata', metricName],
-    queryFn: async () => {
-      const params: MetricMetadataRequestParameters = { metric: metricName };
-
-      return await client!.metricMetadata(params);
-    },
-  });
-
-  const metadata: MetricMetadata | undefined = useMemo(() => {
-    return metricData?.data?.[metricName]?.[0];
-  }, [metricData, metricName]);
-
-  const { series, labelValueCounters, isLoading } = useSeriesStates(datasource, metricName, filters);
+  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
+  const { series, labelValueCounters, isLoading } = useSeriesStates(metricName, filters, datasource);
 
   return (
     <Stack gap={2} {...props}>
@@ -267,7 +192,7 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
           </Typography>
           <Typography>
             Description:
-            {isMetricLoading ? (
+            {isMetadataLoading ? (
               <Skeleton variant="text" width={180} />
             ) : (
               <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>

@@ -4,16 +4,9 @@ import CheckIcon from 'mdi-material-ui/Check';
 import * as React from 'react';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import { DatasourceSelector } from '@perses-dev/core';
-import { useDatasourceClient } from '@perses-dev/plugin-system';
-import {
-  LabelNamesRequestParameters,
-  LabelValuesRequestParameters,
-  LabelValuesResponse,
-  PrometheusClient,
-} from '@perses-dev/prometheus-plugin';
-import { useQuery } from '@tanstack/react-query';
 import { Virtuoso } from 'react-virtuoso';
-import { computeFilterExpr, LabelFilter } from '../types';
+import { LabelFilter } from '../types';
+import { useLabels, useLabelValues } from '../utils';
 
 export interface LabelFilterInputProps {
   datasource: DatasourceSelector;
@@ -25,38 +18,17 @@ export interface LabelFilterInputProps {
 
 // TODO: fix when a filter is deleted => refresh data
 export function LabelFilterInput({ datasource, value, filters, onChange, onDelete }: LabelFilterInputProps) {
-  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
-
   const filtersWithoutCurrent = useMemo(
     () => filters.filter((filter) => filter.label !== value.label),
     [filters, value.label]
   );
 
-  const { data: labelOptions, isLoading: isLabelOptionsLoading } = useQuery<LabelValuesResponse>({
-    enabled: !!client,
-    queryKey: ['labels', 'datasource', datasource.name, 'filters', ...filtersWithoutCurrent],
-    queryFn: async () => {
-      const params: LabelNamesRequestParameters = {};
-      if (filters.length) {
-        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
-      }
-
-      return await client!.labelNames(params);
-    },
-  });
-
-  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useQuery<LabelValuesResponse>({
-    enabled: !!client && !!value.label,
-    queryKey: ['labelValues', value.label, 'datasource', datasource.name, 'filters', ...filtersWithoutCurrent],
-    queryFn: async () => {
-      const params: LabelValuesRequestParameters = { labelName: value.label };
-      if (filters.length) {
-        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
-      }
-
-      return await client!.labelValues(params);
-    },
-  });
+  const { data: labelOptions, isLoading: isLabelOptionsLoading } = useLabels(filtersWithoutCurrent, datasource);
+  const { data: labelValuesOptions, isLoading: isLabelValuesOptionsLoading } = useLabelValues(
+    value.label,
+    filtersWithoutCurrent,
+    datasource
+  );
 
   return (
     <RawFilterInput

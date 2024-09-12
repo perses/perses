@@ -13,24 +13,18 @@
 
 import { Button, ButtonGroup, ButtonGroupProps, CircularProgress, Stack, StackProps } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
-import {
-  DEFAULT_PROM,
-  LabelValuesRequestParameters,
-  LabelValuesResponse,
-  PrometheusClient,
-} from '@perses-dev/prometheus-plugin';
+import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
 import { useMemo } from 'react';
 import * as React from 'react';
-import { useDatasourceClient } from '@perses-dev/plugin-system';
-import { useQuery } from '@tanstack/react-query';
 import ViewListIcon from 'mdi-material-ui/ViewList';
 import GridIcon from 'mdi-material-ui/Grid';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
-import { computeFilterExpr, DisplayMode, LabelFilter } from './types';
+import { DisplayMode, LabelFilter } from './types';
 import { FinderFilters } from './filter/FinderFilters';
 import { MetricGrid } from './display/grid/MetricGrid';
 import { MetricList } from './display/list/MetricList';
 import { MetricOverview } from './overview/MetricOverview';
+import { useLabelValues } from './utils';
 
 export interface ToggleDisplayButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {
   value: DisplayMode;
@@ -74,20 +68,7 @@ export function MetricNameExplorer({
   onExplore,
   ...props
 }: MetricNameExplorerProps) {
-  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
-
-  const { data, isLoading } = useQuery<LabelValuesResponse>({
-    enabled: !!client,
-    queryKey: ['labelValues', '__name__', 'datasource', datasource.name, 'filters', ...filters],
-    queryFn: async () => {
-      const params: LabelValuesRequestParameters = { labelName: '__name__' };
-      if (filters.length) {
-        params['match[]'] = [`{${computeFilterExpr(filters)}}`];
-      }
-
-      return await client!.labelValues(params);
-    },
-  });
+  const { data, isLoading } = useLabelValues('__name__', filters, datasource);
 
   if (isLoading) {
     return (
@@ -231,7 +212,7 @@ export function PrometheusMetricsFinder({
         <MetricNameExplorer
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
-          showPanelByDefault={!hidePanelByDefault}
+          showPanelByDefault={false}
           display={display ?? 'list'}
           onExplore={setExploredMetric}
         />
@@ -240,9 +221,6 @@ export function PrometheusMetricsFinder({
   );
 }
 
-// TODO: timerange
-// TODO: improve grid design (panel)
-// TODO: height
 // TODO: theme colors
 // TODO: others tab
 // TODO: tests

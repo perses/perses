@@ -2,19 +2,11 @@ import { DatasourceSelector } from '@perses-dev/core';
 import { Button, Chip, ChipProps, Divider, Grid2Props, Skeleton, Stack, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
 import * as React from 'react';
-import { useDatasourceClient } from '@perses-dev/plugin-system';
-import {
-  MetricMetadata,
-  MetricMetadataRequestParameters,
-  MetricMetadataResponse,
-  PrometheusClient,
-} from '@perses-dev/prometheus-plugin';
-import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
 import { LabelFilter } from '../../types';
-import { encodeQueryData } from '../../utils';
+import { encodeQueryData, useMetricMetadata } from '../../utils';
 
 export function MetricChip({ label, ...props }: ChipProps) {
   if (label === 'gauge') {
@@ -41,21 +33,7 @@ export interface MetricRowProps {
 }
 
 export function MetricRow({ metricName, datasource, filters, onExplore }: MetricRowProps) {
-  const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
-
-  const { data, isLoading } = useQuery<MetricMetadataResponse>({
-    enabled: !!client,
-    queryKey: ['metricMetadata', metricName],
-    queryFn: async () => {
-      const params: MetricMetadataRequestParameters = { metric: metricName };
-
-      return await client!.metricMetadata(params);
-    },
-  });
-
-  const metadata: MetricMetadata | undefined = useMemo(() => {
-    return data?.data?.[metricName]?.[0];
-  }, [data, metricName]);
+  const { metadata, isLoading } = useMetricMetadata(metricName, datasource);
 
   const searchParams = useMemo(() => {
     return encodeQueryData({
