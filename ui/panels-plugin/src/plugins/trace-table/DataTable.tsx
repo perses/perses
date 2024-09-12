@@ -187,12 +187,8 @@ function buildServiceStatsChips(
       style={{ borderColor: serviceColorGenerator(serviceName) }}
       avatar={
         <Avatar
-          sx={{
-            backgroundColor: serviceColorGenerator(serviceName),
-            fontSize: '0.65rem',
-            fontWeight: 'bold',
-            textShadow: '0 0 5px #fff',
-          }}
+          sx={{ fontSize: '0.65rem', fontWeight: 'bold', textShadow: '0 0 5px #fff' }}
+          style={{ backgroundColor: serviceColorGenerator(serviceName) }}
         >
           {stats.spanCount}
         </Avatar>
