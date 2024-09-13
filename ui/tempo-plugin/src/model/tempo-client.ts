@@ -78,7 +78,7 @@ export function search(params: SearchRequestParameters, queryOptions: QueryOptio
  * Returns an entire trace.
  */
 export function query(params: QueryRequestParameters, queryOptions: QueryOptions) {
-  return fetchWithGet<null, QueryResponse>(`/api/traces/${params.traceId}`, null, queryOptions);
+  return fetchWithGet<null, QueryResponse>(`/api/traces/${encodeURIComponent(params.traceId)}`, null, queryOptions);
 }
 
 /**
@@ -156,7 +156,7 @@ export function searchTags(params: SearchTagsRequestParameters, queryOptions: Qu
 export function searchTagValues(params: SearchTagValuesRequestParameters, queryOptions: QueryOptions) {
   const { tag, ...rest } = params;
   return fetchWithGet<Omit<SearchTagValuesRequestParameters, 'tag'>, SearchTagValuesResponse>(
-    `/api/v2/search/tag/${tag}/values`,
+    `/api/v2/search/tag/${encodeURIComponent(tag)}/values`,
     rest,
     queryOptions
   );
