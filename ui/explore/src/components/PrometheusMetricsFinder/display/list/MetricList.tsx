@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import { Button, Chip, ChipProps, Divider, Grid2Props, Skeleton, Stack, TableCell, Typography } from '@mui/material';
+import { Button, Chip, ChipProps, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
 import * as React from 'react';
 import { useMemo } from 'react';
@@ -42,11 +42,12 @@ export interface MetricRowProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  isMetadataEnabled?: boolean;
   onExplore: (metricName: string) => void;
 }
 
-export function MetricRow({ metricName, datasource, filters, onExplore }: MetricRowProps) {
-  const { metadata, isLoading } = useMetricMetadata(metricName, datasource);
+export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, onExplore }: MetricRowProps) {
+  const { metadata, isLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
   const searchParams = useMemo(() => {
     return encodeQueryData({
@@ -91,21 +92,35 @@ export function MetricRow({ metricName, datasource, filters, onExplore }: Metric
   );
 }
 
-export interface MetricListProps extends Grid2Props {
+export interface MetricListProps extends StackProps {
   metricNames: string[];
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  isMetadataEnabled?: boolean;
   onExplore: (metricName: string) => void;
 }
 
-export function MetricList({ metricNames, datasource, filters, onExplore, ...props }: MetricListProps) {
+export function MetricList({
+  metricNames,
+  datasource,
+  filters,
+  isMetadataEnabled,
+  onExplore,
+  ...props
+}: MetricListProps) {
   return (
     <Stack gap={2} width="100%" divider={<Divider orientation="horizontal" flexItem />} {...props}>
       <TableVirtuoso
         style={{ height: '70vh', width: '100%' }}
         data={metricNames}
         itemContent={(_, metricName) => (
-          <MetricRow metricName={metricName} datasource={datasource} filters={filters} onExplore={onExplore} />
+          <MetricRow
+            metricName={metricName}
+            datasource={datasource}
+            filters={filters}
+            isMetadataEnabled={isMetadataEnabled}
+            onExplore={onExplore}
+          />
         )}
       />
     </Stack>

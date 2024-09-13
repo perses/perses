@@ -17,6 +17,11 @@ export type Operator = '=' | '!=' | '=~' | '!~';
 
 export type DisplayMode = 'grid' | 'list';
 
+export interface Settings {
+  isMetadataEnabled: string;
+  isPanelEnabled: string;
+}
+
 export interface FinderQueryParams {
   display?: DisplayMode;
   datasource?: DatasourceSelector;

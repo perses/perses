@@ -113,14 +113,24 @@ export interface MetricCardProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
-  showPanel?: boolean;
+  isMetadataEnabled?: boolean;
+  isPanelEnabled?: boolean;
   onExplore: (metricName: string) => void;
 }
 
-export function MetricCard({ metricName, datasource, filters, showPanel, onExplore, sx, ...props }: MetricCardProps) {
-  const [isPanelEnabled, setIsPanelEnabled] = useState(showPanel ?? true);
+export function MetricCard({
+  metricName,
+  datasource,
+  filters,
+  isMetadataEnabled,
+  isPanelEnabled,
+  onExplore,
+  sx,
+  ...props
+}: MetricCardProps) {
+  const [isPanelDisplayed, setIsPanelDisplayed] = useState(isPanelEnabled);
 
-  const { metadata, isLoading } = useMetricMetadata(metricName, datasource, isPanelEnabled);
+  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
   const searchParams = useMemo(() => {
     return encodeQueryData({
@@ -149,7 +159,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
         component="header"
         disableTypography
         title={
-          <Stack direction="row" height="100%" gap={1}>
+          <Stack direction="row" height="100%" gap={0.5}>
             <Typography
               variant="subtitle1"
               sx={{
@@ -164,7 +174,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
             >
               {metricName}
             </Typography>
-            {isPanelEnabled && isLoading && (
+            {isPanelDisplayed && isMetadataLoading && (
               <Stack height={24} alignItems="center">
                 <CircularProgress size={24} aria-label="loading" />
               </Stack>
@@ -191,7 +201,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
               variant="contained"
               startIcon={<CompassIcon />}
               style={{ textWrap: 'nowrap' }}
-              // onClick={() => onExplore(metricName)}
+              onClick={() => onExplore(metricName)}
               component={RouterLink}
               to={`?${searchParams}`}
             >
@@ -222,7 +232,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
           padding: 0,
         }}
       >
-        {isPanelEnabled ? (
+        {isPanelDisplayed ? (
           <MetricCardPanel metricName={metricName} datasource={datasource} filters={filters} />
         ) : (
           <Button
@@ -230,7 +240,7 @@ export function MetricCard({ metricName, datasource, filters, showPanel, onExplo
             variant="contained"
             size="large"
             startIcon={<EyeOutlineIcon />}
-            onClick={() => setIsPanelEnabled(true)}
+            onClick={() => setIsPanelDisplayed(true)}
           >
             Show panel
           </Button>
