@@ -20,3 +20,6 @@ export { TempoTraceQuery, TempoDatasource };
 // For consumers to leverage in DatasourceStoreProvider onCreate
 export * from './model/tempo-client';
 export * from './model/tempo-selectors';
+
+// For consumers of TraceQLExtension
+export * from './components/TraceQLExtension';
