@@ -90,14 +90,7 @@ function MetricDataTable({ queries = [] }: { queries: QueryDefinition[] }) {
 
 export function MetricsExplorer() {
   const {
-    data: {
-      tab = 0,
-      queries = [],
-      display = 'list',
-      datasource = DEFAULT_PROM,
-      filters = [],
-      exploredMetric = undefined,
-    },
+    data: { tab = 0, queries = [], datasource = DEFAULT_PROM, filters = [], exploredMetric = undefined },
     setData,
   } = useExplorerManagerContext<MetricsExplorerQueryParams>();
 
@@ -138,7 +131,7 @@ export function MetricsExplorer() {
           <Stack>
             <PrometheusMetricsFinder
               onChange={(state) => setData({ tab, ...state })}
-              value={{ display, datasource, filters, exploredMetric }}
+              value={{ datasource, filters, exploredMetric }}
             />
           </Stack>
         )}

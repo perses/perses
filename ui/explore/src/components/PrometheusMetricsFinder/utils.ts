@@ -28,12 +28,12 @@ import {
   SeriesResponse,
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
-import { useDatasourceClient } from '@perses-dev/plugin-system';
+import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { computeFilterExpr, FinderQueryParams, LabelFilter, LabelValueCounter } from './types';
 
 export function encodeQueryData(data: FinderQueryParams): string {
   return queryString.stringify(
-    encodeQueryParams({ explorer: StringParam, data: JsonParam }, { explorer: 'metric', data: { ...data, tab: 2 } })
+    encodeQueryParams({ explorer: StringParam, data: JsonParam }, { explorer: 'metric', data: { tab: 2, ...data } })
   );
 }
 
@@ -65,13 +65,19 @@ export function useMetricMetadata(metricName: string, datasource: DatasourceSele
 }
 
 export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector) {
+  const {
+    absoluteTimeRange: { start, end },
+  } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   return useQuery<LabelValuesResponse>({
     enabled: !!client,
-    queryKey: ['labels', 'datasource', datasource.name, 'filters', ...filters],
+    queryKey: ['labels', 'datasource', datasource.name, 'start', start, 'end', end, 'filters', ...filters],
     queryFn: async () => {
-      const params: LabelNamesRequestParameters = {};
+      const params: LabelNamesRequestParameters = {
+        start: start.valueOf() / 1000,
+        end: end.valueOf() / 1000,
+      };
       if (filters.length) {
         params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
@@ -83,13 +89,20 @@ export function useLabels(filters: LabelFilter[], datasource: DatasourceSelector
 
 // Retrieve label values from the Prometheus API for a given label name and filters
 export function useLabelValues(labelName: string, filters: LabelFilter[], datasource: DatasourceSelector) {
+  const {
+    absoluteTimeRange: { start, end },
+  } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   return useQuery<LabelValuesResponse>({
     enabled: !!client,
-    queryKey: ['labelValues', labelName, 'datasource', datasource.name, 'filters', ...filters],
+    queryKey: ['labelValues', labelName, 'datasource', datasource.name, 'start', start, 'end', 'filters', ...filters],
     queryFn: async () => {
-      const params: LabelValuesRequestParameters = { labelName: labelName };
+      const params: LabelValuesRequestParameters = {
+        labelName: labelName,
+        start: start.valueOf() / 1000,
+        end: end.valueOf() / 1000,
+      };
       if (filters.length) {
         params['match[]'] = [`{${computeFilterExpr(filters)}}`];
       }
@@ -110,13 +123,20 @@ export function useSeriesStates(
   labelValueCounters: Map<string, Array<{ labelValue: string; counter: number }>>;
   isLoading: boolean;
 } {
+  const {
+    absoluteTimeRange: { start, end },
+  } = useTimeRange();
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   const { data: seriesData, isLoading } = useQuery<SeriesResponse>({
     enabled: !!client,
-    queryKey: ['series', metricName, 'filters', ...filters],
+    queryKey: ['series', metricName, 'datasource', datasource, 'start', start, 'end', 'filters', ...filters],
     queryFn: async () => {
-      const params: SeriesRequestParameters = { 'match[]': [`{${computeFilterExpr(filters)}}`] };
+      const params: SeriesRequestParameters = {
+        'match[]': [`{${computeFilterExpr(filters)}}`],
+        start: start.valueOf() / 1000,
+        end: end.valueOf() / 1000,
+      };
 
       return await client!.series(params);
     },

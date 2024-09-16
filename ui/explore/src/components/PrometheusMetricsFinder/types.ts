@@ -15,15 +15,11 @@ import { DatasourceSelector } from '@perses-dev/core';
 
 export type Operator = '=' | '!=' | '=~' | '!~';
 
-export type DisplayMode = 'grid' | 'list';
-
 export interface Settings {
-  isMetadataEnabled: string;
-  isPanelEnabled: string;
+  isMetadataEnabled: boolean;
 }
 
 export interface FinderQueryParams {
-  display?: DisplayMode;
   datasource?: DatasourceSelector;
   filters?: LabelFilter[];
   exploredMetric?: string;

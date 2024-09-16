@@ -64,10 +64,14 @@ export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, 
       </TableCell>
 
       <TableCell style={{ minWidth: 'fit-content', textAlign: 'center' }}>
-        {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
+        {isMetadataEnabled && isLoading ? (
+          <Skeleton variant="rounded" width={75} />
+        ) : (
+          <MetricChip label={metadata?.type ?? 'unknown'} />
+        )}
       </TableCell>
       <TableCell style={{ width: '100%' }}>
-        {isLoading ? (
+        {isMetadataEnabled && isLoading ? (
           <Skeleton variant="text" width={180} />
         ) : (
           <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
@@ -123,6 +127,11 @@ export function MetricList({
           />
         )}
       />
+      <Stack sx={{ width: '100%' }} textAlign="end">
+        <Typography>
+          Total: <strong>{metricNames.length}</strong> metrics
+        </Typography>
+      </Stack>
     </Stack>
   );
 }

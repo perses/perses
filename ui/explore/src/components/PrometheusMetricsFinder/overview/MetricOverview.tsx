@@ -11,29 +11,113 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, StackProps, Tab, Tabs } from '@mui/material';
+import { Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
 import { useMemo, useState } from 'react';
-import { DatasourceSelector } from '@perses-dev/core';
+import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import * as React from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-system';
-
+import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
 import { computeFilterExpr, LabelFilter } from '../types';
+import { useMetricMetadata } from '../utils';
 import { OverviewTab } from './tabs/OverviewTab';
+import { JobTab } from './tabs/JobTab';
+import { SimilarTab } from './tabs/SimilarTab';
+
+export interface OverviewPanelProps extends StackProps {
+  metricName: string;
+  datasource: DatasourceSelector;
+  filters: LabelFilter[];
+  type?: string;
+  isLoading?: boolean;
+}
+
+export function OverviewPanel({ metricName, datasource, filters, type, isLoading, ...props }: OverviewPanelProps) {
+  const { width, ref: panelRef } = useResizeObserver();
+  const suggestedStepMs = useSuggestedStepMs(width);
+
+  const { queries, definitions }: { queries: QueryDefinition[]; definitions: Array<Definition<UnknownSpec>> } =
+    useMemo(() => {
+      const expr =
+        type === 'counter'
+          ? `rate({__name__="${metricName}", ${computeFilterExpr(filters)}}[5m])`
+          : `{__name__="${metricName}", ${computeFilterExpr(filters)}}`;
+
+      const queries = [
+        {
+          kind: 'TimeSeriesQuery',
+          spec: {
+            plugin: {
+              kind: 'PrometheusTimeSeriesQuery',
+              spec: {
+                datasource: datasource,
+                query: expr,
+              },
+            },
+          },
+        },
+      ];
+
+      const definitions = queries.map((query) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+        };
+      });
+
+      return { queries, definitions };
+    }, [datasource, filters, metricName, type]);
+
+  if (isLoading) {
+    return (
+      <Stack {...props}>
+        <Skeleton variant="rectangular" height="100%" />
+      </Stack>
+    );
+  }
+
+  return (
+    <Stack ref={panelRef} {...props}>
+      <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
+        <Panel
+          panelOptions={{
+            hideHeader: true,
+          }}
+          definition={{
+            kind: 'Panel',
+            spec: {
+              queries: queries,
+              display: { name: '' },
+              plugin: { kind: 'TimeSeriesChart', spec: {} },
+            },
+          }}
+        />
+      </DataQueriesProvider>
+    </Stack>
+  );
+}
 
 export interface MetricOverviewProps extends StackProps {
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
+  isMetadataEnabled?: boolean;
   onExplore: (metricName: string) => void;
   onFiltersChange: (filters: LabelFilter[]) => void;
 }
 
-export function MetricOverview({ metricName, datasource, filters, onFiltersChange, ...props }: MetricOverviewProps) {
+export function MetricOverview({
+  metricName,
+  datasource,
+  filters,
+  isMetadataEnabled,
+  onExplore,
+  onFiltersChange,
+  ...props
+}: MetricOverviewProps) {
   const [tab, setTab] = useState(0);
-  const { width, ref: panelRef } = useResizeObserver();
-  const suggestedStepMs = useSuggestedStepMs(width);
+  const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
 
   const filtersWithMetricName: LabelFilter[] = useMemo(() => {
     const result = filters.filter((filter) => filter.label !== '__name__');
@@ -41,51 +125,27 @@ export function MetricOverview({ metricName, datasource, filters, onFiltersChang
     return result;
   }, [filters, metricName]);
 
-  const queries = [
-    {
-      kind: 'TimeSeriesQuery',
-      spec: {
-        plugin: {
-          kind: 'PrometheusTimeSeriesQuery',
-          spec: {
-            datasource: datasource,
-            query: `{__name__="${metricName}", ${computeFilterExpr(filtersWithMetricName)}}`,
-          },
-        },
-      },
-    },
-  ];
-
-  const definitions = queries.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
-
   function handleFilterAdd(filter: LabelFilter) {
     onFiltersChange([...filters, filter]);
   }
 
+  function handleExplore(metricName: string, tab?: number) {
+    onExplore(metricName);
+    if (tab !== undefined) {
+      setTab(tab);
+    }
+  }
+
   return (
     <Stack sx={{ width: '100%' }} {...props}>
-      <Stack ref={panelRef} height="250px">
-        <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
-          <Panel
-            panelOptions={{
-              hideHeader: true,
-            }}
-            definition={{
-              kind: 'Panel',
-              spec: {
-                queries: queries,
-                display: { name: '' },
-                plugin: { kind: 'TimeSeriesChart', spec: {} },
-              },
-            }}
-          />
-        </DataQueriesProvider>
-      </Stack>
+      <OverviewPanel
+        metricName={metricName}
+        filters={filters}
+        datasource={datasource}
+        type={metadata?.type}
+        height="250px"
+        isLoading={isMetadataEnabled && isMetadataLoading}
+      />
       <Tabs
         value={tab}
         onChange={(_, state) => setTab(state)}
@@ -93,9 +153,24 @@ export function MetricOverview({ metricName, datasource, filters, onFiltersChang
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
         <Tab label="Overview" />
-        {/*<Tab label="Labels" />*/}
-        {/*<Tab label="Job related metrics" />*/}
-        {/*<Tab label="Filter related metrics" />*/}
+        <Tab
+          label="Job related metrics"
+          icon={
+            <Tooltip title="All metrics scraped from the same job" placement="top">
+              <HelpCircleOutlineIcon />
+            </Tooltip>
+          }
+          iconPosition="end"
+        />
+        <Tab
+          label="Similar metrics"
+          icon={
+            <Tooltip title="All metrics matching current filters" placement="top">
+              <HelpCircleOutlineIcon />
+            </Tooltip>
+          }
+          iconPosition="end"
+        />
       </Tabs>
       <Stack gap={1}>
         {tab === 0 && (
@@ -106,9 +181,22 @@ export function MetricOverview({ metricName, datasource, filters, onFiltersChang
             onFilterAdd={handleFilterAdd}
           />
         )}
-        {/*{tab === 1 && <Stack></Stack>}*/}
-        {/*{tab === 2 && <Stack></Stack>}*/}
-        {/*{tab === 3 && <Stack></Stack>}*/}
+        {tab === 1 && (
+          <JobTab
+            filters={filtersWithMetricName}
+            datasource={datasource}
+            isMetadataEnabled={isMetadataEnabled}
+            onExplore={(metricName) => handleExplore(metricName, 0)}
+          />
+        )}
+        {tab === 2 && (
+          <SimilarTab
+            filters={filtersWithMetricName}
+            datasource={datasource}
+            isMetadataEnabled={isMetadataEnabled}
+            onExplore={(metricName) => handleExplore(metricName, 0)}
+          />
+        )}
       </Stack>
     </Stack>
   );

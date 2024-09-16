@@ -13,8 +13,6 @@
 
 import {
   Button,
-  ButtonGroup,
-  ButtonGroupProps,
   Checkbox,
   CircularProgress,
   FormControlLabel,
@@ -30,46 +28,19 @@ import { DatasourceSelector } from '@perses-dev/core';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
 import { useMemo, useState } from 'react';
 import * as React from 'react';
-import ViewListIcon from 'mdi-material-ui/ViewList';
-import GridIcon from 'mdi-material-ui/Grid';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
-import { DisplayMode, LabelFilter } from './types';
+import { LabelFilter, Settings } from './types';
 import { FinderFilters } from './filter/FinderFilters';
-import { MetricGrid } from './display/grid/MetricGrid';
 import { MetricList } from './display/list/MetricList';
 import { MetricOverview } from './overview/MetricOverview';
 import { useLabelValues } from './utils';
 
-export interface ToggleDisplayButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {
-  value: DisplayMode;
-  onChange: (value: DisplayMode) => void;
-}
-
-export function ToggleDisplayButtons({ value, onChange, ...props }: ToggleDisplayButtonsProps) {
-  return (
-    <ButtonGroup variant="contained" aria-label="change current metric finder display" disableElevation {...props}>
-      <Button
-        variant={value === 'grid' ? 'contained' : 'outlined'}
-        startIcon={<GridIcon />}
-        onClick={() => onChange('grid')}
-      >
-        Grid
-      </Button>
-      <Button
-        variant={value === 'list' ? 'contained' : 'outlined'}
-        startIcon={<ViewListIcon />}
-        onClick={() => onChange('list')}
-      >
-        List
-      </Button>
-    </ButtonGroup>
-  );
-}
+const PERSES_METRICS_FINDER_SETTINGS = 'PERSES_METRICS_FINDER_SETTINGS';
 
 export interface SettingsMenuProps {
-  value: { isMetadataEnabled: boolean; isPanelEnabled: boolean };
-  onChange: (value: { isMetadataEnabled: boolean; isPanelEnabled: boolean }) => void;
+  value: Settings;
+  onChange: (value: Settings) => void;
 }
 
 export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
@@ -88,11 +59,8 @@ export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
         <CogIcon />
       </IconButton>
       <Menu id="finder-settings-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={() => onChange({ ...value, isMetadataEnabled: !value.isMetadataEnabled })}>
+        <MenuItem onClick={() => onChange({ isMetadataEnabled: !value.isMetadataEnabled })}>
           <FormControlLabel control={<Checkbox />} label="Enable Metadata" checked={value.isMetadataEnabled} />
-        </MenuItem>
-        <MenuItem onClick={() => onChange({ ...value, isPanelEnabled: !value.isPanelEnabled })}>
-          <FormControlLabel control={<Checkbox />} label="Enable Panels" checked={value.isPanelEnabled} />
         </MenuItem>
       </Menu>
     </>
@@ -102,18 +70,14 @@ export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
 export interface MetricNameExplorerProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
-  display: DisplayMode;
   isMetadataEnabled?: boolean;
-  isPanelEnabled?: boolean;
   onExplore: (metricName: string) => void;
 }
 
 export function MetricNameExplorer({
   datasource,
   filters,
-  display,
   isMetadataEnabled,
-  isPanelEnabled,
   onExplore,
   ...props
 }: MetricNameExplorerProps) {
@@ -127,26 +91,12 @@ export function MetricNameExplorer({
     );
   }
 
-  if (display === 'list') {
-    return (
-      <MetricList
-        metricNames={data?.data ?? []}
-        datasource={datasource}
-        filters={filters}
-        isMetadataEnabled={isMetadataEnabled}
-        onExplore={onExplore}
-        {...props}
-      />
-    );
-  }
-
   return (
-    <MetricGrid
+    <MetricList
       metricNames={data?.data ?? []}
       datasource={datasource}
       filters={filters}
       isMetadataEnabled={isMetadataEnabled}
-      isPanelEnabled={isPanelEnabled}
       onExplore={onExplore}
       {...props}
     />
@@ -155,18 +105,15 @@ export function MetricNameExplorer({
 
 export interface PrometheusMetricsFinderProps extends Omit<StackProps, 'onChange'> {
   value: {
-    display: DisplayMode;
     datasource: DatasourceSelector;
     filters: LabelFilter[];
     exploredMetric: string | undefined;
   };
   onChange: ({
-    display,
     datasource,
     filters,
     exploredMetric,
   }: {
-    display: DisplayMode;
     datasource: DatasourceSelector;
     filters: LabelFilter[];
     exploredMetric: string | undefined;
@@ -174,11 +121,19 @@ export interface PrometheusMetricsFinderProps extends Omit<StackProps, 'onChange
 }
 
 export function PrometheusMetricsFinder({
-  value: { display = 'list', datasource = DEFAULT_PROM, filters = [], exploredMetric },
+  value: { datasource = DEFAULT_PROM, filters = [], exploredMetric },
   onChange,
   ...props
 }: PrometheusMetricsFinderProps) {
-  const [settings, setSettings] = useState({ isMetadataEnabled: true, isPanelEnabled: true }); // TODO: get default from config
+  const settingsStored = localStorage.getItem(PERSES_METRICS_FINDER_SETTINGS);
+  const [settings, setSettings] = useState<Settings>(
+    settingsStored ? JSON.parse(settingsStored) : { isMetadataEnabled: true }
+  );
+
+  function handleSettingsUpdate(value: Settings) {
+    setSettings(value);
+    localStorage.setItem(PERSES_METRICS_FINDER_SETTINGS, JSON.stringify(value));
+  }
 
   const isMobileSize = useMediaQuery(useTheme().breakpoints.down('md'));
 
@@ -212,20 +167,16 @@ export function PrometheusMetricsFinder({
     return result;
   }, [filters]);
 
-  function setDisplay(value: DisplayMode) {
-    onChange({ display: value, datasource, filters, exploredMetric });
-  }
-
   function setDatasource(value: DatasourceSelector) {
-    onChange({ display, datasource: value, filters, exploredMetric });
+    onChange({ datasource: value, filters, exploredMetric });
   }
 
   function setFilters(value: LabelFilter[]) {
-    onChange({ display, datasource, filters: value, exploredMetric });
+    onChange({ datasource, filters: value, exploredMetric });
   }
 
   function setExploredMetric(value: string | undefined) {
-    onChange({ display, datasource, filters, exploredMetric: value });
+    onChange({ datasource, filters, exploredMetric: value });
   }
 
   return (
@@ -239,7 +190,7 @@ export function PrometheusMetricsFinder({
           onFiltersChange={setFilters}
         />
         <Stack direction="row" gap={1} alignItems="center">
-          {exploredMetric ? (
+          {exploredMetric && (
             <Button
               variant="contained"
               aria-label="back to metric explorer"
@@ -248,17 +199,15 @@ export function PrometheusMetricsFinder({
             >
               Back
             </Button>
-          ) : (
-            <Stack
-              direction="row"
-              sx={{ width: isMobileSize ? '100%' : 'unset' }}
-              justifyContent={isMobileSize ? 'center' : 'unset'}
-              alignItems="center"
-            >
-              <ToggleDisplayButtons value={display ?? 'list'} onChange={setDisplay} sx={{ height: 32 }} />
-              <SettingsMenu value={settings} onChange={setSettings} />
-            </Stack>
           )}
+          <Stack
+            direction="row"
+            sx={{ width: isMobileSize ? '100%' : 'unset' }}
+            justifyContent={isMobileSize ? 'center' : 'unset'}
+            alignItems="center"
+          >
+            <SettingsMenu value={settings} onChange={handleSettingsUpdate} />
+          </Stack>
         </Stack>
       </Stack>
       {exploredMetric ? (
@@ -266,6 +215,7 @@ export function PrometheusMetricsFinder({
           metricName={exploredMetric}
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
+          isMetadataEnabled={settings.isMetadataEnabled}
           onExplore={setExploredMetric}
           onFiltersChange={setFilters}
         />
@@ -273,9 +223,7 @@ export function PrometheusMetricsFinder({
         <MetricNameExplorer
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
-          display={display ?? 'list'}
           isMetadataEnabled={settings.isMetadataEnabled}
-          isPanelEnabled={settings.isMetadataEnabled}
           onExplore={setExploredMetric}
         />
       )}
@@ -283,12 +231,9 @@ export function PrometheusMetricsFinder({
   );
 }
 
-// TODO: settings button
-// TODO: number of panel per row
-// TODO: retrieve grid/list from query params
 // TODO: theme colors
 // TODO: responsive
-// TODO: others tab
 // TODO: tests
 // TODO: put virtualized autocomplete in components
 // TODO: improve url query params
+// TODO: loading indicator filters
