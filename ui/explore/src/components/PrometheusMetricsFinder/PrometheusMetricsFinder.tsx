@@ -232,7 +232,6 @@ export function PrometheusMetricsFinder({
 }
 
 // TODO: theme colors
-// TODO: responsive
 // TODO: tests
 // TODO: put virtualized autocomplete in components
 // TODO: improve url query params

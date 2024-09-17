@@ -12,17 +12,8 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import {
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  StackProps,
-  Typography,
-} from '@mui/material';
-import { useMemo, useState } from 'react';
+import { CircularProgress, Stack, StackProps } from '@mui/material';
+import { useMemo } from 'react';
 import { MetricList } from '../../display/list/MetricList';
 import { LabelFilter } from '../../types';
 import { useLabelValues } from '../../utils';

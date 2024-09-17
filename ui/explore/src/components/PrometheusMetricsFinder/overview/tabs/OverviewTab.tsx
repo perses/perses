@@ -27,6 +27,8 @@ import {
   StackProps,
   TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import * as React from 'react';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -48,17 +50,32 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
   const [isAddingFilter, setIsAddingFilter] = useState(false);
   const [operator, setOperator] = useState<Operator>('=');
   const [value, setValue] = useState('');
-  const [showAllValues, setShowAllValues] = useState(false); // TODO
+  const [showAllValues, setShowAllValues] = useState(false);
+  const isMobileSize = useMediaQuery(useTheme().breakpoints.down('md'));
+
+  const displayedValueCounters = useMemo(() => {
+    if (showAllValues) {
+      return valueCounters;
+    }
+    return valueCounters.slice(0, 5);
+  }, [showAllValues, valueCounters]);
 
   return (
-    <Stack key={label} sx={{ width: '100%' }} direction="row" alignItems="center" gap={2} {...props}>
+    <Stack
+      key={label}
+      sx={{ width: '100%' }}
+      direction={isMobileSize ? 'column' : 'row'}
+      alignItems="center"
+      gap={2}
+      {...props}
+    >
       <Stack
         sx={{ width: '100%', height: '100%' }}
         justifyContent="space-between"
         alignContent="center"
-        direction="row"
+        direction={isMobileSize ? 'column' : 'row'}
       >
-        <Typography sx={{ fontFamily: 'monospace' }} pl={1}>
+        <Typography sx={{ fontFamily: 'monospace' }} pl={isMobileSize ? 0 : 1}>
           {label}
         </Typography>
         <Stack direction="row" gap={1} alignItems="center">
@@ -118,26 +135,43 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
         </Stack>
       </Stack>
 
-      <Stack sx={{ width: '100%' }}>
-        <Typography variant="subtitle1" sx={{ paddingBottom: 1 }}>
-          {valueCounters.length} values
-        </Typography>
-        <Stack>
-          {valueCounters.map((labelValueCounter) => (
+      <Stack sx={{ width: '100%' }} gap={0.5}>
+        <Stack direction="row" gap={2}>
+          <Typography variant="subtitle1">{valueCounters.length} values</Typography>
+        </Stack>
+
+        <Stack sx={{ overflow: isMobileSize ? 'auto' : 'unset' }}>
+          {displayedValueCounters.map((labelValueCounter) => (
             <Stack key={`${label}-${labelValueCounter.labelValue}`} direction="row" gap={2}>
               <Typography
                 sx={{
                   fontFamily: 'monospace',
                   ':hover': { backgroundColor: 'rgba(127,127,127,0.35)', cursor: 'pointer' },
+                  textWrap: isMobileSize ? 'nowrap' : 'unset',
                 }}
                 color="rgb(89, 204, 141)"
                 onClick={() => onFilterAdd({ label, labelValues: [labelValueCounter.labelValue], operator: '=' })}
               >
                 {labelValueCounter.labelValue}
               </Typography>
-              <Typography>({labelValueCounter.counter} series)</Typography>
+              <Typography sx={{ textWrap: 'nowrap' }}>({labelValueCounter.counter} series)</Typography>
             </Stack>
           ))}
+        </Stack>
+        <Stack width="100%" textAlign={isMobileSize ? 'center' : 'unset'}>
+          {showAllValues ? (
+            <Button variant="text" sx={{ width: 'fit-content' }} onClick={() => setShowAllValues(false)}>
+              Hide full values
+            </Button>
+          ) : (
+            <>
+              {valueCounters.length > 5 && (
+                <Button variant="text" sx={{ width: 'fit-content' }} onClick={() => setShowAllValues(true)}>
+                  Show {valueCounters.length - 5} more values
+                </Button>
+              )}
+            </>
+          )}
         </Stack>
       </Stack>
     </Stack>
