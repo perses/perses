@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { cloneElement, forwardRef, HTMLAttributes, ReactElement, useMemo, useRef, useState } from 'react';
-import { Autocomplete, IconButton, InputAdornment, TextField } from '@mui/material';
+import { Autocomplete, CircularProgress, IconButton, InputAdornment, TextField } from '@mui/material';
 import CheckIcon from 'mdi-material-ui/Check';
 import * as React from 'react';
 import DeleteIcon from 'mdi-material-ui/Delete';
@@ -103,7 +103,15 @@ export interface RawFilterInputProps {
   onDelete: () => void;
 }
 
-export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChange, onDelete }: RawFilterInputProps) {
+export function RawFilterInput({
+  value,
+  labelOptions,
+  labelValuesOptions,
+  isLabelOptionsLoading,
+  isLabelValuesOptionsLoading,
+  onChange,
+  onDelete,
+}: RawFilterInputProps) {
   const [isEditingLabelName, setIsEditingLabelName] = useState(value.labelValues.length === 0);
   const [labelName, setLabelName] = useState(value.label);
 
@@ -127,6 +135,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         value={value.label}
         sx={{ minWidth: 250, display: isEditingLabelName ? 'block' : 'none' }}
         ListboxComponent={ListboxComponent}
+        loading={isLabelOptionsLoading}
         renderInput={(params) => {
           return (
             <TextField
@@ -138,6 +147,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
                 ...params.InputProps,
                 endAdornment: (
                   <InputAdornment position="end">
+                    {isLabelOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
                     <IconButton aria-label="validate label name" onClick={() => handleLabelConfirmation()} edge="end">
                       <CheckIcon />
                     </IconButton>
@@ -161,6 +171,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
         value={value.labelValues}
         ListboxComponent={ListboxComponent}
         sx={{ minWidth: 250, display: isEditingLabelName ? 'none' : 'block' }}
+        loading={isLabelValuesOptionsLoading}
         renderInput={(params) => {
           return (
             <TextField
@@ -172,6 +183,7 @@ export function RawFilterInput({ value, labelOptions, labelValuesOptions, onChan
                 ...params.InputProps,
                 endAdornment: (
                   <InputAdornment position="end">
+                    {isLabelValuesOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
                     <IconButton aria-label="delete label filter" onClick={() => onDelete()} edge="end">
                       <DeleteIcon />
                     </IconButton>

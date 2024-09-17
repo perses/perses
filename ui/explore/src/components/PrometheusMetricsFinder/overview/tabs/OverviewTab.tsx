@@ -149,7 +149,7 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
                   ':hover': { backgroundColor: 'rgba(127,127,127,0.35)', cursor: 'pointer' },
                   textWrap: isMobileSize ? 'nowrap' : 'unset',
                 }}
-                color="rgb(89, 204, 141)"
+                color={(theme) => theme.palette.success.main}
                 onClick={() => onFilterAdd({ label, labelValues: [labelValueCounter.labelValue], operator: '=' })}
               >
                 {labelValueCounter.labelValue}
