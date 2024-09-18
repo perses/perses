@@ -60,7 +60,7 @@ function TimeSeriesPanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-function MetricDataTable({ queries = [] }: { queries: QueryDefinition[] }) {
+function MetricDataTable({ queries }: { queries: QueryDefinition[] }) {
   const height = PANEL_PREVIEW_HEIGHT;
 
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
@@ -112,7 +112,7 @@ export function MetricsExplorer() {
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setData({ tab, queries: state })}
-              queries={queries as QueryDefinition[]}
+              queries={queries}
             />
             <MetricDataTable queries={queries} />
           </Stack>
@@ -122,7 +122,7 @@ export function MetricsExplorer() {
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
               onChange={(state) => setData({ tab, queries: state })}
-              queries={queries as QueryDefinition[]}
+              queries={queries}
             />
             <TimeSeriesPanel queries={queries} />
           </Stack>

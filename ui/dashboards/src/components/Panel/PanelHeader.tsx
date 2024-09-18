@@ -42,7 +42,6 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
     onDuplicatePanelClick: () => void;
     onDeletePanelClick: () => void;
   };
-  customActions?: ReactNode;
 }
 
 export function PanelHeader({
@@ -52,7 +51,6 @@ export function PanelHeader({
   links,
   readHandlers,
   editHandlers,
-  customActions,
   sx,
   extra,
   ...rest
@@ -171,7 +169,7 @@ export function PanelHeader({
       }
       action={
         <HeaderActionWrapper direction="row" spacing={0.25} alignItems="center">
-          {customActions} {editHandlers === undefined && extra} {readActions} {editActions}
+          {editHandlers === undefined && extra} {readActions} {editActions}
         </HeaderActionWrapper>
       }
       sx={combineSx(
@@ -196,12 +194,12 @@ export function PanelHeader({
   );
 }
 
-export const HeaderIconButton = styled(IconButton)(({ theme }) => ({
+const HeaderIconButton = styled(IconButton)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   padding: '4px',
 }));
 
-export const HeaderActionWrapper = styled(Stack)(() => ({
+const HeaderActionWrapper = styled(Stack)(() => ({
   // Adding back the negative margins from MUI's defaults for actions, so we
   // avoid increasing the header size when actions are present while also being
   // able to vertically center the actions.

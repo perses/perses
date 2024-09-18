@@ -26,7 +26,6 @@ export interface PanelProps extends CardProps<'section'> {
   editHandlers?: PanelHeaderProps['editHandlers'];
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
-  customActions?: ReactNode;
 }
 
 export type PanelOptions = {
@@ -61,7 +60,6 @@ export const Panel = memo(function Panel(props: PanelProps) {
     definition,
     readHandlers,
     editHandlers,
-    customActions,
     onMouseEnter,
     onMouseLeave,
     sx,
@@ -122,7 +120,6 @@ export const Panel = memo(function Panel(props: PanelProps) {
           readHandlers={readHandlers}
           editHandlers={editHandlers}
           links={definition.spec.links}
-          customActions={customActions}
           sx={{ paddingX: `${chartsTheme.container.padding.default}px` }}
         />
       )}
