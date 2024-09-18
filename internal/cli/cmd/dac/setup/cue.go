@@ -73,7 +73,7 @@ func extractCUEDepsToDst() error {
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			if folderErr := os.Mkdir(newDepPath, 0666); err != nil {
+			if folderErr := os.Mkdir(newDepPath, os.ModePerm); err != nil {
 				return fmt.Errorf("can't create dir %s: %v", newDepPath, folderErr)
 			}
 			logrus.Debugf("dir %s created succesfully", newDepPath)
