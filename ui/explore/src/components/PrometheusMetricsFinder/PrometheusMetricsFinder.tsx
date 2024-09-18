@@ -26,8 +26,7 @@ import {
 } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
-import { useMemo, useState } from 'react';
-import * as React from 'react';
+import { MouseEvent, useMemo, useState } from 'react';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
 import { Link as RouterLink } from 'react-router-dom';
@@ -46,9 +45,9 @@ export interface SettingsMenuProps {
 }
 
 export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
@@ -235,7 +234,3 @@ export function PrometheusMetricsFinder({
     </Stack>
   );
 }
-
-// TODO: tests
-// TODO: put virtualized autocomplete in components
-// TODO: improve url query params

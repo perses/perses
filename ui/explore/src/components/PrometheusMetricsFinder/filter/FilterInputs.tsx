@@ -14,7 +14,6 @@
 import { cloneElement, forwardRef, HTMLAttributes, ReactElement, useMemo, useRef, useState } from 'react';
 import { Autocomplete, CircularProgress, IconButton, InputAdornment, TextField } from '@mui/material';
 import CheckIcon from 'mdi-material-ui/Check';
-import * as React from 'react';
 import DeleteIcon from 'mdi-material-ui/Delete';
 import { DatasourceSelector } from '@perses-dev/core';
 import { Virtuoso } from 'react-virtuoso';

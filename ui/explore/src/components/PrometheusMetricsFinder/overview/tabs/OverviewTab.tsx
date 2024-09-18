@@ -30,7 +30,6 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material';
-import * as React from 'react';
 import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';

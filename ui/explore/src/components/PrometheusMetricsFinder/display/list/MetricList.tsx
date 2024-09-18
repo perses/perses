@@ -14,8 +14,6 @@
 import { DatasourceSelector } from '@perses-dev/core';
 import { Button, Chip, ChipProps, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
-import * as React from 'react';
-import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
 import { LabelFilter } from '../../types';
