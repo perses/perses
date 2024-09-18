@@ -15,6 +15,7 @@ import type {} from './types/ThemeExtension';
 import { PersesColor } from './palette';
 
 export * from './theme';
+export * from './typography';
 
 //Use Typescript interface augmentation to extend the MUI type definition
 declare module '@mui/material/styles/createPalette' {
