@@ -83,7 +83,7 @@ export const ListboxComponent = forwardRef<HTMLUListElement, HTMLAttributes<HTML
           data={data}
           totalListHeightChanged={setHeight}
           itemContent={(index, child) => {
-            return cloneElement(child, { index });
+            return cloneElement(child, { index, title: child.props.children });
           }}
         />
       </ul>
