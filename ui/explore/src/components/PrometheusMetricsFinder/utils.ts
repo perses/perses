@@ -31,7 +31,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { computeFilterExpr, FinderQueryParams, LabelFilter, LabelValueCounter } from './types';
 
-export function encodeQueryData(data: FinderQueryParams): string {
+export function encodeFinderQueryParams(data: FinderQueryParams): string {
   return queryString.stringify(
     encodeQueryParams({ explorer: StringParam, data: JsonParam }, { explorer: 'metric', data: { tab: 2, ...data } })
   );

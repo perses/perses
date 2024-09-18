@@ -23,7 +23,7 @@ import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 interface MetricsExplorerQueryParams extends FinderQueryParams {
-  tab?: number;
+  tab?: string;
   queries?: QueryDefinition[];
 }
 
@@ -90,7 +90,7 @@ function MetricDataTable({ queries = [] }: { queries: QueryDefinition[] }) {
 
 export function MetricsExplorer() {
   const {
-    data: { tab = 0, queries = [], datasource = DEFAULT_PROM, filters = [], exploredMetric = undefined },
+    data: { tab = 'table', queries = [], datasource = DEFAULT_PROM, filters = [], exploredMetric = undefined },
     setData,
   } = useExplorerManagerContext<MetricsExplorerQueryParams>();
 
@@ -102,12 +102,12 @@ export function MetricsExplorer() {
         variant="scrollable"
         sx={{ borderBottom: 1, borderColor: 'divider' }}
       >
-        <Tab label="Table" />
-        <Tab label="Graph" />
-        <Tab label="Finder" />
+        <Tab value="table" label="Table" />
+        <Tab value="graph" label="Graph" />
+        <Tab value="finder" label="Finder" />
       </Tabs>
       <Stack gap={1}>
-        {tab === 0 && (
+        {tab === 'table' && (
           <Stack>
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
@@ -117,7 +117,7 @@ export function MetricsExplorer() {
             <MetricDataTable queries={queries} />
           </Stack>
         )}
-        {tab === 1 && (
+        {tab === 'graph' && (
           <Stack>
             <MultiQueryEditor
               queryTypes={['TimeSeriesQuery']}
@@ -127,7 +127,7 @@ export function MetricsExplorer() {
             <TimeSeriesPanel queries={queries} />
           </Stack>
         )}
-        {tab === 2 && (
+        {tab === 'finder' && (
           <Stack>
             <PrometheusMetricsFinder
               onChange={(state) => setData({ tab, ...state })}

@@ -21,6 +21,7 @@ import { DataQueriesProvider, useSuggestedStepMs } from '@perses-dev/plugin-syst
 import HelpCircleOutlineIcon from 'mdi-material-ui/HelpCircleOutline';
 import { computeFilterExpr, LabelFilter } from '../types';
 import { useMetricMetadata } from '../utils';
+import { useExplorerQueryParams } from '../../ExploreManager/query-params';
 import { OverviewTab } from './tabs/OverviewTab';
 import { JobTab } from './tabs/JobTab';
 import { SimilarTab } from './tabs/SimilarTab';
@@ -103,7 +104,7 @@ export interface MetricOverviewProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
-  onExplore: (metricName: string) => void;
+  onExplore?: (metricName: string) => void;
   onFiltersChange: (filters: LabelFilter[]) => void;
 }
 
@@ -130,7 +131,7 @@ export function MetricOverview({
   }
 
   function handleExplore(metricName: string, tab?: number) {
-    onExplore(metricName);
+    onExplore?.(metricName);
     if (tab !== undefined) {
       setTab(tab);
     }

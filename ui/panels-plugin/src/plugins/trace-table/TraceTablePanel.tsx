@@ -15,6 +15,8 @@ import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { QueryDefinition } from '@perses-dev/core';
+import queryString from 'query-string';
+import { encodeQueryParams, JsonParam, StringParam } from 'use-query-params';
 import { DataTable, TraceLink } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -32,10 +34,9 @@ export function defaultTraceLink({ query: originalQuery, traceId }: { query: Que
   const query: QueryDefinition = JSON.parse(JSON.stringify(originalQuery));
   query.spec.plugin.spec.query = traceId;
 
-  const traceLinkParams = new URLSearchParams({
-    explorer: 'traces',
-    queries: JSON.stringify([query]),
-  });
+  const traceLinkParams = queryString.stringify(
+    encodeQueryParams({ explorer: StringParam, data: JsonParam }, { explorer: 'traces', data: { queries: [query] } })
+  );
   return `/explore?${traceLinkParams}`;
 }
 

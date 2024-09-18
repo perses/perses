@@ -30,6 +30,8 @@ import { useMemo, useState } from 'react';
 import * as React from 'react';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
+import { Link as RouterLink } from 'react-router-dom';
+import { useExplorerQueryParams } from '../ExploreManager/query-params';
 import { LabelFilter, Settings } from './types';
 import { FinderFilters } from './filter/FinderFilters';
 import { MetricList } from './display/list/MetricList';
@@ -71,7 +73,7 @@ export interface MetricNameExplorerProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
-  onExplore: (metricName: string) => void;
+  onExplore?: (metricName: string) => void;
 }
 
 export function MetricNameExplorer({
@@ -118,11 +120,13 @@ export interface PrometheusMetricsFinderProps extends Omit<StackProps, 'onChange
     filters: LabelFilter[];
     exploredMetric: string | undefined;
   }) => void;
+  onExplore?: (metricName: string) => void;
 }
 
 export function PrometheusMetricsFinder({
   value: { datasource = DEFAULT_PROM, filters = [], exploredMetric },
   onChange,
+  onExplore,
   ...props
 }: PrometheusMetricsFinderProps) {
   const settingsStored = localStorage.getItem(PERSES_METRICS_FINDER_SETTINGS);
@@ -167,16 +171,16 @@ export function PrometheusMetricsFinder({
     return result;
   }, [filters]);
 
+  const searchParams = useExplorerQueryParams({
+    data: { tab: 'finder', datasource, filters, exploredMetric: undefined },
+  });
+
   function setDatasource(value: DatasourceSelector) {
     onChange({ datasource: value, filters, exploredMetric });
   }
 
   function setFilters(value: LabelFilter[]) {
     onChange({ datasource, filters: value, exploredMetric });
-  }
-
-  function setExploredMetric(value: string | undefined) {
-    onChange({ datasource, filters, exploredMetric: value });
   }
 
   return (
@@ -195,7 +199,8 @@ export function PrometheusMetricsFinder({
               variant="contained"
               aria-label="back to metric explorer"
               startIcon={<ArrowLeftIcon />}
-              onClick={() => setExploredMetric(undefined)}
+              component={RouterLink}
+              to={`?${searchParams}`}
             >
               Back
             </Button>
@@ -216,15 +221,15 @@ export function PrometheusMetricsFinder({
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
           isMetadataEnabled={settings.isMetadataEnabled}
-          onExplore={setExploredMetric}
           onFiltersChange={setFilters}
+          onExplore={onExplore}
         />
       ) : (
         <MetricNameExplorer
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
           isMetadataEnabled={settings.isMetadataEnabled}
-          onExplore={setExploredMetric}
+          onExplore={onExplore}
         />
       )}
     </Stack>

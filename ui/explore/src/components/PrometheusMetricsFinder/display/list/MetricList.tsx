@@ -19,7 +19,8 @@ import { useMemo } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
 import { LabelFilter } from '../../types';
-import { encodeQueryData, useMetricMetadata } from '../../utils';
+import { useMetricMetadata } from '../../utils';
+import { useExplorerQueryParams } from '../../../ExploreManager/query-params';
 
 export function MetricChip({ label, ...props }: ChipProps) {
   if (label === 'gauge') {
@@ -43,19 +44,15 @@ export interface MetricRowProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
-  onExplore: (metricName: string) => void;
+  onExplore?: (metricName: string) => void;
 }
 
 export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, onExplore }: MetricRowProps) {
   const { metadata, isLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
-  const searchParams = useMemo(() => {
-    return encodeQueryData({
-      datasource,
-      filters,
-      exploredMetric: metricName,
-    });
-  }, [datasource, filters, metricName]);
+  const searchParams = useExplorerQueryParams({
+    data: { tab: 'finder', datasource, filters, exploredMetric: metricName },
+  });
 
   return (
     <>
@@ -85,7 +82,7 @@ export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, 
           variant="contained"
           startIcon={<CompassIcon />}
           style={{ textWrap: 'nowrap' }}
-          onClick={() => onExplore(metricName)}
+          onClick={() => onExplore?.(metricName)}
           component={RouterLink}
           to={`?${searchParams}`}
         >
@@ -101,7 +98,7 @@ export interface MetricListProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
-  onExplore: (metricName: string) => void;
+  onExplore?: (metricName: string) => void;
 }
 
 export function MetricList({
