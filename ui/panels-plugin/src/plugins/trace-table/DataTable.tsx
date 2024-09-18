@@ -131,7 +131,7 @@ function buildRow(
         <Typography display="inline">{totalSpanCount} spans</Typography>
         {totalErrorCount > 0 && (
           <Chip
-            label={`${totalErrorCount} errors`}
+            label={`${totalErrorCount} error${totalErrorCount === 1 ? '' : 's'}`}
             sx={{ marginLeft: '5px' }}
             icon={<InformationIcon />}
             variant="outlined"
@@ -181,14 +181,18 @@ function buildServiceStatsChips(
     <Chip
       key={serviceName}
       label={serviceName}
-      sx={{ marginTop: '5px', marginRight: '5px' }}
       variant="outlined"
       size="small"
-      style={{ borderColor: serviceColorGenerator(serviceName) }}
+      style={{ ['--service-color' as string]: serviceColorGenerator(serviceName) }}
+      sx={{ marginTop: '5px', marginRight: '5px', borderColor: 'var(--service-color)' }}
       avatar={
         <Avatar
-          sx={{ fontSize: '0.65rem', fontWeight: 'bold', textShadow: '0 0 5px #fff' }}
-          style={{ backgroundColor: serviceColorGenerator(serviceName) }}
+          sx={{
+            backgroundColor: 'var(--service-color)',
+            fontSize: '0.65rem',
+            fontWeight: 'bold',
+            textShadow: '0 0 5px #fff',
+          }}
         >
           {stats.spanCount}
         </Avatar>
