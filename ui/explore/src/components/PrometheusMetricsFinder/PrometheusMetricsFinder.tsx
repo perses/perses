@@ -207,7 +207,7 @@ export function PrometheusMetricsFinder({
           <Stack
             direction="row"
             sx={{ width: isMobileSize ? '100%' : 'unset' }}
-            justifyContent={isMobileSize ? 'center' : 'unset'}
+            justifyContent={isMobileSize ? 'end' : 'unset'}
             alignItems="center"
           >
             <SettingsMenu value={settings} onChange={handleSettingsUpdate} />
