@@ -453,6 +453,10 @@
                   "name": "Time"
                 },
                 {
+                    "header": "ValueCustomHeader",
+                    "name": "value"
+                },
+                {
                   "header": "API server",
                   "name": "apiserver",
                   "width": 300
