@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import queryString from 'query-string';
 import { encodeQueryParams, JsonParam, StringParam, useQueryParams } from 'use-query-params';
 import { TimeRangeParam } from '@perses-dev/plugin-system';
+import { stringify } from 'qs';
 
 export const explorerQueryConfig = {
   refresh: TimeRangeParam,
@@ -34,5 +34,5 @@ interface ExplorerQueryData {
 // Provide a query string for the explorer page using the given inputs, but also including any existing query params
 export function useExplorerQueryParams(inputs: ExplorerQueryData): string {
   const [query] = useQueryParams(explorerQueryConfig, { updateType: 'replaceIn' });
-  return queryString.stringify(encodeQueryParams(explorerQueryConfig, { ...query, ...inputs }));
+  return stringify(encodeQueryParams(explorerQueryConfig, { ...query, ...inputs }));
 }

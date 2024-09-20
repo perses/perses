@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { encodeQueryParams, JsonParam, StringParam } from 'use-query-params';
-import queryString from 'query-string';
 import { DatasourceSelector } from '@perses-dev/core';
 import { useMemo } from 'react';
 import {
@@ -29,13 +27,7 @@ import {
 } from '@perses-dev/prometheus-plugin';
 import { useQuery } from '@tanstack/react-query';
 import { useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
-import { computeFilterExpr, FinderQueryParams, LabelFilter, LabelValueCounter } from './types';
-
-export function encodeFinderQueryParams(data: FinderQueryParams): string {
-  return queryString.stringify(
-    encodeQueryParams({ explorer: StringParam, data: JsonParam }, { explorer: 'metric', data: { tab: 2, ...data } })
-  );
-}
+import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 
 // Retrieve metric metadata from the Prometheus API
 export function useMetricMetadata(metricName: string, datasource: DatasourceSelector, enabled?: boolean) {

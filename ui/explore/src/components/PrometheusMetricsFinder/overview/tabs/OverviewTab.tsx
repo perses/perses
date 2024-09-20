@@ -33,10 +33,10 @@ import {
 import PlusIcon from 'mdi-material-ui/Plus';
 import CheckIcon from 'mdi-material-ui/Check';
 import CloseIcon from 'mdi-material-ui/Close';
-import { MetricChip } from '../../display/list/MetricList';
 import { LabelFilter, LabelValueCounter, Operator } from '../../types';
 import { ListboxComponent } from '../../filter/FilterInputs';
 import { useMetricMetadata, useSeriesStates } from '../../utils';
+import { MetricChip } from '../../display/MetricChip';
 
 export interface LabelValuesRowProps extends StackProps {
   label: string;

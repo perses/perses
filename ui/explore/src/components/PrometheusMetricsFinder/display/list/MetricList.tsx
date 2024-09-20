@@ -12,30 +12,14 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import { Button, Chip, ChipProps, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
+import { Button, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
 import { LabelFilter } from '../../types';
 import { useMetricMetadata } from '../../utils';
 import { useExplorerQueryParams } from '../../../ExploreManager/query-params';
-
-export function MetricChip({ label, ...props }: ChipProps) {
-  if (label === 'gauge') {
-    return <Chip label={label} color="success" {...props} />;
-  }
-  if (label === 'counter') {
-    return <Chip label={label} color="primary" {...props} />;
-  }
-  if (label === 'histogram') {
-    return <Chip label={label} color="warning" {...props} />;
-  }
-  if (label === 'summary') {
-    return <Chip label={label} color="info" {...props} />;
-  }
-
-  return <Chip label={label} sx={{ fontStyle: label === 'unknown' ? 'italic' : 'initial' }} {...props} />;
-}
+import { MetricChip } from '../MetricChip';
 
 export interface MetricRowProps {
   metricName: string;
@@ -123,7 +107,7 @@ export function MetricList({
         )}
       />
       <Stack sx={{ width: '100%' }} textAlign="end">
-        <Typography>
+        <Typography data-testid="finder-total">
           Total: <strong>{metricNames.length}</strong> metrics
         </Typography>
       </Stack>

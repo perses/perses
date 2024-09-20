@@ -60,8 +60,13 @@ export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
         <CogIcon />
       </IconButton>
       <Menu id="finder-settings-menu" anchorEl={anchorEl} open={open} onClose={handleClose}>
-        <MenuItem onClick={() => onChange({ isMetadataEnabled: !value.isMetadataEnabled })}>
-          <FormControlLabel control={<Checkbox />} label="Enable Metadata" checked={value.isMetadataEnabled} />
+        <MenuItem onClick={(e) => e.preventDefault()}>
+          <FormControlLabel
+            control={<Checkbox />}
+            label="Enable Metadata"
+            checked={value.isMetadataEnabled}
+            onClick={() => onChange({ isMetadataEnabled: !value.isMetadataEnabled })}
+          />
         </MenuItem>
       </Menu>
     </>

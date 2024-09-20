@@ -11,7 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { cloneElement, forwardRef, HTMLAttributes, ReactElement, useMemo, useRef, useState } from 'react';
+import {
+  cloneElement,
+  forwardRef,
+  HTMLAttributes,
+  ReactElement,
+  SyntheticEvent,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Autocomplete, CircularProgress, IconButton, InputAdornment, TextField } from '@mui/material';
 import CheckIcon from 'mdi-material-ui/Check';
 import DeleteIcon from 'mdi-material-ui/Delete';
@@ -157,7 +166,7 @@ export function RawFilterInput({
           );
         }}
         onKeyDown={handleKeyPress}
-        onInputChange={(_: React.SyntheticEvent, newValue: string | null) => {
+        onInputChange={(_: SyntheticEvent, newValue: string | null) => {
           setLabelName(newValue ?? '');
         }}
       />
@@ -192,7 +201,7 @@ export function RawFilterInput({
             />
           );
         }}
-        onChange={(_: React.SyntheticEvent, newValue: string[] | null) => {
+        onChange={(_: SyntheticEvent, newValue: string[] | null) => {
           if (Array.isArray(newValue)) {
             onChange({ label: value.label, labelValues: newValue });
           }
