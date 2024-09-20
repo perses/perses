@@ -417,7 +417,7 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
-		return nil, err
+		return nil, &oauth2.RetrieveError{ErrorCode: string(oidc.InvalidRequest), ErrorDescription: err.Error()}
 	}
 
 	// Generate and save access and refresh tokens

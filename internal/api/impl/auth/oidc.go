@@ -336,7 +336,7 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
-		return nil, err
+		return nil, &oidc.Error{ErrorType: oidc.InvalidRequest, Description: err.Error()}
 	}
 
 	// Generate and save access and refresh tokens
