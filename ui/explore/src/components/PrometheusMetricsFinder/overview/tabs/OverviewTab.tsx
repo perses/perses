@@ -241,9 +241,9 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
             {isMetadataLoading ? (
               <Skeleton variant="text" width={180} />
             ) : (
-              <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
+              <span style={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
                 {metadata ? metadata.help : 'unknown'}
-              </Typography>
+              </span>
             )}
           </Typography>
         </Stack>
@@ -254,7 +254,7 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
             {isLoading ? (
               <Skeleton variant="text" width={20} sx={{ display: 'inline-block' }} />
             ) : (
-              <Typography sx={{ fontWeight: 'bold' }}>{series?.length ?? 0} series</Typography>
+              <strong>{series?.length ?? 0} series</strong>
             )}
           </Typography>
         </Stack>
