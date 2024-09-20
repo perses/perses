@@ -105,6 +105,6 @@ describe('TraceTablePanel', () => {
     expect(lastRow).toHaveTextContent('13 spans'); // span count
     expect(lastRow).toHaveTextContent('2 errors'); // span count
     expect(lastRow).toHaveTextContent('100ms'); // duration
-    expect(lastRow).toHaveTextContent('December 18, 2023 at 5:07:25 PM'); // start time
+    expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25 PM'); // start time
   });
 });

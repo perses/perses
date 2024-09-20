@@ -23,8 +23,8 @@
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
-    "test": "cross-env TZ=UTC jest",
-    "test:watch": "cross-env TZ=UTC jest --watch",
+    "test": "cross-env LC_ALL=C TZ=UTC jest",
+    "test:watch": "cross-env LC_ALL=C TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
