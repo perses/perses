@@ -11,20 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Avatar,
-  Chip,
-  Link,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-  styled,
-  useTheme,
-} from '@mui/material';
+import { Avatar, Box, Chip, Link, Tooltip, Typography, useTheme } from '@mui/material';
 import {
   QueryDefinition,
   ServiceStats,
@@ -34,10 +21,11 @@ import {
   msToPrometheusDuration,
 } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { ReactNode, useCallback } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import InformationIcon from 'mdi-material-ui/Information';
 import { useChartsTheme } from '@perses-dev/components';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { useCallback, useMemo } from 'react';
 import { getServiceColor } from '../tracing-gantt-chart/TracingGanttChart/utils';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -59,6 +47,11 @@ export interface DataTableProps {
   traceLink?: TraceLink;
 }
 
+interface Row extends TraceSearchResult {
+  id: string;
+  traceLink?: string;
+}
+
 export function DataTable(props: DataTableProps) {
   const { options, result, traceLink } = props;
   const muiTheme = useTheme();
@@ -70,120 +63,159 @@ export function DataTable(props: DataTableProps) {
     [muiTheme, chartsTheme, paletteMode]
   );
 
-  if (!result) {
-    return null;
-  }
-
-  const rows: ReactNode[] = [];
+  const rows: Row[] = [];
   for (const query of result) {
-    const traceLinkWithQuery = traceLink
-      ? (traceId: string) => traceLink({ query: JSON.parse(JSON.stringify(query.definition)), traceId })
-      : undefined;
     for (const trace of query.data?.searchResult || []) {
-      rows.push(buildRow(trace, serviceColorGenerator, traceLinkWithQuery));
+      rows.push({
+        ...trace,
+        id: trace.traceId,
+        traceLink: traceLink?.({ query: query.definition, traceId: trace.traceId }),
+      });
     }
   }
 
+  const columns = useMemo<Array<GridColDef<Row>>>(
+    () => [
+      {
+        field: 'name',
+        headerName: 'Trace name',
+        type: 'string',
+        flex: 4,
+        display: 'flex',
+        valueGetter: (_, trace) => `${trace.rootServiceName}: ${trace.rootTraceName}`,
+        renderCell: ({ row }) => (
+          <Box sx={{ my: 1 }}>
+            <TraceName row={row} />
+            <br />
+            {Object.entries(row.serviceStats).map(([serviceName, stats]) => (
+              <ServiceChip
+                key={serviceName}
+                serviceName={serviceName}
+                stats={stats}
+                serviceColor={serviceColorGenerator(serviceName)}
+              />
+            ))}
+          </Box>
+        ),
+      },
+      {
+        field: 'spanCount',
+        headerName: 'Spans',
+        type: 'number',
+        headerAlign: 'left',
+        align: 'left',
+        flex: 2,
+        minWidth: 145,
+        display: 'flex',
+        valueGetter: (_, trace) => Object.values(trace.serviceStats).reduce((acc, val) => acc + val.spanCount, 0),
+        renderCell: ({ row }) => {
+          let totalSpanCount = 0;
+          let totalErrorCount = 0;
+          for (const stats of Object.values(row.serviceStats)) {
+            totalSpanCount += stats.spanCount;
+            totalErrorCount += stats.errorCount ?? 0;
+          }
+          return (
+            <>
+              <Typography display="inline">{totalSpanCount} spans</Typography>
+              {totalErrorCount > 0 && (
+                <Chip
+                  label={`${totalErrorCount} error${totalErrorCount === 1 ? '' : 's'}`}
+                  sx={{ marginLeft: '5px' }}
+                  icon={<InformationIcon />}
+                  variant="outlined"
+                  size="small"
+                  color="error"
+                />
+              )}
+            </>
+          );
+        },
+      },
+      {
+        field: 'durationMs',
+        headerName: 'Duration',
+        type: 'number',
+        headerAlign: 'left',
+        align: 'left',
+        flex: 1,
+        minWidth: 70,
+        display: 'flex',
+        renderCell: ({ row }) => (
+          <Typography display="inline">
+            {row.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(row.durationMs))}
+          </Typography>
+        ),
+      },
+      {
+        field: 'startTimeUnixMs',
+        headerName: 'Start time',
+        type: 'number',
+        headerAlign: 'left',
+        align: 'left',
+        flex: 3,
+        minWidth: 240,
+        display: 'flex',
+        renderCell: ({ row }) => (
+          <Tooltip title={UTC_DATE_FORMATTER(new Date(row.startTimeUnixMs))} placement="top" arrow>
+            <Typography display="inline">{DATE_FORMATTER(new Date(row.startTimeUnixMs))}</Typography>
+          </Tooltip>
+        ),
+      },
+    ],
+    [serviceColorGenerator]
+  );
+
   return (
-    <>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>
-              <Typography>Trace name</Typography>
-            </StyledTableCell>
-            <StyledTableCell>
-              <Typography>Spans</Typography>
-            </StyledTableCell>
-            <StyledTableCell>
-              <Typography>Duration</Typography>
-            </StyledTableCell>
-            <StyledTableCell>
-              <Typography>Start time</Typography>
-            </StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>{rows}</TableBody>
-      </Table>
-    </>
+    <DataGrid
+      sx={{ borderWidth: 0 }}
+      columns={columns}
+      rows={rows}
+      getRowHeight={() => 'auto'}
+      getEstimatedRowHeight={() => 66}
+      autoHeight={true}
+      disableRowSelectionOnClick={true}
+      pageSizeOptions={[20]}
+      initialState={{
+        pagination: { paginationModel: { pageSize: 20 } },
+      }}
+    />
   );
 }
 
-function buildRow(
-  trace: TraceSearchResult,
-  serviceColorGenerator: (serviceName: string) => string,
-  traceLink?: (traceId: string) => string
-): ReactNode {
-  let totalSpanCount = 0;
-  let totalErrorCount = 0;
-  for (const stats of Object.values(trace.serviceStats)) {
-    totalSpanCount += stats.spanCount;
-    totalErrorCount += stats.errorCount ?? 0;
-  }
-
-  return (
-    <StyledTableRow key={trace.traceId}>
-      <StyledTableCell>
-        {buildTraceName(trace, traceLink)}
-        {buildServiceStatsChips(trace.serviceStats, serviceColorGenerator)}
-      </StyledTableCell>
-      <StyledTableCell>
-        <Typography display="inline">{totalSpanCount} spans</Typography>
-        {totalErrorCount > 0 && (
-          <Chip
-            label={`${totalErrorCount} error${totalErrorCount === 1 ? '' : 's'}`}
-            sx={{ marginLeft: '5px' }}
-            icon={<InformationIcon />}
-            variant="outlined"
-            size="small"
-            color="error"
-          />
-        )}
-      </StyledTableCell>
-      <StyledTableCell>
-        <Typography>
-          {trace.durationMs < 1 ? '<1ms' : formatDuration(msToPrometheusDuration(trace.durationMs))}
-        </Typography>
-      </StyledTableCell>
-      <StyledTableCell>
-        <Tooltip title={UTC_DATE_FORMATTER(new Date(trace.startTimeUnixMs))} placement="top" arrow>
-          <Typography display="inline">{DATE_FORMATTER(new Date(trace.startTimeUnixMs))}</Typography>
-        </Tooltip>
-      </StyledTableCell>
-    </StyledTableRow>
-  );
+interface TraceNameProps {
+  row: Row;
 }
 
-function buildTraceName(trace: TraceSearchResult, traceLink?: (traceId: string) => string) {
-  if (traceLink) {
+function TraceName({ row: trace }: TraceNameProps) {
+  if (trace.traceLink) {
     return (
-      <>
-        <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={traceLink(trace.traceId)}>
-          <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
-        </Link>
-        <br />
-      </>
+      <Link variant="body1" color="inherit" underline="hover" component={RouterLink} to={trace.traceLink}>
+        <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
+      </Link>
     );
   }
 
   return (
-    <Typography>
+    <Typography display="inline">
       <strong>{trace.rootServiceName}:</strong> {trace.rootTraceName}
     </Typography>
   );
 }
 
-function buildServiceStatsChips(
-  serviceStats: Record<string, ServiceStats>,
-  serviceColorGenerator: (serviceName: string) => string
-) {
-  return Object.entries(serviceStats).map(([serviceName, stats]) => (
+interface ServiceChipProps {
+  serviceName: string;
+  stats: ServiceStats;
+  serviceColor: string;
+}
+
+function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
+  return (
     <Chip
-      key={serviceName}
       label={serviceName}
       variant="outlined"
       size="small"
-      style={{ ['--service-color' as string]: serviceColorGenerator(serviceName) }}
+      style={{ ['--service-color' as string]: serviceColor }}
       sx={{ marginTop: '5px', marginRight: '5px', borderColor: 'var(--service-color)' }}
       avatar={
         <Avatar
@@ -198,16 +230,5 @@ function buildServiceStatsChips(
         </Avatar>
       }
     />
-  ));
+  );
 }
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:hover': {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  paddingTop: theme.spacing(1),
-  paddingBottom: theme.spacing(1),
-}));

@@ -97,16 +97,14 @@ describe('TraceTablePanel', () => {
     });
     renderPanel();
 
-    expect(await screen.findByText('service-name')).toBeInTheDocument();
-    expect(await screen.findByText('span-name')).toBeInTheDocument();
-    expect(await screen.findByText('13 spans')).toBeInTheDocument();
-    expect(await screen.findByText('2 errors')).toBeInTheDocument();
-
     const rows = screen.getAllByRole('row');
     const lastRow = rows[rows.length - 1];
-    expect(lastRow).toHaveTextContent('10service-name'); // check service <Chip>s
-    expect(lastRow).toHaveTextContent('3second-service-name');
-
-    expect(await screen.findAllByRole('cell')).toHaveLength(4); // 1 line with 4 columns
+    expect(lastRow).toHaveTextContent('service-name: span-name'); // trace name
+    expect(lastRow).toHaveTextContent('10service-name'); // service name <Chip>s
+    expect(lastRow).toHaveTextContent('3second-service-name'); // service name <Chip>s
+    expect(lastRow).toHaveTextContent('13 spans'); // span count
+    expect(lastRow).toHaveTextContent('2 errors'); // span count
+    expect(lastRow).toHaveTextContent('100ms'); // duration
+    expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25 PM'); // start time
   });
 });
