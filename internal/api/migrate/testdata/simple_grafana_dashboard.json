@@ -378,6 +378,7 @@
             "indexByName": {},
             "renameByName": {
               "Time": "",
+              "Value": "ValueCustomHeader",
               "apiserver": "API server"
             }
           }

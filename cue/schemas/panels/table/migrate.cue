@@ -18,7 +18,11 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// We use the future 'header' information as a key for both maps here, because this is the common denominator between the two sources
 		// Indeed in grafana the fieldconfig's overrides are matched against the final column name (thus potentially renamed))
 		_renamedMap: {if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for technicalName, prettyName in transformation.options.renameByName {
-			"\(prettyName)": technicalName
+			"\(prettyName)": [
+				if technicalName != "Value" { technicalName },
+				// Map Grafana special 'Value' to lowercase 'value':
+				if technicalName == "Value" { "value" }
+			][0]
 		}}
 		_customWidthMap: {if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" {
 			"\(override.matcher.options)": property.value
