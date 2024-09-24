@@ -16,7 +16,7 @@ import { RawFilterInput, RawFilterInputProps } from './FilterInputs';
 
 describe('FilterInputs', () => {
   const renderInputs = ({
-    value = { label: '', labelValues: [] },
+    value = { label: '', labelValues: [], operator: '=~' },
     labelOptions,
     labelValuesOptions,
     isLabelOptionsLoading,
@@ -77,7 +77,7 @@ describe('FilterInputs', () => {
 
   it('should set the label values', async () => {
     const onChange = jest.fn();
-    renderInputs({ value: { label: 'MySuperLabel', labelValues: ['test1'] }, onChange });
+    renderInputs({ value: { label: 'MySuperLabel', labelValues: ['test1'], operator: '=~' }, onChange });
 
     const input = screen.getByRole('combobox', { name: 'MySuperLabel' });
     expect(input).toBeInTheDocument();

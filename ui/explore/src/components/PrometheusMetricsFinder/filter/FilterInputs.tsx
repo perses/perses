@@ -125,7 +125,7 @@ export function RawFilterInput({
 
   function handleLabelConfirmation() {
     setIsEditingLabelName(false);
-    onChange({ label: labelName, labelValues: [] });
+    onChange({ label: labelName, labelValues: value.labelValues, operator: value.operator });
   }
 
   function handleKeyPress(event: { key: string }) {
@@ -151,6 +151,7 @@ export function RawFilterInput({
               label="Label Name"
               variant="outlined"
               fullWidth
+              size="medium"
               InputProps={{
                 ...params.InputProps,
                 endAdornment: (
@@ -172,7 +173,7 @@ export function RawFilterInput({
       />
       <Autocomplete
         freeSolo
-        multiple
+        multiple={value.operator === '=~' || value.operator === '!~'}
         limitTags={1}
         disableClearable
         options={labelValuesOptions ?? []}
@@ -187,8 +188,15 @@ export function RawFilterInput({
               label={value.label}
               variant="outlined"
               fullWidth
+              size="medium"
               InputProps={{
                 ...params.InputProps,
+                startAdornment: (
+                  <>
+                    <InputAdornment position="start">{value.operator}</InputAdornment>
+                    {params.InputProps.startAdornment}
+                  </>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     {isLabelValuesOptionsLoading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -201,9 +209,12 @@ export function RawFilterInput({
             />
           );
         }}
-        onChange={(_: SyntheticEvent, newValue: string[] | null) => {
+        onChange={(_: SyntheticEvent, newValue: string[] | string | null) => {
+          if (typeof newValue === 'string') {
+            onChange({ label: value.label, labelValues: [newValue], operator: value.operator });
+          }
           if (Array.isArray(newValue)) {
-            onChange({ label: value.label, labelValues: newValue });
+            onChange({ label: value.label, labelValues: newValue, operator: value.operator });
           }
         }}
       />

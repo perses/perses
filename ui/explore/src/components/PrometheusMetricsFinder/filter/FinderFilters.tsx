@@ -73,7 +73,7 @@ export function FinderFilters({
         startIcon={<PlusIcon />}
         aria-label="add filter"
         onClick={() => {
-          onFiltersChange([...filters, { label: '', labelValues: [] }]);
+          onFiltersChange([...filters, { label: '', labelValues: [], operator: '=~' }]);
         }}
       >
         Add filter

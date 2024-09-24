@@ -147,32 +147,7 @@ export function PrometheusMetricsFinder({
 
   // Remove duplicated filters and filters without label or labelValues
   const filteredFilters: LabelFilter[] = useMemo(() => {
-    const usableFilters: Map<string, Set<string>> = new Map();
-
-    for (const filter of filters ?? []) {
-      // Ignore filters without a label or labelValues
-      if (!filter.label || filter.labelValues.length === 0) {
-        continue;
-      }
-
-      // Remove duplicated labelValues
-      let labelValues = usableFilters.get(filter.label);
-      if (!labelValues) {
-        labelValues = new Set<string>();
-        usableFilters.set(filter.label, labelValues);
-      }
-      for (const labelValue of filter.labelValues) {
-        labelValues.add(labelValue);
-      }
-    }
-
-    // Format the result
-    const result: LabelFilter[] = [];
-    for (const [label, labelValues] of usableFilters.entries()) {
-      result.push({ label, labelValues: Array.from(labelValues) });
-    }
-
-    return result;
+    return filters.filter((filter) => filter.label && filter.labelValues.length > 0);
   }, [filters]);
 
   const searchParams = useExplorerQueryParams({

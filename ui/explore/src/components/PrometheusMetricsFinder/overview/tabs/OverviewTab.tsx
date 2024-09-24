@@ -236,16 +236,14 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
           <Typography variant="h1" sx={{ fontFamily: 'monospace' }}>
             {metricName}
           </Typography>
-          <Typography>
-            Description:
-            {isMetadataLoading ? (
-              <Skeleton variant="text" width={180} />
-            ) : (
-              <span style={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
-                {metadata ? metadata.help : 'unknown'}
-              </span>
-            )}
-          </Typography>
+          <Typography>Description:</Typography>
+          {isMetadataLoading ? (
+            <Skeleton variant="text" width={180} />
+          ) : (
+            <Typography style={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
+              {metadata ? metadata.help : 'unknown'}
+            </Typography>
+          )}
         </Stack>
         <Stack gap={1}>
           {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
@@ -260,7 +258,15 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
         </Stack>
       </Stack>
 
-      <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isLoading} />
+      {series?.length === 0 ? (
+        <Stack {...props}>
+          <Typography sx={{ color: (theme) => theme.palette.warning.main }}>
+            No series found with current filters.
+          </Typography>
+        </Stack>
+      ) : (
+        <LabelValuesTable labelValueCounters={labelValueCounters} onFilterAdd={onFilterAdd} isLoading={isLoading} />
+      )}
     </Stack>
   );
 }
