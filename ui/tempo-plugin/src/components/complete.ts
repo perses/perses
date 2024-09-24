@@ -13,6 +13,8 @@
 
 import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
+import { EditorState } from '@codemirror/state';
+import { Tree } from '@lezer/common';
 import {
   String as StringType,
   FieldExpression,
@@ -42,11 +44,11 @@ export interface Completions {
 }
 
 export async function complete(
-  completionContext: CompletionContext,
+  { state, pos }: CompletionContext,
   client?: TempoClient
 ): Promise<CompletionResult | null> {
   // First, identify the completion scopes, for example Scopes() and TagName(scope=intrinsic)
-  const completions = identifyCompletions(completionContext);
+  const completions = identifyCompletions(state, pos, syntaxTree(state));
   if (!completions) {
     // No completion scopes found for current cursor position.
     return null;
@@ -65,9 +67,8 @@ export async function complete(
  *
  * Function is exported for tests only.
  */
-export function identifyCompletions(completionContext: CompletionContext): Completions | undefined {
-  const { state, pos } = completionContext;
-  const node = syntaxTree(state).resolveInner(pos, -1);
+export function identifyCompletions(state: EditorState, pos: number, tree: Tree): Completions | undefined {
+  const node = tree.resolveInner(pos, -1);
 
   switch (node.type.id) {
     case SpansetFilter:
