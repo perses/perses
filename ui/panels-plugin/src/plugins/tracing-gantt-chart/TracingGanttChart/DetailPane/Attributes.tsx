@@ -33,9 +33,11 @@ export function AttributeList(props: AttributeListProps) {
   return (
     <>
       <List>
-        {attributes.map((attribute, i) => (
-          <AttributeItem key={i} attribute={attribute} linkTo={attributeLinks?.[attribute.key]?.(attributesMap)} />
-        ))}
+        {attributes
+          .sort((a, b) => a.key.localeCompare(b.key))
+          .map((attribute, i) => (
+            <AttributeItem key={i} attribute={attribute} linkTo={attributeLinks?.[attribute.key]?.(attributesMap)} />
+          ))}
       </List>
     </>
   );
