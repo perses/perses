@@ -185,7 +185,7 @@ export interface LabelValuesTableProps extends StackProps {
 
 export function LabelValuesTable({ labelValueCounters, isLoading, onFilterAdd, ...props }: LabelValuesTableProps) {
   const labels: string[] = useMemo(() => {
-    return [...labelValueCounters.keys()];
+    return [...labelValueCounters.keys()].sort();
   }, [labelValueCounters]);
 
   if (isLoading) {
