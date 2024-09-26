@@ -16,13 +16,13 @@ if #panel.type != _|_ if #panel.type == "table" {
 			for excludedColumn, value in transformation.options.excludeByName if value {
 				_settingsGatherer: "\(excludedColumn)": hide: true
 			}
-			for technicalName, prettyName in transformation.options.renameByName {
+			for technicalName, displayName in transformation.options.renameByName {
 				let name = [
 					// Map Grafana special 'Value' to lowercase 'value':
 					if technicalName == "Value" { "value" },
 					technicalName
 				][0]
-				_settingsGatherer: "\(name)": "header_\(prettyName)": true
+				_settingsGatherer: "\(name)": headers: "\(displayName)": true
 			}
 		}
 		if #panel.fieldConfig.overrides != _|_ {
@@ -39,20 +39,20 @@ if #panel.type != _|_ if #panel.type == "table" {
 						// NB: this is best effort. E.g if there are several organize transformations chained this wont work, but a settings
 						// object will still get created, thus it could still be arranged manually by the user after the migration.
 						for k, v in _settingsGatherer {
-							if v["header_\(override.matcher.options)"] != _|_ {
-								_settingsGatherer: "\(k)": "header_\(property.value)": true
+							if v.headers[override.matcher.options] != _|_ {
+								_settingsGatherer: "\(k)": headers: "\(property.value)": true
 							}
 						}
-						_settingsGatherer: "\(name)": "header_\(property.value)": true
+						_settingsGatherer: "\(name)": headers: "\(property.value)": true
 					}
 					if property.id == "custom.width" {
 						// same as above
 						for k, v in _settingsGatherer {
-							if v["header_\(override.matcher.options)"] != _|_ {
-								_settingsGatherer: "\(k)": "width_\(property.value)": true
+							if v.headers[override.matcher.options] != _|_ {
+								_settingsGatherer: "\(k)": widths: "\(property.value)": true
 							}
 						}
-						_settingsGatherer: "\(name)": "width_\(property.value)": true
+						_settingsGatherer: "\(name)": widths: "\(property.value)": true
 					}
 				}
 			}
@@ -60,8 +60,8 @@ if #panel.type != _|_ if #panel.type == "table" {
 
 		columnSettings: [for settingsID, settings in _settingsGatherer {
 			name: settingsID
-			let headers = [for settingKey, _ in settings if strings.HasPrefix(settingKey, "header_") { strings.TrimPrefix(settingKey, "header_") }]
-			if len(headers) > 0 {
+			if settings.headers != _|_ if len(settings.headers) > 0 {
+				let headers = [for settingKey, _ in settings.headers { settingKey }]
 				// Why do we take the last element here: it's mostly based on grafana's behavior
 				// - field overrides take precedence over the organize transformation (organize transformation was processed first above)
 				// - if there are multiple overrides for the same field, the last one takes precedence
@@ -70,8 +70,8 @@ if #panel.type != _|_ if #panel.type == "table" {
 			if settings.hide != _|_ {
 				hide: settings.hide
 			}
-			let widths = [for settingKey, _ in settings if strings.HasPrefix(settingKey, "width_") { strings.TrimPrefix(settingKey, "width_") }]
-			if len(widths) > 0 {
+			if settings.widths != _|_ if len(settings.widths) > 0 {
+				let widths = [for settingKey, _ in settings.widths { settingKey }]
 				width: strconv.Atoi(widths[len(widths) - 1])
 			}
 		}]
