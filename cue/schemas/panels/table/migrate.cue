@@ -9,37 +9,72 @@ if #panel.type != _|_ if #panel.type == "table" {
 			][0]
 		}
 
-		_excludedColumns: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName if value {
-			name: excludedColumn,
-			hide: true
-		}]
-
-		// Build intermediary maps to be able to merge settings coming from different places
-		// We use the future 'header' information as a key for both maps here, because this is the common denominator between the two sources
-		// Indeed in grafana the fieldconfig's overrides are matched against the final column name (thus potentially renamed))
-		_renamedMap: {if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for technicalName, prettyName in transformation.options.renameByName {
-			"\(prettyName)": [
-				if technicalName != "Value" { technicalName },
-				// Map Grafana special 'Value' to lowercase 'value':
-				if technicalName == "Value" { "value" }
-			][0]
-		}}
-		_customWidthMap: {if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" {
-			"\(override.matcher.options)": property.value
-		}}
-
-		_prettifiedColumns: [for rKey, rVal in _renamedMap {
-			name: rVal
-			header: rKey
-			if _customWidthMap[rKey] != _|_ {
-				width: _customWidthMap[rKey]
+		// intermediary object to gather all the settings/overrides we can find, before taking decisions about which ones to assign to columnSettings
+		// Because CUE doesn't allow to override values, we have to do some tricky stuff like creating unique fields for each "candidate" to avoid conflicts.
+		_settingsGatherer: {}
+		if #panel.transformations != _|_ for i, transformation in #panel.transformations if transformation.id == "organize" {
+			for excludedColumn, value in transformation.options.excludeByName if value {
+				_settingsGatherer: "\(excludedColumn)": hide: true
 			}
-		}] + [for cwKey, cwVal in _customWidthMap if _renamedMap[cwKey] == _|_ {
-			name: cwKey
-			width: cwVal
-		}]
+			for technicalName, prettyName in transformation.options.renameByName {
+				let name = [
+					// Map Grafana special 'Value' to lowercase 'value':
+					if technicalName == "Value" { "value" },
+					technicalName
+				][0]
+				_settingsGatherer: "\(name)": "header_\(prettyName)": true
+			}
+		}
+		if #panel.fieldConfig.overrides != _|_ {
+			for i, override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
+				for property in override.properties {
+					let name = [
+						// Map Grafana special 'Value' to lowercase 'value':
+						if override.matcher.options == "Value" { "value" },
+						override.matcher.options
+					][0]
+					if property.id == "displayName" {
+						// Grafana's field overrides can be defined on fields already renamed via the Organize transformation,
+						// hence why we go through the map here to try gathering the renames in the same "place".
+						// NB: this is best effort. E.g if there are several organize transformations chained this wont work, but a settings
+						// object will still get created, thus it could still be arranged manually by the user after the migration.
+						for k, v in _settingsGatherer {
+							if v["header_\(override.matcher.options)"] != _|_ {
+								_settingsGatherer: "\(k)": "header_\(property.value)": true
+							}
+						}
+						_settingsGatherer: "\(name)": "header_\(property.value)": true
+					}
+					if property.id == "custom.width" {
+						// same as above
+						for k, v in _settingsGatherer {
+							if v["header_\(override.matcher.options)"] != _|_ {
+								_settingsGatherer: "\(k)": "width_\(property.value)": true
+							}
+						}
+						_settingsGatherer: "\(name)": "width_\(property.value)": true
+					}
+				}
+			}
+		}
 
-		columnSettings: _excludedColumns + _prettifiedColumns
+		columnSettings: [for settingsID, settings in _settingsGatherer {
+			name: settingsID
+			let headers = [for settingKey, _ in settings if strings.HasPrefix(settingKey, "header_") { strings.TrimPrefix(settingKey, "header_") }]
+			if len(headers) > 0 {
+				// Why do we take the last element here: it's mostly based on grafana's behavior
+				// - field overrides take precedence over the organize transformation (organize transformation was processed first above)
+				// - if there are multiple overrides for the same field, the last one takes precedence
+				header: headers[len(headers) - 1]
+			}
+			if settings.hide != _|_ {
+				hide: settings.hide
+			}
+			let widths = [for settingKey, _ in settings if strings.HasPrefix(settingKey, "width_") { strings.TrimPrefix(settingKey, "width_") }]
+			if len(widths) > 0 {
+				width: strconv.Atoi(widths[len(widths) - 1])
+			}
+		}]
 	}
 },
 if #panel.type != _|_ if #panel.type == "table-old" {
