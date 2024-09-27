@@ -443,7 +443,7 @@
                 {
                   "header": "",
                   "hide": true,
-                  "name": "Time"
+                  "name": "timestamp"
                 },
                 {
                   "hide": true,

@@ -12,34 +12,36 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// intermediary object to gather all the settings/overrides we can find, before taking decisions about which ones to assign to columnSettings
 		// Because CUE doesn't allow to override values, we have to do some tricky stuff like creating unique fields for each "candidate" to avoid conflicts.
 		_settingsGatherer: {}
-		if #panel.transformations != _|_ for i, transformation in #panel.transformations if transformation.id == "organize" {
+		_nameBuilder: {
+			#var: string
+			output: [
+				// Rename anonymous fields that Perses names differently than Grafana
+				if #var == "Time" { "timestamp" },
+				if #var == "Value" { "value" },
+				#var
+			][0]
+		}
+		if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
 			for excludedColumn, value in transformation.options.excludeByName if value {
-				_settingsGatherer: "\(excludedColumn)": hide: true
+				let name = {_nameBuilder & {#var: excludedColumn}}.output
+				_settingsGatherer: "\(name)": hide: true
 			}
 			for technicalName, displayName in transformation.options.renameByName {
-				let name = [
-					// Map Grafana special 'Value' to lowercase 'value':
-					if technicalName == "Value" { "value" },
-					technicalName
-				][0]
+				let name = {_nameBuilder & {#var: technicalName}}.output
 				_settingsGatherer: "\(name)": headers: "\(displayName)": true
 			}
 		}
 		if #panel.fieldConfig.overrides != _|_ {
-			for i, override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
+			for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
 				for property in override.properties {
-					let name = [
-						// Map Grafana special 'Value' to lowercase 'value':
-						if override.matcher.options == "Value" { "value" },
-						override.matcher.options
-					][0]
+					let name = {_nameBuilder & {#var: override.matcher.options}}.output
 					if property.id == "displayName" {
 						// Grafana's field overrides can be defined on fields already renamed via the Organize transformation,
 						// hence why we go through the map here to try gathering the renames in the same "place".
 						// NB: this is best effort. E.g if there are several organize transformations chained this wont work, but a settings
 						// object will still get created, thus it could still be arranged manually by the user after the migration.
 						for k, v in _settingsGatherer {
-							if v.headers[override.matcher.options] != _|_ {
+							if v.headers[name] != _|_ {
 								_settingsGatherer: "\(k)": headers: "\(property.value)": true
 							}
 						}
@@ -48,7 +50,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 					if property.id == "custom.width" {
 						// same as above
 						for k, v in _settingsGatherer {
-							if v.headers[override.matcher.options] != _|_ {
+							if v.headers[name] != _|_ {
 								_settingsGatherer: "\(k)": widths: "\(property.value)": true
 							}
 						}
