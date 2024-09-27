@@ -32,6 +32,13 @@ spec:
   text: <string>
 ```
 
+## PieChart
+
+```yaml
+kind: "PieChart"
+# TODO document the spec of PieChart
+```
+
 ## StatChart
 
 ```yaml
@@ -56,6 +63,28 @@ spec:
 ```yaml
 kind: "ScatterChart"
 spec: # TODO document the spec of ScatterChart
+```
+
+## Table
+
+```yaml
+kind: "Table"
+spec:
+  [ density: <enum = "compact" | "standard" | "comfortable"> ]
+  [ columnSettings: <Column Settings specification> ]
+```
+
+### Column Settings specification
+
+```yaml
+name:  <string>
+[ header:  <string> ]
+[ headerDescription:  <string> ]
+[ cellDescription: <string> ]
+[ align: <enum = "left" | "center" | "right"> ]
+[ enableSorting: <boolean> ]
+[ width: <number | "auto"> ]
+[ hide: <boolean> ]
 ```
 
 ## TimeSeriesChart
@@ -131,6 +160,27 @@ queryIndex: <number>
 colorMode: <enum = "fixed" | "fixed-single">
 # colorValue is an hexadecimal color code
 colorValue: <string>
+```
+
+## TimeSeriesTable
+
+```yaml
+kind: "TimeSeriesTable"
+# TODO document the spec of TimeSeriesTable
+```
+
+## TraceTable
+
+```yaml
+kind: "TraceTable"
+# TODO document the spec of TraceTable
+```
+
+## TracingGanttChart
+
+```yaml
+kind: "TracingGanttChart"
+# TODO document the spec of TracingGanttChart
 ```
 
 ## Common definitions
