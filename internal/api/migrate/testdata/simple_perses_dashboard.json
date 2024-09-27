@@ -46,7 +46,7 @@
             "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
             "hidden": true
           },
-          "value": "const_val",
+          "value": "${VAR_MYCONST}",
           "constant": true,
           "name": "MyConst"
         }
@@ -320,6 +320,10 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "${DS_PROM}"
+                    },
                     "query": "vector(4)"
                   }
                 }
@@ -365,7 +369,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(2)"
                   }
@@ -404,10 +408,6 @@
                 "connectNulls": true,
                 "display": "line",
                 "lineWidth": 1
-              },
-              "yAxis": {
-                "max": 100,
-                "min": 0
               }
             }
           },
@@ -420,7 +420,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(1)"
                   }
@@ -441,6 +441,7 @@
             "spec": {
               "columnSettings": [
                 {
+                  "header": "",
                   "hide": true,
                   "name": "Time"
                 },
@@ -449,16 +450,16 @@
                   "name": "__name__"
                 },
                 {
-                  "header": "",
-                  "name": "Time"
-                },
-                {
-                    "header": "ValueCustomHeader",
-                    "name": "value"
+                  "header": "ValueCustomHeader",
+                  "name": "value"
                 },
                 {
                   "header": "API server",
                   "name": "apiserver",
+                  "width": 300
+                },
+                {
+                  "name": "API server",
                   "width": 300
                 },
                 {
@@ -478,7 +479,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "up{stack=\"ccp-ne-ogob01a\", prometheus=\"platform\"}"
                   }
@@ -515,7 +516,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(3)"
                   }
