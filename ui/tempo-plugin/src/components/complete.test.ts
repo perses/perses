@@ -13,8 +13,7 @@
 
 import { EditorState } from '@uiw/react-codemirror';
 import { parser } from '@grafana/lezer-traceql';
-import { LRLanguage } from '@codemirror/language';
-import { CompletionContext } from '@codemirror/autocomplete';
+import { LRLanguage, ensureSyntaxTree } from '@codemirror/language';
 import { Completions, identifyCompletions } from './complete';
 
 const traceQLExtension = LRLanguage.define({ parser: parser });
@@ -157,12 +156,14 @@ describe('complete', () => {
     },
   ];
 
-  it.each(tests)('retrive completions for $expr', ({ expr, pos, expected }) => {
+  it.each(tests)('retrieve completions for $expr', ({ expr, pos, expected }) => {
     if (pos === undefined) pos = expr.length;
     if (pos < 0) pos = expr.length + pos;
 
     const state = EditorState.create({ doc: expr, extensions: traceQLExtension });
-    const completions = identifyCompletions({ state, pos } as CompletionContext);
+    const tree = ensureSyntaxTree(state, expr.length, 1000);
+    expect(tree).not.toBeNull();
+    const completions = identifyCompletions(state, pos, tree!);
     expect(completions).toEqual(expected);
   });
 });
