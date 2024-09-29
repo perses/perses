@@ -1,9 +1,9 @@
 # Perses CLI (percli)
 
-On top of the application, we also provide a CLI named `percli`. This tool can be used to interact with the backend REST
-API to manage the resources such as dashboards, datasources, projects, etc.
+Besides the Perses application, we also provide a CLI named `percli`. This tool can be used to interact with the backend REST
+API to manage resources such as dashboards, datasources, projects, etc.
 
-The CLI is available in the docker image or in the archive we created during each release.
+The CLI is available in the archives created at each [release](https://github.com/perses/perses/releases), as well as in the [docker images](https://hub.docker.com/r/persesdev/perses/tags).
 
 ## Tips
 
