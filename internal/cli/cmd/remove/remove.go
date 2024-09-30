@@ -47,6 +47,7 @@ type option struct {
 	opt.DirectoryOption
 	opt.ProjectOption
 	writer    io.Writer
+	errWriter io.Writer
 	kind      modelV1.Kind
 	all       bool
 	names     []keyCombination
@@ -189,6 +190,10 @@ func (o *option) setNames(entities []modelAPI.Entity) {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

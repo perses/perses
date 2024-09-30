@@ -54,6 +54,7 @@ type loginOption interface {
 type option struct {
 	persesCMD.Option
 	writer               io.Writer
+	errWriter            io.Writer
 	url                  *common.URL
 	isNativeSelected     bool
 	username             string
@@ -185,6 +186,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func (o *option) newLoginOption() (loginOption, error) {
