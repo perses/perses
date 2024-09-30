@@ -58,7 +58,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
           render={({ field }) => (
             <MultiQueryEditor
               queryTypes={plugin.supportedQueryTypes ?? []}
-              queries={field.value ?? []}
+              queries={panelDefinition.spec.queries ?? []}
               onChange={(queries) => {
                 field.onChange(queries);
                 onQueriesChange(queries);
@@ -80,7 +80,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
             name="panelDefinition.spec.plugin.spec"
             render={({ field }) => (
               <OptionsEditorComponent
-                value={field.value}
+                value={panelDefinition.spec.plugin.spec}
                 onChange={(spec) => {
                   field.onChange(spec);
                   onPluginSpecChange(spec);
@@ -107,7 +107,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
         render={({ field }) => (
           <JSONEditor
             maxHeight="80vh"
-            value={field.value}
+            value={panelDefinition}
             onChange={(json) => {
               field.onChange(json);
               onJSONChange(json);
