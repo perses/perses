@@ -105,7 +105,7 @@ export function useLabelValues(labelName: string, filters: LabelFilter[], dataso
 }
 
 // Retrieve series from the Prometheus API for a given metric name and filters
-// Also computes the number of times a label value appears in a series
+// Also computes the number of times a label value appears for the given metric name and filters
 export function useSeriesStates(
   metricName: string,
   filters: LabelFilter[],

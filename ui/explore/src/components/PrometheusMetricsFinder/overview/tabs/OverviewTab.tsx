@@ -16,8 +16,10 @@ import { useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
+  Checkbox,
   CircularProgress,
   Divider,
+  FormControlLabel,
   IconButton,
   MenuItem,
   Select,
@@ -231,7 +233,7 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
 
   return (
     <Stack gap={2} {...props}>
-      <Stack direction="row" alignItems="center" gap={3} mt={1} justifyContent="space-between">
+      <Stack direction="row" gap={3} mt={1} justifyContent="space-between">
         <Stack gap={1}>
           <Typography variant="h1" sx={{ fontFamily: 'monospace' }}>
             {metricName}
@@ -245,7 +247,7 @@ export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...p
             </Typography>
           )}
         </Stack>
-        <Stack gap={1}>
+        <Stack gap={1} justifyContent="center">
           {isLoading ? <Skeleton variant="rounded" width={75} /> : <MetricChip label={metadata?.type ?? 'unknown'} />}
           <Typography>
             Result:{' '}

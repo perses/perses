@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
+import { Checkbox, FormControlLabel, Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
@@ -36,10 +36,12 @@ export function OverviewPanel({ metricName, datasource, filters, type, isLoading
   const { width, ref: panelRef } = useResizeObserver();
   const suggestedStepMs = useSuggestedStepMs(width);
 
+  const [rateEnabled, setRateEnabled] = useState(true);
+
   const { queries, definitions }: { queries: QueryDefinition[]; definitions: Array<Definition<UnknownSpec>> } =
     useMemo(() => {
       const expr =
-        type === 'counter'
+        type === 'counter' || rateEnabled
           ? `rate({__name__="${metricName}", ${computeFilterExpr(filters)}}[5m])`
           : `{__name__="${metricName}", ${computeFilterExpr(filters)}}`;
 
@@ -66,7 +68,7 @@ export function OverviewPanel({ metricName, datasource, filters, type, isLoading
       });
 
       return { queries, definitions };
-    }, [datasource, filters, metricName, type]);
+    }, [datasource, filters, metricName, rateEnabled, type]);
 
   if (isLoading) {
     return (
@@ -77,7 +79,15 @@ export function OverviewPanel({ metricName, datasource, filters, type, isLoading
   }
 
   return (
-    <Stack ref={panelRef} {...props}>
+    <Stack ref={panelRef} alignItems="end" {...props}>
+      {(type === undefined || type === 'summary' || type === 'histogram') && (
+        <FormControlLabel
+          control={<Checkbox size="small" />}
+          label="Enable rate"
+          checked={rateEnabled}
+          onChange={(_, checked) => setRateEnabled(checked)}
+        />
+      )}
       <DataQueriesProvider definitions={definitions} options={{ suggestedStepMs, mode: 'range' }}>
         <Panel
           panelOptions={{

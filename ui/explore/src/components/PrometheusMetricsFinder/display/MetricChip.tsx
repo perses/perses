@@ -24,7 +24,7 @@ export function MetricChip({ label, ...props }: ChipProps) {
     return <Chip label={label} color="warning" {...props} />;
   }
   if (label === 'summary') {
-    return <Chip label={label} color="info" {...props} />;
+    return <Chip label={label} color="secondary" {...props} />;
   }
 
   return <Chip label={label} sx={{ fontStyle: label === 'unknown' ? 'italic' : 'initial' }} {...props} />;
