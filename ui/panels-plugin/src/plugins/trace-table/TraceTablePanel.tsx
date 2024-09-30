@@ -34,8 +34,9 @@ export function defaultTraceLink({ query: originalQuery, traceId }: { query: Que
 
   const traceLinkParams = new URLSearchParams({
     explorer: 'traces',
-    queries: JSON.stringify([query]),
+    data: JSON.stringify({ queries: [query] }),
   });
+
   return `/explore?${traceLinkParams}`;
 }
 

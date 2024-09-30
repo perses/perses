@@ -47,7 +47,7 @@ function defaultClickHandler(data: EChartTraceValue) {
 
   const exploreParams = new URLSearchParams({
     explorer: 'traces',
-    queries: JSON.stringify([query]),
+    data: JSON.stringify({ queries: [query] }),
   });
 
   // do not use react-router here, as downstream products, which embed this panel, may not have a compatible version of it

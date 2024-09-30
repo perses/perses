@@ -20,8 +20,12 @@ import {
   LabelNamesResponse,
   LabelValuesRequestParameters,
   LabelValuesResponse,
+  MetricMetadataRequestParameters,
+  MetricMetadataResponse,
   RangeQueryRequestParameters,
   RangeQueryResponse,
+  SeriesRequestParameters,
+  SeriesResponse,
   SuccessResponse,
 } from './api-types';
 
@@ -36,6 +40,8 @@ export interface PrometheusClient extends DatasourceClient {
   rangeQuery(params: RangeQueryRequestParameters, headers?: RequestHeaders): Promise<RangeQueryResponse>;
   labelNames(params: LabelNamesRequestParameters, headers?: RequestHeaders): Promise<LabelNamesResponse>;
   labelValues(params: LabelValuesRequestParameters, headers?: RequestHeaders): Promise<LabelValuesResponse>;
+  metricMetadata(params: MetricMetadataRequestParameters, headers?: RequestHeaders): Promise<MetricMetadataResponse>;
+  series(params: SeriesRequestParameters, headers?: RequestHeaders): Promise<SeriesResponse>;
 }
 
 export interface QueryOptions {
@@ -99,6 +105,25 @@ export function labelValues(
 
   const apiURI = `/api/v1/label/${encodeURIComponent(labelName)}/values`;
   return fetchWithGet<typeof searchParams, LabelValuesResponse>(apiURI, searchParams, queryOptions);
+}
+
+/**
+ * Calls the `/api/v1/label/{labelName}/values` endpoint to get a list of values for a label.
+ */
+export function metricMetadata(
+  params: MetricMetadataRequestParameters,
+  queryOptions: QueryOptions
+): Promise<MetricMetadataResponse> {
+  const apiURI = `/api/v1/metadata`;
+  return fetchWithGet<MetricMetadataRequestParameters, MetricMetadataResponse>(apiURI, params, queryOptions);
+}
+
+/**
+ * Calls the `/api/v1/series` endpoint to finding series by label matchers.
+ */
+export function series(params: SeriesRequestParameters, queryOptions: QueryOptions): Promise<SeriesResponse> {
+  const apiURI = `/api/v1/series`;
+  return fetchWithPost<SeriesRequestParameters, SeriesResponse>(apiURI, params, queryOptions);
 }
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {

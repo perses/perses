@@ -81,8 +81,9 @@ export type RangeQueryResponse = ApiResponse<MatrixData>;
 
 export interface SeriesRequestParameters {
   'match[]': string[];
-  start: UnixTimestampSeconds;
-  end: UnixTimestampSeconds;
+  start?: UnixTimestampSeconds;
+  end?: UnixTimestampSeconds;
+  limit?: number;
 }
 
 export type SeriesResponse = ApiResponse<Metric[]>;
@@ -91,6 +92,7 @@ export interface LabelNamesRequestParameters {
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
   'match[]'?: string[];
+  limit?: number;
 }
 
 export type LabelNamesResponse = ApiResponse<string[]>;
@@ -100,6 +102,7 @@ export interface LabelValuesRequestParameters {
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
   'match[]'?: string[];
+  limit?: number;
 }
 
 export type LabelValuesResponse = ApiResponse<string[]>;
