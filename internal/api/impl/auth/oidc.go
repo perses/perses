@@ -284,16 +284,13 @@ func (e *oIDCEndpoint) deviceCode(ctx echo.Context) error {
 // token is the http handler on Perses side that will generate a proper Perses session.
 // It is used only in case of device code flow and client credentials flow.
 func (e *oIDCEndpoint) token(ctx echo.Context) error {
-	var reqBody api.TokenRequest
-	if err := ctx.Bind(&reqBody); err != nil {
-		e.logWithError(err).Error("Invalid request body")
-		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
-	}
+	grantType := ctx.FormValue("grant_type")
 
 	var uInfo *oidcUserInfo
-	switch reqBody.GrantType {
+	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
-		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), e.deviceCodeRelyingParty, reqBody.DeviceCode)
+		deviceCode := ctx.FormValue("device_code")
+		resp, err := retrieveDeviceAccessToken(ctx.Request().Context(), e.deviceCodeRelyingParty, deviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
@@ -310,13 +307,20 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 			return err
 		}
 	case api.GrantTypeClientCredentials:
-		_, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), reqBody.ClientID, reqBody.ClientSecret)
+		// Extract client_id and client_secret from Authorization header
+		clientID, clientSecret, ok := ctx.Request().BasicAuth()
+		if !ok {
+			err := &oauth2.RetrieveError{ErrorCode: string(oidc.InvalidRequest)}
+			e.logWithError(err).Error("Invalid or missing Authorization header")
+			return err
+		}
+		_, err := e.retrieveClientCredentialsToken(ctx.Request().Context(), clientID, clientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
 			return err
 		}
 		//TODO: Probably not a good idea to use the client id as the subject, but what can we do with client credentials?
-		uInfo = &oidcUserInfo{Subject: reqBody.ClientID}
+		uInfo = &oidcUserInfo{Subject: clientID}
 	default:
 		return oidc.ErrUnsupportedGrantType()
 	}

@@ -18,6 +18,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -38,7 +39,7 @@ func TestMainScenarioDashboard(t *testing.T) {
 }
 
 func TestCreateDashboardWithWrongName(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		entity := e2eframework.NewDashboard(t, "perses", "Incorrect Name With Space")
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -52,7 +53,7 @@ func TestCreateDashboardWithWrongName(t *testing.T) {
 }
 
 func TestUpdateDashboardIncreaseVersion(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		entity := e2eframework.NewDashboard(t, "perses", "test")
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -85,7 +86,7 @@ func TestUpdateDashboardIncreaseVersion(t *testing.T) {
 }
 
 func TestListDashboardInEmptyProject(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
 		demoProject := e2eframework.NewProject("Demo")
@@ -104,7 +105,7 @@ func TestListDashboardInEmptyProject(t *testing.T) {
 }
 
 func TestListDashboardWithOnlyMetadata(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		demoDashboard := e2eframework.NewDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, persesProject, demoDashboard)
@@ -133,7 +134,7 @@ func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashb
 }
 
 func TestAuthListDashboardInProject(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 
 		usrEntity := e2eframework.NewUser("creator")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -150,8 +151,8 @@ func TestAuthListDashboardInProject(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsAll("accessToken", "refreshToken")
-		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
+		authResponse.JSON().Object().Keys().ContainsAll("access_token", "refresh_token")
+		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		firstProject := e2eframework.NewProject("first")
 		secondProject := e2eframework.NewProject("second")

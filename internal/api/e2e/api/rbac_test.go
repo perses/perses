@@ -18,6 +18,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -30,7 +31,7 @@ import (
 )
 
 func TestNewProjectEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -47,8 +48,8 @@ func TestNewProjectEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsAll("accessToken", "refreshToken")
-		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
+		authResponse.JSON().Object().Keys().ContainsAll("access_token", "refresh_token")
+		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		projectName := "mysuperproject"
 		projectEntity := e2eframework.NewProject(projectName)
@@ -71,7 +72,7 @@ func TestNewProjectEndpoints(t *testing.T) {
 }
 
 func TestAnonymousEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -88,8 +89,8 @@ func TestAnonymousEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsOnly("accessToken", "refreshToken")
-		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
+		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token")
+		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		expect.GET("/api/config").WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusOK)
 		expect.GET("/api/config").WithHeader("Authorization", "Bearer <bad token>").Expect().Status(http.StatusOK)
@@ -101,7 +102,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 }
 
 func TestUnauthorizedEndpoints(t *testing.T) {
-	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
+	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
 		usrEntity := e2eframework.NewUser(creator)
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
@@ -118,8 +119,8 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsOnly("accessToken", "refreshToken")
-		token := authResponse.JSON().Object().Value("accessToken").String().Raw()
+		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token")
+		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		glRole := e2eframework.NewGlobalRole("test")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathGlobalRole)).WithJSON(glRole).WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusForbidden)
