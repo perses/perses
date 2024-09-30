@@ -168,7 +168,7 @@
               "columnSettings": [
                 {
                   "hide": true,
-                  "name": "Time"
+                  "name": "timestamp"
                 },
                 {
                   "header": "hello",
@@ -339,7 +339,7 @@
                 },
                 {
                   "header": "Timestamp",
-                  "name": "Time"
+                  "name": "timestamp"
                 },
                 {
                   "header": "group",
@@ -388,7 +388,7 @@
                 },
                 {
                   "header": "Timestamp",
-                  "name": "Time"
+                  "name": "timestamp"
                 },
                 {
                   "header": "group",
