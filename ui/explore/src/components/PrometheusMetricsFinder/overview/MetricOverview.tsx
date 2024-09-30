@@ -41,7 +41,7 @@ export function OverviewPanel({ metricName, datasource, filters, type, isLoading
   const { queries, definitions }: { queries: QueryDefinition[]; definitions: Array<Definition<UnknownSpec>> } =
     useMemo(() => {
       const expr =
-        type === 'counter' || rateEnabled
+        type === 'counter' || (rateEnabled && (type === undefined || type === 'summary' || type === 'histogram'))
           ? `rate({__name__="${metricName}", ${computeFilterExpr(filters)}}[5m])`
           : `{__name__="${metricName}", ${computeFilterExpr(filters)}}`;
 
