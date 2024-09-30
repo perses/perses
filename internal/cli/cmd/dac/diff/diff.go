@@ -53,6 +53,7 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	writer     io.Writer
+	errWriter  io.Writer
 	apiClient  api.ClientInterface
 	dashboards []*modelV1.Dashboard
 }
@@ -115,6 +116,10 @@ func (o *option) setDashboards() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

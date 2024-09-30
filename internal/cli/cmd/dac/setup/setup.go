@@ -74,9 +74,10 @@ func addOutputDirToGitignore() error {
 
 type option struct {
 	persesCMD.Option
-	writer   io.Writer
-	version  string
-	language string
+	writer    io.Writer
+	errWriter io.Writer
+	version   string
+	language  string
 }
 
 func (o *option) Complete(args []string) error {
@@ -158,6 +159,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {
