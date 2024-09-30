@@ -33,11 +33,14 @@ import { computeFilterExpr, LabelFilter, LabelValueCounter } from './types';
 export function useMetricMetadata(metricName: string, datasource: DatasourceSelector, enabled?: boolean) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
+  // histograms and summaries timeseries desc are not always added to prefixed timeseries
+  const name = metricName.replace(/(_count|_sum|_bucket)$/, '');
+
   const { data, isLoading } = useQuery<MetricMetadataResponse>({
     enabled: !!client && enabled,
-    queryKey: ['metricMetadata', metricName], // Not indexed on datasource, assuming a metric metadata should be similar across datasources
+    queryKey: ['metricMetadata', name], // Not indexed on datasource, assuming a metric metadata should be similar across datasources
     queryFn: async () => {
-      const params: MetricMetadataRequestParameters = { metric: metricName };
+      const params: MetricMetadataRequestParameters = { metric: name };
 
       return await client!.metricMetadata(params);
     },
@@ -45,13 +48,13 @@ export function useMetricMetadata(metricName: string, datasource: DatasourceSele
 
   // Find the first result with help text
   const metadata: MetricMetadata | undefined = useMemo(() => {
-    for (const metric of data?.data?.[metricName] ?? []) {
+    for (const metric of data?.data?.[name] ?? []) {
       if (metric.help.length > 0) {
         return metric;
       }
     }
     return undefined;
-  }, [data, metricName]);
+  }, [data, name]);
 
   return { metadata, isLoading };
 }
