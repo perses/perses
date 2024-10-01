@@ -29,6 +29,7 @@ import {
 } from '@perses-dev/components';
 import { CalculationType, DEFAULT_CALCULATION, isPercentUnit, FormatOptions } from '@perses-dev/core';
 import { Button } from '@mui/material';
+import { MouseEventHandler } from 'react';
 import {
   BarChartOptions,
   BarChartOptionsEditorProps,
@@ -72,7 +73,7 @@ export function BarChartOptionsEditorSettings(props: BarChartOptionsEditorProps)
     );
   };
 
-  const handleResetSettings: React.MouseEventHandler<HTMLButtonElement> = () => {
+  const handleResetSettings: MouseEventHandler<HTMLButtonElement> = () => {
     onChange(
       produce(value, (draft: BarChartOptions) => {
         draft.calculation = DEFAULT_CALCULATION;
