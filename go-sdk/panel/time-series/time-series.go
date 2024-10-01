@@ -18,6 +18,8 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
+const PluginKind = "TimeSeriesChart"
+
 type LegendPosition string
 
 const (
@@ -150,7 +152,7 @@ func Chart(options ...Option) panel.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = "TimeSeriesChart"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}

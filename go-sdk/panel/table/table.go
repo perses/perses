@@ -17,6 +17,8 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
+const PluginKind = "Table"
+
 type Density string
 
 const (
@@ -75,7 +77,7 @@ func Table(options ...Option) panel.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = "Table"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}
