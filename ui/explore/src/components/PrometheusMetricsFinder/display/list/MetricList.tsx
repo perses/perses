@@ -42,7 +42,7 @@ export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, 
         <Typography sx={{ fontFamily: 'monospace' }}>{metricName}</Typography>
       </TableCell>
 
-      <TableCell style={{ minWidth: 'fit-content', textAlign: 'center' }}>
+      <TableCell style={{ width: 115, textAlign: 'center' }}>
         {isMetadataEnabled && isLoading ? (
           <Skeleton variant="rounded" width={75} />
         ) : (
@@ -53,12 +53,12 @@ export function MetricRow({ metricName, datasource, filters, isMetadataEnabled, 
         {isMetadataEnabled && isLoading ? (
           <Skeleton variant="text" width={180} />
         ) : (
-          <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic' }}>
+          <Typography sx={{ fontStyle: metadata?.help ? 'initial' : 'italic', minWidth: '30vw' }}>
             {metadata ? metadata.help : 'unknown'}
           </Typography>
         )}
       </TableCell>
-      <TableCell style={{ minWidth: 'fit-content' }}>
+      <TableCell style={{ width: 140 }}>
         <Button
           aria-label={`explore metric ${metricName}`}
           variant="contained"
