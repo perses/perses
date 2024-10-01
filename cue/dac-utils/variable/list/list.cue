@@ -27,7 +27,7 @@ varBuilder
 #display?: _ // this is needed for below reference
 
 // specify the constraints for this variable
-#kind:             "ListVariable"
+#kind:             v1Variable.#KindList
 #allowAllValue:    bool | *false
 #allowMultiple:    bool | *false
 #customAllValue?:  string

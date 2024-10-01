@@ -15,6 +15,7 @@ package text
 
 import (
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
+	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
 	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
@@ -26,7 +27,7 @@ varBuilder
 #display?: _ // this is needed for below reference
 
 // specify the constraints for this variable
-#kind:     "TextVariable"
+#kind:     v1Variable.#KindText
 #value:    string
 #constant: bool | *false
 
