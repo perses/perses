@@ -2,6 +2,14 @@
 
 ## 0.48.0-rc0 / 2024-10-01
 
+This update introduces a brand-new Prometheus metric finder,
+based on the design from Prometheus 3.0 / Promlens, as well as a new Pie chart panel.
+
+Besides, It comes with multiple enhancements for the Table, ScatterPlot and TracingGanttChart panels.
+
+It also addresses various bug fixes, documentation improvements,
+and includes a breaking change to OAuth & OIDC to better respect the industry standard.
+
 - [FEATURE] Add PromQL metric finder to the explorer (#2245)
 - [FEATURE] TracingGanttChart: support categorical color palette (#2194)
 - [FEATURE] PieCharts Panel Plugin (#2170)
@@ -20,7 +28,7 @@
 - [ENHANCEMENT] TraceTable: show date in UTC in tooltip (#2202)
 - [ENHANCEMENT] ScatterPlot panel: format time based on next best unit (#2198)
 - [ENHANCEMENT] ScatterPlot: setup onClick handler and link to explore page by default (#2205)
-- [ENHANCEMENT] make circle size configurable in ScatterPlot panel (#2197)
+- [ENHANCEMENT] Make circle size configurable in ScatterPlot panel (#2197)
 - [ENHANCEMENT] ScatterPlot: update tooltip formatting (#2203)
 - [ENHANCEMENT] TracingGanttChart: support links in the span attribute list (#2206)
 - [ENHANCEMENT] TraceTablePanel: support disabling links to the trace (#2207)
@@ -38,7 +46,7 @@
 - [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
 - [BREAKINGCHANGE] OAuth & OIDC /token endpoint should respect the oauth 2.0 RFC (#1901)
 - [DOC] Table: Add datamodel documentation (#2275)
-- [DOC] add links in the CLI doc (#2276)
+- [DOC] Add links in the CLI doc (#2276)
 - [DOC] Use latest interfaces in docs (#2271)
 - [DOC] Put an accurate example for `percli dac setup` command (#2224)
 - [DOC] Add tshoot section with TLS/HTTP mixed datasource (#2174)
