@@ -1,5 +1,58 @@
 # Changelog
 
+## 0.48.0-rc0 / 2024-10-01
+
+This update introduces a brand-new Prometheus metric finder,
+based on the design from Prometheus 3.0 / Promlens, as well as a new Pie chart panel.
+
+Besides, It comes with multiple enhancements for the Table, ScatterPlot and TracingGanttChart panels.
+
+It also addresses various bug fixes, documentation improvements,
+and includes a breaking change to OAuth & OIDC to better respect the industry standard.
+
+- [FEATURE] Add PromQL metric finder to the explorer (#2245)
+- [FEATURE] TracingGanttChart: support categorical color palette (#2194)
+- [FEATURE] PieCharts Panel Plugin (#2170)
+- [ENHANCEMENT] Table panel migration: rename Time to timestamp (#2278)
+- [ENHANCEMENT] Table panel migration: support column rename from field overrides (#2273)
+- [ENHANCEMENT] TracingGanttChart: sort span attributes alphabetically (#2264)
+- [ENHANCEMENT] TraceTable: use MUI DataGrid to support sorting (#2261)
+- [ENHANCEMENT] Migrate: rename Value to value in table migrations (#2259)
+- [ENHANCEMENT] Return invalid_request oauth2 error when user sync failed (#2246)
+- [ENHANCEMENT] TraceQL query editor: add auto-complete support (#2240)
+- [ENHANCEMENT] TraceTable: improve readability of service name chips (#2243)
+- [ENHANCEMENT] TracingGanttChart: indicate selected row (#2216)
+- [ENHANCEMENT] TraceQL query editor: add syntax highlighting with Lezer (#2227)
+- [ENHANCEMENT] Avoid failing grafana migration on `hide` absence (#2221)
+- [ENHANCEMENT] TraceTablePanel: support categorical color palette (#2209)
+- [ENHANCEMENT] TraceTable: show date in UTC in tooltip (#2202)
+- [ENHANCEMENT] ScatterPlot panel: format time based on next best unit (#2198)
+- [ENHANCEMENT] ScatterPlot: setup onClick handler and link to explore page by default (#2205)
+- [ENHANCEMENT] Make circle size configurable in ScatterPlot panel (#2197)
+- [ENHANCEMENT] ScatterPlot: update tooltip formatting (#2203)
+- [ENHANCEMENT] TracingGanttChart: support links in the span attribute list (#2206)
+- [ENHANCEMENT] TraceTablePanel: support disabling links to the trace (#2207)
+- [ENHANCEMENT] Ignore Not Found errors in percli delete command (#2184)
+- [ENHANCEMENT] TimeSeries chart: Migrate max/min from grafana (#2168)
+- [ENHANCEMENT] Add bits/sec (common units used in networking) (#2164)
+- [BUGFIX] Default panel spec not saved (#2272)
+- [BUGFIX] Fix exit code when error occurred in cmd dac build (#2279)
+- [BUGFIX] fix flaky TraceQL auto-completion tests (#2274)
+- [BUGFIX] Disable mounting native echats tooltip to body for timeseries chart except stacked (#2248)
+- [BUGFIX] Panel name must be provided (#2262)
+- [BUGFIX] Fix dac cue setup and upgrade min version (#2255)
+- [BUGFIX] tempo client: encode URL parameters in path (#2241)
+- [BUGFIX] tempo query: disable syntax highlighting if query is a trace id (#2242)
+- [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
+- [BREAKINGCHANGE] OAuth & OIDC /token endpoint should respect the oauth 2.0 RFC (#1901)
+- [DOC] Table: Add datamodel documentation (#2275)
+- [DOC] Add links in the CLI doc (#2276)
+- [DOC] Use latest interfaces in docs (#2271)
+- [DOC] Put an accurate example for `percli dac setup` command (#2224)
+- [DOC] Add tshoot section with TLS/HTTP mixed datasource (#2174)
+- [DOC] Add an introduction to the plugins documentation + patch some docs (#2208)
+- [DOC] Add --config dev/config.yaml to installing perses from the source guide (#2162)
+
 ## 0.47.1 / 2024-08-21
 
 - [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
