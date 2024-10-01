@@ -32,6 +32,7 @@ import (
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
+	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -92,9 +93,9 @@ func TestDashboardBuilder(t *testing.T) {
 			txtVar.Text("platform", txtVar.Constant(true)),
 		),
 		AddVariable("prometheus_namespace",
-			txtVar.Text("observability",
-				txtVar.Constant(true),
-				txtVar.Description("constant to reduce the query scope thus improve performances"),
+			listVar.List(
+				staticlist.StaticList(staticlist.Values("observability", "monitoring")),
+				listVar.Description("to reduce the query scope thus improve performances"),
 			),
 		),
 		AddVariable("namespace", listVar.List(
@@ -192,9 +193,9 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				txtVar.Text("platform", txtVar.Constant(true)),
 			),
 			variablegroup.AddVariable("prometheus_namespace",
-				txtVar.Text("observability",
-					txtVar.Constant(true),
-					txtVar.Description("constant to reduce the query scope thus improve performances"),
+				listVar.List(
+					staticlist.StaticList(staticlist.Values("observability", "monitoring")),
+					listVar.Description("to reduce the query scope thus improve performances"),
 				),
 			),
 			variablegroup.AddVariable("namespace", listVar.List(

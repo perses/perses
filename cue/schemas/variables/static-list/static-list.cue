@@ -15,7 +15,8 @@ package model
 
 kind: "StaticListVariable"
 spec: close({
-	values: [...(string | {value: string
+	values: [...(string | {
+		value:  string
 		label?: string
 	})]
 })
