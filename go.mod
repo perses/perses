@@ -1,7 +1,6 @@
 module github.com/perses/perses
 
-go 1.22.5
-toolchain go1.23.1
+go 1.23.0
 
 require (
 	cuelang.org/go v0.10.0
