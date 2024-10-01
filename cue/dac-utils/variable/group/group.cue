@@ -14,6 +14,7 @@
 package group
 
 import (
+	"strings"
 	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
@@ -24,3 +25,7 @@ import (
 }]
 
 variables: [for i in #input {i.variable}]
+
+// generate a query param string to be used in urls
+_varNames: [for v in variables {"var-\(v.spec.name)=$\(v.spec.name)"}]
+queryParams: strings.Join(_varNames, "&")
