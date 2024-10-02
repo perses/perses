@@ -23,10 +23,7 @@ listVarBuilder
 
 // specify the constraints for this variable
 #pluginKind: staticListVar.kind
-#values: [...(string | {
-	value:  string
-	label?: string
-})]
+#values: [...staticListVar.#value]
 
 variable: listVarBuilder.variable & {
 	spec: {

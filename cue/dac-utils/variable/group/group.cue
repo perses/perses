@@ -20,6 +20,13 @@ import (
 
 #input: [...varBuilder]
 
+// For each variable, append previous variables as "dependencies" for it.
+// E.g considering 3 variables: cluster>namespace>pod, with each one depending
+// on the previous ones, the generated dependencies would be:
+// - cluster:   []
+// - namespace: [cluster]
+// - pod:       [cluster, namespace]
+// this dependencies information can be used later to generate the right filter(s)
 #input: [for i, _ in #input {
 	#dependencies: [for i2, var in #input if i > i2 {var}]
 }]
