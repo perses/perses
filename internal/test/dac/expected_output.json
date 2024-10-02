@@ -47,15 +47,21 @@
         }
       },
       {
-        "kind": "TextVariable",
+        "kind": "ListVariable",
         "spec": {
           "name": "prometheus_namespace",
           "display": {
-            "description": "constant to reduce the query scope thus improve performances",
+            "description": "to reduce the query scope thus improve performances",
             "hidden": false
           },
-          "value": "observability",
-          "constant": true
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [ "observability", "monitoring" ]
+            }
+          }
         }
       },
       {
