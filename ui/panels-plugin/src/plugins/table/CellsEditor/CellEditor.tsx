@@ -43,14 +43,14 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="From"
           placeholder="Start of range"
           value={condition.spec?.min ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { min: e.target.value } } as Condition)}
+          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, min: e.target.value } } as Condition)}
           fullWidth
         />
         <TextField
           label="To"
           placeholder="End of range (inclusive)"
           value={condition.spec?.max ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { max: e.target.value } } as Condition)}
+          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, max: e.target.value } } as Condition)}
           fullWidth
         />
       </Stack>
