@@ -22,6 +22,7 @@ import (
 	labelValuesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelvalues"
 	labelNamesVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable/labelnames"
 	textVarBuilder "github.com/perses/perses/cue/dac-utils/variable/text"
+	staticListVarBuilder "github.com/perses/perses/cue/dac-utils/variable/staticlist"
 	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
@@ -43,11 +44,10 @@ import (
 			#value:    "platform"
 			#constant: true
 		},
-		textVarBuilder & {
+		staticListVarBuilder & {
 			#name: "prometheus_namespace"
-			#display: description: "constant to reduce the query scope thus improve performances"
-			#value:    "observability"
-			#constant: true
+			#display: description: "to reduce the query scope thus improve performances"
+			#values: ["observability", "monitoring"]
 		},
 		promQLVarBuilder & {
 			#name:           "namespace"
@@ -110,6 +110,11 @@ import (
 				spec: plugin: promQuery & {
 					spec: query: "sum \(#grouping) (container_cpu_usage_seconds{\(#filter)})"
 				}
+			},
+		]
+		links: [
+			{
+				url: "http://localhost:3000/projects/perses/dashboards/hello?" + #myVarsBuilder.queryParams
 			},
 		]
 	}
