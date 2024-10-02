@@ -55,7 +55,6 @@ export function VirtualizedTable<TableData>({
   cellConfigs,
 }: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
-  console.log('cellConfigs', cellConfigs);
 
   // Use a ref for these values because they are only needed for keyboard
   // focus interactions and setting them on state will lead to a significant
@@ -190,12 +189,8 @@ export function VirtualizedTable<TableData>({
                 const cellContext = cell.getContext();
                 const cellConfig = cellConfigs?.[cellContext.cell.id];
 
-                console.log('id', cellContext.cell.id);
-                console.log('cellConfig', cellConfig);
-
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
-                console.log('cellContent', cellContent);
 
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;

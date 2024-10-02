@@ -51,16 +51,48 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
 
 function generateCellConfig(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
   for (const setting of settings) {
-    console.log(setting);
-    console.log(value);
     if (setting.condition.kind === 'Value' && setting.condition.spec?.value === String(value)) {
       return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
     }
-    // if (
-    //   setting.condition.kind === 'Range'
-    // ) {
-    //   return setting.text ?? value;
-    // }
+
+    if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
+      const numericValue = Number(value);
+      if (
+        setting.condition.spec?.min &&
+        setting.condition.spec?.max &&
+        numericValue >= +setting.condition.spec?.min &&
+        numericValue <= +setting.condition.spec?.max
+      ) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+
+      if (setting.condition.spec?.min && numericValue >= +setting.condition.spec?.min) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+
+      if (setting.condition.spec?.max && numericValue <= +setting.condition.spec?.max) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
+
+    if (setting.condition.kind === 'Regex' && setting.condition.spec?.regex) {
+      const regex = new RegExp(setting.condition.spec?.regex);
+      if (regex.test(String(value))) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
+
+    if (setting.condition.kind === 'Misc' && setting.condition.spec?.value) {
+      if (setting.condition.spec?.value === 'empty' && value === '') {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
   }
   return undefined;
 }
@@ -121,7 +153,22 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
 
     let index = 0;
     for (const row of data) {
-      for (const [key, value] of Object.entries(row)) {
+      // Transforming key to object to extend the row with undefined values if the key is not present
+      // for checking the cell config "Misc" condition with "null"
+      const keysAsObj = keys.reduce(
+        (acc, key) => {
+          acc[key] = undefined;
+          return acc;
+        },
+        {} as Record<string, undefined>
+      );
+
+      const extendRow = {
+        ...keysAsObj,
+        ...row,
+      };
+
+      for (const [key, value] of Object.entries(extendRow)) {
         const cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
         if (cellConfig) {
           result[`${index}_${key}`] = cellConfig;
