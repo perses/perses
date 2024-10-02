@@ -112,6 +112,11 @@ import (
 				}
 			},
 		]
+		links: [
+			{
+				url: "http://localhost:3000/projects/perses/dashboards/hello?" + #myVarsBuilder.queryParams
+			},
+		]
 	}
 }
 

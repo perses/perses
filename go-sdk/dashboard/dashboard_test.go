@@ -70,6 +70,7 @@ func buildCPUPanel(grouping string) panelgroup.Option {
 		panel.AddQuery(
 			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
 		),
+		panel.AddLink("http://localhost:3000/projects/perses/dashboards/hello?var-stack=$stack&var-prometheus=$prometheus&var-prometheus_namespace=$prometheus_namespace&var-namespace=$namespace&var-namespaceLabels=$namespaceLabels&var-pod=$pod&var-container=$container&var-containerLabels=$containerLabels"),
 	)
 }
 
