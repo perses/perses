@@ -17,6 +17,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -102,7 +103,23 @@ type RESTClient struct {
 	// base is the root URL for all invocations of the client
 	BaseURL *url.URL
 	// Set specific behavior of the client.  If not set http.DefaultClient will be used.
-	Client *http.Client
+	Client    *http.Client
+	authMutex sync.RWMutex
+}
+
+func (c *RESTClient) SetBasicAuth(username, password string) {
+	c.authMutex.Lock()
+	c.basicAuth = &secret.BasicAuth{
+		Username: username,
+		Password: password,
+	}
+	c.authMutex.Unlock()
+}
+
+func (c *RESTClient) SetAuthorization(authorization *secret.Authorization) {
+	c.authMutex.Lock()
+	c.authorization = authorization
+	c.authMutex.Unlock()
 }
 
 // GetHeaders gets the headers
@@ -136,5 +153,7 @@ func (c *RESTClient) Delete() *Request {
 }
 
 func (c *RESTClient) newRequest(method string) *Request {
+	c.authMutex.RLock()
+	defer c.authMutex.RUnlock()
 	return NewRequest(c.Client, method, c.BaseURL, c.authorization, c.basicAuth, c.headers)
 }
