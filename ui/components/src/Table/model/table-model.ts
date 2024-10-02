@@ -63,6 +63,13 @@ export interface TableProps<TableData> {
   columns: Array<TableColumnConfig<TableData>>;
 
   /**
+   * Custom render cell configurations. Each entry of the object should be an
+   * id for cell `${rowIndex}_${columnIndex}`, can apply custom text, text color
+   * and background color.
+   */
+  cellConfigs?: TableCellConfigs;
+
+  /**
    * The density of the table layout. This impacts the size and space taken up
    * by content in the table (e.g. font size, padding).
    */
@@ -201,6 +208,16 @@ export function getTableCellLayout(
 }
 
 export type TableCellAlignment = 'left' | 'right' | 'center';
+
+export interface TableCellConfigs {
+  [id: string]: TableCellConfig;
+}
+
+export interface TableCellConfig {
+  text?: string;
+  textColor?: string;
+  backgroundColor?: string;
+}
 
 // Overrides of meta value, so it can have a meaningful type in our code instead
 // of `any`. Putting this in the model instead of a separate .d.ts file because

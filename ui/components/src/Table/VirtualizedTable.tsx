@@ -22,7 +22,7 @@ import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableProps, TableRowEventOpts } from './model/table-model';
+import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
@@ -36,6 +36,7 @@ export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableDat
     rows: Array<Row<TableData>>;
     columns: Array<Column<TableData, unknown>>;
     headers: Array<HeaderGroup<TableData>>;
+    cellConfigs?: TableCellConfigs;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -51,8 +52,10 @@ export function VirtualizedTable<TableData>({
   rows,
   columns,
   headers,
+  cellConfigs,
 }: VirtualizedTableProps<TableData>) {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
+  console.log('cellConfigs', cellConfigs);
 
   // Use a ref for these values because they are only needed for keyboard
   // focus interactions and setting them on state will lead to a significant
@@ -185,8 +188,14 @@ export function VirtualizedTable<TableData>({
                 };
 
                 const cellContext = cell.getContext();
+                const cellConfig = cellConfigs?.[cellContext.cell.id];
+
+                console.log('id', cellContext.cell.id);
+                console.log('cellConfig', cellConfig);
+
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
+                console.log('cellContent', cellContent);
 
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;
@@ -212,8 +221,10 @@ export function VirtualizedTable<TableData>({
                     isFirstColumn={i === 0}
                     isLastColumn={i === cells.length - 1}
                     description={description}
+                    color={cellConfig?.textColor ?? undefined}
+                    backgroundColor={cellConfig?.backgroundColor ?? undefined}
                   >
-                    {cellContent}
+                    {cellConfig?.text || cellContent}
                   </TableCell>
                 );
               })}
