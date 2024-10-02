@@ -162,7 +162,12 @@ export function CellEditor({ cell, onChange, onDelete }: CellEditorProps) {
         </Stack>
       </Grid>
       <Grid xs={4}>
-        <TextField value={cell.text} onChange={(e) => onChange({ ...cell, text: e.target.value })} fullWidth />
+        <TextField
+          label="Display text"
+          value={cell.text}
+          onChange={(e) => onChange({ ...cell, text: e.target.value })}
+          fullWidth
+        />
       </Grid>
       <Grid xs={1}>
         <Stack direction="row" justifyContent="center" gap={1}>
