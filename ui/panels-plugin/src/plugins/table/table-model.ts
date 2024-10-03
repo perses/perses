@@ -59,8 +59,8 @@ export interface ValueCondition {
 export interface RangeCondition {
   kind: 'Range';
   spec: {
-    min?: string;
-    max?: string;
+    min?: number;
+    max?: number;
   };
 }
 
@@ -74,7 +74,7 @@ export interface RegexCondition {
 export interface MiscCondition {
   kind: 'Misc';
   spec: {
-    value: 'empty' | 'null' | 'NaN';
+    value: 'empty' | 'null' | 'NaN' | 'true' | 'false';
   };
 }
 

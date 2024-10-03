@@ -14,7 +14,7 @@
 import React from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context';
 import { ColorPicker } from './ColorPicker';
 
 export interface OptionsColorPickerProps {

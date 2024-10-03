@@ -92,6 +92,12 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
+      if (setting.condition.spec?.value === 'true' && value === true) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'false' && value === false) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
     }
   }
   return undefined;
