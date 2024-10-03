@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { MOCK_SEARCH_RESPONSE_VPARQUET3, MOCK_SEARCH_RESPONSE_VPARQUET4, MOCK_TRACE_RESPONSE } from '../test';
+import {
+  MOCK_SEARCH_RESPONSE_MIXED_VPARQUET3_AND_4,
+  MOCK_SEARCH_RESPONSE_VPARQUET3,
+  MOCK_SEARCH_RESPONSE_VPARQUET4,
+  MOCK_TRACE_RESPONSE,
+} from '../test';
 import { searchWithFallback } from './tempo-client';
 
 const fetchMock = (global.fetch = jest.fn());
@@ -30,5 +35,24 @@ describe('tempo-client', () => {
 
     const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
     expect(results).toEqual(MOCK_SEARCH_RESPONSE_VPARQUET4);
+  });
+
+  it('should augment query results with serviceStats if they are partially present', async () => {
+    fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_SEARCH_RESPONSE_MIXED_VPARQUET3_AND_4) });
+    fetchMock.mockResolvedValueOnce({ json: () => Promise.resolve(MOCK_TRACE_RESPONSE) });
+
+    const results = await searchWithFallback({ q: '{}' }, { datasourceUrl: '' });
+
+    // in the mock response, the first trace contains serviceStats but the second trace does not contain serviceStats
+    expect(results.traces[0]?.serviceStats).toEqual({
+      telemetrygen: { spanCount: 2 },
+    });
+    expect(results.traces[1]?.serviceStats).toEqual({
+      'article-service': { spanCount: 2 },
+      'auth-service': { spanCount: 1 },
+      'cart-service': { spanCount: 2 },
+      postgres: { spanCount: 1 },
+      'shop-backend': { spanCount: 4 },
+    });
   });
 });

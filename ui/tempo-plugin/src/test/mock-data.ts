@@ -2341,6 +2341,62 @@ export const MOCK_SEARCH_RESPONSE_VPARQUET4: SearchResponse = {
   ],
 };
 
+export const MOCK_SEARCH_RESPONSE_MIXED_VPARQUET3_AND_4: SearchResponse = {
+  traces: [
+    {
+      traceID: '224a0e75a0d244f1a3dab3af233e6cf3',
+      rootServiceName: 'telemetrygen',
+      rootTraceName: 'lets-go',
+      startTimeUnixNano: '1727969811138427469',
+      spanSets: [
+        {
+          spans: [
+            {
+              spanID: '237f68dfbed2f473',
+              startTimeUnixNano: '1727969811138427469',
+              durationNanos: '123000',
+            },
+            {
+              spanID: 'a8eefdaad116a872',
+              startTimeUnixNano: '1727969811138427469',
+              durationNanos: '123000',
+            },
+          ],
+          matched: 2,
+        },
+      ],
+      serviceStats: {
+        telemetrygen: {
+          spanCount: 2,
+        },
+      },
+    },
+    {
+      traceID: '71bd40553a881d98dc52f2a27fd53fe3',
+      rootServiceName: 'telemetrygen',
+      rootTraceName: 'lets-go',
+      startTimeUnixNano: '1727969665041183110',
+      spanSets: [
+        {
+          spans: [
+            {
+              spanID: '968a78f0ffbc6570',
+              startTimeUnixNano: '1727969665041183110',
+              durationNanos: '123000',
+            },
+            {
+              spanID: 'bb8ab44ffd46ca07',
+              startTimeUnixNano: '1727969665041183110',
+              durationNanos: '123000',
+            },
+          ],
+          matched: 2,
+        },
+      ],
+    },
+  ],
+};
+
 export const MOCK_TRACE_DATA_SEARCHRESULT: TraceData = {
   searchResult: [
     {

@@ -65,10 +65,10 @@ export interface TraceSearchResponse {
 
 export interface SpanSearchResponse {
   spanID: string;
-  name: string;
+  name?: string;
   startTimeUnixNano: string;
   durationNanos: string;
-  attributes: Attribute[];
+  attributes?: Attribute[];
 }
 
 export interface ServiceStats {
