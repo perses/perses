@@ -184,7 +184,7 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     }
 
     return result;
-  }, [data, spec.cellSettings]);
+  }, [data, keys, spec.cellSettings]);
 
   function handleSortingChange(sorting: SortingState) {
     setSorting(sorting);
