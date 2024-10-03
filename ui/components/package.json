@@ -50,6 +50,7 @@
     "react-error-boundary": "^3.1.4",
     "react-hook-form": "^7.51.3",
     "react-virtuoso": "^4.3.6",
+    "use-debounce": "^10.0.3",
     "zod": "^3.21.4"
   },
   "devDependencies": {

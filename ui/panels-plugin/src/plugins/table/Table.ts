@@ -28,9 +28,9 @@ export const Table: PanelPlugin<TableOptions> = {
     mode: 'instant',
   },
   panelOptionsEditorComponents: [
-    { label: 'Cell Settings', content: TableCellsEditor },
-    { label: 'Column Settings', content: TableColumnsEditor },
     { label: 'General Settings', content: TableSettingsEditor },
+    { label: 'Column Settings', content: TableColumnsEditor },
+    { label: 'Cell Settings', content: TableCellsEditor },
   ],
   createInitialOptions: createInitialTableOptions,
 };
