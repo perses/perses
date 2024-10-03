@@ -205,7 +205,6 @@ export function CellEditor({ cell, onChange, onDelete }: CellEditorProps) {
               color={cell.backgroundColor ?? '#fff'}
               onColorChange={(color) => onChange({ ...cell, backgroundColor: color } as CellSettings)}
               onClear={() => onChange({ ...cell, backgroundColor: undefined } as CellSettings)}
-              debounceTime={200}
             />
           ) : (
             <IconButton onClick={() => onChange({ ...cell, backgroundColor: '#000' })}>

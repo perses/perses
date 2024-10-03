@@ -14,19 +14,17 @@
 import React from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useDebouncedCallback } from 'use-debounce';
 import { useChartsTheme } from '../context';
 import { ColorPicker } from './ColorPicker';
 
 export interface OptionsColorPickerProps {
   label: string;
   color: string;
-  debounceTime?: number;
   onColorChange: (color: string) => void;
   onClear?: () => void;
 }
 
-export function OptionsColorPicker({ label, color, debounceTime, onColorChange, onClear }: OptionsColorPickerProps) {
+export function OptionsColorPicker({ label, color, onColorChange, onClear }: OptionsColorPickerProps) {
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -41,10 +39,6 @@ export function OptionsColorPicker({ label, color, debounceTime, onColorChange, 
   const {
     thresholds: { defaultColor, palette },
   } = useChartsTheme();
-
-  const handleColorChange = useDebouncedCallback((color: string) => {
-    onColorChange(color);
-  }, debounceTime);
 
   return (
     <>
@@ -72,12 +66,7 @@ export function OptionsColorPicker({ label, color, debounceTime, onColorChange, 
           horizontal: 'right',
         }}
       >
-        <ColorPicker
-          color={color}
-          palette={[defaultColor, ...palette]}
-          onChange={handleColorChange}
-          onClear={onClear}
-        />
+        <ColorPicker color={color} palette={[defaultColor, ...palette]} onChange={onColorChange} onClear={onClear} />
       </Popover>
     </>
   );
