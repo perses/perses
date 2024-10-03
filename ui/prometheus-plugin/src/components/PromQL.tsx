@@ -14,7 +14,7 @@
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
-import { useTheme } from '@mui/material';
+import { useTheme, InputLabel, Stack } from '@mui/material';
 import { useMemo } from 'react';
 
 export type PromQLEditorProps = { completeConfig: CompleteConfiguration } & Omit<
@@ -31,16 +31,45 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
   }, [completeConfig]);
 
   return (
-    <CodeMirror
-      {...rest}
-      style={{ border: `1px solid ${theme.palette.divider}` }}
-      theme={isDarkMode ? 'dark' : 'light'}
-      basicSetup={{
-        highlightActiveLine: false,
-        highlightActiveLineGutter: false,
-        foldGutter: false,
-      }}
-      extensions={[EditorView.lineWrapping, promQLExtension]}
-    />
+    <Stack position="relative">
+      <InputLabel // reproduce the same kind of input label that regular MUI TextFields have
+        shrink
+        sx={{
+          position: 'absolute',
+          top: '-8px',
+          left: '10px',
+          padding: '0 4px',
+          color: theme.palette.text.primary,
+          zIndex: 1,
+        }}
+      >
+        PromQL expression
+      </InputLabel>
+      <CodeMirror
+        {...rest}
+        theme={isDarkMode ? 'dark' : 'light'}
+        basicSetup={{
+          highlightActiveLine: false,
+          highlightActiveLineGutter: false,
+          foldGutter: false,
+        }}
+        extensions={[
+          EditorView.lineWrapping,
+          promQLExtension,
+          EditorView.theme({
+            '.cm-content': {
+              paddingTop: '8px',
+              paddingBottom: '8px',
+            },
+            '.cm-scroller': {
+              border: `1px solid ${theme.palette.divider}`,
+              borderRadius: '4px',
+            },
+          }),
+          EditorView.editorAttributes.of({ style: 'border-radius: 4px' }),
+        ]}
+        placeholder="sum(rate(http_requests_total[5m]))"
+      />
+    </Stack>
   );
 }
