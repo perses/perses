@@ -44,7 +44,7 @@ func TestLoginOAuth(t *testing.T) {
 			//  - On the other hand, putting client id as username can be misleading(/unsecure?) for some providers.
 			//    For example azure advise to use object id to identify a Azure Application in a relying party tool like Perses.
 			//e2eframework.NewUser("anything"),
-			e2eframework.NewUser("john.doe"),
+			e2eframework.NewUser("john.doe", "password"),
 		}
 		testSuite := []cmdTest.Suite{{
 			Title: "Nominal Device Code flow",
@@ -78,8 +78,8 @@ func TestLoginOIDC(t *testing.T) {
 	// Server with oauth provider configured.
 	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("anything"),
-			e2eframework.NewUser("john.doeOIDC"),
+			e2eframework.NewUser("anything", "password"),
+			e2eframework.NewUser("john.doeOIDC", "password"),
 		}
 		testSuite := []cmdTest.Suite{{
 			Title: "Nominal Device Code flow",

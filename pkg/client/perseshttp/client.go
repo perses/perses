@@ -14,117 +14,25 @@
 package perseshttp
 
 import (
-	"net"
 	"net/http"
 	"net/url"
-	"sync"
-	"time"
 
-	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 )
-
-const connectionTimeout = 30 * time.Second
-
-// PublicRestConfigClient is the struct that should be used when printing the config
-type PublicRestConfigClient struct {
-	URL       *common.URL             `json:"url" yaml:"url"`
-	BasicAuth *secret.PublicBasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
-	// The HTTP authorization credentials for the targets.
-	Authorization *secret.PublicAuthorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
-	// TLSConfig to use to connect to the targets.
-	TLSConfig *secret.PublicTLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
-	Headers   map[string]string       `json:"headers,omitempty" yaml:"headers,omitempty"`
-}
-
-func NewPublicRestConfigClient(config *RestConfigClient) *PublicRestConfigClient {
-	if config == nil {
-		return nil
-	}
-	return &PublicRestConfigClient{
-		URL:           config.URL,
-		BasicAuth:     secret.NewPublicBasicAuth(config.BasicAuth),
-		Authorization: secret.NewPublicAuthorization(config.Authorization),
-		TLSConfig:     secret.NewPublicTLSConfig(config.TLSConfig),
-		Headers:       config.Headers,
-	}
-}
-
-// RestConfigClient defines all parameters that can be set to customize the RESTClient
-type RestConfigClient struct {
-	URL       *common.URL       `json:"url" yaml:"url"`
-	BasicAuth *secret.BasicAuth `json:"basicAuth,omitempty" yaml:"basicAuth,omitempty"`
-	// The HTTP authorization credentials for the targets.
-	Authorization *secret.Authorization `json:"authorization,omitempty" yaml:"authorization,omitempty"`
-	// TLSConfig to use to connect to the targets.
-	TLSConfig *secret.TLSConfig `json:"tlsConfig,omitempty" yaml:"tlsConfig,omitempty"`
-	Headers   map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
-}
-
-// NewFromConfig create an instance of RESTClient using the config passed as parameter
-func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
-	tlsCfg, err := secret.BuildTLSConfig(config.TLSConfig)
-	if err != nil {
-		return nil, err
-	}
-	roundTripper := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   connectionTimeout,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		TLSHandshakeTimeout: 10 * time.Second,
-		TLSClientConfig:     tlsCfg, // nolint: gas, gosec
-	}
-
-	httpClient := &http.Client{
-		Transport: roundTripper,
-		Timeout:   connectionTimeout,
-	}
-
-	return &RESTClient{
-		authorization: config.Authorization,
-		BaseURL:       config.URL.URL,
-		Client:        httpClient,
-		headers:       config.Headers,
-		basicAuth:     config.BasicAuth,
-	}, nil
-}
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.
 type RESTClient struct {
 	// Usually it contains the bearer token required to contact the remote API.
-	authorization *secret.Authorization
+	Authorization *secret.Authorization
 	// basicAuth to be used for each request (not editable)
 	// Using a basicAuth has the priority other the token
-	basicAuth *secret.BasicAuth
+	BasicAuth *secret.BasicAuth
 	// Default headers for all client requests (not editable)
-	headers map[string]string
+	Headers map[string]string
 	// base is the root URL for all invocations of the client
 	BaseURL *url.URL
-	// Set specific behavior of the client.  If not set http.DefaultClient will be used.
-	Client    *http.Client
-	authMutex sync.RWMutex
-}
-
-func (c *RESTClient) SetBasicAuth(username, password string) {
-	c.authMutex.Lock()
-	c.basicAuth = &secret.BasicAuth{
-		Username: username,
-		Password: password,
-	}
-	c.authMutex.Unlock()
-}
-
-func (c *RESTClient) SetAuthorization(authorization *secret.Authorization) {
-	c.authMutex.Lock()
-	c.authorization = authorization
-	c.authMutex.Unlock()
-}
-
-// GetHeaders gets the headers
-func (c *RESTClient) GetHeaders() map[string]string {
-	return c.headers
+	// Set specific behavior of the client. If not, set http.DefaultClient will be used.
+	Client *http.Client
 }
 
 // Get begins a GET request. Short for c.newRequest("GET")
@@ -153,7 +61,5 @@ func (c *RESTClient) Delete() *Request {
 }
 
 func (c *RESTClient) newRequest(method string) *Request {
-	c.authMutex.RLock()
-	defer c.authMutex.RUnlock()
-	return NewRequest(c.Client, method, c.BaseURL, c.authorization, c.basicAuth, c.headers)
+	return NewRequest(c.Client, method, c.BaseURL, c.Authorization, c.BasicAuth, c.Headers)
 }

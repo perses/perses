@@ -49,7 +49,7 @@ func decodePublicUser(t *testing.T, object interface{}) *modelV1.PublicUser {
 func TestMainScenarioUser(t *testing.T) {
 	path := utils.PathUser
 	creator := func(name string) modelAPI.Entity {
-		return e2eframework.NewUser(name)
+		return e2eframework.NewUser(name, "password")
 	}
 	e2eframework.CreateTestScenario(t, path, creator)
 	// Update test

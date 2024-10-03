@@ -20,6 +20,7 @@ import (
 	"github.com/perses/common/async"
 	"github.com/perses/common/async/taskhelper"
 	"github.com/perses/perses/internal/api/discovery/service"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
@@ -28,7 +29,7 @@ import (
 )
 
 func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
-	client, err := perseshttp.NewFromConfig(cfg.RestConfigClient)
+	client, err := clientConfig.NewFromConfig(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err
 	}
