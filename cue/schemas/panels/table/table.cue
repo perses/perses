@@ -51,14 +51,14 @@ spec: close({
 #regexCondition: {
   kind: "Regex"
 	spec: {
-		regex: string
+		regex: strings.MinRunes(1)
 	}
 }
 
 #miscCondition: {
 	kind: "Misc"
 	spec: {
-		value: "Empty" | "Null" | "NaN" | "True" | "False"
+		value: "empty" | "null" | "NaN" | "true" | "false"
 	}
 }
 

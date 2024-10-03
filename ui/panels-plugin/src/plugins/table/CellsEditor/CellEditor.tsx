@@ -43,14 +43,14 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
           label="From"
           placeholder="Start of range"
           value={condition.spec?.min ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, min: e.target.value } } as Condition)}
+          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, min: +e.target.value } } as Condition)}
           fullWidth
         />
         <TextField
           label="To"
           placeholder="End of range (inclusive)"
           value={condition.spec?.max ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, max: e.target.value } } as Condition)}
+          onChange={(e) => onChange({ ...condition, spec: { ...condition.spec, max: +e.target.value } } as Condition)}
           fullWidth
         />
       </Stack>
@@ -89,10 +89,22 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
               <Typography variant="caption">Matches null or undefined</Typography>
             </Stack>
           </MenuItem>
-          <MenuItem value="nan">
+          <MenuItem value="NaN">
             <Stack>
               <Typography>NaN</Typography>
               <Typography variant="caption">Matches Not a Number value</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="true">
+            <Stack>
+              <Typography>True</Typography>
+              <Typography variant="caption">Matches true boolean</Typography>
+            </Stack>
+          </MenuItem>
+          <MenuItem value="false">
+            <Stack>
+              <Typography>False</Typography>
+              <Typography variant="caption">Matches false boolean</Typography>
             </Stack>
           </MenuItem>
         </TextField>

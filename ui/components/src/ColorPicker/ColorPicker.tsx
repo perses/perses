@@ -15,7 +15,7 @@ import { IconButton, Stack, TextField } from '@mui/material';
 import React, { useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import CircleIcon from 'mdi-material-ui/Circle';
-import CloseIcon from 'mdi-material-ui/Close';
+import DeleteIcon from 'mdi-material-ui/Delete';
 
 interface ColorPickerProps {
   color: string;
@@ -72,7 +72,7 @@ export const ColorPicker = ({ color, onChange, onClear, palette }: ColorPickerPr
         />
         {onClear && (
           <IconButton onClick={onClear}>
-            <CloseIcon />
+            <DeleteIcon />
           </IconButton>
         )}
       </Stack>
