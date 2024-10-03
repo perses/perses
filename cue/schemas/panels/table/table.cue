@@ -36,7 +36,7 @@ spec: close({
 #valueCondition: {
 	kind: "Value"
 	spec: {
-			value: strings.MinRunes(1)
+		value: strings.MinRunes(1)
 	}
 }
 
@@ -49,7 +49,7 @@ spec: close({
 }
 
 #regexCondition: {
-  kind: "Regex"
+	kind: "Regex"
 	spec: {
 		regex: strings.MinRunes(1)
 	}
@@ -63,12 +63,12 @@ spec: close({
 }
 
 #condition: {
-		#valueCondition | #rangeCondition | #regexCondition | #miscCondition
+	#valueCondition | #rangeCondition | #regexCondition | #miscCondition
 }
 
 #cellSettings: {
-	condition: #condition
-	text?: string
-	textColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+	condition:        #condition
+	text?:            string
+	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
