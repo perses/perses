@@ -43,7 +43,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
           zIndex: 1,
         }}
       >
-        PromQL expression
+        PromQL Expression
       </InputLabel>
       <CodeMirror
         {...rest}
@@ -64,7 +64,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
             },
           }),
         ]}
-        placeholder="sum(rate(http_requests_total[5m]))"
+        placeholder="Example: sum(rate(http_requests_total[5m]))"
       />
     </Stack>
   );
