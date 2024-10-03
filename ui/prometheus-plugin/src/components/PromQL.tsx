@@ -47,6 +47,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
       </InputLabel>
       <CodeMirror
         {...rest}
+        style={{ border: `1px solid ${theme.palette.divider}` }}
         theme={isDarkMode ? 'dark' : 'light'}
         basicSetup={{
           highlightActiveLine: false,
@@ -61,12 +62,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
               paddingTop: '8px',
               paddingBottom: '8px',
             },
-            '.cm-scroller': {
-              border: `1px solid ${theme.palette.divider}`,
-              borderRadius: '4px',
-            },
           }),
-          EditorView.editorAttributes.of({ style: 'border-radius: 4px' }),
         ]}
         placeholder="sum(rate(http_requests_total[5m]))"
       />
