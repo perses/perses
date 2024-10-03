@@ -208,7 +208,8 @@ export function VirtualizedTable<TableData>({
                 return (
                   <TableCell
                     key={cell.id}
-                    title={cellConfig?.text || cellContent}
+                    data-testid={cell.id}
+                    title={description || cellConfig?.text || cellContent}
                     width={cell.column.getSize() || 'auto'}
                     align={cell.column.columnDef.meta?.align}
                     density={density}
