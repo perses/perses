@@ -88,9 +88,9 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       <Stack direction="row" spacing={2}>
         <TextField
           fullWidth
-          label="Legend Name"
-          placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
-          helperText="Name for each series in the legend and the tooltip."
+          label="Legend"
+          placeholder="Example: '{{instance}}' will generate series names like 'webserver-123', 'webserver-456'..."
+          helperText="Text to be displayed in the legend and the tooltip. Use {{label_name}} to interpolate label values."
           value={format ?? ''}
           onChange={(e) => handleFormatChange(e.target.value)}
           onBlur={handleFormatBlur}
