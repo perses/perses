@@ -26,3 +26,11 @@ func WithColumnSettings(settings []ColumnSettings) Option {
 		return nil
 	}
 }
+
+func WithCellSettings(settings []CellSettings) Option {
+	return func(builder *Builder) error {
+		builder.CellSettings = settings
+		return nil
+	}
+
+}
