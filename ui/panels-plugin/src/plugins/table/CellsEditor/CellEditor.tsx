@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, MenuItem, Stack, StackProps, TextField, Tooltip, Typography } from '@mui/material';
+import { GridProps, IconButton, MenuItem, Stack, StackProps, TextField, Tooltip, Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { OptionsColorPicker } from '@perses-dev/components';
@@ -114,15 +114,15 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
   return null;
 }
 
-export interface CellEditorProps {
+export interface CellEditorProps extends Omit<GridProps, 'onChange'> {
   cell: CellSettings;
   onChange: (cell: CellSettings) => void;
   onDelete: () => void;
 }
 
-export function CellEditor({ cell, onChange, onDelete }: CellEditorProps) {
+export function CellEditor({ cell, onChange, onDelete, ...props }: CellEditorProps) {
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} {...props}>
       <Grid xs={5}>
         <Stack direction="row" gap={1} width="100%">
           <TextField

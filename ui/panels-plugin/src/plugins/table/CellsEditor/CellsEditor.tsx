@@ -65,17 +65,16 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
         </Grid>
         <Grid xs={1}></Grid>
       </Grid>
-      {cells.map((cell, i) => (
-        <>
+      <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
+        {cells.map((cell, i) => (
           <CellEditor
             key={i}
             cell={cell}
             onChange={(updatedCell: CellSettings) => handleCellChange(i, updatedCell)}
             onDelete={() => handleCellDelete(i)}
           />
-          {i !== cells.length && <Divider flexItem orientation="horizontal" />}
-        </>
-      ))}
+        ))}
+      </Stack>
 
       <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddCellEditor}>
         Add Cell Settings
