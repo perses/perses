@@ -3,7 +3,7 @@ import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirro
 import { EditorView } from '@codemirror/view';
 import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem } from '@mui/material';
 import DotsVertical from 'mdi-material-ui/DotsVertical';
-import CloseIcon from 'mdi-material-ui/Close'; 
+import CloseIcon from 'mdi-material-ui/Close';
 import { useMemo, useState } from 'react';
 
 export type PromQLEditorProps = { completeConfig: CompleteConfiguration } & Omit<
@@ -15,6 +15,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [editorContent, setEditorContent] = useState(rest.value);
   const [isTreeViewVisible, setTreeViewVisible] = useState(true);
 
   const promQLExtension = useMemo(() => {
@@ -32,6 +33,10 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
   const handleShowTreeView = () => {
     setTreeViewVisible(!isTreeViewVisible); // Toggle TreeView visibility
     setAnchorEl(null);
+  };
+
+  const handleEditorChange = (value: string) => {
+    setEditorContent(value);
   };
 
   return (
@@ -70,6 +75,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
           }),
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
+        onChange={handleEditorChange}
       />
       <IconButton
         aria-label="more"
@@ -84,13 +90,35 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
       <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
         <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
       </Menu>
-      {isTreeViewVisible && <TreeView onClose={() => setTreeViewVisible(false)} />}
+      {isTreeViewVisible && <TreeView content={editorContent ?? ''} onClose={() => setTreeViewVisible(false)} />}
     </Stack>
   );
 }
 
-const TreeView = ({ onClose }: { onClose: () => void }) => {
+const TreeView = ({ content, onClose }: { content: string; onClose: () => void }) => {
   const theme = useTheme();
+
+  // temporary logic
+  const formatContent = (input: string) => {
+    let formatted = '';
+    let tabCount = 0;
+
+    for (const char of input) {
+      if (char === '(') {
+        tabCount++;
+        formatted += `(${'\n' + '\t'.repeat(tabCount)}`;
+      } else if (char === ')') {
+        tabCount--;
+        formatted += `\n${'\t'.repeat(tabCount)}${char}`;
+      } else {
+        formatted += char;
+      }
+    }
+
+    return formatted;
+  };
+
+  const modifiedContent = formatContent(content);
 
   return (
     <div style={{ border: `1px solid ${theme.palette.divider}`, padding: '10px', position: 'relative' }}>
@@ -102,12 +130,7 @@ const TreeView = ({ onClose }: { onClose: () => void }) => {
       >
         <CloseIcon sx={{ fontSize: '18px' }} />
       </IconButton>
-      <h3>Tree View</h3>
-      <ul>
-        <li>Node 1</li>
-        <li>Node 2</li>
-        <li>Node 3</li>
-      </ul>
+      <pre style={{ margin: 0, minHeight: '16px' }}>{modifiedContent}</pre>
     </div>
   );
 };
