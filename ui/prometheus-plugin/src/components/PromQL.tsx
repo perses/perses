@@ -77,20 +77,24 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
         placeholder="Example: sum(rate(http_requests_total[5m]))"
         onChange={handleEditorChange}
       />
-      <IconButton
-        aria-label="more"
-        aria-controls="long-menu"
-        aria-haspopup="true"
-        onClick={handleMenuOpen}
-        sx={{ position: 'absolute', right: '5px', top: '5px' }}
-        size="small"
-      >
-        <DotsVertical sx={{ fontSize: '18px' }} />
-      </IconButton>
-      <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
-      </Menu>
-      {isTreeViewVisible && <TreeView content={editorContent ?? ''} onClose={() => setTreeViewVisible(false)} />}
+      {editorContent && editorContent.trim() !== '' && (
+        <>
+          <IconButton
+            aria-label="more"
+            aria-controls="long-menu"
+            aria-haspopup="true"
+            onClick={handleMenuOpen}
+            sx={{ position: 'absolute', right: '5px', top: '5px' }}
+            size="small"
+          >
+            <DotsVertical sx={{ fontSize: '18px' }} />
+          </IconButton>
+          <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
+            <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
+          </Menu>
+          {isTreeViewVisible && <TreeView content={editorContent} onClose={() => setTreeViewVisible(false)} />}
+        </>
+      )}
     </Stack>
   );
 }
