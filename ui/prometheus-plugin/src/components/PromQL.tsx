@@ -1,7 +1,7 @@
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
-import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem } from '@mui/material';
+import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import DotsVertical from 'mdi-material-ui/DotsVertical';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useMemo, useState } from 'react';
@@ -79,16 +79,18 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
       />
       {editorContent && editorContent.trim() !== '' && (
         <>
-          <IconButton
-            aria-label="more"
-            aria-controls="long-menu"
-            aria-haspopup="true"
-            onClick={handleMenuOpen}
-            sx={{ position: 'absolute', right: '5px', top: '5px' }}
-            size="small"
-          >
-            <DotsVertical sx={{ fontSize: '18px' }} />
-          </IconButton>
+          <Tooltip title="Settings">
+            <IconButton
+              aria-label="Settings"
+              aria-controls="long-menu"
+              aria-haspopup="true"
+              onClick={handleMenuOpen}
+              sx={{ position: 'absolute', right: '5px', top: '5px' }}
+              size="small"
+            >
+              <DotsVertical sx={{ fontSize: '18px' }} />
+            </IconButton>
+          </Tooltip>
           <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
             <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
           </Menu>
@@ -126,14 +128,16 @@ const TreeView = ({ content, onClose }: { content: string; onClose: () => void }
 
   return (
     <div style={{ border: `1px solid ${theme.palette.divider}`, padding: '10px', position: 'relative' }}>
-      <IconButton
-        aria-label="close"
-        onClick={onClose} // Trigger the onClose function
-        sx={{ position: 'absolute', top: '5px', right: '5px' }}
-        size="small"
-      >
-        <CloseIcon sx={{ fontSize: '18px' }} />
-      </IconButton>
+      <Tooltip title="Close tree view">
+        <IconButton
+          aria-label="Close tree view"
+          onClick={onClose} // Trigger the onClose function
+          sx={{ position: 'absolute', top: '5px', right: '5px' }}
+          size="small"
+        >
+          <CloseIcon sx={{ fontSize: '18px' }} />
+        </IconButton>
+      </Tooltip>
       <pre style={{ margin: 0, minHeight: '16px' }}>{modifiedContent}</pre>
     </div>
   );
