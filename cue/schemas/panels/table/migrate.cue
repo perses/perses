@@ -112,7 +112,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 
 		columnSettings: list.Concat([_excludedColumns,_prettifiedColumns])
 
-		cellSettings: [
+		cellSettings: list.FlattenN([
 				if #panel.fieldConfig != _|_  && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
 
 					if mapping.type == "value" {
@@ -147,14 +147,14 @@ if #panel.type != _|_ if #panel.type == "table" {
 									if mapping.options.match == "false" { "false" },
 								][0] }},
 							][0]
-							if mapping.result.text != _|_ { text: mapping.result.text }
-							if mapping.result.color != _|_ { backgroundColor: [ // switch
-									if #mapping.color[mapping.result.color] != _|_ { #mapping.color[mapping.result.color] },
-									{ mapping.result.color }
+							if mapping.options.result.text != _|_ { text: mapping.options.result.text }
+							if mapping.options.result.color != _|_ { backgroundColor: [ // switch
+									if #mapping.color[mapping.options.result.color] != _|_ { #mapping.color[mapping.options.result.color] },
+									{ mapping.options.result.color }
 							][0]}
 					}
 				}
-		]
+		], 1)
 	}
 },
 if #panel.type != _|_ if #panel.type == "table-old" {
