@@ -512,7 +512,7 @@ headers:
 ```yaml
 [ basic_auth: <Basic Auth specification> ]
 
-[ oauth_config: <Oauth specification> ]
+[ oauthg: <Oauth specification> ]
 ```
 
 ##### Oauth specification

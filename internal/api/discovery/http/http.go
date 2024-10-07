@@ -29,7 +29,7 @@ import (
 )
 
 func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
-	client, err := clientConfig.NewFromConfig(cfg.RestConfigClient)
+	client, err := clientConfig.NewRESTClient(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err
 	}

@@ -97,7 +97,7 @@ func (o *option) Complete(args []string) error {
 		o.restConfig.TLSConfig = &secret.TLSConfig{}
 	}
 	o.restConfig.TLSConfig.InsecureSkipVerify = o.insecureTLS
-	restClient, err := clientConfig.NewFromConfig(o.restConfig)
+	restClient, err := clientConfig.NewRESTClient(o.restConfig)
 	if err != nil {
 		return err
 	}

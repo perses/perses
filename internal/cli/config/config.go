@@ -89,7 +89,7 @@ type Config struct {
 }
 
 func (c *Config) init() error {
-	restClient, err := config.NewFromConfig(c.RestClientConfig)
+	restClient, err := config.NewRESTClient(c.RestClientConfig)
 	if err != nil {
 		return err
 	}

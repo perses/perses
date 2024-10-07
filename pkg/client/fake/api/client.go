@@ -33,7 +33,7 @@ type client struct {
 }
 
 func New() api.ClientInterface {
-	restClient, _ := config.NewFromConfig(config.RestConfigClient{
+	restClient, _ := config.NewRESTClient(config.RestConfigClient{
 		URL: common.MustParseURL("http://localhost:8080"),
 	})
 	return &client{
