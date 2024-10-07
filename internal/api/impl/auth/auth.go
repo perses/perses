@@ -16,8 +16,10 @@ package auth
 import (
 	"errors"
 	"fmt"
+	promConfig "github.com/prometheus/common/config"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
@@ -58,6 +60,23 @@ func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 	return rd.String()
 }
 
+// newHTTPClient is a simple http client builder designed to be used for the queries to external authentication providers.
+func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
+	httpClient := &http.Client{
+		Timeout: time.Duration(httpConfig.Timeout),
+	}
+	if httpConfig.TLSConfig != nil {
+		tlsConfig, err := promConfig.NewTLSConfig(httpConfig.TLSConfig)
+		if err != nil {
+			return nil, err
+		}
+		if tlsConfig != nil {
+			httpClient.Transport = &http.Transport{TLSClientConfig: tlsConfig}
+		}
+	}
+	return httpClient, nil
+}
+
 type endpoint struct {
 	endpoints       []route.Endpoint
 	jwt             crypto.JWT
@@ -88,7 +107,11 @@ func New(dao user.DAO, jwt crypto.JWT, providers config.AuthProviders, isAuthEna
 
 	// Register the OAuth providers if any
 	for _, provider := range providers.OAuth {
-		ep.endpoints = append(ep.endpoints, newOAuthEndpoint(provider, jwt, dao))
+		oauthEp, err := newOAuthEndpoint(provider, jwt, dao)
+		if err != nil {
+			return nil, err
+		}
+		ep.endpoints = append(ep.endpoints, oauthEp)
 	}
 	return ep, nil
 }
