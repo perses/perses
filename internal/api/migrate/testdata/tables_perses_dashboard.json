@@ -98,7 +98,24 @@
           "plugin": {
             "kind": "Table",
             "spec": {
-              "columnSettings": [],
+              "columnSettings": [
+                {
+                  "header": "hello",
+                  "name": "value"
+                },
+                {
+                  "header": "group",
+                  "name": "job"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                },
+                {
+                  "header": "hello",
+                  "name": "bonjour"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -136,6 +153,7 @@
                   "name": "Time"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
