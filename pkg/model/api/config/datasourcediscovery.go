@@ -17,14 +17,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/perses/perses/pkg/client/config"
 	"github.com/prometheus/common/model"
 )
 
 const defaultRefreshInterval = model.Duration(time.Minute * 5)
 
 type HTTPDiscovery struct {
-	perseshttp.RestConfigClient `json:",inline" yaml:",inline"`
+	config.RestConfigClient `json:",inline" yaml:",inline"`
 }
 
 type KubeServiceDiscovery struct {

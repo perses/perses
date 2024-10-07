@@ -30,7 +30,7 @@ import (
 
 func TestMainScenarioRoleBinding(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		project := e2eframework.NewProject("mysuperproject")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -47,7 +47,7 @@ func TestMainScenarioRoleBinding(t *testing.T) {
 
 func TestUpdateScenarioRoleBindingRole(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		project := e2eframework.NewProject("mysuperproject")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)

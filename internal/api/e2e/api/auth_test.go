@@ -16,7 +16,6 @@
 package api
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -27,18 +26,17 @@ import (
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/internal/api/utils"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
-	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/perses/perses/pkg/client/config"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
 func TestAuth(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-		usrEntity := e2eframework.NewUser("foo")
+		usrEntity := e2eframework.NewUser("foo", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
@@ -62,7 +60,7 @@ func TestAuth(t *testing.T) {
 
 func TestAuth_EmptyPassword(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
-		usrEntity := e2eframework.NewUser("foo")
+		usrEntity := e2eframework.NewUser("foo", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
@@ -243,7 +241,7 @@ func TestAuth_OAuthProvider_Token_FromDeviceCode(t *testing.T) {
 
 	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("john.doe"),
+			e2eframework.NewUser("john.doe", ""),
 		}
 
 		jsonToken := expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)).
@@ -271,7 +269,7 @@ func TestAuth_OIDCProvider_Token_FromDeviceCode(t *testing.T) {
 
 	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("john.doeOIDC"),
+			e2eframework.NewUser("john.doeOIDC", ""),
 		}
 
 		jsonToken := expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOIDC, providerConfig.SlugID, utils.PathToken)).
@@ -299,7 +297,7 @@ func TestAuth_OAuthProvider_Token_FromClientCredentials(t *testing.T) {
 
 	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("john.doe"),
+			e2eframework.NewUser("john.doe", ""),
 		}
 
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)).
@@ -332,7 +330,7 @@ func TestAuth_OIDCProvider_Token_FromClientCredentials(t *testing.T) {
 
 	e2eframework.WithServerConfig(t, conf, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("client-id-oidc"),
+			e2eframework.NewUser("client-id-oidc", ""),
 		}
 
 		expect.POST(fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOIDC, providerConfig.SlugID, utils.PathToken)).
@@ -364,28 +362,29 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 	// Server with oauth provider configured.
 	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("john.doe"),
+			e2eframework.NewUser("john.doe", ""),
 		}
 
 		persesBaseURL := common.MustParseURL(server.URL)
-		unauthenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-			URL: persesBaseURL,
-		})
-		assert.NoError(t, err)
-
-		authenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+		unauthenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
 		})
 		assert.NoError(t, err)
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
-		oauthConfig := &clientcredentials.Config{
-			ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-			ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-			TokenURL:     persesTokenURL.String(),
-			AuthStyle:    oauth2.AuthStyleInHeader,
-		}
-		authenticatedClient.Client = oauthConfig.Client(context.Background())
+
+		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
+			URL: persesBaseURL,
+			Auth: &config.Auth{
+				Oauth: &config.Oauth{
+					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+					TokenURL:     persesTokenURL.String(),
+					AuthStyle:    oauth2.AuthStyleInHeader,
+				},
+			},
+		})
+		assert.NoError(t, err)
 
 		// => Nominal case: The perses backend has the /token endpoint and the client have the client credentials.
 		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
@@ -401,19 +400,20 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 	// Server without oauth provider configured.
 	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		persesBaseURL := common.MustParseURL(server.URL)
-		authenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-			URL: persesBaseURL,
-		})
-		assert.NoError(t, err)
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
-		oauthConfig := &clientcredentials.Config{
-			ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-			ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-			TokenURL:     persesTokenURL.String(),
-			AuthStyle:    oauth2.AuthStyleInHeader,
-		}
-		authenticatedClient.Client = oauthConfig.Client(context.Background())
+		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
+			URL: persesBaseURL,
+			Auth: &config.Auth{
+				Oauth: &config.Oauth{
+					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+					TokenURL:     persesTokenURL.String(),
+					AuthStyle:    oauth2.AuthStyleInHeader,
+				},
+			},
+		})
+		assert.NoError(t, err)
 
 		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
 
@@ -436,28 +436,29 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 	// Server with OIDC provider configured.
 	e2eframework.WithServerConfig(t, conf, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		usersCreatedByTheSuite := []modelAPI.Entity{
-			e2eframework.NewUser("MyClientID"),
+			e2eframework.NewUser("MyClientID", ""),
 		}
 
 		persesBaseURL := common.MustParseURL(server.URL)
-		unauthenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+		unauthenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
 		})
 		assert.NoError(t, err)
 
-		authenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
-			URL: persesBaseURL,
-		})
-		assert.NoError(t, err)
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOIDC, providerConfig.SlugID, utils.PathToken)
-		oauthConfig := &clientcredentials.Config{
-			ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-			ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-			TokenURL:     persesTokenURL.String(),
-			AuthStyle:    oauth2.AuthStyleInHeader,
-		}
-		authenticatedClient.Client = oauthConfig.Client(context.Background())
+		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
+			URL: persesBaseURL,
+			Auth: &config.Auth{
+				Oauth: &config.Oauth{
+					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+					TokenURL:     persesTokenURL.String(),
+					AuthStyle:    oauth2.AuthStyleInHeader,
+				},
+			},
+		})
+		assert.NoError(t, err)
 
 		// => Nominal case: The perses backend has the /token endpoint and the client have the client credentials.
 		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
@@ -473,19 +474,20 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 	// Server without OIDC provider configured.
 	e2eframework.WithServer(t, func(server *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		persesBaseURL := common.MustParseURL(server.URL)
-		authenticatedClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+		persesTokenURL := common.MustParseURL(server.URL)
+		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
+		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
+			Auth: &config.Auth{
+				Oauth: &config.Oauth{
+					ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
+					ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
+					TokenURL:     persesTokenURL.String(),
+					AuthStyle:    oauth2.AuthStyleInHeader,
+				},
+			},
 			URL: persesBaseURL,
 		})
 		assert.NoError(t, err)
-		persesTokenURL := common.MustParseURL(server.URL)
-		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
-		oauthConfig := &clientcredentials.Config{
-			ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
-			ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
-			TokenURL:     persesTokenURL.String(),
-			AuthStyle:    oauth2.AuthStyleInHeader,
-		}
-		authenticatedClient.Client = oauthConfig.Client(context.Background())
 
 		_, err = v1.NewWithClient(authenticatedClient).Project().List("")
 

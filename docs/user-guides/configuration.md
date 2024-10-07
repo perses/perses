@@ -494,17 +494,38 @@ discovery_name: <string>
 # URL of the HTTP server exposing the global datasource list to retrieve.
 url: <url>
 
-[ basicAuth: <Basic Auth specification> ]
+[ auth: <Auth specification> ]
 
 # The HTTP authorization credentials for the targets.
 # Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
 [ authorization: <Authorization specification> ]
 
 # Config used to connect to the targets.
-[ tlsConfig: <TLS Config specification> ]
+[ tls_config: <TLS Config specification> ]
 
 headers:
   [<string>:<string>]
+```
+
+##### Auth
+
+```yaml
+[ basic_auth: <Basic Auth specification> ]
+
+[ oauthg: <Oauth specification> ]
+```
+
+##### Oauth specification
+
+```yaml
+# ClientID is the application's ID.
+client_id: <string>
+
+# ClientSecret is the application's secret.
+client_secret: <string>
+
+# TokenURL is the resource server's token endpoint URL. This is a constant specific to each server.
+token_url: <string>
 ```
 
 ##### Basic Auth specification

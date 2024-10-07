@@ -130,8 +130,10 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusOK, api.AuthResponse{
-		AccessToken: accessToken,
+	return ctx.JSON(http.StatusOK, oauth2.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	})
 }
 
