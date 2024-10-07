@@ -75,8 +75,8 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
       }
     }
 
-    if (setting.condition.kind === 'Regex' && setting.condition.spec?.regex) {
-      const regex = new RegExp(setting.condition.spec?.regex);
+    if (setting.condition.kind === 'Regex' && setting.condition.spec?.expr) {
+      const regex = new RegExp(setting.condition.spec?.expr);
       if (regex.test(String(value))) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }

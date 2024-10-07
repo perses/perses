@@ -67,7 +67,7 @@ export interface RangeCondition {
 export interface RegexCondition {
   kind: 'Regex';
   spec: {
-    regex: string;
+    expr: string;
   };
 }
 

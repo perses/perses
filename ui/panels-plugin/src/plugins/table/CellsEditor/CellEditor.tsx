@@ -61,8 +61,8 @@ function ConditionEditor({ condition, onChange, ...props }: ConditionEditorProps
         <TextField
           label="Regular Expression"
           placeholder="JavaScript regular expression"
-          value={condition.spec?.regex ?? ''}
-          onChange={(e) => onChange({ ...condition, spec: { regex: e.target.value } } as Condition)}
+          value={condition.spec?.expr ?? ''}
+          onChange={(e) => onChange({ ...condition, spec: { expr: e.target.value } } as Condition)}
           fullWidth
         />
       </Stack>
