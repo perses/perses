@@ -111,6 +111,50 @@ if #panel.type != _|_ if #panel.type == "table" {
 		}]])
 
 		columnSettings: list.Concat([_excludedColumns,_prettifiedColumns])
+
+		cellSettings: [
+				if #panel.fieldConfig != _|_  && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
+
+					if mapping.type == "value" {
+						[for key, option in mapping.options {
+							condition: {
+									kind: "Value"
+									spec: {
+										value: key
+									}
+							}
+							if option.text != _|_ { text: option.text }
+							if option.color != _|_ { backgroundColor: [ // switch
+									if #mapping.color[option.color] != _|_ { #mapping.color[option.color] },
+									{ option.color }
+							][0]}
+					 }]
+					}
+
+					if mapping.type == "range"  || mapping.type == "regex" || mapping.type == "special" {
+							condition: [
+								if mapping.type == "range" { kind: "Range", spec: {
+									if mapping.options.from != _|_ { min: mapping.options.from },
+									if mapping.options.to != _|_ { max: mapping.options.to }
+								}},
+								if mapping.type == "regex" { kind: "Regex", spec: { expr: mapping.options.pattern }},
+								if mapping.type == "special" { kind: "Misc", spec: { value: [
+									if mapping.options.match == "empty" { "empty" },
+									if mapping.options.match == "null" { "null" },
+									if mapping.options.match == "nan" { "NaN" },
+									if mapping.options.match == "null+nan" { "null" },
+									if mapping.options.match == "true" { "true" },
+									if mapping.options.match == "false" { "false" },
+								][0] }},
+							][0]
+							if mapping.result.text != _|_ { text: mapping.result.text }
+							if mapping.result.color != _|_ { backgroundColor: [ // switch
+									if #mapping.color[mapping.result.color] != _|_ { #mapping.color[mapping.result.color] },
+									{ mapping.result.color }
+							][0]}
+					}
+				}
+		]
 	}
 },
 if #panel.type != _|_ if #panel.type == "table-old" {

@@ -51,7 +51,7 @@ spec: close({
 #regexCondition: {
 	kind: "Regex"
 	spec: {
-		regex: strings.MinRunes(1)
+		expr: strings.MinRunes(1)
 	}
 }
 

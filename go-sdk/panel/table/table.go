@@ -55,7 +55,7 @@ type RangeConditionSpec struct {
 }
 
 type RegexConditionSpec struct {
-	Regex string `json:"regex" yaml:"regex"`
+	Expr string `json:"expr" yaml:"expr"`
 }
 
 type MiscValue string
