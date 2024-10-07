@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.48.0-rc.1 / 2024-10-07
+
+- [ENHANCEMENT] DaC CUE SDK: new utility to generate query params from labels (#2293)
+- [ENHANCEMENT] Add missing tempo and pie-chart plugin in go-sdk
+- [ENHANCEMENT] Normalizes the way to expose the `PluginKind` for each plugin (#2285)
+- [BUGFIX] Tempo: support search results with mixed vParquet3 and vParquet4 blocks (#2301)
+- [BUGFIX] Fix metric finder list flickering (#2286)
+- [BUGFIX] Fix database folder in default config file for the archives (#2283)
+- [BREAKINGCHANGE] Refactor package `pkg/client` to handle native/oauth auth easily (#2300)
+- [BREAKINGCHANGE] OIDC/OAUTH: client_secret is now optional in the perses config (#2296)
+- [DOC] DaC Go SDK: add missing doc for Static list var (#2292)
+
 ## 0.48.0-rc0 / 2024-10-01
 
 This update introduces a brand-new Prometheus metric finder,
