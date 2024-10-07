@@ -44,6 +44,7 @@
                   "name": "job"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -85,6 +86,7 @@
                   "name": "job"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -134,6 +136,7 @@
                   "name": "bonjour"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -180,6 +183,7 @@
                   "width": 100
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -223,6 +227,7 @@
                   "width": 100
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -260,6 +265,7 @@
                   "name": "value"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -297,6 +303,7 @@
                   "width": 200
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -346,6 +353,7 @@
                   "name": "family"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -400,6 +408,7 @@
                   "width": 150
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },

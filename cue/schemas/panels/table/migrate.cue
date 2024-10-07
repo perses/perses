@@ -78,6 +78,8 @@ if #panel.type != _|_ if #panel.type == "table" {
 			}
 		}]
 
+		// Using flatten to avoid having an array of arrays with "value" mappings
+		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		cellSettings: list.FlattenN([
 				if #panel.fieldConfig != _|_  && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
 
