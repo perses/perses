@@ -44,6 +44,38 @@
                   "name": "job"
                 }
               ],
+              "cellSettings": [
+                {
+                  "backgroundColor": "#c4162a",
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "testValue1"
+                    }
+                  },
+                  "text": "My Super Display Text"
+                },
+                {
+                  "backgroundColor": "#e02f44",
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "testValue2"
+                    }
+                  }
+                },
+                {
+                  "backgroundColor": "#f2495c",
+                  "condition": {
+                    "kind": "Range",
+                    "spec": {
+                      "max": 20,
+                      "min": 1
+                    }
+                  },
+                  "text": "Good"
+                }
+              ],
               "density": "compact"
             }
           },
@@ -85,6 +117,7 @@
                   "name": "job"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -134,6 +167,7 @@
                   "name": "bonjour"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -180,6 +214,7 @@
                   "width": 100
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -223,6 +258,7 @@
                   "width": 100
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -260,6 +296,7 @@
                   "name": "value"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -297,6 +334,7 @@
                   "width": 200
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -346,6 +384,7 @@
                   "name": "family"
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },
@@ -400,6 +439,7 @@
                   "width": 150
                 }
               ],
+              "cellSettings": [],
               "density": "compact"
             }
           },

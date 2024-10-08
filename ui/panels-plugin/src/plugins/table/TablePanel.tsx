@@ -16,7 +16,8 @@ import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components
 import { useMemo, useState } from 'react';
 import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
 import { SortingState } from '@tanstack/react-table';
-import { ColumnSettings, TableOptions } from './table-model';
+import { TableCellConfig, TableCellConfigs } from '@perses-dev/components/dist/Table/model/table-model';
+import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
 /*
  * Generate column config from column definitions, if a column has multiple definitions, the first one will be used.
@@ -46,6 +47,60 @@ function generateColumnConfig(name: string, columnSettings: ColumnSettings[]): T
     accessorKey: name,
     header: name,
   };
+}
+
+function generateCellConfig(value: unknown, settings: CellSettings[]): TableCellConfig | undefined {
+  for (const setting of settings) {
+    if (setting.condition.kind === 'Value' && setting.condition.spec?.value === String(value)) {
+      return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+    }
+
+    if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
+      const numericValue = Number(value);
+      if (
+        setting.condition.spec?.min &&
+        setting.condition.spec?.max &&
+        numericValue >= +setting.condition.spec?.min &&
+        numericValue <= +setting.condition.spec?.max
+      ) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+
+      if (setting.condition.spec?.min && numericValue >= +setting.condition.spec?.min) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+
+      if (setting.condition.spec?.max && numericValue <= +setting.condition.spec?.max) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
+
+    if (setting.condition.kind === 'Regex' && setting.condition.spec?.expr) {
+      const regex = new RegExp(setting.condition.spec?.expr);
+      if (regex.test(String(value))) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
+
+    if (setting.condition.kind === 'Misc' && setting.condition.spec?.value) {
+      if (setting.condition.spec?.value === 'empty' && value === '') {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'null' && (value === null || value === undefined)) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'NaN' && Number.isNaN(value)) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'true' && value === true) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+      if (setting.condition.spec?.value === 'false' && value === false) {
+        return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
+      }
+    }
+  }
+  return undefined;
 }
 
 export type TableProps = PanelProps<TableOptions>;
@@ -93,6 +148,44 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return columns;
   }, [keys, spec.columnSettings]);
 
+  // Generate cell settings that will be used by the table to render cells (text color, background color, ...)
+  const cellConfigs: TableCellConfigs = useMemo(() => {
+    // If there is no cell settings, return an empty array
+    if (spec.cellSettings === undefined) {
+      return {};
+    }
+
+    const result: TableCellConfigs = {};
+
+    let index = 0;
+    for (const row of data) {
+      // Transforming key to object to extend the row with undefined values if the key is not present
+      // for checking the cell config "Misc" condition with "null"
+      const keysAsObj = keys.reduce(
+        (acc, key) => {
+          acc[key] = undefined;
+          return acc;
+        },
+        {} as Record<string, undefined>
+      );
+
+      const extendRow = {
+        ...keysAsObj,
+        ...row,
+      };
+
+      for (const [key, value] of Object.entries(extendRow)) {
+        const cellConfig = generateCellConfig(value, spec.cellSettings ?? []);
+        if (cellConfig) {
+          result[`${index}_${key}`] = cellConfig;
+        }
+      }
+      index++;
+    }
+
+    return result;
+  }, [data, keys, spec.cellSettings]);
+
   function handleSortingChange(sorting: SortingState) {
     setSorting(sorting);
   }
@@ -109,6 +202,7 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     <Table
       data={data}
       columns={columns}
+      cellConfigs={cellConfigs}
       sorting={sorting}
       height={contentDimensions.height}
       width={contentDimensions.width}
