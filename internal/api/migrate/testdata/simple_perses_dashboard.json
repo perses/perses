@@ -441,30 +441,12 @@
             "spec": {
               "columnSettings": [
                 {
-                  "header": "",
                   "hide": true,
-                  "name": "timestamp"
+                  "name": "Time"
                 },
                 {
                   "hide": true,
                   "name": "__name__"
-                },
-                {
-                  "header": "ValueCustomHeader",
-                  "name": "value"
-                },
-                {
-                  "header": "API server",
-                  "name": "apiserver",
-                  "width": 300
-                },
-                {
-                  "name": "API server",
-                  "width": 300
-                },
-                {
-                  "name": "endpoint",
-                  "width": 75
                 }
               ],
               "density": "compact"
