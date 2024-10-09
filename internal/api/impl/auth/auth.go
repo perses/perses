@@ -16,7 +16,6 @@ package auth
 import (
 	"errors"
 	"fmt"
-	promConfig "github.com/prometheus/common/config"
 	"net/http"
 	"net/url"
 	"time"
@@ -27,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
@@ -62,19 +62,14 @@ func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 
 // newHTTPClient is a simple http client builder designed to be used for the queries to external authentication providers.
 func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
-	httpClient := &http.Client{
-		Timeout: time.Duration(httpConfig.Timeout),
+	roundTripper, err := perseshttp.NewRoundTripper(time.Duration(httpConfig.Timeout), httpConfig.TLSConfig)
+	if err != nil {
+		return nil, err
 	}
-	if httpConfig.TLSConfig != nil {
-		tlsConfig, err := promConfig.NewTLSConfig(httpConfig.TLSConfig)
-		if err != nil {
-			return nil, err
-		}
-		if tlsConfig != nil {
-			httpClient.Transport = &http.Transport{TLSClientConfig: tlsConfig}
-		}
-	}
-	return httpClient, nil
+	return &http.Client{
+		Timeout:   time.Duration(httpConfig.Timeout),
+		Transport: roundTripper,
+	}, nil
 }
 
 type endpoint struct {

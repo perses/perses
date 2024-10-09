@@ -16,7 +16,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/prometheus/common/config"
 	"time"
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
@@ -49,7 +48,7 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 
 type HTTP struct {
 	Timeout   model.Duration    `json:"timeout" yaml:"timeout"`
-	TLSConfig *config.TLSConfig `json:"tls_config" yaml:"tls_config"`
+	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
 }
 
 func (h *HTTP) Verify() error {
