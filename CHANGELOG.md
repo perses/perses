@@ -1,18 +1,6 @@
 # Changelog
 
-## 0.48.0-rc.1 / 2024-10-07
-
-- [ENHANCEMENT] DaC CUE SDK: new utility to generate query params from labels (#2293)
-- [ENHANCEMENT] Add missing tempo and pie-chart plugin in go-sdk
-- [ENHANCEMENT] Normalizes the way to expose the `PluginKind` for each plugin (#2285)
-- [BUGFIX] Tempo: support search results with mixed vParquet3 and vParquet4 blocks (#2301)
-- [BUGFIX] Fix metric finder list flickering (#2286)
-- [BUGFIX] Fix database folder in default config file for the archives (#2283)
-- [BREAKINGCHANGE] Refactor package `pkg/client` to handle native/oauth auth easily (#2300)
-- [BREAKINGCHANGE] OIDC/OAUTH: client_secret is now optional in the perses config (#2296)
-- [DOC] DaC Go SDK: add missing doc for Static list var (#2292)
-
-## 0.48.0-rc0 / 2024-10-01
+## 0.48.0 / 2024-10-09
 
 This update introduces a brand-new Prometheus metric finder,
 based on the design from Prometheus 3.0 / Promlens, as well as a new Pie chart panel.
@@ -25,6 +13,11 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [FEATURE] Add PromQL metric finder to the explorer (#2245)
 - [FEATURE] TracingGanttChart: support categorical color palette (#2194)
 - [FEATURE] PieCharts Panel Plugin (#2170)
+- [ENHANCEMENT] Configuration of the HTTP client for oauth/oidc providers (#2311)
+- [ENHANCEMENT] Use TLS config in oauth client config (#2313)
+- [ENHANCEMENT] DaC CUE SDK: new utility to generate query params from labels (#2293)
+- [ENHANCEMENT] Add missing tempo and pie-chart plugin in go-sdk
+- [ENHANCEMENT] Normalizes the way to expose the `PluginKind` for each plugin (#2285)
 - [ENHANCEMENT] Table panel migration: rename Time to timestamp (#2278)
 - [ENHANCEMENT] Table panel migration: support column rename from field overrides (#2273)
 - [ENHANCEMENT] TracingGanttChart: sort span attributes alphabetically (#2264)
@@ -47,6 +40,11 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [ENHANCEMENT] Ignore Not Found errors in percli delete command (#2184)
 - [ENHANCEMENT] TimeSeries chart: Migrate max/min from grafana (#2168)
 - [ENHANCEMENT] Add bits/sec (common units used in networking) (#2164)
+- [BUGFIX] Tempo: support search results with mixed vParquet3 and vParquet4 blocks (#2301)
+- [BUGFIX] Fix metric finder list flickering (#2286)
+- [BUGFIX] Fix database folder in a default config file for the archives (#2283)
+- [BUGFIX] Grafana migration: fix some failing cases (#2314)
+- [BUGFIX] Prevents saving empty PromQL strings (#2304)
 - [BUGFIX] Default panel spec not saved (#2272)
 - [BUGFIX] Fix exit code when error occurred in cmd dac build (#2279)
 - [BUGFIX] fix flaky TraceQL auto-completion tests (#2274)
@@ -57,6 +55,9 @@ and includes a breaking change to OAuth & OIDC to better respect the industry st
 - [BUGFIX] tempo query: disable syntax highlighting if query is a trace id (#2242)
 - [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
 - [BREAKINGCHANGE] OAuth & OIDC /token endpoint should respect the oauth 2.0 RFC (#1901)
+- [BREAKINGCHANGE] Refactor package `pkg/client` to handle native/oauth auth easily (#2300)
+- [BREAKINGCHANGE] OIDC/OAUTH: client_secret is now optional in the Perses config (#2296)
+- [DOC] DaC Go SDK: add missing doc for Static list var (#2292)
 - [DOC] Table: Add datamodel documentation (#2275)
 - [DOC] Add links in the CLI doc (#2276)
 - [DOC] Use latest interfaces in docs (#2271)
