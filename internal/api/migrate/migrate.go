@@ -139,7 +139,7 @@ func (m *mig) BuildMigrationSchemaString() {
 }
 
 func (m *mig) Migrate(userInput []byte) (*v1.Dashboard, error) {
-	cueContext := cuecontext.New()
+	cueContext := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	// preprocessing in Go before passing it to CUE
 	grafanaDashboard := rearrangeGrafanaPanelsWithinExpandedRows(userInput)
 
