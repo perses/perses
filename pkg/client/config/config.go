@@ -15,6 +15,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -119,6 +120,27 @@ type Auth struct {
 	BasicAuth  *secret.BasicAuth `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`
 }
 
+func (a *Auth) Validate() error {
+	if a == nil {
+		return nil
+	}
+	nbAuthConfigured := 0
+	if a.NativeAuth != nil {
+		nbAuthConfigured++
+	}
+	if a.Oauth != nil {
+		nbAuthConfigured++
+	}
+	if a.BasicAuth != nil {
+		nbAuthConfigured++
+	}
+
+	if nbAuthConfigured > 1 {
+		return fmt.Errorf("only one type of authentication should be configured")
+	}
+	return nil
+}
+
 // RestConfigClient defines all parameters that can be set to customize the RESTClient
 type RestConfigClient struct {
 	URL  *common.URL `json:"url" yaml:"url"`
@@ -132,24 +154,6 @@ type RestConfigClient struct {
 
 // NewRESTClient create an instance of RESTClient using the config passed as parameter
 func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
-	if config.Auth != nil && config.Auth.Oauth != nil {
-		// In case oauth is configured, then TLS parameters are ignored.
-		// Everything is handled by the custom http client from Oauth2 (including the refresh of the token).
-		oauthConfig := &clientcredentials.Config{
-			ClientID:     config.Auth.Oauth.ClientID,
-			ClientSecret: config.Auth.Oauth.ClientSecret,
-			TokenURL:     config.Auth.Oauth.TokenURL,
-			Scopes:       config.Auth.Oauth.Scopes,
-			AuthStyle:    config.Auth.Oauth.AuthStyle,
-		}
-		httpClient := oauthConfig.Client(context.Background())
-		return &perseshttp.RESTClient{
-			Headers: config.Headers,
-			BaseURL: config.URL.URL,
-			Client:  httpClient,
-		}, nil
-	}
-
 	tlsCfg, err := secret.BuildTLSConfig(config.TLSConfig)
 	if err != nil {
 		return nil, err
@@ -164,7 +168,7 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		TLSClientConfig:     tlsCfg, // nolint: gas, gosec
 	}
 	var basicAuth *secret.BasicAuth
-
+	var httpClient *http.Client
 	if config.Auth != nil {
 		if config.Auth.BasicAuth != nil {
 			basicAuth = config.Auth.BasicAuth
@@ -172,11 +176,27 @@ func NewRESTClient(config RestConfigClient) (*perseshttp.RESTClient, error) {
 		if config.Auth.NativeAuth != nil {
 			roundTripper = transport.New(config.URL.URL, roundTripper, *config.Auth.NativeAuth)
 		}
+		if config.Auth.Oauth != nil {
+			oauthConfig := &clientcredentials.Config{
+				ClientID:     config.Auth.Oauth.ClientID,
+				ClientSecret: config.Auth.Oauth.ClientSecret,
+				TokenURL:     config.Auth.Oauth.TokenURL,
+				Scopes:       config.Auth.Oauth.Scopes,
+				AuthStyle:    config.Auth.Oauth.AuthStyle,
+			}
+			ctx := context.WithValue(context.Background(), oauth2.HTTPClient, &http.Client{
+				Transport: roundTripper,
+				Timeout:   connectionTimeout,
+			})
+			httpClient = oauthConfig.Client(ctx)
+		}
 	}
 
-	httpClient := &http.Client{
-		Transport: roundTripper,
-		Timeout:   connectionTimeout,
+	if httpClient == nil {
+		httpClient = &http.Client{
+			Transport: roundTripper,
+			Timeout:   connectionTimeout,
+		}
 	}
 
 	return &perseshttp.RESTClient{
