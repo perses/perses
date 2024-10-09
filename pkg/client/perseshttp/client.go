@@ -14,7 +14,6 @@
 package perseshttp
 
 import (
-	"net"
 	"net/http"
 	"net/url"
 
