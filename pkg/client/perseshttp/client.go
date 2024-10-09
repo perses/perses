@@ -60,20 +60,27 @@ type RestConfigClient struct {
 	Headers   map[string]string `json:"headers,omitempty" yaml:"headers,omitempty"`
 }
 
-// NewFromConfig create an instance of RESTClient using the config passed as parameter
-func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
-	tlsCfg, err := secret.BuildTLSConfig(config.TLSConfig)
+func NewRoundTripper(timeout time.Duration, tlsConfig *secret.TLSConfig) (http.RoundTripper, error) {
+	tlsCfg, err := secret.BuildTLSConfig(tlsConfig)
 	if err != nil {
 		return nil, err
 	}
-	roundTripper := &http.Transport{
+	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
-			Timeout:   connectionTimeout,
+			Timeout:   timeout,
 			KeepAlive: 30 * time.Second,
 		}).DialContext,
 		TLSHandshakeTimeout: 10 * time.Second,
 		TLSClientConfig:     tlsCfg, // nolint: gas, gosec
+	}, nil
+}
+
+// NewFromConfig create an instance of RESTClient using the config passed as parameter
+func NewFromConfig(config RestConfigClient) (*RESTClient, error) {
+	roundTripper, err := NewRoundTripper(connectionTimeout, config.TLSConfig)
+	if err != nil {
+		return nil, err
 	}
 
 	httpClient := &http.Client{

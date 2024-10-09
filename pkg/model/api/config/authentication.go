@@ -26,6 +26,7 @@ import (
 const (
 	DefaultAccessTokenTTL  = time.Minute * 15
 	DefaultRefreshTokenTTL = time.Hour * 24
+	DefaultProviderTimeout = time.Minute * 1
 )
 
 type OAuthOverride struct {
@@ -45,6 +46,18 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 	return append(slice, value), true
 }
 
+type HTTP struct {
+	Timeout   model.Duration    `json:"timeout" yaml:"timeout"`
+	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+}
+
+func (h *HTTP) Verify() error {
+	if h.Timeout == 0 {
+		h.Timeout = model.Duration(DefaultProviderTimeout)
+	}
+	return nil
+}
+
 type Provider struct {
 	SlugID            string         `json:"slug_id" yaml:"slug_id"`
 	Name              string         `json:"name" yaml:"name"`
@@ -54,7 +67,7 @@ type Provider struct {
 	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
 	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
-	DisablePKCE       bool           `json:"disable_pkce" yaml:"disable_pkce"`
+	HTTP              HTTP           `json:"http" yaml:"http"`
 }
 
 func (p *Provider) Verify() error {
@@ -78,6 +91,7 @@ type OIDCProvider struct {
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
 	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
+	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 }
 
 func (p *OIDCProvider) Verify() error {
