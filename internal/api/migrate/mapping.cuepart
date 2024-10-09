@@ -60,7 +60,7 @@ import (
     // mapping array for the sort attribute (index = grafana sort id, value = perses equivalent)
     sort: ["none", "alphabetical-asc", "alphabetical-desc", "numerical-asc", "numerical-desc", "alphabetical-ci-asc", "alphabetical-ci-desc"]
 }
-#defaultCalc: "Last"
+#defaultCalc: "last"
 
 kind: "Dashboard",
 metadata: {

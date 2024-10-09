@@ -1,0 +1,66 @@
+{
+  "editable": false,
+  "graphTooltip": 0,
+  "id": null,
+  "panels": [
+    {
+      "datasource": "$datasource",
+      "description": "Just displaying some metrics with Stat panel",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            {
+              "id": 1,
+              "text": "unset",
+              "type": 1,
+              "value": 0
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 11
+      },
+      "id": 19,
+      "options": {
+        "graphMode": "none"
+      },
+      "targets": [
+        {
+          "expr": "up{env=\"demo\",instance=~\"demo.do.prometheus.io.*\"}",
+          "refID": "A"
+        }
+      ],
+      "title": "Some metrics",
+      "transparent": false,
+      "type": "stat"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 25,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Stat panel with undefined reduceOptions",
+  "uid": "stat-undefined-calc"
+}
