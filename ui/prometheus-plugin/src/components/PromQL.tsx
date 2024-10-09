@@ -75,7 +75,7 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
           }),
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
-        onChange={handleEditorChange}
+        // TODO enable back: onChange={handleEditorChange}
       />
       {editorContent && editorContent.trim() !== '' && (
         <>
