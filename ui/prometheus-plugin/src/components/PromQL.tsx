@@ -1,3 +1,16 @@
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
@@ -5,6 +18,16 @@ import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from
 import DotsVertical from 'mdi-material-ui/DotsVertical';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useMemo, useState } from 'react';
+import TreeNode from './TreeNode';
+import {
+  aggregationType,
+  BinaryExpr,
+  binaryOperatorType,
+  matchType,
+  nodeType,
+  valueType,
+  vectorMatchCardinality,
+} from './promql/ast';
 
 export type PromQLEditorProps = { completeConfig: CompleteConfiguration } & Omit<
   ReactCodeMirrorProps,
@@ -104,27 +127,80 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
 const TreeView = ({ content, onClose }: { content: string; onClose: () => void }) => {
   const theme = useTheme();
 
-  // temporary logic
-  const formatContent = (input: string) => {
-    let formatted = '';
-    let tabCount = 0;
+  console.log('content: ', content);
 
-    for (const char of input) {
-      if (char === '(') {
-        tabCount++;
-        formatted += `(${'\n' + '\t'.repeat(tabCount)}`;
-      } else if (char === ')') {
-        tabCount--;
-        formatted += `\n${'\t'.repeat(tabCount)}${char}`;
-      } else {
-        formatted += char;
-      }
-    }
-
-    return formatted;
+  // TEMP: Sample node for testing, representing the following expression:
+  // rate(demo_api_request_duration_seconds_count{job="demo"}[5m]) / on(instance) group_left sum by(instance) (rate(demo_api_request_duration_seconds_count{job="demo"}[5m]))
+  const sampleNode: BinaryExpr = {
+    type: nodeType.binaryExpr,
+    op: binaryOperatorType.div,
+    lhs: {
+      type: nodeType.call,
+      func: {
+        name: 'rate',
+        argTypes: [valueType.matrix],
+        variadic: 0,
+        returnType: valueType.vector,
+      },
+      args: [
+        {
+          type: nodeType.matrixSelector,
+          name: 'demo_api_request_duration_seconds_count',
+          matchers: [
+            {
+              type: matchType.equal,
+              name: 'job',
+              value: 'demo',
+            },
+          ],
+          range: 300, // 5 minutes in seconds
+          offset: 0,
+          timestamp: null,
+          startOrEnd: null,
+        },
+      ],
+    },
+    rhs: {
+      type: nodeType.aggregation,
+      expr: {
+        type: nodeType.call,
+        func: {
+          name: 'rate',
+          argTypes: [valueType.matrix],
+          variadic: 0,
+          returnType: valueType.vector,
+        },
+        args: [
+          {
+            type: nodeType.matrixSelector,
+            name: 'demo_api_request_duration_seconds_count',
+            matchers: [
+              {
+                type: matchType.equal,
+                name: 'job',
+                value: 'demo',
+              },
+            ],
+            range: 300, // 5 minutes in seconds
+            offset: 0,
+            timestamp: null,
+            startOrEnd: null,
+          },
+        ],
+      },
+      op: aggregationType.sum,
+      param: null,
+      grouping: ['instance'],
+      without: false,
+    },
+    matching: {
+      card: vectorMatchCardinality.oneToOne,
+      labels: ['instance'],
+      on: true,
+      include: [],
+    },
+    bool: false,
   };
-
-  const modifiedContent = formatContent(content);
 
   return (
     <div style={{ border: `1px solid ${theme.palette.divider}`, padding: '10px', position: 'relative' }}>
@@ -138,7 +214,7 @@ const TreeView = ({ content, onClose }: { content: string; onClose: () => void }
           <CloseIcon sx={{ fontSize: '18px' }} />
         </IconButton>
       </Tooltip>
-      <pre style={{ margin: 0, minHeight: '16px' }}>{modifiedContent}</pre>
+      <TreeNode node={sampleNode} reverse={false} childIdx={0} />
     </div>
   );
 };
