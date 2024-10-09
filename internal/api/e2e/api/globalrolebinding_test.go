@@ -30,7 +30,7 @@ import (
 
 func TestMainScenarioGlobalRoleBinding(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		globalRole := e2eframework.NewGlobalRole("admin")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)
@@ -45,7 +45,7 @@ func TestMainScenarioGlobalRoleBinding(t *testing.T) {
 
 func TestUpdateScenarioGlobalRoleBindingRole(t *testing.T) {
 	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		globalRole := e2eframework.NewGlobalRole("admin")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, globalRole)

@@ -11,15 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tracetable
+package query
 
-import "github.com/perses/perses/go-sdk/panel"
+import tempoDatasource "github.com/perses/perses/go-sdk/tempo/datasource"
 
-const PluginKind = "TraceTable"
+func Expr(expr string) Option {
+	return func(builder *Builder) error {
+		builder.Query = expr
+		return nil
+	}
+}
 
-func Chart() panel.Option {
-	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = PluginKind
+func Datasource(datasourceName string) Option {
+	return func(builder *Builder) error {
+		builder.Datasource = tempoDatasource.Selector(datasourceName)
 		return nil
 	}
 }

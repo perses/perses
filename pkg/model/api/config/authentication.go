@@ -62,7 +62,7 @@ type Provider struct {
 	SlugID            string         `json:"slug_id" yaml:"slug_id"`
 	Name              string         `json:"name" yaml:"name"`
 	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
-	ClientSecret      secret.Hidden  `json:"client_secret" yaml:"client_secret"`
+	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
 	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
 	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
@@ -79,9 +79,6 @@ func (p *Provider) Verify() error {
 	}
 	if p.ClientID == "" {
 		return errors.New("provider's `client_id` is mandatory")
-	}
-	if p.ClientSecret == "" {
-		return errors.New("provider's `client_secret` is mandatory")
 	}
 	return nil
 }

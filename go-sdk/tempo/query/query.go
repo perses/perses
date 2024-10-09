@@ -11,29 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package markdown
+package query
 
-import "github.com/perses/perses/go-sdk/panel"
+import (
+	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/go-sdk/query"
+)
 
-const PluginKind = "Markdown"
+const PluginKind = "TempoTraceQuery"
 
 type PluginSpec struct {
-	Text string `json:"text" yaml:"text"`
+	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
+	Query      string               `json:"query" yaml:"query"`
 }
 
 type Option func(plugin *Builder) error
 
-type Builder struct {
-	PluginSpec `json:",inline" yaml:",inline"`
-}
-
-func create(text string, options ...Option) (Builder, error) {
+func create(query string, options ...Option) (Builder, error) {
 	builder := &Builder{
 		PluginSpec: PluginSpec{},
 	}
 
 	defaults := []Option{
-		Text(text),
+		Expr(query),
 	}
 
 	for _, opt := range append(defaults, options...) {
@@ -45,14 +45,19 @@ func create(text string, options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
-func Markdown(text string, options ...Option) panel.Option {
-	return func(builder *panel.Builder) error {
-		r, err := create(text, options...)
+type Builder struct {
+	PluginSpec `json:",inline" yaml:",inline"`
+}
+
+func TraceQL(expr string, options ...Option) query.Option {
+	return func(builder *query.Builder) error {
+		plugin, err := create(expr, options...)
 		if err != nil {
 			return err
 		}
+
 		builder.Spec.Plugin.Kind = PluginKind
-		builder.Spec.Plugin.Spec = r.PluginSpec
+		builder.Spec.Plugin.Spec = plugin
 		return nil
 	}
 }

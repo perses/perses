@@ -19,17 +19,13 @@ import (
 
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	"github.com/prometheus/common/model"
 )
 
-const (
-	PluginKind = "PrometheusDatasource"
-)
+const PluginKind = "TempoDatasource"
 
 type PluginSpec struct {
-	DirectURL      string         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy    `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {
@@ -90,7 +86,7 @@ type Builder struct {
 	PluginSpec `json:",inline" yaml:",inline"`
 }
 
-func Prometheus(options ...Option) datasource.Option {
+func Tempo(options ...Option) datasource.Option {
 	return func(builder *datasource.Builder) error {
 		plugin, err := create(options...)
 		if err != nil {

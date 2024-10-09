@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package auth
 
 import (
 	"context"
@@ -22,37 +22,38 @@ import (
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
 
 const authResource = "auth"
 
-// AuthInterface has methods to work with Auth resource
-type AuthInterface interface {
-	Login(user, password string) (*api.AuthResponse, error)
-	Refresh(refreshToken string) (*api.AuthResponse, error)
+// Interface has methods to work with Auth resource
+type Interface interface {
+	Login(user, password string) (*oauth2.Token, error)
+	Refresh(refreshToken string) (*oauth2.Token, error)
 	DeviceCode(authKind, authProvider string) (*oauth2.DeviceAuthResponse, error)
-	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse) (*api.AuthResponse, error)
-	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error)
+	DeviceAccessToken(authKind, slugID string, deviceCAuthResp *oauth2.DeviceAuthResponse) (*oauth2.Token, error)
+	ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*oauth2.Token, error)
 }
 
-func newAuth(client *perseshttp.RESTClient) AuthInterface {
+func New(client *perseshttp.RESTClient) Interface {
 	return &auth{client: client}
 }
 
 // auth implements AuthInterface
 type auth struct {
-	AuthInterface
+	Interface
 	client *perseshttp.RESTClient
 }
 
-func (c *auth) Login(user string, password string) (*api.AuthResponse, error) {
+func (c *auth) Login(user string, password string) (*oauth2.Token, error) {
 	body := &api.Auth{
 		Login:    user,
 		Password: password,
 	}
-	result := &api.AuthResponse{}
+	result := &oauth2.Token{}
 
 	return result, c.client.Post().
 		APIVersion("").
@@ -62,9 +63,9 @@ func (c *auth) Login(user string, password string) (*api.AuthResponse, error) {
 		Object(result)
 }
 
-func (c *auth) Refresh(refreshToken string) (*api.AuthResponse, error) {
+func (c *auth) Refresh(refreshToken string) (*oauth2.Token, error) {
 	body := &api.RefreshRequest{RefreshToken: refreshToken}
-	result := &api.AuthResponse{}
+	result := &oauth2.Token{}
 
 	return result, c.client.Post().
 		APIVersion("").
@@ -96,7 +97,7 @@ func (c *auth) DeviceCode(authKind, slugID string) (*oauth2.DeviceAuthResponse, 
 	return resp, nil
 }
 
-func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse) (*api.AuthResponse, error) {
+func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2.DeviceAuthResponse) (*oauth2.Token, error) {
 	config := &oauth2.Config{
 		Endpoint: oauth2.Endpoint{
 			TokenURL: c.tokenURL(authKind, slugID),
@@ -106,13 +107,14 @@ func (c *auth) DeviceAccessToken(authKind, slugID string, deviceAuthResp *oauth2
 	if err != nil {
 		return nil, &perseshttp.RequestError{Err: err}
 	}
-	return &api.AuthResponse{
+	return &oauth2.Token{
 		AccessToken:  token.AccessToken,
 		RefreshToken: token.RefreshToken,
+		TokenType:    oidc.BearerToken,
 	}, nil
 }
 
-func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*api.AuthResponse, error) {
+func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret string) (*oauth2.Token, error) {
 	config := &clientcredentials.Config{
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
@@ -123,9 +125,7 @@ func (c *auth) ClientCredentialsToken(authKind, slugID, clientID, clientSecret s
 	if err != nil {
 		return nil, &perseshttp.RequestError{Err: err}
 	}
-	return &api.AuthResponse{
-		AccessToken: token.AccessToken,
-	}, nil
+	return token, nil
 }
 
 func (c *auth) deviceAuthURL(authKind, authProvider string) string {

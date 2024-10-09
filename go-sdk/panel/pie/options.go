@@ -11,15 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tracetable
+package pie
 
-import "github.com/perses/perses/go-sdk/panel"
+import commonSdk "github.com/perses/perses/go-sdk/common"
 
-const PluginKind = "TraceTable"
+func WithLegend(legend Legend) Option {
+	return func(builder *Builder) error {
+		builder.Legend = &legend
+		return nil
+	}
+}
 
-func Chart() panel.Option {
-	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = PluginKind
+func WithVisual(visual Visual) Option {
+	return func(builder *Builder) error {
+		builder.Visual = &visual
+		return nil
+	}
+}
+
+func WithFormat(format *commonSdk.Format) Option {
+	return func(builder *Builder) error {
+		builder.Format = format
+		return nil
+	}
+}
+
+func WithQuerySettings(querySettingsList []QuerySettingsItem) Option {
+	return func(builder *Builder) error {
+		builder.QuerySettings = &querySettingsList
 		return nil
 	}
 }

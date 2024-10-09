@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package timeseries
+package pie
 
 import (
 	commonSdk "github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/panel"
 )
 
-const PluginKind = "TimeSeriesChart"
+const PluginKind = "PieChart"
 
 type LegendPosition string
 
@@ -46,10 +46,6 @@ type Legend struct {
 	Mode     LegendMode              `json:"mode,omitempty" yaml:"mode,omitempty"`
 	Size     LegendSize              `json:"size,omitempty" yaml:"size,omitempty"`
 	Values   []commonSdk.Calculation `json:"values,omitempty" yaml:"values,omitempty"`
-}
-
-type Tooltip struct {
-	EnablePinning bool `json:"enablePinning,omitempty" yaml:"enablePinning,omitempty"`
 }
 
 type PaletteMode string
@@ -95,23 +91,6 @@ type Visual struct {
 	ConnectNulls bool             `json:"connectNulls,omitempty" yaml:"connectNulls,omitempty"`
 }
 
-type YAxis struct {
-	Show   bool              `json:"show,omitempty" yaml:"show,omitempty"`
-	Label  string            `json:"label,omitempty" yaml:"label,omitempty"`
-	Format *commonSdk.Format `json:"format,omitempty" yaml:"format,omitempty"`
-	Min    float64           `json:"min,omitempty" yaml:"min,omitempty"`
-	Max    float64           `json:"max,omitempty" yaml:"max,omitempty"`
-}
-
-type PluginSpec struct {
-	Legend        *Legend               `json:"legend,omitempty" yaml:"legend,omitempty"`
-	Tooltip       *Tooltip              `json:"tooltip,omitempty" yaml:"tooltip,omitempty"`
-	YAxis         *YAxis                `json:"yAxis,omitempty" yaml:"yAxis,omitempty"`
-	Thresholds    *commonSdk.Thresholds `json:"thresholds,omitempty" yaml:"thresholds,omitempty"`
-	Visual        *Visual               `json:"visual,omitempty" yaml:"visual,omitempty"`
-	QuerySettings *[]QuerySettingsItem  `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
-}
-
 type ColorMode string
 
 const (
@@ -125,7 +104,32 @@ type QuerySettingsItem struct {
 	ColorValue string    `json:"colorValue" yaml:"colorValue"`
 }
 
+type Sort string
+
+const (
+	AscendingSort  Sort = "asc"
+	DescendingSort Sort = "desc"
+)
+
+type PluginMode string
+
+const (
+	ValueMode      PluginMode = "value"
+	PercentageMode PluginMode = "percentage"
+)
+
 type Option func(plugin *Builder) error
+
+type PluginSpec struct {
+	Legend        *Legend               `json:"legend,omitempty" yaml:"legend,omitempty"`
+	QuerySettings *[]QuerySettingsItem  `json:"querySettings,omitempty" yaml:"querySettings,omitempty"`
+	Calculation   commonSdk.Calculation `json:"calculation" yaml:"calculation"`
+	Format        *commonSdk.Format     `json:"format,omitempty" yaml:"format,omitempty"`
+	Sort          Sort                  `json:"sort,omitempty" yaml:"sort,omitempty"`
+	Mode          PluginMode            `json:"mode,omitempty" yaml:"mode,omitempty"`
+	Visual        *Visual               `json:"visual,omitempty" yaml:"visual,omitempty"`
+	Radius        int                   `json:"radius" yaml:"radius"`
+}
 
 func create(options ...Option) (Builder, error) {
 	builder := &Builder{

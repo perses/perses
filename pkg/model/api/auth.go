@@ -17,8 +17,24 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
 )
+
+type PublicAuth struct {
+	Login    string        `json:"login"`
+	Password secret.Hidden `json:"password"`
+}
+
+func NewPublicAuth(auth *Auth) *PublicAuth {
+	if auth == nil {
+		return nil
+	}
+	return &PublicAuth{
+		Login:    auth.Login,
+		Password: secret.Hidden(auth.Password),
+	}
+}
 
 type Auth struct {
 	Login    string `json:"login"`
@@ -40,14 +56,6 @@ func (u *Auth) UnmarshalJSON(data []byte) error {
 	u.Password = tmp.Password
 	u.Login = tmp.Login
 	return nil
-}
-
-// AuthResponse represents the response of an authentication request.
-// Disclaimer: This is an exception to the general camelCase convention in the project, to respect oauth 2.0 specs.
-// -> https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.4
-type AuthResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 // RefreshRequest represents the request used to refresh an access token from a refresh token.

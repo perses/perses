@@ -11,15 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tracetable
+package datasource
 
-import "github.com/perses/perses/go-sdk/panel"
+import (
+	"github.com/perses/perses/go-sdk/http"
+)
 
-const PluginKind = "TraceTable"
+func DirectURL(url string) Option {
+	return func(builder *Builder) error {
+		builder.DirectURL = url
+		return nil
+	}
+}
 
-func Chart() panel.Option {
-	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = PluginKind
+func HTTPProxy(url string, options ...http.Option) Option {
+	return func(builder *Builder) error {
+		p, err := http.New(url, options...)
+		if err != nil {
+			return err
+		}
+		builder.Proxy = &p.Proxy
 		return nil
 	}
 }

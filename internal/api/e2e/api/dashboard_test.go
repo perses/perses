@@ -136,7 +136,7 @@ func extractDashboardFromHTTPBody(body interface{}, t *testing.T) *modelV1.Dashb
 func TestAuthListDashboardInProject(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 
-		usrEntity := e2eframework.NewUser("creator")
+		usrEntity := e2eframework.NewUser("creator", "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().

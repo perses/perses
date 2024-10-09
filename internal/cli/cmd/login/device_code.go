@@ -19,7 +19,7 @@ import (
 
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	modelAPI "github.com/perses/perses/pkg/model/api"
+	"golang.org/x/oauth2"
 )
 
 type deviceCodeLogin struct {
@@ -29,7 +29,7 @@ type deviceCodeLogin struct {
 	apiClient            api.ClientInterface
 }
 
-func (l *deviceCodeLogin) Login() (*modelAPI.AuthResponse, error) {
+func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
 	if err != nil {
 		return nil, err

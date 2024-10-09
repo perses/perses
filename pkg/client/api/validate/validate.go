@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package validate
 
 import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
-type ValidateInterface interface {
+type Interface interface {
 	Dashboard(entity *v1.Dashboard) error
 	Datasource(entity *v1.Datasource) error
 	GlobalDatasource(entity *v1.GlobalDatasource) error
@@ -27,11 +27,11 @@ type ValidateInterface interface {
 }
 
 type validate struct {
-	ValidateInterface
+	Interface
 	client *perseshttp.RESTClient
 }
 
-func newValidate(client *perseshttp.RESTClient) ValidateInterface {
+func New(client *perseshttp.RESTClient) Interface {
 	return &validate{client: client}
 }
 

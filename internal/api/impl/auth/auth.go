@@ -26,7 +26,7 @@ import (
 	"github.com/perses/perses/internal/api/interface/v1/user"
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
-	"github.com/perses/perses/pkg/client/perseshttp"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/config"
 	"github.com/zitadel/oidc/v3/pkg/oidc"
@@ -62,7 +62,7 @@ func getRedirectURI(r *http.Request, authKind string, slugID string) string {
 
 // newHTTPClient is a simple http client builder designed to be used for the queries to external authentication providers.
 func newHTTPClient(httpConfig config.HTTP) (*http.Client, error) {
-	roundTripper, err := perseshttp.NewRoundTripper(time.Duration(httpConfig.Timeout), httpConfig.TLSConfig)
+	roundTripper, err := clientConfig.NewRoundTripper(time.Duration(httpConfig.Timeout), httpConfig.TLSConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +148,10 @@ func (e *endpoint) refresh(ctx echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return ctx.JSON(http.StatusOK, api.AuthResponse{
-		AccessToken: accessToken,
+	return ctx.JSON(http.StatusOK, oauth2.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	})
 }
 

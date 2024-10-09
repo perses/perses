@@ -336,7 +336,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*api.AuthResponse, error) {
+func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	// We don´t forget to set the issuer before making any sync in the database.
 	userInfo.issuer = e.issuer
 
@@ -359,9 +359,10 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 		return nil, err
 	}
 
-	return &api.AuthResponse{
+	return &oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	}, nil
 }
 

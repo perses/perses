@@ -433,7 +433,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*api.AuthResponse, error) {
+func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
@@ -453,9 +453,10 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 		return nil, err
 	}
 
-	return &api.AuthResponse{
+	return &oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	}, nil
 }
 
