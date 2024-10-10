@@ -32,10 +32,8 @@ export const TreeView = ({ promqlExpr, datasource, onClose }: TreeViewProps) => 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(promqlExpr, datasource);
   let errorMessage = 'An unknown error occurred';
   if (error && error instanceof Error) {
-    console.log('if (error && error instanceof Error) {');
     if (error.message.trim() === '404 page not found') {
-      console.log('if (error.message.trim() === 404 page not found)');
-      errorMessage = 'Tree view is not available for this datasource';
+      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
     } else {
       errorMessage = error.message;
     }
