@@ -81,7 +81,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={query}
+        value={value.query}
+        datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
       />

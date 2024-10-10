@@ -176,6 +176,7 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
         value={value.expr}
+        datasource={selectedDatasource}
         onChange={(query) => {
           props.onChange({ ...props.value, expr: query });
         }}

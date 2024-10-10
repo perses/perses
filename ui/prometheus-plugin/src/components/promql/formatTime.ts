@@ -14,10 +14,12 @@
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/lib/formatTime.ts
 
 // Format a duration in milliseconds into a Prometheus duration string like "1d2h3m4s".
+
 export const formatPrometheusDuration = (d: number): string => {
   return formatDuration(d);
 };
 
+// TODO check if this not a duplicate
 const formatDuration = (d: number, componentSeparator?: string, showFractionalSeconds?: boolean): string => {
   if (d === 0) {
     return '0s';

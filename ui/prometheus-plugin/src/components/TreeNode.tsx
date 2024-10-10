@@ -33,20 +33,17 @@ interface TreeNodeProps {
 
 const TreeNode: React.FC<TreeNodeProps> = ({ node, reverse, childIdx }) => {
   const children = getNodeChildren(node);
-
-  console.log(' reverse: ', reverse, ' childIdx: ', childIdx, ' node: ', node);
-
   const innerNode = <Box>{formatNode(node, false, 1)}</Box>;
 
   if (node.type === nodeType.binaryExpr) {
     return (
       <div>
         <Box ml={nodeIndent}>
-          <TreeNode node={children[0]} reverse={true} childIdx={0} />
+          <TreeNode node={children[0]!} reverse={true} childIdx={0} />
         </Box>
         {innerNode}
         <Box ml={nodeIndent}>
-          <TreeNode node={children[1]} reverse={false} childIdx={1} />
+          <TreeNode node={children[1]!} reverse={false} childIdx={1} />
         </Box>
       </div>
     );

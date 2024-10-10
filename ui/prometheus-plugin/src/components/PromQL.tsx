@@ -16,29 +16,19 @@ import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirro
 import { EditorView } from '@codemirror/view';
 import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import DotsVertical from 'mdi-material-ui/DotsVertical';
-import CloseIcon from 'mdi-material-ui/Close';
 import { useMemo, useState } from 'react';
-import TreeNode from './TreeNode';
-import {
-  aggregationType,
-  BinaryExpr,
-  binaryOperatorType,
-  matchType,
-  nodeType,
-  valueType,
-  vectorMatchCardinality,
-} from './promql/ast';
+import { PrometheusDatasourceSelector } from '../model';
+import { TreeView } from './TreeView';
 
-export type PromQLEditorProps = { completeConfig: CompleteConfiguration } & Omit<
-  ReactCodeMirrorProps,
-  'theme' | 'extensions'
->;
+export type PromQLEditorProps = {
+  completeConfig: CompleteConfiguration;
+  datasource: PrometheusDatasourceSelector;
+} & Omit<ReactCodeMirrorProps, 'theme' | 'extensions'>;
 
-export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
+export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [editorContent, setEditorContent] = useState(rest.value);
   const [isTreeViewVisible, setTreeViewVisible] = useState(true);
 
   const promQLExtension = useMemo(() => {
@@ -56,10 +46,6 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
   const handleShowTreeView = () => {
     setTreeViewVisible(!isTreeViewVisible); // Toggle TreeView visibility
     setAnchorEl(null);
-  };
-
-  const handleEditorChange = (value: string) => {
-    setEditorContent(value);
   };
 
   return (
@@ -98,9 +84,8 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
           }),
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
-        // TODO enable back: onChange={handleEditorChange}
       />
-      {editorContent && editorContent.trim() !== '' && (
+      {rest.value && rest.value.trim() !== '' && (
         <>
           <Tooltip title="Settings">
             <IconButton
@@ -117,104 +102,11 @@ export function PromQLEditor({ completeConfig, ...rest }: PromQLEditorProps) {
           <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
             <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
           </Menu>
-          {isTreeViewVisible && <TreeView content={editorContent} onClose={() => setTreeViewVisible(false)} />}
+          {isTreeViewVisible && (
+            <TreeView promqlExpr={rest.value} datasource={datasource} onClose={() => setTreeViewVisible(false)} />
+          )}
         </>
       )}
     </Stack>
   );
 }
-
-const TreeView = ({ content, onClose }: { content: string; onClose: () => void }) => {
-  const theme = useTheme();
-
-  console.log('content: ', content);
-
-  // TEMP: Sample node for testing, representing the following expression:
-  // rate(demo_api_request_duration_seconds_count{job="demo"}[5m]) / on(instance) group_left sum by(instance) (rate(demo_api_request_duration_seconds_count{job="demo"}[5m]))
-  const sampleNode: BinaryExpr = {
-    type: nodeType.binaryExpr,
-    op: binaryOperatorType.div,
-    lhs: {
-      type: nodeType.call,
-      func: {
-        name: 'rate',
-        argTypes: [valueType.matrix],
-        variadic: 0,
-        returnType: valueType.vector,
-      },
-      args: [
-        {
-          type: nodeType.matrixSelector,
-          name: 'demo_api_request_duration_seconds_count',
-          matchers: [
-            {
-              type: matchType.equal,
-              name: 'job',
-              value: 'demo',
-            },
-          ],
-          range: 300, // 5 minutes in seconds
-          offset: 0,
-          timestamp: null,
-          startOrEnd: null,
-        },
-      ],
-    },
-    rhs: {
-      type: nodeType.aggregation,
-      expr: {
-        type: nodeType.call,
-        func: {
-          name: 'rate',
-          argTypes: [valueType.matrix],
-          variadic: 0,
-          returnType: valueType.vector,
-        },
-        args: [
-          {
-            type: nodeType.matrixSelector,
-            name: 'demo_api_request_duration_seconds_count',
-            matchers: [
-              {
-                type: matchType.equal,
-                name: 'job',
-                value: 'demo',
-              },
-            ],
-            range: 300, // 5 minutes in seconds
-            offset: 0,
-            timestamp: null,
-            startOrEnd: null,
-          },
-        ],
-      },
-      op: aggregationType.sum,
-      param: null,
-      grouping: ['instance'],
-      without: false,
-    },
-    matching: {
-      card: vectorMatchCardinality.oneToOne,
-      labels: ['instance'],
-      on: true,
-      include: [],
-    },
-    bool: false,
-  };
-
-  return (
-    <div style={{ border: `1px solid ${theme.palette.divider}`, padding: '10px', position: 'relative' }}>
-      <Tooltip title="Close tree view">
-        <IconButton
-          aria-label="Close tree view"
-          onClick={onClose} // Trigger the onClose function
-          sx={{ position: 'absolute', top: '5px', right: '5px' }}
-          size="small"
-        >
-          <CloseIcon sx={{ fontSize: '18px' }} />
-        </IconButton>
-      </Tooltip>
-      <TreeNode node={sampleNode} reverse={false} childIdx={0} />
-    </div>
-  );
-};
