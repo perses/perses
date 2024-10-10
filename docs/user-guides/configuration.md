@@ -457,33 +457,33 @@ A TLS config allows configuring TLS connections.
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
 [ ca: <string> ]
-[ ca_file: <filename> ]
+[ caFile: <filename> ]
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
 [ cert: <string> ]
-[ cert_file: <filename> ]
+[ certFile: <filename> ]
 [ key: <secret> ]
-[ key_file: <filename> ]
+[ keyFile: <filename> ]
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-[ server_name: <string> ]
+[ serverName: <string> ]
 
 # Disable validation of the server certificate.
-[ insecure_skip_verify: <boolean> ]
+[ insecureSkipVerify: <boolean> ]
 
 # Minimum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
 # If unset, Prometheus will use Go default minimum version, which is TLS 1.2.
 # See MinVersion in https://pkg.go.dev/crypto/tls#Config.
-[ min_version: <string> ]
+[ minVersion: <string> ]
 # Maximum acceptable TLS version. Accepted values: TLS10 (TLS 1.0), TLS11 (TLS
 # 1.1), TLS12 (TLS 1.2), TLS13 (TLS 1.3).
 # If unset, Prometheus will use Go default maximum version, which is TLS 1.3.
 # See MaxVersion in https://pkg.go.dev/crypto/tls#Config.
-[ max_version: <string> ]
+[ maxVersion: <string> ]
 ```
 
 ### Provisioning config

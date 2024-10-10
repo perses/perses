@@ -46,6 +46,27 @@ authentication:
           scopes: ["https://graph.microsoft.com/.default"] # For Client Credentials
 ```
 
+#### Keycloak no TLS
+
+An example of how to configure oauth authentication for keycloak provider using no TLS configuration. To run in a development configuration for instance, when your Keycloak server doesn't have certificates signed by known authority.
+
+```yaml
+authentication:
+  providers:
+    oauth:
+      - slug_id: keycloak
+        name: "Keycloak"
+        client_id: "<your client ID>"
+        client_secret: "<your client Secret>"
+        scopes: ["openid", "profile", "email"]
+        auth_url: "http://mykeycloak-server.com/realms/<my_realm>/protocol/openid-connect/auth"
+        token_url: "http://mykeycloak-server.com/realms/<my_realm>/protocol/openid-connect/token"
+        user_infos_url: "http://mykeycloak-server.com/realms/<my_realm>/protocol/openid-connect/userinfo"
+        http:
+          tls_config:
+            insecureSkipVerify: true
+```
+
 > [!tip]
 > The **scope** used to generate a token from client credentials is different from the one used in other flows.
 >
