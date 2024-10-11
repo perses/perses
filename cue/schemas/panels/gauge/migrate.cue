@@ -1,7 +1,10 @@
 if #panel.type != _|_ if #panel.type == "gauge" {
 	kind: "GaugeChart"
 	spec: {
-		#calcName: *"\(#panel.options.reduceOptions.calcs[0])" | null // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
+		#calcName: [if #panel.options.reduceOptions != _|_ if #panel.options.reduceOptions.calcs != _|_ 
+			{*"\(#panel.options.reduceOptions.calcs[0])" | null}, // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
+			{"lastNotNull"}]
+		[0]
 		calculation: [ // switch
 			if #mapping.calc[#calcName] != _|_ { #mapping.calc[#calcName] },
 			{ #defaultCalc }
@@ -14,7 +17,7 @@ if #panel.type != _|_ if #panel.type == "gauge" {
 			}
 		}
 
-		if #panel.fieldConfig.defaults.thresholds != _|_ {
+		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.thresholds.steps != _|_ {
 			thresholds: {
 				// defaultColor: TODO how to fill this one?
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part? 
