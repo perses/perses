@@ -3,12 +3,13 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 	spec: {
 		// legend
 		 // NB: no support of former "show" attribute from Grafana, people should migrate to latest Grafana datamodel before migrating to Perses
-		if #panel.options.legend.showLegend != _|_ if #panel.options.legend.showLegend {
+		#showLegend: *#panel.options.legend.showLegend | true
+		if #panel.options.legend != _|_ if #showLegend {
 			legend: {
 				if #panel.type == "timeseries" {
 					position: [
-						if #panel.options.legend.placement == "bottom" { "bottom" },
-						if #panel.options.legend.placement == "right" { "right" },
+						if #panel.options.legend.placement != _|_ if #panel.options.legend.placement == "right" {"right"},
+						{"bottom"}
 					][0]
 					mode: [
 						if #panel.options.legend.displayMode == "list" { "list" },
@@ -21,7 +22,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				if #panel.type == "graph" {
 					position: [ // switch
 						if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "right" },
-						{ "bottom" }
+						{"bottom"}
 					][0]
 					mode: [
 						if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "table" },
@@ -72,6 +73,11 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 		}
 		// visual
 		visual: {
+			// cldx patch: add categorical to map custom color palette.
+			// https://github.com/perses/perses/blob/main/docs/plugins/panels.md#palette-specification
+			palette: {
+				mode: "categorical"
+			}
 			if #panel.fieldConfig.defaults.custom.lineWidth != _|_ {
 				lineWidth: [ // switch
 					if #panel.fieldConfig.defaults.custom.lineWidth > 3 { 3 }, // line width can't go beyond 3 in Perses
