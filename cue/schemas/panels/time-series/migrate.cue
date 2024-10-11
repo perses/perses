@@ -75,6 +75,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 			if #panel.fieldConfig.defaults.custom.lineWidth != _|_ {
 				lineWidth: [ // switch
 					if #panel.fieldConfig.defaults.custom.lineWidth > 3 { 3 }, // line width can't go beyond 3 in Perses
+					if #panel.fieldConfig.defaults.custom.lineWidth < 0.25 { 0.25 }, // line width can't go below 0.25 in Perses
 					{ #panel.fieldConfig.defaults.custom.lineWidth }
 				][0]
 			}
