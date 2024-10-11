@@ -43,11 +43,13 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(rest.value ?? '', datasource);
   let errorMessage = 'An unknown error occurred';
+  let isSyntaxError = false;
   if (error && error instanceof Error) {
     if (error.message.trim() === '404 page not found') {
       errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
     } else {
       errorMessage = error.message;
+      isSyntaxError = true;
     }
   }
 
@@ -90,40 +92,50 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
       />
       {rest.value && rest.value.trim() !== '' && (
         <>
-          <Tooltip title={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}>
-            <IconButton
-              aria-label={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}
-              onClick={handleShowTreeView}
-              sx={{ position: 'absolute', right: '5px', top: '5px' }}
-              size="small"
-            >
-              <FileTreeIcon sx={{ fontSize: '18px' }} />
-            </IconButton>
-          </Tooltip>
-          {isTreeViewVisible && (
+          {isSyntaxError ? (
             <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
-              <Tooltip title="Close tree view">
+              <ErrorAlert error={{ name: 'Parse query error', message: errorMessage }} />
+            </div>
+          ) : (
+            <>
+              <Tooltip title={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}>
                 <IconButton
-                  aria-label="Close tree view"
-                  onClick={() => setTreeViewVisible(false)}
-                  sx={{ position: 'absolute', top: '5px', right: '5px' }}
+                  aria-label={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}
+                  onClick={handleShowTreeView}
+                  sx={{ position: 'absolute', right: '5px', top: '5px' }}
                   size="small"
                 >
-                  <CloseIcon sx={{ fontSize: '18px' }} />
+                  <FileTreeIcon sx={{ fontSize: '18px' }} />
                 </IconButton>
               </Tooltip>
-              {error ? (
-                <ErrorAlert error={{ name: 'Tree view rendering error', message: errorMessage }} />
-              ) : (
-                <div style={{ padding: '10px' }}>
-                  {isLoading ? (
-                    <CircularProgress />
-                  ) : parseQueryResponse?.data ? (
-                    <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
-                  ) : null}
+              {isTreeViewVisible && (
+                <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
+                  {!isSyntaxError && (
+                    <Tooltip title="Close tree view">
+                      <IconButton
+                        aria-label="Close tree view"
+                        onClick={() => setTreeViewVisible(false)}
+                        sx={{ position: 'absolute', top: '5px', right: '5px' }}
+                        size="small"
+                      >
+                        <CloseIcon sx={{ fontSize: '18px' }} />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {error ? (
+                    <ErrorAlert error={{ name: 'Tree view not supported', message: errorMessage }} />
+                  ) : (
+                    <div style={{ padding: '10px' }}>
+                      {isLoading ? (
+                        <CircularProgress />
+                      ) : parseQueryResponse?.data ? (
+                        <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
+                      ) : null}
+                    </div>
+                  )}
                 </div>
               )}
-            </div>
+            </>
           )}
         </>
       )}
