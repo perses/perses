@@ -31,7 +31,7 @@ export type PromQLEditorProps = {
 export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [isTreeViewVisible, setTreeViewVisible] = useState(true);
+  const [isTreeViewVisible, setTreeViewVisible] = useState(false);
 
   const promQLExtension = useMemo(() => {
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
