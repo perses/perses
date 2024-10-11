@@ -43,15 +43,19 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(rest.value ?? '', datasource);
   let errorMessage = 'An unknown error occurred';
-  let isSyntaxError = false;
-  if (error && error instanceof Error) {
-    if (error.message.trim() === '404 page not found') {
-      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
-    } else {
-      errorMessage = error.message;
-      isSyntaxError = true;
-    }
+  let isGenericError = false;
+  // If the error is 404 page not found, it likely means the datasource does not support the tree view.
+  // In that case we want a different behavior, see below.
+  if (error && error instanceof Error && error.message.trim() !== '404 page not found') {
+    errorMessage = error.message;
+    isGenericError = true;
   }
+
+  const treeViewText = 'Tree View';
+  const treeViewActionTexts = {
+    open: 'Open ' + treeViewText,
+    close: 'Close ' + treeViewText,
+  };
 
   return (
     <Stack position="relative">
@@ -90,17 +94,19 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
       />
-      {rest.value && rest.value.trim() !== '' && (
+      {rest.value?.trim() !== '' && (
         <>
-          {isSyntaxError ? (
-            <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
+          {isGenericError ? (
+            // Display the error without any close button, tree view etc when it's a generic error
+            <div style={{ border: `1px solid ${theme.palette.divider}` }}>
               <ErrorAlert error={{ name: 'Parse query error', message: errorMessage }} />
             </div>
           ) : (
+            // Otherwise include the logic to show/hide the tree view
             <>
-              <Tooltip title={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}>
+              <Tooltip title={isTreeViewVisible ? treeViewActionTexts.close : treeViewActionTexts.open}>
                 <IconButton
-                  aria-label={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}
+                  aria-label={isTreeViewVisible ? treeViewActionTexts.close : treeViewActionTexts.open}
                   onClick={handleShowTreeView}
                   sx={{ position: 'absolute', right: '5px', top: '5px' }}
                   size="small"
@@ -110,20 +116,25 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
               </Tooltip>
               {isTreeViewVisible && (
                 <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
-                  {!isSyntaxError && (
-                    <Tooltip title="Close tree view">
-                      <IconButton
-                        aria-label="Close tree view"
-                        onClick={() => setTreeViewVisible(false)}
-                        sx={{ position: 'absolute', top: '5px', right: '5px' }}
-                        size="small"
-                      >
-                        <CloseIcon sx={{ fontSize: '18px' }} />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                  <Tooltip title={treeViewActionTexts.close}>
+                    <IconButton
+                      aria-label={treeViewActionTexts.close}
+                      onClick={() => setTreeViewVisible(false)}
+                      sx={{ position: 'absolute', top: '5px', right: '5px' }}
+                      size="small"
+                    >
+                      <CloseIcon sx={{ fontSize: '18px' }} />
+                    </IconButton>
+                  </Tooltip>
                   {error ? (
-                    <ErrorAlert error={{ name: 'Tree view not supported', message: errorMessage }} />
+                    // Here the user is able to hide the error alert
+                    <ErrorAlert
+                      error={{
+                        name: 'Tree view not supported',
+                        message:
+                          'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications',
+                      }}
+                    />
                   ) : (
                     <div style={{ padding: '10px' }}>
                       {isLoading ? (
