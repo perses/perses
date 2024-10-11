@@ -1,7 +1,7 @@
 if #panel.type != _|_ if #panel.type == "stat" {
 	kind: "StatChart"
 	spec: {
-		#calcName: *"\(#panel.options.reduceOptions.calcs[0])" | null // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
+		#calcName: *"\(#panel.options.reduceOptions.calcs[0])" | null // only consider [0] here as Perses's StatChart doesn't support individual calcs
 		calculation: [ // switch
 			if #mapping.calc[#calcName] != _|_ { #mapping.calc[#calcName] },
 			{ #defaultCalc }
