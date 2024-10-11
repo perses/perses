@@ -14,11 +14,14 @@
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
-import { useTheme, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { useTheme, CircularProgress, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import DotsVertical from 'mdi-material-ui/DotsVertical';
 import { useMemo, useState } from 'react';
+import { ErrorAlert } from '@perses-dev/components';
+import CloseIcon from 'mdi-material-ui/Close';
 import { PrometheusDatasourceSelector } from '../model';
-import { TreeView } from './TreeView';
+import { useParseQuery } from './utils';
+import TreeNode from './TreeNode';
 
 export type PromQLEditorProps = {
   completeConfig: CompleteConfiguration;
@@ -47,6 +50,16 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
     setTreeViewVisible(!isTreeViewVisible); // Toggle TreeView visibility
     setAnchorEl(null);
   };
+
+  const { data: parseQueryResponse, isLoading, error } = useParseQuery(rest.value ?? '', datasource);
+  let errorMessage = 'An unknown error occurred';
+  if (error && error instanceof Error) {
+    if (error.message.trim() === '404 page not found') {
+      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+    } else {
+      errorMessage = error.message;
+    }
+  }
 
   return (
     <Stack position="relative">
@@ -103,7 +116,29 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
             <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
           </Menu>
           {isTreeViewVisible && (
-            <TreeView promqlExpr={rest.value} datasource={datasource} onClose={() => setTreeViewVisible(false)} />
+            <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
+              <Tooltip title="Close tree view">
+                <IconButton
+                  aria-label="Close tree view"
+                  onClick={() => setTreeViewVisible(false)}
+                  sx={{ position: 'absolute', top: '5px', right: '5px' }}
+                  size="small"
+                >
+                  <CloseIcon sx={{ fontSize: '18px' }} />
+                </IconButton>
+              </Tooltip>
+              {error ? (
+                <ErrorAlert error={{ name: 'Tree view rendering error', message: errorMessage }} />
+              ) : (
+                <div style={{ padding: '10px' }}>
+                  {isLoading ? (
+                    <CircularProgress />
+                  ) : parseQueryResponse?.data ? (
+                    <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
+                  ) : null}
+                </div>
+              )}
+            </div>
           )}
         </>
       )}
