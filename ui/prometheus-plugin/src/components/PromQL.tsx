@@ -14,8 +14,8 @@
 import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { PromQLExtension, CompleteConfiguration } from '@prometheus-io/codemirror-promql';
 import { EditorView } from '@codemirror/view';
-import { useTheme, CircularProgress, InputLabel, Stack, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
-import DotsVertical from 'mdi-material-ui/DotsVertical';
+import { useTheme, CircularProgress, InputLabel, Stack, IconButton, Tooltip } from '@mui/material';
+import FileTreeIcon from 'mdi-material-ui/FileTree';
 import { useMemo, useState } from 'react';
 import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
@@ -31,24 +31,14 @@ export type PromQLEditorProps = {
 export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEditorProps) {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isTreeViewVisible, setTreeViewVisible] = useState(true);
 
   const promQLExtension = useMemo(() => {
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
   }, [completeConfig]);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
   const handleShowTreeView = () => {
-    setTreeViewVisible(!isTreeViewVisible); // Toggle TreeView visibility
-    setAnchorEl(null);
+    setTreeViewVisible(!isTreeViewVisible);
   };
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(rest.value ?? '', datasource);
@@ -100,21 +90,16 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
       />
       {rest.value && rest.value.trim() !== '' && (
         <>
-          <Tooltip title="Settings">
+          <Tooltip title={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}>
             <IconButton
-              aria-label="Settings"
-              aria-controls="long-menu"
-              aria-haspopup="true"
-              onClick={handleMenuOpen}
+              aria-label={isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}
+              onClick={handleShowTreeView}
               sx={{ position: 'absolute', right: '5px', top: '5px' }}
               size="small"
             >
-              <DotsVertical sx={{ fontSize: '18px' }} />
+              <FileTreeIcon sx={{ fontSize: '18px' }} />
             </IconButton>
           </Tooltip>
-          <Menu id="long-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
-            <MenuItem onClick={handleShowTreeView}>{isTreeViewVisible ? 'Hide Tree View' : 'Show Tree View'}</MenuItem>
-          </Menu>
           {isTreeViewVisible && (
             <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
               <Tooltip title="Close tree view">
