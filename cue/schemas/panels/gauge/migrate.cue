@@ -1,10 +1,7 @@
 if #panel.type != _|_ if #panel.type == "gauge" {
 	kind: "GaugeChart"
 	spec: {
-		#calcName: [if #panel.options.reduceOptions != _|_ if #panel.options.reduceOptions.calcs != _|_ 
-			{*"\(#panel.options.reduceOptions.calcs[0])" | null}, // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
-			{"lastNotNull"}]
-		[0]
+		#calcName: *"\(#panel.options.reduceOptions.calcs[0])" | null // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 		calculation: [ // switch
 			if #mapping.calc[#calcName] != _|_ { #mapping.calc[#calcName] },
 			{ #defaultCalc }
