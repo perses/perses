@@ -40,7 +40,7 @@ export const TreeView = ({ promqlExpr, datasource, onClose }: TreeViewProps) => 
   }
 
   return (
-    <div style={{ border: `1px solid ${theme.palette.divider}`, padding: '10px', position: 'relative' }}>
+    <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
       <Tooltip title="Close tree view">
         <IconButton
           aria-label="Close tree view"
@@ -53,11 +53,15 @@ export const TreeView = ({ promqlExpr, datasource, onClose }: TreeViewProps) => 
       </Tooltip>
       {error ? (
         <ErrorAlert error={{ name: 'Tree view rendering error', message: errorMessage }} />
-      ) : isLoading ? (
-        <CircularProgress />
-      ) : parseQueryResponse?.data ? (
-        <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
-      ) : null}
+      ) : (
+        <div style={{ padding: '10px' }}>
+          {isLoading ? (
+            <CircularProgress />
+          ) : parseQueryResponse?.data ? (
+            <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };
