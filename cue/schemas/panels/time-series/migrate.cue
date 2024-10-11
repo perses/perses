@@ -73,11 +73,6 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 		}
 		// visual
 		visual: {
-			// cldx patch: add categorical to map custom color palette.
-			// https://github.com/perses/perses/blob/main/docs/plugins/panels.md#palette-specification
-			palette: {
-				mode: "categorical"
-			}
 			if #panel.fieldConfig.defaults.custom.lineWidth != _|_ {
 				lineWidth: [ // switch
 					if #panel.fieldConfig.defaults.custom.lineWidth > 3 { 3 }, // line width can't go beyond 3 in Perses
