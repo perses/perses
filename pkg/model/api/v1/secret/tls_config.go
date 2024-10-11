@@ -61,8 +61,8 @@ func BuildTLSConfig(cfg *TLSConfig) (*tls.Config, error) {
 		KeyFile:            cfg.KeyFile,
 		ServerName:         cfg.ServerName,
 		InsecureSkipVerify: cfg.InsecureSkipVerify,
-		MinVersion:         promConfig.TLSVersions["TLS12"],
-		MaxVersion:         promConfig.TLSVersions["TLS13"],
+		MinVersion:         promConfig.TLSVersions[cfg.MinVersion],
+		MaxVersion:         promConfig.TLSVersions[cfg.MaxVersion],
 	}
 	return promConfig.NewTLSConfig(preConfig)
 }
@@ -84,4 +84,8 @@ type TLSConfig struct {
 	ServerName string `yaml:"serverName,omitempty" json:"serverName,omitempty"`
 	// Disable target certificate validation.
 	InsecureSkipVerify bool `yaml:"insecureSkipVerify" json:"insecureSkipVerify"`
+	// Minimum acceptable TLS version.
+	MinVersion string `yaml:"minVersion" json:"minVersion" default:"TLS12"`
+	// Maximum acceptable TLS version.
+	MaxVersion string `yaml:"maxVersion" json:"maxVersion" default:"TLS13"`
 }
