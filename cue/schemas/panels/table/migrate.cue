@@ -25,16 +25,19 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// 		#var
 		// 	][0]
 		// }
-		// if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
-		// 	for excludedColumn, value in transformation.options.excludeByName if value {
-		// 		let name = {_nameBuilder & {#var: excludedColumn}}.output
-		// 		_settingsGatherer: "\(name)": hide: true
-		// 	}
-		// 	for technicalName, displayName in transformation.options.renameByName {
-		// 		let name = {_nameBuilder & {#var: technicalName}}.output
-		// 		_settingsGatherer: "\(name)": headers: "\(displayName)": true
-		// 	}
-		// }
+		//if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
+		//	if transformation.options.excludeByName != _|_ {
+		//		for excludedColumn, value in transformation.options.excludeByName if value {
+		//			let name = {_nameBuilder & {#var: excludedColumn}}.output
+		//			_settingsGatherer: "\(name)": hide: true
+		//		}}
+		//	if transformation.options.renameByName != _|_ {
+		//		for technicalName, displayName in transformation.options.renameByName {
+		//			let name = {_nameBuilder & {#var: technicalName}}.output
+		//			_settingsGatherer: "\(name)": headers: "\(displayName)": true
+		//		}
+		//	}
+		//}
 		// if #panel.fieldConfig.overrides != _|_ {
 		// 	for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
 		// 		for property in override.properties {
