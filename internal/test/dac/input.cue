@@ -139,8 +139,6 @@ import (
 }
 
 #targetsPanel: panelBuilder & {
-	#grouping: string | *""
-
 	spec: {
 		display: name: "Target status"
 		plugin: table & {
