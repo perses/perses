@@ -34,6 +34,38 @@
           "plugin": {
             "kind": "Table",
             "spec": {
+              "cellSettings": [
+                {
+                  "backgroundColor": "#c4162a",
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "testValue1"
+                    }
+                  },
+                  "text": "My Super Display Text"
+                },
+                {
+                  "backgroundColor": "#e02f44",
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "testValue2"
+                    }
+                  }
+                },
+                {
+                  "backgroundColor": "#f2495c",
+                  "condition": {
+                    "kind": "Range",
+                    "spec": {
+                      "max": 20,
+                      "min": 1
+                    }
+                  },
+                  "text": "Good"
+                }
+              ],
               "columnSettings": [],
               "density": "compact"
             }

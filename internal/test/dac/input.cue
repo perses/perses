@@ -25,6 +25,7 @@ import (
 	staticListVarBuilder "github.com/perses/perses/cue/dac-utils/variable/staticlist"
 	promFilterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 	timeseriesChart "github.com/perses/perses/cue/schemas/panels/time-series:model"
+	table "github.com/perses/perses/cue/schemas/panels/table:model"
 	promQuery "github.com/perses/perses/cue/schemas/queries/prometheus:model"
 	prometheusDs "github.com/perses/perses/cue/schemas/datasources/prometheus:model"
 )
@@ -137,6 +138,44 @@ import (
 	}
 }
 
+#targetsPanel: panelBuilder & {
+	spec: {
+		display: name: "Target status"
+		plugin: table & {
+			spec: cellSettings: [
+				{
+					condition: {
+						kind: "Value"
+						spec: {
+							value: "1"
+						}
+					}
+					text:            "UP"
+					backgroundColor: "#00FF00"
+				},
+				{
+					condition: {
+						kind: "Value"
+						spec: {
+							value: "0"
+						}
+					}
+					text:            "DOWN"
+					backgroundColor: "#FF0000"
+				},
+			]
+		}
+		queries: [
+			{
+				kind: "TimeSeriesQuery"
+				spec: plugin: promQuery & {
+					spec: query: "up{\(#filter)}"
+				}
+			},
+		]
+	}
+}
+
 dashboardBuilder & {
 	#name: "ContainersMonitoring"
 	#display: name: "Containers monitoring"
@@ -159,6 +198,13 @@ dashboardBuilder & {
 				#panels: [
 					#cpuPanel & {#grouping: "by (container)"},
 					#memoryPanel & {#grouping: "by (container)"},
+				]
+			},
+			{
+				#title: "Misc"
+				#cols:  1
+				#panels: [
+					#targetsPanel,
 				]
 			},
 		]
