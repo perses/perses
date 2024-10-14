@@ -13,12 +13,13 @@
 
 // Forked from https://github.com/prometheus/prometheus/blob/65f610353919b1c7b42d3776c3a95b68046a6bba/web/ui/mantine-ui/src/pages/query/TreeNode.tsx
 
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import ASTNode, { nodeType } from './promql/ast';
 import { getNodeChildren } from './promql/utils';
 import { formatNode } from './promql/format';
 
-const nodeIndent = 20;
+// The indentation factor for each level of the tree.
+const nodeIndent = 4;
 
 interface TreeNodeProps {
   node: ASTNode;
@@ -33,7 +34,23 @@ interface TreeNodeProps {
 
 const TreeNode: React.FC<TreeNodeProps> = ({ node, reverse, childIdx }) => {
   const children = getNodeChildren(node);
-  const innerNode = <Box>{formatNode(node, false, 1)}</Box>;
+
+  const innerNode = (
+    <Box
+      sx={{
+        display: 'inline-block',
+        padding: '8px',
+        marginBottom: 2,
+        backgroundColor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
+        borderRadius: '4px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        fontSize: '14px',
+        color: (theme) => theme.palette.text.primary,
+      }}
+    >
+      {formatNode(node, false, 1)}
+    </Box>
+  );
 
   if (node.type === nodeType.binaryExpr) {
     return (
