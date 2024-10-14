@@ -91,7 +91,7 @@ export function buildVariableListSchema(pluginSchema: PluginSchema): typeof vari
 export const variableTextSpecSchema: z.ZodSchema<TextVariableSpec> = z.object({
   name: z.string().min(1),
   display: variableDisplaySchema.optional(),
-  value: z.string().min(1),
+  value: z.string(),
   constant: z.boolean().optional(),
 });
 
