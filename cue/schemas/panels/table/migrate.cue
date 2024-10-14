@@ -140,12 +140,9 @@ if #panel.type != _|_ if #panel.type == "table" {
 						}},
 						if mapping.type == "regex" { kind: "Regex", spec: { expr: mapping.options.pattern }},
 						if mapping.type == "special" { kind: "Misc", spec: { value: [
-							if mapping.options.match == "empty" { "empty" },
-							if mapping.options.match == "null" { "null" },
 							if mapping.options.match == "nan" { "NaN" },
 							if mapping.options.match == "null+nan" { "null" },
-							if mapping.options.match == "true" { "true" },
-							if mapping.options.match == "false" { "false" },
+							mapping.options.match,
 						][0] }},
 					][0]
 
