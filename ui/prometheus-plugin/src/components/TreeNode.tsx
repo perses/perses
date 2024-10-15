@@ -20,7 +20,8 @@ import { getNodeChildren } from './promql/utils';
 import { formatNode } from './promql/format';
 
 // The indentation factor for each level of the tree.
-const nodeIndent = 4;
+const nodeIndent = 5;
+const connectorWidth = nodeIndent * 5;
 
 interface TreeNodeProps {
   // The AST node to render.
@@ -44,11 +45,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
   const nodeRef = useCallback((node: HTMLDivElement) => setNodeEl(node), []);
 
   const [connectorStyle, setConnectorStyle] = useState({
-    borderColor: theme.palette.mode === 'dark' ? theme.palette.grey[800] : theme.palette.grey[400],
+    borderColor: theme.palette.grey['500'],
     borderLeftStyle: 'solid',
     borderLeftWidth: 2,
-    width: nodeIndent * 5,
-    left: -nodeIndent * 5,
+    width: connectorWidth,
+    left: -connectorWidth,
   });
 
   // Update the size and position of tree connector lines based on the node's and its parent's position.
@@ -70,7 +71,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
         ...prevStyle,
         top: 'calc(50% - 1px)',
         bottom: nodeRect.bottom - parentRect.top,
-        borderTopLeftRadius: 3,
+        borderTopLeftRadius: 10,
         borderTopStyle: 'solid',
         borderBottomLeftRadius: undefined,
       }));
@@ -79,7 +80,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
         ...prevStyle,
         top: parentRect.bottom - nodeRect.top,
         bottom: 'calc(50% - 1px)',
-        borderBottomLeftRadius: 3,
+        borderBottomLeftRadius: 10,
         borderBottomStyle: 'solid',
         borderTopLeftRadius: undefined,
       }));
@@ -90,15 +91,12 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
     <Box
       ref={nodeRef}
       sx={{
-        display: 'inline-block',
-        padding: '8px',
-        marginBottom: 2,
-        backgroundColor: (theme) => (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
-        borderRadius: '4px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-        fontSize: '14px',
-        color: (theme) => theme.palette.text.primary,
         position: 'relative',
+        display: 'inline-block',
+        padding: 1,
+        marginBottom: 2,
+        borderRadius: 2,
+        backgroundColor: theme.palette.background.code,
       }}
     >
       {parentEl !== undefined && (

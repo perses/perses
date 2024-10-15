@@ -20,7 +20,7 @@ import { useMemo, useState } from 'react';
 import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
 import { PrometheusDatasourceSelector } from '../model';
-import { useParseQuery } from './utils';
+import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
 
 export type PromQLEditorProps = {
@@ -88,7 +88,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
             '.cm-content': {
               paddingTop: '8px',
               paddingBottom: '8px',
-              paddingRight: '40px',
+              paddingRight: '40px', // offset for the tree view button
             },
           }),
         ]}
