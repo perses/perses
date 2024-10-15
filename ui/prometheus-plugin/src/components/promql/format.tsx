@@ -28,43 +28,43 @@ import { maybeParenthesizeBinopChild, escapeString } from './utils';
 
 // Styled components that reproduce the theming of CodeMirror:
 
-const PromqlCode = styled('span')(() => ({
+const PromQLCode = styled('span')(() => ({
   fontFamily: '"DejaVu Sans Mono", monospace',
 }));
 
-const PromqlKeyword = styled('span')(({ theme }) => ({
+const PromQLKeyword = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#e5c07b' : '#708',
 }));
 
-const PromqlFunction = styled('span')(({ theme }) => ({
+const PromQLFunction = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#61afef' : '#2a2e42',
 }));
 
-const PromqlMetricName = styled('span')(({ theme }) => ({
+const PromQLMetricName = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#e06c75' : '#2a2e42',
 }));
 
-const PromqlLabelName = styled('span')(({ theme }) => ({
+const PromQLLabelName = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#61afef' : '#219',
 }));
 
-const PromqlString = styled('span')(({ theme }) => ({
+const PromQLString = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#98c379' : '#a31515',
 }));
 
-const PromqlEllipsis = styled('span')(() => ({
+const PromQLEllipsis = styled('span')(() => ({
   color: '#aaaaaa', // Same color for both modes as in the original CSS
 }));
 
-const PromqlDuration = styled('span')(({ theme }) => ({
+const PromQLDuration = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#e5c07b' : '#09885a',
 }));
 
-const PromqlNumber = styled('span')(({ theme }) => ({
+const PromQLNumber = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#e5c07b' : '#164',
 }));
 
-const PromqlOperator = styled('span')(({ theme }) => ({
+const PromQLOperator = styled('span')(({ theme }) => ({
   color: theme.palette.mode === 'dark' ? '#56b6c2' : '#708',
 }));
 
@@ -73,7 +73,7 @@ export const labelNameList = (labels: string[]): React.ReactNode[] => {
     return (
       <span key={i}>
         {i !== 0 && ', '}
-        <PromqlLabelName>{l}</PromqlLabelName>
+        <PromQLLabelName>{l}</PromQLLabelName>
       </span>
     );
   });
@@ -84,12 +84,12 @@ const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, off
     {timestamp !== null ? (
       <>
         {' '}
-        <PromqlOperator>@</PromqlOperator> <PromqlNumber>{(timestamp / 1000).toFixed(3)}</PromqlNumber>
+        <PromQLOperator>@</PromQLOperator> <PromQLNumber>{(timestamp / 1000).toFixed(3)}</PromQLNumber>
       </>
     ) : startOrEnd !== null ? (
       <>
         {' '}
-        <PromqlOperator>@</PromqlOperator> <PromqlKeyword>{startOrEnd}</PromqlKeyword>
+        <PromQLOperator>@</PromQLOperator> <PromQLKeyword>{startOrEnd}</PromQLKeyword>
         <span>(</span>
         <span>)</span>
       </>
@@ -101,14 +101,14 @@ const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, off
     ) : offset > 0 ? (
       <>
         {' '}
-        <PromqlKeyword>offset</PromqlKeyword>{' '}
-        <PromqlDuration>{formatDuration(msToPrometheusDuration(offset))}</PromqlDuration>
+        <PromQLKeyword>offset</PromQLKeyword>{' '}
+        <PromQLDuration>{formatDuration(msToPrometheusDuration(offset))}</PromQLDuration>
       </>
     ) : (
       <>
         {' '}
-        <PromqlKeyword>offset</PromqlKeyword>{' '}
-        <PromqlDuration>-{formatDuration(msToPrometheusDuration(-offset))}</PromqlDuration>
+        <PromQLKeyword>offset</PromQLKeyword>{' '}
+        <PromQLDuration>-{formatDuration(msToPrometheusDuration(-offset))}</PromQLDuration>
       </>
     )}
   </>
@@ -120,15 +120,15 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
     .map((m, i) => (
       <span key={i}>
         {i !== 0 && ','}
-        <PromqlLabelName>{m.name}</PromqlLabelName>
+        <PromQLLabelName>{m.name}</PromQLLabelName>
         {m.type}
-        <PromqlString>&quot;{escapeString(m.value)}&quot;</PromqlString>
+        <PromQLString>&quot;{escapeString(m.value)}&quot;</PromQLString>
       </span>
     ));
 
   return (
     <>
-      <PromqlMetricName>{node.name}</PromqlMetricName>
+      <PromQLMetricName>{node.name}</PromQLMetricName>
       {matchLabels.length > 0 && (
         <>
           {'{'}
@@ -138,7 +138,7 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
       )}
       {node.type === nodeType.matrixSelector && (
         <>
-          [<PromqlDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromqlDuration>]
+          [<PromQLDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromQLDuration>]
         </>
       )}
       {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
@@ -146,7 +146,7 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
   );
 };
 
-const ellipsis = <PromqlEllipsis>…</PromqlEllipsis>;
+const ellipsis = <PromQLEllipsis>…</PromQLEllipsis>;
 
 const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: number): React.ReactNode => {
   if (maxDepth === 0) {
@@ -159,11 +159,11 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
     case nodeType.aggregation:
       return (
         <>
-          <PromqlOperator>{node.op}</PromqlOperator>
+          <PromQLOperator>{node.op}</PromQLOperator>
           {node.without ? (
             <>
               {' '}
-              <PromqlKeyword>without</PromqlKeyword>
+              <PromQLKeyword>without</PromQLKeyword>
               <span>(</span>
               {labelNameList(node.grouping)}
               <span>)</span>{' '}
@@ -172,7 +172,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
             node.grouping.length > 0 && (
               <>
                 {' '}
-                <PromqlKeyword>by</PromqlKeyword>
+                <PromQLKeyword>by</PromQLKeyword>
                 <span>(</span>
                 {labelNameList(node.grouping)}
                 <span>)</span>{' '}
@@ -193,8 +193,8 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
       return (
         <>
           {showChildren && formatNode(node.expr, showChildren, childMaxDepth)}[
-          <PromqlDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromqlDuration>:
-          {node.step !== 0 && <PromqlDuration>{formatDuration(msToPrometheusDuration(node.step))}</PromqlDuration>}]
+          <PromQLDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromQLDuration>:
+          {node.step !== 0 && <PromQLDuration>{formatDuration(msToPrometheusDuration(node.step))}</PromQLDuration>}]
           {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
         </>
       );
@@ -221,7 +221,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
 
       return (
         <>
-          <PromqlFunction>{node.func.name}</PromqlFunction>
+          <PromQLFunction>{node.func.name}</PromQLFunction>
           {showChildren && (
             <>
               <span>(</span>
@@ -237,13 +237,13 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
     case nodeType.vectorSelector:
       return formatSelector(node);
     case nodeType.numberLiteral:
-      return <PromqlNumber>{node.val}</PromqlNumber>;
+      return <PromQLNumber>{node.val}</PromQLNumber>;
     case nodeType.stringLiteral:
-      return <PromqlString>&quot;{escapeString(node.val)}&quot;</PromqlString>;
+      return <PromQLString>&quot;{escapeString(node.val)}&quot;</PromQLString>;
     case nodeType.unaryExpr:
       return (
         <>
-          <PromqlOperator>{node.op}</PromqlOperator>
+          <PromQLOperator>{node.op}</PromQLOperator>
           {showChildren && formatNode(node.expr, showChildren, childMaxDepth)}
         </>
       );
@@ -256,7 +256,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
           matching = (
             <>
               {' '}
-              <PromqlKeyword>on</PromqlKeyword>
+              <PromQLKeyword>on</PromQLKeyword>
               <span>(</span>
               {labelNameList(vm.labels)}
               <span>)</span>
@@ -266,7 +266,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
           matching = (
             <>
               {' '}
-              <PromqlKeyword>ignoring</PromqlKeyword>
+              <PromQLKeyword>ignoring</PromQLKeyword>
               <span>(</span>
               {labelNameList(vm.labels)}
               <span>)</span>
@@ -277,11 +277,11 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
         if (vm.card === vectorMatchCardinality.manyToOne || vm.card === vectorMatchCardinality.oneToMany) {
           grouping = (
             <>
-              <PromqlKeyword>
+              <PromQLKeyword>
                 {' '}
                 group_
                 {vm.card === vectorMatchCardinality.manyToOne ? 'left' : 'right'}
-              </PromqlKeyword>
+              </PromQLKeyword>
               <span>(</span>
               {labelNameList(vm.include)}
               <span>)</span>
@@ -294,14 +294,14 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
         <>
           {showChildren && formatNode(maybeParenthesizeBinopChild(node.op, node.lhs), showChildren, childMaxDepth)}{' '}
           {['atan2', 'and', 'or', 'unless'].includes(node.op) ? (
-            <PromqlOperator>{node.op}</PromqlOperator>
+            <PromQLOperator>{node.op}</PromQLOperator>
           ) : (
-            <PromqlOperator>{node.op}</PromqlOperator>
+            <PromQLOperator>{node.op}</PromQLOperator>
           )}
           {node.bool && (
             <>
               {' '}
-              <PromqlKeyword>bool</PromqlKeyword>
+              <PromQLKeyword>bool</PromQLKeyword>
             </>
           )}
           {matching}
@@ -319,5 +319,5 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
 };
 
 export const formatNode = (node: ASTNode, showChildren: boolean, maxDepth?: number): React.ReactElement => (
-  <PromqlCode>{formatNodeInternal(node, showChildren, maxDepth)}</PromqlCode>
+  <PromQLCode>{formatNodeInternal(node, showChildren, maxDepth)}</PromQLCode>
 );
