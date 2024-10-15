@@ -38,10 +38,6 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
   }, [completeConfig]);
 
-  const handleShowTreeView = () => {
-    setTreeViewVisible(!isTreeViewVisible);
-  };
-
   const queryExpr = useReplaceVariablesInString(rest.value);
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
@@ -58,6 +54,10 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
   const treeViewActionTexts = {
     open: 'Open ' + treeViewText,
     close: 'Close ' + treeViewText,
+  };
+
+  const handleShowTreeView = () => {
+    setTreeViewVisible(!isTreeViewVisible);
   };
 
   return (
