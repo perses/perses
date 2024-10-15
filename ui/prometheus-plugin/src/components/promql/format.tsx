@@ -15,6 +15,7 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { styled } from '@mui/material';
+import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
 import ASTNode, {
   VectorSelector,
   matchType,
@@ -24,7 +25,6 @@ import ASTNode, {
   MatrixSelector,
 } from './ast';
 import { maybeParenthesizeBinopChild, escapeString } from './utils';
-import { formatPrometheusDuration } from './formatTime';
 
 // Styled components that reproduce the theming of CodeMirror:
 
@@ -101,12 +101,14 @@ const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, off
     ) : offset > 0 ? (
       <>
         {' '}
-        <PromqlKeyword>offset</PromqlKeyword> <PromqlDuration>{formatPrometheusDuration(offset)}</PromqlDuration>
+        <PromqlKeyword>offset</PromqlKeyword>{' '}
+        <PromqlDuration>{formatDuration(msToPrometheusDuration(offset))}</PromqlDuration>
       </>
     ) : (
       <>
         {' '}
-        <PromqlKeyword>offset</PromqlKeyword> <PromqlDuration>-{formatPrometheusDuration(-offset)}</PromqlDuration>
+        <PromqlKeyword>offset</PromqlKeyword>{' '}
+        <PromqlDuration>-{formatDuration(msToPrometheusDuration(-offset))}</PromqlDuration>
       </>
     )}
   </>
@@ -136,7 +138,7 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
       )}
       {node.type === nodeType.matrixSelector && (
         <>
-          [<PromqlDuration>{formatPrometheusDuration(node.range)}</PromqlDuration>]
+          [<PromqlDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromqlDuration>]
         </>
       )}
       {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
@@ -191,8 +193,8 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
       return (
         <>
           {showChildren && formatNode(node.expr, showChildren, childMaxDepth)}[
-          <PromqlDuration>{formatPrometheusDuration(node.range)}</PromqlDuration>:
-          {node.step !== 0 && <PromqlDuration>{formatPrometheusDuration(node.step)}</PromqlDuration>}]
+          <PromqlDuration>{formatDuration(msToPrometheusDuration(node.range))}</PromqlDuration>:
+          {node.step !== 0 && <PromqlDuration>{formatDuration(msToPrometheusDuration(node.step))}</PromqlDuration>}]
           {formatAtAndOffset(node.timestamp, node.startOrEnd, node.offset)}
         </>
       );
