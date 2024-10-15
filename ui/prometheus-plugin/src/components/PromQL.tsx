@@ -40,14 +40,24 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const queryExpr = useReplaceVariablesInString(rest.value);
 
+  // Specific errors that user should be able to hide
+  const apiNotAvailableError = '404 page not found';
+  const blockedByProxyError =
+    'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
+
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
   let errorMessage = 'An unknown error occurred';
   let isGenericError = false;
-  // If the error is 404 page not found, it likely means the datasource does not support the tree view.
-  // In that case we want a different behavior, see below.
-  if (error && error instanceof Error && error.message.trim() !== '404 page not found') {
-    errorMessage = error.message;
-    isGenericError = true;
+  if (error && error instanceof Error) {
+    errorMessage = error.message.trim();
+    if (errorMessage === apiNotAvailableError) {
+      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+    } else if (errorMessage === blockedByProxyError) {
+      errorMessage =
+        'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';
+    } else {
+      isGenericError = true;
+    }
   }
 
   const treeViewText = 'Tree View';
@@ -133,9 +143,8 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                     // Here the user is able to hide the error alert
                     <ErrorAlert
                       error={{
-                        name: 'Tree view not supported',
-                        message:
-                          'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications',
+                        name: 'Tree view not available',
+                        message: errorMessage,
                       }}
                     />
                   ) : (
