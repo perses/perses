@@ -16,9 +16,8 @@ package apply
 import (
 	"fmt"
 	"io"
-	"strings"
 
-	"github.com/hashicorp/go-multierror"
+	"github.com/efficientgo/core/merrors"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -36,11 +35,11 @@ type option struct {
 	opt.ProjectOption
 	opt.FileOption
 	opt.DirectoryOption
-	opt.ForceCreateOption
-	writer    io.Writer
-	errWriter io.Writer
-	apiClient api.ClientInterface
-	entities  []modelAPI.Entity
+	forceCreate bool
+	writer      io.Writer
+	errWriter   io.Writer
+	apiClient   api.ClientInterface
+	entities    []modelAPI.Entity
 }
 
 func (o *option) Complete(args []string) error {
@@ -68,31 +67,24 @@ func (o *option) Complete(args []string) error {
 	return o.setEntities()
 }
 
-func (o *option) Validate() error {
-	var result *multierror.Error
+func (o *option) validateProjectConsistency() error {
+	var result = merrors.New()
 	for _, entity := range o.entities {
 		kind := modelV1.Kind(entity.GetKind())
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
-		if !o.ForceCreate && len(o.Project) != 0 && project != o.Project {
-			result = multierror.Append(result, fmt.Errorf("inconsistency has been detected for object %q %q: while the metadata suggests the project name %q, the currently selected project indicates %q,", kind, entity.GetMetadata().GetName(), project, o.Project))
+		if !o.forceCreate && len(o.Project) != 0 && project != o.Project {
+			result.Add(fmt.Errorf("\ninconsistency has been detected for object %q %q: while the metadata suggests the project name %q, the currently selected project indicates %q, \nuse the '--force' flag to bypass consistency check", kind, entity.GetMetadata().GetName(), project, o.Project))
 		}
 	}
 
-	if result == nil {
-		return nil
-	}
+	return result.Err()
+}
 
-	result.ErrorFormat = func([]error) string {
-		var message strings.Builder
-		message.WriteString(fmt.Sprintf("%d errors occurred:\n", len(result.Errors)))
-		for _, err := range result.Errors {
-			message.WriteString(fmt.Sprintf("\t* %s\n", err.Error()))
-		}
-		message.WriteString("To enforce creation while respecting the metadata, use the '--force' flag\n")
-		return message.String()
+func (o *option) Validate() error {
+	if !o.forceCreate {
+		return o.validateProjectConsistency()
 	}
-
-	return result
+	return nil
 }
 
 func (o *option) Execute() error {
@@ -162,7 +154,7 @@ cat ./resources.json | percli apply -f -
 	opt.AddProjectFlags(cmd, &o.ProjectOption)
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
-	opt.AddForceCreateFlags(cmd, &o.ForceCreateOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
+	cmd.Flags().BoolVarP(&o.forceCreate, "force", "", false, "If present, the command will create the resource even if the projects are not consistent, it prioritize the json file")
 	return cmd
 }

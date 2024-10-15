@@ -6,6 +6,7 @@ require (
 	cuelang.org/go v0.11.0-alpha.3
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
+	github.com/efficientgo/core v1.0.0-rc.3
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/go-jose/go-jose/v4 v4.0.4
@@ -14,7 +15,6 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/goreleaser/goreleaser/v2 v2.2.0
 	github.com/gorilla/securecookie v1.1.2
-	github.com/hashicorp/go-multierror v1.1.1
 	github.com/huandu/go-sqlbuilder v1.30.1
 	github.com/kylelemons/godebug v1.1.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
@@ -103,7 +103,6 @@ require (
 	github.com/goreleaser/fileglob v1.3.0 // indirect
 	github.com/goreleaser/nfpm/v2 v2.39.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect

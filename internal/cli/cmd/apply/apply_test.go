@@ -66,11 +66,11 @@ func TestApplyCMD(t *testing.T) {
 			Args:            []string{"-f", "../../test/sample_resources/multiple_resources.json", "--project", "foo"},
 			APIClient:       fakeapi.New(),
 			IsErrorExpected: true,
-			ExpectedMessage: `2 errors occurred:
-	* inconsistency has been detected for object "Folder" "aoe4": while the metadata suggests the project name "game", the currently selected project indicates "foo",
-	* inconsistency has been detected for object "Folder" "foo": while the metadata suggests the project name "perses", the currently selected project indicates "foo",
-To enforce creation while respecting the metadata, use the '--force' flag
-`,
+			ExpectedMessage: `2 errors: 
+inconsistency has been detected for object "Folder" "aoe4": while the metadata suggests the project name "game", the currently selected project indicates "foo", 
+use the '--force' flag to bypass consistency check; 
+inconsistency has been detected for object "Folder" "foo": while the metadata suggests the project name "perses", the currently selected project indicates "foo", 
+use the '--force' flag to bypass consistency check`,
 		},
 		{
 			Title:           "apply multiples different resources with force creation",
