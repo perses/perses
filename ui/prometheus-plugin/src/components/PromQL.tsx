@@ -139,7 +139,9 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                       }}
                     />
                   ) : (
-                    <div style={{ padding: '10px', overflowX: 'auto' }}>
+                    <div
+                      style={{ padding: '10px', overflowX: 'auto', backgroundColor: theme.palette.background.default }}
+                    >
                       {isLoading ? (
                         <CircularProgress />
                       ) : parseQueryResponse?.data ? (
