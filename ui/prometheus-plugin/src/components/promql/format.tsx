@@ -26,20 +26,30 @@ import ASTNode, {
 import { maybeParenthesizeBinopChild, escapeString } from './utils';
 import { formatPrometheusDuration } from './formatTime';
 
+// Styled components that reproduce the theming of CodeMirror:
+
 const PromqlCode = styled('span')(() => ({
   fontFamily: '"DejaVu Sans Mono", monospace',
 }));
 
 const PromqlKeyword = styled('span')(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#14bfad' : '#008080',
+  color: theme.palette.mode === 'dark' ? '#e5c07b' : '#708',
+}));
+
+const PromqlFunction = styled('span')(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#61afef' : '#2a2e42',
+}));
+
+const PromqlMetricName = styled('span')(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#e06c75' : '#2a2e42',
 }));
 
 const PromqlLabelName = styled('span')(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#ff8585' : '#800000',
+  color: theme.palette.mode === 'dark' ? '#61afef' : '#219',
 }));
 
 const PromqlString = styled('span')(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#fca5a5' : '#a31515',
+  color: theme.palette.mode === 'dark' ? '#98c379' : '#a31515',
 }));
 
 const PromqlEllipsis = styled('span')(() => ({
@@ -47,11 +57,15 @@ const PromqlEllipsis = styled('span')(() => ({
 }));
 
 const PromqlDuration = styled('span')(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#22c55e' : '#09885a',
+  color: theme.palette.mode === 'dark' ? '#e5c07b' : '#09885a',
 }));
 
 const PromqlNumber = styled('span')(({ theme }) => ({
-  color: theme.palette.mode === 'dark' ? '#22c55e' : '#09885a',
+  color: theme.palette.mode === 'dark' ? '#e5c07b' : '#164',
+}));
+
+const PromqlOperator = styled('span')(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#56b6c2' : '#708',
 }));
 
 export const labelNameList = (labels: string[]): React.ReactNode[] => {
@@ -59,7 +73,7 @@ export const labelNameList = (labels: string[]): React.ReactNode[] => {
     return (
       <span key={i}>
         {i !== 0 && ', '}
-        <span className="promql-code promql-label-name">{l}</span>
+        <PromqlLabelName>{l}</PromqlLabelName>
       </span>
     );
   });
@@ -70,12 +84,12 @@ const formatAtAndOffset = (timestamp: number | null, startOrEnd: StartOrEnd, off
     {timestamp !== null ? (
       <>
         {' '}
-        <span>@</span> <PromqlNumber>{(timestamp / 1000).toFixed(3)}</PromqlNumber>
+        <PromqlOperator>@</PromqlOperator> <PromqlNumber>{(timestamp / 1000).toFixed(3)}</PromqlNumber>
       </>
     ) : startOrEnd !== null ? (
       <>
         {' '}
-        <span>@</span> <PromqlKeyword>{startOrEnd}</PromqlKeyword>
+        <PromqlOperator>@</PromqlOperator> <PromqlKeyword>{startOrEnd}</PromqlKeyword>
         <span>(</span>
         <span>)</span>
       </>
@@ -112,7 +126,7 @@ const formatSelector = (node: VectorSelector | MatrixSelector): ReactElement => 
 
   return (
     <>
-      <span>{node.name}</span>
+      <PromqlMetricName>{node.name}</PromqlMetricName>
       {matchLabels.length > 0 && (
         <>
           {'{'}
@@ -143,7 +157,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
     case nodeType.aggregation:
       return (
         <>
-          <PromqlKeyword>{node.op}</PromqlKeyword>
+          <PromqlOperator>{node.op}</PromqlOperator>
           {node.without ? (
             <>
               {' '}
@@ -205,7 +219,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
 
       return (
         <>
-          <PromqlKeyword>{node.func.name}</PromqlKeyword>
+          <PromqlFunction>{node.func.name}</PromqlFunction>
           {showChildren && (
             <>
               <span>(</span>
@@ -227,7 +241,7 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
     case nodeType.unaryExpr:
       return (
         <>
-          <span>{node.op}</span>
+          <PromqlOperator>{node.op}</PromqlOperator>
           {showChildren && formatNode(node.expr, showChildren, childMaxDepth)}
         </>
       );
@@ -278,9 +292,9 @@ const formatNodeInternal = (node: ASTNode, showChildren: boolean, maxDepth?: num
         <>
           {showChildren && formatNode(maybeParenthesizeBinopChild(node.op, node.lhs), showChildren, childMaxDepth)}{' '}
           {['atan2', 'and', 'or', 'unless'].includes(node.op) ? (
-            <PromqlKeyword>{node.op}</PromqlKeyword>
+            <PromqlOperator>{node.op}</PromqlOperator>
           ) : (
-            <span>{node.op}</span>
+            <PromqlOperator>{node.op}</PromqlOperator>
           )}
           {node.bool && (
             <>
