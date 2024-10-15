@@ -19,6 +19,7 @@ import FileTreeIcon from 'mdi-material-ui/FileTree';
 import { useMemo, useState } from 'react';
 import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
+import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
 import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
@@ -41,7 +42,9 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
     setTreeViewVisible(!isTreeViewVisible);
   };
 
-  const { data: parseQueryResponse, isLoading, error } = useParseQuery(rest.value ?? '', datasource);
+  const queryExpr = useReplaceVariablesInString(rest.value);
+
+  const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
   let errorMessage = 'An unknown error occurred';
   let isGenericError = false;
   // If the error is 404 page not found, it likely means the datasource does not support the tree view.
@@ -94,7 +97,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
       />
-      {rest.value?.trim() !== '' && (
+      {queryExpr?.trim() !== '' && (
         <>
           {isGenericError ? (
             // Display the error without any close button, tree view etc when it's a generic error
