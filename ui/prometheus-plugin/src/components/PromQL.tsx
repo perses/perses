@@ -140,7 +140,11 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                     />
                   ) : (
                     <div
-                      style={{ padding: '10px', overflowX: 'auto', backgroundColor: theme.palette.background.default }}
+                      style={{
+                        padding: `${theme.spacing(1.5)} ${theme.spacing(1.5)} 0 ${theme.spacing(1.5)}`, // let paddingBottom at 0 because nodes have margin-bottom
+                        overflowX: 'auto',
+                        backgroundColor: theme.palette.background.default,
+                      }}
                     >
                       {isLoading ? (
                         <CircularProgress />

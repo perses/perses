@@ -94,7 +94,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
         position: 'relative',
         display: 'inline-block',
         padding: 1,
-        marginBottom: 2,
+        marginBottom: 1.5,
         borderRadius: 2,
         backgroundColor: theme.palette.background.code,
       }}
