@@ -140,7 +140,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                       {isLoading ? (
                         <CircularProgress />
                       ) : parseQueryResponse?.data ? (
-                        <TreeNode node={parseQueryResponse.data} reverse={false} childIdx={0} />
+                        <TreeNode node={parseQueryResponse.data} reverse={false} />
                       ) : null}
                     </div>
                   )}

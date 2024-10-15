@@ -29,11 +29,9 @@ interface TreeNodeProps {
   parentEl?: HTMLDivElement | null;
   // used to compute the position of the connector line between this node and its parent.
   reverse: boolean;
-  // The index of this node in its parent's children.
-  childIdx: number;
 }
 
-const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, childIdx }) => {
+const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse }) => {
   const theme = useTheme();
   const children = getNodeChildren(node);
 
@@ -122,11 +120,11 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, childIdx }
     return (
       <div>
         <Box ml={nodeIndent}>
-          <TreeNode node={children[0]!} parentEl={nodeEl} reverse={true} childIdx={0} />
+          <TreeNode node={children[0]!} parentEl={nodeEl} reverse={true} />
         </Box>
         {innerNode}
         <Box ml={nodeIndent}>
-          <TreeNode node={children[1]!} parentEl={nodeEl} reverse={false} childIdx={1} />
+          <TreeNode node={children[1]!} parentEl={nodeEl} reverse={false} />
         </Box>
       </div>
     );
@@ -137,7 +135,7 @@ const TreeNode: React.FC<TreeNodeProps> = ({ node, parentEl, reverse, childIdx }
       {innerNode}
       {children.map((child, idx) => (
         <Box ml={nodeIndent} key={idx}>
-          <TreeNode node={child} parentEl={nodeEl} reverse={false} childIdx={idx} />
+          <TreeNode node={child} parentEl={nodeEl} reverse={false} />
         </Box>
       ))}
     </div>
