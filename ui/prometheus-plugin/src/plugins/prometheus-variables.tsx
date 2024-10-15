@@ -177,8 +177,8 @@ function PrometheusPromQLVariableEditor(props: OptionsEditorProps<PrometheusProm
         completeConfig={{ remote: { url: promURL } }}
         value={value.expr}
         datasource={selectedDatasource}
-        onChange={(query) => {
-          props.onChange({ ...props.value, expr: query });
+        onBlur={(event) => {
+          props.onChange({ ...props.value, expr: event.target.textContent ?? '' });
         }}
         readOnly={props.isReadonly}
         width="100%"
