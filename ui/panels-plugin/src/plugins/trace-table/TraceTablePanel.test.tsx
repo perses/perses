@@ -24,7 +24,7 @@ import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MemoryRouter } from 'react-router-dom';
-import { MOCK_TRACE_QUERY_RESULT } from '../../test';
+import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from '../../test';
 import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -91,7 +91,7 @@ describe('TraceTablePanel', () => {
 
   it('should render multi values with timestamps', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
       isLoading: false,
       isFetching: false,
     });
