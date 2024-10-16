@@ -25,16 +25,19 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// 		#var
 		// 	][0]
 		// }
-		// if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
-		// 	for excludedColumn, value in transformation.options.excludeByName if value {
-		// 		let name = {_nameBuilder & {#var: excludedColumn}}.output
-		// 		_settingsGatherer: "\(name)": hide: true
-		// 	}
-		// 	for technicalName, displayName in transformation.options.renameByName {
-		// 		let name = {_nameBuilder & {#var: technicalName}}.output
-		// 		_settingsGatherer: "\(name)": headers: "\(displayName)": true
-		// 	}
-		// }
+		//if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
+		//	if transformation.options.excludeByName != _|_ {
+		//		for excludedColumn, value in transformation.options.excludeByName if value {
+		//			let name = {_nameBuilder & {#var: excludedColumn}}.output
+		//			_settingsGatherer: "\(name)": hide: true
+		//		}}
+		//	if transformation.options.renameByName != _|_ {
+		//		for technicalName, displayName in transformation.options.renameByName {
+		//			let name = {_nameBuilder & {#var: technicalName}}.output
+		//			_settingsGatherer: "\(name)": headers: "\(displayName)": true
+		//		}
+		//	}
+		//}
 		// if #panel.fieldConfig.overrides != _|_ {
 		// 	for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
 		// 		for property in override.properties {
@@ -111,6 +114,51 @@ if #panel.type != _|_ if #panel.type == "table" {
 		}]])
 
 		columnSettings: list.Concat([_excludedColumns,_prettifiedColumns])
+
+		// Using flatten to avoid having an array of arrays with "value" mappings
+		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
+		let x = list.FlattenN([
+			if #panel.fieldConfig != _|_  && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
+				if mapping.type == "value" {
+					[for key, option in mapping.options {
+						condition: {
+							kind: "Value"
+								spec: {
+									value: key
+								}
+							}
+						if option.text != _|_ { text: option.text }
+						if option.color != _|_ { backgroundColor: [ // switch
+							if #mapping.color[option.color] != _|_ { #mapping.color[option.color] },
+								{ option.color }
+						][0]}
+					}]
+				}
+
+				if mapping.type == "range"  || mapping.type == "regex" || mapping.type == "special" {
+					condition: [
+						if mapping.type == "range" { kind: "Range", spec: {
+							if mapping.options.from != _|_ { min: mapping.options.from },
+							if mapping.options.to != _|_ { max: mapping.options.to }
+						}},
+						if mapping.type == "regex" { kind: "Regex", spec: { expr: mapping.options.pattern }},
+						if mapping.type == "special" { kind: "Misc", spec: { value: [
+							if mapping.options.match == "nan" { "NaN" },
+							if mapping.options.match == "null+nan" { "null" },
+							mapping.options.match,
+						][0] }},
+					][0]
+
+					if mapping.options.result.text != _|_ { text: mapping.options.result.text }
+					if mapping.options.result.color != _|_ { backgroundColor: [ // switch
+						if #mapping.color[mapping.options.result.color] != _|_ { #mapping.color[mapping.options.result.color] },
+							{ mapping.options.result.color }
+					][0]}
+				}
+			}
+		], 1)
+
+		if len(x) > 0 { cellSettings: x }
 	}
 },
 if #panel.type != _|_ if #panel.type == "table-old" {

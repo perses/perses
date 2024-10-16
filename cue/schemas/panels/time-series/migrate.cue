@@ -3,12 +3,13 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 	spec: {
 		// legend
 		 // NB: no support of former "show" attribute from Grafana, people should migrate to latest Grafana datamodel before migrating to Perses
-		if #panel.options.legend.showLegend != _|_ if #panel.options.legend.showLegend {
+		#showLegend: *#panel.options.legend.showLegend | true
+		if #panel.options.legend != _|_ if #showLegend {
 			legend: {
 				if #panel.type == "timeseries" {
 					position: [
-						if #panel.options.legend.placement == "bottom" { "bottom" },
-						if #panel.options.legend.placement == "right" { "right" },
+						if #panel.options.legend.placement != _|_ if #panel.options.legend.placement == "right" {"right"},
+						{"bottom"}
 					][0]
 					mode: [
 						if #panel.options.legend.displayMode == "list" { "list" },
@@ -58,7 +59,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 		}
 		// thresholds
 		// -> migrate thresholds only if they are visible
-		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle.mode != "off" {
+		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.thresholds.steps != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle.mode != "off" {
 			thresholds: {
 				// defaultColor: TODO how to fill this one?
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part?
@@ -75,6 +76,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 			if #panel.fieldConfig.defaults.custom.lineWidth != _|_ {
 				lineWidth: [ // switch
 					if #panel.fieldConfig.defaults.custom.lineWidth > 3 { 3 }, // line width can't go beyond 3 in Perses
+					if #panel.fieldConfig.defaults.custom.lineWidth < 0.25 { 0.25 }, // line width can't go below 0.25 in Perses
 					{ #panel.fieldConfig.defaults.custom.lineWidth }
 				][0]
 			}

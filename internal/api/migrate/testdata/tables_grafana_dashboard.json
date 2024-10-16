@@ -77,7 +77,34 @@
             },
             "inspect": false
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "testValue1": {
+                  "color": "dark-red",
+                  "index": 0,
+                  "text": "My Super Display Text"
+                },
+                "testValue2": {
+                  "color": "semi-dark-red",
+                  "index": 1
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "from": 1,
+                "result": {
+                  "color": "red",
+                  "index": 2,
+                  "text": "Good"
+                },
+                "to": 20
+              },
+              "type": "range"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [

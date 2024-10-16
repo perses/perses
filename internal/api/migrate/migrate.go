@@ -247,8 +247,8 @@ func rearrangeGrafanaPanelsWithinExpandedRows(grafanaDashboardRaw json.RawMessag
 
 		if panel["type"] == "row" {
 			if _, found := panel["collapsed"]; !found {
-				logrus.Error(errors.New("expected attribute `collapsed` not found in row"))
-				return grafanaDashboardRaw
+				// add collaped=false in row if missing
+				panel["collapsed"] = false
 			}
 			collapsed, ok := panel["collapsed"].(bool)
 			if !ok {
@@ -288,9 +288,9 @@ func rearrangeGrafanaPanelsWithinExpandedRows(grafanaDashboardRaw json.RawMessag
 				// panelB, <- current iterated panel
 				// ...
 				// -> in this case we have to move this non-row panel inside the saved parentRow
+				// add empty panels array to row if missing
 				if _, found := parentRow["panels"]; !found {
-					logrus.Error(errors.New("expected attribute `panels` not found in row"))
-					return grafanaDashboardRaw
+					parentRow["panels"] = []any{}
 				}
 				subPanelsList, ok := parentRow["panels"].([]any)
 				if !ok {
