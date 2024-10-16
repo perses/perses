@@ -107,7 +107,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
         ]}
         placeholder="Example: sum(rate(http_requests_total[5m]))"
       />
-      {queryExpr?.trim() !== '' && (
+      {queryExpr && (
         <>
           {isGenericError ? (
             // Display the error without any close button, tree view etc when it's a generic error
