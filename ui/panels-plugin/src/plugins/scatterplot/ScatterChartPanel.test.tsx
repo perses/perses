@@ -24,7 +24,11 @@ import { screen, render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { MOCK_TRACE_DATA, MOCK_TRACE_QUERY_RESULT, MOCK_EMPTY_TRACE_QUERY_RESULT } from '../../test/';
+import {
+  MOCK_TRACE_SEARCH_RESULT,
+  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
+  MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
+} from '../../test/';
 import { getSymbolSize, ScatterChartPanel, ScatterChartPanelProps } from './ScatterChartPanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
@@ -36,7 +40,7 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 const FakeTraceQueryPlugin: TraceQueryPlugin<UnknownSpec> = {
   getTraceData: async () => {
-    return MOCK_TRACE_DATA;
+    return MOCK_TRACE_SEARCH_RESULT;
   },
   createInitialOptions: () => ({}),
 };
@@ -85,7 +89,7 @@ describe('ScatterChartPanel', () => {
 
   it('should render a ScatterPlot', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
       isLoading: false,
       isFetching: false,
     });
@@ -95,7 +99,7 @@ describe('ScatterChartPanel', () => {
 
   it('should not render a ScatterPlot because trace results are empty', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_EMPTY_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY,
       isLoading: false,
       isFetching: false,
     });

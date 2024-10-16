@@ -11,12 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, TraceData } from '@perses-dev/core';
+import { Span, Trace, TraceData } from '@perses-dev/core';
+
+function addParentReferences(span: Span) {
+  for (const child of span.childSpans) {
+    child.parentSpan = span;
+    addParentReferences(child);
+  }
+}
 
 /**
  * Mock data we get from getTraceData() in @perses/tempo-plugin.
  */
-export const MOCK_TRACE_DATA: TraceData = {
+export const MOCK_TRACE_SEARCH_RESULT: TraceData = {
   searchResult: [
     {
       startTimeUnixMs: 1702915645000, // unix epoch time in milliseconds
@@ -40,7 +47,7 @@ export const MOCK_TRACE_DATA: TraceData = {
   },
 };
 
-export const MOCK_EMPTY_TRACE_DATA: TraceData = {
+export const MOCK_TRACE_SEARCH_RESULT_EMPTY: TraceData = {
   searchResult: [],
   metadata: {
     executedQueryString: '{duration > 500ms}',
@@ -52,14 +59,14 @@ export const MOCK_EMPTY_TRACE_DATA: TraceData = {
  * This function uses then React TanStack function useQueries(fooQuery) to
  * handle fetching.
  */
-export const MOCK_TRACE_QUERY_RESULT = [
+export const MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT = [
   {
     status: 'success',
     fetchStatus: 'idle',
     isLoading: false,
     isSuccess: true,
     isError: false,
-    data: MOCK_TRACE_DATA,
+    data: MOCK_TRACE_SEARCH_RESULT,
     dataUpdatedAt: 1666500979895,
     definition: {
       kind: 'TraceQuery',
@@ -93,14 +100,14 @@ export const MOCK_TRACE_QUERY_RESULT = [
   },
 ];
 
-export const MOCK_EMPTY_TRACE_QUERY_RESULT = [
+export const MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT_EMPTY = [
   {
     status: 'success',
     fetchStatus: 'idle',
     isLoading: false,
     isSuccess: true,
     isError: false,
-    data: MOCK_EMPTY_TRACE_DATA,
+    data: MOCK_TRACE_SEARCH_RESULT_EMPTY,
     dataUpdatedAt: 1666500979895,
     error: null,
     errorUpdatedAt: 0,
@@ -119,100 +126,65 @@ export const MOCK_EMPTY_TRACE_QUERY_RESULT = [
   },
 ];
 
-export const shopBackendResource = {
-  serviceName: 'shop-backend',
-  attributes: [
-    {
-      key: 'service.name',
-      value: {
-        stringValue: 'shop-backend',
-      },
+export const MOCK_TRACE: Trace = {
+  rootSpan: {
+    resource: {
+      serviceName: 'shop-backend',
+      attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
     },
-  ],
-};
-
-export const k6scope = {
-  name: 'k6',
-};
-
-export const trace1_root: Span = {
-  resource: shopBackendResource,
-  scope: k6scope,
-  childSpans: [],
-
-  traceId: 'tid1',
-  spanId: 'sid1',
-  name: 'testRootSpan',
-  kind: 'SPAN_KIND_SERVER',
-  startTimeUnixMs: 1000,
-  endTimeUnixMs: 2000,
-  attributes: [],
-  events: [],
-};
-
-export const trace1_root_child1: Span = {
-  resource: shopBackendResource,
-  scope: k6scope,
-  parentSpan: trace1_root,
-  childSpans: [],
-
-  traceId: 'tid1',
-  spanId: 'sid2',
-  parentSpanId: 'sid1',
-  name: 'testChildSpan2',
-  kind: 'SPAN_KIND_CLIENT',
-  startTimeUnixMs: 1100,
-  endTimeUnixMs: 1200,
-  attributes: [
-    {
-      key: 'http.method',
-      value: {
-        stringValue: 'DELETE',
-      },
-    },
-  ],
-  events: [
-    {
-      timeUnixMs: 1150,
-      name: 'event1_name',
-      attributes: [
-        {
-          key: 'event1_key',
-          value: {
-            stringValue: 'event1_value',
-          },
+    scope: { name: 'k6' },
+    traceId: 'tid1',
+    spanId: 'sid1',
+    name: 'testRootSpan',
+    kind: 'SPAN_KIND_SERVER',
+    startTimeUnixMs: 1000,
+    endTimeUnixMs: 2000,
+    attributes: [],
+    events: [],
+    childSpans: [
+      {
+        resource: {
+          serviceName: 'shop-backend',
+          attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
         },
-      ],
-    },
-  ],
-  status: {
-    message: 'Forbidden',
-    code: 'STATUS_CODE_ERROR',
+        scope: { name: 'k6' },
+        childSpans: [
+          {
+            resource: {
+              serviceName: 'shop-backend',
+              attributes: [{ key: 'service.name', value: { stringValue: 'shop-backend' } }],
+            },
+            scope: { name: 'k6' },
+            childSpans: [],
+            traceId: 'tid1',
+            spanId: 'sid3',
+            parentSpanId: 'sid2',
+            name: 'testChildSpan3',
+            kind: 'SPAN_KIND_CLIENT',
+            startTimeUnixMs: 1300,
+            endTimeUnixMs: 1450,
+            attributes: [{ key: 'http.method', value: { stringValue: 'PUT' } }],
+            events: [],
+          },
+        ],
+        traceId: 'tid1',
+        spanId: 'sid2',
+        parentSpanId: 'sid1',
+        name: 'testChildSpan2',
+        kind: 'SPAN_KIND_CLIENT',
+        startTimeUnixMs: 1100,
+        endTimeUnixMs: 1200,
+        attributes: [{ key: 'http.method', value: { stringValue: 'DELETE' } }],
+        events: [
+          {
+            timeUnixMs: 1150,
+            name: 'event1_name',
+            attributes: [{ key: 'event1_key', value: { stringValue: 'event1_value' } }],
+          },
+        ],
+        status: { message: 'Forbidden', code: 'STATUS_CODE_ERROR' },
+      },
+    ],
   },
 };
-trace1_root.childSpans = [trace1_root_child1];
-
-export const trace1_root_child1_child1: Span = {
-  resource: shopBackendResource,
-  scope: k6scope,
-  parentSpan: trace1_root_child1,
-  childSpans: [],
-
-  traceId: 'tid1',
-  spanId: 'sid3',
-  parentSpanId: 'sid2',
-  name: 'testChildSpan3',
-  kind: 'SPAN_KIND_CLIENT',
-  startTimeUnixMs: 1300,
-  endTimeUnixMs: 1450,
-  attributes: [
-    {
-      key: 'http.method',
-      value: {
-        stringValue: 'PUT',
-      },
-    },
-  ],
-  events: [],
-};
-trace1_root_child1.childSpans = [trace1_root_child1_child1];
+addParentReferences(MOCK_TRACE.rootSpan);
