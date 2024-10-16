@@ -39,7 +39,21 @@ describe('SpanDuration', () => {
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
+    expect(parseInt(screen.getByText('150ms').style.left)).toEqual(44); // 44%, on the right side of the span bar
     expect(screen.getByTestId('span-duration-bar').style.backgroundColor).toEqual('rgba(83, 83, 83, 0.9)');
+  });
+
+  it('render span bar duration on left side', () => {
+    renderComponent({
+      options: {},
+      span: MOCK_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      viewport: {
+        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs + 290,
+        endTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs + 400,
+      },
+    });
+    expect(screen.getByText('150ms')).toBeInTheDocument();
+    expect(parseInt(screen.getByText('150ms').style.left)).toEqual(9); // 9%, on the left side of the span bar
   });
 
   it('render span bar with colors from eCharts theme', () => {
