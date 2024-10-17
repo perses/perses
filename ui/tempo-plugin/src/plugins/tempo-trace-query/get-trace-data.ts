@@ -59,17 +59,22 @@ export const getTraceData: TraceQueryPlugin<TempoTraceQuerySpec>['getTraceData']
   );
 
   const getQuery = (): SearchRequestParameters => {
-    // if time range not defined -- only return the query from the spec
-    if (context.absoluteTimeRange === undefined) {
-      return { q: spec.query };
-    }
-    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
-    const { start, end } = getUnixTimeRange(context?.absoluteTimeRange);
-    return {
+    const params: SearchRequestParameters = {
       q: spec.query,
-      start,
-      end,
     };
+
+    // handle time range selection from UI drop down (e.g. last 5 minutes, last 1 hour )
+    if (context.absoluteTimeRange) {
+      const { start, end } = getUnixTimeRange(context.absoluteTimeRange);
+      params.start = start;
+      params.end = end;
+    }
+
+    if (spec.limit) {
+      params.limit = spec.limit;
+    }
+
+    return params;
   };
 
   /**
