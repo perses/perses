@@ -13,7 +13,7 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { MOCK_TRACE } from '../../../test';
+import { MOCK_GANTT_TRACE } from '../../../test';
 import { TicksHeader, TicksHeaderProps } from './Ticks';
 
 describe('Ticks', () => {
@@ -23,11 +23,8 @@ describe('Ticks', () => {
 
   it('render <TicksHeader>', () => {
     renderComponent({
-      rootSpan: MOCK_TRACE.rootSpan,
-      viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
-      },
+      trace: MOCK_GANTT_TRACE,
+      viewport: { startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs, endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs },
     });
     expect(screen.getByText('0μs')).toBeInTheDocument();
     expect(screen.getByText('250ms')).toBeInTheDocument();

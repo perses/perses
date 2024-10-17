@@ -12,6 +12,8 @@
 // limitations under the License.
 
 import { Span, Trace, TraceData } from '@perses-dev/core';
+import { GanttTrace } from '../plugins/tracing-gantt-chart/TracingGanttChart/trace';
+import { JaegerTrace, parseJaegerTrace } from './get-trace-data-jaeger';
 
 function addParentReferences(span: Span) {
   for (const child of span.childSpans) {
@@ -188,3 +190,696 @@ export const MOCK_TRACE: Trace = {
   },
 };
 addParentReferences(MOCK_TRACE.rootSpan);
+
+export const MOCK_GANTT_TRACE: GanttTrace = {
+  rootSpan: MOCK_TRACE.rootSpan,
+  startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
+  endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
+};
+
+const MOCK_JAEGER_TRACE_ASYNC: JaegerTrace = {
+  traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+  spans: [
+    {
+      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+      spanID: 'b93f60c81f2a4ce0',
+      operationName: 'script',
+      references: [],
+      startTime: 1729001599633602,
+      duration: 3,
+      tags: [
+        {
+          key: 'span.kind',
+          type: 'string',
+          value: 'client',
+        },
+      ],
+      logs: [],
+      processID: 'p1',
+      warnings: [],
+      process: {
+        serviceName: 'hermes',
+        tags: [
+          {
+            key: 'otel.library.name',
+            type: 'string',
+            value: 'hermes_client',
+          },
+          {
+            key: 'telemetry.sdk.language',
+            type: 'string',
+            value: 'cpp',
+          },
+          {
+            key: 'telemetry.sdk.name',
+            type: 'string',
+            value: 'opentelemetry',
+          },
+          {
+            key: 'telemetry.sdk.version',
+            type: 'string',
+            value: '1.12.0',
+          },
+        ],
+      },
+      relativeStartTime: 0,
+      depth: 0,
+      hasChildren: true,
+      childSpanIds: ['4653459b582b47cb', '8a83db29894c10c4', '0bd40fdf749d38af', '5b6c5367c8f55a07'],
+    },
+    {
+      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+      spanID: '5b6c5367c8f55a07',
+      operationName: 'post1',
+      references: [
+        {
+          refType: 'CHILD_OF',
+          traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+          spanID: 'b93f60c81f2a4ce0',
+          span: {
+            traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+            spanID: 'b93f60c81f2a4ce0',
+            operationName: 'script',
+            references: [],
+            startTime: 1729001599633602,
+            duration: 3,
+            tags: [
+              {
+                key: 'span.kind',
+                type: 'string',
+                value: 'client',
+              },
+            ],
+            logs: [],
+            processID: 'p1',
+            warnings: [],
+            process: {
+              serviceName: 'hermes',
+              tags: [
+                {
+                  key: 'otel.library.name',
+                  type: 'string',
+                  value: 'hermes_client',
+                },
+                {
+                  key: 'telemetry.sdk.language',
+                  type: 'string',
+                  value: 'cpp',
+                },
+                {
+                  key: 'telemetry.sdk.name',
+                  type: 'string',
+                  value: 'opentelemetry',
+                },
+                {
+                  key: 'telemetry.sdk.version',
+                  type: 'string',
+                  value: '1.12.0',
+                },
+              ],
+            },
+            relativeStartTime: 0,
+            depth: 0,
+            hasChildren: true,
+            childSpanIds: ['4653459b582b47cb', '8a83db29894c10c4', '0bd40fdf749d38af', '5b6c5367c8f55a07'],
+          },
+        },
+      ],
+      startTime: 1729001599633651,
+      duration: 3081,
+      tags: [
+        {
+          key: 'http.request.method',
+          type: 'string',
+          value: 'POST',
+        },
+        {
+          key: 'http.response.status_code',
+          type: 'int64',
+          value: 200,
+        },
+        {
+          key: 'otel.status_code',
+          type: 'string',
+          value: 'OK',
+        },
+        {
+          key: 'span.kind',
+          type: 'string',
+          value: 'client',
+        },
+        {
+          key: 'url.full',
+          type: 'string',
+          value: 'http://server-mock:8080/url/example/path/id-24',
+        },
+      ],
+      logs: [
+        {
+          timestamp: 1729001599633766,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Request sent',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599636650,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Response received',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599636673,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Body received',
+            },
+          ],
+        },
+      ],
+      processID: 'p1',
+      warnings: [],
+      process: {
+        serviceName: 'hermes',
+        tags: [
+          {
+            key: 'otel.library.name',
+            type: 'string',
+            value: 'hermes_client',
+          },
+          {
+            key: 'telemetry.sdk.language',
+            type: 'string',
+            value: 'cpp',
+          },
+          {
+            key: 'telemetry.sdk.name',
+            type: 'string',
+            value: 'opentelemetry',
+          },
+          {
+            key: 'telemetry.sdk.version',
+            type: 'string',
+            value: '1.12.0',
+          },
+        ],
+      },
+      relativeStartTime: 49,
+      depth: 1,
+      hasChildren: false,
+      childSpanIds: [],
+    },
+    {
+      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+      spanID: '0bd40fdf749d38af',
+      operationName: 'get1',
+      references: [
+        {
+          refType: 'CHILD_OF',
+          traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+          spanID: 'b93f60c81f2a4ce0',
+          span: {
+            traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+            spanID: 'b93f60c81f2a4ce0',
+            operationName: 'script',
+            references: [],
+            startTime: 1729001599633602,
+            duration: 3,
+            tags: [
+              {
+                key: 'span.kind',
+                type: 'string',
+                value: 'client',
+              },
+            ],
+            logs: [],
+            processID: 'p1',
+            warnings: [],
+            process: {
+              serviceName: 'hermes',
+              tags: [
+                {
+                  key: 'otel.library.name',
+                  type: 'string',
+                  value: 'hermes_client',
+                },
+                {
+                  key: 'telemetry.sdk.language',
+                  type: 'string',
+                  value: 'cpp',
+                },
+                {
+                  key: 'telemetry.sdk.name',
+                  type: 'string',
+                  value: 'opentelemetry',
+                },
+                {
+                  key: 'telemetry.sdk.version',
+                  type: 'string',
+                  value: '1.12.0',
+                },
+              ],
+            },
+            relativeStartTime: 0,
+            depth: 0,
+            hasChildren: true,
+            childSpanIds: ['4653459b582b47cb', '8a83db29894c10c4', '0bd40fdf749d38af', '5b6c5367c8f55a07'],
+          },
+        },
+      ],
+      startTime: 1729001599733700,
+      duration: 2719,
+      tags: [
+        {
+          key: 'http.request.method',
+          type: 'string',
+          value: 'GET',
+        },
+        {
+          key: 'http.response.status_code',
+          type: 'int64',
+          value: 200,
+        },
+        {
+          key: 'otel.status_code',
+          type: 'string',
+          value: 'OK',
+        },
+        {
+          key: 'span.kind',
+          type: 'string',
+          value: 'client',
+        },
+        {
+          key: 'url.full',
+          type: 'string',
+          value: 'http://server-mock:8080/url/example/path?id=id-24',
+        },
+      ],
+      logs: [
+        {
+          timestamp: 1729001599733877,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Request sent',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599736343,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Response received',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599736364,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Body received',
+            },
+          ],
+        },
+      ],
+      processID: 'p1',
+      warnings: [],
+      process: {
+        serviceName: 'hermes',
+        tags: [
+          {
+            key: 'otel.library.name',
+            type: 'string',
+            value: 'hermes_client',
+          },
+          {
+            key: 'telemetry.sdk.language',
+            type: 'string',
+            value: 'cpp',
+          },
+          {
+            key: 'telemetry.sdk.name',
+            type: 'string',
+            value: 'opentelemetry',
+          },
+          {
+            key: 'telemetry.sdk.version',
+            type: 'string',
+            value: '1.12.0',
+          },
+        ],
+      },
+      relativeStartTime: 100098,
+      depth: 1,
+      hasChildren: false,
+      childSpanIds: [],
+    },
+    {
+      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+      spanID: '8a83db29894c10c4',
+      operationName: 'put1',
+      references: [
+        {
+          refType: 'CHILD_OF',
+          traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+          spanID: 'b93f60c81f2a4ce0',
+          span: {
+            traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+            spanID: 'b93f60c81f2a4ce0',
+            operationName: 'script',
+            references: [],
+            startTime: 1729001599633602,
+            duration: 3,
+            tags: [
+              {
+                key: 'span.kind',
+                type: 'string',
+                value: 'client',
+              },
+            ],
+            logs: [],
+            processID: 'p1',
+            warnings: [],
+            process: {
+              serviceName: 'hermes',
+              tags: [
+                {
+                  key: 'otel.library.name',
+                  type: 'string',
+                  value: 'hermes_client',
+                },
+                {
+                  key: 'telemetry.sdk.language',
+                  type: 'string',
+                  value: 'cpp',
+                },
+                {
+                  key: 'telemetry.sdk.name',
+                  type: 'string',
+                  value: 'opentelemetry',
+                },
+                {
+                  key: 'telemetry.sdk.version',
+                  type: 'string',
+                  value: '1.12.0',
+                },
+              ],
+            },
+            relativeStartTime: 0,
+            depth: 0,
+            hasChildren: true,
+            childSpanIds: ['4653459b582b47cb', '8a83db29894c10c4', '0bd40fdf749d38af', '5b6c5367c8f55a07'],
+          },
+        },
+      ],
+      startTime: 1729001599833654,
+      duration: 2803,
+      tags: [
+        {
+          key: 'http.request.method',
+          type: 'string',
+          value: 'PUT',
+        },
+        {
+          key: 'http.response.status_code',
+          type: 'int64',
+          value: 200,
+        },
+        {
+          key: 'otel.status_code',
+          type: 'string',
+          value: 'OK',
+        },
+        {
+          key: 'span.kind',
+          type: 'string',
+          value: 'client',
+        },
+        {
+          key: 'url.full',
+          type: 'string',
+          value: 'http://server-mock:8080/url/example/path/id-24',
+        },
+      ],
+      logs: [
+        {
+          timestamp: 1729001599833794,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Request sent',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599836396,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Response received',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599836408,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Body received',
+            },
+          ],
+        },
+      ],
+      processID: 'p1',
+      warnings: [],
+      process: {
+        serviceName: 'hermes',
+        tags: [
+          {
+            key: 'otel.library.name',
+            type: 'string',
+            value: 'hermes_client',
+          },
+          {
+            key: 'telemetry.sdk.language',
+            type: 'string',
+            value: 'cpp',
+          },
+          {
+            key: 'telemetry.sdk.name',
+            type: 'string',
+            value: 'opentelemetry',
+          },
+          {
+            key: 'telemetry.sdk.version',
+            type: 'string',
+            value: '1.12.0',
+          },
+        ],
+      },
+      relativeStartTime: 200052,
+      depth: 1,
+      hasChildren: false,
+      childSpanIds: [],
+    },
+    {
+      traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+      spanID: '4653459b582b47cb',
+      operationName: 'delete1',
+      references: [
+        {
+          refType: 'CHILD_OF',
+          traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+          spanID: 'b93f60c81f2a4ce0',
+          span: {
+            traceID: '7d73f3ae841bf59a74cf5b52a328cfca',
+            spanID: 'b93f60c81f2a4ce0',
+            operationName: 'script',
+            references: [],
+            startTime: 1729001599633602,
+            duration: 3,
+            tags: [
+              {
+                key: 'span.kind',
+                type: 'string',
+                value: 'client',
+              },
+            ],
+            logs: [],
+            processID: 'p1',
+            warnings: [],
+            process: {
+              serviceName: 'hermes',
+              tags: [
+                {
+                  key: 'otel.library.name',
+                  type: 'string',
+                  value: 'hermes_client',
+                },
+                {
+                  key: 'telemetry.sdk.language',
+                  type: 'string',
+                  value: 'cpp',
+                },
+                {
+                  key: 'telemetry.sdk.name',
+                  type: 'string',
+                  value: 'opentelemetry',
+                },
+                {
+                  key: 'telemetry.sdk.version',
+                  type: 'string',
+                  value: '1.12.0',
+                },
+              ],
+            },
+            relativeStartTime: 0,
+            depth: 0,
+            hasChildren: true,
+            childSpanIds: ['4653459b582b47cb', '8a83db29894c10c4', '0bd40fdf749d38af', '5b6c5367c8f55a07'],
+          },
+        },
+      ],
+      startTime: 1729001599944592,
+      duration: 20156,
+      tags: [
+        {
+          key: 'http.request.method',
+          type: 'string',
+          value: 'DELETE',
+        },
+        {
+          key: 'http.response.status_code',
+          type: 'int64',
+          value: 200,
+        },
+        {
+          key: 'otel.status_code',
+          type: 'string',
+          value: 'OK',
+        },
+        {
+          key: 'span.kind',
+          type: 'string',
+          value: 'client',
+        },
+        {
+          key: 'url.full',
+          type: 'string',
+          value: 'http://server-mock:8080/url/example/path/id-24',
+        },
+      ],
+      logs: [
+        {
+          timestamp: 1729001599944786,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Request sent',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599964619,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Response received',
+            },
+          ],
+        },
+        {
+          timestamp: 1729001599964650,
+          fields: [
+            {
+              key: 'event',
+              type: 'string',
+              value: 'Body received',
+            },
+          ],
+        },
+      ],
+      processID: 'p1',
+      warnings: [],
+      process: {
+        serviceName: 'hermes',
+        tags: [
+          {
+            key: 'otel.library.name',
+            type: 'string',
+            value: 'hermes_client',
+          },
+          {
+            key: 'telemetry.sdk.language',
+            type: 'string',
+            value: 'cpp',
+          },
+          {
+            key: 'telemetry.sdk.name',
+            type: 'string',
+            value: 'opentelemetry',
+          },
+          {
+            key: 'telemetry.sdk.version',
+            type: 'string',
+            value: '1.12.0',
+          },
+        ],
+      },
+      relativeStartTime: 310990,
+      depth: 1,
+      hasChildren: false,
+      childSpanIds: [],
+    },
+  ],
+  processes: {
+    p1: {
+      serviceName: 'hermes',
+      tags: [
+        {
+          key: 'otel.library.name',
+          type: 'string',
+          value: 'hermes_client',
+        },
+        {
+          key: 'telemetry.sdk.language',
+          type: 'string',
+          value: 'cpp',
+        },
+        {
+          key: 'telemetry.sdk.name',
+          type: 'string',
+          value: 'opentelemetry',
+        },
+        {
+          key: 'telemetry.sdk.version',
+          type: 'string',
+          value: '1.12.0',
+        },
+      ],
+    },
+  },
+  warnings: null,
+};
+
+export const MOCK_TRACE_ASYNC = parseJaegerTrace(MOCK_JAEGER_TRACE_ASYNC);

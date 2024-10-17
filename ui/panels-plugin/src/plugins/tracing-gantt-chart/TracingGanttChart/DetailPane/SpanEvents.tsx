@@ -15,35 +15,36 @@ import { Accordion, AccordionDetails, AccordionSummary, Typography } from '@mui/
 import { Span, SpanEvent } from '@perses-dev/core';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronDown';
 import { formatDuration } from '../utils';
+import { GanttTrace } from '../trace';
 import { AttributeList } from './Attributes';
 
 export interface SpanEventListProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   span: Span;
 }
 
 export function SpanEventList(props: SpanEventListProps) {
-  const { rootSpan, span } = props;
+  const { trace, span } = props;
 
   return (
     <>
       {span.events
         .sort((a, b) => a.timeUnixMs - b.timeUnixMs)
         .map((event, i) => (
-          <SpanEventItem key={i} rootSpan={rootSpan} event={event} />
+          <SpanEventItem key={i} trace={trace} event={event} />
         ))}
     </>
   );
 }
 
 interface SpanEventItemProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   event: SpanEvent;
 }
 
 function SpanEventItem(props: SpanEventItemProps) {
-  const { rootSpan, event } = props;
-  const relativeTime = event.timeUnixMs - rootSpan.startTimeUnixMs;
+  const { trace, event } = props;
+  const relativeTime = event.timeUnixMs - trace.startTimeUnixMs;
 
   return (
     <Accordion disableGutters>
