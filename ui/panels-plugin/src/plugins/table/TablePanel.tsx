@@ -13,9 +13,8 @@
 
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
-import { useMemo, useState } from 'react';
-import { TimeSeries, TimeSeriesData } from '@perses-dev/core';
-import { SortingState } from '@tanstack/react-table';
+import { useMemo } from 'react';
+import { TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { TableCellConfig, TableCellConfigs } from '@perses-dev/components/dist/Table/model/table-model';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
@@ -109,19 +108,29 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
-  const [sorting, setSorting] = useState<SortingState>([]);
+  console.log(queryResults);
+  console.log(queryResults.flatMap((d: QueryData<TimeSeriesData>) => d.data));
 
-  const data: Array<Record<string, unknown>> = useMemo(() => {
+  const rawData: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
-      .flatMap((d: QueryData<TimeSeriesData>) => d.data)
-      .flatMap((d: TimeSeriesData | undefined) => d?.series || [])
-      .map((ts: TimeSeries) => {
+      .flatMap(
+        (d: QueryData<TimeSeriesData>, queryIndex: number) =>
+          d.data?.series.map((ts: TimeSeries) => ({ ts, queryIndex })) || []
+      )
+      .map(({ ts, queryIndex }: { ts: TimeSeries; queryIndex: number }) => {
         if (ts.values[0] === undefined) {
           return { ...ts.labels };
         }
-        return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels }; // TODO: support multiple values and timestamps
+        if (queryResults.length === 1) {
+          return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels };
+        }
+        // If there are multiple queries, we need to add the query index to the value key to avoid conflicts
+        return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...ts.labels };
       });
   }, [queryResults]);
+
+  // Transform will be applied by their orders on the original data
+  const data = useTransformData(rawData, spec.transforms ?? []);
 
   const keys: string[] = useMemo(() => {
     const result: string[] = [];
@@ -186,10 +195,6 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return result;
   }, [data, keys, spec.cellSettings]);
 
-  function handleSortingChange(sorting: SortingState) {
-    setSorting(sorting);
-  }
-
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
   }
@@ -203,11 +208,9 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
       data={data}
       columns={columns}
       cellConfigs={cellConfigs}
-      sorting={sorting}
       height={contentDimensions.height}
       width={contentDimensions.width}
       density={spec.density}
-      onSortingChange={handleSortingChange}
     />
   );
 }
