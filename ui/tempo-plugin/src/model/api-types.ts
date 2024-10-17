@@ -33,6 +33,10 @@ export interface SearchRequestParameters {
   q: string;
   start?: number;
   end?: number;
+  /** max number of search results, default: 20 */
+  limit?: number;
+  /** max number of matching spans per trace in search result, default: 3 */
+  spss?: number;
 }
 
 /**

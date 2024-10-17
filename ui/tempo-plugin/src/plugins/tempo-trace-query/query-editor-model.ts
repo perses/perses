@@ -56,3 +56,43 @@ export function useQueryState(props: TraceQueryEditorProps) {
 
   return { query, handleQueryChange, handleQueryBlur };
 }
+
+/**
+ * Hook to manage `limit` state to ensure panel preview does not rerender until text input is blurred
+ */
+export function useLimitState(props: TraceQueryEditorProps) {
+  const { onChange, value } = props;
+
+  // TODO: reusable hook or helper util instead of duplicating from useQueryState
+  const [limit, setLimit] = useState(value.limit ? value.limit.toString() : '');
+  const [lastSyncedLimit, setLastSyncedLimit] = useState(value.limit);
+  if (value.limit !== lastSyncedLimit) {
+    setLimit(value.limit ? value.limit.toString() : '');
+    setLastSyncedLimit(value.limit);
+  }
+
+  // limit must be empty or an integer > 0
+  const limitHasError = !(limit === '' || (/^[0-9]+$/.test(limit) && parseInt(limit) > 0));
+
+  // Update our local state as the user types
+  const handleLimitChange = (e: string) => {
+    setLimit(e);
+  };
+
+  // Propagate changes to the panel preview component when limit TextField is blurred
+  const handleLimitBlur = () => {
+    if (limitHasError) {
+      return;
+    }
+
+    const limitVal = limit === '' ? undefined : parseInt(limit);
+    setLastSyncedLimit(limitVal);
+    onChange(
+      produce(value, (draft) => {
+        draft.limit = limitVal;
+      })
+    );
+  };
+
+  return { limit, handleLimitChange, handleLimitBlur, limitHasError };
+}

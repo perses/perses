@@ -22,6 +22,7 @@ export const TempoTraceQuery = {
   OptionsEditorComponent: TempoTraceQueryEditor,
   createInitialOptions: () => ({
     query: '',
+    limit: 20,
     datasource: undefined,
   }),
 };
