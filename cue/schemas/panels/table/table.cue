@@ -20,6 +20,7 @@ spec: close({
 	density?: "compact" | "standard" | "comfortable"
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
+	transforms?: [...#transform]
 })
 
 #columnSettings: {
@@ -32,6 +33,7 @@ spec: close({
 	width?:             number | "auto"
 	hide?:              bool
 }
+
 
 #valueCondition: {
 	kind: "Value"
@@ -71,4 +73,27 @@ spec: close({
 	text?:            string
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+}
+
+
+#joinTransform: {
+	kind: "Join"
+	spec: {
+		key: string
+	}
+}
+
+#transformSpec: {
+	#joinTransform
+}
+
+#transform: {
+	kind: "Transform"
+	spec: {
+		plugin: {
+			kind: string
+			spec: _
+		}
+		disabled?: bool
+	}
 }

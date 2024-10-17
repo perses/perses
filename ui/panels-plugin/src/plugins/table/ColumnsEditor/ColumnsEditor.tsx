@@ -34,7 +34,7 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
     onChange(updatedColumns);
   }
 
-  function handleAddColumnEditor(): void {
+  function handleColumnAdd(): void {
     const columnName: string = `column_${Object.keys(columns).length}`;
     const updatedColumns = [...columns];
     updatedColumns.push({ name: columnName });
@@ -77,7 +77,7 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
         />
       ))}
 
-      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleAddColumnEditor}>
+      <Button variant="contained" startIcon={<AddIcon />} sx={{ marginTop: 1 }} onClick={handleColumnAdd}>
         Add Column Settings
       </Button>
     </Stack>
