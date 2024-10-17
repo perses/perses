@@ -169,10 +169,10 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "setup",
-		Short: "Sets up a local development environment to do Dashboard-as-Code",
+		Short: "Set up a local development environment to code dashboards",
 		Long: `
-This command takes care of setting up a ready-to-use development environment to do Dashboard-as-Code.
-It mainly consists in adding the CUE sources from Perses as external dependencies to your DaC repo.
+This command takes care of setting up a ready-to-use development environment to code dashboards.
+It mainly consists in retrieving the Perses libraries to start coding dashboards. The setup is language-specific (default: CUE).
 
 /!\ This command must be executed at the root of your repo.
 `,
@@ -181,7 +181,7 @@ It mainly consists in adding the CUE sources from Perses as external dependencie
 percli dac setup
 
 # DaC setup when you are not connected to a server, you need to provide the Perses version to consider for dependencies retrieval
-percli dac setup --version 0.47.1 # any version you'd like above v0.44.0-rc0
+percli dac setup --version 0.47.1 # any version you'd like above v0.44.0
 `,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
