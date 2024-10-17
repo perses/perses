@@ -14,7 +14,7 @@
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { MOCK_TRACE } from '../../../../test';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { GanttTableProvider } from './GanttTableProvider';
 import { SpanDuration, SpanDurationProps } from './SpanDuration';
 
@@ -32,10 +32,10 @@ describe('SpanDuration', () => {
   it('render span bar', () => {
     renderComponent({
       options: {},
-      span: MOCK_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
@@ -46,10 +46,10 @@ describe('SpanDuration', () => {
   it('render span bar duration on left side', () => {
     renderComponent({
       options: {},
-      span: MOCK_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs + 290,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs + 400,
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs + 290,
+        endTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs + 400,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();
@@ -59,10 +59,10 @@ describe('SpanDuration', () => {
   it('render span bar with colors from eCharts theme', () => {
     renderComponent({
       options: { visual: { palette: { mode: 'categorical' } } },
-      span: MOCK_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
+      span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]!,
       viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
       },
     });
     expect(screen.getByText('150ms')).toBeInTheDocument();

@@ -24,6 +24,8 @@ export interface Viewport {
   endTimeUnixMs: number;
 }
 
+/** minimum span width, i.e. increase width if the calculated width is too small to be visible */
+export const minSpanWidthPx = 2;
 export const rowHeight = '2rem';
 export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
 

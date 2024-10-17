@@ -15,7 +15,7 @@ import { render } from '@testing-library/react';
 import { fireEvent, screen } from '@testing-library/dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
-import { MOCK_TRACE } from '../../../../test';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { GanttTableProvider } from './GanttTableProvider';
 import { GanttTable, GanttTableProps } from './GanttTable';
 
@@ -36,10 +36,10 @@ describe('GanttTable', () => {
   it('render table', () => {
     renderComponent({
       options: {},
-      rootSpan: MOCK_TRACE.rootSpan,
+      trace: MOCK_GANTT_TRACE,
       viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
       },
     });
     expect(screen.getByText('testRootSpan')).toBeInTheDocument();
@@ -50,10 +50,10 @@ describe('GanttTable', () => {
   it('collapses a span on click', () => {
     renderComponent({
       options: {},
-      rootSpan: MOCK_TRACE.rootSpan,
+      trace: MOCK_GANTT_TRACE,
       viewport: {
-        startTimeUnixMs: MOCK_TRACE.rootSpan.startTimeUnixMs,
-        endTimeUnixMs: MOCK_TRACE.rootSpan.endTimeUnixMs,
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
       },
     });
     fireEvent.click(screen.getAllByTitle('collapse')[1]!);
