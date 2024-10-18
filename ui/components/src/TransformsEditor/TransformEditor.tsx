@@ -1,4 +1,13 @@
-import { Autocomplete, MenuItem, Stack, StackProps, TextField, Typography } from '@mui/material';
+import {
+  Autocomplete,
+  FormControlLabel,
+  MenuItem,
+  Stack,
+  StackProps,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { Transform } from '@perses-dev/core';
 
 export interface TransformEditorProps extends Omit<StackProps, 'children' | 'value' | 'onChange'> {
@@ -31,48 +40,88 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
         </MenuItem>
       </TextField>
       {value.spec.plugin.kind === 'JoinByColumnValue' && (
-        <Autocomplete
-          freeSolo
-          id="join-column"
-          options={[]} // TODO: fill from query data when query result will be available at settings level
-          value={value.spec.plugin.spec.column as string}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
-          onChange={(e, column: string | null) => {
-            if (column === null) {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
-              });
-            } else {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
-              });
+        <Stack direction="row">
+          <Autocomplete
+            freeSolo
+            id="join-column"
+            options={[]} // TODO: fill from query data when query result will be available at settings level
+            value={value.spec.plugin.spec.column as string}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
+            sx={{ width: '100%' }}
+            onChange={(e, column: string | null) => {
+              if (column === null) {
+                onChange({
+                  ...value,
+                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
+                });
+              } else {
+                onChange({
+                  ...value,
+                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
+                });
+              }
+            }}
+          />
+          <FormControlLabel
+            label="Enabled"
+            sx={{ width: '100%', alignItems: 'start' }}
+            labelPlacement="start"
+            control={
+              <Switch
+                value={!value.spec.disabled ?? true}
+                checked={!value.spec.disabled ?? true}
+                onChange={(e) =>
+                  onChange({
+                    ...value,
+                    spec: { ...value.spec, disabled: e.target.checked },
+                  })
+                }
+              />
             }
-          }}
-        />
+          />
+        </Stack>
       )}
       {value.spec.plugin.kind === 'MergeIndexedColumns' && (
-        <Autocomplete
-          freeSolo
-          id="merge-column"
-          options={[]} // TODO: fill from query data when query result will be available at settings level
-          value={value.spec.plugin.spec.column as string}
-          renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
-          onChange={(e, column: string | null) => {
-            if (column === null) {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
-              });
-            } else {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
-              });
+        <Stack direction="row">
+          <Autocomplete
+            freeSolo
+            id="merge-column"
+            options={[]} // TODO: fill from query data when query result will be available at settings level
+            value={value.spec.plugin.spec.column as string}
+            renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
+            sx={{ width: '100%' }}
+            onChange={(e, column: string | null) => {
+              if (column === null) {
+                onChange({
+                  ...value,
+                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
+                });
+              } else {
+                onChange({
+                  ...value,
+                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
+                });
+              }
+            }}
+          />
+          <FormControlLabel
+            label="Enabled"
+            sx={{ width: '100%', alignItems: 'start' }}
+            labelPlacement="start"
+            control={
+              <Switch
+                value={!value.spec.disabled ?? true}
+                checked={!value.spec.disabled ?? true}
+                onChange={(e) =>
+                  onChange({
+                    ...value,
+                    spec: { ...value.spec, disabled: e.target.checked },
+                  })
+                }
+              />
             }
-          }}
-        />
+          />
+        </Stack>
       )}
     </Stack>
   );
