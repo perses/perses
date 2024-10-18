@@ -127,14 +127,14 @@ export function series(params: SeriesRequestParameters, queryOptions: QueryOptio
 }
 
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const { datasourceUrl } = queryOptions;
+  const { datasourceUrl, headers } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = createSearchParams(params).toString();
   if (urlParams !== '') {
     url += `?${urlParams}`;
   }
-  return fetchJson<TResponse>(url, { method: 'GET' });
+  return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
