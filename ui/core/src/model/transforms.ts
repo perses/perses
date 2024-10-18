@@ -12,11 +12,11 @@ export interface TransformationSpec<PluginSpec = UnknownSpec> {
 export interface JoinTransformSpec {
   kind: 'Join';
   spec: {
-    keys: string[];
+    key: string;
   };
 }
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
-  Join: 'Join by field(s)',
+  Join: 'Join by column value',
 };

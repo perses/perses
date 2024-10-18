@@ -14,7 +14,7 @@
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
 import { useMemo } from 'react';
-import { TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
+import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
 import { TableCellConfig, TableCellConfigs } from '@perses-dev/components/dist/Table/model/table-model';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
@@ -124,8 +124,15 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
         if (queryResults.length === 1) {
           return { timestamp: ts.values[0][0], value: ts.values[0][1], ...ts.labels };
         }
+
+        // If there is more than one query, we need to add the query index to the value key to avoid conflicts
+        const labels = Object.entries(ts.labels ?? {}).reduce((acc, [key, value]) => {
+          if (key) acc[`${key} #${queryIndex + 1}`] = value;
+          return acc;
+        }, {} as Labels);
+
         // If there are multiple queries, we need to add the query index to the value key to avoid conflicts
-        return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...ts.labels };
+        return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...labels };
       });
   }, [queryResults]);
 
