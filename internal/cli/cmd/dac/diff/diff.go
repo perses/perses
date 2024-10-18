@@ -126,7 +126,10 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "diff (-f [FILENAME] | -d [DIRECTORY_NAME])",
-		Short: "diff between online dashboard and local one",
+		Short: "Generate diff(s) between online dashboard(s) and local one(s)",
+		Example: `
+percli dac diff -d ./build
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},
