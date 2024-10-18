@@ -44,7 +44,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const promURL = client?.options.datasourceUrl;
   const { data: datasourceResource } = useDatasource(selectedDatasource);
 
-  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+  const { handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
@@ -81,7 +81,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={query}
+        value={value.query}
+        datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
       />

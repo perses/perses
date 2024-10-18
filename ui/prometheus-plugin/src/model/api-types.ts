@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
+import ASTNode from '../components/promql/ast';
 
 // Just reuse dashboard model's type and re-export
 export type { DurationString };
@@ -119,3 +120,10 @@ export interface MetricMetadataRequestParameters {
 }
 
 export type MetricMetadataResponse = ApiResponse<Record<string, MetricMetadata[]>>;
+
+// ref: https://prometheus.io/docs/prometheus/3.0/querying/api/#parsing-a-promql-expressions-into-a-abstract-syntax-tree-ast
+export interface ParseQueryRequestParameters {
+  query: string;
+}
+
+export type ParseQueryResponse = ApiResponse<ASTNode>;

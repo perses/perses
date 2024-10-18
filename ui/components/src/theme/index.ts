@@ -25,6 +25,7 @@ declare module '@mui/material/styles/createPalette' {
     overlay: string;
     border: string;
     lighter: string;
+    code: string;
   }
 
   interface TypeText {
