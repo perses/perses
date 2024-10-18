@@ -13,7 +13,6 @@
 
 import { fetch as initialFetch, FetchError, UserFriendlyError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
-import { SignInRoute } from './route';
 
 export async function fetch(...args: Parameters<typeof global.fetch>) {
   return initialFetch(...args).catch((error: UserFriendlyError | FetchError) => {
@@ -21,10 +20,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>) {
       throw error;
     }
     return refreshToken()
-      .catch((refreshTokenError: UserFriendlyError | FetchError) => {
-        if (refreshTokenError.status === 400) {
-          window.location.href = SignInRoute;
-        }
+      .catch((_: UserFriendlyError | FetchError) => {
         throw error;
       })
       .then(() => {
