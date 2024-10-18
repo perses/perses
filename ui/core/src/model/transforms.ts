@@ -10,13 +10,21 @@ export interface TransformationSpec<PluginSpec = UnknownSpec> {
 }
 
 export interface JoinTransformSpec {
-  kind: 'Join';
+  kind: 'JoinByColumnValue';
   spec: {
-    key: string;
+    column: string;
+  };
+}
+
+export interface MergeTransformSpec {
+  kind: 'MergeIndexedColumn';
+  spec: {
+    columns: string[];
   };
 }
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
   Join: 'Join by column value',
+  Merge: 'Merge indexed columns',
 };

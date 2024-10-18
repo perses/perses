@@ -27,18 +27,21 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
       {value.spec.plugin.kind === 'Join' && (
         <Autocomplete
           freeSolo
-          id="join-key"
+          id="join-column"
           options={[]} // TODO: fill from query data when query result will be available at settings level
-          value={value.spec.plugin.spec.key as string}
+          value={value.spec.plugin.spec.column as string}
           renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
-          onChange={(e, key: string | null) => {
-            if (key === null) {
+          onChange={(e, column: string | null) => {
+            if (column === null) {
               onChange({
                 ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { key: undefined } } }, // TODO
+                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
               });
             } else {
-              onChange({ ...value, spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { key: key } } } });
+              onChange({
+                ...value,
+                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
+              });
             }
           }}
         />

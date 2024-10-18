@@ -5,19 +5,19 @@ export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
   transform: Transform
 ): Array<Record<string, unknown>> {
-  const key: string = transform.spec.plugin.spec.key as string;
+  const column: string = transform.spec.plugin.spec.column as string;
   const entriesHashed: { [key: string]: Record<string, unknown> } = {};
 
   for (const entry of data) {
-    const match = Object.keys(entry).find((k) => new RegExp('^' + key + ' #\\d+$').test(k));
+    const match = Object.keys(entry).find((k) => new RegExp('^' + column + ' #\\d+$').test(k));
     if (match) {
       const value = entry[match];
       delete entry[match];
-      entry[key] = value;
+      entry[column] = value;
     }
 
-    if (Object.keys(entry).includes(key)) {
-      const hash = String(entry[key]);
+    if (Object.keys(entry).includes(column)) {
+      const hash = String(entry[column]);
       const entryHashed = entriesHashed[hash];
 
       if (entryHashed) {
