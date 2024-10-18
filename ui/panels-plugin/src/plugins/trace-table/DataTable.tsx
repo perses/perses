@@ -175,7 +175,7 @@ export function DataTable(props: DataTableProps) {
       getEstimatedRowHeight={() => 66}
       autoHeight={true}
       disableRowSelectionOnClick={true}
-      pageSizeOptions={[20]}
+      pageSizeOptions={[10, 20, 50, 100]}
       initialState={{
         pagination: { paginationModel: { pageSize: 20 } },
       }}
