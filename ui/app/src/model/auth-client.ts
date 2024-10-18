@@ -32,6 +32,12 @@ export interface NativeAuthBody {
 
 export function useIsAccessTokenExist(): boolean {
   const [cookies] = useCookies();
+  // Warm the access token request cache back
+  // If the refresh token is not expired, the debounce mechanism will get the refreshed accedd token.
+  // Otherwise, debounce will let pass the empty access token and auth guard will redirect to sign in.
+  if (cookies[jwtPayload] === undefined) {
+    refreshToken().then();
+  }
 
   // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
   const [debouncedValue, setDebouncedValue] = useState(cookies);
@@ -40,7 +46,7 @@ export function useIsAccessTokenExist(): boolean {
       setDebouncedValue(cookies);
     }, cookieRefreshTime);
 
-    return () => clearTimeout(timer);
+    return (): void => clearTimeout(timer);
   }, [cookies]);
 
   return debouncedValue[jwtPayload] !== undefined;
@@ -50,7 +56,7 @@ export function useIsAccessTokenExist(): boolean {
  * Get the redirect path from URL's query params.
  * This is used to retrieve the original path that a user desired before being redirected to the login page.
  */
-export function useRedirectQueryParam() {
+export function useRedirectQueryParam(): string {
   const [path] = useQueryParam<string>(redirectQueryParam);
   return path ?? '/';
 }
@@ -59,7 +65,7 @@ export function useRedirectQueryParam() {
  * Build a query string with the redirect path. Related with {@link useRedirectQueryParam}
  * @param path original path desired by the user before being redirected to the login page.
  */
-export function buildRedirectQueryString(path: string) {
+export function buildRedirectQueryString(path: string): string {
   return `${redirectQueryParam}=${encodeURIComponent(path)}`;
 }
 
