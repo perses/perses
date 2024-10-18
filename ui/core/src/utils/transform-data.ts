@@ -30,6 +30,33 @@ export function applyJoinTransform(
   return Object.values(entriesHashed);
 }
 
+export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unknown>>, transform: Transform) {
+  const result: Array<Record<string, unknown>> = [];
+  const column: string = transform.spec.plugin.spec.column as string;
+
+  for (const entry of data) {
+    const indexedColumns = Object.keys(entry).filter((k) =>
+      new RegExp('^(' + column + ' #\\d+)|(' + column + ')$').test(k)
+    );
+    const indexedColumnValues: Record<string, unknown> = {};
+
+    for (const indexedColumn of indexedColumns) {
+      indexedColumnValues[indexedColumn] = entry[indexedColumn];
+      delete entry[indexedColumn];
+    }
+
+    for (const indexedColumn of indexedColumns) {
+      result.push({ ...entry, [column]: indexedColumnValues[indexedColumn] });
+    }
+
+    if (indexedColumns.length === 0) {
+      result.push(entry);
+    }
+  }
+
+  return result;
+}
+
 /*
  * Transforms query data with the given transforms
  */
@@ -41,9 +68,13 @@ export function transformData(
 
   // Apply transforms by their orders
   for (const transform of transforms ?? []) {
+    // TODO: switch
     if (transform.spec.disabled) continue;
-    if (transform.spec.plugin.kind === 'Join') {
+    if (transform.spec.plugin.kind === 'JoinByColumnValue') {
       result = applyJoinTransform(result, transform);
+    }
+    if (transform.spec.plugin.kind === 'MergeIndexedColumns') {
+      result = applyMergeIndexedColumnsTransform(result, transform);
     }
   }
   return result;

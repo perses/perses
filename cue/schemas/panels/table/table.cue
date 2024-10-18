@@ -77,14 +77,21 @@ spec: close({
 
 
 #joinTransform: {
-	kind: "Join"
+	kind: "JoinByColumnValue"
 	spec: {
-		key: string
+		column: string
+	}
+}
+
+#mergeTransform: {
+	kind: "MergeIndexedColumns"
+	spec: {
+		column: string
 	}
 }
 
 #transformSpec: {
-	#joinTransform
+	#joinTransform | #mergeTransform
 }
 
 #transform: {

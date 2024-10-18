@@ -17,14 +17,14 @@ export interface JoinTransformSpec {
 }
 
 export interface MergeTransformSpec {
-  kind: 'MergeIndexedColumn';
+  kind: 'MergeIndexedColumns';
   spec: {
-    columns: string[];
+    column: string;
   };
 }
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
-  Join: 'Join by column value',
-  Merge: 'Merge indexed columns',
+  JoinByColumnValue: 'Join by column value',
+  MergeIndexedColumns: 'Merge indexed columns',
 };
