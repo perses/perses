@@ -15,11 +15,15 @@ import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResul
 import { fetch, fetchJson } from '@perses-dev/core';
 import { useCookies } from 'react-cookie';
 import { decodeToken } from 'react-jwt';
+import { useQueryParam } from 'use-query-params';
+import { useEffect, useState } from 'react';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
 
 const authResource = 'auth';
 const jwtPayload = 'jwtPayload';
+const redirectQueryParam = 'rd';
+const cookieRefreshTime = 500;
 
 export interface NativeAuthBody {
   login: string;
@@ -28,7 +32,35 @@ export interface NativeAuthBody {
 
 export function useIsAccessTokenExist(): boolean {
   const [cookies] = useCookies();
-  return cookies[jwtPayload] !== undefined;
+
+  // Don't directly say "false" when cookie disappear as it's removed/recreated directly by refresh mechanism.
+  const [debouncedValue, setDebouncedValue] = useState(cookies);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(cookies);
+    }, cookieRefreshTime);
+
+    return () => clearTimeout(timer);
+  }, [cookies]);
+
+  return debouncedValue[jwtPayload] !== undefined;
+}
+
+/**
+ * Get the redirect path from URL's query params.
+ * This is used to retrieve the original path that a user desired before being redirected to the login page.
+ */
+export function useRedirectQueryParam() {
+  const [path] = useQueryParam<string>(redirectQueryParam);
+  return path ?? '/';
+}
+
+/**
+ * Build a query string with the redirect path. Related with {@link useRedirectQueryParam}
+ * @param path original path desired by the user before being redirected to the login page.
+ */
+export function buildRedirectQueryString(path: string) {
+  return `${redirectQueryParam}=${encodeURIComponent(path)}`;
 }
 
 interface Payload {

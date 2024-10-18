@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Suspense, lazy, ReactElement } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
 import HomeView from './views/home/HomeView';
@@ -33,6 +33,7 @@ import {
   useIsExplorerEnabled,
   useIsSignUpDisable,
 } from './context/Config';
+import { buildRedirectQueryString, useIsAccessTokenExist } from './model/auth-client';
 
 // Other routes are lazy-loaded for code-splitting
 const ImportView = lazy(() => import('./views/import/ImportView'));
@@ -58,13 +59,64 @@ function Router(): ReactElement {
         <Routes>
           {isAuthEnabled && <Route path={SignInRoute} element={<SignInView />} />}
           {isAuthEnabled && !isSignUpDisable && <Route path={SignUpRoute} element={<SignUpView />} />}
-          <Route path={AdminRoute} element={<AdminView />} />
-          <Route path={`${AdminRoute}/:tab`} element={<AdminView />} />
-          <Route path={ConfigRoute} element={<ConfigView />} />
-          <Route path={ImportRoute} element={<ImportView />} />
-          <Route path={ProjectRoute} element={<HomeView />} />
-          {isExplorerEnabled && <Route path={ExploreRoute} element={<ExploreView />} />}
-          <Route path={`${ProjectRoute}/:projectName`} element={<GuardedProjectRoute />}>
+          <Route
+            path={AdminRoute}
+            element={
+              <RequireAuth>
+                <AdminView />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path={`${AdminRoute}/:tab`}
+            element={
+              <RequireAuth>
+                <AdminView />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path={ConfigRoute}
+            element={
+              <RequireAuth>
+                <ConfigView />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path={ImportRoute}
+            element={
+              <RequireAuth>
+                <ImportView />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path={ProjectRoute}
+            element={
+              <RequireAuth>
+                <HomeView />
+              </RequireAuth>
+            }
+          />
+          {isExplorerEnabled && (
+            <Route
+              path={ExploreRoute}
+              element={
+                <RequireAuth>
+                  <ExploreView />
+                </RequireAuth>
+              }
+            />
+          )}
+          <Route
+            path={`${ProjectRoute}/:projectName`}
+            element={
+              <RequireAuth>
+                <GuardedProjectRoute />
+              </RequireAuth>
+            }
+          >
             <Route path="" element={<ProjectView />} />
             <Route path=":tab" element={<ProjectView />} />
             <Route path="dashboard/new" element={<CreateDashboardView />} />
@@ -76,12 +128,38 @@ function Router(): ReactElement {
               <Route path="ephemeraldashboards/:ephemeralDashboardName" element={<EphemeralDashboardView />} />
             )}
           </Route>
-          <Route path="/" element={<HomeView />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <HomeView />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<Navigate replace to="/" />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>
   );
+}
+
+/**
+ * This component aims to redirect the user to the SignIn page if not logged in.
+ * Otherwise, it just loads the underlying component(s) defined as children.
+ * This is leveraging the following mechanism:
+ * https://reactrouter.com/en/main/upgrading/v5#refactor-custom-routes
+ * https://gist.github.com/mjackson/d54b40a094277b7afdd6b81f51a0393f
+ * @param children
+ * @constructor
+ */
+function RequireAuth({ children }: { children: ReactElement }): ReactElement | null {
+  const isAuthenticated = useIsAccessTokenExist();
+  const path = useLocation().pathname;
+  let to = SignInRoute;
+  if (path !== '' && path !== '/') {
+    to += `?${buildRedirectQueryString(path)}`;
+  }
+  return isAuthenticated ? children : <Navigate to={to} />;
 }
 
 export default Router;

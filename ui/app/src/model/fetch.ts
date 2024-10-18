@@ -13,7 +13,6 @@
 
 import { fetch as initialFetch, StatusError } from '@perses-dev/core';
 import { refreshToken } from './auth-client';
-import { SignInRoute } from './route';
 
 export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
   return initialFetch(...args).catch((error: StatusError) => {
@@ -21,10 +20,7 @@ export async function fetch(...args: Parameters<typeof global.fetch>): Promise<R
       throw error;
     }
     return refreshToken()
-      .catch((refreshTokenError: StatusError) => {
-        if (refreshTokenError.status === 400) {
-          window.location.href = SignInRoute;
-        }
+      .catch((_: StatusError) => {
         throw error;
       })
       .then(() => {
