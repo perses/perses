@@ -28,8 +28,8 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
       >
         <MenuItem value="JoinByColumnValue">
           <Stack>
-            <Typography>Join by field</Typography>
-            <Typography variant="caption">Regroup row with equal fields values</Typography>
+            <Typography>Join by column value</Typography>
+            <Typography variant="caption">Regroup rows with equal cell value in a column</Typography>
           </Stack>
         </MenuItem>
         <MenuItem value="MergeIndexedColumns">
@@ -41,26 +41,19 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
       </TextField>
       {value.spec.plugin.kind === 'JoinByColumnValue' && (
         <Stack direction="row">
-          <Autocomplete
-            freeSolo
+          <TextField
             id="join-column"
-            options={[]} // TODO: fill from query data when query result will be available at settings level
+            variant="outlined"
+            label="Column"
             value={value.spec.plugin.spec.column as string}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
             sx={{ width: '100%' }}
-            onChange={(e, column: string | null) => {
-              if (column === null) {
-                onChange({
-                  ...value,
-                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
-                });
-              } else {
-                onChange({
-                  ...value,
-                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
-                });
-              }
+            onChange={(e) => {
+              onChange({
+                ...value,
+                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+              });
             }}
+            required
           />
           <FormControlLabel
             label="Enabled"
@@ -82,26 +75,20 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
       )}
       {value.spec.plugin.kind === 'MergeIndexedColumns' && (
         <Stack direction="row">
-          <Autocomplete
-            freeSolo
+          <TextField
             id="merge-column"
-            options={[]} // TODO: fill from query data when query result will be available at settings level
+            variant="outlined"
+            label="Column"
+            placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
             value={value.spec.plugin.spec.column as string}
-            renderInput={(params) => <TextField {...params} variant="outlined" label="Column" required />}
             sx={{ width: '100%' }}
-            onChange={(e, column: string | null) => {
-              if (column === null) {
-                onChange({
-                  ...value,
-                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: undefined } } }, // TODO
-                });
-              } else {
-                onChange({
-                  ...value,
-                  spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: column } } },
-                });
-              }
+            onChange={(e) => {
+              onChange({
+                ...value,
+                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+              });
             }}
+            required
           />
           <FormControlLabel
             label="Enabled"

@@ -5,6 +5,11 @@ export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
   transform: Transform
 ): Array<Record<string, unknown>> {
+  // If column is undefined or empty, return data as is
+  if (!transform.spec.plugin.spec.column) {
+    return data;
+  }
+
   const column: string = transform.spec.plugin.spec.column as string;
   const entriesHashed: { [key: string]: Record<string, unknown> } = {};
 

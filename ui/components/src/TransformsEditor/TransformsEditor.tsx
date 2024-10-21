@@ -20,7 +20,7 @@ export function TransformsEditor({ transforms, onChange, ...props }: TransformsE
 
   function handleTransformAdd(): void {
     const updatedTransforms = [...transforms];
-    updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: 'Join', spec: { keys: [] } } } }); // TODO: change to unset kind
+    updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } }); // TODO: change to unset kind
     onChange(updatedTransforms);
     setTransformsCollapsed((prev) => {
       prev.push(false);
