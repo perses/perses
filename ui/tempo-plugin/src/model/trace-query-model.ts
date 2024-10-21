@@ -17,5 +17,6 @@ import { TempoDatasourceSelector } from './tempo-selectors';
  */
 export interface TempoTraceQuerySpec {
   query: string;
+  limit?: number;
   datasource?: TempoDatasourceSelector;
 }
