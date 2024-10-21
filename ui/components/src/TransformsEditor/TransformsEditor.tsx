@@ -18,21 +18,21 @@ import AddIcon from 'mdi-material-ui/Plus';
 import { TransformEditorContainer } from './TransformEditorContainer';
 
 export interface TransformsEditorProps extends Omit<StackProps, 'onChange'> {
-  transforms: Transform[];
+  value: Transform[];
   onChange: (transforms: Transform[]) => void;
 }
 
-export function TransformsEditor({ transforms, onChange, ...props }: TransformsEditorProps) {
-  const [transformsCollapsed, setTransformsCollapsed] = useState(transforms.map(() => true));
+export function TransformsEditor({ value, onChange, ...props }: TransformsEditorProps) {
+  const [transformsCollapsed, setTransformsCollapsed] = useState(value.map(() => true));
 
   function handleTransformChange(index: number, transform: Transform): void {
-    const updatedTransforms = [...transforms];
+    const updatedTransforms = [...value];
     updatedTransforms[index] = transform;
     onChange(updatedTransforms);
   }
 
   function handleTransformAdd(): void {
-    const updatedTransforms = [...transforms];
+    const updatedTransforms = [...value];
     updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } });
     onChange(updatedTransforms);
     setTransformsCollapsed((prev) => {
@@ -42,7 +42,7 @@ export function TransformsEditor({ transforms, onChange, ...props }: TransformsE
   }
 
   function handleTransformDelete(index: number): void {
-    const updatedTransforms = [...transforms];
+    const updatedTransforms = [...value];
     updatedTransforms.splice(index, 1);
     onChange(updatedTransforms);
     setTransformsCollapsed((prev) => {
@@ -60,9 +60,10 @@ export function TransformsEditor({ transforms, onChange, ...props }: TransformsE
 
   return (
     <Stack gap={1} {...props}>
-      {transforms.map((transform, i) => (
+      {value.map((transform, i) => (
         <TransformEditorContainer
           key={i}
+          index={i}
           value={transform}
           isCollapsed={transformsCollapsed[i] ?? true}
           onChange={(updatedTransform: Transform) => handleTransformChange(i, updatedTransform)}

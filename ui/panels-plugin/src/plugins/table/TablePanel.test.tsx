@@ -140,4 +140,30 @@ describe('TablePanel', () => {
 
     expect(await screen.findAllByRole('cell')).toHaveLength(14); // 2 time series with 7 columns
   });
+
+  it('should apply transforms', async () => {
+    (useDataQueries as jest.Mock).mockReturnValue({
+      queryResults: MOCK_TIME_SERIES_QUERY_RESULT_SINGLEVALUE,
+      isLoading: false,
+      isFetching: false,
+    });
+    renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
+      transforms: [
+        {
+          kind: 'Transform',
+          spec: {
+            plugin: {
+              kind: 'JoinByColumnValue',
+              spec: {
+                column: 'env',
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(await screen.findAllByRole('cell')).toHaveLength(8); // 1 row of 8 columns (not joined => 16)
+    expect(await screen.findByRole('cell', { name: 'demo' })).toBeInTheDocument();
+  });
 });

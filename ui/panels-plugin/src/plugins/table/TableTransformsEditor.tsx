@@ -23,5 +23,5 @@ export function TableTransformsEditor({ value, onChange }: TableSettingsEditorPr
     onChange({ ...value, transforms: transforms });
   }
 
-  return <TransformsEditor transforms={value.transforms ?? []} onChange={handleTransformsChange} />;
+  return <TransformsEditor value={value.transforms ?? []} onChange={handleTransformsChange} />;
 }

@@ -21,12 +21,14 @@ import { TRANSFORM_TEXT } from '@perses-dev/core';
 import { TransformEditor, TransformEditorProps } from './TransformEditor';
 
 export interface TransformEditorContainerProps extends TransformEditorProps {
+  index?: number;
   isCollapsed: boolean;
   onCollapse: (collapsed: boolean) => void;
   onDelete: () => void;
 }
 
 export function TransformEditorContainer({
+  index,
   value,
   isCollapsed,
   onChange,
@@ -49,11 +51,7 @@ export function TransformEditorContainer({
         gap={4}
       >
         <Stack direction="row" gap={1}>
-          <IconButton
-            // data-testid={`transform-toggle#${transform.kind}`}
-            size="small"
-            onClick={() => onCollapse(!isCollapsed)}
-          >
+          <IconButton data-testid={`transform-toggle#${index}`} size="small" onClick={() => onCollapse(!isCollapsed)}>
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
@@ -70,7 +68,10 @@ export function TransformEditorContainer({
         <Stack direction="row" gap={1}>
           {isCollapsed && (
             <>
-              <Tooltip title={value.spec?.disabled ? 'Show column' : 'Hide column'} placement="top">
+              <Tooltip
+                title={value.spec?.disabled ? 'Enable transformation' : 'Disable transformation'}
+                placement="top"
+              >
                 <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={handleTransformDisable}>
                   {value.spec?.disabled ? <EyeOffIcon /> : <EyeIcon />}
                 </IconButton>
@@ -78,7 +79,7 @@ export function TransformEditorContainer({
               <Divider flexItem orientation="vertical" variant="middle" />
             </>
           )}
-          <Tooltip title="Remove column settings" placement="top">
+          <Tooltip title="Remove transformation" placement="top">
             <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
               <DeleteIcon />
             </IconButton>
