@@ -190,7 +190,7 @@ func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "build",
-		Short: "Build the given DaC file, or directory containing DaC files",
+		Short: "Build the given DaC file(s)",
 		Long: `
 Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
 The supported languages for a DaC are:

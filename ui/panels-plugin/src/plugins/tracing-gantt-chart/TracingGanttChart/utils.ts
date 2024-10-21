@@ -61,7 +61,7 @@ export function formatDuration(timeMs: number) {
     return `${Math.round(timeMs * 1000)}μs`;
   }
   if (timeMs < 1000) {
-    return `${timeMs.toFixed(0)}ms`;
+    return `${+timeMs.toFixed(2)}ms`;
   }
   return `${+(timeMs / 1000).toFixed(2)}s`;
 }

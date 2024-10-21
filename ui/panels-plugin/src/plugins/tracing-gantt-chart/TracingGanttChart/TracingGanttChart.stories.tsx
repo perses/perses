@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { trace1_root } from '../../../test';
+import { MOCK_TRACE } from '../../../test';
 import { TracingGanttChart } from './TracingGanttChart';
 
 const exampleTraces = {
-  Demo: trace1_root,
+  Demo: MOCK_TRACE.rootSpan,
 };
 
 const meta: Meta<typeof TracingGanttChart> = {
@@ -42,6 +42,6 @@ export const Primary: Story = {
         },
       },
     },
-    rootSpan: trace1_root,
+    rootSpan: MOCK_TRACE.rootSpan,
   },
 };
