@@ -22,7 +22,6 @@ type ProvisioningConfig struct {
 	// Interval is the refresh frequency
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
 	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 
