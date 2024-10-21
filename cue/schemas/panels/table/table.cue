@@ -34,7 +34,6 @@ spec: close({
 	hide?:              bool
 }
 
-
 #valueCondition: {
 	kind: "Value"
 	spec: {
@@ -74,7 +73,6 @@ spec: close({
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
-
 
 #joinTransform: {
 	kind: "JoinByColumnValue"
