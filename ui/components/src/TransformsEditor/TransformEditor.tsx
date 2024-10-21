@@ -17,7 +17,7 @@ export interface TransformEditorProps extends Omit<StackProps, 'children' | 'val
 
 export function TransformEditor({ value, onChange, ...props }: TransformEditorProps) {
   return (
-    <Stack gap={2} sx={{ width: '100%' }} {...props}>
+    <Stack gap={2} sx={{ width: '100%' }} mt={1} {...props}>
       <TextField
         select
         label="Kind"
@@ -35,7 +35,7 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
         <MenuItem value="MergeIndexedColumns">
           <Stack>
             <Typography>Merge indexed columns</Typography>
-            <Typography variant="caption">All indexed column are merged to one column</Typography>
+            <Typography variant="caption">All indexed columns are merged to one column</Typography>
           </Stack>
         </MenuItem>
       </TextField>
@@ -64,7 +64,6 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
           />
           <FormControlLabel
             label="Enabled"
-            sx={{ width: '100%', alignItems: 'start' }}
             labelPlacement="start"
             control={
               <Switch
@@ -73,7 +72,7 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
                 onChange={(e) =>
                   onChange({
                     ...value,
-                    spec: { ...value.spec, disabled: e.target.checked },
+                    spec: { ...value.spec, disabled: !e.target.checked },
                   })
                 }
               />
@@ -106,7 +105,6 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
           />
           <FormControlLabel
             label="Enabled"
-            sx={{ width: '100%', alignItems: 'start' }}
             labelPlacement="start"
             control={
               <Switch
@@ -115,7 +113,7 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
                 onChange={(e) =>
                   onChange({
                     ...value,
-                    spec: { ...value.spec, disabled: e.target.checked },
+                    spec: { ...value.spec, disabled: !e.target.checked },
                   })
                 }
               />

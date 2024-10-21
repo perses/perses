@@ -108,9 +108,6 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
   // TODO: handle other query types
   const { isFetching, isLoading, queryResults } = useDataQueries('TimeSeriesQuery');
 
-  console.log(queryResults);
-  console.log(queryResults.flatMap((d: QueryData<TimeSeriesData>) => d.data));
-
   const rawData: Array<Record<string, unknown>> = useMemo(() => {
     return queryResults
       .flatMap(
