@@ -30,6 +30,9 @@ type EphemeralDashboard struct {
 	// When true user will be able to use the ephemeral dashboard at project level.
 	Enable bool `json:"enable" yaml:"enable"`
 	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	CleanupInterval model.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
 }
 
@@ -64,6 +67,9 @@ type Config struct {
 	// EphemeralDashboardsCleanupInterval is the interval at which the ephemeral dashboards are cleaned up
 	// DEPRECATED.
 	// Please use the config EphemeralDashboard instead.
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 	// EphemeralDashboard contains the config about the ephemeral dashboard feature
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`

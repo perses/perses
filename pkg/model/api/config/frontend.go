@@ -36,8 +36,11 @@ type Explorer struct {
 }
 
 type TimeRange struct {
-	DisableCustomTimeRange bool             `json:"disable_custom" yaml:"disable_custom"`
-	Options                []model.Duration `json:"options,omitempty" yaml:"options,omitempty"`
+	DisableCustomTimeRange bool `json:"disable_custom" yaml:"disable_custom"`
+	// +kubebuilder:validation:Type=array
+	// +kubebuilder:validation:Items.Type=string
+	// +kubebuilder:validation:Items.Format=duration
+	Options []model.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func (t *TimeRange) Verify() error {
