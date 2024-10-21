@@ -69,6 +69,7 @@ type Config struct {
 	// Please use the config EphemeralDashboard instead.
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	EphemeralDashboardsCleanupInterval model.Duration `json:"ephemeral_dashboards_cleanup_interval,omitempty" yaml:"ephemeral_dashboards_cleanup_interval,omitempty"`
 	// EphemeralDashboard contains the config about the ephemeral dashboard feature
 	EphemeralDashboard EphemeralDashboard `json:"ephemeral_dashboard,omitempty" yaml:"ephemeral_dashboard,omitempty"`

@@ -82,6 +82,7 @@ type GlobalDatasourceDiscovery struct {
 	// Refresh interval to re-query the endpoint.
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
 	// HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
 	// It fetches an HTTP endpoint containing a list of zero or more global datasources.
