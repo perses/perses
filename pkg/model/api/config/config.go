@@ -32,6 +32,7 @@ type EphemeralDashboard struct {
 	// The interval at which to trigger the cleanup of ephemeral dashboards, based on their TTLs.
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	CleanupInterval model.Duration `json:"cleanup_interval" yaml:"cleanup_interval"`
 }
 
