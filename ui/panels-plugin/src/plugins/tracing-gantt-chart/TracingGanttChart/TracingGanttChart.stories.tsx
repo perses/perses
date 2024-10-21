@@ -16,13 +16,13 @@ import { MOCK_TRACE } from '../../../test';
 import { TracingGanttChart } from './TracingGanttChart';
 
 const exampleTraces = {
-  Demo: MOCK_TRACE.rootSpan,
+  Demo: MOCK_TRACE,
 };
 
 const meta: Meta<typeof TracingGanttChart> = {
   component: TracingGanttChart,
   argTypes: {
-    rootSpan: {
+    trace: {
       options: Object.keys(exampleTraces),
       mapping: exampleTraces,
     },
@@ -42,6 +42,6 @@ export const Primary: Story = {
         },
       },
     },
-    rootSpan: MOCK_TRACE.rootSpan,
+    trace: exampleTraces.Demo,
   },
 };
