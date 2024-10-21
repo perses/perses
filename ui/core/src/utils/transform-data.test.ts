@@ -372,10 +372,10 @@ describe('Join By Column Transform', () => {
     const result: Array<Record<string, unknown>> = [
       {
         timestamp: 1630000000,
-        value: 80,
+        value: 166,
         job: 'job1',
         instance: 'instance1',
-        devices: '/dva/2',
+        devices: '/dva/3',
       },
     ];
 

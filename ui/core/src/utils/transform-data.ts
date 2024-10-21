@@ -9,13 +9,6 @@ export function applyJoinTransform(
   const entriesHashed: { [key: string]: Record<string, unknown> } = {};
 
   for (const entry of data) {
-    const match = Object.keys(entry).find((k) => new RegExp('^' + column + ' #\\d+$').test(k));
-    if (match) {
-      const value = entry[match];
-      delete entry[match];
-      entry[column] = value;
-    }
-
     if (Object.keys(entry).includes(column)) {
       const hash = String(entry[column]);
       const entryHashed = entriesHashed[hash];
