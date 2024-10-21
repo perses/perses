@@ -33,7 +33,7 @@ export function TransformsEditor({ transforms, onChange, ...props }: TransformsE
 
   function handleTransformAdd(): void {
     const updatedTransforms = [...transforms];
-    updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } }); // TODO: change to unset kind
+    updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } });
     onChange(updatedTransforms);
     setTransformsCollapsed((prev) => {
       prev.push(false);

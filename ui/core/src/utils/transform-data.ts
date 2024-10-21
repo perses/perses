@@ -79,13 +79,15 @@ export function transformData(
 
   // Apply transforms by their orders
   for (const transform of transforms ?? []) {
-    // TODO: switch
     if (transform.spec.disabled) continue;
-    if (transform.spec.plugin.kind === 'JoinByColumnValue') {
-      result = applyJoinTransform(result, transform);
-    }
-    if (transform.spec.plugin.kind === 'MergeIndexedColumns') {
-      result = applyMergeIndexedColumnsTransform(result, transform);
+
+    switch (transform.spec.plugin.kind) {
+      case 'JoinByColumnValue':
+        result = applyJoinTransform(result, transform);
+        break;
+      case 'MergeIndexedColumns':
+        result = applyMergeIndexedColumnsTransform(result, transform);
+        break;
     }
   }
   return result;
