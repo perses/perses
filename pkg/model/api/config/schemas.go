@@ -34,7 +34,6 @@ type Schemas struct {
 	VariablesPath   string `json:"variables_path,omitempty" yaml:"variables_path,omitempty"`
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
 	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 

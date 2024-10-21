@@ -148,10 +148,14 @@ func (p *AuthProviders) Verify() error {
 
 type AuthenticationConfig struct {
 	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
 	AccessTokenTTL model.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
 	RefreshTokenTTL model.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
 	// DisableSignUp deactivates the Sign-up page in the UI.
 	// It also disables the endpoint that gives the possibility to create a user.
