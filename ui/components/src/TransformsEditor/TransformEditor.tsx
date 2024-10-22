@@ -12,7 +12,93 @@
 // limitations under the License.
 
 import { FormControlLabel, MenuItem, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
-import { Transform } from '@perses-dev/core';
+import { JoinByColumnValueTransformSpec, MergeIndexedColumnsTransformSpec, Transform } from '@perses-dev/core';
+
+interface TransformSpecEditorProps<Spec> {
+  value: Transform<Spec>;
+  onChange: (transform: Transform<Spec>) => void;
+}
+
+function JoinByColumnValueTransformEditor({
+  value,
+  onChange,
+}: TransformSpecEditorProps<JoinByColumnValueTransformSpec>) {
+  return (
+    <Stack direction="row">
+      <TextField
+        id="join-column"
+        variant="outlined"
+        label="Column"
+        value={value.spec.plugin.spec.column as string}
+        sx={{ width: '100%' }}
+        onChange={(e) => {
+          onChange({
+            ...value,
+            spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+          });
+        }}
+        required
+      />
+      <FormControlLabel
+        label="Enabled"
+        labelPlacement="start"
+        control={
+          <Switch
+            value={!value.spec.disabled ?? true}
+            checked={!value.spec.disabled ?? true}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                spec: { ...value.spec, disabled: !e.target.checked },
+              })
+            }
+          />
+        }
+      />
+    </Stack>
+  );
+}
+
+function MergeIndexedColumnsTransformEditor({
+  value,
+  onChange,
+}: TransformSpecEditorProps<MergeIndexedColumnsTransformSpec>) {
+  return (
+    <Stack direction="row">
+      <TextField
+        id="merge-column"
+        variant="outlined"
+        label="Column"
+        placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
+        value={value.spec.plugin.spec.column}
+        sx={{ width: '100%' }}
+        onChange={(e) => {
+          onChange({
+            ...value,
+            spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+          });
+        }}
+        required
+      />
+      <FormControlLabel
+        label="Enabled"
+        labelPlacement="start"
+        control={
+          <Switch
+            value={!value.spec.disabled ?? true}
+            checked={!value.spec.disabled ?? true}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                spec: { ...value.spec, disabled: !e.target.checked },
+              })
+            }
+          />
+        }
+      />
+    </Stack>
+  );
+}
 
 export interface TransformEditorProps extends Omit<StackProps, 'children' | 'value' | 'onChange'> {
   value: Transform;
@@ -44,73 +130,16 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
         </MenuItem>
       </TextField>
       {value.spec.plugin.kind === 'JoinByColumnValue' && (
-        <Stack direction="row">
-          <TextField
-            id="join-column"
-            variant="outlined"
-            label="Column"
-            value={value.spec.plugin.spec.column as string}
-            sx={{ width: '100%' }}
-            onChange={(e) => {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
-              });
-            }}
-            required
-          />
-          <FormControlLabel
-            label="Enabled"
-            labelPlacement="start"
-            control={
-              <Switch
-                value={!value.spec.disabled ?? true}
-                checked={!value.spec.disabled ?? true}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    spec: { ...value.spec, disabled: !e.target.checked },
-                  })
-                }
-              />
-            }
-          />
-        </Stack>
+        <JoinByColumnValueTransformEditor
+          value={value as unknown as Transform<JoinByColumnValueTransformSpec>}
+          onChange={onChange as unknown as (transform: Transform<JoinByColumnValueTransformSpec>) => void}
+        />
       )}
       {value.spec.plugin.kind === 'MergeIndexedColumns' && (
-        <Stack direction="row">
-          <TextField
-            id="merge-column"
-            variant="outlined"
-            label="Column"
-            placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
-            value={value.spec.plugin.spec.column as string}
-            sx={{ width: '100%' }}
-            onChange={(e) => {
-              onChange({
-                ...value,
-                spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
-              });
-            }}
-            required
-          />
-          <FormControlLabel
-            label="Enabled"
-            labelPlacement="start"
-            control={
-              <Switch
-                value={!value.spec.disabled ?? true}
-                checked={!value.spec.disabled ?? true}
-                onChange={(e) =>
-                  onChange({
-                    ...value,
-                    spec: { ...value.spec, disabled: !e.target.checked },
-                  })
-                }
-              />
-            }
-          />
-        </Stack>
+        <MergeIndexedColumnsTransformEditor
+          value={value as unknown as Transform<MergeIndexedColumnsTransformSpec>}
+          onChange={onChange as unknown as (transform: Transform<MergeIndexedColumnsTransformSpec>) => void}
+        />
       )}
     </Stack>
   );

@@ -18,18 +18,18 @@ export interface Transform<PluginSpec = UnknownSpec> extends Definition<Transfor
 }
 
 export interface TransformationSpec<PluginSpec = UnknownSpec> {
-  plugin: Definition<PluginSpec>;
+  plugin: PluginSpec;
   disabled?: boolean;
 }
 
-export interface JoinTransformSpec {
+export interface JoinByColumnValueTransformSpec {
   kind: 'JoinByColumnValue';
   spec: {
     column: string;
   };
 }
 
-export interface MergeTransformSpec {
+export interface MergeIndexedColumnsTransformSpec {
   kind: 'MergeIndexedColumns';
   spec: {
     column: string;

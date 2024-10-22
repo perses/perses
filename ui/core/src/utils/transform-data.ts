@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Transform } from '@perses-dev/core';
+import { JoinByColumnValueTransformSpec, MergeIndexedColumnsTransformSpec, Transform } from '@perses-dev/core';
 import { useMemo } from 'react';
 
 export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
-  transform: Transform
+  transform: Transform<JoinByColumnValueTransformSpec>
 ): Array<Record<string, unknown>> {
   // If column is undefined or empty, return data as is
   if (!transform.spec.plugin.spec.column) {
@@ -41,7 +41,10 @@ export function applyJoinTransform(
   return Object.values(entriesHashed);
 }
 
-export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unknown>>, transform: Transform) {
+export function applyMergeIndexedColumnsTransform(
+  data: Array<Record<string, unknown>>,
+  transform: Transform<MergeIndexedColumnsTransformSpec>
+) {
   const result: Array<Record<string, unknown>> = [];
   const column: string = transform.spec.plugin.spec.column as string;
 
@@ -83,10 +86,13 @@ export function transformData(
 
     switch (transform.spec.plugin.kind) {
       case 'JoinByColumnValue':
-        result = applyJoinTransform(result, transform);
+        result = applyJoinTransform(result, transform as unknown as Transform<JoinByColumnValueTransformSpec>);
         break;
       case 'MergeIndexedColumns':
-        result = applyMergeIndexedColumnsTransform(result, transform);
+        result = applyMergeIndexedColumnsTransform(
+          result,
+          transform as unknown as Transform<MergeIndexedColumnsTransformSpec>
+        );
         break;
     }
   }
