@@ -31,6 +31,7 @@ import (
         // throughput units
         bps: "bits/sec"
         Bps: "bytes/sec"
+        cps: "counts/sec"
         // TODO add mappings for all throughput units
     }
     // mapping table for the calculation attribute (key = grafana unit, value = perses equivalent)
