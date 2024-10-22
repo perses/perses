@@ -58,7 +58,7 @@ func (o *option) Complete(args []string) error {
 		return outputErr
 	}
 	o.completeInput()
-	if (len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0) || len(o.variablesSchemas) > 0 {
+	if len(o.chartsSchemas) > 0 && len(o.queriesSchemas) > 0 && len(o.variablesSchemas) > 0 {
 		var err error
 		o.mig, err = migrate.New(apiConfig.Schemas{
 			PanelsPath:    o.chartsSchemas,
@@ -99,6 +99,9 @@ func (o *option) completeInput() {
 }
 
 func (o *option) Validate() error {
+	if !o.online && (len(o.chartsSchemas) == 0 || len(o.queriesSchemas) == 0 || len(o.variablesSchemas) == 0) {
+		return fmt.Errorf("in case you want an offline validation, you need to provide the schemas using the flag schemas.<schema_type>")
+	}
 	return nil
 }
 
@@ -162,7 +165,8 @@ percli migrate -f ./dashboard.json --input=DS_PROMETHEUS=PrometheusDemo --online
 	cmd.Flags().StringVar(&o.variablesSchemas, "schemas.variables", "", "Path to the CUE schemas for the dashboard variables")
 	cmd.Flags().BoolVar(&o.online, "online", false, "When enable, it can request the API to use it to perform the migration")
 
-	// when online flag is used, the CLI will call the endpoint /migrate that will then use the schema from the server.
+	// When the online flags are used,
+	// the CLI will call the endpoint /migrate that will then use the schema from the server.
 	// So no need to use / load the schemas with the CLI.
 	cmd.MarkFlagsMutuallyExclusive("schemas.charts", "online")
 	cmd.MarkFlagsMutuallyExclusive("schemas.queries", "online")
