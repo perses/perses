@@ -123,8 +123,42 @@ describe('complete', () => {
 
     // tag values
     {
+      expr: '{ name=',
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 7 },
+    },
+    {
+      expr: '{ name=H',
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 7 },
+    },
+    {
+      expr: '{ name="',
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 8 },
+    },
+    {
+      expr: '{ name=""',
+      pos: -1,
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 8 },
+    },
+    {
+      expr: '{ name=""',
+      expected: undefined,
+    },
+    {
+      expr: '{ name="H',
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 8 },
+    },
+    {
+      expr: '{ name="H"',
+      pos: -1,
+      expected: { scopes: [{ kind: 'TagValue', tag: 'name' }], from: 8 },
+    },
+    {
+      expr: '{ name="H"',
+      expected: undefined,
+    },
+    {
       expr: '{ resource.service.name=',
-      expected: { scopes: [{ kind: 'TagValue', tag: 'resource.service.name', quotes: true }], from: 24 },
+      expected: { scopes: [{ kind: 'TagValue', tag: 'resource.service.name' }], from: 24 },
     },
     {
       expr: '{ resource.service.name=""',
@@ -148,7 +182,7 @@ describe('complete', () => {
     },
     {
       expr: '{ status=',
-      expected: { scopes: [{ kind: 'TagValue', tag: 'status', quotes: true }], from: 9 },
+      expected: { scopes: [{ kind: 'TagValue', tag: 'status' }], from: 9 },
     },
     {
       expr: '{ status=e',
