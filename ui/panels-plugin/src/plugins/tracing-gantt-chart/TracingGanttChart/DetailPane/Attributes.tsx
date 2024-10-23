@@ -72,7 +72,7 @@ function AttributeItem(props: AttributeItemProps) {
 }
 
 function renderAttributeValue(value: TraceAttributeValue): string {
-  if ('stringValue' in value) return value.stringValue;
+  if ('stringValue' in value) return value.stringValue.length > 0 ? value.stringValue : '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('boolValue' in value) return value.boolValue.toString();
   if ('arrayValue' in value) return value.arrayValue.values.map(renderAttributeValue).join(', ');
