@@ -81,7 +81,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={value.query}
+        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
