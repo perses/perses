@@ -24,6 +24,34 @@ import { PrometheusDatasourceSelector } from '../model';
 import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
 
+// Process the error to identify if it's a generic one & adjust the message in some cases
+// TODO: This should be removed when properly tackling query error at query editor level (https://github.com/perses/perses/issues/1419)
+//       Here this was kinda a quick-win to do it like this with the implementation of the Tree view.
+//       Once #1419 will be tackled, any error reported by the query to the parse endpoint here should be treated the same (= display
+//       the error in the debug/tree view & always let the buttons accessible to show/hide it).
+function processError(error: unknown): { errorMessage: string; isGenericError: boolean } {
+  // Specific errors that user should be able to hide
+  const apiNotAvailableError = '404 page not found';
+  const blockedByProxyError =
+    'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
+
+  let errorMessage = 'An unknown error occurred';
+  let isGenericError = false;
+  if (error && error instanceof Error) {
+    errorMessage = error.message.trim();
+    if (errorMessage === apiNotAvailableError) {
+      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+    } else if (errorMessage === blockedByProxyError) {
+      errorMessage =
+        'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';
+    } else {
+      isGenericError = true;
+    }
+  }
+
+  return { errorMessage, isGenericError };
+}
+
 export type PromQLEditorProps = {
   completeConfig: CompleteConfiguration;
   datasource: PrometheusDatasourceSelector;
@@ -40,25 +68,8 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const queryExpr = useReplaceVariablesInString(rest.value);
 
-  // Specific errors that user should be able to hide
-  const apiNotAvailableError = '404 page not found';
-  const blockedByProxyError =
-    'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
-
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
-  let errorMessage = 'An unknown error occurred';
-  let isGenericError = false;
-  if (error && error instanceof Error) {
-    errorMessage = error.message.trim();
-    if (errorMessage === apiNotAvailableError) {
-      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
-    } else if (errorMessage === blockedByProxyError) {
-      errorMessage =
-        'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';
-    } else {
-      isGenericError = true;
-    }
-  }
+  const { errorMessage, isGenericError } = processError(error);
 
   const treeViewText = 'Tree View';
   const treeViewActionTexts = {
