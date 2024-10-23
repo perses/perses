@@ -220,6 +220,8 @@ function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
       avatar={
         <Avatar
           sx={{
+            width: 'auto !important', // by default width is fixed to 18px, which is not enough for multi-digit span counts
+            padding: '6px',
             backgroundColor: 'var(--service-color)',
             fontSize: '0.65rem',
             fontWeight: 'bold',
