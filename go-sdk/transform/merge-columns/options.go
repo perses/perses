@@ -11,30 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package transform
+package mergecolumns
 
-import "github.com/perses/perses/go-sdk/common"
-
-type Option func(panel *Builder) error
-
-func New(options ...Option) (Builder, error) {
-	builder := &Builder{
-		Transform: common.Transform{
-			Kind: "Transform",
-		},
+func Columns(columns []string) Option {
+	return func(plugin *Builder) error {
+		plugin.Columns = columns
+		return nil
 	}
-
-	defaults := []Option{}
-
-	for _, opt := range append(defaults, options...) {
-		if err := opt(builder); err != nil {
-			return *builder, err
-		}
-	}
-
-	return *builder, nil
 }
 
-type Builder struct {
-	common.Transform `json:",inline" yaml:",inline"`
+func Name(name string) Option {
+	return func(plugin *Builder) error {
+		plugin.Name = name
+		return nil
+	}
 }

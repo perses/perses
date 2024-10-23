@@ -31,7 +31,7 @@ import (
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
-	mergeindexedcolumns "github.com/perses/perses/go-sdk/transform/merge-indexed-columns"
+	joinbycolumnvalue "github.com/perses/perses/go-sdk/transform/join-by-column-value"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
@@ -102,8 +102,8 @@ func buildTargetStatusPanel() panelgroup.Option {
 				},
 			}),
 			table.AddTransform(
-				mergeindexedcolumns.MergeIndexedColumns(
-					mergeindexedcolumns.Column("instance"),
+				joinbycolumnvalue.JoinByColumnValue(
+					joinbycolumnvalue.Column("instance"),
 				),
 			),
 		),

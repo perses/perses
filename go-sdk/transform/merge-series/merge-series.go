@@ -11,22 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package transform
+package mergeseries
 
-import "github.com/perses/perses/go-sdk/common"
+import (
+	"github.com/perses/perses/go-sdk/transform"
+)
 
-type Option func(panel *Builder) error
+const PluginKind = "MergeSeries"
 
-func New(options ...Option) (Builder, error) {
+type Option func(plugin *Builder) error
+
+func create(options ...Option) (Builder, error) {
 	builder := &Builder{
-		Transform: common.Transform{
-			Kind: "Transform",
-		},
+		PluginSpec: PluginSpec{},
 	}
 
-	defaults := []Option{}
-
-	for _, opt := range append(defaults, options...) {
+	for _, opt := range options {
 		if err := opt(builder); err != nil {
 			return *builder, err
 		}
@@ -35,6 +35,21 @@ func New(options ...Option) (Builder, error) {
 	return *builder, nil
 }
 
+type PluginSpec struct{}
+
 type Builder struct {
-	common.Transform `json:",inline" yaml:",inline"`
+	PluginSpec `json:"spec" yaml:"spec"`
+}
+
+func MergeSeries(options ...Option) transform.Option {
+	return func(builder *transform.Builder) error {
+		plugin, err := create(options...)
+		if err != nil {
+			return err
+		}
+
+		builder.Spec.Plugin.Kind = PluginKind
+		builder.Spec.Plugin.Spec = plugin.PluginSpec
+		return nil
+	}
 }

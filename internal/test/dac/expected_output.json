@@ -344,9 +344,11 @@
                 {
                   "kind": "Transform",
                   "spec": {
-                    "kind": "JoinByColumnValue",
                     "plugin": {
-                      "column": "instance"
+                      "kind": "JoinByColumnValue",
+                        "spec": {
+                            "column": "instance"
+                        }
                     },
                     "disabled": false
                   }

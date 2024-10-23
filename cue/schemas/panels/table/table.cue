@@ -74,22 +74,35 @@ spec: close({
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
 
-#joinTransform: {
+#joinByColumnValueTransform: {
 	kind: "JoinByColumnValue"
 	spec: {
 		column: string
 	}
 }
 
-#mergeTransform: {
+#mergeColumnsTransform: {
+	kind: "MergeColumns"
+	spec: {
+		columns: [string]
+		name: string
+	}
+}
+
+#mergeIndexedColumnsTransform: {
 	kind: "MergeIndexedColumns"
 	spec: {
 		column: string
 	}
 }
 
+#mergeSeries: {
+	kind: "MergeSeries"
+	spec: _
+}
+
 #transformSpec: {
-	#joinTransform | #mergeTransform
+	#joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries
 }
 
 #transform: {

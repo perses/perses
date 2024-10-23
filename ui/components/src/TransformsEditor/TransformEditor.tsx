@@ -40,19 +40,23 @@ function JoinByColumnValueTransformEditor({
 }: TransformSpecEditorProps<JoinByColumnValueTransformSpec>) {
   return (
     <Stack direction="row">
-      <TextField
-        id="join-column"
-        variant="outlined"
-        label="Column"
-        value={value.spec.plugin.spec.column as string}
+      <Autocomplete
+        freeSolo
+        multiple
+        id="join-columns"
         sx={{ width: '100%' }}
-        onChange={(e) => {
+        options={[]}
+        value={value.spec.plugin.spec.columns}
+        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
+        onChange={(_, columns) => {
           onChange({
             ...value,
-            spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+            spec: {
+              ...value.spec,
+              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, columns: columns } },
+            },
           });
         }}
-        required
       />
       <FormControlLabel
         label="Enabled"
@@ -84,7 +88,7 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         sx={{ width: '100%' }}
         options={[]}
         value={value.spec.plugin.spec.columns}
-        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" />}
+        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
             ...value,
