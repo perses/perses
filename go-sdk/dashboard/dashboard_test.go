@@ -31,6 +31,7 @@ import (
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
+	mergeindexedcolumns "github.com/perses/perses/go-sdk/transform/merge-indexed-columns"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
@@ -100,6 +101,11 @@ func buildTargetStatusPanel() panelgroup.Option {
 					BackgroundColor: "#FF0000",
 				},
 			}),
+			table.AddTransform(
+				mergeindexedcolumns.MergeIndexedColumns(
+					mergeindexedcolumns.Column("instance"),
+				),
+			),
 		),
 		panel.AddQuery(
 			query.PromQL(fmt.Sprintf("up{%s}", filter)),
@@ -200,7 +206,7 @@ func TestDashboardBuilder(t *testing.T) {
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
-
+	fmt.Println(string(builderOutput))
 	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 

@@ -11,42 +11,99 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { JoinByColumnValueTransformSpec, MergeIndexedColumnsTransformSpec, Transform } from '@perses-dev/core';
+import {
+  JoinByColumnValueTransformSpec,
+  MergeColumnsTransformSpec,
+  MergeIndexedColumnsTransformSpec,
+  Transform,
+} from '@perses-dev/core';
 import { useMemo } from 'react';
+
+// export function applyJoinTransform(
+//   data: Array<Record<string, unknown>>,
+//   transform: Transform<JoinByColumnValueTransformSpec>
+// ): Array<Record<string, unknown>> {
+//   // If column is undefined or empty, return data as is
+//   if (!transform.spec.plugin.spec.column) {
+//     return data;
+//   }
+//
+//   const column: string = transform.spec.plugin.spec.column;
+//   const entriesHashed: { [key: string]: Record<string, unknown> } = {};
+//
+//   for (const entry of data) {
+//     if (Object.keys(entry).includes(column)) {
+//       const hash = String(entry[column]);
+//       const entryHashed = entriesHashed[hash];
+//
+//       if (entryHashed) {
+//         entriesHashed[hash] = { ...entryHashed, ...entry };
+//       } else {
+//         entriesHashed[hash] = { ...entry };
+//       }
+//     }
+//   }
+//   return Object.values(entriesHashed);
+// }
 
 export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
-  transform: Transform<JoinByColumnValueTransformSpec>
+  columns: string[]
 ): Array<Record<string, unknown>> {
   // If column is undefined or empty, return data as is
-  if (!transform.spec.plugin.spec.column) {
+  if (columns?.length === 0) {
     return data;
   }
 
-  const column: string = transform.spec.plugin.spec.column as string;
-  const entriesHashed: { [key: string]: Record<string, unknown> } = {};
+  const rowHashed: { [key: string]: Record<string, unknown> } = {};
 
-  for (const entry of data) {
-    if (Object.keys(entry).includes(column)) {
-      const hash = String(entry[column]);
-      const entryHashed = entriesHashed[hash];
+  for (const row of data) {
+    const rowHash = Object.keys(row)
+      .filter((k) => columns.includes(k))
+      .map((k) => row[k])
+      .join('|');
 
-      if (entryHashed) {
-        entriesHashed[hash] = { ...entryHashed, ...entry };
-      } else {
-        entriesHashed[hash] = { ...entry };
-      }
+    const rowHashedValue = rowHashed[rowHash];
+    if (rowHashedValue) {
+      rowHashed[rowHash] = { ...rowHashedValue, ...row };
+    } else {
+      rowHashed[rowHash] = { ...row };
     }
   }
-  return Object.values(entriesHashed);
+  return Object.values(rowHashed);
 }
 
-export function applyMergeIndexedColumnsTransform(
+export function applyMergeColumnsTransform(
   data: Array<Record<string, unknown>>,
-  transform: Transform<MergeIndexedColumnsTransformSpec>
+  selectedColumns: string[],
+  outputName: string
 ) {
   const result: Array<Record<string, unknown>> = [];
-  const column: string = transform.spec.plugin.spec.column as string;
+
+  for (const row of data) {
+    const columns = Object.keys(row).filter((k) => selectedColumns.includes(k));
+
+    const selectedColumnValues: Record<string, unknown> = {};
+
+    for (const column of columns) {
+      selectedColumnValues[column] = row[column];
+      delete row[column];
+    }
+
+    for (const column of columns) {
+      result.push({ ...row, [outputName]: selectedColumnValues[column] });
+    }
+
+    if (columns.length === 0) {
+      result.push(row);
+    }
+  }
+
+  return result;
+}
+
+export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unknown>>, column: string) {
+  const result: Array<Record<string, unknown>> = [];
 
   for (const entry of data) {
     const indexedColumns = Object.keys(entry).filter((k) =>
@@ -71,6 +128,27 @@ export function applyMergeIndexedColumnsTransform(
   return result;
 }
 
+export function applyMergeSeriesTransform(data: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  let result: Array<Record<string, unknown>> = [...data];
+
+  const labelColumns = Array.from(
+    new Set(
+      data
+        .flatMap(Object.keys)
+        .map((label) => label.replace(/ #\d+/, ''))
+        .filter((label) => label !== 'value')
+    )
+  );
+
+  for (const label of labelColumns) {
+    result = applyMergeIndexedColumnsTransform(result, label);
+  }
+
+  result = applyJoinTransform(result, labelColumns);
+
+  return result;
+}
+
 /*
  * Transforms query data with the given transforms
  */
@@ -85,17 +163,44 @@ export function transformData(
     if (transform.spec.disabled) continue;
 
     switch (transform.spec.plugin.kind) {
-      case 'JoinByColumnValue':
-        result = applyJoinTransform(result, transform as unknown as Transform<JoinByColumnValueTransformSpec>);
+      case 'JoinByColumnValue': {
+        const spec = (transform as unknown as Transform<JoinByColumnValueTransformSpec>).spec.plugin.spec;
+        if (spec.columns && spec.columns.length > 0) {
+          result = applyJoinTransform(result, spec.columns);
+        }
         break;
-      case 'MergeIndexedColumns':
-        result = applyMergeIndexedColumnsTransform(
-          result,
-          transform as unknown as Transform<MergeIndexedColumnsTransformSpec>
-        );
+      }
+      case 'MergeIndexedColumns': {
+        const spec = (transform as unknown as Transform<MergeIndexedColumnsTransformSpec>).spec.plugin.spec;
+        if (spec.column) {
+          result = applyMergeIndexedColumnsTransform(result, spec.column);
+        }
         break;
+      }
+      case 'MergeColumns': {
+        const spec = (transform as unknown as Transform<MergeColumnsTransformSpec>).spec.plugin.spec;
+        if (spec.columns && spec.columns.length > 0 && spec.name) {
+          result = applyMergeColumnsTransform(result, spec.columns, spec.name);
+        }
+        break;
+      }
+      case 'MergeSeries': {
+        result = applyMergeSeriesTransform(result);
+        break;
+      }
     }
   }
+
+  // Ordering data column alphabetically
+  result = result.map((row) => {
+    return Object.keys(row)
+      .sort()
+      .reduce((obj, key) => {
+        // @ts-expect-error: todo
+        obj[key] = row[key];
+        return obj;
+      }, {});
+  });
   return result;
 }
 

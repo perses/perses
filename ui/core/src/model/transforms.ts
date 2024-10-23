@@ -25,7 +25,15 @@ export interface TransformationSpec<PluginSpec = UnknownSpec> {
 export interface JoinByColumnValueTransformSpec {
   kind: 'JoinByColumnValue';
   spec: {
-    column: string;
+    columns: string[];
+  };
+}
+
+export interface MergeColumnsTransformSpec {
+  kind: 'MergeColumns';
+  spec: {
+    columns: string[];
+    name: string;
   };
 }
 
@@ -36,8 +44,14 @@ export interface MergeIndexedColumnsTransformSpec {
   };
 }
 
+export interface MergeSeriesTransformSpec {
+  kind: 'MergeSeries';
+}
+
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
   JoinByColumnValue: 'Join by column value',
+  MergeColumns: 'Merge columns',
   MergeIndexedColumns: 'Merge indexed columns',
+  MergeSeries: 'Merge series',
 };

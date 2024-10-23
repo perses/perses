@@ -11,8 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormControlLabel, MenuItem, Stack, StackProps, Switch, TextField, Typography } from '@mui/material';
-import { JoinByColumnValueTransformSpec, MergeIndexedColumnsTransformSpec, Transform } from '@perses-dev/core';
+import {
+  Autocomplete,
+  FormControlLabel,
+  MenuItem,
+  Stack,
+  StackProps,
+  Switch,
+  TextField,
+  Typography,
+} from '@mui/material';
+import {
+  JoinByColumnValueTransformSpec,
+  MergeColumnsTransformSpec,
+  MergeIndexedColumnsTransformSpec,
+  MergeSeriesTransformSpec,
+  Transform,
+} from '@perses-dev/core';
 
 interface TransformSpecEditorProps<Spec> {
   value: Transform<Spec>;
@@ -59,6 +74,65 @@ function JoinByColumnValueTransformEditor({
   );
 }
 
+function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeColumnsTransformSpec>) {
+  return (
+    <Stack direction="row" gap={1} alignItems="center">
+      <Autocomplete
+        freeSolo
+        multiple
+        id="merge-columns-columns"
+        sx={{ width: '100%' }}
+        options={[]}
+        value={value.spec.plugin.spec.columns}
+        renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" />}
+        onChange={(_, columns) => {
+          onChange({
+            ...value,
+            spec: {
+              ...value.spec,
+              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, columns: columns } },
+            },
+          });
+        }}
+      />
+
+      <TextField
+        id="merge-columns-name"
+        variant="outlined"
+        label="Output Name"
+        value={value.spec.plugin.spec.name}
+        sx={{ width: '100%' }}
+        onChange={(e) => {
+          onChange({
+            ...value,
+            spec: {
+              ...value.spec,
+              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, name: e.target.value } },
+            },
+          });
+        }}
+        required
+      />
+      <FormControlLabel
+        label="Enabled"
+        labelPlacement="start"
+        control={
+          <Switch
+            value={!value.spec.disabled ?? true}
+            checked={!value.spec.disabled ?? true}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                spec: { ...value.spec, disabled: !e.target.checked },
+              })
+            }
+          />
+        }
+      />
+    </Stack>
+  );
+}
+
 function MergeIndexedColumnsTransformEditor({
   value,
   onChange,
@@ -66,7 +140,7 @@ function MergeIndexedColumnsTransformEditor({
   return (
     <Stack direction="row">
       <TextField
-        id="merge-column"
+        id="merge-indexed-columns"
         variant="outlined"
         label="Column"
         placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
@@ -80,6 +154,29 @@ function MergeIndexedColumnsTransformEditor({
         }}
         required
       />
+      <FormControlLabel
+        label="Enabled"
+        labelPlacement="start"
+        control={
+          <Switch
+            value={!value.spec.disabled ?? true}
+            checked={!value.spec.disabled ?? true}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                spec: { ...value.spec, disabled: !e.target.checked },
+              })
+            }
+          />
+        }
+      />
+    </Stack>
+  );
+}
+
+function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransformSpec>) {
+  return (
+    <Stack direction="row">
       <FormControlLabel
         label="Enabled"
         labelPlacement="start"
@@ -122,10 +219,22 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
             <Typography variant="caption">Regroup rows with equal cell value in a column</Typography>
           </Stack>
         </MenuItem>
+        <MenuItem value="MergeColumns">
+          <Stack>
+            <Typography>Merge columns</Typography>
+            <Typography variant="caption">Multiple columns are merged to one column</Typography>
+          </Stack>
+        </MenuItem>
         <MenuItem value="MergeIndexedColumns">
           <Stack>
             <Typography>Merge indexed columns</Typography>
-            <Typography variant="caption">All indexed columns are merged to one column</Typography>
+            <Typography variant="caption">Indexed columns are merged to one column</Typography>
+          </Stack>
+        </MenuItem>
+        <MenuItem value="MergeSeries">
+          <Stack>
+            <Typography>Merge series</Typography>
+            <Typography variant="caption">Series will be merged by their labels</Typography>
           </Stack>
         </MenuItem>
       </TextField>
@@ -135,10 +244,22 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
           onChange={onChange as unknown as (transform: Transform<JoinByColumnValueTransformSpec>) => void}
         />
       )}
+      {value.spec.plugin.kind === 'MergeColumns' && (
+        <MergeColumnsTransformEditor
+          value={value as unknown as Transform<MergeColumnsTransformSpec>}
+          onChange={onChange as unknown as (transform: Transform<MergeColumnsTransformSpec>) => void}
+        />
+      )}
       {value.spec.plugin.kind === 'MergeIndexedColumns' && (
         <MergeIndexedColumnsTransformEditor
           value={value as unknown as Transform<MergeIndexedColumnsTransformSpec>}
           onChange={onChange as unknown as (transform: Transform<MergeIndexedColumnsTransformSpec>) => void}
+        />
+      )}
+      {value.spec.plugin.kind === 'MergeSeries' && (
+        <MergeSeriesTransformEditor
+          value={value as unknown as Transform<MergeSeriesTransformSpec>}
+          onChange={onChange as unknown as (transform: Transform<MergeSeriesTransformSpec>) => void}
         />
       )}
     </Stack>
