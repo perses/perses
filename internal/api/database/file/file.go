@@ -143,7 +143,7 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 		}
 
 		// If it's YAML, we need to convert to JSON first
-		if d.Extension == "yaml" {
+		if d.Extension == config.YAMLExtension {
 			// Parse the YAML content
 			var yamlData interface{}
 			if err := yaml.Unmarshal(data, &yamlData); err != nil {
