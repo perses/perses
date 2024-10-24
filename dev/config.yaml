@@ -40,6 +40,7 @@ ephemeral_dashboard:
 frontend:
   explorer:
     enable: true
+  send_usage_metrics: true
 
   important_dashboards:
     - project: "perses"

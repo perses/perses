@@ -59,4 +59,6 @@ type Frontend struct {
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
 	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
+	// SendUsageMetrics toggles on and off sending usage metrics from the prontend to track which dashboards are being used.
+	SendUsageMetrics bool `json:"send_usage_metrics" yaml:"send_usage_metrics"`
 }

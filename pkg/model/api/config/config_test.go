@@ -71,7 +71,8 @@ func TestJSONMarshalConfig(t *testing.T) {
     },
     "time_range": {
       "disable_custom": false
-    }
+    },
+    "send_usage_metrics": false
   }
 }`,
 		},
@@ -138,7 +139,8 @@ func TestJSONMarshalConfig(t *testing.T) {
         "1w",
         "2w"
       ]
-    }
+    },
+    "send_usage_metrics": false
   }
 }`,
 		},

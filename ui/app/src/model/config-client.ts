@@ -144,6 +144,7 @@ export interface FrontendConfig {
   information?: string;
   explorer: ExplorerConfig;
   time_range: TimeRangeConfig;
+  send_usage_metrics: boolean;
 }
 
 export interface EphemeralDashboardConfig {
