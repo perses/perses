@@ -347,7 +347,7 @@
                     "plugin": {
                       "kind": "JoinByColumnValue",
                         "spec": {
-                            "column": "instance"
+                            "columns": ["instance"]
                         }
                     },
                     "disabled": false

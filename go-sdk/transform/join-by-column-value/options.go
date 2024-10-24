@@ -13,9 +13,9 @@
 
 package joinbycolumnvalue
 
-func Column(column string) Option {
+func Columns(columns []string) Option {
 	return func(plugin *Builder) error {
-		plugin.Column = column
+		plugin.Columns = columns
 		return nil
 	}
 }

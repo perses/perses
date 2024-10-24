@@ -36,7 +36,7 @@ func create(options ...Option) (Builder, error) {
 }
 
 type PluginSpec struct {
-	Column string `json:"column" yaml:"column"`
+	Columns []string `json:"columns" yaml:"columns"`
 }
 
 type Builder struct {

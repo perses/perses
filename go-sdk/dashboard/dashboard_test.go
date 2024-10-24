@@ -103,7 +103,7 @@ func buildTargetStatusPanel() panelgroup.Option {
 			}),
 			table.AddTransform(
 				joinbycolumnvalue.JoinByColumnValue(
-					joinbycolumnvalue.Column("instance"),
+					joinbycolumnvalue.Columns([]string{"instance"}),
 				),
 			),
 		),

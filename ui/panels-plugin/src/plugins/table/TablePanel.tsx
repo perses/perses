@@ -129,6 +129,7 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
         }, {} as Labels);
 
         // If there are multiple queries, we need to add the query index to the value key to avoid conflicts
+        // Timestamp is not indexed as it will be the same for all queries
         return { timestamp: ts.values[0][0], [`value #${queryIndex + 1}`]: ts.values[0][1], ...labels };
       });
   }, [queryResults]);

@@ -31,7 +31,7 @@ describe('TransformsEditor', () => {
   it('can collapse and update a transformation', () => {
     const onChange = jest.fn();
     renderTableColumnsEditor(
-      [{ kind: 'Transform', spec: { plugin: { kind: 'JoinByColumnValue', spec: { column: 'env' } } } }],
+      [{ kind: 'Transform', spec: { plugin: { kind: 'MergeIndexedColumns', spec: { column: 'env' } } } }],
       onChange
     );
 
@@ -42,7 +42,7 @@ describe('TransformsEditor', () => {
     const columnInput = screen.getByRole('textbox', { name: /Column/i });
     fireEvent.change(columnInput, { target: { value: 'MySuperName' } });
     expect(onChange).toHaveBeenCalledWith([
-      { kind: 'Transform', spec: { plugin: { kind: 'JoinByColumnValue', spec: { column: 'MySuperName' } } } },
+      { kind: 'Transform', spec: { plugin: { kind: 'MergeIndexedColumns', spec: { column: 'MySuperName' } } } },
     ]);
   });
 });

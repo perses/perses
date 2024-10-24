@@ -51,7 +51,7 @@ export function applyJoinTransform(
   columns: string[]
 ): Array<Record<string, unknown>> {
   // If column is undefined or empty, return data as is
-  if (columns?.length === 0) {
+  if (columns.length === 0) {
     return data;
   }
 

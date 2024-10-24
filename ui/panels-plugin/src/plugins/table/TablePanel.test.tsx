@@ -155,7 +155,7 @@ describe('TablePanel', () => {
             plugin: {
               kind: 'JoinByColumnValue',
               spec: {
-                column: 'env',
+                columns: ['env'],
               },
             },
           },
