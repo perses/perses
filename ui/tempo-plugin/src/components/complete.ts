@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Completion, CompletionContext, CompletionResult } from '@codemirror/autocomplete';
+import { Completion, CompletionContext, CompletionResult, insertCompletionText } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { Tree } from '@lezer/common';
@@ -25,13 +25,14 @@ import {
   SpansetFilter,
   FieldOp,
 } from '@grafana/lezer-traceql';
+import { EditorView } from '@uiw/react-codemirror';
 import { TempoClient } from '../model/tempo-client';
 
 /** CompletionScope specifies the completion kind, e.g. whether to complete tag names or values etc. */
 type CompletionScope =
   | { kind: 'Scopes' } // 'resource'|'span'
   | { kind: 'TagName'; scope: 'resource' | 'span' | 'intrinsic' }
-  | { kind: 'TagValue'; tag: string; quotes?: boolean };
+  | { kind: 'TagValue'; tag: string };
 
 /**
  * Completions specifies the identified scopes and position of the completion in the current editor text.
@@ -154,13 +155,17 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
       if (node.parent?.firstChild?.type.id === FieldExpression) {
         const fieldExpr = node.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
-        return { scopes: [{ kind: 'TagValue', tag: attribute, quotes: true }], from: pos };
+        return { scopes: [{ kind: 'TagValue', tag: attribute }], from: pos };
       }
       break;
 
     case StringType:
       // autocomplete { resource.service.name="
-      if (node.parent?.parent?.parent?.firstChild?.type.id === FieldExpression) {
+      // do not autocomplete if cursor is after closing quotes { resource.service.name=""
+      if (
+        node.parent?.parent?.parent?.firstChild?.type.id === FieldExpression &&
+        !/^".*"$/.test(state.sliceDoc(node.from, pos))
+      ) {
         const fieldExpr = node.parent.parent.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
         return { scopes: [{ kind: 'TagValue', tag: attribute }], from: node.from + 1 }; // node.from+1 to ignore leading "
@@ -172,7 +177,9 @@ export function identifyCompletions(state: EditorState, pos: number, tree: Tree)
       if (node.prevSibling?.type.id === FieldOp && node.parent?.firstChild?.type.id === FieldExpression) {
         const fieldExpr = node.parent.firstChild;
         const attribute = state.sliceDoc(fieldExpr.from, fieldExpr.to);
-        return { scopes: [{ kind: 'TagValue', tag: attribute }], from: node.from };
+        // ignore leading " in { name="HT
+        const from = state.sliceDoc(node.from, node.from + 1) === '"' ? node.from + 1 : node.from;
+        return { scopes: [{ kind: 'TagValue', tag: attribute }], from };
       }
 
       // autocomplete { s
@@ -207,7 +214,7 @@ async function retrieveOptions(completions: CompletionScope[], client?: TempoCli
 
       case 'TagValue':
         if (client) {
-          results.push(completeTagValue(client, completion.tag, completion.quotes));
+          results.push(completeTagValue(client, completion.tag));
         }
         break;
     }
@@ -224,13 +231,31 @@ async function completeTagName(client: TempoClient, scope: 'resource' | 'span' |
   return response.scopes.flatMap((scope) => scope.tags).map((tag) => ({ label: tag }));
 }
 
-async function completeTagValue(client: TempoClient, tag: string, quotes?: boolean): Promise<Completion[]> {
+/**
+ * Add quotes to the completion text in case quotes are not present already.
+ * This handles the following cases:
+ * { name=HTTP
+ * { name="x
+ * { name="x" where cursor is after the 'x'
+ */
+function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number) {
+  let insertText = completion.label;
+  if (view.state.sliceDoc(from - 1, from) !== '"') {
+    insertText = '"' + insertText;
+  }
+  if (view.state.sliceDoc(to, to + 1) !== '"') {
+    insertText = insertText + '"';
+  }
+  view.dispatch(insertCompletionText(view.state, insertText, from, to));
+}
+
+async function completeTagValue(client: TempoClient, tag: string): Promise<Completion[]> {
   const response = await client.searchTagValues({ tag });
   const completions: Completion[] = [];
   for (const { type, value } of response.tagValues) {
     switch (type) {
       case 'string':
-        completions.push({ displayLabel: value, label: quotes ? `"${value}"` : value });
+        completions.push({ label: value, apply: applyQuotedCompletion });
         break;
 
       case 'keyword':
