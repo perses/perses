@@ -69,7 +69,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
   const queryExpr = useReplaceVariablesInString(rest.value);
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
-  const { errorMessage, isGenericError } = processError(error);
+  const { errorMessage, isGenericError } = useMemo(() => processError(error), [error]);
 
   const treeViewText = 'Tree View';
   const treeViewActionTexts = {
