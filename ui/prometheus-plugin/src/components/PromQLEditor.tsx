@@ -24,6 +24,10 @@ import { PrometheusDatasourceSelector } from '../model';
 import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
 
+const treeViewStr = 'Tree View';
+const treeViewOpenStr = 'Open ' + treeViewStr;
+const treeViewCloseStr = 'Close ' + treeViewStr;
+
 // Process the error to identify if it's a generic one & adjust the message in some cases
 // TODO: This should be removed when properly tackling query error at query editor level (https://github.com/perses/perses/issues/1419)
 //       Here this was kinda a quick-win to do it like this with the implementation of the Tree view.
@@ -32,13 +36,11 @@ import TreeNode from './TreeNode';
 function processError(error: unknown): { errorMessage: string; isGenericError: boolean } {
   // Specific errors that user should be able to hide
   const apiNotAvailableError = '404 page not found';
-  const apiNotAvailableErrorRephrased =
-    'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+  const apiNotAvailableErrorRephrased = `${treeViewStr} is available only for datasources whose APIs comply with Prometheus 3.0 specifications`;
 
   const blockedByProxyError =
     'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
-  const blockedByProxyErrorRephrased =
-    'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';;
+  const blockedByProxyErrorRephrased = `Your datasource configuration is blocking the ${treeViewStr} feature: the datasource should allow POST requests to "/api/v1/parse_query"`;
 
   let errorMessage = 'An unknown error occurred';
   let isGenericError = false;
@@ -74,12 +76,6 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
   const { errorMessage, isGenericError } = useMemo(() => processError(error), [error]);
-
-  const treeViewText = 'Tree View';
-  const treeViewActionTexts = {
-    open: 'Open ' + treeViewText,
-    close: 'Close ' + treeViewText,
-  };
 
   const handleShowTreeView = () => {
     setTreeViewVisible(!isTreeViewVisible);
@@ -132,9 +128,9 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
           ) : (
             // Otherwise include the logic to show/hide the tree view
             <>
-              <Tooltip title={isTreeViewVisible ? treeViewActionTexts.close : treeViewActionTexts.open}>
+              <Tooltip title={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}>
                 <IconButton
-                  aria-label={isTreeViewVisible ? treeViewActionTexts.close : treeViewActionTexts.open}
+                  aria-label={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}
                   onClick={handleShowTreeView}
                   sx={{ position: 'absolute', right: '5px', top: '5px' }}
                   size="small"
@@ -144,9 +140,9 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
               </Tooltip>
               {isTreeViewVisible && (
                 <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
-                  <Tooltip title={treeViewActionTexts.close}>
+                  <Tooltip title={treeViewCloseStr}>
                     <IconButton
-                      aria-label={treeViewActionTexts.close}
+                      aria-label={treeViewCloseStr}
                       onClick={() => setTreeViewVisible(false)}
                       sx={{ position: 'absolute', top: '5px', right: '5px' }}
                       size="small"
@@ -158,7 +154,7 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
                     // Here the user is able to hide the error alert
                     <ErrorAlert
                       error={{
-                        name: 'Tree view not available',
+                        name: `${treeViewStr} not available`,
                         message: errorMessage,
                       }}
                     />
