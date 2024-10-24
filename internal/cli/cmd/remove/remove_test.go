@@ -81,6 +81,7 @@ object "Project" "perses" has been deleted
 			IsErrorExpected: false,
 			ExpectedMessage: `object "Folder" "aoe4" has been deleted in the project "game"
 object "Folder" "ff15" has been deleted in the project "perses"
+object "Folder" "foo" has been deleted in the project "perses"
 object "Project" "perses" has been deleted
 `,
 		},
