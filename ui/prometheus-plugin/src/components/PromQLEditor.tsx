@@ -32,18 +32,22 @@ import TreeNode from './TreeNode';
 function processError(error: unknown): { errorMessage: string; isGenericError: boolean } {
   // Specific errors that user should be able to hide
   const apiNotAvailableError = '404 page not found';
+  const apiNotAvailableErrorRephrased =
+    'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+
   const blockedByProxyError =
     'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
+  const blockedByProxyErrorRephrased =
+    'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';;
 
   let errorMessage = 'An unknown error occurred';
   let isGenericError = false;
   if (error && error instanceof Error) {
     errorMessage = error.message.trim();
     if (errorMessage === apiNotAvailableError) {
-      errorMessage = 'Tree view is available only for datasources whose APIs comply with Prometheus 3.0 specifications';
+      errorMessage = apiNotAvailableErrorRephrased;
     } else if (errorMessage === blockedByProxyError) {
-      errorMessage =
-        'Your datasource configuration is blocking the Tree view feature: the datasource should allow POST requests to "/api/v1/parse_query"';
+      errorMessage = blockedByProxyErrorRephrased;
     } else {
       isGenericError = true;
     }
