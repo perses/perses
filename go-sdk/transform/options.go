@@ -11,40 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package table
+package transform
 
-import (
-	"github.com/perses/perses/go-sdk/transform"
-)
+import "github.com/perses/perses/pkg/model/api/v1/common"
 
-func WithDensity(density Density) Option {
+func Plugin(plugin common.Plugin) Option {
 	return func(builder *Builder) error {
-		builder.Density = density
+		builder.Spec.Plugin = plugin
 		return nil
 	}
 }
 
-func WithColumnSettings(settings []ColumnSettings) Option {
+func IsDisabled(disabled bool) Option {
 	return func(builder *Builder) error {
-		builder.ColumnSettings = settings
-		return nil
-	}
-}
-
-func WithCellSettings(settings []CellSettings) Option {
-	return func(builder *Builder) error {
-		builder.CellSettings = settings
-		return nil
-	}
-}
-
-func AddTransform(options ...transform.Option) Option {
-	return func(builder *Builder) error {
-		t, err := transform.New(options...)
-		if err != nil {
-			return err
-		}
-		builder.Transforms = append(builder.Transforms, t.Transform)
+		builder.Spec.Disabled = disabled
 		return nil
 	}
 }

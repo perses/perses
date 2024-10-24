@@ -20,6 +20,7 @@ spec: close({
 	density?: "compact" | "standard" | "comfortable"
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
+	transforms?: [...#transform]
 })
 
 #columnSettings: {
@@ -71,4 +72,46 @@ spec: close({
 	text?:            string
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+}
+
+#joinByColumnValueTransform: {
+	kind: "JoinByColumnValue"
+	spec: {
+		column: string
+	}
+}
+
+#mergeColumnsTransform: {
+	kind: "MergeColumns"
+	spec: {
+		columns: [string]
+		name: string
+	}
+}
+
+#mergeIndexedColumnsTransform: {
+	kind: "MergeIndexedColumns"
+	spec: {
+		column: string
+	}
+}
+
+#mergeSeries: {
+	kind: "MergeSeries"
+	spec: _
+}
+
+#transformSpec: {
+	#joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries
+}
+
+#transform: {
+	kind: "Transform"
+	spec: {
+		plugin: {
+			kind: string
+			spec: _
+		}
+		disabled?: bool
+	}
 }

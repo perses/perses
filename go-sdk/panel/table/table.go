@@ -14,6 +14,7 @@
 package table
 
 import (
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/panel"
 )
 
@@ -94,9 +95,10 @@ type CellSettings struct {
 }
 
 type PluginSpec struct {
-	Density        Density          `json:"density,omitempty" yaml:"density,omitempty"`
-	ColumnSettings []ColumnSettings `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
-	CellSettings   []CellSettings   `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Density        Density            `json:"density,omitempty" yaml:"density,omitempty"`
+	ColumnSettings []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
+	CellSettings   []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Transforms     []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
 }
 
 type Option func(plugin *Builder) error

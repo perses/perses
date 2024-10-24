@@ -11,40 +11,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package table
+package joinbycolumnvalue
 
 import (
 	"github.com/perses/perses/go-sdk/transform"
 )
 
-func WithDensity(density Density) Option {
-	return func(builder *Builder) error {
-		builder.Density = density
-		return nil
+const PluginKind = "JoinByColumnValue"
+
+type Option func(plugin *Builder) error
+
+func create(options ...Option) (Builder, error) {
+	builder := &Builder{
+		PluginSpec: PluginSpec{},
 	}
+
+	for _, opt := range options {
+		if err := opt(builder); err != nil {
+			return *builder, err
+		}
+	}
+
+	return *builder, nil
 }
 
-func WithColumnSettings(settings []ColumnSettings) Option {
-	return func(builder *Builder) error {
-		builder.ColumnSettings = settings
-		return nil
-	}
+type PluginSpec struct {
+	Columns []string `json:"columns" yaml:"columns"`
 }
 
-func WithCellSettings(settings []CellSettings) Option {
-	return func(builder *Builder) error {
-		builder.CellSettings = settings
-		return nil
-	}
+type Builder struct {
+	PluginSpec `json:"spec" yaml:"spec"`
 }
 
-func AddTransform(options ...transform.Option) Option {
-	return func(builder *Builder) error {
-		t, err := transform.New(options...)
+func JoinByColumnValue(options ...Option) transform.Option {
+	return func(builder *transform.Builder) error {
+		plugin, err := create(options...)
 		if err != nil {
 			return err
 		}
-		builder.Transforms = append(builder.Transforms, t.Transform)
+
+		builder.Spec.Plugin.Kind = PluginKind
+		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}
 }
