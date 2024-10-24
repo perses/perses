@@ -460,6 +460,10 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             endpointPattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
             method: 'GET',
           },
+          {
+            endpointPattern: '/api/v1/parse_query',
+            method: 'POST',
+          },
         ],
         url: '',
       },

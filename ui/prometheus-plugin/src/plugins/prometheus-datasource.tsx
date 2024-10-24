@@ -22,6 +22,7 @@ import {
   PrometheusClient,
   metricMetadata,
   series,
+  parseQuery,
 } from '../model';
 import { PrometheusDatasourceSpec } from './types';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
@@ -53,6 +54,7 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
     metricMetadata: (params, headers) => metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders }),
     series: (params, headers) => series(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    parseQuery: (params, headers) => parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 
