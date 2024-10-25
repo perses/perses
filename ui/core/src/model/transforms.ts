@@ -11,42 +11,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, UnknownSpec } from './definitions';
-
-export interface Transform<PluginSpec = UnknownSpec> extends Definition<TransformationSpec<PluginSpec>> {
-  kind: 'Transform';
-}
-
-export interface TransformationSpec<PluginSpec = UnknownSpec> {
-  plugin: PluginSpec;
+export interface TransformCommonSpec {
   disabled?: boolean;
 }
 
-export interface JoinByColumnValueTransformSpec {
+export interface JoinByColumnValueTransform {
   kind: 'JoinByColumnValue';
-  spec: {
+  spec: TransformCommonSpec & {
     columns: string[];
   };
 }
 
-export interface MergeColumnsTransformSpec {
+export interface MergeColumnsTransform {
   kind: 'MergeColumns';
-  spec: {
+  spec: TransformCommonSpec & {
     columns: string[];
     name: string;
   };
 }
 
-export interface MergeIndexedColumnsTransformSpec {
+export interface MergeIndexedColumnsTransform {
   kind: 'MergeIndexedColumns';
-  spec: {
+  spec: TransformCommonSpec & {
     column: string;
   };
 }
 
-export interface MergeSeriesTransformSpec {
+export interface MergeSeriesTransform {
   kind: 'MergeSeries';
+  spec: TransformCommonSpec;
 }
+
+export type Transform =
+  | JoinByColumnValueTransform
+  | MergeColumnsTransform
+  | MergeIndexedColumnsTransform
+  | MergeSeriesTransform;
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {

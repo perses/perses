@@ -17,7 +17,7 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { TRANSFORM_TEXT } from '@perses-dev/core';
+import { Transform, TRANSFORM_TEXT } from '@perses-dev/core';
 import { TransformEditor, TransformEditorProps } from './TransformEditor';
 
 export interface TransformEditorContainerProps extends TransformEditorProps {
@@ -37,7 +37,7 @@ export function TransformEditorContainer({
   ...props
 }: TransformEditorContainerProps) {
   function handleTransformDisable() {
-    onChange({ ...value, spec: { ...value.spec, disabled: !value.spec?.disabled } });
+    onChange({ ...value, spec: { ...value.spec, disabled: !value.spec?.disabled } } as Transform);
   }
 
   return (
@@ -55,9 +55,9 @@ export function TransformEditorContainer({
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
-            {value.spec.plugin.kind ? (
+            {value.kind ? (
               <span>
-                <strong>{TRANSFORM_TEXT[value.spec.plugin.kind as keyof typeof TRANSFORM_TEXT]}</strong>
+                <strong>{TRANSFORM_TEXT[value.kind]}</strong>
               </span>
             ) : (
               <strong>Select a transformation kind</strong>

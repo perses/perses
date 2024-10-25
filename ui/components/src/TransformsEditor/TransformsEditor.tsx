@@ -33,7 +33,8 @@ export function TransformsEditor({ value, onChange, ...props }: TransformsEditor
 
   function handleTransformAdd(): void {
     const updatedTransforms = [...value];
-    updatedTransforms.push({ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } });
+    // @ts-expect-error: Unknown transform
+    updatedTransforms.push({ kind: '', spec: {} });
     onChange(updatedTransforms);
     setTransformsCollapsed((prev) => {
       prev.push(false);

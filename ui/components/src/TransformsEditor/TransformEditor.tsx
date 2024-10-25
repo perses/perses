@@ -22,22 +22,19 @@ import {
   Typography,
 } from '@mui/material';
 import {
-  JoinByColumnValueTransformSpec,
-  MergeColumnsTransformSpec,
-  MergeIndexedColumnsTransformSpec,
-  MergeSeriesTransformSpec,
+  JoinByColumnValueTransform,
+  MergeColumnsTransform,
+  MergeIndexedColumnsTransform,
+  MergeSeriesTransform,
   Transform,
 } from '@perses-dev/core';
 
 interface TransformSpecEditorProps<Spec> {
-  value: Transform<Spec>;
-  onChange: (transform: Transform<Spec>) => void;
+  value: Spec;
+  onChange: (transform: Spec) => void;
 }
 
-function JoinByColumnValueTransformEditor({
-  value,
-  onChange,
-}: TransformSpecEditorProps<JoinByColumnValueTransformSpec>) {
+function JoinByColumnValueTransformEditor({ value, onChange }: TransformSpecEditorProps<JoinByColumnValueTransform>) {
   return (
     <Stack direction="row">
       <Autocomplete
@@ -46,14 +43,14 @@ function JoinByColumnValueTransformEditor({
         id="join-columns"
         sx={{ width: '100%' }}
         options={[]}
-        value={value.spec.plugin.spec.columns ?? []}
+        value={value.spec.columns ?? []}
         renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
             ...value,
             spec: {
               ...value.spec,
-              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, columns: columns } },
+              columns: columns,
             },
           });
         }}
@@ -78,7 +75,7 @@ function JoinByColumnValueTransformEditor({
   );
 }
 
-function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeColumnsTransformSpec>) {
+function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeColumnsTransform>) {
   return (
     <Stack direction="row" gap={1} alignItems="center">
       <Autocomplete
@@ -87,14 +84,14 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         id="merge-columns-columns"
         sx={{ width: '100%' }}
         options={[]}
-        value={value.spec.plugin.spec.columns ?? []}
+        value={value.spec.columns ?? []}
         renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
             ...value,
             spec: {
               ...value.spec,
-              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, columns: columns } },
+              columns: columns,
             },
           });
         }}
@@ -104,14 +101,14 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         id="merge-columns-name"
         variant="outlined"
         label="Output Name"
-        value={value.spec.plugin.spec.name ?? ''}
+        value={value.spec.name ?? ''}
         sx={{ width: '100%' }}
         onChange={(e) => {
           onChange({
             ...value,
             spec: {
               ...value.spec,
-              plugin: { ...value.spec.plugin, spec: { ...value.spec.plugin.spec, name: e.target.value } },
+              name: e.target.value,
             },
           });
         }}
@@ -140,7 +137,7 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
 function MergeIndexedColumnsTransformEditor({
   value,
   onChange,
-}: TransformSpecEditorProps<MergeIndexedColumnsTransformSpec>) {
+}: TransformSpecEditorProps<MergeIndexedColumnsTransform>) {
   return (
     <Stack direction="row">
       <TextField
@@ -148,12 +145,12 @@ function MergeIndexedColumnsTransformEditor({
         variant="outlined"
         label="Column"
         placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
-        value={value.spec.plugin.spec.column ?? ''}
+        value={value.spec.column ?? ''}
         sx={{ width: '100%' }}
         onChange={(e) => {
           onChange({
             ...value,
-            spec: { ...value.spec, plugin: { ...value.spec.plugin, spec: { column: e.target.value } } },
+            spec: { ...value.spec, column: e.target.value },
           });
         }}
         required
@@ -178,7 +175,7 @@ function MergeIndexedColumnsTransformEditor({
   );
 }
 
-function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransformSpec>) {
+function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransform>) {
   return (
     <Stack direction="row">
       <FormControlLabel
@@ -212,10 +209,8 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
       <TextField
         select
         label="Kind"
-        value={value.spec.plugin.kind}
-        onChange={(e) =>
-          onChange({ ...value, spec: { ...value.spec, plugin: { ...value.spec.plugin, kind: e.target.value } } })
-        }
+        value={value.kind}
+        onChange={(e) => onChange({ ...value, kind: e.target.value as unknown as Transform['kind'] } as Transform)}
       >
         <MenuItem value="JoinByColumnValue">
           <Stack>
@@ -242,30 +237,10 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
           </Stack>
         </MenuItem>
       </TextField>
-      {value.spec.plugin.kind === 'JoinByColumnValue' && (
-        <JoinByColumnValueTransformEditor
-          value={value as unknown as Transform<JoinByColumnValueTransformSpec>}
-          onChange={onChange as unknown as (transform: Transform<JoinByColumnValueTransformSpec>) => void}
-        />
-      )}
-      {value.spec.plugin.kind === 'MergeColumns' && (
-        <MergeColumnsTransformEditor
-          value={value as unknown as Transform<MergeColumnsTransformSpec>}
-          onChange={onChange as unknown as (transform: Transform<MergeColumnsTransformSpec>) => void}
-        />
-      )}
-      {value.spec.plugin.kind === 'MergeIndexedColumns' && (
-        <MergeIndexedColumnsTransformEditor
-          value={value as unknown as Transform<MergeIndexedColumnsTransformSpec>}
-          onChange={onChange as unknown as (transform: Transform<MergeIndexedColumnsTransformSpec>) => void}
-        />
-      )}
-      {value.spec.plugin.kind === 'MergeSeries' && (
-        <MergeSeriesTransformEditor
-          value={value as unknown as Transform<MergeSeriesTransformSpec>}
-          onChange={onChange as unknown as (transform: Transform<MergeSeriesTransformSpec>) => void}
-        />
-      )}
+      {value.kind === 'JoinByColumnValue' && <JoinByColumnValueTransformEditor value={value} onChange={onChange} />}
+      {value.kind === 'MergeColumns' && <MergeColumnsTransformEditor value={value} onChange={onChange} />}
+      {value.kind === 'MergeIndexedColumns' && <MergeIndexedColumnsTransformEditor value={value} onChange={onChange} />}
+      {value.kind === 'MergeSeries' && <MergeSeriesTransformEditor value={value} onChange={onChange} />}
     </Stack>
   );
 }

@@ -13,22 +13,36 @@
 
 package common
 
-import "github.com/perses/perses/pkg/model/api/v1/common"
+type TransformKind = string
 
-type MergeIndexedColumnTransform struct {
-	Column string `json:"column" yaml:"column"`
+const (
+	JoinByColumValueKind    TransformKind = "JoinByColumnValue"
+	MergeByColumnsKind      TransformKind = "MergeColumns"
+	MergeIndexedColumnsKind TransformKind = "MergeIndexedColumns"
+	MergeSeriesKind         TransformKind = "MergeSeries"
+)
+
+type JoinByColumnValueSpec struct {
+	Columns  []string `json:"columns" yaml:"columns"`
+	Disabled bool     `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 }
 
-type JoinByColumnValueTransform struct {
-	Column string `json:"column" yaml:"column"`
+type MergeColumnsSpec struct {
+	Columns  []string `json:"columns" yaml:"columns"`
+	Name     string   `json:"name" yaml:"name"`
+	Disabled bool     `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 }
 
-type TransformSpec struct {
-	Plugin   common.Plugin `json:"plugin" yaml:"plugin"`
-	Disabled bool          `json:"disabled" yaml:"disabled"`
+type MergeIndexedColumnsSpec struct {
+	Column   string `json:"column" yaml:"column"`
+	Disabled bool   `json:"disabled,omitempty" yaml:"disabled,omitempty"`
+}
+
+type MergeSeriesSpec struct {
+	Disabled bool `json:"disabled,omitempty" yaml:"disabled,omitempty"`
 }
 
 type Transform struct {
-	Kind string        `json:"kind" yaml:"kind"`
-	Spec TransformSpec `json:"spec" yaml:"spec"`
+	Kind TransformKind `json:"kind" yaml:"kind"`
+	Spec interface{}   `json:"spec" yaml:"spec"`
 }

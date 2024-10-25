@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
@@ -31,7 +32,6 @@ import (
 	labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"
 	labelValuesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-values"
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
-	joinbycolumnvalue "github.com/perses/perses/go-sdk/transform/join-by-column-value"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
 	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
@@ -82,7 +82,7 @@ func buildTargetStatusPanel() panelgroup.Option {
 			table.WithCellSettings([]table.CellSettings{
 				{
 					Condition: table.Condition{
-						Kind: "Value",
+						Kind: table.ValueConditionKind,
 						Spec: table.ValueConditionSpec{
 							Value: "1",
 						},
@@ -92,7 +92,7 @@ func buildTargetStatusPanel() panelgroup.Option {
 				},
 				{
 					Condition: table.Condition{
-						Kind: "Value",
+						Kind: table.ValueConditionKind,
 						Spec: table.ValueConditionSpec{
 							Value: "0",
 						},
@@ -101,10 +101,15 @@ func buildTargetStatusPanel() panelgroup.Option {
 					BackgroundColor: "#FF0000",
 				},
 			}),
-			table.AddTransform(
-				joinbycolumnvalue.JoinByColumnValue(
-					joinbycolumnvalue.Columns([]string{"instance"}),
-				),
+			table.Transform(
+				[]common.Transform{
+					{
+						Kind: common.JoinByColumValueKind,
+						Spec: common.JoinByColumnValueSpec{
+							Columns: []string{"instance"},
+						},
+					},
+				},
 			),
 		),
 		panel.AddQuery(

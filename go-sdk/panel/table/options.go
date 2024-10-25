@@ -14,7 +14,7 @@
 package table
 
 import (
-	"github.com/perses/perses/go-sdk/transform"
+	"github.com/perses/perses/go-sdk/common"
 )
 
 func WithDensity(density Density) Option {
@@ -38,13 +38,9 @@ func WithCellSettings(settings []CellSettings) Option {
 	}
 }
 
-func AddTransform(options ...transform.Option) Option {
+func Transform(transforms []common.Transform) Option {
 	return func(builder *Builder) error {
-		t, err := transform.New(options...)
-		if err != nil {
-			return err
-		}
-		builder.Transforms = append(builder.Transforms, t.Transform)
+		builder.Transforms = transforms
 		return nil
 	}
 }

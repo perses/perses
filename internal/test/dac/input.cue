@@ -167,15 +167,9 @@ import (
 				]
 				transforms: [
 					{
-						kind: "Transform"
+						kind: "JoinByColumnValue"
 						spec: {
-							plugin: {
-								kind: "JoinByColumnValue"
-								spec: {
-									columns: ["instance"]
-								}
-							}
-							disabled: false
+							columns: ["instance"]
 						}
 					},
 				]

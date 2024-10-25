@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  JoinByColumnValueTransformSpec,
-  MergeColumnsTransformSpec,
-  MergeIndexedColumnsTransformSpec,
-  Transform,
-} from '@perses-dev/core';
+import { Transform } from '@perses-dev/core';
 import { useMemo } from 'react';
 
 /*
@@ -219,25 +214,22 @@ export function transformData(
   for (const transform of transforms ?? []) {
     if (transform.spec.disabled) continue;
 
-    switch (transform.spec.plugin.kind) {
+    switch (transform.kind) {
       case 'JoinByColumnValue': {
-        const spec = (transform as unknown as Transform<JoinByColumnValueTransformSpec>).spec.plugin.spec;
-        if (spec.columns && spec.columns.length > 0) {
-          result = applyJoinTransform(result, spec.columns);
+        if (transform.spec.columns && transform.spec.columns.length > 0) {
+          result = applyJoinTransform(result, transform.spec.columns);
         }
         break;
       }
       case 'MergeIndexedColumns': {
-        const spec = (transform as unknown as Transform<MergeIndexedColumnsTransformSpec>).spec.plugin.spec;
-        if (spec.column) {
-          result = applyMergeIndexedColumnsTransform(result, spec.column);
+        if (transform.spec.column) {
+          result = applyMergeIndexedColumnsTransform(result, transform.spec.column);
         }
         break;
       }
       case 'MergeColumns': {
-        const spec = (transform as unknown as Transform<MergeColumnsTransformSpec>).spec.plugin.spec;
-        if (spec.columns && spec.columns.length > 0 && spec.name) {
-          result = applyMergeColumnsTransform(result, spec.columns, spec.name);
+        if (transform.spec.columns && transform.spec.columns.length > 0 && transform.spec.name) {
+          result = applyMergeColumnsTransform(result, transform.spec.columns, transform.spec.name);
         }
         break;
       }
@@ -252,8 +244,7 @@ export function transformData(
   result = result.map((row) => {
     return Object.keys(row)
       .sort()
-      .reduce((obj, key) => {
-        // @ts-expect-error: todo
+      .reduce((obj: Record<string, unknown>, key: string) => {
         obj[key] = row[key];
         return obj;
       }, {});

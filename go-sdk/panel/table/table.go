@@ -76,10 +76,10 @@ type MiscConditionSpec struct {
 type ConditionKind string
 
 const (
-	ValueConditionKind ConditionKind = "value"
-	RangeConditionKind ConditionKind = "range"
-	RegexConditionKind ConditionKind = "regex"
-	MiscConditionKind  ConditionKind = "misc"
+	ValueConditionKind ConditionKind = "Value"
+	RangeConditionKind ConditionKind = "Range"
+	RegexConditionKind ConditionKind = "Regex"
+	MiscConditionKind  ConditionKind = "Misc"
 )
 
 type Condition struct {
