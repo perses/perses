@@ -129,6 +129,7 @@ type oAuthEndpoint struct {
 	conf            oauth2.Config
 	deviceCodeConf  oauth2.Config
 	clientCredConf  oauth2.Config
+	httpClient      *http.Client
 	secureCookie    *securecookie.SecureCookie
 	jwt             crypto.JWT
 	tokenManagement tokenManagement
@@ -139,7 +140,7 @@ type oAuthEndpoint struct {
 	loginProps      []string
 }
 
-func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO) route.Endpoint {
+func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DAO) (route.Endpoint, error) {
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// (same reason as newOIDCEndpoint)
 	key := securecookie.GenerateRandomKey(16)
@@ -160,10 +161,16 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		loginProps = []string{customProp}
 	}
 
+	httpClient, err := newHTTPClient(provider.HTTP)
+	if err != nil {
+		return nil, err
+	}
+
 	return &oAuthEndpoint{
 		conf:            conf,
 		deviceCodeConf:  deviceCodeConf,
 		clientCredConf:  clientCredConf,
+		httpClient:      httpClient,
 		secureCookie:    secureCookie,
 		jwt:             jwt,
 		tokenManagement: tokenManagement{jwt: jwt},
@@ -172,7 +179,7 @@ func newOAuthEndpoint(provider config.OAuthProvider, jwt crypto.JWT, dao user.DA
 		authURL:         *provider.AuthURL.URL,
 		svc:             service{dao: dao},
 		loginProps:      loginProps,
-	}
+	}, nil
 }
 
 func (e *oAuthEndpoint) setCookie(ctx echo.Context, name, value string) error {
@@ -252,6 +259,13 @@ func (e *oAuthEndpoint) readCodeVerifierCookie(ctx echo.Context) (state string, 
 	return state, nil
 }
 
+// newQueryContext build a specific context for the oauth provider.
+// It allows us to set up tls config hacking the http client directly in the given context
+// Ref: https://github.com/golang/oauth2/issues/187
+func (e *oAuthEndpoint) newQueryContext(ctx echo.Context) context.Context {
+	return context.WithValue(ctx.Request().Context(), oauth2.HTTPClient, e.httpClient)
+}
+
 func (e *oAuthEndpoint) CollectRoutes(g *route.Group) {
 	oauthGroup := g.Group(fmt.Sprintf("/%s/%s", utils.AuthKindOAuth, e.slugID), withOAuthErrorMdw)
 
@@ -326,14 +340,16 @@ func (e *oAuthEndpoint) codeExchangeHandler(ctx echo.Context) error {
 		opts = append(opts, oauth2.SetAuthURLParam("redirect_uri", getRedirectURI(ctx.Request(), utils.AuthKindOAuth, e.slugID)))
 	}
 
+	providerCtx := e.newQueryContext(ctx)
+
 	// Exchange the authorization code with a token
-	token, err := e.conf.Exchange(ctx.Request().Context(), code, opts...)
+	token, err := e.conf.Exchange(providerCtx, code, opts...)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while exchanging code with token")
 		return err
 	}
 
-	uInfo, err := e.requestUserInfo(ctx, token)
+	uInfo, err := e.requestUserInfo(providerCtx, token)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while requesting user infos. User infos will be ignored.")
 		return err
@@ -358,7 +374,8 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 		e.logWithError(errors.New("device code flow is not supported by this provider"))
 		return echo.NewHTTPError(http.StatusNotImplemented, "Device code flow is not supported by this provider")
 	}
-	resp, err := e.deviceCodeConf.DeviceAuth(ctx.Request().Context())
+
+	resp, err := e.deviceCodeConf.DeviceAuth(e.newQueryContext(ctx))
 	if err != nil {
 		return err
 	}
@@ -370,12 +387,14 @@ func (e *oAuthEndpoint) deviceCodeHandler(ctx echo.Context) error {
 func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 	grantType := ctx.FormValue("grant_type")
 
+	providerCtx := e.newQueryContext(ctx)
+
 	var accessToken *oauth2.Token
 	var err error
 	switch api.GrantType(grantType) {
 	case api.GrantTypeDeviceCode:
 		deviceCode := ctx.FormValue("device_code")
-		accessToken, err = e.retrieveDeviceAccessToken(ctx.Request().Context(), deviceCode)
+		accessToken, err = e.retrieveDeviceAccessToken(providerCtx, deviceCode)
 		if err != nil {
 			// (We log a warning as the failure means most of the time that the user didn't authorize the app yet)
 			e.logWithError(err).Warn("Failed to exchange device code for token")
@@ -389,7 +408,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 			e.logWithError(err).Error("Invalid or missing Authorization header")
 			return err
 		}
-		accessToken, err = e.retrieveClientCredentialsToken(ctx.Request().Context(), clientID, clientSecret)
+		accessToken, err = e.retrieveClientCredentialsToken(providerCtx, clientID, clientSecret)
 		if err != nil {
 			e.logWithError(err).Error("Failed to exchange client credentials for token")
 			return err
@@ -400,7 +419,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 		}
 	}
 
-	uInfo, err := e.requestUserInfo(ctx, accessToken)
+	uInfo, err := e.requestUserInfo(providerCtx, accessToken)
 	if err != nil {
 		e.logWithError(err).Error("An error occurred while requesting user infos.")
 		return err
@@ -414,7 +433,7 @@ func (e *oAuthEndpoint) tokenHandler(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*api.AuthResponse, error) {
+func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	usr, err := e.svc.syncUser(userInfo)
 	if err != nil {
 		e.logWithError(err).Error("Failed to sync user in database.")
@@ -434,9 +453,10 @@ func (e *oAuthEndpoint) performUserSync(userInfo externalUserInfo, setCookie fun
 		return nil, err
 	}
 
-	return &api.AuthResponse{
+	return &oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	}, nil
 }
 
@@ -528,8 +548,8 @@ func (e *oAuthEndpoint) retrieveClientCredentialsToken(ctx context.Context, clie
 }
 
 // requestUserInfo execute an HTTP request on the user infos url if provided.
-func (e *oAuthEndpoint) requestUserInfo(ctx echo.Context, token *oauth2.Token) (externalUserInfo, error) {
-	resp, err := e.conf.Client(ctx.Request().Context(), token).Get(e.userInfoURL)
+func (e *oAuthEndpoint) requestUserInfo(ctx context.Context, token *oauth2.Token) (externalUserInfo, error) {
+	resp, err := e.conf.Client(ctx, token).Get(e.userInfoURL)
 	if err != nil {
 		return nil, err
 	}

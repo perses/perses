@@ -101,7 +101,7 @@ export async function searchWithFallback(
   }
 
   // exit early if fallback is not required (serviceStats are contained in the response)
-  if (searchResponse.traces[0]?.serviceStats) {
+  if (searchResponse.traces.every((t) => t.serviceStats)) {
     return searchResponse;
   }
 
@@ -109,6 +109,11 @@ export async function searchWithFallback(
   return {
     traces: await Promise.all(
       searchResponse.traces.map(async (trace) => {
+        if (trace.serviceStats) {
+          // fallback not required, serviceStats are contained in the response
+          return trace;
+        }
+
         const serviceStats: Record<string, ServiceStats> = {};
         const searchTraceIDResponse = await query({ traceId: trace.traceID }, queryOptions);
 

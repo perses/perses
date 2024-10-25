@@ -24,6 +24,8 @@ export interface Viewport {
   endTimeUnixMs: number;
 }
 
+/** minimum span width, i.e. increase width if the calculated width is too small to be visible */
+export const minSpanWidthPx = 2;
 export const rowHeight = '2rem';
 export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
 
@@ -61,7 +63,7 @@ export function formatDuration(timeMs: number) {
     return `${Math.round(timeMs * 1000)}μs`;
   }
   if (timeMs < 1000) {
-    return `${timeMs.toFixed(0)}ms`;
+    return `${+timeMs.toFixed(2)}ms`;
   }
   return `${+(timeMs / 1000).toFixed(2)}s`;
 }

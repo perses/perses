@@ -12,19 +12,19 @@
 // limitations under the License.
 
 import { Box, Stack, useTheme } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import { Viewport, rowHeight } from '../utils';
 import { TicksHeader } from '../Ticks';
+import { GanttTrace } from '../trace';
 
 interface GanttTableHeaderProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   viewport: Viewport;
   nameColumnWidth: number;
   divider: React.ReactNode;
 }
 
 export function GanttTableHeader(props: GanttTableHeaderProps) {
-  const { rootSpan, viewport, nameColumnWidth, divider } = props;
+  const { trace, viewport, nameColumnWidth, divider } = props;
   const theme = useTheme();
 
   return (
@@ -42,7 +42,7 @@ export function GanttTableHeader(props: GanttTableHeaderProps) {
       </Box>
       {divider}
       <Box sx={{ position: 'relative', height: '100%', flexGrow: 1 }}>
-        <TicksHeader rootSpan={rootSpan} viewport={viewport} />
+        <TicksHeader trace={trace} viewport={viewport} />
       </Box>
     </Stack>
   );

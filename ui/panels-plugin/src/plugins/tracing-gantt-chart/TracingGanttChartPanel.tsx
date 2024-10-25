@@ -55,7 +55,7 @@ export function TracingGanttChartPanel(props: TracingGanttChartPanelProps) {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart options={spec} attributeLinks={attributeLinks} rootSpan={trace.rootSpan} />
+      <TracingGanttChart options={spec} attributeLinks={attributeLinks} trace={trace} />
     </Box>
   );
 }

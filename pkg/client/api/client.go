@@ -14,7 +14,9 @@
 package api
 
 import (
+	"github.com/perses/perses/pkg/client/api/auth"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
+	"github.com/perses/perses/pkg/client/api/validate"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
@@ -25,8 +27,8 @@ type ClientInterface interface {
 	RESTClient() *perseshttp.RESTClient
 	V1() v1.ClientInterface
 	Migrate(body *api.Migrate) (*modelV1.Dashboard, error)
-	Validate() ValidateInterface
-	Auth() AuthInterface
+	Validate() validate.Interface
+	Auth() auth.Interface
 	Config() (*apiConfig.Config, error)
 }
 
@@ -60,12 +62,12 @@ func (c *client) Migrate(body *api.Migrate) (*modelV1.Dashboard, error) {
 	return result, err
 }
 
-func (c *client) Validate() ValidateInterface {
-	return newValidate(c.restClient)
+func (c *client) Validate() validate.Interface {
+	return validate.New(c.restClient)
 }
 
-func (c *client) Auth() AuthInterface {
-	return newAuth(c.restClient)
+func (c *client) Auth() auth.Interface {
+	return auth.New(c.restClient)
 }
 
 func (c *client) Config() (*apiConfig.Config, error) {

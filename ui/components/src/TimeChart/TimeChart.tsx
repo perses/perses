@@ -226,7 +226,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
         showContent: isStackedBar,
         trigger: isStackedBar ? 'item' : 'axis',
-        appendToBody: true,
+        appendToBody: isStackedBar,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {

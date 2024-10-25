@@ -192,6 +192,18 @@ device_code:
   [ client_id: <secret> ]
   # Allow to use a different Client Secret for the device code flow
   [ client_secret: <secret> ]
+  # Allow using different Scopes for the device code flow
+  scopes:
+  - [ <string> ]
+
+client_credentials:
+  # Allow using a different Client ID for the client credentials flow
+  [ client_id: <secret> ]
+  # Allow using a different Client Secret for the client credentials flow
+  [ client_secret: <secret> ]
+  # Allow using different Scopes for the client credentials flow
+  scopes:
+  - [ <string> ]
 
 # The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
 # If not set it will get it from the request.
@@ -200,6 +212,9 @@ device_code:
 # The needed scopes to authenticate a user in the provider. It's not mandatory because it will depend on the provider
 scopes:
   - [ <string> ]
+
+# Some configuration of the HTTP client used to make the requests to the provider
+http: <Authentication provider HTTP Config>
 
 # The provider issuer URL
 issuer: <string>
@@ -248,12 +263,16 @@ client_credentials:
   scopes:
     - [ <string> ]
 
-# The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oidc/{slug}/callback)
+# The callback URL for authorization code (Have to be <your URL> + /api/auth/providers/oauth/{slug}/callback)
+# If not set it will get it from the request.
 [ redirect_uri: <string> ]
 
 # The needed scopes to authenticate a user in the provider
 scopes:
   - [ <string> ]
+
+# Some configuration of the HTTP client used to make the requests to the provider
+http: <Authentication provider HTTP Config>
 
 # The provider Authorization URL
 auth_url: <string>
@@ -272,6 +291,16 @@ user_infos_url: <string>
 # Name of the property to get "login" from user infos API (if not in the default list ["login", "username"] )
 # The login is mandatory to store in the database the name of the user.
 [ custom_login_property: <string>]
+```
+
+###### Authentication provider HTTP Config
+
+```yaml
+# Request timeout
+[ timeout: <duration> | default = 1m]
+
+# TLS configuration.
+[ tls_config: <TLS config> ]
 ```
 
 #### Authorization config
@@ -494,17 +523,38 @@ discovery_name: <string>
 # URL of the HTTP server exposing the global datasource list to retrieve.
 url: <url>
 
-[ basicAuth: <Basic Auth specification> ]
+[ auth: <Auth specification> ]
 
 # The HTTP authorization credentials for the targets.
 # Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
 [ authorization: <Authorization specification> ]
 
 # Config used to connect to the targets.
-[ tlsConfig: <TLS Config specification> ]
+[ tls_config: <TLS Config specification> ]
 
 headers:
   [<string>:<string>]
+```
+
+##### Auth
+
+```yaml
+[ basic_auth: <Basic Auth specification> ]
+
+[ oauth: <Oauth specification> ]
+```
+
+##### Oauth specification
+
+```yaml
+# ClientID is the application's ID.
+client_id: <string>
+
+# ClientSecret is the application's secret.
+client_secret: <string>
+
+# TokenURL is the resource server's token endpoint URL. This is a constant specific to each server.
+token_url: <string>
 ```
 
 ##### Basic Auth specification

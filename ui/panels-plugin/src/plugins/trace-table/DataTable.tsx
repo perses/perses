@@ -175,7 +175,7 @@ export function DataTable(props: DataTableProps) {
       getEstimatedRowHeight={() => 66}
       autoHeight={true}
       disableRowSelectionOnClick={true}
-      pageSizeOptions={[20]}
+      pageSizeOptions={[10, 20, 50, 100]}
       initialState={{
         pagination: { paginationModel: { pageSize: 20 } },
       }}
@@ -220,6 +220,8 @@ function ServiceChip({ serviceName, stats, serviceColor }: ServiceChipProps) {
       avatar={
         <Avatar
           sx={{
+            minWidth: 'fit-content', // by default width is fixed to 18px, which is not enough for multi-digit span counts
+            padding: '6px',
             backgroundColor: 'var(--service-color)',
             fontSize: '0.65rem',
             fontWeight: 'bold',

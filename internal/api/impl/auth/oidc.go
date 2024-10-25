@@ -90,6 +90,7 @@ func newRelyingParty(provider config.OIDCProvider, override *config.OAuthOverrid
 	if !provider.RedirectURI.IsNilOrEmpty() {
 		redirectURI = provider.RedirectURI.String()
 	}
+
 	// As the cookie is used only at login time, we don't need a persistent value here.
 	// The OIDC library will use it this way:
 	// - Right before calling the /authorize provider's endpoint, it set "state" in a cookie and the "PKCE code challenge" in another
@@ -98,12 +99,8 @@ func newRelyingParty(provider config.OIDCProvider, override *config.OAuthOverrid
 	//   from cookie to use them before deleting the cookies.
 	key := securecookie.GenerateRandomKey(16)
 	cookieHandler := httphelper.NewCookieHandler(key, key)
-	httpClient := &http.Client{
-		Timeout: time.Minute,
-	}
 	options := []rp.Option{
 		rp.WithVerifierOpts(rp.WithIssuedAtOffset(5 * time.Second)),
-		rp.WithHTTPClient(httpClient),
 		rp.WithCookieHandler(cookieHandler),
 	}
 	if !provider.DisablePKCE {
@@ -112,6 +109,12 @@ func newRelyingParty(provider config.OIDCProvider, override *config.OAuthOverrid
 	if !provider.DiscoveryURL.IsNilOrEmpty() {
 		options = append(options, rp.WithCustomDiscoveryUrl(provider.DiscoveryURL.String()))
 	}
+
+	httpClient, err := newHTTPClient(provider.HTTP)
+	if err != nil {
+		return nil, err
+	}
+	options = append(options, rp.WithHTTPClient(httpClient))
 
 	clientID := provider.ClientID
 	clientSecret := provider.ClientSecret
@@ -333,7 +336,7 @@ func (e *oIDCEndpoint) token(ctx echo.Context) error {
 }
 
 // performUserSync performs user synchronization and generates access and refresh tokens.
-func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*api.AuthResponse, error) {
+func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(cookie *http.Cookie)) (*oauth2.Token, error) {
 	// We don´t forget to set the issuer before making any sync in the database.
 	userInfo.issuer = e.issuer
 
@@ -356,9 +359,10 @@ func (e *oIDCEndpoint) performUserSync(userInfo *oidcUserInfo, setCookie func(co
 		return nil, err
 	}
 
-	return &api.AuthResponse{
+	return &oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	}, nil
 }
 

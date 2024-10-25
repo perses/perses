@@ -27,13 +27,13 @@ Stories **SHOULD** live in the first entry in the list below that matches their 
 
 #### Components
 
-Stories for components should use [Component Story Format (CSF)](https://storybook.js.org/docs/react/api/csf) and follow the `PascalCaseName.stories.tsx` naming scheme.
+Stories for components should use [Component Story Format (CSF)](https://storybook.js.org/docs/api/csf?renderer=react) and follow the `PascalCaseName.stories.tsx` naming scheme.
 
 See [Writing stories in TypeScript](https://storybook.js.org/docs/writing-stories/typescript) for some additional guidance on typing for stories.
 
 #### Text-only documentation
 
-Stories that are primarily text-based documentation (e.g. the `About` pages for each package) should be written using [MDX](https://storybook.js.org/docs/react/writing-docs/mdx) and follow the `PascalCase.stories.mdx` naming scheme.
+Stories that are primarily text-based documentation (e.g. the `About` pages for each package) should be written using [MDX](https://storybook.js.org/docs/writing-docs/mdx?renderer=react) and follow the `PascalCase.stories.mdx` naming scheme.
 
 These may include importing a few small components like the `LinkTo` component from the [Link addon](https://storybook.js.org/addons/@storybook/addon-links/) to link out to other stories.
 
@@ -88,7 +88,7 @@ We primarily use first party addons maintained by Storybook to avoid pain with u
 
 ## Defining and using decorators
 
-[Decorators](https://storybook.js.org/docs/react/writing-stories/decorators) provide a way to wrap a story in extra "rendering" functionality.
+[Decorators](https://storybook.js.org/docs/writing-stories/decorators?renderer=react) provide a way to wrap a story in extra "rendering" functionality.
 
 ### General guidelines
 
@@ -139,18 +139,18 @@ import { WithQueryClient, WithQueryParams } from '@perses-dev/storybook';
 
 Storybook configuration lives in `src/config` and includes the following:
 
-- `main.ts` - [Core configuration](https://storybook.js.org/docs/react/configure/overview#configure-your-storybook-project).
-- `preview.ts` - [Rendering configuration](https://storybook.js.org/docs/react/configure/overview#configure-story-rendering)
-- `decorators` - Directory for global [decorators](https://storybook.js.org/docs/react/writing-stories/decorators) that wrap all stories.
+- `main.ts` - [Core configuration](https://storybook.js.org/docs/configure/overview#configure-your-storybook-project?renderer=react).
+- `preview.ts` - [Rendering configuration](https://storybook.js.org/docs/configure/overview#configure-story-rendering?renderer=react)
+- `decorators` - Directory for global [decorators](https://storybook.js.org/docs/writing-stories/decorators?renderer=react) that wrap all stories.
   - `WithBackground` - Decorator that allows toggling between different background colors from the projects theme. It relies on significant prior art from the [backgrounds addon](https://storybook.js.org/addons/@storybook/addon-backgrounds/), which we cannot easily use here because it requires the background colors to be hardcoded (instead of dynamic based on being in dark/light mode).
   - `WithThemes` - Decorator that wraps all stories with theming for MUI and echarts.
 - `DocsContainer` - Custom container for the docs addon to make it work with the dark mode addon.
 
-Storybook is currently configured to build with [Webpack 5](https://storybook.js.org/docs/react/builders/webpack#webpack-5).
+Storybook is currently configured to build with [Webpack 5](https://storybook.js.org/docs/builders/webpack#webpack-5?renderer=react).
 
 ## Interaction tests
 
-We primarily use Jest and Playwright for writing tests. However, there are use cases where we want to test real browser-based interactions (i.e. not jsdom, which is used in Jest tests) for lower-level react components. In this case, [Storybook interaction tests](https://storybook.js.org/docs/react/writing-tests/interaction-testing) can be a good fit.
+We primarily use Jest and Playwright for writing tests. However, there are use cases where we want to test real browser-based interactions (i.e. not jsdom, which is used in Jest tests) for lower-level react components. In this case, [Storybook interaction tests](https://storybook.js.org/docs/writing-tests/interaction-testing?renderer=react) can be a good fit.
 
 To test locally:
 

@@ -19,7 +19,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	modelAPI "github.com/perses/perses/pkg/model/api"
+	"golang.org/x/oauth2"
 )
 
 type nativeLogin struct {
@@ -29,7 +29,7 @@ type nativeLogin struct {
 	apiClient api.ClientInterface
 }
 
-func (l *nativeLogin) Login() (*modelAPI.AuthResponse, error) {
+func (l *nativeLogin) Login() (*oauth2.Token, error) {
 	return l.apiClient.Auth().Login(l.username, l.password)
 }
 

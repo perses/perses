@@ -14,7 +14,7 @@
 import { Box, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { useChartsTheme } from '@perses-dev/components';
-import { Viewport, formatDuration, getSpanColor } from '../utils';
+import { Viewport, formatDuration, getSpanColor, minSpanWidthPx } from '../utils';
 import { Ticks } from '../Ticks';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
 
@@ -47,6 +47,7 @@ export function SpanDuration(props: SpanDurationProps) {
           top: 0,
           bottom: 0,
           margin: 'auto',
+          minWidth: `${minSpanWidthPx}px`,
           height: '8px',
           borderRadius: muiTheme.shape.borderRadius,
         }}
@@ -61,13 +62,21 @@ export function SpanDuration(props: SpanDurationProps) {
           position: 'absolute',
           top: '50%',
           transform: 'translateY(-50%)',
-          marginLeft: '8px',
+          padding: '0 8px',
           color: muiTheme.palette.grey[700],
           fontSize: '.7rem',
         }}
-        style={{
-          left: `${(relativeStart + relativeDuration) * 100}%`,
-        }}
+        style={
+          /* print span duration on right side of the span bar, if there is space */
+          relativeStart + relativeDuration < 0.95
+            ? {
+                left: `${(relativeStart + relativeDuration) * 100}%`,
+              }
+            : {
+                left: `${relativeStart * 100}%`,
+                transform: 'translateY(-50%) translateX(-100%)',
+              }
+        }
       >
         {formatDuration(spanDuration)}
       </Box>

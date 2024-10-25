@@ -22,6 +22,8 @@ import {
   LabelValuesResponse,
   MetricMetadataRequestParameters,
   MetricMetadataResponse,
+  ParseQueryRequestParameters,
+  ParseQueryResponse,
   RangeQueryRequestParameters,
   RangeQueryResponse,
   SeriesRequestParameters,
@@ -42,6 +44,7 @@ export interface PrometheusClient extends DatasourceClient {
   labelValues(params: LabelValuesRequestParameters, headers?: RequestHeaders): Promise<LabelValuesResponse>;
   metricMetadata(params: MetricMetadataRequestParameters, headers?: RequestHeaders): Promise<MetricMetadataResponse>;
   series(params: SeriesRequestParameters, headers?: RequestHeaders): Promise<SeriesResponse>;
+  parseQuery(params: ParseQueryRequestParameters, headers?: RequestHeaders): Promise<ParseQueryResponse>;
 }
 
 export interface QueryOptions {
@@ -126,15 +129,26 @@ export function series(params: SeriesRequestParameters, queryOptions: QueryOptio
   return fetchWithPost<SeriesRequestParameters, SeriesResponse>(apiURI, params, queryOptions);
 }
 
+/**
+ * Calls the `/api/v1/parse_query` to parse the given promQL expresion into an abstract syntax tree (AST).
+ */
+export function parseQuery(
+  params: ParseQueryRequestParameters,
+  queryOptions: QueryOptions
+): Promise<ParseQueryResponse> {
+  const apiURI = `/api/v1/parse_query`;
+  return fetchWithPost<ParseQueryRequestParameters, ParseQueryResponse>(apiURI, params, queryOptions);
+}
+
 function fetchWithGet<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {
-  const { datasourceUrl } = queryOptions;
+  const { datasourceUrl, headers } = queryOptions;
 
   let url = `${datasourceUrl}${apiURI}`;
   const urlParams = createSearchParams(params).toString();
   if (urlParams !== '') {
     url += `?${urlParams}`;
   }
-  return fetchJson<TResponse>(url, { method: 'GET' });
+  return fetchJson<TResponse>(url, { method: 'GET', headers });
 }
 
 function fetchWithPost<T extends RequestParams<T>, TResponse>(apiURI: string, params: T, queryOptions: QueryOptions) {

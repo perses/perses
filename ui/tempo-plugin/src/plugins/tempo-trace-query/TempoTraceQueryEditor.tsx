@@ -11,12 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
+import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
-import { DEFAULT_TEMPO, isDefaultTempoSelector, isTempoDatasourceSelector } from '../../model/tempo-selectors';
+import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import {
+  DEFAULT_TEMPO,
+  isDefaultTempoSelector,
+  isTempoDatasourceSelector,
+  TEMPO_DATASOURCE_KIND,
+} from '../../model/tempo-selectors';
 import { TempoClient } from '../../model/tempo-client';
-import { TraceQueryEditorProps, useQueryState } from './query-editor-model';
-import { DashboardTempoTraceQueryEditor } from './DashboardTempoTraceQueryEditor';
+import { TraceQLEditor } from '../../components';
+import { TraceQueryEditorProps, useLimitState, useQueryState } from './query-editor-model';
 
 export function TempoTraceQueryEditor(props: TraceQueryEditorProps) {
   const { onChange, value } = props;
@@ -24,9 +30,9 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps) {
   const selectedDatasource = datasource ?? DEFAULT_TEMPO;
 
   const { data: client } = useDatasourceClient<TempoClient>(selectedDatasource);
-  const datasourceURL = client?.options.datasourceUrl;
 
   const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+  const { limit, handleLimitChange, handleLimitBlur, limitHasError } = useLimitState(props);
 
   const handleDatasourceChange: DatasourceSelectProps['onChange'] = (next) => {
     if (isTempoDatasourceSelector(next)) {
@@ -44,13 +50,35 @@ export function TempoTraceQueryEditor(props: TraceQueryEditorProps) {
   };
 
   return (
-    <DashboardTempoTraceQueryEditor
-      selectedDatasource={selectedDatasource}
-      handleDatasourceChange={handleDatasourceChange}
-      datasourceURL={datasourceURL}
-      query={query}
-      handleQueryChange={handleQueryChange}
-      handleQueryBlur={handleQueryBlur}
-    />
+    <Stack spacing={2}>
+      <FormControl margin="dense" fullWidth={false}>
+        {/* TODO: How do we ensure unique ID values if there are multiple of these? Can we use React 18 useId and
+                maintain 17 compatibility somehow with a polyfill/shim? */}
+        <InputLabel id="tempo-datasource-label">Tempo Datasource</InputLabel>
+        <DatasourceSelect
+          datasourcePluginKind={TEMPO_DATASOURCE_KIND}
+          value={selectedDatasource}
+          onChange={handleDatasourceChange}
+          labelId="tempo-datasource-label"
+          label="Tempo Datasource"
+        />
+      </FormControl>
+      <Stack direction="row" spacing={2}>
+        <TraceQLEditor
+          completeConfig={{ client }}
+          value={query}
+          onChange={handleQueryChange}
+          onBlur={handleQueryBlur}
+        />
+        <TextField
+          label="Max Traces"
+          value={limit}
+          error={limitHasError}
+          onChange={(e) => handleLimitChange(e.target.value)}
+          onBlur={handleLimitBlur}
+          sx={{ width: '110px' }}
+        />
+      </Stack>
+    </Stack>
   );
 }

@@ -44,7 +44,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const promURL = client?.options.datasourceUrl;
   const { data: datasourceResource } = useDatasource(selectedDatasource);
 
-  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+  const { handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
@@ -81,16 +81,17 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={{ remote: { url: promURL } }}
-        value={query}
+        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
+        datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
       />
       <Stack direction="row" spacing={2}>
         <TextField
           fullWidth
-          label="Legend Name"
-          placeholder="Tip: Use {{label_name}}. Example: {{instance}} will be replaced with values such as 'webserver-123' and 'webserver-456'."
-          helperText="Name for each series in the legend and the tooltip."
+          label="Legend"
+          placeholder="Example: '{{instance}}' will generate series names like 'webserver-123', 'webserver-456'..."
+          helperText="Text to be displayed in the legend and the tooltip. Use {{label_name}} to interpolate label values."
           value={format ?? ''}
           onChange={(e) => handleFormatChange(e.target.value)}
           onBlur={handleFormatBlur}

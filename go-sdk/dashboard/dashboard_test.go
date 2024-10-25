@@ -24,6 +24,7 @@ import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
+	"github.com/perses/perses/go-sdk/panel/table"
 	timeseries "github.com/perses/perses/go-sdk/panel/time-series"
 	promDs "github.com/perses/perses/go-sdk/prometheus/datasource"
 	"github.com/perses/perses/go-sdk/prometheus/query"
@@ -32,6 +33,7 @@ import (
 	promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
 	variablegroup "github.com/perses/perses/go-sdk/variable-group"
 	listVar "github.com/perses/perses/go-sdk/variable/list-variable"
+	staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
 	txtVar "github.com/perses/perses/go-sdk/variable/text-variable"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -69,6 +71,39 @@ func buildCPUPanel(grouping string) panelgroup.Option {
 		panel.AddQuery(
 			query.PromQL(fmt.Sprintf("sum %s (%s{%s})", grouping, cpuMetric, filter)),
 		),
+		panel.AddLink("http://localhost:3000/projects/perses/dashboards/hello?var-stack=$stack&var-prometheus=$prometheus&var-prometheus_namespace=$prometheus_namespace&var-namespace=$namespace&var-namespaceLabels=$namespaceLabels&var-pod=$pod&var-container=$container&var-containerLabels=$containerLabels"),
+	)
+}
+
+func buildTargetStatusPanel() panelgroup.Option {
+	return panelgroup.AddPanel("Target status",
+		table.Table(
+			table.WithCellSettings([]table.CellSettings{
+				{
+					Condition: table.Condition{
+						Kind: "Value",
+						Spec: table.ValueConditionSpec{
+							Value: "1",
+						},
+					},
+					Text:            "UP",
+					BackgroundColor: "#00FF00",
+				},
+				{
+					Condition: table.Condition{
+						Kind: "Value",
+						Spec: table.ValueConditionSpec{
+							Value: "0",
+						},
+					},
+					Text:            "DOWN",
+					BackgroundColor: "#FF0000",
+				},
+			}),
+		),
+		panel.AddQuery(
+			query.PromQL(fmt.Sprintf("up{%s}", filter)),
+		),
 	)
 }
 
@@ -92,9 +127,9 @@ func TestDashboardBuilder(t *testing.T) {
 			txtVar.Text("platform", txtVar.Constant(true)),
 		),
 		AddVariable("prometheus_namespace",
-			txtVar.Text("observability",
-				txtVar.Constant(true),
-				txtVar.Description("constant to reduce the query scope thus improve performances"),
+			listVar.List(
+				staticlist.StaticList(staticlist.Values("observability", "monitoring")),
+				listVar.Description("to reduce the query scope thus improve performances"),
 			),
 		),
 		AddVariable("namespace", listVar.List(
@@ -144,6 +179,12 @@ func TestDashboardBuilder(t *testing.T) {
 			buildCPUPanel(grouping),
 			buildMemoryPanel(grouping),
 		),
+		AddPanelGroup("Misc",
+			panelgroup.PanelsPerLine(1),
+
+			// PANELS
+			buildTargetStatusPanel(),
+		),
 
 		// DATASOURCES
 		AddDatasource("myPromDemo",
@@ -192,9 +233,9 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 				txtVar.Text("platform", txtVar.Constant(true)),
 			),
 			variablegroup.AddVariable("prometheus_namespace",
-				txtVar.Text("observability",
-					txtVar.Constant(true),
-					txtVar.Description("constant to reduce the query scope thus improve performances"),
+				listVar.List(
+					staticlist.StaticList(staticlist.Values("observability", "monitoring")),
+					listVar.Description("to reduce the query scope thus improve performances"),
 				),
 			),
 			variablegroup.AddVariable("namespace", listVar.List(
@@ -244,6 +285,12 @@ func TestDashboardBuilderWithGroupedVariables(t *testing.T) {
 			// PANELS
 			buildCPUPanel(grouping),
 			buildMemoryPanel(grouping),
+		),
+		AddPanelGroup("Misc",
+			panelgroup.PanelsPerLine(1),
+
+			// PANELS
+			buildTargetStatusPanel(),
 		),
 
 		// DATASOURCES

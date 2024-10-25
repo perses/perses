@@ -17,6 +17,8 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
+const PluginKind = "Table"
+
 type Density string
 
 const (
@@ -43,9 +45,58 @@ type ColumnSettings struct {
 	Hide              bool    `json:"hide,omitempty" yaml:"hide,omitempty"`
 }
 
+type ValueConditionSpec struct {
+	Value string `json:"value" yaml:"value"`
+}
+
+type RangeConditionSpec struct {
+	Min float64 `json:"min,omitempty" yaml:"min,omitempty"`
+	Max float64 `json:"max,omitempty" yaml:"max,omitempty"`
+}
+
+type RegexConditionSpec struct {
+	Expr string `json:"expr" yaml:"expr"`
+}
+
+type MiscValue string
+
+var (
+	EmptyValue MiscValue = "empty"
+	NullValue  MiscValue = "null"
+	NaNValue   MiscValue = "NaN"
+	TrueValue  MiscValue = "true"
+	FalseValue MiscValue = "false"
+)
+
+type MiscConditionSpec struct {
+	Value MiscValue `json:"value" yaml:"value"`
+}
+
+type ConditionKind string
+
+const (
+	ValueConditionKind ConditionKind = "value"
+	RangeConditionKind ConditionKind = "range"
+	RegexConditionKind ConditionKind = "regex"
+	MiscConditionKind  ConditionKind = "misc"
+)
+
+type Condition struct {
+	Kind ConditionKind `json:"kind" yaml:"kind"`
+	Spec interface{}   `json:"spec" yaml:"spec"`
+}
+
+type CellSettings struct {
+	Condition       Condition `json:"condition" yaml:"condition"`
+	Text            string    `json:"text,omitempty" yaml:"text,omitempty"`
+	TextColor       string    `json:"textColor,omitempty" yaml:"textColor,omitempty"`
+	BackgroundColor string    `json:"backgroundColor,omitempty" yaml:"backgroundColor,omitempty"`
+}
+
 type PluginSpec struct {
 	Density        Density          `json:"density,omitempty" yaml:"density,omitempty"`
 	ColumnSettings []ColumnSettings `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
+	CellSettings   []CellSettings   `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
 }
 
 type Option func(plugin *Builder) error
@@ -75,7 +126,7 @@ func Table(options ...Option) panel.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = "Table"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}

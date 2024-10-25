@@ -4,18 +4,28 @@
     "name": "ContainersMonitoring",
     "createdAt": "0001-01-01T00:00:00Z",
     "updatedAt": "0001-01-01T00:00:00Z",
-    "project": "MyProject",
-    "version": 0
+    "version": 0,
+    "project": "MyProject"
   },
   "spec": {
     "display": {
       "name": "Containers monitoring"
     },
+    "datasources": {
+      "myPromDemo": {
+        "default": true,
+        "plugin": {
+          "kind": "PrometheusDatasource",
+          "spec": {
+            "directUrl": "http://localhost:9090"
+          }
+        }
+      }
+    },
     "variables": [
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "stack",
           "display": {
             "name": "PaaS",
             "hidden": false
@@ -35,33 +45,42 @@
                 "thanos_build_info{}"
               ]
             }
-          }
-        }
-      },
-      {
-        "kind": "TextVariable",
-        "spec": {
-          "name": "prometheus",
-          "value": "platform",
-          "constant": true
-        }
-      },
-      {
-        "kind": "TextVariable",
-        "spec": {
-          "name": "prometheus_namespace",
-          "display": {
-            "description": "constant to reduce the query scope thus improve performances",
-            "hidden": false
           },
-          "value": "observability",
-          "constant": true
+          "name": "stack"
+        }
+      },
+      {
+        "kind": "TextVariable",
+        "spec": {
+          "value": "platform",
+          "constant": true,
+          "name": "prometheus"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "namespace",
+          "display": {
+            "description": "to reduce the query scope thus improve performances",
+            "hidden": false
+          },
+          "allowAllValue": false,
+          "allowMultiple": false,
+          "plugin": {
+            "kind": "StaticListVariable",
+            "spec": {
+              "values": [
+                "observability",
+                "monitoring"
+              ]
+            }
+          },
+          "name": "prometheus_namespace"
+        }
+      },
+      {
+        "kind": "ListVariable",
+        "spec": {
           "allowAllValue": false,
           "allowMultiple": true,
           "plugin": {
@@ -74,13 +93,13 @@
               "expr": "group by (namespace) (kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\"})",
               "labelName": "namespace"
             }
-          }
+          },
+          "name": "namespace"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "namespaceLabels",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -94,13 +113,13 @@
                 "kube_namespace_labels{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"}"
               ]
             }
-          }
+          },
+          "name": "namespaceLabels"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "pod",
           "allowAllValue": true,
           "allowMultiple": true,
           "plugin": {
@@ -113,13 +132,13 @@
               "expr": "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})",
               "labelName": "pod"
             }
-          }
+          },
+          "name": "pod"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "container",
           "allowAllValue": true,
           "allowMultiple": true,
           "customAllValue": ".*",
@@ -133,13 +152,13 @@
               "expr": "group by (container) (kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\"})",
               "labelName": "container"
             }
-          }
+          },
+          "name": "container"
         }
       },
       {
         "kind": "ListVariable",
         "spec": {
-          "name": "containerLabels",
           "display": {
             "description": "simply the list of labels for the considered metric",
             "hidden": true
@@ -158,7 +177,8 @@
                 "kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"}"
               ]
             }
-          }
+          },
+          "name": "containerLabels"
         }
       }
     ],
@@ -218,6 +238,11 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "url": "http://localhost:3000/projects/perses/dashboards/hello?var-stack=$stack&var-prometheus=$prometheus&var-prometheus_namespace=$prometheus_namespace&var-namespace=$namespace&var-namespaceLabels=$namespaceLabels&var-pod=$pod&var-container=$container&var-containerLabels=$containerLabels"
+            }
           ]
         }
       },
@@ -251,6 +276,11 @@
                 }
               }
             }
+          ],
+          "links": [
+            {
+              "url": "http://localhost:3000/projects/perses/dashboards/hello?var-stack=$stack&var-prometheus=$prometheus&var-prometheus_namespace=$prometheus_namespace&var-namespace=$namespace&var-namespaceLabels=$namespaceLabels&var-pod=$pod&var-container=$container&var-containerLabels=$containerLabels"
+            }
           ]
         }
       },
@@ -272,6 +302,54 @@
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
                     "query": "max by (container) (container_memory_rss{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"})"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "2_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Target status"
+          },
+          "plugin": {
+            "kind": "Table",
+            "spec": {
+              "cellSettings": [
+                {
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "1"
+                    }
+                  },
+                  "text": "UP",
+                  "backgroundColor": "#00FF00"
+                },
+                {
+                  "condition": {
+                    "kind": "Value",
+                    "spec": {
+                      "value": "0"
+                    }
+                  },
+                  "text": "DOWN",
+                  "backgroundColor": "#FF0000"
+                }
+              ]
+            }
+          },
+          "queries": [
+            {
+              "kind": "TimeSeriesQuery",
+              "spec": {
+                "plugin": {
+                  "kind": "PrometheusTimeSeriesQuery",
+                  "spec": {
+                    "query": "up{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"}"
                   }
                 }
               }
@@ -336,19 +414,27 @@
             }
           ]
         }
-      }
-    ],
-    "datasources": {
-      "myPromDemo": {
-        "default": true,
-        "plugin": {
-          "kind": "PrometheusDatasource",
-          "spec": {
-            "directUrl": "http://localhost:9090"
-          }
+      },
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Misc"
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 0,
+              "width": 24,
+              "height": 6,
+              "content": {
+                "$ref": "#/spec/panels/2_0"
+              }
+            }
+          ]
         }
       }
-    },
+    ],
     "duration": "3h",
     "refreshInterval": "30s"
   }

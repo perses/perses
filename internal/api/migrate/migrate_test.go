@@ -14,6 +14,7 @@
 package migrate
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -70,6 +71,12 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "tables_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a stat panel that has undefined reduceOptions",
+			inputGrafanaDashboardFile:   "stat_calc_undefined_grafana_dashboard.json",
+			expectedPersesDashboardFile: "stat_calc_undefined_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 
 	for _, test := range testSuite {
@@ -95,6 +102,7 @@ func TestMigrate(t *testing.T) {
 			assert.Equal(t, test.expectedErrorStr, actualErrorStr)
 
 			actualPersesDashboardRaw := testUtils.JSONMarshalStrict(actualPersesDashboard)
+			fmt.Print(string(actualPersesDashboardRaw))
 			require.JSONEq(t, string(expectedPersesDashboardRaw), string(actualPersesDashboardRaw))
 		})
 	}

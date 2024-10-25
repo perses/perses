@@ -33,7 +33,7 @@ import (
 func TestNewProjectEndpoints(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
-		usrEntity := e2eframework.NewUser(creator)
+		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
@@ -74,7 +74,7 @@ func TestNewProjectEndpoints(t *testing.T) {
 func TestAnonymousEndpoints(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
-		usrEntity := e2eframework.NewUser(creator)
+		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
@@ -89,7 +89,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token")
+		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token", "expiry", "token_type")
 		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		expect.GET("/api/config").WithHeader("Authorization", fmt.Sprintf("Bearer %s", token)).Expect().Status(http.StatusOK)
@@ -104,7 +104,7 @@ func TestAnonymousEndpoints(t *testing.T) {
 func TestUnauthorizedEndpoints(t *testing.T) {
 	e2eframework.WithServerConfig(t, e2eframework.DefaultAuthConfig(), func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []modelAPI.Entity {
 		creator := "foo"
-		usrEntity := e2eframework.NewUser(creator)
+		usrEntity := e2eframework.NewUser(creator, "password")
 		expect.POST(fmt.Sprintf("%s/%s", utils.APIV1Prefix, utils.PathUser)).
 			WithJSON(usrEntity).
 			Expect().
@@ -119,7 +119,7 @@ func TestUnauthorizedEndpoints(t *testing.T) {
 			Expect().
 			Status(http.StatusOK)
 
-		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token")
+		authResponse.JSON().Object().Keys().ContainsOnly("access_token", "refresh_token", "expiry", "token_type")
 		token := authResponse.JSON().Object().Value("access_token").String().Raw()
 
 		glRole := e2eframework.NewGlobalRole("test")

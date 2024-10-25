@@ -15,6 +15,8 @@ package markdown
 
 import "github.com/perses/perses/go-sdk/panel"
 
+const PluginKind = "Markdown"
+
 type PluginSpec struct {
 	Text string `json:"text" yaml:"text"`
 }
@@ -49,7 +51,7 @@ func Markdown(text string, options ...Option) panel.Option {
 		if err != nil {
 			return err
 		}
-		builder.Spec.Plugin.Kind = "Markdown"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = r.PluginSpec
 		return nil
 	}
