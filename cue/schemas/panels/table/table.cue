@@ -76,33 +76,34 @@ spec: close({
 
 #joinByColumnValueTransform: {
 	kind: "JoinByColumnValue"
-	spec: #transformCommonSpec & {
+	spec: {
 		columns: [string]
+		disabled?: bool
 	}
 }
 
 #mergeColumnsTransform: {
 	kind: "MergeColumns"
-	spec: #transformCommonSpec & {
+	spec: {
 		columns: [string]
-		name: strings.MinRunes(1)
+		name:      strings.MinRunes(1)
+		disabled?: bool
 	}
 }
 
 #mergeIndexedColumnsTransform: {
 	kind: "MergeIndexedColumns"
-	spec: #transformCommonSpec & {
-		column: strings.MinRunes(1)
+	spec: {
+		column:    strings.MinRunes(1)
+		disabled?: bool
 	}
 }
 
 #mergeSeries: {
 	kind: "MergeSeries"
-	spec: #transformCommonSpec
-}
-
-#transformCommonSpec: {
-	disabled?: bool
+	spec: {
+		disabled?: bool
+	}
 }
 
 #transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries

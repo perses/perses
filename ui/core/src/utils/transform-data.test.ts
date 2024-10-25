@@ -69,14 +69,9 @@ describe('Merge Indexed Columns Transform', () => {
     const input = generateMockFlattenQueriesResult();
 
     const mergeTransform: Transform = {
-      kind: 'Transform',
+      kind: 'MergeIndexedColumns',
       spec: {
-        plugin: {
-          kind: 'MergeIndexedColumns',
-          spec: {
-            column: 'non-existent-column',
-          },
-        },
+        column: 'non-existent-column',
       },
     };
 
@@ -88,14 +83,9 @@ describe('Merge Indexed Columns Transform', () => {
     const input = generateMockFlattenQueriesResult();
 
     const mergeTransform: Transform = {
-      kind: 'Transform',
+      kind: 'MergeIndexedColumns',
       spec: {
-        plugin: {
-          kind: 'MergeIndexedColumns',
-          spec: {
-            column: 'instance',
-          },
-        },
+        column: 'instance',
       },
     };
 
@@ -149,47 +139,27 @@ describe('Merge Indexed Columns Transform', () => {
 
     const transforms: Transform[] = [
       {
-        kind: 'Transform',
+        kind: 'MergeIndexedColumns',
         spec: {
-          plugin: {
-            kind: 'MergeIndexedColumns',
-            spec: {
-              column: 'timestamp',
-            },
-          },
+          column: 'timestamp',
         },
       },
       {
-        kind: 'Transform',
+        kind: 'MergeIndexedColumns',
         spec: {
-          plugin: {
-            kind: 'MergeIndexedColumns',
-            spec: {
-              column: 'value',
-            },
-          },
+          column: 'value',
         },
       },
       {
-        kind: 'Transform',
+        kind: 'MergeIndexedColumns',
         spec: {
-          plugin: {
-            kind: 'MergeIndexedColumns',
-            spec: {
-              column: 'job',
-            },
-          },
+          column: 'job',
         },
       },
       {
-        kind: 'Transform',
+        kind: 'MergeIndexedColumns',
         spec: {
-          plugin: {
-            kind: 'MergeIndexedColumns',
-            spec: {
-              column: 'instance',
-            },
-          },
+          column: 'instance',
         },
       },
     ];
@@ -245,14 +215,9 @@ describe('Join By Column Transform', () => {
     const input = generateMockFlattenQueriesResult();
 
     const joinTransform: Transform = {
-      kind: 'Transform',
+      kind: 'JoinByColumnValue',
       spec: {
-        plugin: {
-          kind: 'JoinByColumnValue',
-          spec: {
-            columns: ['non-existent-column'],
-          },
-        },
+        columns: ['non-existent-column'],
       },
     };
 
@@ -278,25 +243,15 @@ describe('Join By Column Transform', () => {
 
     const transforms: Transform[] = [
       {
-        kind: 'Transform',
+        kind: 'MergeIndexedColumns',
         spec: {
-          plugin: {
-            kind: 'MergeIndexedColumns',
-            spec: {
-              column: 'instance',
-            },
-          },
+          column: 'instance',
         },
       },
       {
-        kind: 'Transform',
+        kind: 'JoinByColumnValue',
         spec: {
-          plugin: {
-            kind: 'JoinByColumnValue',
-            spec: {
-              columns: ['instance'],
-            },
-          },
+          columns: ['instance'],
         },
       },
     ];
@@ -371,14 +326,9 @@ describe('Join By Column Transform', () => {
     ];
 
     const joinTransform: Transform = {
-      kind: 'Transform',
+      kind: 'JoinByColumnValue',
       spec: {
-        plugin: {
-          kind: 'JoinByColumnValue',
-          spec: {
-            columns: ['instance'],
-          },
-        },
+        columns: ['instance'],
       },
     };
 
