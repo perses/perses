@@ -72,7 +72,7 @@ func (o *option) validateProjectConsistency() error {
 	for _, entity := range o.entities {
 		kind := modelV1.Kind(entity.GetKind())
 		project := resource.GetProject(entity.GetMetadata(), o.Project)
-		if !o.forceCreate && len(o.Project) != 0 && project != o.Project {
+		if len(o.Project) != 0 && project != o.Project {
 			result.Add(fmt.Errorf("\ninconsistency has been detected for object %q %q: while the metadata suggests the project name %q, the currently selected project indicates %q, \nuse the '--force' flag to bypass consistency check", kind, entity.GetMetadata().GetName(), project, o.Project))
 		}
 	}
