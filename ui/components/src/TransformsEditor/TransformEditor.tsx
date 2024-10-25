@@ -46,7 +46,7 @@ function JoinByColumnValueTransformEditor({
         id="join-columns"
         sx={{ width: '100%' }}
         options={[]}
-        value={value.spec.plugin.spec.columns}
+        value={value.spec.plugin.spec.columns ?? []}
         renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
@@ -63,8 +63,8 @@ function JoinByColumnValueTransformEditor({
         labelPlacement="start"
         control={
           <Switch
-            value={!value.spec.disabled ?? true}
-            checked={!value.spec.disabled ?? true}
+            value={!value.spec.disabled}
+            checked={!value.spec.disabled}
             onChange={(e) =>
               onChange({
                 ...value,
@@ -87,7 +87,7 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         id="merge-columns-columns"
         sx={{ width: '100%' }}
         options={[]}
-        value={value.spec.plugin.spec.columns}
+        value={value.spec.plugin.spec.columns ?? []}
         renderInput={(params) => <TextField {...params} variant="outlined" label="Columns" required />}
         onChange={(_, columns) => {
           onChange({
@@ -104,7 +104,7 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         id="merge-columns-name"
         variant="outlined"
         label="Output Name"
-        value={value.spec.plugin.spec.name}
+        value={value.spec.plugin.spec.name ?? ''}
         sx={{ width: '100%' }}
         onChange={(e) => {
           onChange({
@@ -122,8 +122,8 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
         labelPlacement="start"
         control={
           <Switch
-            value={!value.spec.disabled ?? true}
-            checked={!value.spec.disabled ?? true}
+            value={!value.spec.disabled}
+            checked={!value.spec.disabled}
             onChange={(e) =>
               onChange({
                 ...value,
@@ -148,7 +148,7 @@ function MergeIndexedColumnsTransformEditor({
         variant="outlined"
         label="Column"
         placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
-        value={value.spec.plugin.spec.column}
+        value={value.spec.plugin.spec.column ?? ''}
         sx={{ width: '100%' }}
         onChange={(e) => {
           onChange({
@@ -163,8 +163,8 @@ function MergeIndexedColumnsTransformEditor({
         labelPlacement="start"
         control={
           <Switch
-            value={!value.spec.disabled ?? true}
-            checked={!value.spec.disabled ?? true}
+            value={!value.spec.disabled}
+            checked={!value.spec.disabled}
             onChange={(e) =>
               onChange({
                 ...value,
@@ -186,8 +186,8 @@ function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProp
         labelPlacement="start"
         control={
           <Switch
-            value={!value.spec.disabled ?? true}
-            checked={!value.spec.disabled ?? true}
+            value={!value.spec.disabled}
+            checked={!value.spec.disabled}
             onChange={(e) =>
               onChange({
                 ...value,

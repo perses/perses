@@ -206,7 +206,6 @@ func TestDashboardBuilder(t *testing.T) {
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
-	fmt.Println(string(builderOutput))
 	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 

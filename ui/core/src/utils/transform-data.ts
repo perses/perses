@@ -19,33 +19,25 @@ import {
 } from '@perses-dev/core';
 import { useMemo } from 'react';
 
-// export function applyJoinTransform(
-//   data: Array<Record<string, unknown>>,
-//   transform: Transform<JoinByColumnValueTransformSpec>
-// ): Array<Record<string, unknown>> {
-//   // If column is undefined or empty, return data as is
-//   if (!transform.spec.plugin.spec.column) {
-//     return data;
-//   }
-//
-//   const column: string = transform.spec.plugin.spec.column;
-//   const entriesHashed: { [key: string]: Record<string, unknown> } = {};
-//
-//   for (const entry of data) {
-//     if (Object.keys(entry).includes(column)) {
-//       const hash = String(entry[column]);
-//       const entryHashed = entriesHashed[hash];
-//
-//       if (entryHashed) {
-//         entriesHashed[hash] = { ...entryHashed, ...entry };
-//       } else {
-//         entriesHashed[hash] = { ...entry };
-//       }
-//     }
-//   }
-//   return Object.values(entriesHashed);
-// }
-
+/*
+ * Join: Regroup rows with equal cell value in a column.
+ * If there are multiple line with same value, next row values override the current one
+ *
+ * Example: Join on 'mount' column
+ * INPUT:
+ * | timestamp  | value #1 | value #3 | mount     |
+ * |------------|----------|----------|-----------|
+ * | 1630000000 | 1        |          | /         |
+ * | 1630000000 | 2        |          | /boot/efi |
+ * | 1630000000 |          | 3        | /         |
+ * | 1630000000 |          | 4        | /boot/efi |
+ *
+ * OUTPUT:
+ * | timestamp  | value #1 | value #3 | mount     |
+ * |------------|----------|----------|-----------|
+ * | 1630000000 | 1        | 3        | /         |
+ * | 1630000000 | 2        | 4        | /boot/efi |
+ */
 export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
   columns: string[]
@@ -73,6 +65,30 @@ export function applyJoinTransform(
   return Object.values(rowHashed);
 }
 
+/*
+ * Merges selected columns into a single column.
+ *
+ * Example: Merge columns 'value #1' and 'value #2' into a single column 'MERGED'
+ * INPUT:
+ * +------------+----------+----------+-----------+-----------+
+ * | timestamp  | value #1 | value #2 | mount #1  | mount #2  |
+ * +------------+----------+----------+-----------+-----------+
+ * | 1630000000 | 1        |          | /         |           |
+ * | 1630000000 | 2        |          | /boot/efi |           |
+ * | 1630000000 |          | 3        |           | /         |
+ * | 1630000000 |          | 4        |           | /boot/efi |
+ * +------------+----------+----------+-----------+-----------+
+ *
+ * OUTPUT:
+ * +------------+--------+-----------+-----------+
+ * | timestamp  | MERGED | mount #1  | mount #2  |
+ * +------------+--------+-----------+-----------+
+ * | 1630000000 | 1      | /         |           |
+ * | 1630000000 | 2      | /boot/efi |           |
+ * | 1630000000 | 2      |           | /         |
+ * | 1630000000 | 3      |           | /boot/efi |
+ * +------------+--------+-----------+-----------+
+ */
 export function applyMergeColumnsTransform(
   data: Array<Record<string, unknown>>,
   selectedColumns: string[],
@@ -102,6 +118,30 @@ export function applyMergeColumnsTransform(
   return result;
 }
 
+/*
+ * Merge Indexed Columns: All indexed columns are merged to one column
+ *
+ * Example: Join on 'value' column
+ * INPUT:
+ * | timestamp #1 | timestamp #2 | value #1 | value #2 | instance #1 | instance #2 |
+ * |--------------|--------------|----------|----------|-------------|-------------|
+ * | 1630000000   |              | 55       |          | toto        |             |
+ * | 1630000000   |              | 33       |          | toto        |             |
+ * | 1630000000   |              | 45       |          | toto        |             |
+ * |              | 1630000000   |          | 112      |             | titi        |
+ * |              | 1630000000   |          | 20       |             | titi        |
+ * |              | 1630000000   |          | 10       |             | titi        |
+ *
+ * OUTPUT:
+ * | timestamp #1 | timestamp #2 | value | instance #1 | instance #2 |
+ * |--------------|--------------|-------|-------------|-------------|
+ * | 1630000000   |              | 55    | toto        |             |
+ * | 1630000000   |              | 33    | toto        |             |
+ * | 1630000000   |              | 45    | toto        |             |
+ * |              | 1630000000   | 112   |             | titi        |
+ * |              | 1630000000   | 20    |             | titi        |
+ * |              | 1630000000   | 10    |             | titi        |
+ */
 export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unknown>>, column: string) {
   const result: Array<Record<string, unknown>> = [];
 
@@ -128,6 +168,23 @@ export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unk
   return result;
 }
 
+/*
+ * Merge Indexed Columns: All indexed columns are merged to one column
+ *
+ * INPUT:
+ * | timestamp  | value #1 | value #2 | mount #1  | mount #2  | instance #1 | instance #2 | env #1 | env #2 |
+ * |------------|----------|----------|-----------|-----------|-------------|-------------|--------|--------|
+ * | 1630000000 | 1        |          | /         |           | test:44     |             | prd    |        |
+ * | 1630000000 | 2        |          | /boot/efi |           | test:44     |             | prd    |        |
+ * | 1630000000 |          | 5        |           | /         |             | test:44     |        | prd    |
+ * | 1630000000 |          | 6        |           | /boot/efi |             | test:44     |        | prd    |
+ *
+ * OUTPUT:
+ * | timestamp  | value #1 | value #2 | mount     | instance | env |
+ * |------------|----------|----------|-----------|----------|-----|
+ * | 1630000000 | 1        | 5        | /         | test:44  | prd |
+ * | 1630000000 | 2        | 6        | /boot/efi | test:44  | prd |
+ */
 export function applyMergeSeriesTransform(data: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
   let result: Array<Record<string, unknown>> = [...data];
 

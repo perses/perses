@@ -77,7 +77,7 @@ spec: close({
 #joinByColumnValueTransform: {
 	kind: "JoinByColumnValue"
 	spec: {
-		column: string
+		columns: [string]
 	}
 }
 
@@ -85,33 +85,28 @@ spec: close({
 	kind: "MergeColumns"
 	spec: {
 		columns: [string]
-		name: string
+		name: strings.MinRunes(1)
 	}
 }
 
 #mergeIndexedColumnsTransform: {
 	kind: "MergeIndexedColumns"
 	spec: {
-		column: string
+		column: strings.MinRunes(1)
 	}
 }
 
 #mergeSeries: {
 	kind: "MergeSeries"
-	spec: _
+	spec?: {}
 }
 
-#transformSpec: {
-	#joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries
-}
+#transformPlugin: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries
 
 #transform: {
 	kind: "Transform"
 	spec: {
-		plugin: {
-			kind: string
-			spec: _
-		}
+		plugin: #transformPlugin
 		disabled?: bool
 	}
 }
