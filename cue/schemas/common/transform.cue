@@ -11,36 +11,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package table
+package common
 
 import (
-	"github.com/perses/perses/go-sdk/common"
+	"strings"
 )
 
-func WithDensity(density Density) Option {
-	return func(builder *Builder) error {
-		builder.Density = density
-		return nil
+#joinByColumnValueTransform: {
+	kind: "JoinByColumnValue"
+	spec: {
+		columns: [string]
+		disabled?: bool
 	}
 }
 
-func WithColumnSettings(settings []ColumnSettings) Option {
-	return func(builder *Builder) error {
-		builder.ColumnSettings = settings
-		return nil
+#mergeColumnsTransform: {
+	kind: "MergeColumns"
+	spec: {
+		columns: [string]
+		name:      strings.MinRunes(1)
+		disabled?: bool
 	}
 }
 
-func WithCellSettings(settings []CellSettings) Option {
-	return func(builder *Builder) error {
-		builder.CellSettings = settings
-		return nil
+#mergeIndexedColumnsTransform: {
+	kind: "MergeIndexedColumns"
+	spec: {
+		column:    strings.MinRunes(1)
+		disabled?: bool
 	}
 }
 
-func Transform(transforms []common.Transform) Option {
-	return func(builder *Builder) error {
-		builder.Transforms = transforms
-		return nil
+#mergeSeries: {
+	kind: "MergeSeries"
+	spec: {
+		disabled?: bool
 	}
 }
+
+#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries

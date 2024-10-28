@@ -142,28 +142,38 @@ import (
 	spec: {
 		display: name: "Target status"
 		plugin: table & {
-			spec: cellSettings: [
-				{
-					condition: {
-						kind: "Value"
-						spec: {
-							value: "1"
+			spec: {
+				cellSettings: [
+					{
+						condition: {
+							kind: "Value"
+							spec: {
+								value: "1"
+							}
 						}
-					}
-					text:            "UP"
-					backgroundColor: "#00FF00"
-				},
-				{
-					condition: {
-						kind: "Value"
-						spec: {
-							value: "0"
+						text:            "UP"
+						backgroundColor: "#00FF00"
+					},
+					{
+						condition: {
+							kind: "Value"
+							spec: {
+								value: "0"
+							}
 						}
-					}
-					text:            "DOWN"
-					backgroundColor: "#FF0000"
-				},
-			]
+						text:            "DOWN"
+						backgroundColor: "#FF0000"
+					},
+				]
+				transforms: [
+					{
+						kind: "JoinByColumnValue"
+						spec: {
+							columns: ["instance"]
+						}
+					},
+				]
+			}
 		}
 		queries: [
 			{

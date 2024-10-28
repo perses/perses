@@ -130,7 +130,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 						if option.text != _|_ { text: option.text }
 						if option.color != _|_ { backgroundColor: [ // switch
 							if #mapping.color[option.color] != _|_ { #mapping.color[option.color] },
-								{ option.color }
+							{ option.color }
 						][0]}
 					}]
 				}
@@ -152,13 +152,37 @@ if #panel.type != _|_ if #panel.type == "table" {
 					if mapping.options.result.text != _|_ { text: mapping.options.result.text }
 					if mapping.options.result.color != _|_ { backgroundColor: [ // switch
 						if #mapping.color[mapping.options.result.color] != _|_ { #mapping.color[mapping.options.result.color] },
-							{ mapping.options.result.color }
+						{ mapping.options.result.color }
 					][0]}
 				}
 			}
 		], 1)
 
 		if len(x) > 0 { cellSettings: x }
+
+		if #panel.transformations != _|_ {
+			#transforms: [
+				for transformation in #panel.transformations if transformation.id == "merge" || transformation.id == "joinByField" {
+					if transformation.id == "merge" {
+						kind: "MergeSeries"
+						spec: {
+							if transformation.disabled != _|_ { disabled: transformation.disabled }
+						}
+					}
+					if transformation.id == "joinByField" {
+						kind: "JoinByColumnValue"
+						spec: {
+							[ // switch
+								if transformation.options.byField != _|_ { columns: [transformation.options.byField] },
+								{ columns: [] }
+							][0]
+							if transformation.disabled != _|_ { disabled: transformation.disabled }
+						}
+					}
+				}
+			]
+			if len(#transforms) > 0 { transforms: #transforms }
+		}
 	}
 },
 if #panel.type != _|_ if #panel.type == "table-old" {

@@ -14,7 +14,12 @@
 package table
 
 import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/panel"
+	"gopkg.in/yaml.v3"
 )
 
 const PluginKind = "Table"
@@ -75,15 +80,57 @@ type MiscConditionSpec struct {
 type ConditionKind string
 
 const (
-	ValueConditionKind ConditionKind = "value"
-	RangeConditionKind ConditionKind = "range"
-	RegexConditionKind ConditionKind = "regex"
-	MiscConditionKind  ConditionKind = "misc"
+	ValueConditionKind ConditionKind = "Value"
+	RangeConditionKind ConditionKind = "Range"
+	RegexConditionKind ConditionKind = "Regex"
+	MiscConditionKind  ConditionKind = "Misc"
 )
 
 type Condition struct {
 	Kind ConditionKind `json:"kind" yaml:"kind"`
 	Spec interface{}   `json:"spec" yaml:"spec"`
+}
+
+func (c *Condition) UnmarshalJSON(data []byte) error {
+	jsonUnmarshalFunc := func(variable interface{}) error {
+		return json.Unmarshal(data, variable)
+	}
+	return c.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
+}
+
+func (c *Condition) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return c.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
+}
+
+func (c *Condition) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+	var tmp Condition
+	type plain Condition
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	rawSpec, err := staticMarshal(tmp.Spec)
+	if err != nil {
+		return err
+	}
+	var spec interface{}
+	switch tmp.Kind {
+	case ValueConditionKind:
+		spec = &ValueConditionSpec{}
+	case RangeConditionKind:
+		spec = &RangeConditionSpec{}
+	case RegexConditionKind:
+		spec = &RegexConditionSpec{}
+	case MiscConditionKind:
+		spec = &MiscConditionSpec{}
+	default:
+		return fmt.Errorf("unknown transform.kind %q used", tmp.Kind)
+	}
+	if unMarshalErr := staticUnmarshal(rawSpec, spec); unMarshalErr != nil {
+		return unMarshalErr
+	}
+	c.Kind = tmp.Kind
+	c.Spec = spec
+	return nil
 }
 
 type CellSettings struct {
@@ -94,9 +141,10 @@ type CellSettings struct {
 }
 
 type PluginSpec struct {
-	Density        Density          `json:"density,omitempty" yaml:"density,omitempty"`
-	ColumnSettings []ColumnSettings `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
-	CellSettings   []CellSettings   `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Density        Density            `json:"density,omitempty" yaml:"density,omitempty"`
+	ColumnSettings []ColumnSettings   `json:"columnSettings,omitempty" yaml:"columnSettings,omitempty"`
+	CellSettings   []CellSettings     `json:"cellSettings,omitempty" yaml:"cellSettings,omitempty"`
+	Transforms     []common.Transform `json:"transforms,omitempty" yaml:"transforms,omitempty"`
 }
 
 type Option func(plugin *Builder) error

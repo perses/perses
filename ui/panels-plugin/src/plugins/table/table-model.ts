@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
+import { Definition, Transform } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -101,6 +101,7 @@ export interface TableOptions {
   density?: TableDensity;
   columnSettings?: ColumnSettings[];
   cellSettings?: CellSettings[];
+  transforms?: Transform[];
 }
 
 /**
