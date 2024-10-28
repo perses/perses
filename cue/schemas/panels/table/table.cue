@@ -13,14 +13,17 @@
 
 package model
 
-import "strings"
+import (
+	"strings"
+	"github.com/perses/perses/cue/schemas/common"
+)
 
 kind: "Table"
 spec: close({
 	density?: "compact" | "standard" | "comfortable"
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
-	transforms?: [...#transform]
+	transforms?: [...common.#transform]
 })
 
 #columnSettings: {
@@ -73,37 +76,3 @@ spec: close({
 	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
-
-#joinByColumnValueTransform: {
-	kind: "JoinByColumnValue"
-	spec: {
-		columns: [string]
-		disabled?: bool
-	}
-}
-
-#mergeColumnsTransform: {
-	kind: "MergeColumns"
-	spec: {
-		columns: [string]
-		name:      strings.MinRunes(1)
-		disabled?: bool
-	}
-}
-
-#mergeIndexedColumnsTransform: {
-	kind: "MergeIndexedColumns"
-	spec: {
-		column:    strings.MinRunes(1)
-		disabled?: bool
-	}
-}
-
-#mergeSeries: {
-	kind: "MergeSeries"
-	spec: {
-		disabled?: bool
-	}
-}
-
-#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries

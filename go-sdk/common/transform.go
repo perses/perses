@@ -13,6 +13,13 @@
 
 package common
 
+import (
+	"encoding/json"
+	"fmt"
+
+	"gopkg.in/yaml.v3"
+)
+
 type TransformKind = string
 
 const (
@@ -45,4 +52,46 @@ type MergeSeriesSpec struct {
 type Transform struct {
 	Kind TransformKind `json:"kind" yaml:"kind"`
 	Spec interface{}   `json:"spec" yaml:"spec"`
+}
+
+func (t *Transform) UnmarshalJSON(data []byte) error {
+	jsonUnmarshalFunc := func(variable interface{}) error {
+		return json.Unmarshal(data, variable)
+	}
+	return t.unmarshal(jsonUnmarshalFunc, json.Marshal, json.Unmarshal)
+}
+
+func (t *Transform) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	return t.unmarshal(unmarshal, yaml.Marshal, yaml.Unmarshal)
+}
+
+func (t *Transform) unmarshal(unmarshal func(interface{}) error, staticMarshal func(interface{}) ([]byte, error), staticUnmarshal func([]byte, interface{}) error) error {
+	var tmp Transform
+	type plain Transform
+	if err := unmarshal((*plain)(&tmp)); err != nil {
+		return err
+	}
+	rawSpec, err := staticMarshal(tmp.Spec)
+	if err != nil {
+		return err
+	}
+	var spec interface{}
+	switch tmp.Kind {
+	case JoinByColumValueKind:
+		spec = &JoinByColumnValueSpec{}
+	case MergeByColumnsKind:
+		spec = &MergeColumnsSpec{}
+	case MergeIndexedColumnsKind:
+		spec = &MergeIndexedColumnsSpec{}
+	case MergeSeriesKind:
+		spec = &MergeSeriesSpec{}
+	default:
+		return fmt.Errorf("unknown transform.kind %q used", tmp.Kind)
+	}
+	if unMarshalErr := staticUnmarshal(rawSpec, spec); unMarshalErr != nil {
+		return unMarshalErr
+	}
+	t.Kind = tmp.Kind
+	t.Spec = spec
+	return nil
 }

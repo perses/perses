@@ -150,14 +150,9 @@ describe('TablePanel', () => {
     renderPanel(MOCK_TIME_SERIES_DATA_SINGLEVALUE, {
       transforms: [
         {
-          kind: 'Transform',
+          kind: 'JoinByColumnValue',
           spec: {
-            plugin: {
-              kind: 'JoinByColumnValue',
-              spec: {
-                columns: ['env'],
-              },
-            },
+            columns: ['env'],
           },
         },
       ],

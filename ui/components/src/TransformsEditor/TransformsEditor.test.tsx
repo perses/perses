@@ -25,15 +25,12 @@ describe('TransformsEditor', () => {
     renderTableColumnsEditor([], onChange);
     const addColumnButton = screen.getByRole('button', { name: /Add Transformation/i });
     fireEvent.click(addColumnButton);
-    expect(onChange).toHaveBeenCalledWith([{ kind: 'Transform', spec: { plugin: { kind: '', spec: {} } } }]);
+    expect(onChange).toHaveBeenCalledWith([{ kind: '', spec: {} }]);
   });
 
   it('can collapse and update a transformation', () => {
     const onChange = jest.fn();
-    renderTableColumnsEditor(
-      [{ kind: 'Transform', spec: { plugin: { kind: 'MergeIndexedColumns', spec: { column: 'env' } } } }],
-      onChange
-    );
+    renderTableColumnsEditor([{ kind: 'MergeIndexedColumns', spec: { column: 'env' } }], onChange);
 
     // Expand the transform editor for the first transform
     const collapseIcon = screen.getByTestId('transform-toggle#0');
@@ -41,8 +38,6 @@ describe('TransformsEditor', () => {
 
     const columnInput = screen.getByRole('textbox', { name: /Column/i });
     fireEvent.change(columnInput, { target: { value: 'MySuperName' } });
-    expect(onChange).toHaveBeenCalledWith([
-      { kind: 'Transform', spec: { plugin: { kind: 'MergeIndexedColumns', spec: { column: 'MySuperName' } } } },
-    ]);
+    expect(onChange).toHaveBeenCalledWith([{ kind: 'MergeIndexedColumns', spec: { column: 'MySuperName' } }]);
   });
 });
