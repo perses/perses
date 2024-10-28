@@ -4,7 +4,7 @@ if #panel.type != _|_ if #panel.type == "gauge" {
 		#calcName: *"\(#panel.options.reduceOptions.calcs[0])" | null // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
 		calculation: [ // switch
 			if #mapping.calc[#calcName] != _|_ { #mapping.calc[#calcName] },
-			{ #defaultCalc }
+			#defaultCalc
 		][0]
 
 		#unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
@@ -20,7 +20,7 @@ if #panel.type != _|_ if #panel.type == "gauge" {
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part? 
 					value: [ // switch
 						if step.value == null { 0 },
-						{ step.value }
+						step.value
 					][0]
 					color: step.color
 				}]

@@ -4,8 +4,8 @@ if #panel.type != _|_ if #panel.type == "table" {
 		if #panel.options != _|_ if #panel.options.cellHeight != _|_ {
 			density: [
 				if #panel.options.cellHeight == "sm" { "compact" },
-				if #panel.options.cellHeight == "md" { "standard" },
 				if #panel.options.cellHeight == "lg" { "comfortable" }
+				"standard"
 			][0]
 		}
 
@@ -130,7 +130,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 						if option.text != _|_ { text: option.text }
 						if option.color != _|_ { backgroundColor: [ // switch
 							if #mapping.color[option.color] != _|_ { #mapping.color[option.color] },
-							{ option.color }
+							option.color
 						][0]}
 					}]
 				}
@@ -152,7 +152,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 					if mapping.options.result.text != _|_ { text: mapping.options.result.text }
 					if mapping.options.result.color != _|_ { backgroundColor: [ // switch
 						if #mapping.color[mapping.options.result.color] != _|_ { #mapping.color[mapping.options.result.color] },
-						{ mapping.options.result.color }
+						mapping.options.result.color
 					][0]}
 				}
 			}
