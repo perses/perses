@@ -23,7 +23,7 @@ import (
 
 // Have to use an intermediary variable here to handle the fact that labelNames variable should be excluded from the filter
 // This is again a case where proper support of short-circuit on CUE side would help simplify the code (see https://github.com/cue-lang/cue/issues/2232)
-_filterArr: [for var in #input {
+_matchers: [for var in #input {
 	[// switch
 		if var.#kind == "TextVariable" {"\(var.#name)=~\"$\(var.#name)\""},
 		if var.#kind == "ListVariable" if var.#pluginKind != labelNamesVar.kind {"\(var.#name)=~\"$\(var.#name)\""},
@@ -31,4 +31,4 @@ _filterArr: [for var in #input {
 	][0]
 }]
 
-filter: strings.Join([for matcher in _filterArr if matcher != null {matcher}], ",")
+filter: strings.Join([for matcher in _matchers if matcher != null {matcher}], ",")
