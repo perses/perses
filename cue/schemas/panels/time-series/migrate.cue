@@ -9,11 +9,11 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				if #panel.type == "timeseries" {
 					position: [
 						if #panel.options.legend.placement != _|_ if #panel.options.legend.placement == "right" {"right"},
-						{"bottom"}
+						"bottom"
 					][0]
 					mode: [
-						if #panel.options.legend.displayMode == "list" { "list" },
 						if #panel.options.legend.displayMode == "table" { "table" },
+						"list"
 					][0]
 					values: [ for calc in #panel.options.legend.calcs 
 						if (#mapping.calc[calc] != _|_) { #mapping.calc[calc] }
@@ -22,11 +22,11 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				if #panel.type == "graph" {
 					position: [ // switch
 						if #panel.legend.rightSide != _|_ if #panel.legend.rightSide { "right" },
-						{ "bottom" }
+						"bottom"
 					][0]
 					mode: [
 						if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable { "table" },
-						{ "list" }
+						"list"
 					][0]
 					values: [ for oldCalc, newCalc in #mapping.calc  
 						// Check if the mapping field is set on the legend and 
@@ -65,7 +65,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				steps: [ for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ { // TODO how to manage the overrides part?
 					value: [ // switch
 						if step.value == null { 0 },
-						{ step.value }
+						step.value
 					][0]
 					color: step.color
 				}]
@@ -77,7 +77,7 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				lineWidth: [ // switch
 					if #panel.fieldConfig.defaults.custom.lineWidth > 3 { 3 }, // line width can't go beyond 3 in Perses
 					if #panel.fieldConfig.defaults.custom.lineWidth < 0.25 { 0.25 }, // line width can't go below 0.25 in Perses
-					{ #panel.fieldConfig.defaults.custom.lineWidth }
+					#panel.fieldConfig.defaults.custom.lineWidth
 				][0]
 			}
 			if #panel.fieldConfig.defaults.custom.fillOpacity != _|_ {

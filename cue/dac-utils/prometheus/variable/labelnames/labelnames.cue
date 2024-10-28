@@ -32,7 +32,7 @@ filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
 	if #query != _|_ {#query},
-	{#metric + "{" + filter + "}"},
+	#metric + "{" + filter + "}",
 ][0]
 
 variable: promVarBuilder.variable & {
