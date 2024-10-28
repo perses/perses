@@ -31,7 +31,7 @@ import (
 )
 
 #myVarsBuilder: varGroupBuilder & {
-	#input: [for i in #input { #datasourceName: "promDemo"}]
+	#input: [for i in #input {#datasourceName: "promDemo"}]
 	#input: [
 		labelValuesVarBuilder & {
 			#name: "stack"
@@ -51,19 +51,19 @@ import (
 			#values: ["observability", "monitoring"]
 		},
 		promQLVarBuilder & {
-			#name:           "namespace"
-			#metric:         "kube_namespace_labels"
-			#allowMultiple:  true
+			#name:          "namespace"
+			#metric:        "kube_namespace_labels"
+			#allowMultiple: true
 		},
 		labelNamesVarBuilder & {
-			#name:           "namespaceLabels"
-			#metric:         "kube_namespace_labels"
+			#name:   "namespaceLabels"
+			#metric: "kube_namespace_labels"
 		},
 		promQLVarBuilder & {
-			#name:           "pod"
-			#query:          "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})"
-			#allowAllValue:  true
-			#allowMultiple:  true
+			#name:          "pod"
+			#query:         "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})"
+			#allowAllValue: true
+			#allowMultiple: true
 		},
 		promQLVarBuilder & {
 			#name:           "container"
@@ -78,8 +78,8 @@ import (
 				description: "simply the list of labels for the considered metric"
 				hidden:      true
 			}
-			#query:          "kube_pod_container_info{\(#filter)}"
-			#sort:           "alphabetical-ci-desc"
+			#query: "kube_pod_container_info{\(#filter)}"
+			#sort:  "alphabetical-ci-desc"
 		},
 	]
 }
