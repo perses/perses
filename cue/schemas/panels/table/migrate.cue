@@ -3,9 +3,9 @@ if #panel.type != _|_ if #panel.type == "table" {
 	spec: {
 		if #panel.options != _|_ if #panel.options.cellHeight != _|_ {
 			density: [
-				if #panel.options.cellHeight == "sm" { "compact" },
-				if #panel.options.cellHeight == "lg" { "comfortable" }
-				"standard"
+				if #panel.options.cellHeight == "sm" {"compact"},
+				if #panel.options.cellHeight == "lg" {"comfortable"},
+				"standard",
 			][0]
 		}
 
@@ -88,7 +88,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// Bringing back the old logic from before #2273 + some adjustments due to using cue v0.11.0 + corner case uncovered with unit test added since:
 
 		_excludedColumns: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName if value {
-			name: excludedColumn,
+			name: excludedColumn
 			hide: true
 		}]
 
@@ -103,62 +103,85 @@ if #panel.type != _|_ if #panel.type == "table" {
 		}}
 
 		_prettifiedColumns: list.Concat([[for rKey, rVal in _renamedMap {
-			name: rVal
+			name:   rVal
 			header: rKey
 			if _customWidthMap[rKey] != _|_ {
 				width: _customWidthMap[rKey]
 			}
-		}],[for cwKey, cwVal in _customWidthMap if _renamedMap[cwKey] == _|_ {
-			name: cwKey
+		}], [for cwKey, cwVal in _customWidthMap if _renamedMap[cwKey] == _|_ {
+			name:  cwKey
 			width: cwVal
 		}]])
 
-		columnSettings: list.Concat([_excludedColumns,_prettifiedColumns])
+		columnSettings: list.Concat([_excludedColumns, _prettifiedColumns])
 
 		// Using flatten to avoid having an array of arrays with "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		let x = list.FlattenN([
-			if #panel.fieldConfig != _|_  && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
+			if #panel.fieldConfig != _|_ && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
 				if mapping.type == "value" {
 					[for key, option in mapping.options {
 						condition: {
 							kind: "Value"
-								spec: {
-									value: key
-								}
+							spec: {
+								value: key
 							}
-						if option.text != _|_ { text: option.text }
-						if option.color != _|_ { backgroundColor: [ // switch
-							if #mapping.color[option.color] != _|_ { #mapping.color[option.color] },
-							option.color
-						][0]}
+						}
+						if option.text != _|_ {
+							text: option.text
+						}
+						if option.color != _|_ {
+							backgroundColor: [// switch
+								if #mapping.color[option.color] != _|_ {#mapping.color[option.color]},
+								option.color,
+							][0]
+						}
 					}]
 				}
 
-				if mapping.type == "range"  || mapping.type == "regex" || mapping.type == "special" {
-					condition: [
-						if mapping.type == "range" { kind: "Range", spec: {
-							if mapping.options.from != _|_ { min: mapping.options.from },
-							if mapping.options.to != _|_ { max: mapping.options.to }
-						}},
-						if mapping.type == "regex" { kind: "Regex", spec: { expr: mapping.options.pattern }},
-						if mapping.type == "special" { kind: "Misc", spec: { value: [
-							if mapping.options.match == "nan" { "NaN" },
-							if mapping.options.match == "null+nan" { "null" },
-							mapping.options.match,
-						][0] }},
+				if mapping.type == "range" || mapping.type == "regex" || mapping.type == "special" {
+					condition: [//switch
+						if mapping.type == "range" {
+							kind: "Range",
+							spec: {
+								if mapping.options.from != _|_ {
+									min: mapping.options.from
+								}
+								if mapping.options.to != _|_ {
+									max: mapping.options.to
+								}
+							}
+						},
+						if mapping.type == "regex" {
+							kind: "Regex",
+							spec: {
+								expr: mapping.options.pattern
+							}
+						},
+						if mapping.type == "special" {
+							kind: "Misc",
+							spec: {
+								value: [//switch
+									if mapping.options.match == "nan" {"NaN"},
+									if mapping.options.match == "null+nan" {"null"},
+									mapping.options.match,
+								][0]
+							}
+						},
 					][0]
 
-					if mapping.options.result.text != _|_ { text: mapping.options.result.text }
-					if mapping.options.result.color != _|_ { backgroundColor: [ // switch
-						if #mapping.color[mapping.options.result.color] != _|_ { #mapping.color[mapping.options.result.color] },
-						mapping.options.result.color
-					][0]}
+					if mapping.options.result.text != _|_ {text: mapping.options.result.text}
+					if mapping.options.result.color != _|_ {
+						backgroundColor: [// switch
+							if #mapping.color[mapping.options.result.color] != _|_ {#mapping.color[mapping.options.result.color]},
+							mapping.options.result.color,
+						][0]
+					}
 				}
-			}
+			},
 		], 1)
 
-		if len(x) > 0 { cellSettings: x }
+		if len(x) > 0 {cellSettings: x}
 
 		if #panel.transformations != _|_ {
 			#transforms: [
@@ -166,22 +189,26 @@ if #panel.type != _|_ if #panel.type == "table" {
 					if transformation.id == "merge" {
 						kind: "MergeSeries"
 						spec: {
-							if transformation.disabled != _|_ { disabled: transformation.disabled }
+							if transformation.disabled != _|_ {
+								disabled: transformation.disabled
+							}
 						}
 					}
 					if transformation.id == "joinByField" {
 						kind: "JoinByColumnValue"
 						spec: {
-							[ // switch
-								if transformation.options.byField != _|_ { columns: [transformation.options.byField] },
-								{ columns: [] }
+							[// switch
+								if transformation.options.byField != _|_ {columns: [transformation.options.byField]},
+								{columns: []},
 							][0]
-							if transformation.disabled != _|_ { disabled: transformation.disabled }
+							if transformation.disabled != _|_ {
+								disabled: transformation.disabled
+							}
 						}
 					}
-				}
+				},
 			]
-			if len(#transforms) > 0 { transforms: #transforms }
+			if len(#transforms) > 0 {transforms: #transforms}
 		}
 	}
 },
