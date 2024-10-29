@@ -346,7 +346,7 @@
               "calculation": "last-number",
               "format": {
                 "unit": "hours",
-                "decimal": 1
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [
@@ -406,7 +406,7 @@
                 ]
               },
               "format": {
-                "decimal": 3
+                "decimalPlaces": 3
               },
               "visual": {
                 "areaOpacity": 0,
