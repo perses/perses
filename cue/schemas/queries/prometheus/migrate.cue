@@ -16,6 +16,7 @@ if #target.datasource != _|_ if #target.datasource.type != _|_ if #target.dataso
 		}
 	}
 },
+
 // The datasource.type may not be present while we are dealing with a prometheus query.
 // In such case, rely on the "expr" field, whose presence likely indicates that this is a prometheus query.
 // /!\ This is a best-effort conversion logic and may wrongly convert not-prometheus queries to PrometheusTimeSeriesQuery
