@@ -55,7 +55,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
     completeConfig = { remote: { url: promURL } };
   }
 
-  const { query, handleQueryChange, handleQueryBlur } = useQueryState(props);
+  const { handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
   const { minStep, handleMinStepChange, handleMinStepBlur } = useMinStepState(props);
   const minStepPlaceholder =
@@ -92,7 +92,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
       </FormControl>
       <PromQLEditor
         completeConfig={completeConfig}
-        value={query}
+        value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
+        datasource={selectedDatasource}
         onChange={handleQueryChange}
         onBlur={handleQueryBlur}
       />
