@@ -2,9 +2,11 @@
 
 ## 0.49.0-rc.0 / 2024-10-28
 
-- [FEATURE] Add Join and Merge transformations to the Table panel (#2359)
+This update introduces a toggleable Tree view in the PromQL editor (Prom 3.0-like), as well as new customization options for the Table panel.
+
+- [FEATURE] Table panel: Add Join and Merge transformationsl (#2359)
 - [FEATURE] PromQL Tree view / Debugger (#2344)
-- [FEATURE] Add cell settings (#2298)
+- [FEATURE] Table panel: Add cell settings (#2298)
 - [ENHANCEMENT] Change timeseries panel's legend migration (#2335)
 - [ENHANCEMENT] Add counts/sec unit to the mapping list for migration (#2365)
 - [ENHANCEMENT] Handle collapsed/panels missing in row (#2330)
