@@ -13,6 +13,12 @@ if #panel.type != _|_ if #panel.type == "stat" {
 				unit: #mapping.unit[#unitPath]
 			}
 		}
+		#decimal: *(#panel.fieldConfig.defaults.decimal) | null
+		if #decimal != null {
+			format: {
+				decimalPlaces: #decimal
+			}
+		}
 
 		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.thresholds.steps != _|_
 

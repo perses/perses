@@ -122,7 +122,8 @@
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "Bps",
+          "decimal": 2
         },
         "overrides": []
       },
@@ -189,7 +190,8 @@
               }
             ]
           },
-          "unit": "h"
+          "unit": "h",
+          "decimal": 1
         },
         "overrides": []
       },
@@ -284,7 +286,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "decimal": 3
         },
         "overrides": []
       },
