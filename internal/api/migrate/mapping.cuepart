@@ -165,7 +165,9 @@ spec: {
                 if grafanaVar.sort != _|_ if #mapping.sort[grafanaVar.sort] != _|_ {
                     sort: #mapping.sort[grafanaVar.sort]
                 }
-                // defaultValue: nothing to map to this field
+                if grafanaVar.current != _|_ if grafanaVar.current.value != _|_ {
+                    defaultValue: grafanaVar.current.value
+                }
                 #var: grafanaVar
                 plugin: [ // switch
                     %(conditional_variables)

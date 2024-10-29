@@ -20,6 +20,7 @@
             "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
             "hidden": false
           },
+          "defaultValue": "one",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
