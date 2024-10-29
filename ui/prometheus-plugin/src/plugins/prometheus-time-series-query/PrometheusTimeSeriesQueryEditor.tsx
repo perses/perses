@@ -45,8 +45,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
   const { data: datasourceResource } = useDatasource(selectedDatasource);
 
-  const promURL =
-    (datasourceResource?.plugin.spec as PrometheusDatasourceSpec).directUrl ?? client?.options.datasourceUrl;
+  const promURL = client?.options.datasourceUrl;
   let completeConfig: CompleteConfiguration;
   if (datasourceResource && (datasourceResource.plugin.spec.proxy as HTTPProxy)?.spec.headers) {
     const promHeaders = (datasourceResource.plugin.spec.proxy as HTTPProxy).spec.headers;
