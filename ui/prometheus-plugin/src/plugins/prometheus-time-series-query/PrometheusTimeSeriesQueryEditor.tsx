@@ -50,7 +50,8 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   let completeConfig: CompleteConfiguration;
   if (datasourceResource && (datasourceResource.plugin.spec.proxy as HTTPProxy)?.spec.headers) {
     const promHeaders = (datasourceResource.plugin.spec.proxy as HTTPProxy).spec.headers;
-    completeConfig = { remote: { url: promURL, requestHeaders: promHeaders } };
+    const headers = new Headers(promHeaders);
+    completeConfig = { remote: { url: promURL, requestHeaders: headers } };
   } else {
     completeConfig = { remote: { url: promURL } };
   }
