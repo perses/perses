@@ -150,6 +150,7 @@
             "description": "ad hoc filter",
             "hidden": false
           },
+          "defaultValue": "1m",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
