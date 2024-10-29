@@ -60,6 +60,7 @@
             "description": "Label values, 1rst flavor",
             "hidden": false
           },
+          "defaultValue": "$__all",
           "allowAllValue": true,
           "allowMultiple": false,
           "customAllValue": ".*",
@@ -82,6 +83,7 @@
             "description": "Label values, 2nd flavor",
             "hidden": false
           },
+          "defaultValue": "$__all",
           "allowAllValue": true,
           "allowMultiple": false,
           "sort": "none",
@@ -105,6 +107,7 @@
             "description": "Label values, 3rd flavor",
             "hidden": false
           },
+          "defaultValue": "$__all",
           "allowAllValue": true,
           "allowMultiple": false,
           "sort": "alphabetical-asc",
@@ -128,6 +131,7 @@
             "description": "Label values, 4th flavor",
             "hidden": false
           },
+          "defaultValue": "$__all",
           "allowAllValue": true,
           "allowMultiple": false,
           "sort": "alphabetical-desc",
