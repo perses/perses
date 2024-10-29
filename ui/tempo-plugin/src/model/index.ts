@@ -14,4 +14,4 @@
 export * from './tempo-client'
 export * from './tempo-selectors'
 export * from './trace-query-model'
-export * from './types'
+export * from './api-types'
