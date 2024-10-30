@@ -77,6 +77,12 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "stat_calc_undefined_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a bar gauge",
+			inputGrafanaDashboardFile:   "barchart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 
 	for _, test := range testSuite {
