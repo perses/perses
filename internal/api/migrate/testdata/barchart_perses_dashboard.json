@@ -17,7 +17,7 @@
               "spec": {
                   "display": {
                       "name": "Some metrics",
-                      "description": "Just displaying some metrics with Stat panel"
+                      "description": "Just displaying some metrics with Bar panel"
                   },
                   "plugin": {
                       "kind": "BarChart",
