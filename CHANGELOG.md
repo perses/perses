@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.49.0-rc.1 / 2024-10-31
+
+- [ENHANCEMENT] Add decimal migrations; Add barchart migration (#2386)
+- [ENHANCEMENT] tempo-plugin: export all models (including TempoTraceQuerySpec) (#2384)
+- [ENHANCEMENT] TraceTable: show scrollbar only if content overflows (#2385)
+
 ## 0.49.0-rc.0 / 2024-10-28
 
 This update introduces a toggleable Tree view in the PromQL editor (Prom 3.0-like), as well as new customization options for the Table panel.
