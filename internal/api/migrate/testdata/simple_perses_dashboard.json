@@ -297,7 +297,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "bytes/sec"
+                "unit": "bytes/sec",
+                "decimalPlaces": 2
               },
               "thresholds": {
                 "steps": [
@@ -344,7 +345,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "hours"
+                "unit": "hours",
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [
@@ -402,6 +404,9 @@
                   "mean",
                   "sum"
                 ]
+              },
+              "format": {
+                "decimalPlaces": 3
               },
               "visual": {
                 "areaOpacity": 0,

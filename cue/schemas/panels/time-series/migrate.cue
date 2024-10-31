@@ -46,6 +46,13 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 				}
 			}
 		}
+		#decimal: *(#panel.fieldConfig.defaults.decimal) | null
+		if #decimal != null {
+			format: {
+				decimalPlaces: #decimal
+			}
+		}
+
 		#min: *#panel.fieldConfig.defaults.min | null
 		if #min != null {
 			yAxis: {
