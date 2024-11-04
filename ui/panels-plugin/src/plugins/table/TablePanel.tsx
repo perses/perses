@@ -153,12 +153,25 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
 
   const columns: Array<TableColumnConfig<unknown>> = useMemo(() => {
     const columns: Array<TableColumnConfig<unknown>> = [];
-    for (const key of keys) {
+
+    // Taking the customized columns first for the ordering of the columns in the table
+    const customizedColumns =
+      spec.columnSettings?.map((column) => column.name).filter((name) => keys.includes(name)) ?? [];
+    const defaultColumns = keys.filter((key) => !customizedColumns.includes(key));
+
+    for (const key of customizedColumns) {
       const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
       if (columnConfig !== undefined) {
         columns.push(columnConfig);
       }
     }
+    for (const key of defaultColumns) {
+      const columnConfig = generateColumnConfig(key, spec.columnSettings ?? []);
+      if (columnConfig !== undefined) {
+        columns.push(columnConfig);
+      }
+    }
+
     return columns;
   }, [keys, spec.columnSettings]);
 

@@ -14,7 +14,6 @@
 import { Button, Divider, Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Unstable_Grid2';
 
-import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { CellSettings } from '../table-model';
 import { CellEditor } from './CellEditor';
@@ -25,26 +24,21 @@ export interface CellsEditorProps {
 }
 
 export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
-  const [cells, setCells] = useState<CellSettings[]>(cellSettings);
-
   function handleCellChange(index: number, cell: CellSettings): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells[index] = cell;
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
   function handleAddCellEditor(): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells.push({ condition: { kind: 'Value', spec: { value: '' } } });
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
   function handleCellDelete(index: number): void {
-    const updatedCells = [...cells];
+    const updatedCells = [...cellSettings];
     updatedCells.splice(index, 1);
-    setCells(updatedCells);
     onChange(updatedCells);
   }
 
@@ -66,7 +60,7 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
         <Grid xs={1}></Grid>
       </Grid>
       <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
-        {cells.map((cell, i) => (
+        {cellSettings.map((cell, i) => (
           <CellEditor
             key={i}
             cell={cell}
