@@ -188,8 +188,8 @@ func Write(cfg *Config) error {
 				if restConfig.Authorization != nil {
 					previousConf.RestClientConfig.Authorization = restConfig.Authorization
 				}
-				if restConfig.Oauth != nil {
-					previousConf.RestClientConfig.Oauth = restConfig.Oauth
+				if restConfig.OAuth != nil {
+					previousConf.RestClientConfig.OAuth = restConfig.OAuth
 				}
 				if restConfig.BasicAuth != nil {
 					previousConf.RestClientConfig.BasicAuth = restConfig.BasicAuth

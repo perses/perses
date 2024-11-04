@@ -375,7 +375,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Oauth: &config.Oauth{
+			OAuth: &config.OAuth{
 				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
 				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
 				TokenURL:     persesTokenURL.String(),
@@ -402,7 +402,7 @@ func TestAuth_OAuthProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Oauth: &config.Oauth{
+			OAuth: &config.OAuth{
 				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
 				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
 				TokenURL:     persesTokenURL.String(),
@@ -445,7 +445,7 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOIDC, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
 			URL: persesBaseURL,
-			Oauth: &config.Oauth{
+			OAuth: &config.OAuth{
 				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
 				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
 				TokenURL:     persesTokenURL.String(),
@@ -471,7 +471,7 @@ func TestAuth_OIDCProvider_Token_WithLib(t *testing.T) {
 		persesTokenURL := common.MustParseURL(server.URL)
 		persesTokenURL.Path = fmt.Sprintf("%s/%s/%s/%s/%s", utils.APIPrefix, utils.PathAuthProviders, utils.AuthKindOAuth, providerConfig.SlugID, utils.PathToken)
 		authenticatedClient, err := config.NewRESTClient(config.RestConfigClient{
-			Oauth: &config.Oauth{
+			OAuth: &config.OAuth{
 				ClientID:     "MyClientID",     // Can be anything as our provider is very permissive
 				ClientSecret: "MyClientSecret", // Can be anything as our provider is very permissive
 				TokenURL:     persesTokenURL.String(),
