@@ -29,10 +29,6 @@ type State =
       type: 'idle';
     }
   | {
-      type: 'preview';
-      container: HTMLElement;
-    }
-  | {
       type: 'is-dragging';
     }
   | {
@@ -83,25 +79,11 @@ export function ColumnEditorContainer({
   onDelete,
 }: ColumnEditorContainerProps) {
   const ref = useRef<HTMLDivElement>(null);
-  // const [isDragged, setIsDragged] = useState(false);
   const [state, setState] = useState<State>(idle);
 
   function handleHideColumn() {
     onChange({ ...column, hide: !column.hide });
   }
-
-  // useEffect(() => {
-  //   const el = ref.current;
-  //   if (!el) {
-  //     return;
-  //   }
-  //
-  //   return draggable({
-  //     element: el,
-  //     onDragStart: () => setIsDragged(true),
-  //     onDrop: () => setIsDragged(false),
-  //   });
-  // }, []);
 
   useEffect(() => {
     const element = ref.current;
@@ -130,12 +112,10 @@ export function ColumnEditorContainer({
             return false;
           }
           // only allowing tasks to be dropped on me
-          // return isTaskData(source.data); TODO
           return true;
         },
         getData({ input }) {
           const data = column as unknown as Record<string, unknown>;
-          // const data = getTaskData(task); TODO
           return attachClosestEdge(data, {
             element,
             input,
@@ -172,8 +152,8 @@ export function ColumnEditorContainer({
   }, [column]);
 
   return (
-    <Stack spacing={1} ref={ref} style={{ opacity: state.type === 'is-dragging' ? 0.5 : 'unset' }}>
-      {state.type === 'is-dragging-over' && state.closestEdge ? <DropIndicator /> : null}
+    <Stack spacing={1} style={{ opacity: state.type === 'is-dragging' ? 0.5 : 'unset' }} ref={ref}>
+      {state.type === 'is-dragging-over' && state.closestEdge === 'top' ? <DropIndicator /> : null}
 
       <Stack
         direction="row"
@@ -187,6 +167,7 @@ export function ColumnEditorContainer({
           <IconButton size="small">
             <DragIcon />
           </IconButton>
+
           <IconButton
             data-testid={`column-toggle#${column.name}`}
             size="small"
@@ -225,6 +206,7 @@ export function ColumnEditorContainer({
         </Stack>
       </Stack>
       {!isCollapsed && <ColumnEditor column={column} onChange={onChange} />}
+      {state.type === 'is-dragging-over' && state.closestEdge === 'bottom' ? <DropIndicator /> : null}
     </Stack>
   );
 }

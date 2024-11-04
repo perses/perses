@@ -70,9 +70,6 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
 
   useEffect(() => {
     return monitorForElements({
-      // canMonitor({ source }) {
-      //   return isTaskData(source.data);
-      // },
       onDrop({ location, source }) {
         const target = location.current.dropTargets[0];
         if (!target) {
@@ -82,15 +79,8 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
         const sourceData = source.data;
         const targetData = target.data;
 
-        // if (!isTaskData(sourceData) || !isTaskData(targetData)) {
-        //   return;
-        // }
-
         const indexOfSource = columnSettings.findIndex((column) => column.name === sourceData.name);
         const indexOfTarget = columnSettings.findIndex((column) => column.name === targetData.name);
-
-        console.log(indexOfSource);
-        console.log(indexOfTarget);
 
         if (indexOfTarget < 0 || indexOfSource < 0) {
           return;
@@ -100,6 +90,7 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
 
         // Using `flushSync` so we can query the DOM straight after this line
         flushSync(() => {
+          // TODO: handle if the setting is collapsed
           setColumns(
             reorderWithEdge({
               list: columnSettings,
@@ -110,14 +101,6 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
             })
           );
         });
-        // // Being simple and just querying for the task after the drop.
-        // // We could use react context to register the element in a lookup,
-        // // and then we could retrieve that element after the drop and use
-        // // `triggerPostMoveFlash`. But this gets the job done.
-        // const element = document.querySelector(`[data-task-id="${sourceData.taskId}"]`);
-        // if (element instanceof HTMLElement) {
-        //   triggerPostMoveFlash(element);
-        // }
       },
     });
   }, [columnSettings]);
