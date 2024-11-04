@@ -522,11 +522,10 @@ discovery_name: <string>
 ```yaml
 # URL of the HTTP server exposing the global datasource list to retrieve.
 url: <url>
-
-[ auth: <Auth specification> ]
-
 # The HTTP authorization credentials for the targets.
-# Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
+# Basic Auth, authorization and oauth are mutually exclusive. Use one of them.
+[ basic_auth: <Basic Auth specification> ]
+[ oauth: <Oauth specification> ]
 [ authorization: <Authorization specification> ]
 
 # Config used to connect to the targets.
@@ -534,14 +533,6 @@ url: <url>
 
 headers:
   [<string>:<string>]
-```
-
-##### Auth
-
-```yaml
-[ basic_auth: <Basic Auth specification> ]
-
-[ oauth: <Oauth specification> ]
 ```
 
 ##### Oauth specification

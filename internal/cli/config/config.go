@@ -188,11 +188,17 @@ func Write(cfg *Config) error {
 				if restConfig.Authorization != nil {
 					previousConf.RestClientConfig.Authorization = restConfig.Authorization
 				}
+				if restConfig.OAuth != nil {
+					previousConf.RestClientConfig.OAuth = restConfig.OAuth
+				}
+				if restConfig.BasicAuth != nil {
+					previousConf.RestClientConfig.BasicAuth = restConfig.BasicAuth
+				}
+				if restConfig.NativeAuth != nil {
+					previousConf.RestClientConfig.NativeAuth = restConfig.NativeAuth
+				}
 				if len(restConfig.Headers) > 0 {
 					previousConf.RestClientConfig.Headers = restConfig.Headers
-				}
-				if restConfig.Auth != nil {
-					previousConf.RestClientConfig.Auth = restConfig.Auth
 				}
 			}
 			if len(cfg.Project) > 0 {
