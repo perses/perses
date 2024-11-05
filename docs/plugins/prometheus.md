@@ -17,12 +17,12 @@ Prometheus as a datasource is basically an HTTP server. So we need to define an 
 # It is the url of the datasource.
 # Leave it empty if you don't want to access the datasource directly from the UI.
 # You should define a proxy if you want to access the datasource through the Perses' server.
-[ directUrl: <url> ]
+directUrl: <url> # Optional
 
 # It is the http configuration that will be used by the Perses' server to redirect to the datasource any query sent by the UI.
-[ proxy: <HTTP Proxy specification> ]
+proxy: <HTTP Proxy specification> # Optional
 
-[ scrapeInterval: <duration> ]
+scrapeInterval: <duration> # Optional
 ```
 
 #### HTTP Proxy specification
@@ -36,16 +36,16 @@ spec:
   # It is a tuple list of http methods and http endpoints that will be accessible.
   # Leave it empty if you don't want to restrict the access to the datasource.
   allowedEndpoints:
-    - [ <Allowed Endpoints specification> ]
+    - <Allowed Endpoints specification> # Optional
 
   # It can be used to provide additional headers that need to be forwarded when requesting the datasource
   headers:
-    [ <string>: <string> ]
+    <string>: <string> # Optional
 
   # This is the name of the secret that should be used for the proxy or discovery configuration
   # It will contain any sensitive information such as password, token, certificate.
   # Please read the documentation about secrets to understand how to create one
-  [ secret: <string> ]
+  secret: <string> # Optional
 ```
 
 ##### Allowed Endpoints specification
@@ -121,12 +121,12 @@ query: <string>
 
 # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
 # See the documentation about the datasources to understand how it is selected.
-[ datasource: <Datasource selector> ]
-[ seriesNameFormat: <string> ]
+datasource: <Datasource selector> # Optional
+seriesNameFormat: <string> # Optional
 
 # `minStep` is the minimum time interval you want between each data points.
-[ minStep: <duration> ]
-[ resolution: number ]
+minStep: <duration> # Optional
+resolution: number # Optional
 ```
 
 #### Example
@@ -156,9 +156,9 @@ spec: <Prometheus Label Names specification>
 ```yaml
 # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
 # See the documentation about the datasources to understand how it is selected.
-[ datasource: <datasource_selector> ]
+datasource: <datasource_selector> # Optional
 matchers:
-  [ - <string> ]
+  - <string> # Optional
 ```
 
 #### Example
@@ -211,10 +211,10 @@ spec: <Prometheus Label Values specification>
 ```yaml
 # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
 # See the documentation about the datasources to understand how it is selected.
-[ datasource: <Datasource selector> ]
+datasource: <Datasource selector> # Optional
 labelName: <string>
 matchers:
-  [ - <string> ]
+  - <string> # Optional
 ```
 
 #### Example
@@ -272,11 +272,11 @@ spec: <Prometheus PromQL specification>
 ```yaml
 # `datasource` is a datasource selector. If not provided, the default PrometheusDatasource is used.
 # See the documentation about the datasources to understand how it is selected.
-[ datasource: <Datasource selector> ]
+datasource: <Datasource selector> # Optional
 
 # The promql expression
 expr: <string>
-[ labelName: <string> ]
+labelName: <string> # Optional
 ```
 
 ### Datasource selector
@@ -285,5 +285,5 @@ expr: <string>
 kind: "PrometheusDatasource"
 
 # The name of the datasource regardless its level
-[ name: <string> ]
+name: <string> # Optional
 ```

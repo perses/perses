@@ -21,21 +21,21 @@ See the next section to get details about the `<dashboard_specification>`.
 ```yaml
 # Metadata.name has some restrictions. For example, you can't use space there.
 # `display` allows to provide a rich name and a description for your dashboard.
-[ display: <Display specification> ]
+display: <Display specification> # Optional
 
 # `datasources` is a map where the key is the reference of the datasource. The value is the actual datasource definition.
 # A datasource can be referenced by the different panels and/or variables.
 datasources:
-  [ <string>: <Datasource specification> ]
+  <string>: <Datasource specification> # Optional
 
 # `variables` is the list of dashboard variables. A variable can be referenced by the different panels and/or by other variables.
 variables:
-  - [ <Variable specification> ]
+  - <Variable specification> # Optional
 
 # `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
 # the kind of chart this panel is using. A panel can only hold one chart.
 panels:
-  [ <string>: <Panel specification> ]
+  <string>: <Panel specification> # Optional
 
 # `layouts` is the list of layouts. A layout describes how to display the list of panels. 
 # Indeed, in Perses the definition of a panel is uncorrelated from the definition of where to position it.
@@ -43,10 +43,10 @@ layouts:
   - <Layout specification>
 
 # `duration` is the default time range to use on the initial load of the dashboard.
-[ duration: <duration> ]
+duration: <duration> # Optional
 
 # `refreshInterval` is the default refresh interval to use on the initial load of the dashboard.
-[ refreshInterval: <duration> ]
+refreshInterval: <duration> # Optional
 ```
 
 A dashboard in its minimal definition only requires a panel and a layout.
@@ -60,10 +60,10 @@ characters you can use there.
 # The new name of the dashboard. If set, it will replace `metadata.name` in the dashboard title in the UI.
 # Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the dashboard.
 # This is just for display purpose.
-[ name: <string> ]
+name: <string> # Optional
 
 # The description of the dashboard.
-[ description: <string> ]
+description: <string> # Optional
 ```
 
 ### Datasource specification
@@ -87,7 +87,7 @@ spec:
 
   # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of chart & the type of datasource used.
   queries:
-    - [ <Query specification> ]
+    - <Query specification> # Optional
 ```
 
 #### Panel Plugin specification
