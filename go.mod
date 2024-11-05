@@ -7,7 +7,7 @@ require (
 	github.com/brunoga/deep v1.2.4
 	github.com/charmbracelet/huh v0.6.0
 	github.com/efficientgo/core v1.0.0-rc.3
-	github.com/fsnotify/fsnotify v1.7.0
+	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gavv/httpexpect/v2 v2.16.0
 	github.com/go-jose/go-jose/v4 v4.0.4
 	github.com/go-sql-driver/mysql v1.8.1
@@ -31,7 +31,7 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	github.com/tidwall/gjson v1.18.0
-	github.com/zitadel/oidc/v3 v3.31.0
+	github.com/zitadel/oidc/v3 v3.32.1
 	golang.org/x/crypto v0.28.0
 	golang.org/x/exp v0.0.0-20240416160154-fe59bbe5cc7f
 	golang.org/x/mod v0.21.0
