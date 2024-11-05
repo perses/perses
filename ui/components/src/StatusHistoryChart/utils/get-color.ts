@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const fallbackColor = '#1f77b4';
+export const FALLBACK_COLOR = '#1f77b4';
 
 export function getColorForValue(value: number | string, baseColor: string): string {
   // Validate base color
   if (!baseColor.match(/^#[0-9A-Fa-f]{6}$/)) {
-    baseColor = fallbackColor;
+    baseColor = FALLBACK_COLOR;
   }
 
   try {
@@ -53,8 +53,8 @@ export function getColorForValue(value: number | string, baseColor: string): str
     }
 
     return color;
-  } catch (_) {
-    return fallbackColor;
+  } catch (error) {
+    return FALLBACK_COLOR;
   }
 }
 
@@ -67,9 +67,9 @@ export function getColorsForValues(uniqueValues: Array<number | string>, themeCo
   // Use theme colors first, then generate additional ones
   return uniqueValues.map((value, index) => {
     if (index < themeColors.length) {
-      return themeColors[index] || fallbackColor;
+      return themeColors[index] || FALLBACK_COLOR;
     }
-    return getColorForValue(value, themeColors[0] || fallbackColor);
+    return getColorForValue(value, themeColors[0] || FALLBACK_COLOR);
   });
 }
 

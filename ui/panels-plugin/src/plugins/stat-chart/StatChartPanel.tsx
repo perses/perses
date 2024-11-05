@@ -14,8 +14,16 @@
 import { TitleComponentOption } from 'echarts';
 import { StatChart, StatChartData, useChartsTheme, GraphSeries, LoadingOverlay } from '@perses-dev/components';
 import { Stack, Typography, SxProps } from '@mui/material';
-import { ReactElement, useMemo } from 'react';
-import { CalculationsMap, CalculationType, DEFAULT_CALCULATION, TimeSeriesData } from '@perses-dev/core';
+import { useMemo } from 'react';
+import {
+  applyValueMapping,
+  CalculationsMap,
+  CalculationType,
+  DEFAULT_CALCULATION,
+  TimeSeries,
+  TimeSeriesData,
+  ValueMapping,
+} from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
 import { convertSparkline, getColorFromThresholds } from './utils/data-transform';
@@ -25,14 +33,12 @@ const SPACING = 2;
 
 export type StatChartPanelProps = PanelProps<StatChartOptions>;
 
-export function StatChartPanel(props: StatChartPanelProps): ReactElement | null {
-  const {
-    spec: { calculation, format, sparkline, thresholds, valueFontSize: valueFontSize },
-    contentDimensions,
-  } = props;
+export function StatChartPanel(props: StatChartPanelProps) {
+  const { spec, contentDimensions } = props;
 
+  const { format, sparkline, thresholds, valueFontSize: valueFontSize } = spec;
   const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
-  const statChartData = useStatChartData(queryResults, calculation);
+  const statChartData = useStatChartData(queryResults, spec);
   const isMultiSeries = statChartData.length > 1;
 
   const chartsTheme = useChartsTheme();
@@ -89,13 +95,10 @@ export function StatChartPanel(props: StatChartPanelProps): ReactElement | null 
 
 const useStatChartData = (
   queryResults: UseDataQueryResults<TimeSeriesData>['queryResults'],
-  calculation: CalculationType
+  spec: StatChartOptions
 ): StatChartData[] => {
   return useMemo(() => {
-    if (CalculationsMap[calculation] === undefined) {
-      console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
-    }
-    const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
+    const { calculation, mappings } = spec;
 
     const statChartData: StatChartData[] = [];
     for (const result of queryResults) {
@@ -103,14 +106,35 @@ const useStatChartData = (
       if (result.isLoading || result.isFetching || result.data === undefined) continue;
 
       for (const seriesData of result.data.series) {
-        const calculatedValue = seriesData !== undefined ? calculate(seriesData.values) : undefined;
+        const calculatedValue = getValueOrLabel(seriesData, calculation, mappings);
+
         const series: GraphSeries = {
           name: seriesData.formattedName ?? '',
           values: seriesData.values,
         };
+
         statChartData.push({ calculatedValue, seriesData: series });
       }
     }
     return statChartData;
-  }, [queryResults, calculation]);
+  }, [queryResults, spec]);
+};
+
+const getValueOrLabel = (
+  seriesData: TimeSeries,
+  calculation: CalculationType,
+  mappings?: ValueMapping[]
+): string | number | undefined | null => {
+  if (CalculationsMap[calculation] === undefined) {
+    console.warn(`Invalid StatChart panel calculation ${calculation}, fallback to ${DEFAULT_CALCULATION}`);
+  }
+
+  const calculate = CalculationsMap[calculation] ?? CalculationsMap[DEFAULT_CALCULATION];
+  const calculatedValue = calculate(seriesData.values);
+
+  if (mappings?.length && calculatedValue) {
+    return applyValueMapping(calculatedValue, mappings).value;
+  } else {
+    return calculatedValue;
+  }
 };

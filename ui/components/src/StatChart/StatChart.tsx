@@ -33,7 +33,7 @@ const SERIES_NAME_FONT_WEIGHT = 400;
 const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
-  calculatedValue?: number | null;
+  calculatedValue?: string | number | null | undefined;
   seriesData?: GraphSeries;
 }
 
@@ -48,8 +48,8 @@ export interface StatChartProps {
   valueFontSize?: FontSizeOption;
 }
 
-export function StatChart(props: StatChartProps): ReactElement {
-  const { width, height, data, format, color, sparkline, showSeriesName, valueFontSize } = props;
+export function StatChart(props: StatChartProps) {
+  const { width, height, data, color, sparkline, showSeriesName, format, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
 
   let formattedValue = '';
@@ -57,6 +57,10 @@ export function StatChart(props: StatChartProps): ReactElement {
     formattedValue = 'null';
   } else if (typeof data.calculatedValue === 'number') {
     formattedValue = formatValue(data.calculatedValue, format);
+  } else if (data.calculatedValue === undefined) {
+    formattedValue = '';
+  } else {
+    formattedValue = data.calculatedValue;
   }
 
   const containerPadding = chartsTheme.container.padding.default;
@@ -108,7 +112,19 @@ export function StatChart(props: StatChartProps): ReactElement {
         animation: false,
         silent: true,
       };
-      const mergedSeries = merge(lineSeries, sparkline);
+
+      const sparklineConfig = {
+        lineStyle: {
+          width: sparkline.width ?? chartsTheme.sparkline.width,
+          color,
+          opacity: 1,
+        },
+        areaStyle: {
+          color,
+          opacity: 0.4,
+        },
+      };
+      const mergedSeries = merge(lineSeries, sparklineConfig);
       statSeries.push(mergedSeries);
     }
 

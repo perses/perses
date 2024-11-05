@@ -33,4 +33,66 @@ spec: {
 			}
 		}
 	}
+	// Add migration logic for Value mapping
+	if #panel.options.mappings != _|_ {
+		mappings: [ for mapping in #panel.options.mappings {
+			if mapping.type == "value" {
+				{
+					kind: "Value"
+					spec: {
+						value: mapping.value
+						result: {
+							value: mapping.text
+							if mapping.color != _|_ {
+								color: mapping.color
+							}
+						}
+					}
+				}
+				}
+			if mapping.type == "range" {
+				{
+					kind: "Range"
+					spec: {
+						from: mapping.from
+						to: mapping.to
+						result: {
+							value: mapping.text
+							if mapping.color != _|_ {
+								color: mapping.color
+							}
+						}
+					}
+				}
+			}
+			if mapping.type == "regex" {
+				{
+					kind: "Regex"
+					spec: {
+						pattern: mapping.pattern
+						result: {
+							value: mapping.text
+							if mapping.color != _|_ {
+								color: mapping.color
+							}
+						}
+					}
+				}
+			}
+			if mapping.type == "misc" {
+				{
+					kind: "Misc"
+					spec: {
+						value: mapping.value
+						result: {
+							value: mapping.text
+							if mapping.color != _|_ {
+								color: mapping.color
+							}
+						}
+					}
+				}
+			}
+		}]
+	}
 }

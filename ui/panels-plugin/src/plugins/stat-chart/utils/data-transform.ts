@@ -19,8 +19,8 @@ import { StatChartSparklineOptions } from '../stat-chart-model';
 export function getColorFromThresholds(
   chartsTheme: PersesChartsTheme,
   thresholds?: ThresholdOptions,
-  value?: number | null
-): string {
+  value?: number | string | null
+) {
   // thresholds color takes priority over other colors
   const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
 
@@ -46,7 +46,7 @@ export function convertSparkline(
   chartsTheme: PersesChartsTheme,
   sparkline?: StatChartSparklineOptions,
   thresholds?: ThresholdOptions,
-  value?: number | null
+  value?: number | string | null
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
 
