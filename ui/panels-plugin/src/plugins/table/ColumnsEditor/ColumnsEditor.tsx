@@ -12,11 +12,9 @@
 // limitations under the License.
 
 import { Button, Stack } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
-import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { reorderWithEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge';
-import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { useDragAndDropMonitor } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 import { ColumnEditorContainer } from './ColumnEditorContainer';
 
@@ -62,39 +60,11 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
     });
   }
 
-  useEffect(() => {
-    return monitorForElements({
-      onDrop({ location, source }) {
-        const target = location.current.dropTargets[0];
-        if (!target) {
-          return;
-        }
-
-        const sourceData = source.data;
-        const targetData = target.data;
-
-        const indexOfSource = columnSettings.findIndex((column) => column.name === sourceData.name);
-        const indexOfTarget = columnSettings.findIndex((column) => column.name === targetData.name);
-
-        if (indexOfTarget < 0 || indexOfSource < 0) {
-          return;
-        }
-
-        const closestEdgeOfTarget = extractClosestEdge(targetData);
-
-        // TODO: handle if the setting is collapsed
-        onChange(
-          reorderWithEdge({
-            list: columnSettings,
-            startIndex: indexOfSource,
-            indexOfTarget,
-            closestEdgeOfTarget,
-            axis: 'vertical',
-          })
-        );
-      },
-    });
-  }, [columnSettings, onChange]);
+  useDragAndDropMonitor({
+    elements: columnSettings as unknown as Array<Record<string, unknown>>,
+    accessKey: 'name',
+    onChange: onChange as unknown as (elements: Array<Record<string, unknown>>) => void,
+  });
 
   return (
     <Stack spacing={1}>

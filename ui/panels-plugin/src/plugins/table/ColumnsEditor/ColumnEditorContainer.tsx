@@ -11,59 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Divider, IconButton, Stack, Tooltip, Typography } from '@mui/material';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import DragIcon from 'mdi-material-ui/Drag';
-import { useEffect, useRef, useState } from 'react';
-import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { attachClosestEdge, Edge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { DragAndDropElement } from '@perses-dev/components';
 import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
-
-type State =
-  | {
-      type: 'idle';
-    }
-  | {
-      type: 'is-dragging';
-    }
-  | {
-      type: 'is-dragging-over';
-      closestEdge: Edge | null;
-    };
-
-const idle: State = { type: 'idle' };
-
-export function DropIndicator() {
-  return (
-    <Stack direction="row" alignItems="center">
-      <Box
-        sx={{
-          content: '""',
-          width: 8,
-          height: 8,
-          boxSizing: 'border-box',
-          position: 'absolute',
-          backgroundColor: (theme) => theme.palette.background.default,
-          border: (theme) => `2px solid ${theme.palette.info.main}`,
-          borderRadius: '50%',
-        }}
-      ></Box>
-      <Box
-        sx={{
-          content: '""',
-          height: 2,
-          background: (theme) => theme.palette.info.main,
-          width: '100%',
-        }}
-      ></Box>
-    </Stack>
-  );
-}
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
   isCollapsed: boolean;
@@ -78,83 +34,12 @@ export function ColumnEditorContainer({
   onCollapse,
   onDelete,
 }: ColumnEditorContainerProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [state, setState] = useState<State>(idle);
-
   function handleHideColumn() {
     onChange({ ...column, hide: !column.hide });
   }
 
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) {
-      return;
-    }
-
-    return combine(
-      draggable({
-        element,
-        getInitialData() {
-          return column as unknown as Record<string, unknown>;
-        },
-        onDragStart() {
-          setState({ type: 'is-dragging' });
-        },
-        onDrop() {
-          setState(idle);
-        },
-      }),
-      dropTargetForElements({
-        element,
-        canDrop({ source }) {
-          // not allowing dropping on yourself
-          if (source.element === element) {
-            return false;
-          }
-          // only allowing tasks to be dropped on me
-          return true;
-        },
-        getData({ input }) {
-          const data = column as unknown as Record<string, unknown>;
-          return attachClosestEdge(data, {
-            element,
-            input,
-            allowedEdges: ['top', 'bottom'],
-          });
-        },
-        getIsSticky() {
-          return true;
-        },
-        onDragEnter({ self }) {
-          const closestEdge = extractClosestEdge(self.data);
-          setState({ type: 'is-dragging-over', closestEdge });
-        },
-        onDrag({ self }) {
-          const closestEdge = extractClosestEdge(self.data);
-
-          // Only need to update react state if nothing has changed.
-          // Prevents re-rendering.
-          setState((current) => {
-            if (current.type === 'is-dragging-over' && current.closestEdge === closestEdge) {
-              return current;
-            }
-            return { type: 'is-dragging-over', closestEdge };
-          });
-        },
-        onDragLeave() {
-          setState(idle);
-        },
-        onDrop() {
-          setState(idle);
-        },
-      })
-    );
-  }, [column]);
-
   return (
-    <Stack spacing={1} style={{ opacity: state.type === 'is-dragging' ? 0.5 : 'unset' }} ref={ref}>
-      {state.type === 'is-dragging-over' && state.closestEdge === 'top' ? <DropIndicator /> : null}
-
+    <DragAndDropElement data={column as unknown as Record<string, unknown>}>
       <Stack
         direction="row"
         alignItems="center"
@@ -206,7 +91,6 @@ export function ColumnEditorContainer({
         </Stack>
       </Stack>
       {!isCollapsed && <ColumnEditor column={column} onChange={onChange} />}
-      {state.type === 'is-dragging-over' && state.closestEdge === 'bottom' ? <DropIndicator /> : null}
-    </Stack>
+    </DragAndDropElement>
   );
 }
