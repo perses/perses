@@ -1,6 +1,6 @@
 {
     "name": "@perses-dev/tempo-plugin",
-    "version": "0.49.0-rc.1",
+    "version": "0.49.0",
     "description": "A Perses plugin to interact with Tempo traces",
     "license": "Apache-2.0",
     "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -32,9 +32,9 @@
         "@codemirror/autocomplete": "^6.17.0",
         "@lezer/highlight": "^1.0.0",
         "@grafana/lezer-traceql": "^0.0.18",
-        "@perses-dev/components": "0.49.0-rc.1",
-        "@perses-dev/core": "0.49.0-rc.1",
-        "@perses-dev/plugin-system": "0.49.0-rc.1",
+        "@perses-dev/components": "0.49.0",
+        "@perses-dev/core": "0.49.0",
+        "@perses-dev/plugin-system": "0.49.0",
         "@uiw/react-codemirror": "^4.19.1"
     },
     "peerDependencies": {
