@@ -62,7 +62,7 @@ export function TraceTablePanel(props: TraceTablePanelProps) {
   }
 
   return (
-    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
+    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'auto' }}>
       <DataTable
         options={spec}
         result={queryResults}

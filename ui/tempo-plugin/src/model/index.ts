@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './tempo-client'
-export * from './tempo-selectors'
-export * from './trace-query-model'
-export * from './types'
+export * from './tempo-client';
+export * from './tempo-selectors';
+export * from './trace-query-model';
+export * from './api-types';

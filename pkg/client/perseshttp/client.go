@@ -16,17 +16,10 @@ package perseshttp
 import (
 	"net/http"
 	"net/url"
-
-	"github.com/perses/perses/pkg/model/api/v1/secret"
 )
 
 // RESTClient defines an HTTP client designed for the HTTP request to a REST API.
 type RESTClient struct {
-	// Usually it contains the bearer token required to contact the remote API.
-	Authorization *secret.Authorization
-	// basicAuth to be used for each request (not editable)
-	// Using a basicAuth has the priority other the token
-	BasicAuth *secret.BasicAuth
 	// Default headers for all client requests (not editable)
 	Headers map[string]string
 	// base is the root URL for all invocations of the client
@@ -61,5 +54,5 @@ func (c *RESTClient) Delete() *Request {
 }
 
 func (c *RESTClient) newRequest(method string) *Request {
-	return NewRequest(c.Client, method, c.BaseURL, c.Authorization, c.BasicAuth, c.Headers)
+	return NewRequest(c.Client, method, c.BaseURL, c.Headers)
 }
