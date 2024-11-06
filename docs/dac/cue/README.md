@@ -12,15 +12,15 @@ See the dedicated pages for each builder:
 - [Dashboard](./dashboard.md)
 - [Panel Groups](./panelgroups.md)
 - Variable-related builders:
-  - [Variable Group](./variable/group.md)
-  - [Static List Variable](./variable/staticlist.md)
-  - [Text Variable](./variable/text.md)
+    - [Variable Group](./variable/group.md)
+    - [Static List Variable](./variable/staticlist.md)
+    - [Text Variable](./variable/text.md)
 - Prometheus-related builders:
-  - [Filter](./prometheus/filter.md)
-  - [Panel](./prometheus/panel.md)
-  - [Label Names Variable](./prometheus/variable/labelnames.md)
-  - [Label Values Variable](./prometheus/variable/labelvalues.md)
-  - [PromQL Variable](./prometheus/variable/promql.md)
+    - [Filter](./prometheus/filter.md)
+    - [Panel](./prometheus/panel.md)
+    - [Label Names Variable](./prometheus/variable/labelnames.md)
+    - [Label Values Variable](./prometheus/variable/labelvalues.md)
+    - [PromQL Variable](./prometheus/variable/promql.md)
 
 See also some useful patterns for DaC with the CUE SDK in the below section.
 
