@@ -11,6 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DropIndicator';
-export * from './DragAndDropList';
-export * from './DragButton';
+import { Edge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+
+export type State =
+  | {
+      type: 'idle';
+    }
+  | {
+      type: 'is-dragging';
+    }
+  | {
+      type: 'is-dragging-over';
+      closestEdge: Edge | null;
+    };
+
+export const idle: State = { type: 'idle' };

@@ -14,7 +14,7 @@
 import { Button, Stack } from '@mui/material';
 import { useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
-import { useDragAndDropMonitor } from '@perses-dev/components';
+import { handleMoveDown, handleMoveUp, useDragAndDropMonitor } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 import { ColumnEditorContainer } from './ColumnEditorContainer';
 
@@ -76,6 +76,8 @@ export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) 
           onChange={(updatedColumn: ColumnSettings) => handleColumnChange(i, updatedColumn)}
           onDelete={() => handleColumnDelete(i)}
           onCollapse={(collapsed) => handleColumnCollapseExpand(i, collapsed)}
+          onMoveUp={() => onChange(handleMoveUp(column, columnSettings))}
+          onMoveDown={() => onChange(handleMoveDown(column, columnSettings))}
         />
       ))}
 

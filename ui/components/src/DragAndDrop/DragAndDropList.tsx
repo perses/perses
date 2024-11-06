@@ -1,3 +1,16 @@
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { reorderWithEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge';
 import {
@@ -6,13 +19,10 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { attachClosestEdge, Edge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
-import { Box, Stack } from '@mui/material';
-
-function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
-  // @ts-expect-error: wip
-  return path.split('.').reduce((acc, key) => acc && acc[key], obj);
-}
+import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { Stack } from '@mui/material';
+import { idle, State } from './model';
+import { DropIndicator } from './DropIndicator';
 
 interface MonitorElementsProps {
   elements: Array<Record<string, unknown>>;
@@ -21,6 +31,15 @@ interface MonitorElementsProps {
   onChange: (elements: Array<Record<string, unknown>>) => void;
 }
 
+/**
+ * This hook is responsible for monitoring the drag and drop of elements.
+ * It will call the onChange function with the new order of elements when a drop is detected.
+ *
+ * @param elements - The list of elements to monitor
+ * @param accessKey - The key to use to identify the elements (key of the object)
+ * @param axis - The axis to monitor the drag and drop on
+ * @param onChange - The function to call when a drop is detected
+ */
 export function useDragAndDropMonitor({ elements, accessKey, axis = 'vertical', onChange }: MonitorElementsProps) {
   return useEffect(() => {
     return monitorForElements({
@@ -33,12 +52,8 @@ export function useDragAndDropMonitor({ elements, accessKey, axis = 'vertical', 
         const sourceData = source.data;
         const targetData = target.data;
 
-        const indexOfSource = elements.findIndex(
-          (column) => getNestedValue(column, accessKey) === getNestedValue(sourceData, accessKey)
-        );
-        const indexOfTarget = elements.findIndex(
-          (column) => getNestedValue(column, accessKey) === getNestedValue(targetData, accessKey)
-        );
+        const indexOfSource = elements.findIndex((column) => column[accessKey] === sourceData[accessKey]);
+        const indexOfTarget = elements.findIndex((column) => column[accessKey] === targetData[accessKey]);
 
         if (indexOfTarget < 0 || indexOfSource < 0) {
           return;
@@ -60,52 +75,14 @@ export function useDragAndDropMonitor({ elements, accessKey, axis = 'vertical', 
   }, [accessKey, axis, elements, onChange]);
 }
 
-type State =
-  | {
-      type: 'idle';
-    }
-  | {
-      type: 'is-dragging';
-    }
-  | {
-      type: 'is-dragging-over';
-      closestEdge: Edge | null;
-    };
-
-const idle: State = { type: 'idle' };
-
-export function DropIndicator() {
-  return (
-    <Stack direction="row" alignItems="center">
-      <Box
-        sx={{
-          content: '""',
-          width: 8,
-          height: 8,
-          boxSizing: 'border-box',
-          position: 'absolute',
-          backgroundColor: (theme) => theme.palette.background.default,
-          border: (theme) => `2px solid ${theme.palette.info.main}`,
-          borderRadius: '50%',
-        }}
-      ></Box>
-      <Box
-        sx={{
-          content: '""',
-          height: 2,
-          background: (theme) => theme.palette.info.main,
-          width: '100%',
-        }}
-      ></Box>
-    </Stack>
-  );
-}
-
 export interface DragAndDropElementProps {
   children: ReactNode;
   data: Record<string, unknown>;
 }
 
+/*
+ * This component wraps the children that should be draggable
+ */
 export function DragAndDropElement({ children, data }: DragAndDropElementProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<State>(idle);

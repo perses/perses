@@ -17,14 +17,15 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
-import DragIcon from 'mdi-material-ui/Drag';
-import { DragAndDropElement } from '@perses-dev/components';
+import { DragAndDropElement, DragButton } from '@perses-dev/components';
 import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
   isCollapsed: boolean;
   onCollapse: (collapsed: boolean) => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 export function ColumnEditorContainer({
@@ -33,6 +34,8 @@ export function ColumnEditorContainer({
   onChange,
   onCollapse,
   onDelete,
+  onMoveUp,
+  onMoveDown,
 }: ColumnEditorContainerProps) {
   function handleHideColumn() {
     onChange({ ...column, hide: !column.hide });
@@ -49,9 +52,7 @@ export function ColumnEditorContainer({
         gap={4}
       >
         <Stack direction="row" gap={1}>
-          <IconButton size="small">
-            <DragIcon />
-          </IconButton>
+          <DragButton onMoveUp={onMoveUp} onMoveDown={onMoveDown} />
 
           <IconButton
             data-testid={`column-toggle#${column.name}`}
