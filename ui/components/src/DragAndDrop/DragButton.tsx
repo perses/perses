@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, IconButtonProps, Menu, MenuItem } from '@mui/material';
+import { IconButton, IconButtonProps, Menu, MenuItem, MenuProps } from '@mui/material';
 import DragIcon from 'mdi-material-ui/Drag';
 import { useState, MouseEvent } from 'react';
 
@@ -44,9 +44,10 @@ export interface DragButtonProps extends IconButtonProps {
   onMoveDown?: () => void;
   onMoveLeft?: () => void;
   onMoveRight?: () => void;
+  menuSx?: MenuProps['sx'];
 }
 
-export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight }: DragButtonProps) {
+export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx }: DragButtonProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
@@ -73,6 +74,7 @@ export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight }: Dr
           anchorEl={anchorEl}
           open={open}
           onClose={() => handleMove(undefined)}
+          sx={menuSx}
         >
           {onMoveUp && <MenuItem onClick={() => handleMove(onMoveUp)}>Move Up</MenuItem>}
           {onMoveDown && <MenuItem onClick={() => handleMove(onMoveDown)}>Move Down</MenuItem>}
