@@ -37,7 +37,7 @@
           "description": ""
         }
       },
-         {
+      {
         "pluginType": "Panel",
         "kind": "PieChart",
         "display": {
@@ -90,6 +90,14 @@
         "kind": "TracingGanttChart",
         "display": {
           "name": "Tracing Gantt Chart",
+          "description": ""
+        }
+      },
+      {
+        "pluginType": "Panel",
+        "kind": "StatusHistoryChart",
+        "display": {
+          "name": "Status History Chart",
           "description": ""
         }
       }
