@@ -20,22 +20,21 @@ import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
+import { FormEditorProps } from '../form-drawers';
 
-interface RoleEditorFormProps {
-  initialRole: Role;
-  initialAction: Action;
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: Role) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
-}
+type RoleEditorFormProps = FormEditorProps<Role>;
 
-export function RoleEditorForm(props: RoleEditorFormProps) {
-  const { initialRole, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function RoleEditorForm({
+  initialValue,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleEditorFormProps) {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -43,7 +42,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   const form = useForm<Role>({
     resolver: zodResolver(rolesEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialRole,
+    defaultValues: initialValue,
   });
 
   const processForm: SubmitHandler<Role> = (data: Role) => {
@@ -60,7 +59,7 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (JSON.stringify(initialRole) !== JSON.stringify(form.getValues())) {
+    if (JSON.stringify(initialValue) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -81,9 +80,11 @@ export function RoleEditorForm(props: RoleEditorFormProps) {
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' ? (
             <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
+              {onActionChange && (
+                <Button disabled={isReadonly} variant="contained" onClick={() => onActionChange('update')}>
+                  Edit
+                </Button>
+              )}
               <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>

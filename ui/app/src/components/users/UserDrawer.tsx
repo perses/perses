@@ -15,15 +15,23 @@ import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { UserResource } from '@perses-dev/core';
 import { DeleteResourceDialog } from '../dialogs';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { UserEditorForm } from './UserEditorForm';
 
 interface UserDrawerProps extends DrawerProps<UserResource> {
   user: UserResource;
 }
 
-export function UserDrawer(props: UserDrawerProps) {
-  const { user, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function UserDrawer({
+  user,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: UserDrawerProps) {
   const [isDeleteUserDialogStateOpened, setDeleteUserDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
@@ -37,10 +45,11 @@ export function UserDrawer(props: UserDrawerProps) {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <UserEditorForm
-            initialUser={user}
-            initialAction={action}
+            initialValue={user}
+            action={action}
             isDraft={false}
             isReadonly={isReadonly}
+            onActionChange={onActionChange}
             onSave={onSave as Dispatch<UserResource>}
             onClose={onClose}
             onDelete={onDelete ? () => setDeleteUserDialogStateOpened(true) : undefined}

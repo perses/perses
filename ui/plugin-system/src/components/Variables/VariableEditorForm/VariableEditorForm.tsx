@@ -337,19 +337,26 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
 
 interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
-  initialAction: Action;
+  action: Action;
   isDraft: boolean;
   isReadonly?: boolean;
+  onActionChange?: (action: Action) => void;
   onSave: (def: VariableDefinition) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
-export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function VariableEditorForm({
+  initialVariableDefinition,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: VariableEditorFormProps) {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
@@ -405,9 +412,11 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' ? (
             <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
+              {onActionChange && (
+                <Button disabled={isReadonly} variant="contained" onClick={() => onActionChange('update')}>
+                  Edit
+                </Button>
+              )}
               <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>

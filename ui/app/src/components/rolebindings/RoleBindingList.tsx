@@ -77,6 +77,7 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
 
   const handleRoleBindingSave = useCallback(
     async (roleBinding: T) => {
+      console.log('RoleBindingList.tsx', roleBinding);
       if (action === 'create') {
         await onCreate(roleBinding);
       } else if (action === 'update') {
@@ -186,9 +187,10 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
         <>
           <RoleBindingDrawer
             roleBinding={targetedRoleBinding}
-            isOpen={isRoleBindingDrawerOpened}
             action={action}
+            isOpen={isRoleBindingDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleRoleBindingSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
             onClose={() => setRoleBindingDrawerOpened(false)}

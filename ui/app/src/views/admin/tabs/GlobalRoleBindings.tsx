@@ -58,6 +58,8 @@ export function GlobalRoleBindings(props: GlobalRoleBindingsProps) {
   const handleGlobalRoleBindingUpdate = useCallback(
     (roleBinding: GlobalRoleBindingResource): Promise<void> =>
       new Promise((resolve, reject) => {
+        console.log('GlobalRoleBindings', roleBinding);
+
         updateRoleBindingMutation.mutate(roleBinding, {
           onSuccess: (updatedRoleBinding: RoleBinding) => {
             successSnackbar(`GlobalRoleBinding ${updatedRoleBinding.metadata.name} has been successfully updated`);

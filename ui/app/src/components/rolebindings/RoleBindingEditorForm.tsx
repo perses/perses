@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
+import { RoleBinding, roleBindingsEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Autocomplete, Box, Button, Divider, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
@@ -21,23 +21,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
 import { useUserList } from '../../model/user-client';
+import { FormEditorProps } from '../form-drawers';
 
-interface RoleBindingEditorFormProps {
-  initialRoleBinding: RoleBinding;
-  initialAction: Action;
+interface RoleBindingEditorFormProps extends FormEditorProps<RoleBinding> {
   roleSuggestions: string[];
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: RoleBinding) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
 }
 
-export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
-  const { initialRoleBinding, initialAction, roleSuggestions, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function RoleBindingEditorForm({
+  initialValue,
+  action,
+  roleSuggestions,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleBindingEditorFormProps) {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -45,10 +46,11 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   const form = useForm<RoleBinding>({
     resolver: zodResolver(roleBindingsEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialRoleBinding,
+    defaultValues: initialValue,
   });
 
   const processForm: SubmitHandler<RoleBinding> = (data: RoleBinding) => {
+    console.log('RoleBindingEditorForm.tsx', data);
     onSave(data);
   };
 
@@ -67,7 +69,7 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel() {
-    if (JSON.stringify(initialRoleBinding) !== JSON.stringify(form.getValues())) {
+    if (JSON.stringify(initialValue) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -88,9 +90,12 @@ export function RoleBindingEditorForm(props: RoleBindingEditorFormProps) {
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' ? (
             <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
+              {/* TODO: refactor to generic */}
+              {onActionChange && (
+                <Button disabled={isReadonly} variant="contained" onClick={() => onActionChange('update')}>
+                  Edit
+                </Button>
+              )}
               <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>

@@ -13,7 +13,7 @@
 
 import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Alert, Box, Button, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
@@ -22,33 +22,32 @@ import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { useIsExternalProviderEnabled, useIsNativeProviderEnabled } from '../../context/Config';
+import { FormEditorProps } from '../form-drawers';
 
-interface UserEditorFormProps {
-  initialUser: UserResource;
-  initialAction: Action;
-  isDraft: boolean;
-  isReadonly?: boolean;
-  onSave: (def: UserResource) => void;
-  onClose: () => void;
-  onDelete?: DispatchWithoutAction;
-}
+type UserEditorFormProps = FormEditorProps<UserResource>;
 
-export function UserEditorForm(props: UserEditorFormProps) {
-  const { initialUser, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function UserEditorForm({
+  initialValue,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: UserEditorFormProps) {
   const externalProvidersEnabled = useIsExternalProviderEnabled();
   const nativeProviderEnabled = useIsNativeProviderEnabled();
 
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialUserClean: UserResource = useMemo(() => {
-    const result = { ...initialUser };
+    const result = { ...initialValue };
     if (result.spec.nativeProvider?.password) result.spec.nativeProvider.password = '';
     if (result.spec.oauthProviders === undefined) result.spec.oauthProviders = [];
     return result;
-  }, [initialUser]);
+  }, [initialValue]);
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
 
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -96,9 +95,11 @@ export function UserEditorForm(props: UserEditorFormProps) {
         <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
           {action === 'read' ? (
             <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
+              {onActionChange && (
+                <Button disabled={isReadonly} variant="contained" onClick={() => onActionChange('update')}>
+                  Edit
+                </Button>
+              )}
               <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
                 Delete
               </Button>
