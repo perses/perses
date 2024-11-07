@@ -31,7 +31,7 @@ Also, as-code means it's GitOps-friendly, meaning that you can also benefit from
 - automated deployments
 - and more...
 
-## Getting Started With CUE
+## Getting started with the CUE SDK
 
 ### Prerequisites
 
@@ -73,7 +73,7 @@ You should then have a look at the [CUE SDK documentation](../dac/cue/README.md)
 
 You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/test/dac/input.cue).
 
-## Getting started with Go SDK
+## Getting started with the Go SDK
 
 ### Prerequisites
 
