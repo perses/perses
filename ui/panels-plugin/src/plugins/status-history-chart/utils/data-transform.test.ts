@@ -17,6 +17,11 @@ describe('createStatusHistoryDataModel', () => {
     const queryResults: Array<QueryData<TimeSeriesData>> = [
       {
         data: {
+          timeRange: {
+            start: new Date(1609459200000),
+            end: new Date(1609459260000),
+          },
+          stepMs: 60000,
           series: [
             {
               name: 'instance1',
@@ -25,6 +30,8 @@ describe('createStatusHistoryDataModel', () => {
                 [1609459200000, 1],
                 [1609459260000, 2],
               ],
+
+              // stepMs?: number;
             },
           ],
         },

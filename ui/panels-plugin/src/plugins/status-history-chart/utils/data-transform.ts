@@ -80,7 +80,7 @@ export function createStatusHistoryDataModel(
   });
 
   const legendItems: LegendItem[] = Array.from(legendSet).map((value, idx) => {
-    const color = colors[idx] || getColorForValue(value, colors[0] || 'defaultColor');
+    const color = colors[idx] || getColorForValue(value, colors[0] || '#1f77b4');
     return {
       id: `${idx}-${value}`,
       label: String(value),

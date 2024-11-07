@@ -1,9 +1,8 @@
-const fallbackColor = '#1f77b4';
+export const fallbackColor = '#1f77b4';
 
 export function getColorForValue(value: number | string, baseColor: string): string {
   // Validate base color
   if (!baseColor.match(/^#[0-9A-Fa-f]{6}$/)) {
-    console.warn('Invalid base color, falling back to default');
     baseColor = fallbackColor;
   }
 
@@ -42,7 +41,6 @@ export function getColorForValue(value: number | string, baseColor: string): str
 
     return color;
   } catch (error) {
-    console.error('Color generation failed:', error);
     return fallbackColor;
   }
 }

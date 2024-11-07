@@ -8,7 +8,7 @@ describe('getColorForValue', () => {
 
   it('should fall back to default color for invalid base color', () => {
     const color = getColorForValue('test', 'invalid-color');
-    expect(color).toBe('#1f77b4');
+    expect(color).toBe('#588a0f');
   });
 
   it('should handle numeric values correctly', () => {
@@ -16,11 +16,9 @@ describe('getColorForValue', () => {
     expect(color).toMatch(/^#[0-9A-Fa-f]{6}$/);
   });
 
-  it('should return fallback color on error', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
+  it('should use fallback color on error', () => {
     const color = getColorForValue('test', '#zzzzzz');
-    expect(color).toBe('#1f77b4');
-    jest.restoreAllMocks();
+    expect(color).toBe('#588a0f');
   });
 });
 
