@@ -12,6 +12,7 @@
 // limitations under the License.
 
 package model
+
 import (
 	"github.com/perses/perses/cue/schemas/common"
 )
@@ -26,5 +27,5 @@ import (
 
 kind: "StatusHistoryChart"
 spec: close({
-	legend?:    #legend
+	legend?: #legend
 })
