@@ -20,6 +20,7 @@
             "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
             "hidden": false
           },
+          "defaultValue": "one",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -149,6 +150,7 @@
             "description": "ad hoc filter",
             "hidden": false
           },
+          "defaultValue": "1m",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
