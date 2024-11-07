@@ -13,10 +13,10 @@
 
 import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { DispatchWithoutAction, Fragment, useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import { Box, Button, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -77,48 +77,16 @@ export function RoleEditorForm({
         }}
       >
         <Typography variant="h2">{titleAction} Role</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              {onActionChange && (
-                <Button disabled={isReadonly} variant="contained" onClick={() => onActionChange('update')}>
-                  Edit
-                </Button>
-              )}
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Stack padding={2} gap={2} sx={{ overflowY: 'scroll' }}>
         <Stack gap={2} direction="row">
