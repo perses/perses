@@ -21,6 +21,7 @@ import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
+import { replacePromBuiltinVariables } from '../utils';
 import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
 
@@ -50,7 +51,10 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
   }, [completeConfig]);
 
-  const queryExpr = useReplaceVariablesInString(rest.value);
+  let queryExpr = useReplaceVariablesInString(rest.value);
+  if (queryExpr) {
+    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345); // TODO placeholder values to replace
+  }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
   const errorMessage = useMemo(() => getErrMessage(error), [error]);
