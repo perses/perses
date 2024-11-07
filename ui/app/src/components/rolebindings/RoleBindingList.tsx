@@ -77,7 +77,6 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
 
   const handleRoleBindingSave = useCallback(
     async (roleBinding: T) => {
-      console.log('RoleBindingList.tsx', roleBinding);
       if (action === 'create') {
         await onCreate(roleBinding);
       } else if (action === 'update') {

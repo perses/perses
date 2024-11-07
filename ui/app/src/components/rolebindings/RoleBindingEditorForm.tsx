@@ -50,7 +50,6 @@ export function RoleBindingEditorForm({
   });
 
   const processForm: SubmitHandler<RoleBinding> = (data: RoleBinding) => {
-    console.log('RoleBindingEditorForm.tsx', data);
     onSave(data);
   };
 
