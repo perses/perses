@@ -52,14 +52,6 @@ export function ColumnEditorContainer({
         gap={4}
       >
         <Stack direction="row" gap={1}>
-          <DragButton
-            onMoveUp={onMoveUp}
-            onMoveDown={onMoveDown}
-            menuSx={{
-              '.MuiPaper-root': { backgroundColor: (theme) => theme.palette.background.lighter },
-            }}
-          />
-
           <IconButton
             data-testid={`column-toggle#${column.name}`}
             size="small"
@@ -94,6 +86,15 @@ export function ColumnEditorContainer({
             <IconButton size="small" sx={{ marginLeft: 'auto' }} onClick={onDelete}>
               <DeleteIcon />
             </IconButton>
+          </Tooltip>
+          <Tooltip title="Reorder column settings" placement="top">
+            <DragButton
+              onMoveUp={onMoveUp}
+              onMoveDown={onMoveDown}
+              menuSx={{
+                '.MuiPaper-root': { backgroundColor: (theme) => theme.palette.background.lighter },
+              }}
+            />
           </Tooltip>
         </Stack>
       </Stack>
