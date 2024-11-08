@@ -83,7 +83,13 @@ export function PieChart(props: PieChartProps) {
   };
 
   return (
-    <Box sx={{ width: width, height: height, overflow: 'auto' }}>
+    <Box
+      style={{
+        width: width,
+        height: height,
+      }}
+      sx={{ overflow: 'auto' }}
+    >
       <EChart
         sx={{
           minHeight: height,
