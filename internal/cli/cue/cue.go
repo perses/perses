@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/perses/perses/internal/cli/file"
+	"github.com/perses/perses/internal/cli/sources"
 )
 
 const (
@@ -34,7 +34,7 @@ func InstallCueDepsFromSources(cueSchemasPath, version string) error {
 		return err
 	}
 
-	if err := file.RetrieveFolderFromSources(cueSchemasPath, cueDepsRootDstPath, maxFileSizeBytes, version); err != nil {
+	if err := sources.DownloadAndExtract(cueSchemasPath, cueDepsRootDstPath, maxFileSizeBytes, version); err != nil {
 		return fmt.Errorf("error installing the common CUE package as a dependency: %v", err)
 	}
 

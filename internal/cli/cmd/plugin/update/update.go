@@ -19,8 +19,8 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/cue"
-	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/internal/cli/sources"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -41,7 +41,7 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'update'")
 	}
 
-	version, err := file.GetProperVersion(o.version)
+	version, err := sources.GetProperVersion(o.version)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	return file.EnsureMinValidVersion(o.version)
+	return sources.EnsureMinValidVersion(o.version)
 }
 
 func (o *option) Execute() error {
