@@ -23,6 +23,7 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/cue"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -30,9 +31,10 @@ import (
 )
 
 const (
-	minVersion  = "v0.47.0"
-	cueLanguage = "cue"
-	goLanguage  = "go"
+	minVersion     = "v0.47.0"
+	cueLanguage    = "cue"
+	goLanguage     = "go"
+	cueSchemasPath = "cue/"
 )
 
 func addOutputDirToGitignore() error {
@@ -146,12 +148,22 @@ func (o *option) Execute() error {
 		logrus.WithError(err).Warningf("unable to add the '%s' folder to .gitignore", config.Global.Dac.OutputFolder)
 	}
 
+	// Install dependencies
 	if o.language == cueLanguage {
-		if err := o.setupCue(); err != nil {
+		if err := cue.InstallCueDepsFromSources(cueSchemasPath, o.version); err != nil {
+			return fmt.Errorf("error installing the Perses CUE schemas as dependencies: %v", err)
+		}
+	} else if o.language == goLanguage {
+		if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
+			return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
+		} else if err != nil {
 			return err
 		}
-	} else if err := o.setupGo(); err != nil {
-		return err
+		if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
+			return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
+		}
+	} else {
+		return fmt.Errorf("language %q is not supported", o.language)
 	}
 
 	return output.HandleString(o.writer, "DaC setup finished")
