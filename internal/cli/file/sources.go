@@ -23,11 +23,14 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/perses/perses/internal/cli/config"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/mod/semver"
 )
 
 const (
 	archiveName = "sources.tar.gz"
+	minVersion  = "v0.47.0"
 )
 
 // RetrieveFolderFromSources retrieves the content of the given folder from the sources archive of the given Perses release
@@ -171,4 +174,44 @@ func removeFirstFolder(filePath string) string {
 	resultPath := strings.Join(components, separatorChar)
 
 	return resultPath
+}
+
+func EnsureMinValidVersion(version string) error {
+	// Validate the format of the provided version
+	if !semver.IsValid(version) {
+		return fmt.Errorf("invalid version: %s", version)
+	}
+
+	// Verify that it is >= to the minimum required version
+	if semver.Compare(version, minVersion) == -1 {
+		return fmt.Errorf("version should be at least %s or higher", minVersion)
+	}
+	return nil
+}
+
+func GetProperVersion(version string) (string, error) {
+	inferedVersion := version
+
+	// If no version provided, let's try to get the version from the Perses server
+	if inferedVersion == "" {
+		logrus.Debug("version flag not provided, retrieving version from Perses server..")
+		apiClient, err := config.Global.GetAPIClient()
+		if err != nil {
+			return "", fmt.Errorf("you need to either provide a version or be connected to a Perses server")
+		}
+
+		health, err := apiClient.V1().Health().Check()
+		if err != nil {
+			logrus.WithError(err).Debug("can't reach Perses server")
+			return "", fmt.Errorf("can't retrieve version from Perses server")
+		}
+		inferedVersion = health.Version
+	}
+
+	// Add "v" prefix to the version if not present
+	if !strings.HasPrefix(inferedVersion, "v") {
+		inferedVersion = fmt.Sprintf("v%s", inferedVersion)
+	}
+
+	return inferedVersion, nil
 }
