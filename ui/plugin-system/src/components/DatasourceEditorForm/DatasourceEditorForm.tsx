@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Action, DatasourceDefinition } from '@perses-dev/core';
-import { Box, Button, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import { DispatchWithoutAction, useState } from 'react';
-import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
+import React, { DispatchWithoutAction, useState } from 'react';
+import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PluginEditor } from '../PluginEditor';
@@ -23,19 +23,19 @@ import { useValidationSchemas } from '../../context';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;
-  initialAction: Action;
+  action: Action;
   isDraft: boolean;
   isReadonly?: boolean;
+  onActionChange?: (action: Action) => void;
   onSave: (def: DatasourceDefinition) => void;
   onClose: DispatchWithoutAction;
   onDelete?: DispatchWithoutAction;
 }
 
 export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
-  const { initialDatasourceDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
+  const { initialDatasourceDefinition, action, isDraft, isReadonly, onActionChange, onSave, onClose, onDelete } = props;
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
@@ -84,41 +84,16 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} Datasource</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="contained" disabled={!form.formState.isValid} onClick={form.handleSubmit(processForm)}>
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
         <Grid container spacing={2} mb={2}>

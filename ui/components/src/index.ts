@@ -22,6 +22,7 @@ export * from './EChart';
 export * from './ErrorAlert';
 export * from './ErrorBoundary';
 export * from './FontSizeSelector';
+export * from './FormEditor';
 export * from './GaugeChart';
 export * from './InfoTooltip';
 export * from './JSONEditor';
