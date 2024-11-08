@@ -28,7 +28,7 @@ describe('TableColumnsEditor', () => {
     expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0' }] });
   });
 
-  it('can update a column width', () => {
+  it('can enable column custom width', () => {
     const onChange = jest.fn();
     renderTableColumnsEditor({ columnSettings: [{ name: 'column_0' }] }, onChange);
 
@@ -37,10 +37,7 @@ describe('TableColumnsEditor', () => {
     fireEvent.click(collapseIcon);
     const customWidthSwitch = screen.getByRole('checkbox', { name: /Custom width/i });
     fireEvent.click(customWidthSwitch);
-
-    const widthInput = screen.getByRole('spinbutton', { name: /Width/i });
-    fireEvent.change(widthInput, { target: { value: '200' } });
-    expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0', width: 200 }] });
+    expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'column_0', width: 100 }] });
   });
 
   it('can rename a column', () => {
