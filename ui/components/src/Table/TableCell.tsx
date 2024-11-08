@@ -125,8 +125,8 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
+      style={{ width: width }}
       sx={{
-        width: width,
         borderBottom: isHeader
           ? (theme) => `solid 1px ${theme.palette.grey[100]}`
           : `solid 1px ${theme.palette.grey[50]}`,

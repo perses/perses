@@ -287,7 +287,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   return (
     <Box
-      sx={{ height }}
+      style={{ height }}
       // onContextMenu={(e) => {
       //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
       //   e.preventDefault(); // Prevent the default behaviour when right clicked
