@@ -69,7 +69,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__interval',
           description:
-            'For dynamic queries that adapt across different time ranges, use $__interval instead of hardcoded intervals. It represents the actual spacing between data points: it’s calculated based on the current time range and the pixel width - plus taking the "Min step" as a lower bound.',
+            'For dynamic queries that adapt across different time ranges, use $__interval instead of hardcoded intervals. It represents the actual spacing between data points: it’s calculated based on the current time range and the panel pixel width (taking the "Min step" as a lower bound).',
           hidden: true,
         },
       },
