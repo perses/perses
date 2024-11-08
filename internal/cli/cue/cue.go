@@ -29,7 +29,7 @@ const (
 // InstallCueDepsFromSources installs the common CUE package as a dependency
 func InstallCueDepsFromSources(cueSchemasPath, version string) error {
 	if _, err := os.Stat(cueModFolder); os.IsNotExist(err) {
-		return fmt.Errorf("unable to find the folder 'cue.mod'. Please run 'cue mod init'")
+		return fmt.Errorf("unable to find the CUE module folder. Please run 'cue mod init'")
 	} else if err != nil {
 		return err
 	}
