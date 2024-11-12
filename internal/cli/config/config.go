@@ -220,3 +220,26 @@ func Write(cfg *Config) error {
 
 	return os.WriteFile(filePath, data, 0600)
 }
+
+func WriteFromScratch(cfg *Config) error {
+	// this value has been set by the root command, and that will be the path where the config must be saved
+	filePath := Global.filePath
+	directory := filepath.Dir(filePath)
+
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		mkdirError := os.Mkdir(directory, 0700)
+		if mkdirError != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(cfg)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filePath, data, 0600)
+}
