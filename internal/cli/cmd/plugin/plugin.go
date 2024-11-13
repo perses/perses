@@ -11,23 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package setup
+package plugin
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
+	"github.com/perses/perses/internal/cli/cmd/plugin/update"
+	"github.com/spf13/cobra"
 )
 
-func (o *option) setupGo() error {
-	if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
-		return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
-	} else if err != nil {
-		return err
+func NewCMD() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "plugin",
+		Short: "Commands related to plugins development",
 	}
+	cmd.AddCommand(update.NewCMD())
 
-	if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
-		return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
-	}
-	return nil
+	return cmd
 }
