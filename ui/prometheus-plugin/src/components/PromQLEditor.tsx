@@ -53,7 +53,11 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   let queryExpr = useReplaceVariablesInString(rest.value);
   if (queryExpr) {
-    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345); // TODO placeholder values to replace
+    // TODO placeholder values for steps to be replaced with actual values
+    // Looks like providing proper values involves some refactoring: currently we'd need to rely on the timeseries query context,
+    // but these step values are actually computed independently / before the queries are getting fired, so it's useless to fire
+    // queries here, so maybe we should extract this part to independant hook(s), to be reused here?
+    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345);
   }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
