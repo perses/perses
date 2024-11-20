@@ -14,6 +14,7 @@
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/perses/common/config"
@@ -80,6 +81,9 @@ func (c *Config) Verify() error {
 			Enable:          true,
 			CleanupInterval: c.EphemeralDashboardsCleanupInterval,
 		}
+	}
+	if len(c.APIPrefix) > 0 && !strings.HasPrefix(c.APIPrefix, "/") {
+		c.APIPrefix = "/" + c.APIPrefix
 	}
 	return nil
 }

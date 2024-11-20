@@ -21,3 +21,4 @@ export * from './plugins/time-series-chart';
 export * from './plugins/time-series-table';
 export * from './plugins/trace-table';
 export * from './plugins/tracing-gantt-chart';
+export * from './plugins/pie-chart';

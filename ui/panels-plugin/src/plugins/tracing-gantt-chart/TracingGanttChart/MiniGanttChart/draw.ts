@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { Span } from '@perses-dev/core';
-import { getConsistentSpanColor } from '../utils';
+import { GanttTrace } from '../trace';
+import { minSpanWidthPx } from '../utils';
 
 const MIN_BAR_HEIGHT = 1;
 const MAX_BAR_HEIGHT = 7;
@@ -25,23 +26,34 @@ function countSpans(span: Span) {
   return n;
 }
 
-export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: number, rootSpan: Span) {
+export function drawSpans(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  trace: GanttTrace,
+  spanColorGenerator: (span: Span) => string
+) {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
-  const numSpans = countSpans(rootSpan);
+  const numSpans = countSpans(trace.rootSpan);
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
 
-  const traceDuration = rootSpan.endTimeUnixMs - rootSpan.startTimeUnixMs;
+  const traceDuration = trace.endTimeUnixMs - trace.startTimeUnixMs;
   const yChange = height / numSpans;
   let y = 0;
 
   const drawSpan = (span: Span) => {
     const spanDuration = span.endTimeUnixMs - span.startTimeUnixMs;
     const relativeDuration = spanDuration / traceDuration;
-    const relativeStart = (span.startTimeUnixMs - rootSpan.startTimeUnixMs) / traceDuration;
+    const relativeStart = (span.startTimeUnixMs - trace.startTimeUnixMs) / traceDuration;
 
-    ctx.fillStyle = getConsistentSpanColor(span);
+    ctx.fillStyle = spanColorGenerator(span);
     ctx.beginPath();
-    ctx.rect(Math.round(relativeStart * width), Math.round(y), Math.round(relativeDuration * width), barHeight);
+    ctx.rect(
+      Math.round(relativeStart * width),
+      Math.round(y),
+      Math.max(minSpanWidthPx, Math.round(relativeDuration * width)),
+      barHeight
+    );
     ctx.fill();
     y += yChange;
 
@@ -50,5 +62,5 @@ export function drawSpans(ctx: CanvasRenderingContext2D, width: number, height: 
     }
   };
 
-  drawSpan(rootSpan);
+  drawSpan(trace.rootSpan);
 }

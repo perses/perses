@@ -15,15 +15,19 @@ package text
 
 import (
 	v1Dashboard "github.com/perses/perses/cue/model/api/v1/dashboard"
-	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
-#kind: varBuilder.#kind & "TextVariable"
-#name: varBuilder.#name
-#display?: v1Variable.#Display & {
-	hidden: bool | *false
-}
+// include the definitions of varBuilder at the root
+varBuilder
+
+#name: _ // this is needed for below reference
+
+#display?: _ // this is needed for below reference
+
+// specify the constraints for this variable
+#kind:     v1Variable.#KindText
 #value:    string
 #constant: bool | *false
 

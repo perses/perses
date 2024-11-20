@@ -141,7 +141,25 @@ func (d *DAO) RawQuery(query databaseModel.Query) ([]json.RawMessage, error) {
 		if readErr != nil {
 			return nil, readErr
 		}
-		result = append(result, data)
+
+		// If it's YAML, we need to convert to JSON first
+		if d.Extension == config.YAMLExtension {
+			// Parse the YAML content
+			var yamlData interface{}
+			if err := yaml.Unmarshal(data, &yamlData); err != nil {
+				return nil, fmt.Errorf("failed to parse YAML from %s: %w", file, err)
+			}
+
+			// Convert YAML to JSON
+			jsonData, err := json.Marshal(yamlData)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert to JSON from %s: %w", file, err)
+			}
+			result = append(result, json.RawMessage(jsonData))
+		} else {
+			// For JSON files, we can append directly
+			result = append(result, json.RawMessage(data))
+		}
 	}
 	return result, nil
 }

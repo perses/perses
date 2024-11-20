@@ -13,7 +13,17 @@
 
 import { BuiltinVariableDefinition } from '@perses-dev/core';
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { healthCheck, instantQuery, rangeQuery, labelNames, labelValues, PrometheusClient } from '../model';
+import {
+  healthCheck,
+  instantQuery,
+  rangeQuery,
+  labelNames,
+  labelValues,
+  PrometheusClient,
+  metricMetadata,
+  series,
+  parseQuery,
+} from '../model';
 import { PrometheusDatasourceSpec } from './types';
 import { PrometheusDatasourceEditor } from './PrometheusDatasourceEditor';
 
@@ -42,6 +52,9 @@ const createClient: DatasourcePlugin<PrometheusDatasourceSpec, PrometheusClient>
     rangeQuery: (params, headers) => rangeQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
     labelNames: (params, headers) => labelNames(params, { datasourceUrl, headers: headers ?? specHeaders }),
     labelValues: (params, headers) => labelValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    metricMetadata: (params, headers) => metricMetadata(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    series: (params, headers) => series(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    parseQuery: (params, headers) => parseQuery(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 
@@ -56,7 +69,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__interval',
           description:
-            'Interval that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
+            'For dynamic queries that adapt across different time ranges, use $__interval instead of hardcoded intervals. It represents the actual spacing between data points: it’s calculated based on the current time range and the panel pixel width (taking the "Min step" as a lower bound).',
           hidden: true,
         },
       },
@@ -69,8 +82,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         source: 'Prometheus',
         display: {
           name: '__interval_ms',
-          description:
-            'Interval in millisecond that can be used to group by time in queries. When there are more data points than can be shown on a graph then queries can be made more efficient by grouping by a larger interval.',
+          description: 'Same as $__interval but in milliseconds.',
           hidden: true,
         },
       },
@@ -84,7 +96,7 @@ const getBuiltinVariableDefinitions: () => BuiltinVariableDefinition[] = () => {
         display: {
           name: '__rate_interval',
           description:
-            "Interval at least four times the value of the scrape interval. It avoids problems specific to Prometheus when using 'rate' and 'increase' functions.",
+            'Use this one rather than $__interval as the range parameter of functions like rate, increase, etc. With such function it is advised to choose a range that is at least 4x the scrape interval (this is to allow for various races, and to be resilient to a failed scrape). $__rate_interval provides that, as it is defined as `max($__interval + Min Step, 4 * Min Step)`, where Min Step value should represent the scrape interval of the metrics.',
           hidden: true,
         },
       },

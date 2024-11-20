@@ -18,23 +18,30 @@ import { QueryDefinition } from '@perses-dev/core';
 import { DataTable, TraceLink } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
-export interface TraceTableProps extends PanelProps<TraceTableOptions> {
-  traceLink?: TraceLink;
+export interface TraceTablePanelProps extends PanelProps<TraceTableOptions> {
+  /**
+   * Specify a link for the traces in the table.
+   * If this field is unset or undefined, a link to the Gantt chart on the explore page is configured.
+   * Set this field explicitly to null to disable creating a link.
+   */
+  traceLink?: TraceLink | null;
 }
 
-export function defaultTraceLink({ query, traceId }: { query: QueryDefinition; traceId: string }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (query.spec.plugin.spec as any).query = traceId;
+export function defaultTraceLink({ query: originalQuery, traceId }: { query: QueryDefinition; traceId: string }) {
+  // clone the original query spec (including the datasource) and replace the query value with the trace id
+  const query: QueryDefinition = JSON.parse(JSON.stringify(originalQuery));
+  query.spec.plugin.spec.query = traceId;
 
   const traceLinkParams = new URLSearchParams({
     explorer: 'traces',
-    queries: JSON.stringify([query]),
+    data: JSON.stringify({ queries: [query] }),
   });
+
   return `/explore?${traceLinkParams}`;
 }
 
-export function TraceTablePanel(props: TraceTableProps) {
-  const { traceLink = defaultTraceLink } = props;
+export function TraceTablePanel(props: TraceTablePanelProps) {
+  const { spec, traceLink } = props;
 
   const chartsTheme = useChartsTheme();
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -55,8 +62,12 @@ export function TraceTablePanel(props: TraceTableProps) {
   }
 
   return (
-    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'scroll' }}>
-      <DataTable result={queryResults} traceLink={traceLink} />
+    <Box sx={{ height: '100%', padding: `${contentPadding}px`, overflowY: 'auto' }}>
+      <DataTable
+        options={spec}
+        result={queryResults}
+        traceLink={traceLink === null ? undefined : (traceLink ?? defaultTraceLink)}
+      />
     </Box>
   );
 }

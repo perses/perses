@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DurationString } from '@perses-dev/core';
+import ASTNode from '../components/promql/ast';
 
 // Just reuse dashboard model's type and re-export
 export type { DurationString };
@@ -81,8 +82,9 @@ export type RangeQueryResponse = ApiResponse<MatrixData>;
 
 export interface SeriesRequestParameters {
   'match[]': string[];
-  start: UnixTimestampSeconds;
-  end: UnixTimestampSeconds;
+  start?: UnixTimestampSeconds;
+  end?: UnixTimestampSeconds;
+  limit?: number;
 }
 
 export type SeriesResponse = ApiResponse<Metric[]>;
@@ -91,6 +93,7 @@ export interface LabelNamesRequestParameters {
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
   'match[]'?: string[];
+  limit?: number;
 }
 
 export type LabelNamesResponse = ApiResponse<string[]>;
@@ -100,6 +103,7 @@ export interface LabelValuesRequestParameters {
   start?: UnixTimestampSeconds;
   end?: UnixTimestampSeconds;
   'match[]'?: string[];
+  limit?: number;
 }
 
 export type LabelValuesResponse = ApiResponse<string[]>;
@@ -116,3 +120,10 @@ export interface MetricMetadataRequestParameters {
 }
 
 export type MetricMetadataResponse = ApiResponse<Record<string, MetricMetadata[]>>;
+
+// ref: https://prometheus.io/docs/prometheus/3.0/querying/api/#parsing-a-promql-expressions-into-a-abstract-syntax-tree-ast
+export interface ParseQueryRequestParameters {
+  query: string;
+}
+
+export type ParseQueryResponse = ApiResponse<ASTNode>;

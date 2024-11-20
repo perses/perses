@@ -13,7 +13,7 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { trace1_root_child1, trace1_root_child1_child1 } from '../../../../test';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { SpanName, SpanNameProps } from './SpanName';
 import { GanttTableProvider } from './GanttTableProvider';
 
@@ -27,13 +27,13 @@ describe('SpanName', () => {
   };
 
   it('render span name without error', () => {
-    renderComponent({ span: trace1_root_child1_child1 });
+    renderComponent({ span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]!.childSpans[0]! });
     expect(screen.getByText('testChildSpan3')).toBeInTheDocument();
     expect(screen.queryByText('error')).not.toBeInTheDocument();
   });
 
   it('render span name with error', () => {
-    renderComponent({ span: trace1_root_child1 });
+    renderComponent({ span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]! });
     expect(screen.getByText('testChildSpan2')).toBeInTheDocument();
     expect(screen.getByText('error')).toBeInTheDocument();
   });

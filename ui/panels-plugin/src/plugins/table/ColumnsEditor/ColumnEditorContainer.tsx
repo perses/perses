@@ -17,12 +17,15 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
+import { DragAndDropElement, DragButton } from '@perses-dev/components';
 import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
   isCollapsed: boolean;
   onCollapse: (collapsed: boolean) => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 export function ColumnEditorContainer({
@@ -31,13 +34,15 @@ export function ColumnEditorContainer({
   onChange,
   onCollapse,
   onDelete,
+  onMoveUp,
+  onMoveDown,
 }: ColumnEditorContainerProps) {
   function handleHideColumn() {
     onChange({ ...column, hide: !column.hide });
   }
 
   return (
-    <Stack spacing={1}>
+    <DragAndDropElement data={column as unknown as Record<string, unknown>}>
       <Stack
         direction="row"
         alignItems="center"
@@ -55,7 +60,7 @@ export function ColumnEditorContainer({
             {isCollapsed ? <ChevronRight /> : <ChevronDown />}
           </IconButton>
           <Typography variant="overline" component="h4" sx={{ textTransform: 'none' }}>
-            COLUMN:{' '}
+            COLUMN:
             {column.header ? (
               <span>
                 <strong>{column.header}</strong> ({column.name})
@@ -82,9 +87,18 @@ export function ColumnEditorContainer({
               <DeleteIcon />
             </IconButton>
           </Tooltip>
+          <Tooltip title="Reorder column settings" placement="top">
+            <DragButton
+              onMoveUp={onMoveUp}
+              onMoveDown={onMoveDown}
+              menuSx={{
+                '.MuiPaper-root': { backgroundColor: (theme) => theme.palette.background.lighter },
+              }}
+            />
+          </Tooltip>
         </Stack>
       </Stack>
       {!isCollapsed && <ColumnEditor column={column} onChange={onChange} />}
-    </Stack>
+    </DragAndDropElement>
   );
 }

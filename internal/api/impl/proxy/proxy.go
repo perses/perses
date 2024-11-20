@@ -27,7 +27,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/perses/perses/internal/api/crypto"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
-	"github.com/perses/perses/internal/api/interface"
+	apiinterface "github.com/perses/perses/internal/api/interface"
 	"github.com/perses/perses/internal/api/interface/v1/dashboard"
 	"github.com/perses/perses/internal/api/interface/v1/datasource"
 	"github.com/perses/perses/internal/api/interface/v1/globaldatasource"
@@ -91,6 +91,8 @@ func (u *unsavedProxyBody) setRequestParams(ctx echo.Context) {
 	ctx.SetRequest(req)
 }
 
+const unsavedDatasourceDefaultName = "unsaved-datasource"
+
 type endpoint struct {
 	dashboard    dashboard.DAO
 	secret       secret.DAO
@@ -145,10 +147,10 @@ func (e *endpoint) checkPermission(ctx echo.Context, projectName string, scope r
 	return nil
 }
 
-func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, spec v1.DatasourceSpec) error {
+func (e *endpoint) proxyGlobalDatasource(ctx echo.Context, datasourceName string, spec v1.DatasourceSpec) error {
 	path := ctx.Param("*")
 	pr, err := newProxy(spec, path, e.crypto, func(name string) (*v1.SecretSpec, error) {
-		return e.getGlobalSecret(spec.Display.Name, name)
+		return e.getGlobalSecret(datasourceName, name)
 	})
 	if err != nil {
 		return err
@@ -168,7 +170,12 @@ func (e *endpoint) proxyUnsavedGlobalDatasource(ctx echo.Context) error {
 
 	body.setRequestParams(ctx)
 
-	return e.proxyGlobalDatasource(ctx, body.Spec)
+	dtsName := unsavedDatasourceDefaultName
+	if body.Spec.Display != nil {
+		dtsName = body.Spec.Display.Name
+	}
+
+	return e.proxyGlobalDatasource(ctx, dtsName, body.Spec)
 }
 
 func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
@@ -182,7 +189,7 @@ func (e *endpoint) proxySavedGlobalDatasource(ctx echo.Context) error {
 		return err
 	}
 
-	return e.proxyGlobalDatasource(ctx, dts)
+	return e.proxyGlobalDatasource(ctx, dts.Metadata.Name, dts.Spec)
 }
 
 func (e *endpoint) proxyProjectDatasource(ctx echo.Context, projectName, dtsName string, spec v1.DatasourceSpec) error {
@@ -209,7 +216,12 @@ func (e *endpoint) proxyUnsavedProjectDatasource(ctx echo.Context) error {
 
 	body.setRequestParams(ctx)
 
-	return e.proxyProjectDatasource(ctx, projectName, body.Spec.Display.Name, body.Spec)
+	dtsName := unsavedDatasourceDefaultName
+	if body.Spec.Display != nil {
+		dtsName = body.Spec.Display.Name
+	}
+
+	return e.proxyProjectDatasource(ctx, projectName, dtsName, body.Spec)
 }
 
 func (e *endpoint) proxySavedProjectDatasource(ctx echo.Context) error {
@@ -252,7 +264,12 @@ func (e *endpoint) proxyUnsavedDashboardDatasource(ctx echo.Context) error {
 
 	body.setRequestParams(ctx)
 
-	return e.proxyDashboardDatasource(ctx, projectName, body.Spec.Display.Name, body.Spec)
+	dtsName := unsavedDatasourceDefaultName
+	if body.Spec.Display != nil {
+		dtsName = body.Spec.Display.Name
+	}
+
+	return e.proxyDashboardDatasource(ctx, projectName, dtsName, body.Spec)
 }
 
 func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
@@ -272,17 +289,17 @@ func (e *endpoint) proxySavedDashboardDatasource(ctx echo.Context) error {
 	return e.proxyDashboardDatasource(ctx, projectName, dtsName, dts)
 }
 
-func (e *endpoint) getGlobalDatasource(name string) (v1.DatasourceSpec, error) {
+func (e *endpoint) getGlobalDatasource(name string) (*v1.GlobalDatasource, error) {
 	dts, err := e.globalDTS.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
 			logrus.Debugf("unable to find the Datasource %q", name)
-			return v1.DatasourceSpec{}, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
+			return nil, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, datasource doesn't exist", name))
 		}
 		logrus.WithError(err).Errorf("unable to find the datasource %q, something wrong with the database", name)
-		return v1.DatasourceSpec{}, apiinterface.InternalError
+		return nil, apiinterface.InternalError
 	}
-	return dts.Spec, nil
+	return dts, nil
 }
 
 func (e *endpoint) getProjectDatasource(projectName string, name string) (v1.DatasourceSpec, error) {
@@ -320,7 +337,7 @@ func (e *endpoint) getGlobalSecret(dtsName, name string) (*v1.SecretSpec, error)
 	scrt, err := e.globalSecret.Get(name)
 	if err != nil {
 		if databaseModel.IsKeyNotFound(err) {
-			logrus.Debugf("unable to find the Datasource %q", name)
+			logrus.Debugf("unable to find the GlobalSecret %q", name)
 			return nil, apiinterface.HandleNotFoundError(fmt.Sprintf("unable to forward the request to the datasource %q, secret %q attached doesn't exist", dtsName, name))
 		}
 		logrus.WithError(err).Errorf("unable to find the secret %q attached to the datasource %q, something wrong with the database", name, dtsName)

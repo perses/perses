@@ -12,11 +12,11 @@
 // limitations under the License.
 
 import { Box, styled } from '@mui/material';
-import { Span } from '@perses-dev/core';
 import { Viewport, formatDuration } from './utils';
+import { GanttTrace } from './trace';
 
 export interface TicksHeaderProps {
-  rootSpan: Span;
+  trace: GanttTrace;
   viewport: Viewport;
 }
 
@@ -24,10 +24,10 @@ export interface TicksHeaderProps {
  * TicksHeader renders all tick labels in the header
  */
 export function TicksHeader(props: TicksHeaderProps) {
-  const { rootSpan, viewport } = props;
+  const { trace, viewport } = props;
 
   const duration = viewport.endTimeUnixMs - viewport.startTimeUnixMs;
-  const startAt = viewport.startTimeUnixMs - rootSpan.startTimeUnixMs;
+  const startAt = viewport.startTimeUnixMs - trace.startTimeUnixMs;
 
   return (
     <>

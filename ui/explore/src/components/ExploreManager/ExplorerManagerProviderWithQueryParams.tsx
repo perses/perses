@@ -13,13 +13,12 @@
 
 import React, { ReactNode } from 'react';
 
-import { createEnumParam, JsonParam, NumberParam, useQueryParams, withDefault } from 'use-query-params';
+import { createEnumParam, JsonParam, useQueryParams, withDefault } from 'use-query-params';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
 const exploreQueryConfig = {
   explorer: withDefault(createEnumParam(['metrics', 'traces']), 'metrics'),
-  tab: withDefault(NumberParam, 0),
-  queries: withDefault(JsonParam, []),
+  data: withDefault(JsonParam, {}),
 };
 
 interface ExplorerManagerProviderWithQueryParamsProps {

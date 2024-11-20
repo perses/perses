@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
+import { Definition, Transform } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -49,6 +49,44 @@ export interface ColumnSettings {
   hide?: boolean;
 }
 
+export interface ValueCondition {
+  kind: 'Value';
+  spec: {
+    value: string;
+  };
+}
+
+export interface RangeCondition {
+  kind: 'Range';
+  spec: {
+    min?: number;
+    max?: number;
+  };
+}
+
+export interface RegexCondition {
+  kind: 'Regex';
+  spec: {
+    expr: string;
+  };
+}
+
+export interface MiscCondition {
+  kind: 'Misc';
+  spec: {
+    value: 'empty' | 'null' | 'NaN' | 'true' | 'false';
+  };
+}
+
+export type Condition = ValueCondition | RangeCondition | RegexCondition | MiscCondition;
+
+export interface CellSettings {
+  condition: Condition;
+  text?: string;
+  textColor?: `#${string}`;
+  backgroundColor?: `#${string}`;
+}
+
 /**
  * The schema for a Table panel.
  */
@@ -62,6 +100,8 @@ export interface TableDefinition extends Definition<TableOptions> {
 export interface TableOptions {
   density?: TableDensity;
   columnSettings?: ColumnSettings[];
+  cellSettings?: CellSettings[];
+  transforms?: Transform[];
 }
 
 /**

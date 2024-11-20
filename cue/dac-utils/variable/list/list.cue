@@ -19,11 +19,15 @@ import (
 	varBuilder "github.com/perses/perses/cue/dac-utils/variable"
 )
 
-#kind: varBuilder.#kind & "ListVariable"
-#name: varBuilder.#name
-#display?: v1Variable.#Display & {
-	hidden: bool | *false
-}
+// include the definitions of varBuilder at the root
+varBuilder
+
+#name: _ // this is needed for below reference
+
+#display?: _ // this is needed for below reference
+
+// specify the constraints for this variable
+#kind:             v1Variable.#KindList
 #allowAllValue:    bool | *false
 #allowMultiple:    bool | *false
 #customAllValue?:  string

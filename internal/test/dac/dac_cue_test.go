@@ -15,16 +15,26 @@ package migrate
 
 import (
 	"encoding/json"
-	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"cuelang.org/go/cue"
 	"cuelang.org/go/cue/cuecontext"
+	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/load"
 	testUtils "github.com/perses/perses/internal/test"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 )
+
+var cueValidationOptions = []cue.Option{
+	cue.Concrete(true),
+	cue.Attributes(true),
+	cue.Definitions(true),
+	cue.Hidden(true),
+}
 
 func TestDashboardAsCodeCUESDK(t *testing.T) {
 	testSuite := []struct {
@@ -62,9 +72,15 @@ func TestDashboardAsCodeCUESDK(t *testing.T) {
 			}
 
 			// validate the value
-			err := value.Validate()
+			err := value.Validate(cueValidationOptions...)
 			if err != nil {
-				logrus.WithError(err).Fatal("Error validating CUE value")
+				// retrieve the full error detail
+				ex, errOs := os.Executable()
+				if errOs != nil {
+					logrus.WithError(errOs).Error("Error retrieving exec path to build CUE error detail")
+				}
+				fullErrStr := errors.Details(err, &errors.Config{Cwd: filepath.Dir(ex)})
+				logrus.WithError(errors.New(fullErrStr)).Fatal("Error validating CUE value")
 			}
 
 			// Compare with expected output

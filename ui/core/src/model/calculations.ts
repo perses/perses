@@ -13,7 +13,7 @@
 
 import { TimeSeriesValueTuple } from './time-series-queries';
 
-export const DEFAULT_CALCULATION: CalculationType = 'last-number';
+export const DEFAULT_CALCULATION: CalculationType = 'last'; // aligned with cue
 
 export const CalculationsMap = {
   first: first,

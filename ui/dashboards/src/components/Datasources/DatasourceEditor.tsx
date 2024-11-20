@@ -99,8 +99,9 @@ export function DatasourceEditor(props: {
         <ValidationProvider>
           <DatasourceEditorForm
             initialDatasourceDefinition={datasourceEdit}
-            initialAction={datasourceFormAction}
+            action={datasourceFormAction}
             isDraft={true}
+            onActionChange={setDatasourceFormAction}
             onSave={(def: DatasourceDefinition) => {
               setDatasources((draft) => {
                 delete draft[datasourceEdit.name]; // to tackle the case where datasource name has been changed

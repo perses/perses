@@ -11,23 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, styled } from '@mui/material';
+import { Stack, styled, useTheme } from '@mui/material';
 import { Span } from '@perses-dev/core';
 import { memo } from 'react';
 import { Viewport, rowHeight } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
 import { SpanName } from './SpanName';
 import { SpanDuration } from './SpanDuration';
 
 interface GanttTableRowProps {
+  options: TracingGanttChartOptions;
   span: Span;
   viewport: Viewport;
+  selected?: boolean;
   nameColumnWidth: number;
   divider: React.ReactNode;
   onClick: (span: Span) => void;
 }
 
 export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowProps) {
-  const { span, viewport, nameColumnWidth, divider, onClick } = props;
+  const { options, span, viewport, selected, nameColumnWidth, divider, onClick } = props;
+  const theme = useTheme();
 
   const handleOnClick = () => {
     // ignore event if triggered by selecting text
@@ -37,10 +41,14 @@ export const GanttTableRow = memo(function GanttTableRow(props: GanttTableRowPro
   };
 
   return (
-    <RowContainer direction="row" onClick={handleOnClick}>
+    <RowContainer
+      sx={{ backgroundColor: selected ? theme.palette.action.selected : 'inherit' }}
+      direction="row"
+      onClick={handleOnClick}
+    >
       <SpanName span={span} nameColumnWidth={nameColumnWidth} />
       {divider}
-      <SpanDuration span={span} viewport={viewport} />
+      <SpanDuration options={options} span={span} viewport={viewport} />
     </RowContainer>
   );
 });

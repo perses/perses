@@ -183,8 +183,9 @@ export function VariableEditor(props: {
         <ValidationProvider>
           <VariableEditorForm
             initialVariableDefinition={currentEditingVariableDefinition}
-            initialAction={variableFormAction}
+            action={variableFormAction}
             isDraft={true}
+            onActionChange={setVariableFormAction}
             onSave={(definition: VariableDefinition) => {
               setVariableDefinitions((draft) => {
                 draft[variableEditIdx] = definition;

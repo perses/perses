@@ -15,6 +15,7 @@ package auth
 
 import (
 	"errors"
+	"fmt"
 
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/interface/v1/user"
@@ -53,7 +54,7 @@ func saveProviderInfo(old v1.UserSpec, uInfoProvider v1.OAuthProvider) (v1.UserS
 	foundPerfectMatch := false
 	for _, provider := range old.OauthProviders {
 		if provider != uInfoProvider {
-			return old, false, errors.New("this user is already registered with a different oauth provider context")
+			return old, false, fmt.Errorf("this user is already registered with a different oauth provider context (%s)", provider.Issuer)
 		}
 		foundPerfectMatch = true
 	}

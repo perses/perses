@@ -226,9 +226,10 @@ export function VariableList<T extends Variable>(props: ListPropertiesWithCallba
         <>
           <VariableDrawer
             variable={targetedVariable}
-            isOpen={isVariableDrawerOpened}
             action={action}
+            isOpen={isVariableDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleVariableSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteVariableDialogOpened(false))}
             onClose={() => setVariableDrawerOpened(false)}

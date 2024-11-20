@@ -27,10 +27,12 @@ type Option interface {
 	// Execute is the method used by the command to actually run the business logic.
 	Execute() error
 	SetWriter(writer io.Writer)
+	SetErrWriter(writer io.Writer)
 }
 
 func Run(o Option, cmd *cobra.Command, args []string) error {
 	o.SetWriter(cmd.OutOrStdout())
+	o.SetErrWriter(cmd.ErrOrStderr())
 	if err := o.Complete(args); err != nil {
 		return err
 	}

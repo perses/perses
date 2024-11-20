@@ -65,8 +65,13 @@ checkunused:
 
 .PHONY: checkstyle
 checkstyle:
-	@echo ">> checking code style"
+	@echo ">> checking Go code style"
 	$(GOCI) run --timeout 5m
+
+.PHONY: checklint
+checklint:
+	@echo ">> checking TS code style"
+	cd ui && npm run lint
 
 .PHONY: checklicense
 checklicense:
