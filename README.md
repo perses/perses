@@ -39,7 +39,7 @@ Perses aims to tackle multiple goals:
 ## Try it
 
 We are providing an online demo available at **https://demo.perses.dev**.
-You can create your own project(s) and dashboard(s) there, no one else will be able to modify them!
+reate your own project(s) and dashboard(s) there, no one else will be able to modify them!
 
 ## Status
 
