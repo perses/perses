@@ -46,11 +46,16 @@ export function generateTooltipHTML({
     padding-top: 8px;
   `;
 
+  const labelStyles = css`
+    margin-right: 16px;
+  `;
+
   return `
     <div>
-      <div style="${tooltipHeader.styles}">${formattedDate} - ${formattedTime}</div>
+      <div style="${tooltipHeader.styles}">${formattedDate} ${formattedTime}</div>
       <div style="${tooltipContentStyles.styles}">
-        <div>${marker} <strong>${yAxisCategories[y]}</strong>
+        <div style="${labelStyles.styles}">
+          ${marker} <strong>${yAxisCategories[y]}</strong>
         </div>
         <div>
           ${value}
