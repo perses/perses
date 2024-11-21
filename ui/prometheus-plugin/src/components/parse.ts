@@ -16,11 +16,11 @@ import { DatasourceSelector } from '@perses-dev/core';
 import { useQuery } from '@tanstack/react-query';
 import { ParseQueryRequestParameters, ParseQueryResponse, PrometheusClient } from '../model';
 
-export function useParseQuery(content: string, datasource: DatasourceSelector) {
+export function useParseQuery(content: string, datasource: DatasourceSelector, enabled?: boolean) {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   return useQuery<ParseQueryResponse>({
-    enabled: !!client,
+    enabled: !!client && enabled,
     queryKey: ['parseQuery', content, 'datasource', datasource],
     queryFn: async () => {
       const params: ParseQueryRequestParameters = { query: content };
