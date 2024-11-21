@@ -103,3 +103,13 @@ export function getFormattedAxisLabel(rangeMs: number) {
     day: '{MM}/{dd}',
   };
 }
+
+export const getDateAndTime = (timeMs: number) => {
+  const date = new Date(timeMs);
+  const formattedDate = format(date, 'MMM dd, yyyy - ');
+  const formattedTime = format(date, 'HH:mm:ss');
+  return {
+    formattedDate,
+    formattedTime,
+  };
+};

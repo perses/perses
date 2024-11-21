@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { HeatmapChart as EChartsHeatmapChart } from 'echarts/charts';
 import {
   GridComponent,
@@ -24,13 +24,13 @@ import {
 import { EChartsCoreOption, use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
+import { useMemo } from 'react';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { useTimeZone } from '../context/TimeZoneProvider';
-import { formatWithTimeZone } from '../utils';
 import { EChart } from '../EChart';
 import { getColorsForValues } from './utils/get-color';
 import { getFormattedStatusHistoryAxisLabel } from './get-formatted-axis-label';
-import { getTooltipPosition } from './utils/get-tooltip-position';
+import { generateTooltipHTML } from './StatusHistoryTooltip';
 
 use([
   EChartsHeatmapChart,
@@ -57,38 +57,36 @@ export function StatusHistoryChart(props: StatusHistoryChartProps) {
   const { height, data, xAxisCategories, yAxisCategories, timeScale } = props;
   const { timeZone } = useTimeZone();
   const chartsTheme = useChartsTheme();
+  const theme = useTheme();
 
-  const uniqueValues = [...new Set(data.map((item) => item[2]))].filter(
-    (value): value is number => value !== undefined
+  const uniqueValues = useMemo(
+    () => [...new Set(data.map((item) => item[2]))].filter((value): value is number => value !== undefined),
+    [data]
   );
 
   // get colors from theme and generate colors if not provided
-  const colors = uniqueValues.map((value, index) => ({
-    value,
-    color: getColorsForValues(
-      uniqueValues,
-      Array.isArray(chartsTheme.echartsTheme.color)
-        ? chartsTheme.echartsTheme.color.filter((color): color is string => typeof color === 'string')
-        : []
-    )[index],
-  }));
+  const pieces = useMemo(() => {
+    const themeColors = Array.isArray(chartsTheme.echartsTheme.color)
+      ? chartsTheme.echartsTheme.color.filter((color): color is string => typeof color === 'string')
+      : [];
+
+    return uniqueValues.map((value, index) => ({
+      value,
+      color: getColorsForValues(uniqueValues, themeColors)[index],
+    }));
+  }, [uniqueValues, chartsTheme.echartsTheme.color]);
 
   const option: EChartsCoreOption = {
     tooltip: {
-      position: getTooltipPosition,
-      formatter: (params: { data: StatusHistoryData }) => {
-        const { data } = params;
-        const [x, y, value] = data;
-        const xAxisLabel = xAxisCategories[x];
-        const date = xAxisLabel ? new Date(xAxisLabel) : null;
-        const time = date ? formatWithTimeZone(date, 'yyyy-MM-dd HH:mm:ss', timeZone) : '';
-        return `
-              <div style="padding: 5px;">
-                  ${time}<br/>
-                  <strong>${yAxisCategories[y]}</strong><br/>
-                  ${value}<br/>
-              </div>
-          `;
+      appendToBody: true,
+      formatter: (params: { data: StatusHistoryData; marker: string }) => {
+        return generateTooltipHTML({
+          data: params.data,
+          marker: params.marker,
+          xAxisCategories,
+          yAxisCategories,
+          theme,
+        });
       },
     },
     grid: {
@@ -129,7 +127,7 @@ export function StatusHistoryChart(props: StatusHistoryChartProps) {
     visualMap: {
       show: false,
       type: 'piecewise',
-      pieces: colors,
+      pieces,
     },
     series: [
       {
