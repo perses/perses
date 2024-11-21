@@ -13,12 +13,13 @@
 
 import { TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
-import { createStatusHistoryDataModel } from './data-transform';
+import { renderHook } from '@testing-library/react';
+import { useStatusHistoryDataModel } from './data-transform';
 
-describe('createStatusHistoryDataModel', () => {
+describe('useStatusHistoryDataModel', () => {
   it('should return empty model for empty query results', () => {
-    const result = createStatusHistoryDataModel([], []);
-    expect(result).toEqual({
+    const { result } = renderHook(() => useStatusHistoryDataModel([], []));
+    expect(result.current).toEqual({
       legendItems: [],
       statusHistoryData: [],
       xAxisCategories: [],
@@ -56,17 +57,17 @@ describe('createStatusHistoryDataModel', () => {
       },
     ];
     const colors = ['#ff0000', '#00ff00'];
-    const result = createStatusHistoryDataModel(queryResults, colors);
+    const { result } = renderHook(() => useStatusHistoryDataModel(queryResults, colors));
 
-    expect(result.legendItems).toEqual([
+    expect(result.current.legendItems).toEqual([
       { id: '0-1', label: '1', color: '#ff0000' },
       { id: '1-2', label: '2', color: '#00ff00' },
     ]);
-    expect(result.statusHistoryData).toEqual([
+    expect(result.current.statusHistoryData).toEqual([
       [0, 0, 1],
       [1, 0, 2],
     ]);
-    expect(result.xAxisCategories).toEqual([1609459200000, 1609459260000]);
-    expect(result.yAxisCategories).toEqual(['instance1']);
+    expect(result.current.xAxisCategories).toEqual([1609459200000, 1609459260000]);
+    expect(result.current.yAxisCategories).toEqual(['instance1']);
   });
 });
