@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { replaceVariable } from '@perses-dev/plugin-system';
-import { formatDuration, msToPrometheusDuration } from '@perses-dev/core';
 import { Metric } from '../model/api-types';
 
 /**
@@ -91,29 +89,4 @@ export function getFormattedPrometheusSeriesName(query: string, metric: Metric, 
   // This controls the regex used to customize legend and tooltip display.
   const formattedName = formatter ? formatSeriesName(formatter, metric) : name;
   return { name, formattedName };
-}
-
-/*
- * Replace variable placeholders in a PromQL query
-
- * @param query The base promQL expression that contains variable placeholders
- * @param minStepMs the lower bound of the interval between data points, in milliseconds
- * @param intervalMs the actual interval between data points, in milliseconds
- * 
- * @returns a PromQL expression with variable placeholders replaced by their values
- */
-export function replacePromBuiltinVariables(query: string, minStepMs: number, intervalMs: number): string {
-  let updatedQuery = replaceVariable(query, '__interval_ms', intervalMs.toString());
-  updatedQuery = replaceVariable(updatedQuery, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
-
-  // The $__rate_interval variable is meant to be used with the rate() promQL function.
-  // It is defined as max($__interval + Min step, 4 * Min step)
-  const rateIntervalMs = Math.max(intervalMs + minStepMs, 4 * minStepMs);
-  updatedQuery = replaceVariable(
-    updatedQuery,
-    '__rate_interval',
-    formatDuration(msToPrometheusDuration(rateIntervalMs))
-  );
-
-  return updatedQuery;
 }

@@ -32,9 +32,10 @@ import {
   VectorData,
   ScalarData,
 } from '../../model';
-import { getFormattedPrometheusSeriesName, replacePromBuiltinVariables } from '../../utils';
+import { getFormattedPrometheusSeriesName } from '../../utils';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
+import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
