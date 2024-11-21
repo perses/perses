@@ -11,22 +11,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { List, ListItem, ListItemText } from '@mui/material';
+import { useMemo } from 'react';
+import { Link, List, ListItem, ListItemText } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import { TraceAttribute, TraceAttributeValue } from '@perses-dev/core';
 
+export type AttributeLinks = Record<string, (attributes: Record<string, TraceAttributeValue>) => string>;
+
 export interface AttributeListProps {
+  attributeLinks?: AttributeLinks;
   attributes: TraceAttribute[];
 }
 
 export function AttributeList(props: AttributeListProps) {
-  const { attributes } = props;
+  const { attributeLinks, attributes } = props;
+  const attributesMap = useMemo(
+    () => Object.fromEntries(attributes.map((attr) => [attr.key, attr.value])),
+    [attributes]
+  );
 
   return (
     <>
       <List>
-        {attributes.map((attribute, i) => (
-          <AttributeItem key={i} attribute={attribute} />
-        ))}
+        {attributes
+          .sort((a, b) => a.key.localeCompare(b.key))
+          .map((attribute, i) => (
+            <AttributeItem key={i} attribute={attribute} linkTo={attributeLinks?.[attribute.key]?.(attributesMap)} />
+          ))}
       </List>
     </>
   );
@@ -34,16 +45,25 @@ export function AttributeList(props: AttributeListProps) {
 
 interface AttributeItemProps {
   attribute: TraceAttribute;
+  linkTo?: string;
 }
 
 function AttributeItem(props: AttributeItemProps) {
-  const { attribute } = props;
+  const { attribute, linkTo } = props;
+
+  const value = linkTo ? (
+    <Link component={RouterLink} to={linkTo}>
+      {renderAttributeValue(attribute.value)}
+    </Link>
+  ) : (
+    renderAttributeValue(attribute.value)
+  );
 
   return (
     <ListItem disablePadding>
       <ListItemText
         primary={attribute.key}
-        secondary={renderAttributeValue(attribute.value)}
+        secondary={value}
         primaryTypographyProps={{ variant: 'h5' }}
         secondaryTypographyProps={{ variant: 'body1', sx: { wordBreak: 'break-word' } }}
       />
@@ -52,7 +72,7 @@ function AttributeItem(props: AttributeItemProps) {
 }
 
 function renderAttributeValue(value: TraceAttributeValue): string {
-  if ('stringValue' in value) return value.stringValue;
+  if ('stringValue' in value) return value.stringValue.length > 0 ? value.stringValue : '<empty string>';
   if ('intValue' in value) return value.intValue;
   if ('boolValue' in value) return value.boolValue.toString();
   if ('arrayValue' in value) return value.arrayValue.values.map(renderAttributeValue).join(', ');

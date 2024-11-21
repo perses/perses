@@ -24,7 +24,7 @@ export function replaceVariables(text: string, variableState: VariableStateMap):
     .sort((a, b) => b.length - a.length)
     .forEach((v) => {
       const variable = variableState[v];
-      if (variable && variable?.value) {
+      if (variable && variable.value !== undefined) {
         finalText = replaceVariable(finalText, v, variable?.value);
       }
     });

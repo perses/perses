@@ -14,7 +14,7 @@
 import { Secret } from '@perses-dev/core';
 import { Dispatch, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 import { SecretEditorForm } from './SecretEditorForm';
 
@@ -22,8 +22,16 @@ interface SecretDrawerProps<T extends Secret> extends DrawerProps<T> {
   secret: T;
 }
 
-export function SecretDrawer<T extends Secret>(props: SecretDrawerProps<T>) {
-  const { secret, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function SecretDrawer<T extends Secret>({
+  secret,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: SecretDrawerProps<T>) {
   const [isDeleteSecretDialogStateOpened, setDeleteSecretDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
@@ -37,10 +45,11 @@ export function SecretDrawer<T extends Secret>(props: SecretDrawerProps<T>) {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <SecretEditorForm
-            initialSecret={secret}
-            initialAction={action}
+            initialValue={secret}
+            action={action}
             isDraft={false}
             isReadonly={isReadonly}
+            onActionChange={onActionChange}
             onSave={onSave as Dispatch<Secret>}
             onClose={onClose}
             onDelete={onDelete ? () => setDeleteSecretDialogStateOpened(true) : undefined}

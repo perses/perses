@@ -23,6 +23,8 @@ import (
 )
 
 type EphemeralDashboardSpecBase struct {
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	TTL model.Duration `json:"ttl" yaml:"ttl"`
 }
 

@@ -1,4 +1,72 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROM",
+      "label": "PROM",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "VAR_MYCONST",
+      "type": "constant",
+      "label": "My Constant Variable",
+      "value": "const_val",
+      "description": ""
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "gauge",
+      "name": "Gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "10.1.8"
+    },
+    {
+      "type": "panel",
+      "id": "heatmap",
+      "name": "Heatmap",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "stat",
+      "name": "Stat",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -25,14 +93,14 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 40381,
+  "id": null,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "argos-world"
+        "uid": "${DS_PROM}"
       },
       "description": "a stat chart that is basically showing stats as a chart",
       "fieldConfig": {
@@ -54,7 +122,8 @@
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "Bps",
+          "decimal": 2
         },
         "overrides": []
       },
@@ -86,7 +155,11 @@
           "expr": "vector(4)",
           "legendFormat": "__auto",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROM}"
+          }
         }
       ],
       "title": "My Stat chart",
@@ -95,7 +168,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "argos-world"
+        "uid": "${DS_PROM}"
       },
       "description": "my second panel is a gauge",
       "fieldConfig": {
@@ -117,7 +190,8 @@
               }
             ]
           },
-          "unit": "h"
+          "unit": "h",
+          "decimal": 1
         },
         "overrides": []
       },
@@ -145,7 +219,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "editorMode": "code",
           "expr": "vector(2)",
@@ -160,7 +234,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "argos-world"
+        "uid": "${DS_PROM}"
       },
       "description": "my first panel is a timeseries",
       "fieldConfig": {
@@ -212,7 +286,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "decimal": 3
         },
         "overrides": []
       },
@@ -248,7 +323,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "editorMode": "code",
           "expr": "vector(1)",
@@ -263,7 +338,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "argos-world"
+        "uid": "${DS_PROM}"
       },
       "fieldConfig": {
         "defaults": {
@@ -343,7 +418,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "editorMode": "code",
           "exemplar": false,
@@ -376,6 +451,7 @@
             "indexByName": {},
             "renameByName": {
               "Time": "",
+              "Value": "ValueCustomHeader",
               "apiserver": "API server"
             }
           }
@@ -396,7 +472,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "description": "my third panel is a timeseries",
           "fieldConfig": {
@@ -440,8 +516,7 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -474,7 +549,8 @@
           "targets": [
             {
               "datasource": {
-                "uid": "argos-world"
+                "type": "prometheus",
+                "uid": "${DS_PROM}"
               },
               "editorMode": "code",
               "expr": "vector(3)",
@@ -489,7 +565,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "fieldConfig": {
             "defaults": {
@@ -553,7 +629,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "${DS_PROM}"
           },
           "description": "",
           "gridPos": {
@@ -581,7 +657,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "argos-world"
+            "uid": "PROM"
           },
           "refId": "A"
         }
@@ -635,20 +711,28 @@
         "hide": 2,
         "label": "My Constant Variable",
         "name": "MyConst",
-        "query": "const_val",
+        "query": "${VAR_MYCONST}",
         "skipUrlSync": false,
-        "type": "constant"
+        "type": "constant",
+        "current": {
+          "value": "${VAR_MYCONST}",
+          "text": "${VAR_MYCONST}",
+          "selected": false
+        },
+        "options": [
+          {
+            "value": "${VAR_MYCONST}",
+            "text": "${VAR_MYCONST}",
+            "selected": false
+          }
+        ]
       },
       {
         "allValue": ".*",
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "label_values(stack)",
         "description": "Label values, 1rst flavor",
@@ -669,13 +753,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
-          "uid": "argos-world"
+          "type": "prometheus",
+          "uid": "${DS_PROM}"
         },
         "definition": "label_values(thanos_build_info, stack)",
         "description": "Label values, 2nd flavor",
@@ -696,14 +777,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "label_values(thanos_build_info{stack=~\"erd.+\"}, stack)",
         "description": "Label values, 3rd flavor",
@@ -724,14 +801,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "label_values(thanos_build_info{stack=~\"$lv1\"}, stack)",
         "description": "Label values, 4th flavor",
@@ -823,7 +896,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "PROM"
         },
         "description": "This ad-hoc filter should be replaced by a placeholder in the migration since it's not supported in Perses yet",
         "filters": [],
@@ -834,14 +907,10 @@
         "type": "adhoc"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "API",
-          "value": "API"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "label_names()",
         "hide": 0,
@@ -860,14 +929,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "Azure",
-          "value": "Azure"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "query_result(group by(type) (up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}))",
         "description": "variable using query_result clause",
@@ -888,14 +953,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "{type=\"TSL\"} 1 1722509708000",
-          "value": "{type=\"TSL\"} 1 1722509708000"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "query_result(group by(type) (present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range])))",
         "description": "query result var for volatile series (relies $__range global var)",
@@ -915,14 +976,10 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "cmdbrtu-custom-sd",
-          "value": "cmdbrtu-custom-sd"
-        },
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "argos-world"
+          "uid": "${DS_PROM}"
         },
         "definition": "query_result(present_over_time(up{osname=~\".*Linux.*\", job=~\"cmdbrtu-custom-sd.*\", prometheus=~\"system\"}[$__range]))",
         "description": "query result var with no <aggr> by clause",

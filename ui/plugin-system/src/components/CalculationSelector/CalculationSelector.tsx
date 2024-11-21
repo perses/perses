@@ -46,7 +46,7 @@ export function CalculationSelector({ value, onChange }: CalculationSelectorProp
           options={CALC_OPTIONS}
           onChange={handleCalculationChange}
           disableClearable
-        ></SettingsAutocomplete>
+        />
       }
     />
   );

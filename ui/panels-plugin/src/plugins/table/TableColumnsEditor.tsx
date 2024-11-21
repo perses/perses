@@ -18,9 +18,9 @@ import { ColumnsEditor } from './ColumnsEditor';
 export type TableColumnsEditorProps = OptionsEditorProps<TableOptions>;
 
 export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps) {
-  function handleColumnChange(columns: ColumnSettings[]): void {
+  function handleColumnsChange(columns: ColumnSettings[]): void {
     onChange({ ...value, columnSettings: columns });
   }
 
-  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnChange} />;
+  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnsChange} />;
 }

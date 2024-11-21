@@ -15,9 +15,11 @@ package timeseriestable
 
 import "github.com/perses/perses/go-sdk/panel"
 
+const PluginKind = "TimeSeriesTable"
+
 func Chart() panel.Option {
 	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = "TimeSeriesTable"
+		builder.Spec.Plugin.Kind = PluginKind
 		return nil
 	}
 }

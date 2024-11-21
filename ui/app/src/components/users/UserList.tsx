@@ -194,9 +194,10 @@ export function UserList(props: ListPropertiesWithCallbacks<UserResource>) {
         <>
           <UserDrawer
             user={targetedUser}
-            isOpen={isUserDrawerOpened}
             action={action}
+            isOpen={isUserDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleUserSave}
             onDelete={(v) => onDelete(v).then(() => setUserDrawerOpened(false))}
             onClose={() => setUserDrawerOpened(false)}

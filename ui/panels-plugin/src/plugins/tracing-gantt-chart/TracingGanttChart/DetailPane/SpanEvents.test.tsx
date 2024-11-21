@@ -13,7 +13,7 @@
 
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { trace1_root, trace1_root_child1 } from '../../../../test';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { SpanEventList, SpanEventListProps } from './SpanEvents';
 
 describe('SpanEvents', () => {
@@ -22,7 +22,7 @@ describe('SpanEvents', () => {
   };
 
   it('render', () => {
-    renderComponent({ rootSpan: trace1_root, span: trace1_root_child1 });
+    renderComponent({ trace: MOCK_GANTT_TRACE, span: MOCK_GANTT_TRACE.rootSpan.childSpans[0]! });
 
     expect(screen.getByText('150ms')).toBeInTheDocument();
     expect(screen.getByText('event1_name')).toBeInTheDocument();

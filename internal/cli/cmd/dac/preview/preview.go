@@ -62,6 +62,7 @@ type option struct {
 	opt.OutputOption
 	dashboards   []*modelV1.Dashboard
 	writer       io.Writer
+	errWriter    io.Writer
 	apiClient    api.ClientInterface
 	ttl          model.Duration
 	ttlAsAString string
@@ -155,12 +156,16 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "preview (-f [FILENAME] | -d [DIRECTORY_NAME])",
-		Short: "Preview of dashboards",
-		Long:  "Creates ephemeral dashboard based on dashboard built locally. As a response it gives the list of the URL for each dashboard preview.",
+		Short: "Generate preview(s) of dashboard(s)",
+		Long:  "Creates ephemeral dashboard(s) based on the dashboard(s) built locally. As a response it gives the list of the URL for each dashboard preview.",
 		Example: `
 percli dac preview -d ./build
 `,

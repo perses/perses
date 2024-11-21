@@ -31,6 +31,11 @@ describe('extractBasePathName', () => {
       expectedBasePath: '',
     },
     {
+      title: 'regular admin path for datasources',
+      path: '/admin/datasources',
+      expectedBasePath: '',
+    },
+    {
       title: 'regular path with prefix',
       path: `/foo${AdminRoute}`,
       expectedBasePath: '/foo',

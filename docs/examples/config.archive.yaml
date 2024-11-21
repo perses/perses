@@ -1,6 +1,6 @@
 database:
   file:
-    folder: "./perses"
+    folder: "./data"
     extension: "json"
 
 schemas:

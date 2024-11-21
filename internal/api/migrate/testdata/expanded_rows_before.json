@@ -66,9 +66,7 @@
     },
     {
       "title": "My 14th panel is an expanded row",
-      "type": "row",
-      "collapsed": false,
-      "panels": []
+      "type": "row"
     },
     {
       "title": "My 15th panel has a parent",

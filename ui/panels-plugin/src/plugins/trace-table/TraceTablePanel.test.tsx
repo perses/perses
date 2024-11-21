@@ -24,8 +24,8 @@ import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MemoryRouter } from 'react-router-dom';
-import { MOCK_TRACE_QUERY_RESULT } from '../../test';
-import { TraceTablePanel, TraceTableProps } from './TraceTablePanel';
+import { MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT } from '../../test';
+import { TraceTablePanel, TraceTablePanelProps } from './TraceTablePanel';
 
 jest.mock('@perses-dev/plugin-system', () => {
   return {
@@ -53,7 +53,7 @@ function buildMockQueryPlugin(): MockPlugin {
   };
 }
 
-const TEST_TRACE_TABLE_PROPS: TraceTableProps = {
+const TEST_TRACE_TABLE_PROPS: TraceTablePanelProps = {
   contentDimensions: {
     width: 500,
     height: 500,
@@ -91,22 +91,20 @@ describe('TraceTablePanel', () => {
 
   it('should render multi values with timestamps', async () => {
     (useDataQueries as jest.Mock).mockReturnValue({
-      queryResults: MOCK_TRACE_QUERY_RESULT,
+      queryResults: MOCK_TRACE_SEARCH_RESULT_QUERY_RESULT,
       isLoading: false,
       isFetching: false,
     });
     renderPanel();
 
-    expect(await screen.findByText('service-name')).toBeInTheDocument();
-    expect(await screen.findByText('span-name')).toBeInTheDocument();
-    expect(await screen.findByText('13 spans')).toBeInTheDocument();
-    expect(await screen.findByText('2 errors')).toBeInTheDocument();
-
     const rows = screen.getAllByRole('row');
     const lastRow = rows[rows.length - 1];
-    expect(lastRow).toHaveTextContent('10service-name'); // check service <Chip>s
-    expect(lastRow).toHaveTextContent('3second-service-name');
-
-    expect(await screen.findAllByRole('cell')).toHaveLength(4); // 1 line with 4 columns
+    expect(lastRow).toHaveTextContent('service-name: span-name'); // trace name
+    expect(lastRow).toHaveTextContent('10service-name'); // service name <Chip>s
+    expect(lastRow).toHaveTextContent('3second-service-name'); // service name <Chip>s
+    expect(lastRow).toHaveTextContent('13 spans'); // span count
+    expect(lastRow).toHaveTextContent('2 errors'); // span count
+    expect(lastRow).toHaveTextContent('100ms'); // duration
+    expect(lastRow).toHaveTextContent('December 18, 2023 at 4:07:25 PM'); // start time
   });
 });

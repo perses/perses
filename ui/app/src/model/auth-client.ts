@@ -21,10 +21,6 @@ import { HTTPHeader, HTTPMethodPOST } from './http';
 const authResource = 'auth';
 const jwtPayload = 'jwtPayload';
 
-export interface NativeAuthResponse {
-  token: string;
-}
-
 export interface NativeAuthBody {
   login: string;
   password: string;
@@ -61,7 +57,7 @@ export function useAuthToken(): UseQueryResult<Payload | null> {
 
 export function useNativeAuthMutation() {
   const queryClient = useQueryClient();
-  return useMutation<NativeAuthResponse, Error, NativeAuthBody>({
+  return useMutation<void, Error, NativeAuthBody>({
     mutationKey: [authResource],
     mutationFn: (body: NativeAuthBody) => {
       return nativeAuth(body);
@@ -74,7 +70,7 @@ export function useNativeAuthMutation() {
 
 export function nativeAuth(body: NativeAuthBody) {
   const url = buildURL({ resource: `${authResource}/providers/native/login`, apiPrefix: '/api' });
-  return fetchJson<NativeAuthResponse>(url, {
+  return fetchJson<void>(url, {
     method: HTTPMethodPOST,
     headers: HTTPHeader,
     body: JSON.stringify(body),

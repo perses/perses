@@ -104,7 +104,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
             onChange={handleKindChange}
             disableClearable
             disabled={disabled}
-          ></SettingsAutocomplete>
+          />
         }
       />
       <OptionsEditorControl

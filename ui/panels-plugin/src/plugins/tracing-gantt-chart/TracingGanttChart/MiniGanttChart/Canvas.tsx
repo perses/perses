@@ -11,18 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, styled } from '@mui/material';
+import { Box, styled, useTheme } from '@mui/material';
 import useResizeObserver from 'use-resize-observer';
-import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState } from 'react';
+import { useEffect, useRef, MouseEvent as ReactMouseEvent, useState, useCallback } from 'react';
 import { Span, useEvent } from '@perses-dev/core';
+import { useChartsTheme } from '@perses-dev/components';
 import { Ticks } from '../Ticks';
-import { Viewport } from '../utils';
+import { getSpanColor, Viewport } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { GanttTrace } from '../trace';
 import { drawSpans } from './draw';
 
 const CANVAS_HEIGHT = 60;
 
 interface CanvasProps {
-  rootSpan: Span;
+  options: TracingGanttChartOptions;
+  trace: GanttTrace;
   viewport: Viewport;
   setViewport: (v: Viewport) => void;
 }
@@ -33,7 +37,9 @@ type MouseState =
   | { type: 'drag'; start: number; end: number };
 
 export function Canvas(props: CanvasProps) {
-  const { rootSpan, viewport, setViewport } = props;
+  const { options, trace, viewport, setViewport } = props;
+  const muiTheme = useTheme();
+  const chartsTheme = useChartsTheme();
   // the <canvas> element must have an absolute width and height to avoid rendering problems
   // the wrapper box is required to get the available dimensions for the <canvas> element
   const { width, ref: wrapperRef } = useResizeObserver();
@@ -41,9 +47,14 @@ export function Canvas(props: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mouseState, setMouseState] = useState<MouseState>({ type: 'none' });
 
-  const traceDuration = rootSpan.endTimeUnixMs - rootSpan.startTimeUnixMs;
-  const relativeCutoffLeft = (viewport.startTimeUnixMs - rootSpan.startTimeUnixMs) / traceDuration;
-  const relativeCutoffRight = (rootSpan.endTimeUnixMs - viewport.endTimeUnixMs) / traceDuration;
+  const traceDuration = trace.endTimeUnixMs - trace.startTimeUnixMs;
+  const relativeCutoffLeft = (viewport.startTimeUnixMs - trace.startTimeUnixMs) / traceDuration;
+  const relativeCutoffRight = (trace.endTimeUnixMs - viewport.endTimeUnixMs) / traceDuration;
+
+  const spanColorGenerator = useCallback(
+    (span: Span) => getSpanColor(muiTheme, chartsTheme, options.visual?.palette?.mode, span),
+    [muiTheme, chartsTheme, options.visual?.palette?.mode]
+  );
 
   useEffect(() => {
     if (!canvasRef.current || !width || !height) return;
@@ -51,14 +62,14 @@ export function Canvas(props: CanvasProps) {
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
 
-    drawSpans(ctx, width, height, rootSpan);
-  }, [width, height, rootSpan]);
+    drawSpans(ctx, width, height, trace, spanColorGenerator);
+  }, [width, height, trace, spanColorGenerator]);
 
   const translateCursorToTime = (e: ReactMouseEvent | MouseEvent) => {
     if (!canvasRef.current || !width) return 0;
     // e.nativeEvent.offsetX doesn't work when sliding over a tick box
     const offsetX = e.clientX - canvasRef.current.getBoundingClientRect().left;
-    return rootSpan.startTimeUnixMs + (offsetX / width) * traceDuration;
+    return trace.startTimeUnixMs + (offsetX / width) * traceDuration;
   };
 
   const handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>) => {
@@ -66,7 +77,7 @@ export function Canvas(props: CanvasProps) {
     if (!(e.target instanceof HTMLElement)) return;
 
     const isDefaultViewport =
-      viewport.startTimeUnixMs === rootSpan.startTimeUnixMs && viewport.endTimeUnixMs === rootSpan.endTimeUnixMs;
+      viewport.startTimeUnixMs === trace.startTimeUnixMs && viewport.endTimeUnixMs === trace.endTimeUnixMs;
     const elem = e.target.dataset['elem'];
     const cursor = translateCursorToTime(e);
 
@@ -108,8 +119,8 @@ export function Canvas(props: CanvasProps) {
         }
 
         setViewport({
-          startTimeUnixMs: Math.max(start, rootSpan.startTimeUnixMs),
-          endTimeUnixMs: Math.min(end, rootSpan.endTimeUnixMs),
+          startTimeUnixMs: Math.max(start, trace.startTimeUnixMs),
+          endTimeUnixMs: Math.min(end, trace.endTimeUnixMs),
         });
         return;
       }
@@ -120,11 +131,11 @@ export function Canvas(props: CanvasProps) {
         const { start, end } = mouseState;
         let cursor = translateCursorToTime(e);
 
-        if (cursor - start < rootSpan.startTimeUnixMs) {
-          cursor = rootSpan.startTimeUnixMs + start;
+        if (cursor - start < trace.startTimeUnixMs) {
+          cursor = trace.startTimeUnixMs + start;
         }
-        if (cursor + end > rootSpan.endTimeUnixMs) {
-          cursor = rootSpan.endTimeUnixMs - end;
+        if (cursor + end > trace.endTimeUnixMs) {
+          cursor = trace.endTimeUnixMs - end;
         }
 
         setViewport({
@@ -143,7 +154,7 @@ export function Canvas(props: CanvasProps) {
 
     // reset viewport if start === end, i.e. a click without movement
     if (viewport.startTimeUnixMs === viewport.endTimeUnixMs) {
-      setViewport({ startTimeUnixMs: rootSpan.startTimeUnixMs, endTimeUnixMs: rootSpan.endTimeUnixMs });
+      setViewport({ startTimeUnixMs: trace.startTimeUnixMs, endTimeUnixMs: trace.endTimeUnixMs });
     }
   });
 

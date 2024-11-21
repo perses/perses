@@ -16,7 +16,7 @@ import { Link, PanelDefinition, PanelDisplay, PanelEditorValues, PanelSpec, Quer
 import { PluginSchema, pluginSchema } from './plugin';
 
 export const panelDisplaySpec: z.ZodSchema<PanelDisplay> = z.object({
-  name: z.string(),
+  name: z.string().min(1, { message: 'Required' }),
   description: z.string().optional(),
 });
 

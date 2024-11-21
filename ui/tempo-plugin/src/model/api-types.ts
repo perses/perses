@@ -26,22 +26,28 @@ export type AttributeValue =
   | { arrayValue: { values: AttributeValue[] } };
 
 /**
- * Parameters of Tempo HTTP API endpoint GET /api/search
+ * Request parameters of Tempo HTTP API endpoint GET /api/search
+ * https://grafana.com/docs/tempo/latest/api_docs/#search
  */
 export interface SearchRequestParameters {
   q: string;
   start?: number;
   end?: number;
+  /** max number of search results, default: 20 */
+  limit?: number;
+  /** max number of matching spans per trace in search result, default: 3 */
+  spss?: number;
 }
 
 /**
- * Response of Tempo HTTP API endpoint GET /api/search/<query>
+ * Response of Tempo HTTP API endpoint GET /api/search
+ * https://grafana.com/docs/tempo/latest/api_docs/#search
  */
-export interface SearchTraceQueryResponse {
-  traces: TraceSearchResult[];
+export interface SearchResponse {
+  traces: TraceSearchResponse[];
 }
 
-export interface TraceSearchResult {
+export interface TraceSearchResponse {
   traceID: string;
   rootServiceName: string;
   rootTraceName: string;
@@ -50,23 +56,23 @@ export interface TraceSearchResult {
   durationMs?: number;
   /** @deprecated spanSet is deprecated in favor of spanSets */
   spanSet?: {
-    spans: SpanSearchResult[];
+    spans: SpanSearchResponse[];
     matched: number;
   };
   spanSets?: Array<{
-    spans: SpanSearchResult[];
+    spans: SpanSearchResponse[];
     matched: number;
   }>;
   /** ServiceStats are only available in Tempo vParquet4+ blocks */
   serviceStats?: Record<string, ServiceStats>;
 }
 
-export interface SpanSearchResult {
+export interface SpanSearchResponse {
   spanID: string;
-  name: string;
+  name?: string;
   startTimeUnixNano: string;
   durationNanos: string;
-  attributes: Attribute[];
+  attributes?: Attribute[];
 }
 
 export interface ServiceStats {
@@ -76,10 +82,18 @@ export interface ServiceStats {
 }
 
 /**
+ * Request parameters of Tempo HTTP API endpoint GET /api/traces/<traceID>
+ * https://grafana.com/docs/tempo/latest/api_docs/#query
+ */
+export interface QueryRequestParameters {
+  traceId: string;
+}
+
+/**
  * Response of Tempo HTTP API endpoint GET /api/traces/<traceID>
  * OTEL trace proto: https://github.com/open-telemetry/opentelemetry-proto-go/blob/main/otlp/trace/v1/trace.pb.go
  */
-export interface SearchTraceIDResponse {
+export interface QueryResponse {
   batches: Batch[];
 }
 
@@ -128,3 +142,51 @@ export interface SpanStatus {
 export const SpanStatusUnset = 'STATUS_CODE_UNSET';
 export const SpanStatusOk = 'STATUS_CODE_OK';
 export const SpanStatusError = 'STATUS_CODE_ERROR';
+
+/**
+ * Request parameters of Tempo HTTP API endpoint GET /api/v2/search/tags
+ * https://grafana.com/docs/tempo/latest/api_docs/#search-tags-v2
+ */
+export interface SearchTagsRequestParameters {
+  scope?: 'resource' | 'span' | 'intrinsic';
+  q?: string;
+  start?: number;
+  end?: number;
+}
+
+/**
+ * Response of Tempo HTTP API endpoint GET /api/v2/search/tags
+ * https://grafana.com/docs/tempo/latest/api_docs/#search-tags-v2
+ */
+export interface SearchTagsResponse {
+  scopes: SearchTagsScope[];
+}
+
+export interface SearchTagsScope {
+  name: 'resource' | 'span' | 'intrinsic';
+  tags: string[];
+}
+
+/**
+ * Request parameters of Tempo HTTP API endpoint GET /api/v2/search/tag/<tag>/values
+ * https://grafana.com/docs/tempo/latest/api_docs/#search-tag-values-v2
+ */
+export interface SearchTagValuesRequestParameters {
+  tag: string;
+  q?: string;
+  start?: number;
+  end?: number;
+}
+
+/**
+ * Response of Tempo HTTP API endpoint GET /api/v2/search/tag/<tag>/values
+ * https://grafana.com/docs/tempo/latest/api_docs/#search-tag-values-v2
+ */
+export interface SearchTagValuesResponse {
+  tagValues: SearchTagValue[];
+}
+
+export interface SearchTagValue {
+  type: string;
+  value: string;
+}

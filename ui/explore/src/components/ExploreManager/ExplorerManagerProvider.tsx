@@ -12,69 +12,65 @@
 // limitations under the License.
 
 import React, { createContext, ReactNode, useContext, useState } from 'react';
-import { QueryDefinition } from '@perses-dev/core';
 
-interface ExplorerState {
+interface ExplorerState<T> {
   explorer: string;
-  tab: number;
-  queries: QueryDefinition[];
+  data: T;
+  // tab: number;
+  // queries: QueryDefinition[];
 }
 
-interface ExplorerManagerContextType {
+interface ExplorerManagerContextType<T> {
   /** observability signal, for example metrics or traces */
   explorer: string;
-  tab: number;
-  queries: QueryDefinition[];
+  data: T;
   setExplorer: (explorer: string) => void;
-  setTab: (tab: number) => void;
-  setQueries: (queries: QueryDefinition[]) => void;
+  setData: (data: T) => void;
 }
 
-const ExplorerManagerContext = createContext<ExplorerManagerContextType | undefined>(undefined);
+const ExplorerManagerContext = createContext<ExplorerManagerContextType<unknown> | undefined>(undefined);
 
 interface ExplorerManagerProviderProps {
   children: ReactNode;
-  store?: [ExplorerState, (state: ExplorerState) => void];
+  store?: [ExplorerState<unknown>, (state: ExplorerState<unknown>) => void];
 }
 
 export function ExplorerManagerProvider({ children, store: externalStore }: ExplorerManagerProviderProps) {
   // cache the state of currently not rendered explore UIs
-  const [explorerStateCache, setExplorerStateCache] = useState<Record<string, Omit<ExplorerState, 'explorer'>>>({});
+  const [explorerStateCache, setExplorerStateCache] = useState<
+    Record<string, Omit<ExplorerState<unknown>, 'explorer'>>
+  >({});
   // local store in case external store is not provided by prop
-  const localStore = useState<ExplorerState>({ explorer: 'metrics', tab: 0, queries: [] });
+  const localStore = useState<ExplorerState<unknown>>({ explorer: 'metrics', data: {} });
   // use store provided by 'store' prop if available, otherwise use local store
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
-  const { explorer, tab, queries } = explorerState;
+  const { explorer, data } = explorerState;
 
   function setExplorer(newExplorer: string) {
     // store current explorer state
-    explorerStateCache[explorer] = { tab, queries };
+    explorerStateCache[explorer] = { data };
     setExplorerStateCache(explorerStateCache);
 
     // restore previous explorer state (if any)
-    const state = explorerStateCache[newExplorer] ?? { tab: 0, queries: [] };
-    setExplorerState({ explorer: newExplorer, tab: state.tab, queries: state.queries });
+    const state = explorerStateCache[newExplorer] ?? { data: {} };
+    setExplorerState({ explorer: newExplorer, data: state.data });
   }
 
-  function setTab(newTab: number) {
-    setExplorerState({ explorer, tab: newTab, queries });
-  }
-
-  function setQueries(newQueries: QueryDefinition[]) {
-    setExplorerState({ explorer, tab, queries: newQueries });
+  function setData(newData: unknown) {
+    setExplorerState({ explorer, data: newData });
   }
 
   return (
-    <ExplorerManagerContext.Provider value={{ explorer, tab, queries, setExplorer, setTab, setQueries }}>
+    <ExplorerManagerContext.Provider value={{ explorer, data, setExplorer, setData }}>
       {children}
     </ExplorerManagerContext.Provider>
   );
 }
 
-export function useExplorerManagerContext(): ExplorerManagerContextType {
+export function useExplorerManagerContext<T>(): ExplorerManagerContextType<T> {
   const ctx = useContext(ExplorerManagerContext);
   if (ctx === undefined) {
     throw new Error('No ExplorerManagerContext found. Did you forget a Provider?');
   }
-  return ctx;
+  return ctx as ExplorerManagerContextType<T>;
 }

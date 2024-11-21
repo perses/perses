@@ -53,6 +53,7 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	writer     io.Writer
+	errWriter  io.Writer
 	apiClient  api.ClientInterface
 	dashboards []*modelV1.Dashboard
 }
@@ -117,11 +118,18 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "diff (-f [FILENAME] | -d [DIRECTORY_NAME])",
-		Short: "diff between online dashboard and local one",
+		Short: "Generate diff(s) between online dashboard(s) and local one(s)",
+		Example: `
+percli dac diff -d ./build
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},

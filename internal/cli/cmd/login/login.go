@@ -23,12 +23,12 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
-	modelAPI "github.com/perses/perses/pkg/model/api"
+	clientConfig "github.com/perses/perses/pkg/client/config"
 	backendConfig "github.com/perses/perses/pkg/model/api/config"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/spf13/cobra"
+	"golang.org/x/oauth2"
 )
 
 type externalAuthKind string
@@ -47,13 +47,14 @@ const (
 )
 
 type loginOption interface {
-	Login() (*modelAPI.AuthResponse, error)
+	Login() (*oauth2.Token, error)
 	SetMissingInput() error
 }
 
 type option struct {
 	persesCMD.Option
 	writer               io.Writer
+	errWriter            io.Writer
 	url                  *common.URL
 	isNativeSelected     bool
 	username             string
@@ -66,7 +67,7 @@ type option struct {
 	refreshToken         string
 	insecureTLS          bool
 	apiClient            api.ClientInterface
-	restConfig           perseshttp.RestConfigClient
+	restConfig           clientConfig.RestConfigClient
 	remoteConfig         *backendConfig.Config
 }
 
@@ -89,20 +90,22 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no URL has been provided neither found in the previous configuration")
 	}
 
-	// create a new apiClient
-	o.restConfig = config.Global.RestClientConfig
-	o.restConfig.URL = o.url
-	if o.restConfig.TLSConfig == nil {
-		o.restConfig.TLSConfig = &secret.TLSConfig{}
+	// Create a new apiClient from scratch.
+	// We shouldn't use the previous context as for the moment we have a single config.
+	// So, switching from a Perses instance to another one without restarting from scratch the context/ the Perses client doesn't make sense.
+	o.restConfig = clientConfig.RestConfigClient{
+		URL: o.url,
+		TLSConfig: &secret.TLSConfig{
+			InsecureSkipVerify: o.insecureTLS,
+		},
 	}
-	o.restConfig.TLSConfig.InsecureSkipVerify = o.insecureTLS
-	restClient, err := perseshttp.NewFromConfig(o.restConfig)
+	restClient, err := clientConfig.NewRESTClient(o.restConfig)
 	if err != nil {
 		return err
 	}
 	o.apiClient = api.NewWithClient(restClient)
 
-	// Finally get the API config, we will need for later
+	// Finally, get the API config; we will need it for later
 	cfg, err := o.apiClient.Config()
 	if err != nil {
 		return err
@@ -172,9 +175,10 @@ func (o *option) Execute() error {
 		o.accessToken = token.AccessToken
 		o.refreshToken = token.RefreshToken
 	}
-
-	o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
-	if writeErr := config.Write(&config.Config{
+	if len(o.accessToken) > 0 {
+		o.restConfig.Authorization = secret.NewBearerToken(o.accessToken)
+	}
+	if writeErr := config.WriteFromScratch(&config.Config{
 		RestClientConfig: o.restConfig,
 		RefreshToken:     o.refreshToken,
 	}); writeErr != nil {
@@ -185,6 +189,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func (o *option) newLoginOption() (loginOption, error) {
@@ -219,9 +227,9 @@ func (o *option) newLoginOption() (loginOption, error) {
 
 func (o *option) selectAndSetProvider() error {
 	providers := o.remoteConfig.Security.Authentication.Providers
-	// The first step is to collect the different providers and store it into items + modifiers.
-	// items will be the selection items to display to users.
-	// modifiers will be the action to save the different user input into option struct.
+	// The first step is to collect the different providers and store it into options and modifiers.
+	// Options will be the selection items to display to users.
+	// Modifiers will be the action to save the different user input into option struct.
 	modifiers := map[string]func(){}
 	var options []huh.Option[string]
 

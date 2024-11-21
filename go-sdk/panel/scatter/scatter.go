@@ -15,9 +15,11 @@ package scatter
 
 import "github.com/perses/perses/go-sdk/panel"
 
+const PluginKind = "ScatterChart"
+
 func Chart() panel.Option {
 	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = "ScatterChart"
+		builder.Spec.Plugin.Kind = PluginKind
 		return nil
 	}
 }

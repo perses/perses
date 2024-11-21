@@ -73,10 +73,10 @@ export function BuiltinVariableAccordions({ builtinVariableDefinitions }: Builti
           <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="builtin" id="builtin">
             <Typography variant="h2">
               <InfoTooltip
-                title={`${source} Builtin Variables`}
+                title={`${source} Built-in Variables`}
                 description="Variables computed during dashboard rendering."
               >
-                <span>{source} Builtin Variables</span>
+                <span>{source} Built-in Variables</span>
               </InfoTooltip>
             </Typography>
           </AccordionSummary>

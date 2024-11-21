@@ -16,26 +16,16 @@ package staticlist
 import (
 	staticListVar "github.com/perses/perses/cue/schemas/variables/static-list:model"
 	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
 )
 
-_kind=#kind: listVarBuilder.#kind & "ListVariable"
-_name=#name: listVarBuilder.#name
-_display=#display?: v1Variable.#Display & {
-	hidden: bool | *false
-}
-_allowAllValue=#allowAllValue:      listVarBuilder.#allowAllValue
-_allowMultiple=#allowMultiple:      listVarBuilder.#allowMultiple
-_customAllValue=#customAllValue?:   string
-_capturingRegexp=#capturingRegexp?: string
-_sort=#sort?:                       v1Variable.#Sort
-#pluginKind:                        listVarBuilder.#pluginKind & staticListVar.kind
-#values: [...(string | {
-	value:  string
-	label?: string
-})]
+// include the definitions of listVarBuilder at the root
+listVarBuilder
 
-variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple, #customAllValue: _customAllValue, #capturingRegexp: _capturingRegexp, #sort: _sort}}.variable & {
+// specify the constraints for this variable
+#pluginKind: staticListVar.kind
+#values: [...staticListVar.#value]
+
+variable: listVarBuilder.variable & {
 	spec: {
 		plugin: staticListVar & {
 			spec: {

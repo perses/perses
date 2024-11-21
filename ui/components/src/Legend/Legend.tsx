@@ -141,9 +141,11 @@ export function Legend({
   if (options.position === 'right') {
     return (
       <Box
-        sx={{
+        style={{
           width: width,
           height: height,
+        }}
+        sx={{
           position: 'absolute',
           top: 0,
           right: 0,
@@ -157,9 +159,11 @@ export function Legend({
   // Position bottom
   return (
     <Box
-      sx={{
+      style={{
         width: width,
         height: height,
+      }}
+      sx={{
         position: 'absolute',
         bottom: 0,
       }}

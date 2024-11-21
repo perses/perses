@@ -155,7 +155,7 @@ describe('BarChartOptionsEditorSettings', () => {
           unit: 'decimal',
           shortValues: true,
         },
-        calculation: 'last-number',
+        calculation: 'last',
         sort: 'desc',
         mode: 'value',
       })

@@ -226,7 +226,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
         // Stacked bar uses ECharts tooltip so subgroup data shows correctly.
         showContent: isStackedBar,
         trigger: isStackedBar ? 'item' : 'axis',
-        appendToBody: true,
+        appendToBody: isStackedBar,
       },
       // https://echarts.apache.org/en/option.html#axisPointer
       axisPointer: {
@@ -287,7 +287,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   return (
     <Box
-      sx={{ height }}
+      style={{ height }}
       // onContextMenu={(e) => {
       //   // TODO: confirm tooltip pinning works correctly on Windows, should e.preventDefault() be added here
       //   e.preventDefault(); // Prevent the default behaviour when right clicked

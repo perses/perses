@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getConsistentColor } from './palette';
+import { getConsistentCategoricalColor, getConsistentColor } from './palette';
 
 describe('getConsistentColor', () => {
   it('should generate a consistent custom hsla color', () => {
@@ -33,5 +33,22 @@ describe('getConsistentColor', () => {
     expect(colorErr).toEqual(colorErr2);
     // expect colors to be different
     expect(color).not.toEqual(colorErr);
+  });
+
+  it('should generate a consistent categorical color, depending on the error state', () => {
+    const categoricalPalette = ['#aaa', '#aab', '#aac'];
+    const errorPalette = ['#baa', '#bab', '#bac'];
+    const color = getConsistentCategoricalColor('test', false, categoricalPalette, errorPalette);
+    const color2 = getConsistentCategoricalColor('test', false, categoricalPalette, errorPalette);
+    const colorErr = getConsistentCategoricalColor('test', true, categoricalPalette, errorPalette);
+    const colorErr2 = getConsistentCategoricalColor('test', true, categoricalPalette, errorPalette);
+    // ensures generated color does not change on subsequent calls
+    expect(color).toEqual(color2);
+    expect(colorErr).toEqual(colorErr2);
+    // expect colors to be different
+    expect(color).not.toEqual(colorErr);
+    // hash doesn't change, so we can statically verify the expected color
+    expect(color).toEqual('#aab');
+    expect(colorErr).toEqual('#bab');
   });
 });

@@ -154,10 +154,11 @@ func CreateAndWaitUntilEntitiesExist(t *testing.T, persistenceManager dependency
 func CreateAndWaitUntilEntityExists(t *testing.T, persistenceManager dependency.PersistenceManager, object interface{}) {
 	getFunc, upsertFunc := CreateGetFunc(t, persistenceManager, object)
 
-	// it appears that (maybe because of the tiny short between a deletion order and a creation order),
+	// It appears that (maybe because of the tiny short between a deletion order and a creation order),
 	// an entity actually created in database could be removed by a previous delete order.
-	// In order to avoid that we will upsert the entity multiple times.
-	// Also, we can have some delay between the order to create the document and the actual creation. so let's wait sometimes
+	// To avoid that we will upsert the entity multiple times.
+	// Also, we can have some delay between the order to create the document and the actual creation.
+	// So let's wait sometimes
 	nbTimeToCreate := 3
 	var err error
 	for i := 0; i < nbTimeToCreate; i++ {
@@ -466,13 +467,13 @@ func NewPublicGlobalSecret(name string) *v1.PublicGlobalSecret {
 	return entity
 }
 
-func NewUser(name string) *v1.User {
+func NewUser(name string, password string) *v1.User {
 	entity := &v1.User{
 		Kind:     v1.KindUser,
 		Metadata: newMetadata(name),
 		Spec: v1.UserSpec{
 			NativeProvider: v1.NativeProvider{
-				Password: "password",
+				Password: password,
 			},
 		},
 	}

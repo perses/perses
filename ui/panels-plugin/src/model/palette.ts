@@ -44,3 +44,23 @@ export function getConsistentColor(name: string, error: boolean) {
   }
   return value;
 }
+
+export function getConsistentCategoricalColor(
+  name: string,
+  error: boolean,
+  categoricalPalette: string[],
+  errorPalette: string[]
+) {
+  const palette = error ? errorPalette : categoricalPalette;
+  if (palette.length === 0) {
+    console.warn('getConsistentCategoricalColor() called with empty color palette, fallback to #000');
+    return '#000';
+  }
+
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  return palette[Math.abs(hash) % palette.length] ?? '#000';
+}

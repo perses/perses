@@ -16,15 +16,23 @@ import { useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
 }
 
-export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function DatasourceDrawer<T extends Datasource>({
+  datasource,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: DatasourceDrawerProps<T>) {
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
@@ -49,9 +57,10 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
             {isOpen && (
               <DatasourceEditorForm
                 initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
-                initialAction={action}
+                action={action}
                 isDraft={false}
                 isReadonly={isReadonly}
+                onActionChange={onActionChange}
                 onSave={handleSave}
                 onClose={onClose}
                 onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}

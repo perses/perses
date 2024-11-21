@@ -29,6 +29,7 @@ import (
 type option struct {
 	persesCMD.Option
 	writer        io.Writer
+	errWriter     io.Writer
 	showToken     bool
 	showURL       bool
 	authorization *secret.Authorization
@@ -75,6 +76,10 @@ func (o *option) extractLogin() (string, error) {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

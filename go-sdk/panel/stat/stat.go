@@ -18,6 +18,8 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
+const PluginKind = "StatChart"
+
 type Sparkline struct {
 	Color string  `json:"color,omitempty" yaml:"color,omitempty"`
 	Width float64 `json:"width,omitempty" yaml:"width,omitempty"`
@@ -61,7 +63,7 @@ func Chart(options ...Option) panel.Option {
 		if err != nil {
 			return err
 		}
-		builder.Spec.Plugin.Kind = "StatChart"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = r.PluginSpec
 		return nil
 	}

@@ -52,10 +52,10 @@ spec: <Datasource specification>
 ## Datasource specification
 
 ```yaml
-[ display: <Display specification> ]
+display: <Display specification> # Optional
 
 # If true, then it's the default datasource for the type defined in the plugin.
-[ default: <boolean> | default = false ]
+default: <boolean> | default = false # Optional
 
 # The definition of the plugin datasource
 plugin: <plugin>
@@ -72,7 +72,7 @@ spec: <Plugin specification>
 ```
 
 We are supporting only prometheus as a datasource for the moment.
-Please look at the [documentation](../plugin/prometheus.md#datasource) to know the spec for the Prometheus datasource.
+Please look at the [documentation](../plugins/prometheus.md#datasource) to know the spec for the Prometheus datasource.
 
 ### Selecting / Referencing a Datasource
 

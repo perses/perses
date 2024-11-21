@@ -19,6 +19,10 @@ import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
+interface TracesExplorerQueryParams {
+  queries?: QueryDefinition[];
+}
+
 interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
@@ -87,11 +91,14 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
 }
 
 export function TracesExplorer() {
-  const { queries, setQueries } = useExplorerManagerContext();
+  const {
+    data: { queries = [] },
+    setData,
+  } = useExplorerManagerContext<TracesExplorerQueryParams>();
 
   // map TraceQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
-    ? queries.map((query) => {
+    ? queries.map((query: QueryDefinition) => {
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
@@ -108,7 +115,11 @@ export function TracesExplorer() {
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
-      <MultiQueryEditor queryTypes={['TraceQuery']} onChange={setQueries} queries={queries} />
+      <MultiQueryEditor
+        queryTypes={['TraceQuery']}
+        onChange={(newQueries) => setData({ queries: newQueries })}
+        queries={queries}
+      />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
         <DataQueriesProvider definitions={definitions}>

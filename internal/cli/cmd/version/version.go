@@ -41,6 +41,7 @@ type option struct {
 	persesCMD.Option
 	opt.OutputOption
 	writer    io.Writer
+	errWriter io.Writer
 	short     bool
 	apiClient api.ClientInterface
 }
@@ -89,6 +90,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

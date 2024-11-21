@@ -49,6 +49,7 @@ export function PanelEditorForm(props: PanelEditorFormProps) {
     pluginTypes: ['Panel'],
     value: { selection: { kind: plugin.kind, type: 'Panel' }, spec: plugin.spec },
     onChange: (plugin) => {
+      form.setValue('panelDefinition.spec.plugin', { kind: plugin.selection.kind, spec: plugin.spec });
       setPlugin({
         kind: plugin.selection.kind,
         spec: plugin.spec,

@@ -16,19 +16,23 @@ import { Span } from '@perses-dev/core';
 import { useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
+import { TracingGanttChartOptions } from '../../gantt-chart-model';
+import { GanttTrace } from '../trace';
 import { useGanttTableContext } from './GanttTableProvider';
 import { GanttTableRow } from './GanttTableRow';
 import { GanttTableHeader } from './GanttTableHeader';
 import { ResizableDivider } from './ResizableDivider';
 
 export interface GanttTableProps {
-  rootSpan: Span;
+  options: TracingGanttChartOptions;
+  trace: GanttTrace;
   viewport: Viewport;
+  selectedSpan?: Span;
   onSpanClick: (span: Span) => void;
 }
 
 export function GanttTable(props: GanttTableProps) {
-  const { rootSpan, viewport, onSpanClick } = props;
+  const { options, trace, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
   const tableRef = useRef<HTMLDivElement>(null);
@@ -36,9 +40,9 @@ export function GanttTable(props: GanttTableProps) {
 
   const rows = useMemo(() => {
     const rows: Span[] = [];
-    treeToRows(rows, rootSpan, collapsedSpans);
+    treeToRows(rows, trace.rootSpan, collapsedSpans);
     return rows;
-  }, [rootSpan, collapsedSpans]);
+  }, [trace.rootSpan, collapsedSpans]);
 
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
@@ -62,13 +66,15 @@ export function GanttTable(props: GanttTableProps) {
         borderRadius: `${theme.shape.borderRadius}px`,
       }}
     >
-      <GanttTableHeader rootSpan={rootSpan} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
+      <GanttTableHeader trace={trace} viewport={viewport} nameColumnWidth={nameColumnWidth} divider={divider} />
       <Virtuoso
         data={rows}
         itemContent={(_, span) => (
           <GanttTableRow
+            options={options}
             span={span}
             viewport={viewport}
+            selected={span === selectedSpan}
             nameColumnWidth={nameColumnWidth}
             divider={divider}
             onClick={onSpanClick}

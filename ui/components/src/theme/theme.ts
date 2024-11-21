@@ -40,12 +40,13 @@ const getModalBackgroundStyle = ({ theme }: { theme: Omit<Theme, 'components'> }
  * Need to reinstantiate the theme everytime to support switching between light and dark themes
  * https://github.com/mui-org/material-ui/issues/18831
  */
-export function getTheme(mode: PaletteMode) {
+export function getTheme(mode: PaletteMode, options: ThemeOptions = {}) {
   const theme = createTheme({
     palette: getPaletteOptions(mode),
     typography,
     mixins: {},
     components,
+    ...options,
   });
   return theme;
 }

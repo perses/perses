@@ -20,6 +20,7 @@ package fakeapi
 import (
 	"github.com/perses/perses/pkg/client/api"
 	v1 "github.com/perses/perses/pkg/client/api/v1"
+	"github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/client/fake/api/v1"
 	"github.com/perses/perses/pkg/client/perseshttp"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
@@ -32,7 +33,7 @@ type client struct {
 }
 
 func New() api.ClientInterface {
-	restClient, _ := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+	restClient, _ := config.NewRESTClient(config.RestConfigClient{
 		URL: common.MustParseURL("http://localhost:8080"),
 	})
 	return &client{

@@ -1,5 +1,120 @@
 # Changelog
 
+## 0.49.0 / 2024-11-05
+
+This update introduces a toggleable Tree view in the PromQL editor (Prom 3.0-like), as well as new customization options for the Table panel.
+
+It also introduces a way to track the time to load the dashboards.
+
+- [FEATURE] Table panel: Add Join and Merge transformations (#2359)
+- [FEATURE] PromQL Tree view / Debugger (#2344)
+- [FEATURE] Table panel: Add cell settings (#2298)
+  [FEATURE] Usage Tracking Frontend Work (#2211)
+- [ENHANCEMENT] Change timeseries panel's legend migration (#2335)
+- [ENHANCEMENT] Add counts/sec unit to the mapping list for migration (#2365)
+- [ENHANCEMENT] Handle collapsed/panels missing in row (#2330)
+- [ENHANCEMENT] migration: Map durations to seconds (#2331)
+- [ENHANCEMENT] Add --force option to allow applying resource despite project config inconsistencies (#1937)
+- [ENHANCEMENT] TraceQL auto-completion: Improve completion of string span attribute values (#2366)
+- [ENHANCEMENT] TracingGanttChart: print `<empty string>` if value is empty (#2367)
+- [ENHANCEMENT] TempoTraceQuery: allow setting search result limit (#2352)
+- [ENHANCEMENT] TracingGanttChart: align span duration label location based on available space (#2348)
+- [ENHANCEMENT] TracingGanttChart: show up to 2 fractional digits (#2347)
+- [ENHANCEMENT] Allows variables to be empty (#2324)
+- [ENHANCEMENT] Migration: Don't fail on `fieldConfig.defaults.thresholds.steps` absence (#2325)
+- [ENHANCEMENT] Configuration of the HTTP client for oauth/oidc providers (#2311)
+- [ENHANCEMENT] Grafana migration: use new CUE evaluator to improve memory usage (#2312)
+- [ENHANCEMENT] Improve the query editor's look (#2299)
+- [ENHANCEMENT] Add decimal migrations; Add barchart migration (#2386)
+- [ENHANCEMENT] tempo-plugin: export all models (including TempoTraceQuerySpec) (#2384)
+- [ENHANCEMENT] TraceTable: show scrollbar only if content overflows (#2385)
+- [BUGFIX] Fix migration failed when excludeByName is not present in transformation.id == "organize" (#2332)
+- [BUGFIX] Migration: Add lineWidth constraint (#2333)
+- [BUGFIX] support YAML extension in database configuration (#2372)
+- [BUGFIX] TraceTable: expand the span count bubble in the service name chips (#2368)
+- [BUGFIX] Fix migrate cmd by making the flag schemas.<schema_kind> mandatory when being offline (#2363)
+- [BUGFIX] TracingGanttChart: calculate start and end time from all spans (#2351)
+- [BUGFIX] Add http headers for GET requests in a Prometheus client (#2357)
+- [BUGFIX] Grafana migration: fix some failing cases (#2314)
+- [BUGFIX] Prevents saving empty PromQL strings (#2304)
+- [BREAKINGCHANGE] Refactor the way to manage authentication in the perses http client (#2388)
+- [DOC] better wording for `percli dac`'s commands helpers (#2350)
+- [DOC] Update Contact information (#2321)
+- [DOC] Fix some storybooks links (#2334)
+- [DOC] remove perses intro (#2394)
+
+## 0.48.0 / 2024-10-09
+
+This update introduces a brand-new Prometheus metric finder,
+based on the design from Prometheus 3.0 / Promlens, as well as a new Pie chart panel.
+
+Besides, It comes with multiple enhancements for the Table, ScatterPlot and TracingGanttChart panels.
+
+It also addresses various bug fixes, documentation improvements,
+and includes a breaking change to OAuth & OIDC to better respect the industry standard.
+
+- [FEATURE] Add PromQL metric finder to the explorer (#2245)
+- [FEATURE] TracingGanttChart: support categorical color palette (#2194)
+- [FEATURE] PieCharts Panel Plugin (#2170)
+- [ENHANCEMENT] Configuration of the HTTP client for oauth/oidc providers (#2311)
+- [ENHANCEMENT] Use TLS config in oauth client config (#2313)
+- [ENHANCEMENT] DaC CUE SDK: new utility to generate query params from labels (#2293)
+- [ENHANCEMENT] Add missing tempo and pie-chart plugin in go-sdk
+- [ENHANCEMENT] Normalizes the way to expose the `PluginKind` for each plugin (#2285)
+- [ENHANCEMENT] Table panel migration: rename Time to timestamp (#2278)
+- [ENHANCEMENT] Table panel migration: support column rename from field overrides (#2273)
+- [ENHANCEMENT] TracingGanttChart: sort span attributes alphabetically (#2264)
+- [ENHANCEMENT] TraceTable: use MUI DataGrid to support sorting (#2261)
+- [ENHANCEMENT] Migrate: rename Value to value in table migrations (#2259)
+- [ENHANCEMENT] Return invalid_request oauth2 error when user sync failed (#2246)
+- [ENHANCEMENT] TraceQL query editor: add auto-complete support (#2240)
+- [ENHANCEMENT] TraceTable: improve readability of service name chips (#2243)
+- [ENHANCEMENT] TracingGanttChart: indicate selected row (#2216)
+- [ENHANCEMENT] TraceQL query editor: add syntax highlighting with Lezer (#2227)
+- [ENHANCEMENT] Avoid failing grafana migration on `hide` absence (#2221)
+- [ENHANCEMENT] TraceTablePanel: support categorical color palette (#2209)
+- [ENHANCEMENT] TraceTable: show date in UTC in tooltip (#2202)
+- [ENHANCEMENT] ScatterPlot panel: format time based on next best unit (#2198)
+- [ENHANCEMENT] ScatterPlot: setup onClick handler and link to explore page by default (#2205)
+- [ENHANCEMENT] Make circle size configurable in ScatterPlot panel (#2197)
+- [ENHANCEMENT] ScatterPlot: update tooltip formatting (#2203)
+- [ENHANCEMENT] TracingGanttChart: support links in the span attribute list (#2206)
+- [ENHANCEMENT] TraceTablePanel: support disabling links to the trace (#2207)
+- [ENHANCEMENT] Ignore Not Found errors in percli delete command (#2184)
+- [ENHANCEMENT] TimeSeries chart: Migrate max/min from grafana (#2168)
+- [ENHANCEMENT] Add bits/sec (common units used in networking) (#2164)
+- [BUGFIX] Tempo: support search results with mixed vParquet3 and vParquet4 blocks (#2301)
+- [BUGFIX] Fix metric finder list flickering (#2286)
+- [BUGFIX] Fix database folder in a default config file for the archives (#2283)
+- [BUGFIX] Grafana migration: fix some failing cases (#2314)
+- [BUGFIX] Prevents saving empty PromQL strings (#2304)
+- [BUGFIX] Default panel spec not saved (#2272)
+- [BUGFIX] Fix exit code when error occurred in cmd dac build (#2279)
+- [BUGFIX] fix flaky TraceQL auto-completion tests (#2274)
+- [BUGFIX] Disable mounting native echats tooltip to body for timeseries chart except stacked (#2248)
+- [BUGFIX] Panel name must be provided (#2262)
+- [BUGFIX] Fix dac cue setup and upgrade min version (#2255)
+- [BUGFIX] tempo client: encode URL parameters in path (#2241)
+- [BUGFIX] tempo query: disable syntax highlighting if query is a trace id (#2242)
+- [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
+- [BREAKINGCHANGE] OAuth & OIDC /token endpoint should respect the oauth 2.0 RFC (#1901)
+- [BREAKINGCHANGE] Refactor package `pkg/client` to handle native/oauth auth easily (#2300)
+- [BREAKINGCHANGE] OIDC/OAUTH: client_secret is now optional in the Perses config (#2296)
+- [DOC] DaC Go SDK: add missing doc for Static list var (#2292)
+- [DOC] Table: Add datamodel documentation (#2275)
+- [DOC] Add links in the CLI doc (#2276)
+- [DOC] Use latest interfaces in docs (#2271)
+- [DOC] Put an accurate example for `percli dac setup` command (#2224)
+- [DOC] Add tshoot section with TLS/HTTP mixed datasource (#2174)
+- [DOC] Add an introduction to the plugins documentation + patch some docs (#2208)
+- [DOC] Add --config dev/config.yaml to installing perses from the source guide (#2162)
+
+## 0.47.1 / 2024-08-21
+
+- [BUGFIX] Fix issue causing panic in DataSource proxy (#2177)
+- [BUGFIX] Fix api_prefix not correctly handled to serve the UI (#2185)
+- [BUGFIX] Fix automatic detection of the API prefix in the UI (#2183)
+
 ## 0.47.0 / 2024-08-07
 
 - [FEATURE] Add Table panel (#2113) (#2138)

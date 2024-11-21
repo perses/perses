@@ -18,6 +18,8 @@ import (
 	"github.com/perses/perses/go-sdk/panel"
 )
 
+const PluginKind = "BarChart"
+
 type Sort string
 
 const (
@@ -69,7 +71,7 @@ func Chart(options ...Option) panel.Option {
 		if err != nil {
 			return err
 		}
-		builder.Spec.Plugin.Kind = "BarChart"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = r.PluginSpec
 		return nil
 	}

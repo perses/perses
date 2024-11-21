@@ -62,6 +62,8 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
    */
   focusState?: 'trigger-focus' | 'focus-next' | 'none';
   onFocusTrigger?: (e: React.MouseEvent<HTMLTableCellElement> | React.KeyboardEvent<HTMLTableCellElement>) => void;
+  color?: string;
+  backgroundColor?: string;
 }
 
 export function TableCell({
@@ -75,6 +77,8 @@ export function TableCell({
   isLastColumn,
   description,
   align,
+  color,
+  backgroundColor,
   ...otherProps
 }: TableCellProps) {
   const theme = useTheme();
@@ -121,8 +125,8 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
+      style={{ width: width }}
       sx={{
-        width: width,
         borderBottom: isHeader
           ? (theme) => `solid 1px ${theme.palette.grey[100]}`
           : `solid 1px ${theme.palette.grey[50]}`,
@@ -144,6 +148,10 @@ export function TableCell({
           // that the `TableSortLabel` uses to determine the location of the icon
           // in headers.
           flexDirection: 'inherit',
+        }}
+        style={{
+          backgroundColor: backgroundColor ?? 'inherit',
+          color: color ?? 'inherit',
         }}
         title={description}
         aria-label={description}

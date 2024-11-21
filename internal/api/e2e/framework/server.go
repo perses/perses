@@ -17,13 +17,18 @@ package e2eframework
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/gavv/httpexpect/v2"
+	"github.com/go-jose/go-jose/v4"
+	"github.com/google/uuid"
 	"github.com/perses/perses/internal/api/core"
 	databaseModel "github.com/perses/perses/internal/api/database/model"
 	"github.com/perses/perses/internal/api/dependency"
@@ -31,10 +36,14 @@ import (
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	apiConfig "github.com/perses/perses/pkg/model/api/config"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/common/model"
+	"github.com/stretchr/testify/assert"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
+	"golang.org/x/oauth2"
 )
 
 var useSQL = os.Getenv("PERSES_TEST_USE_SQL")
@@ -141,19 +150,210 @@ func CreateServer(t *testing.T, conf apiConfig.Config) (*httptest.Server, *httpe
 	}), persistenceManager
 }
 
-func WithServer(t *testing.T, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+func WithServer(t *testing.T, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	conf := DefaultConfig()
 	server, expect, persistenceManager := CreateServer(t, conf)
 	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(expect, persistenceManager)
+	entities := testFunc(server, expect, persistenceManager)
 	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
 }
 
-func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
+func WithServerConfig(t *testing.T, config apiConfig.Config, testFunc func(*httptest.Server, *httpexpect.Expect, dependency.PersistenceManager) []modelAPI.Entity) {
 	server, expect, persistenceManager := CreateServer(t, config)
 	defer persistenceManager.GetPersesDAO().Close()
 	defer server.Close()
-	entities := testFunc(expect, persistenceManager)
+	entities := testFunc(server, expect, persistenceManager)
 	ClearAllKeys(t, persistenceManager.GetPersesDAO(), entities...)
+}
+
+// NewOAuthProviderTestServer creates a new OAuth provider server that will be used to test the OAuth login.
+// It returns the HTTP test server and the configuration of the OAuth provider to request it.
+//
+// - The slug ID is generated randomly, so we are sure that it is unique, but it has no incidence on the provider server.
+// It can be overridden for convenience before starting the Perses backend.
+// - The returned server is a simple HTTP test server that will return a mocked response for each endpoint.
+// Currently, this is only OK responses, but we can easily extend it to return more complex responses from given
+// constructor parameters.
+func NewOAuthProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OAuthProvider) {
+	authPath := "/auth"
+	deviceAuthPath := "/device"
+	tokenPath := "/token"
+	userInfosPath := "/user_infos"
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if strings.HasPrefix(request.RequestURI, authPath) {
+			_, err := writer.Write([]byte("Provider's Auth Endpoint"))
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, deviceAuthPath) {
+			body, err := json.Marshal(oauth2.DeviceAuthResponse{
+				DeviceCode:      "myCode",
+				UserCode:        "myUser",
+				VerificationURI: "myURL",
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, tokenPath) {
+			body, err := json.Marshal(oauth2.Token{
+				AccessToken:  "myToken",
+				TokenType:    "myTokenType",
+				RefreshToken: "myRefreshToken",
+				Expiry:       time.Now().Add(4 * time.Hour),
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, userInfosPath) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, err := writer.Write([]byte(`{"email": "john.doe@gmail.com"}`)) // minimum of an email required
+			assert.NoError(t, err)
+			return
+		}
+		// If something else is asked, it is considered as an error
+		t.Fatalf("An unexpected oauth provider endpoint has been called : %s", request.RequestURI)
+	}))
+
+	authURL := common.MustParseURL(server.URL)
+	authURL.Path = authPath
+	deviceAuthURL := common.MustParseURL(server.URL)
+	deviceAuthURL.Path = deviceAuthPath
+	tokenURL := common.MustParseURL(server.URL)
+	tokenURL.Path = tokenPath
+	userInfosURL := common.MustParseURL(server.URL)
+	userInfosURL.Path = userInfosPath
+
+	id := uuid.New().String() // Generate a unique slug ID in case we register several ones.
+	conf := apiConfig.OAuthProvider{
+		Provider: apiConfig.Provider{
+			SlugID:       id,
+			Name:         id,
+			ClientID:     "unused but required",
+			ClientSecret: "unused but required",
+			RedirectURI:  common.URL{},
+		},
+		AuthURL:       *authURL,
+		TokenURL:      *tokenURL,
+		UserInfosURL:  *userInfosURL,
+		DeviceAuthURL: *deviceAuthURL,
+	}
+
+	return server, conf
+}
+
+// NewOIDCProviderTestServer creates a new OAuth provider server that will be used to test the OAuth login.
+// It returns the HTTP test server and the configuration of the OAuth provider to request it.
+//
+// - The slug ID is generated randomly, so we are sure that it is unique, but it has no incidence on the provider server.
+// It can be overridden for convenience before starting the Perses backend.
+// - The returned server is a simple HTTP test server that will return a mocked response for each endpoint.
+// Currently, this is only OK responses, but we can easily extend it to return more complex responses from given
+// constructor parameters.
+func NewOIDCProviderTestServer(t *testing.T) (*httptest.Server, apiConfig.OIDCProvider) {
+	authPath := "/auth"
+	deviceAuthPath := "/device"
+	tokenPath := "/token"
+	userInfosPath := "/user_infos"
+	jwksPath := "/keys"
+	discoveryPath := "/.well-known/openid-configuration"
+	discoveryConfig := &oidc.DiscoveryConfiguration{}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if strings.HasPrefix(request.RequestURI, discoveryPath) {
+			body, err := json.Marshal(discoveryConfig)
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, authPath) {
+			_, err := writer.Write([]byte("Provider's Auth Endpoint"))
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, deviceAuthPath) {
+			body, err := json.Marshal(oauth2.DeviceAuthResponse{
+				DeviceCode:      "myCode",
+				UserCode:        "myUser",
+				VerificationURI: "myURL",
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, tokenPath) {
+			accessToken, _ := ValidAccessToken(discoveryConfig.Issuer)
+			idToken, _ := ValidIDToken(discoveryConfig.Issuer)
+			body, err := json.Marshal(oidc.AccessTokenResponse{
+				AccessToken: accessToken,
+				TokenType:   "Bearer",
+				IDToken:     idToken,
+				ExpiresIn:   250,
+			})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		if strings.HasPrefix(request.RequestURI, userInfosPath) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, err := writer.Write([]byte(`{"sub": "john.doeOIDC"}`))
+			assert.NoError(t, err)
+			return
+		}
+
+		if strings.HasPrefix(request.RequestURI, jwksPath) {
+			body, err := json.Marshal(jose.JSONWebKeySet{Keys: []jose.JSONWebKey{WebKey.Public()}})
+			assert.NoError(t, err)
+			writer.Header().Set("Content-Type", "application/json")
+			_, err = writer.Write(body)
+			assert.NoError(t, err)
+			return
+		}
+		// If something else is asked, it is considered as an error
+		t.Fatalf("An unexpected OIDC provider endpoint has been called : %s", request.RequestURI)
+	}))
+
+	authURL := common.MustParseURL(server.URL)
+	authURL.Path = authPath
+	deviceAuthURL := common.MustParseURL(server.URL)
+	deviceAuthURL.Path = deviceAuthPath
+	tokenURL := common.MustParseURL(server.URL)
+	tokenURL.Path = tokenPath
+	userInfosURL := common.MustParseURL(server.URL)
+	userInfosURL.Path = userInfosPath
+	jwksURL := common.MustParseURL(server.URL)
+	jwksURL.Path = jwksPath
+	discoveryConfig.Issuer = server.URL
+	discoveryConfig.AuthorizationEndpoint = authURL.String()
+	discoveryConfig.DeviceAuthorizationEndpoint = deviceAuthURL.String()
+	discoveryConfig.TokenEndpoint = tokenURL.String()
+	discoveryConfig.UserinfoEndpoint = userInfosURL.String()
+	discoveryConfig.JwksURI = jwksURL.String()
+
+	id := uuid.New().String() // Generate a unique slug ID in case we register several ones.
+	conf := apiConfig.OIDCProvider{
+		Provider: apiConfig.Provider{
+			SlugID:       id,
+			Name:         id,
+			ClientID:     "clientID",
+			ClientSecret: "clientSecret",
+			RedirectURI:  common.URL{},
+		},
+		Issuer: *common.MustParseURL(server.URL),
+	}
+
+	return server, conf
 }

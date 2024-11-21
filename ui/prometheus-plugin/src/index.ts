@@ -32,7 +32,6 @@ export {
 };
 
 // For consumers to leverage in DatasourceStoreProvider onCreate
-export * from './model/prometheus-client';
-export * from './model/api-types';
+export * from './model';
 
 export * from './plugins/types';

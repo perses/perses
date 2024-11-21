@@ -18,6 +18,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -37,7 +38,7 @@ func TestMainScenarioEphemeralDashboard(t *testing.T) {
 }
 
 func TestCreateEphemeralDashboardWithWrongName(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		entity := e2eframework.NewEphemeralDashboard(t, "perses", "Incorrect Name With Space")
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -51,7 +52,7 @@ func TestCreateEphemeralDashboardWithWrongName(t *testing.T) {
 }
 
 func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		entity := e2eframework.NewEphemeralDashboard(t, "perses", "test")
 		project := e2eframework.NewProject("perses")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -84,7 +85,7 @@ func TestUpdateEphemeralDashboardIncreaseVersion(t *testing.T) {
 }
 
 func TestListEphemeralDashboardInEmptyProject(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		demoEphemeralDashboard := e2eframework.NewEphemeralDashboard(t, "perses", "Demo")
 		persesProject := e2eframework.NewProject("perses")
 		demoProject := e2eframework.NewProject("Demo")

@@ -5,28 +5,33 @@ But why would you want to do this? Basically Dashboard-as-Code (DaC) is somethin
 at scale, when you have many dashboards to maintain, to keep aligned on certain parts, etc.
 
 DaC benefits can be summarized as follows:
+
 - **Operational efficiency**, by the reusability of a common basis of dashboard components for standard monitoring use cases.
 - **Implementation cost reduction**, by leveraging on existing components when creating new dashboards.
 - **Maintenance cost reduction**, by making it easier to: cascade the same update on multiple dashboards, keep multiple components aligned with each other, etc..
 
 Most of these benefits comes from not dealing with the Perses JSON format directly: instead, we provide SDKs in languages that enable factorization, code imports and more, namely:
+
 * [CUE](https://cuelang.org/), a powerful templating language with a strong emphasis on data validation.
 * [Go](https://go.dev/), an opensource programming language, that probably doesn't need to be introduced...
 
 Just pick your favorite to start with DaC. If you don't have one, give a try to both!
 
-> [!NOTE]
-> CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
-> However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
-> This statement applies also to any other language we might have a SDK for in the future.
+!!! note
+	CUE is the language used for the data model of the plugins, which means you'll always be able to include any external plugin installed in your Perses server into your code when using the CUE SDK.
+
+	However, the Golang SDK may not support all the plugins: it's basically up to each plugin development team to provide a Go package to enable the DaC use case.
+
+	This statement applies also to any other language we might have a SDK for in the future.
 
 Also, as-code means it's GitOps-friendly, meaning that you can also benefit from:
+
 - versions history
 - peer-review of changes before rollout
 - automated deployments
 - and more...
 
-## Getting Started With Cue
+## Getting started with the CUE SDK
 
 ### Prerequisites
 
@@ -50,7 +55,7 @@ See the [CUE documentation](https://cuelang.org/docs/concept/modules-packages-in
 Ideally we should rely on a native dependency management here, but since it's not yet available for CUE as already mentioned, we provide in the meantime a dedicated CLI command `dac setup` in order to add the CUE sources from Perses as external dependencies to your repo:
 
 ```
-percli dac setup --version 0.42.1
+percli dac setup --version 0.47.1 # any version you'd like above v0.44.0
 ```
 
 You can omit the version flag if you are connected to a Perses server (it will retrieve its version). Otherwise, unless you have a specific case, better to pass the latest version available.
@@ -60,14 +65,15 @@ You can omit the version flag if you are connected to a Perses server (it will r
 You are now fully ready to start developping dashboards as code!
 
 It's first strongly recommended to ramp up on CUE if you are not familiar with this technology. For this have a look at:
+
 - The [official website](https://cuelang.org/) of Cuelang.
 - [Cuetorials](https://cuetorials.com/), a 3rd party source of information that is a very good complement.
 
-You should then have a look at the [CUE SDK documentation](../dac/cue/) to better understand how to use the framework.
+You should then have a look at the [CUE SDK documentation](../dac/cue/README.md) to better understand how to use the framework.
 
-You can also check an example of DaC usage [here](../../internal/test/dac/input.cue).
+You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/test/dac/input.cue).
 
-## Getting started with Go SDK
+## Getting started with the Go SDK
 
 ### Prerequisites
 
@@ -103,15 +109,15 @@ go get github.com/perses/perses v0.43.0
 You are now fully ready to start developing dashboards as code!
 
 It's first strongly recommended to ramp up on Go if you are not familiar with this technology. For this have a look at:
+
 - The [official website](https://go.dev/) of Go.
 
-You should then have a look at the [Go SDK documentation](../dac/go/) to better understand how to use the framework.
+You should then have a look at the [Go SDK documentation](../dac/go/README.md) to better understand how to use the framework.
 
-You can also check an example of DaC usage [here](../../internal/cli/cmd/dac/build/testdata/go/main.go).
+You can also check an example of DaC usage [here](https://github.com/perses/perses/blob/main/internal/cli/cmd/dac/build/testdata/go/main.go).
 
-> [!WARNING]
->
-> Do not log / print on the standard stdout! It would break the output of the `dac build` command.
+!!! warning
+	Do not log / print on the standard stdout! It would break the output of the `dac build` command.
 
 Quick start example:
 
@@ -176,8 +182,8 @@ percli dac build -f my_dashboard.cue -ojson
 
 If the build is successful, the result can be found in the generated `built` folder.
 
-> [!NOTE]
-> the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
+!!! note
+	the `-o` (alternatively '--output') flag is optional (the default output format is YAML).
 
 ### Build multiple dashboards at once
 

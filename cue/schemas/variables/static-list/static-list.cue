@@ -13,9 +13,12 @@
 
 package model
 
+#value: string | {
+	value:  string
+	label?: string
+}
+
 kind: "StaticListVariable"
 spec: close({
-	values: [...(string | {value: string
-		label?: string
-	})]
+	values: [...#value]
 })

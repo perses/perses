@@ -14,16 +14,12 @@
 package login
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
-	modelAPI "github.com/perses/perses/pkg/model/api"
+	"golang.org/x/oauth2"
 )
 
 type deviceCodeLogin struct {
@@ -33,7 +29,7 @@ type deviceCodeLogin struct {
 	apiClient            api.ClientInterface
 }
 
-func (l *deviceCodeLogin) Login() (*modelAPI.AuthResponse, error) {
+func (l *deviceCodeLogin) Login() (*oauth2.Token, error) {
 	deviceCodeResponse, err := l.apiClient.Auth().DeviceCode(string(l.externalAuthKind), l.externalAuthProvider)
 	if err != nil {
 		return nil, err
@@ -44,55 +40,7 @@ func (l *deviceCodeLogin) Login() (*modelAPI.AuthResponse, error) {
 		return nil, outErr
 	}
 
-	// Compute the expiry and interval from the response
-	ctx := context.Background()
-	if !deviceCodeResponse.Expiry.IsZero() {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithDeadline(ctx, deviceCodeResponse.Expiry)
-		defer cancel()
-	}
-	interval := deviceCodeResponse.Interval
-	if interval == 0 {
-		interval = 5
-	}
-
-	// Poll for an access token
-	ticker := time.NewTicker(time.Duration(interval) * time.Second)
-	defer ticker.Stop()
-	for {
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		case <-ticker.C:
-			tokenResponse, tokenErr := l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse.DeviceCode)
-			if tokenErr == nil {
-				// Handle the access token
-				return tokenResponse, nil
-			}
-
-			reqErr := &perseshttp.RequestError{}
-			if errors.As(tokenErr, &reqErr) && reqErr.Err != nil {
-				oauthErr := &modelAPI.OAuthError{}
-				if errors.As(reqErr.Err, &oauthErr) {
-					switch oauthErr.ErrorCode {
-					case errSlowDown:
-						// https://datatracker.ietf.org/doc/html/rfc8628#section-3.5
-						// "the interval MUST be increased by 5 seconds for this and all subsequent requests"
-						interval += 5
-						ticker.Reset(time.Duration(interval) * time.Second)
-						continue
-					case errAuthorizationPending:
-						// Do nothing.
-						continue
-					default:
-						return nil, oauthErr
-					}
-				}
-				return nil, reqErr.Err
-			}
-			return nil, tokenErr
-		}
-	}
+	return l.apiClient.Auth().DeviceAccessToken(string(l.externalAuthKind), l.externalAuthProvider, deviceCodeResponse)
 }
 
 func (l *deviceCodeLogin) SetMissingInput() error {

@@ -22,12 +22,12 @@ panelGroupsBuilder & {} // input parameter expected
 
 ### panelGroupBuilder parameters
 
-| Parameter | Type                                                     | Default | Description                                           |
-|-----------|----------------------------------------------------------|---------|-------------------------------------------------------|
-| `#panels` | [...[Panel](../../api/dashboard.md#panel-specification)] |         | An array of panels to be included in the panel group. |
-| `#title`  | string                                                   |         | The title of the panel group.                         |
-| `#cols`   | >0 & <=24                                                |         | The number of columns in the grid layout.             |
-| `#height` | number                                                   | 6       | The height for all panels in the grid                 |
+| Parameter | Type                                                     | Mandatory/Optional | Default | Description                                           |
+|-----------|----------------------------------------------------------|--------------------|---------|-------------------------------------------------------|
+| `#panels` | [...[Panel](../../api/dashboard.md#panel-specification)] | Mandatory          |         | An array of panels to be included in the panel group. |
+| `#title`  | string                                                   | Mandatory          |         | The title of the panel group.                         |
+| `#cols`   | >0 & <=24                                                | Mandatory          |         | The number of columns in the grid layout.             |
+| `#height` | number                                                   | Optional           | 6       | The height for all panels in the grid                 |
 
 ## Example
 
@@ -64,4 +64,4 @@ panelGroupsBuilder & {
 }
 ```
 
-To build panels please refer to the [Prometheus Panel builder](prometheus/panel.md)
+To build panels please refer to the [Prometheus Panel builder](prometheus/panel.md).

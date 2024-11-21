@@ -15,9 +15,11 @@ package tracetable
 
 import "github.com/perses/perses/go-sdk/panel"
 
+const PluginKind = "TraceTable"
+
 func Chart() panel.Option {
 	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = "TraceTable"
+		builder.Spec.Plugin.Kind = PluginKind
 		return nil
 	}
 }

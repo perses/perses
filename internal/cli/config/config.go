@@ -22,7 +22,7 @@ import (
 	"reflect"
 
 	"github.com/perses/perses/pkg/client/api"
-	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/sirupsen/logrus"
 )
@@ -55,10 +55,10 @@ func Init(configPath string) {
 
 // PublicConfig should be only used when displaying the config to the client
 type PublicConfig struct {
-	RestClientConfig perseshttp.PublicRestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
-	Project          string                            `json:"project,omitempty" yaml:"project,omitempty"`
-	RefreshToken     secret.Hidden                     `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
-	Dac              Dac                               `json:"dac,omitempty" yaml:"dac,omitempty"`
+	RestClientConfig config.PublicRestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
+	Project          string                        `json:"project,omitempty" yaml:"project,omitempty"`
+	RefreshToken     secret.Hidden                 `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
+	Dac              Dac                           `json:"dac,omitempty" yaml:"dac,omitempty"`
 }
 
 func NewPublicConfig(cfg *Config) *PublicConfig {
@@ -66,7 +66,7 @@ func NewPublicConfig(cfg *Config) *PublicConfig {
 		return nil
 	}
 	return &PublicConfig{
-		RestClientConfig: *perseshttp.NewPublicRestConfigClient(&cfg.RestClientConfig),
+		RestClientConfig: *config.NewPublicRestConfigClient(&cfg.RestClientConfig),
 		Project:          cfg.Project,
 		RefreshToken:     secret.Hidden(cfg.RefreshToken),
 		Dac:              cfg.Dac,
@@ -80,16 +80,16 @@ type Dac struct {
 }
 
 type Config struct {
-	RestClientConfig perseshttp.RestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
-	Project          string                      `json:"project,omitempty" yaml:"project,omitempty"`
-	RefreshToken     string                      `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
-	Dac              Dac                         `json:"dac,omitempty" yaml:"dac,omitempty"`
+	RestClientConfig config.RestConfigClient `json:"rest_client_config,omitempty" yaml:"rest_client_config,omitempty"`
+	Project          string                  `json:"project,omitempty" yaml:"project,omitempty"`
+	RefreshToken     string                  `json:"refresh_token,omitempty" yaml:"refresh_token,omitempty"`
+	Dac              Dac                     `json:"dac,omitempty" yaml:"dac,omitempty"`
 	filePath         string
 	apiClient        api.ClientInterface
 }
 
 func (c *Config) init() error {
-	restClient, err := perseshttp.NewFromConfig(c.RestClientConfig)
+	restClient, err := config.NewRESTClient(c.RestClientConfig)
 	if err != nil {
 		return err
 	}
@@ -153,13 +153,13 @@ func SetProject(project string) error {
 
 func SetAccessToken(token string) error {
 	return Write(&Config{
-		RestClientConfig: perseshttp.RestConfigClient{Authorization: secret.NewBearerToken(token)},
+		RestClientConfig: config.RestConfigClient{Authorization: secret.NewBearerToken(token)},
 	})
 }
 
 // Write writes the configuration file in the path {USER_HOME}/.perses/config
 // if the directory doesn't exist, the function will create it
-func Write(config *Config) error {
+func Write(cfg *Config) error {
 	// this value has been set by the root command, and that will be the path where the config must be saved
 	filePath := Global.filePath
 	directory := filepath.Dir(filePath)
@@ -176,9 +176,9 @@ func Write(config *Config) error {
 	previousConf, err := readConfig(filePath)
 	if err == nil {
 		// the config already exists, so we should update it with the one provided in the parameter.
-		if config != nil {
-			restConfig := config.RestClientConfig
-			if !reflect.DeepEqual(restConfig, perseshttp.RestConfigClient{}) {
+		if cfg != nil {
+			restConfig := cfg.RestClientConfig
+			if !reflect.DeepEqual(restConfig, config.RestConfigClient{}) {
 				if restConfig.TLSConfig != nil {
 					previousConf.RestClientConfig.TLSConfig = restConfig.TLSConfig
 				}
@@ -188,22 +188,54 @@ func Write(config *Config) error {
 				if restConfig.Authorization != nil {
 					previousConf.RestClientConfig.Authorization = restConfig.Authorization
 				}
+				if restConfig.OAuth != nil {
+					previousConf.RestClientConfig.OAuth = restConfig.OAuth
+				}
+				if restConfig.BasicAuth != nil {
+					previousConf.RestClientConfig.BasicAuth = restConfig.BasicAuth
+				}
+				if restConfig.NativeAuth != nil {
+					previousConf.RestClientConfig.NativeAuth = restConfig.NativeAuth
+				}
 				if len(restConfig.Headers) > 0 {
 					previousConf.RestClientConfig.Headers = restConfig.Headers
 				}
 			}
-			if len(config.Project) > 0 {
-				previousConf.Project = config.Project
+			if len(cfg.Project) > 0 {
+				previousConf.Project = cfg.Project
 			}
-			if len(config.RefreshToken) > 0 {
-				previousConf.RefreshToken = config.RefreshToken
+			if len(cfg.RefreshToken) > 0 {
+				previousConf.RefreshToken = cfg.RefreshToken
 			}
 		}
 	} else {
-		previousConf = config
+		previousConf = cfg
 	}
 
 	data, err := json.Marshal(previousConf)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filePath, data, 0600)
+}
+
+func WriteFromScratch(cfg *Config) error {
+	// this value has been set by the root command, and that will be the path where the config must be saved
+	filePath := Global.filePath
+	directory := filepath.Dir(filePath)
+
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		mkdirError := os.Mkdir(directory, 0700)
+		if mkdirError != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(cfg)
 
 	if err != nil {
 		return err

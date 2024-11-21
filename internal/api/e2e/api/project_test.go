@@ -18,6 +18,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -36,7 +37,7 @@ func TestMainScenarioProject(t *testing.T) {
 }
 
 func TestDeleteProjectWithSubResources(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 		projectName := "perses"
 		dash := e2eframework.NewDashboard(t, "perses", "Demo")
 		project := e2eframework.NewProject(projectName)

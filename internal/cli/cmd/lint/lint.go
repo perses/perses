@@ -36,6 +36,7 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	writer             io.Writer
+	errWriter          io.Writer
 	chartsSchemas      string
 	queriesSchemas     string
 	datasourcesSchemas string
@@ -99,6 +100,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func (o *option) validate(objects []modelAPI.Entity) error {

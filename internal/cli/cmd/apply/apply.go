@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/efficientgo/core/merrors"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
@@ -34,9 +35,11 @@ type option struct {
 	opt.ProjectOption
 	opt.FileOption
 	opt.DirectoryOption
-	writer    io.Writer
-	apiClient api.ClientInterface
-	entities  []modelAPI.Entity
+	forceCreate bool
+	writer      io.Writer
+	errWriter   io.Writer
+	apiClient   api.ClientInterface
+	entities    []modelAPI.Entity
 }
 
 func (o *option) Complete(args []string) error {
@@ -64,7 +67,23 @@ func (o *option) Complete(args []string) error {
 	return o.setEntities()
 }
 
+func (o *option) validateProjectConsistency() error {
+	var result = merrors.New()
+	for _, entity := range o.entities {
+		kind := modelV1.Kind(entity.GetKind())
+		project := resource.GetProject(entity.GetMetadata(), o.Project)
+		if len(o.Project) != 0 && project != o.Project {
+			result.Add(fmt.Errorf("\ninconsistency has been detected for object %q %q: while the metadata suggests the project name %q, the currently selected project indicates %q, \nuse the '--force' flag to bypass consistency check", kind, entity.GetMetadata().GetName(), project, o.Project))
+		}
+	}
+
+	return result.Err()
+}
+
 func (o *option) Validate() error {
+	if !o.forceCreate {
+		return o.validateProjectConsistency()
+	}
 	return nil
 }
 
@@ -109,6 +128,10 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
@@ -132,5 +155,6 @@ cat ./resources.json | percli apply -f -
 	opt.AddFileFlags(cmd, &o.FileOption)
 	opt.AddDirectoryFlags(cmd, &o.DirectoryOption)
 	opt.MarkFileAndDirFlagsAsXOR(cmd)
+	cmd.Flags().BoolVarP(&o.forceCreate, "force", "", false, "If present, the command will create the resource even if the projects are not consistent, it prioritize the json file")
 	return cmd
 }

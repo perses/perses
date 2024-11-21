@@ -15,43 +15,33 @@ package labelvalues
 
 import (
 	labelValuesVar "github.com/perses/perses/cue/schemas/variables/prometheus-label-values:model"
-	listVarBuilder "github.com/perses/perses/cue/dac-utils/variable/list"
-	v1Variable "github.com/perses/perses/cue/model/api/v1/variable"
+	promVarBuilder "github.com/perses/perses/cue/dac-utils/prometheus/variable"
 	filterBuilder "github.com/perses/perses/cue/dac-utils/prometheus/filter"
 )
 
-_kind=#kind: listVarBuilder.#kind & "ListVariable"
-_name=#name: listVarBuilder.#name
-_display=#display?: v1Variable.#Display & {
-	hidden: bool | *false
-}
-_allowAllValue=#allowAllValue:      listVarBuilder.#allowAllValue
-_allowMultiple=#allowMultiple:      listVarBuilder.#allowMultiple
-_customAllValue=#customAllValue?:   string
-_capturingRegexp=#capturingRegexp?: string
-_sort=#sort?:                       v1Variable.#Sort
-#datasourceName:                    listVarBuilder.#datasourceName
-#pluginKind:                        listVarBuilder.#pluginKind & labelValuesVar.kind
-#metric:                            string
-#label:                             string | *#name
-#query:                             string
+// include the definitions of promVarBuilder at the root
+promVarBuilder
+
+#name: _ // this is needed for below reference
+
+// specify the constraints for this variable
+#pluginKind: labelValuesVar.kind
+#metric:     string
+#label:      string | *#name
+#query:      string
 #dependencies: [...{...}]
 
 filter: {filterBuilder & {#input: #dependencies}}.filter
 
 queryExpr: [// switch
-		if #query != _|_ {#query},
-		{#metric + "{" + filter + "}"},
+	if #query != _|_ {#query},
+	#metric + "{" + filter + "}",
 ][0]
 
-variable: {listVarBuilder & {#kind: _kind, #name: _name, #display: _display, #allowAllValue: _allowAllValue, #allowMultiple: _allowMultiple, #customAllValue: _customAllValue, #capturingRegexp: _capturingRegexp, #sort: _sort}}.variable & {
+variable: promVarBuilder.variable & {
 	spec: {
 		plugin: labelValuesVar & {
 			spec: {
-				datasource: {
-					kind: "PrometheusDatasource"
-					name: #datasourceName
-				}
 				labelName: #label
 				matchers: [queryExpr]
 			}

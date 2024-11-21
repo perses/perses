@@ -13,5 +13,15 @@
 
 package model
 
+#palette: {
+	mode: "auto" | "categorical"
+}
+
+#visual: {
+	palette?: #palette
+}
+
 kind: "TracingGanttChart"
-spec: close({})
+spec: close({
+	visual?: #visual
+})

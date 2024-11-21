@@ -19,6 +19,7 @@
             "name": "PaaS",
             "hidden": true
           },
+          "defaultValue": "argos-world",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {

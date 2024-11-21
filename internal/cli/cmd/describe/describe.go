@@ -32,6 +32,7 @@ type option struct {
 	opt.ProjectOption
 	opt.OutputOption
 	writer          io.Writer
+	errWriter       io.Writer
 	kind            modelV1.Kind
 	name            string
 	resourceService service.Service
@@ -94,6 +95,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

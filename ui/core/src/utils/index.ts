@@ -18,4 +18,5 @@ export * from './memo';
 export * from './panel-refs';
 export * from './text';
 export * from './time-series-data';
+export * from './transform-data';
 export * from './types';

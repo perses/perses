@@ -22,6 +22,8 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 )
 
+const PluginKind = "PrometheusLabelNamesVariable"
+
 type PluginSpec struct {
 	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Matchers   []string             `json:"matchers,omitempty" yaml:"matchers,omitempty"`
@@ -54,7 +56,7 @@ func PrometheusLabelNames(options ...Option) list_variable.Option {
 		if err != nil {
 			return err
 		}
-		builder.ListVariableSpec.Plugin.Kind = "PrometheusLabelNamesVariable"
+		builder.ListVariableSpec.Plugin.Kind = PluginKind
 		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}

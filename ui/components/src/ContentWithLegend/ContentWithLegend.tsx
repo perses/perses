@@ -48,17 +48,21 @@ export function ContentWithLegend({
 
   return (
     <Box
-      sx={{
+      style={{
         width,
         height,
+      }}
+      sx={{
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <Box
-        sx={{
+        style={{
           width: content.width,
           height: content.height,
+        }}
+        sx={{
           marginRight: `${margin.right}px`,
           marginBottom: `${margin.bottom}px`,
           overflow: 'hidden',

@@ -209,7 +209,18 @@ Define if the list variable is hidden. A hidden variable is a variable that is n
 
 #### Variable Plugin Options
 
-##### Prometheus (List Variable)
+##### Static list (List Variable)
+
+```golang
+import staticlist "github.com/perses/perses/go-sdk/variable/plugin/static-list"
+
+staticListOptions := []staticlist.Option{
+	staticlist.Values("abc", "def"),
+}
+staticlist.StaticList(staticListOptions...)
+```
+
+##### Prometheus PromQL (List Variable)
 
 ```golang
 import promqlVar "github.com/perses/perses/go-sdk/prometheus/variable/promql"
@@ -220,7 +231,7 @@ promqlVar.PrometheusPromQL("group by (namespace) (kube_namespace_labels{})", pro
 
 Use a Prometheus query to populate the list variable. More info at [PromQL Variable](./prometheus/variable/promql.md).
 
-##### Prometheus Label Name (List Variable)
+##### Prometheus Label Names (List Variable)
 
 ```golang
 import labelNamesVar "github.com/perses/perses/go-sdk/prometheus/variable/label-names"

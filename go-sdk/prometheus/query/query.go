@@ -19,6 +19,8 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+const PluginKind = "PrometheusTimeSeriesQuery"
+
 type PluginSpec struct {
 	Datasource       *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Query            string               `json:"query" yaml:"query"`
@@ -58,7 +60,7 @@ func PromQL(expr string, options ...Option) query.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = "PrometheusTimeSeriesQuery"
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin
 		return nil
 	}

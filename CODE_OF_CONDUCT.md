@@ -1,3 +1,3 @@
-# Perses Code of Conduct
+# Perses Community Code of Conduct
 
-Perses follows the [CoreDash Code of Conduct](https://github.com/coredashio/community/blob/main/CODE_OF_CONDUCT.md)
+Perses follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).

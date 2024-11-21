@@ -24,15 +24,23 @@ import {
 } from '@perses-dev/plugin-system';
 import { bundledPluginLoader } from '../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../model/datasource-api';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 
 interface VariableDrawerProps<T extends Variable> extends DrawerProps<T> {
   variable: T;
 }
 
-export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>) {
-  const { variable, isOpen, action, isReadonly, onSave, onDelete, onClose } = props;
+export function VariableDrawer<T extends Variable>({
+  variable,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onDelete,
+  onClose,
+}: VariableDrawerProps<T>) {
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
@@ -75,9 +83,10 @@ export function VariableDrawer<T extends Variable>(props: VariableDrawerProps<T>
                 <VariableProviderWithQueryParams initialVariableDefinitions={[]}>
                   <VariableEditorForm
                     initialVariableDefinition={variableDef}
-                    initialAction={action}
+                    action={action}
                     isDraft={false}
                     isReadonly={isReadonly}
+                    onActionChange={onActionChange}
                     onSave={handleSave}
                     onClose={onClose}
                     onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}

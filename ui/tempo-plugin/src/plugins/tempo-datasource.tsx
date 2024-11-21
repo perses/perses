@@ -12,14 +12,14 @@
 // limitations under the License.
 
 import { DatasourcePlugin } from '@perses-dev/plugin-system';
-import { searchTraceQuery, searchTraceID, searchTraceQueryFallback, TempoClient } from '../model/tempo-client';
+import { TempoClient, query, search, searchTagValues, searchTags, searchWithFallback } from '../model/tempo-client';
 import { TempoDatasourceSpec } from './tempo-datasource-types';
 
 /**
  * Creates a TempoClient for a specific datasource spec.
  */
 const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createClient'] = (spec, options) => {
-  const { directUrl } = spec;
+  const { directUrl, proxy } = spec;
   const { proxyUrl } = options;
 
   // Use the direct URL if specified, but fallback to the proxyUrl by default if not specified
@@ -28,13 +28,18 @@ const createClient: DatasourcePlugin<TempoDatasourceSpec, TempoClient>['createCl
     throw new Error('No URL specified for Tempo client. You can use directUrl in the spec to configure it.');
   }
 
+  const specHeaders = proxy?.spec.headers;
+
   return {
     options: {
       datasourceUrl,
     },
-    searchTraceQuery: (params, queryOptions) => searchTraceQuery(params, queryOptions),
-    searchTraceQueryFallback: (params, queryOptions) => searchTraceQueryFallback(params, queryOptions),
-    searchTraceID: (traceID, queryOptions) => searchTraceID(traceID, queryOptions),
+    query: (params, headers) => query(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    search: (params, headers) => search(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    searchWithFallback: (params, headers) =>
+      searchWithFallback(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    searchTags: (params, headers) => searchTags(params, { datasourceUrl, headers: headers ?? specHeaders }),
+    searchTagValues: (params, headers) => searchTagValues(params, { datasourceUrl, headers: headers ?? specHeaders }),
   };
 };
 

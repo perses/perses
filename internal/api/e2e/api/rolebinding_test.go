@@ -18,6 +18,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -28,8 +29,8 @@ import (
 )
 
 func TestMainScenarioRoleBinding(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		project := e2eframework.NewProject("mysuperproject")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)
@@ -45,8 +46,8 @@ func TestMainScenarioRoleBinding(t *testing.T) {
 }
 
 func TestUpdateScenarioRoleBindingRole(t *testing.T) {
-	e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
-		user := e2eframework.NewUser("alice")
+	e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		user := e2eframework.NewUser("alice", "password")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, user)
 		project := e2eframework.NewProject("mysuperproject")
 		e2eframework.CreateAndWaitUntilEntityExists(t, manager, project)

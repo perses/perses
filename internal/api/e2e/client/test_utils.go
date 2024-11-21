@@ -22,7 +22,7 @@ import (
 	"github.com/perses/perses/internal/api/dependency"
 	e2eframework "github.com/perses/perses/internal/api/e2e/framework"
 	"github.com/perses/perses/pkg/client/api/v1"
-	"github.com/perses/perses/pkg/client/perseshttp"
+	"github.com/perses/perses/pkg/client/config"
 	"github.com/perses/perses/pkg/model/api"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 )
@@ -37,7 +37,7 @@ func withClient(t *testing.T, testFunc func(v1.ClientInterface, dependency.Persi
 }
 
 func createClient(t *testing.T, server *httptest.Server) v1.ClientInterface {
-	restClient, err := perseshttp.NewFromConfig(perseshttp.RestConfigClient{
+	restClient, err := config.NewRESTClient(config.RestConfigClient{
 		URL: common.MustParseURL(server.URL),
 	})
 	if err != nil {

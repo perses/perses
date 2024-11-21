@@ -20,6 +20,8 @@ import (
 type ProvisioningConfig struct {
 	Folders []string `json:"folders,omitempty" yaml:"folders,omitempty"`
 	// Interval is the refresh frequency
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 

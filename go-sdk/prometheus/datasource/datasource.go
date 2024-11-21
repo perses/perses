@@ -23,12 +23,14 @@ import (
 )
 
 const (
-	Kind = "PrometheusDatasource"
+	PluginKind = "PrometheusDatasource"
 )
 
 type PluginSpec struct {
-	DirectURL      string         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy    `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	ScrapeInterval model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }
 
@@ -97,7 +99,7 @@ func Prometheus(options ...Option) datasource.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = Kind
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}
@@ -105,7 +107,7 @@ func Prometheus(options ...Option) datasource.Option {
 
 func Selector(datasourceName string) *datasource.Selector {
 	return &datasource.Selector{
-		Kind: Kind,
+		Kind: PluginKind,
 		Name: datasourceName,
 	}
 }

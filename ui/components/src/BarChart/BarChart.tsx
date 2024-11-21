@@ -114,7 +114,13 @@ export function BarChart(props: BarChartProps) {
   }, [data, chartsTheme, width, mode, format]);
 
   return (
-    <Box sx={{ width: width, height: height, overflow: 'auto' }}>
+    <Box
+      style={{
+        width: width,
+        height: height,
+      }}
+      sx={{ overflow: 'auto' }}
+    >
       <EChart
         sx={{
           minHeight: height,

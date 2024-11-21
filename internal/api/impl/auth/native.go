@@ -25,6 +25,8 @@ import (
 	"github.com/perses/perses/internal/api/route"
 	"github.com/perses/perses/internal/api/utils"
 	"github.com/perses/perses/pkg/model/api"
+	"github.com/zitadel/oidc/v3/pkg/oidc"
+	"golang.org/x/oauth2"
 )
 
 type nativeEndpoint struct {
@@ -71,8 +73,9 @@ func (e *nativeEndpoint) auth(ctx echo.Context) error {
 		return err
 	}
 
-	return ctx.JSON(http.StatusOK, api.AuthResponse{
+	return ctx.JSON(http.StatusOK, oauth2.Token{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
+		TokenType:    oidc.BearerToken,
 	})
 }

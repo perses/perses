@@ -47,6 +47,7 @@ const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
 export function Table<TableData>({
   data,
   columns,
+  cellConfigs,
   density = 'standard',
   checkboxSelection,
   onRowSelectionChange,
@@ -182,6 +183,7 @@ export function Table<TableData>({
       rows={table.getRowModel().rows}
       columns={table.getAllFlatColumns()}
       headers={table.getHeaderGroups()}
+      cellConfigs={cellConfigs}
     />
   );
 }

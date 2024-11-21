@@ -32,7 +32,7 @@ export function PluginEditor(props: PluginEditorProps) {
     <Box {...others}>
       <PluginKindSelect
         fullWidth={false}
-        sx={{ mb: 1, minWidth: 120 }}
+        sx={{ mb: 2, minWidth: 120 }}
         margin="dense"
         label={pluginKindLabel}
         pluginTypes={pluginTypes}

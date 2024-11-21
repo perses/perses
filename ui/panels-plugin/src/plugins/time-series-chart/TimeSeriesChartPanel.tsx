@@ -421,7 +421,7 @@ export function TimeSeriesChartPanel(props: TimeSeriesChartProps) {
       >
         {({ height, width }) => {
           return (
-            <Box sx={{ height, width }}>
+            <Box style={{ height, width }}>
               {yAxis && yAxis.show && yAxis.label && <YAxisLabel name={yAxis.label} height={height} />}
               <TimeChart
                 ref={chartRef}

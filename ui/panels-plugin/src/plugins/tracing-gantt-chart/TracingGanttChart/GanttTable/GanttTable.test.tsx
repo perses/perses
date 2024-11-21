@@ -14,7 +14,8 @@
 import { render } from '@testing-library/react';
 import { fireEvent, screen } from '@testing-library/dom';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { trace1_root } from '../../../../test';
+import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
+import { MOCK_GANTT_TRACE } from '../../../../test';
 import { GanttTableProvider } from './GanttTableProvider';
 import { GanttTable, GanttTableProps } from './GanttTable';
 
@@ -22,18 +23,24 @@ describe('GanttTable', () => {
   const renderComponent = (props: Omit<GanttTableProps, 'onSpanClick'>) => {
     const onSpanClick = jest.fn();
     return render(
-      <VirtuosoMockContext.Provider value={{ viewportHeight: 300, itemHeight: 20 }}>
-        <GanttTableProvider>
-          <GanttTable {...props} onSpanClick={onSpanClick} />
-        </GanttTableProvider>
-      </VirtuosoMockContext.Provider>
+      <ChartsProvider chartsTheme={testChartsTheme}>
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 300, itemHeight: 20 }}>
+          <GanttTableProvider>
+            <GanttTable {...props} onSpanClick={onSpanClick} />
+          </GanttTableProvider>
+        </VirtuosoMockContext.Provider>
+      </ChartsProvider>
     );
   };
 
   it('render table', () => {
     renderComponent({
-      rootSpan: trace1_root,
-      viewport: { startTimeUnixMs: trace1_root.startTimeUnixMs, endTimeUnixMs: trace1_root.endTimeUnixMs },
+      options: {},
+      trace: MOCK_GANTT_TRACE,
+      viewport: {
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+      },
     });
     expect(screen.getByText('testRootSpan')).toBeInTheDocument();
     expect(screen.getByText('testChildSpan2')).toBeInTheDocument();
@@ -42,8 +49,12 @@ describe('GanttTable', () => {
 
   it('collapses a span on click', () => {
     renderComponent({
-      rootSpan: trace1_root,
-      viewport: { startTimeUnixMs: trace1_root.startTimeUnixMs, endTimeUnixMs: trace1_root.endTimeUnixMs },
+      options: {},
+      trace: MOCK_GANTT_TRACE,
+      viewport: {
+        startTimeUnixMs: MOCK_GANTT_TRACE.startTimeUnixMs,
+        endTimeUnixMs: MOCK_GANTT_TRACE.endTimeUnixMs,
+      },
     });
     fireEvent.click(screen.getAllByTitle('collapse')[1]!);
     expect(screen.getByText('testRootSpan')).toBeInTheDocument();
