@@ -32,7 +32,7 @@ export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChar
   return (
     <OptionsEditorGrid>
       <OptionsEditorColumn>
-        <LegendOptionsEditor includeLegendCalcs={false} value={value.legend} onChange={handleLegendChange} />
+        <LegendOptionsEditor showValuesEditor={false} value={value.legend} onChange={handleLegendChange} />
       </OptionsEditorColumn>
       <OptionsEditorColumn>
         <OptionsEditorGroup title="Reset Settings">

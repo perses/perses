@@ -14,6 +14,7 @@
 import { getColorForValue, LegendItem } from '@perses-dev/components';
 import { TimeScale, TimeSeriesData } from '@perses-dev/core';
 import { QueryData } from '@perses-dev/plugin-system';
+import { useMemo } from 'react';
 import { getCommonTimeScaleForQueries } from './get-timescale';
 
 interface StatusHistoryDataModel {
@@ -36,63 +37,65 @@ function generateCompleteTimestamps(timescale?: TimeScale): number[] {
   return timestamps;
 }
 
-export function createStatusHistoryDataModel(
+export function useStatusHistoryDataModel(
   queryResults: Array<QueryData<TimeSeriesData>>,
   colors: string[]
 ): StatusHistoryDataModel {
-  if (!queryResults || queryResults.length === 0) {
-    return {
-      legendItems: [],
-      statusHistoryData: [],
-      xAxisCategories: [],
-      yAxisCategories: [],
-    };
-  }
-
-  const timeScale = getCommonTimeScaleForQueries(queryResults);
-  const statusHistoryData: Array<[number, number, number]> = [];
-  const yAxisCategories: string[] = [];
-  const legendSet = new Set<number>();
-
-  const xAxisCategories = generateCompleteTimestamps(timeScale);
-
-  queryResults.forEach(({ data }) => {
-    if (!data) {
-      return;
+  return useMemo(() => {
+    if (!queryResults || queryResults.length === 0) {
+      return {
+        legendItems: [],
+        statusHistoryData: [],
+        xAxisCategories: [],
+        yAxisCategories: [],
+      };
     }
 
-    data.series.forEach((item) => {
-      const instance = item.formattedName || '';
+    const timeScale = getCommonTimeScaleForQueries(queryResults);
+    const statusHistoryData: Array<[number, number, number]> = [];
+    const yAxisCategories: string[] = [];
+    const legendSet = new Set<number>();
 
-      yAxisCategories.push(instance);
+    const xAxisCategories = generateCompleteTimestamps(timeScale);
 
-      const yIndex = yAxisCategories.length - 1;
+    queryResults.forEach(({ data }) => {
+      if (!data) {
+        return;
+      }
 
-      item.values.forEach(([time, value]) => {
-        const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time);
+      data.series.forEach((item) => {
+        const instance = item.formattedName || '';
 
-        if (value !== null && itemIndexOnXaxis !== -1) {
-          legendSet.add(value);
-          statusHistoryData.push([itemIndexOnXaxis, yIndex, value]);
-        }
+        yAxisCategories.push(instance);
+
+        const yIndex = yAxisCategories.length - 1;
+
+        item.values.forEach(([time, value]) => {
+          const itemIndexOnXaxis = xAxisCategories.findIndex((v) => v === time);
+
+          if (value !== null && itemIndexOnXaxis !== -1) {
+            legendSet.add(value);
+            statusHistoryData.push([itemIndexOnXaxis, yIndex, value]);
+          }
+        });
       });
     });
-  });
 
-  const legendItems: LegendItem[] = Array.from(legendSet).map((value, idx) => {
-    const color = colors[idx] || getColorForValue(value, colors[0] || '#1f77b4');
+    const legendItems: LegendItem[] = Array.from(legendSet).map((value, idx) => {
+      const color = colors[idx] || getColorForValue(value, colors[0] || '#1f77b4');
+      return {
+        id: `${idx}-${value}`,
+        label: String(value),
+        color,
+      };
+    });
+
     return {
-      id: `${idx}-${value}`,
-      label: String(value),
-      color,
+      xAxisCategories,
+      yAxisCategories,
+      legendItems,
+      statusHistoryData,
+      timeScale,
     };
-  });
-
-  return {
-    xAxisCategories,
-    yAxisCategories,
-    legendItems,
-    statusHistoryData,
-    timeScale,
-  };
+  }, [queryResults, colors]);
 }

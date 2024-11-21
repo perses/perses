@@ -16,7 +16,7 @@ import { ContentWithLegend, LoadingOverlay, StatusHistoryChart, useChartsTheme }
 import { PanelProps, useDataQueries, validateLegendSpec } from '@perses-dev/plugin-system';
 import { merge } from 'lodash';
 import { useMemo } from 'react';
-import { createStatusHistoryDataModel } from './utils/data-transform';
+import { useStatusHistoryDataModel } from './utils/data-transform';
 import { StatusHistoryChartOptions } from './status-history-model.js';
 
 export type StatusHistoryChartPanelProps = PanelProps<StatusHistoryChartOptions>;
@@ -32,16 +32,15 @@ export function StatusHistoryPanel(props: StatusHistoryChartPanelProps) {
   const PADDING = chartsTheme.container.padding.default;
   const { queryResults, isLoading, isFetching } = useDataQueries('TimeSeriesQuery');
 
-  const { statusHistoryData, yAxisCategories, xAxisCategories, legendItems, timeScale } = createStatusHistoryDataModel(
+  const { statusHistoryData, yAxisCategories, xAxisCategories, legendItems, timeScale } = useStatusHistoryDataModel(
     queryResults,
     chartsTheme.echartsTheme.color as string[]
   );
 
-  const contentPadding = chartsTheme.container.padding.default;
   const adjustedContentDimensions: typeof contentDimensions = contentDimensions
     ? {
-        width: contentDimensions.width - contentPadding * 2,
-        height: contentDimensions.height - contentPadding * 2,
+        width: contentDimensions.width - PADDING * 2,
+        height: contentDimensions.height - PADDING * 2,
       }
     : undefined;
 

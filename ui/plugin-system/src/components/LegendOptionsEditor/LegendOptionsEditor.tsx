@@ -63,10 +63,10 @@ const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).m
 export interface LegendOptionsEditorProps {
   value?: LegendSpecOptions;
   onChange: (legend?: LegendSpecOptions) => void;
-  includeLegendCalcs?: boolean;
+  showValuesEditor?: boolean;
 }
 
-export function LegendOptionsEditor({ value, onChange, includeLegendCalcs = true }: LegendOptionsEditorProps) {
+export function LegendOptionsEditor({ value, onChange, showValuesEditor = true }: LegendOptionsEditorProps) {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
     const legendValue = checked === true ? { position: DEFAULT_LEGEND.position } : undefined;
@@ -179,7 +179,7 @@ export function LegendOptionsEditor({ value, onChange, includeLegendCalcs = true
           ></SettingsAutocomplete>
         }
       />
-      {includeLegendCalcs && (
+      {showValuesEditor && (
         <OptionsEditorControl
           label="Values"
           control={
