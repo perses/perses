@@ -104,7 +104,15 @@ export function getFormattedAxisLabel(rangeMs: number) {
   };
 }
 
-export const getDateAndTime = (timeMs: number) => {
+interface FormattedDateTime {
+  formattedDate: string;
+  formattedTime: string;
+}
+
+export const getDateAndTime = (timeMs?: number): FormattedDateTime => {
+  if (!timeMs) {
+    return { formattedDate: '', formattedTime: '' };
+  }
   const date = new Date(timeMs);
   const formattedDate = format(date, 'MMM dd, yyyy - ');
   const formattedTime = format(date, 'HH:mm:ss');

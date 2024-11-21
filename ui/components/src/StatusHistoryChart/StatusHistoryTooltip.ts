@@ -20,7 +20,7 @@ export function generateTooltipHTML({
   const [x, y, value] = data;
   const xAxisLabel = xAxisCategories[x];
 
-  const { formattedDate, formattedTime } = xAxisLabel ? getDateAndTime(xAxisLabel) : {};
+  const { formattedDate, formattedTime } = getDateAndTime(xAxisLabel);
 
   const tooltipHeader = css`
     border-bottom: 1px solid ${theme.palette.grey[500]};
@@ -35,7 +35,7 @@ export function generateTooltipHTML({
 
   return `
     <div>
-      <div style="${tooltipHeader.styles}">${formattedDate} ${formattedTime}</div>
+      <div style="${tooltipHeader.styles}">${formattedDate} - ${formattedTime}</div>
       <div style="${tooltipContentStyles.styles}">
         <div>${marker} <strong>${yAxisCategories[y]}</strong>
         </div>
