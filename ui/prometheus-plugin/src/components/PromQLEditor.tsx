@@ -28,34 +28,12 @@ const treeViewStr = 'Tree View';
 const treeViewOpenStr = 'Open ' + treeViewStr;
 const treeViewCloseStr = 'Close ' + treeViewStr;
 
-// Process the error to identify if it's a generic one & adjust the message in some cases
-// TODO: This should be removed when properly tackling query error at query editor level (https://github.com/perses/perses/issues/1419)
-//       Here this was kinda a quick-win to do it like this with the implementation of the Tree view.
-//       Once #1419 will be tackled, any error reported by the query to the parse endpoint here should be treated the same (= display
-//       the error in the debug/tree view & always let the buttons accessible to show/hide it).
-function processError(error: unknown): { errorMessage: string; isGenericError: boolean } {
-  // Specific errors that user should be able to hide
-  const apiNotAvailableError = '404 page not found';
-  const apiNotAvailableErrorRephrased = `${treeViewStr} is available only for datasources whose APIs comply with Prometheus 3.0 specifications`;
-
-  const blockedByProxyError =
-    'forbidden access: you are not allowed to use this endpoint "/api/v1/parse_query" with the HTTP method POST';
-  const blockedByProxyErrorRephrased = `Your datasource configuration is blocking the ${treeViewStr} feature: the datasource should allow POST requests to "/api/v1/parse_query"`;
-
+function getErrMessage(error: unknown): string {
   let errorMessage = 'An unknown error occurred';
-  let isGenericError = false;
   if (error && error instanceof Error) {
     errorMessage = error.message.trim();
-    if (errorMessage === apiNotAvailableError) {
-      errorMessage = apiNotAvailableErrorRephrased;
-    } else if (errorMessage === blockedByProxyError) {
-      errorMessage = blockedByProxyErrorRephrased;
-    } else {
-      isGenericError = true;
-    }
   }
-
-  return { errorMessage, isGenericError };
+  return errorMessage;
 }
 
 export type PromQLEditorProps = {
@@ -74,8 +52,8 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
 
   const queryExpr = useReplaceVariablesInString(rest.value);
 
-  const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource);
-  const { errorMessage, isGenericError } = useMemo(() => processError(error), [error]);
+  const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
+  const errorMessage = useMemo(() => getErrMessage(error), [error]);
 
   const handleShowTreeView = () => {
     setTreeViewVisible(!isTreeViewVisible);
@@ -120,62 +98,52 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
       />
       {queryExpr && (
         <>
-          {isGenericError ? (
-            // Display the error without any close button, tree view etc when it's a generic error
-            <div style={{ border: `1px solid ${theme.palette.divider}` }}>
-              <ErrorAlert error={{ name: 'Parse query error', message: errorMessage }} />
-            </div>
-          ) : (
-            // Otherwise include the logic to show/hide the tree view
-            <>
-              <Tooltip title={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}>
+          <Tooltip title={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}>
+            <IconButton
+              aria-label={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}
+              onClick={handleShowTreeView}
+              sx={{ position: 'absolute', right: '5px', top: '5px' }}
+              size="small"
+            >
+              <FileTreeIcon sx={{ fontSize: '18px' }} />
+            </IconButton>
+          </Tooltip>
+          {isTreeViewVisible && (
+            <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
+              <Tooltip title={treeViewCloseStr}>
                 <IconButton
-                  aria-label={isTreeViewVisible ? treeViewCloseStr : treeViewOpenStr}
-                  onClick={handleShowTreeView}
-                  sx={{ position: 'absolute', right: '5px', top: '5px' }}
+                  aria-label={treeViewCloseStr}
+                  onClick={() => setTreeViewVisible(false)}
+                  sx={{ position: 'absolute', top: '5px', right: '5px' }}
                   size="small"
                 >
-                  <FileTreeIcon sx={{ fontSize: '18px' }} />
+                  <CloseIcon sx={{ fontSize: '18px' }} />
                 </IconButton>
               </Tooltip>
-              {isTreeViewVisible && (
-                <div style={{ border: `1px solid ${theme.palette.divider}`, position: 'relative' }}>
-                  <Tooltip title={treeViewCloseStr}>
-                    <IconButton
-                      aria-label={treeViewCloseStr}
-                      onClick={() => setTreeViewVisible(false)}
-                      sx={{ position: 'absolute', top: '5px', right: '5px' }}
-                      size="small"
-                    >
-                      <CloseIcon sx={{ fontSize: '18px' }} />
-                    </IconButton>
-                  </Tooltip>
-                  {error ? (
-                    // Here the user is able to hide the error alert
-                    <ErrorAlert
-                      error={{
-                        name: `${treeViewStr} not available`,
-                        message: errorMessage,
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        padding: `${theme.spacing(1.5)} ${theme.spacing(1.5)} 0 ${theme.spacing(1.5)}`, // let paddingBottom at 0 because nodes have margin-bottom
-                        overflowX: 'auto',
-                        backgroundColor: theme.palette.background.default,
-                      }}
-                    >
-                      {isLoading ? (
-                        <CircularProgress />
-                      ) : parseQueryResponse?.data ? (
-                        <TreeNode node={parseQueryResponse.data} reverse={false} />
-                      ) : null}
-                    </div>
-                  )}
+              {error ? (
+                // Here the user is able to hide the error alert
+                <ErrorAlert
+                  error={{
+                    name: `${treeViewStr} not available`,
+                    message: errorMessage,
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    padding: `${theme.spacing(1.5)} ${theme.spacing(1.5)} 0 ${theme.spacing(1.5)}`, // let paddingBottom at 0 because nodes have margin-bottom
+                    overflowX: 'auto',
+                    backgroundColor: theme.palette.background.default,
+                  }}
+                >
+                  {isLoading ? (
+                    <CircularProgress />
+                  ) : parseQueryResponse?.data ? (
+                    <TreeNode node={parseQueryResponse.data} reverse={false} />
+                  ) : null}
                 </div>
               )}
-            </>
+            </div>
           )}
         </>
       )}
