@@ -55,7 +55,8 @@ export function generateTooltipHTML({
       <div style="${tooltipHeader.styles}">${formattedDate} ${formattedTime}</div>
       <div style="${tooltipContentStyles.styles}">
         <div style="${labelStyles.styles}">
-          ${marker} <strong>${yAxisCategories[y]}</strong>
+          ${marker}
+          <strong>${yAxisCategories[y]}</strong>
         </div>
         <div>
           ${value}
