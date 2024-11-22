@@ -7,71 +7,62 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 		if #panel.options.legend != _|_ if #showLegend {
 			legend: {
 				if #panel.type == "timeseries" {
-					position: [
-						if #panel.options.legend.placement != _|_ if #panel.options.legend.placement == "right" {"right"},
-						"bottom",
-					][0]
-					mode: [
-						if #panel.options.legend.displayMode == "table" {"table"},
-						"list",
-					][0]
+					position: *(#panel.options.legend.placement & "right") | "bottom"
+					mode: *(#panel.options.legend.displayMode & "table")  | "list"
 					values: [for calc in #panel.options.legend.calcs
 						if (#mapping.calc[calc] != _|_) {#mapping.calc[calc]},
 					]
 				}
 				if #panel.type == "graph" {
+					#rightSide: *#panel.legend.rightSide | false
 					position: [// switch
-						if #panel.legend.rightSide != _|_ if #panel.legend.rightSide {"right"},
+						if #rightSide {"right"},
 						"bottom",
 					][0]
+					#alignAsTable: *#panel.legend.alignAsTable | false
 					mode: [
-						if #panel.legend.alignAsTable != _|_ if #panel.legend.alignAsTable {"table"},
+						if #alignAsTable {"table"},
 						"list",
 					][0]
 					values: [for oldCalc, newCalc in #mapping.calc
-						// Check if the mapping field is set on the legend and 
-						// is true.
-						if #panel.legend[oldCalc] != _|_ if #panel.legend[oldCalc] == true {newCalc},
+						if #panel.legend[oldCalc] != _|_
+						if #panel.legend[oldCalc] == true {
+							newCalc
+						},
 					]
 				}
 			}
 		}
 
 		// yAxis
-		#unitPath: *"\(#panel.fieldConfig.defaults.unit)" | null
-		if #unitPath != null if #mapping.unit[#unitPath] != _|_ {
-			yAxis: {
-				format: {
-					unit: #mapping.unit[#unitPath]
-				}
-			}
+		#unit: *#mapping.unit[#panel.fieldConfig.defaults.unit] | null
+		if #unit != null {
+			yAxis: format: unit: #unit
 		}
-		#decimal: *(#panel.fieldConfig.defaults.decimal) | null
+
+		#decimal: *#panel.fieldConfig.defaults.decimal | null
 		if #decimal != null {
-			format: {
-				decimalPlaces: #decimal
-			}
+			yAxis: format: decimalPlaces: #decimal
 		}
 
 		#min: *#panel.fieldConfig.defaults.min | null
 		if #min != null {
-			yAxis: {
-				min: #min
-			}
+			yAxis: min: #min
 		}
+
 		#max: *#panel.fieldConfig.defaults.max | null
 		if #max != null {
-			yAxis: {
-				max: #max
-			}
+			yAxis: max: #max
 		}
 
 		// thresholds
 		// -> migrate thresholds only if they are visible
-		if #panel.fieldConfig.defaults.thresholds != _|_ if #panel.fieldConfig.defaults.thresholds.steps != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle != _|_ if #panel.fieldConfig.defaults.custom.thresholdsStyle.mode != "off" {
+		#steps: *#panel.fieldConfig.defaults.thresholds.steps | null
+		#mode: *#panel.fieldConfig.defaults.custom.thresholdsStyle.mode | "off"
+		if #steps != null if #mode != "off" {
 			thresholds: {
 				// defaultColor: TODO how to fill this one?
-				steps: [for _, step in #panel.fieldConfig.defaults.thresholds.steps if step.value != _|_ {
+				steps: [for _, step in #steps if step.value != _|_ {
 					value: [// switch
 						if step.value == null {0},
 						step.value,
@@ -82,32 +73,37 @@ if #panel.type != _|_ if #panel.type == "timeseries" || #panel.type == "graph" {
 		}
 
 		// visual
-		visual: {
-			if #panel.fieldConfig.defaults.custom.lineWidth != _|_ {
-				lineWidth: [// switch
-					if #panel.fieldConfig.defaults.custom.lineWidth > 3 {3},       // line width can't go beyond 3 in Perses
-					if #panel.fieldConfig.defaults.custom.lineWidth < 0.25 {0.25}, // line width can't go below 0.25 in Perses
-					#panel.fieldConfig.defaults.custom.lineWidth,
-				][0]
-			}
-			if #panel.fieldConfig.defaults.custom.fillOpacity != _|_ {
-				areaOpacity: #panel.fieldConfig.defaults.custom.fillOpacity / 100 // 
-			}
+		#lineWidth: *#panel.fieldConfig.defaults.custom.lineWidth | null
+		if #lineWidth != null {
+			visual: lineWidth: [// switch
+				if #lineWidth > 3 {3},       // line width can't go beyond 3 in Perses
+				if #lineWidth < 0.25 {0.25}, // line width can't go below 0.25 in Perses
+				#lineWidth,
+			][0]
+		}
 
-			// NB: pointRadius skipped because the optimal size is automatically computed by Perses
-			if #panel.fieldConfig.defaults.custom.spanNulls != _|_ if (#panel.fieldConfig.defaults.custom.spanNulls & bool) != _|_ {
-				connectNulls: #panel.fieldConfig.defaults.custom.spanNulls // ignore in case of "threshold" mode because we don't support it
-			}
-			if #panel.fieldConfig.defaults.custom.drawStyle != _|_ {
-				display: [// switch
-					if #panel.fieldConfig.defaults.custom.drawStyle == "line" {"line"},
-					if #panel.fieldConfig.defaults.custom.drawStyle == "bars" {"bar"},
-					"line",
-				][0]
-			}
-			if #panel.fieldConfig.defaults.custom.stacking != _|_ if #panel.fieldConfig.defaults.custom.stacking.mode != _|_ if #panel.fieldConfig.defaults.custom.stacking.mode != "none" {
-				stack: "all"
-			}
+		#fillOpacity: *#panel.fieldConfig.defaults.custom.fillOpacity | null
+		if #fillOpacity != null {
+			visual: areaOpacity: #fillOpacity / 100
+		}
+
+		// NB: pointRadius skipped because the optimal size is automatically computed by Perses
+		#spanNulls: *(#panel.fieldConfig.defaults.custom.spanNulls & bool) | null // skip in case of "threshold" mode because we don't support it
+		if #spanNulls != null {
+			visual: connectNulls: #spanNulls
+		}
+
+		#drawStyle: *#panel.fieldConfig.defaults.custom.drawStyle | null
+		if #drawStyle != null {
+			visual: display: [// switch
+				if #drawStyle == "bars" {"bar"},
+				"line",
+			][0]
+		}
+
+		#stacking: *#panel.fieldConfig.defaults.custom.stacking.mode | "none"
+		if #stacking != "none" {
+			visual: stack: "all"
 		}
 	}
 },
