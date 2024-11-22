@@ -15,9 +15,9 @@ package v1
 }
 
 #UserSpec: {
-	firstName?:      string          @go(FirstName)
-	lastName?:       string          @go(LastName)
-	nativeProvider?: #NativeProvider @go(NativeProvider)
+	firstName?:      string                 @go(FirstName)
+	lastName?:       string                 @go(LastName)
+	nativeProvider?: null | #NativeProvider @go(NativeProvider,*NativeProvider)
 	oauthProviders?: [...#OAuthProvider] @go(OauthProviders,[]OAuthProvider)
 }
 
