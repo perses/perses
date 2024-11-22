@@ -75,9 +75,7 @@
           },
           "plugin": {
             "kind": "TimeSeriesChart",
-            "spec": {
-              "visual": {}
-            }
+            "spec": {}
           },
           "queries": [
             {

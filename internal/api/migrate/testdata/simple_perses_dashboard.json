@@ -407,8 +407,10 @@
                   "sum"
                 ]
               },
-              "format": {
-                "decimalPlaces": 3
+              "yAxis": {
+                "format": {
+                  "decimalPlaces": 3
+                }
               },
               "visual": {
                 "areaOpacity": 0,

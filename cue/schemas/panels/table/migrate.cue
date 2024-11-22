@@ -1,10 +1,11 @@
-if #panel.type != _|_ if #panel.type == "table" {
+if (*#panel.type | null) == "table" {
 	kind: "Table"
 	spec: {
-		if #panel.options != _|_ if #panel.options.cellHeight != _|_ {
+		#cellHeight: *#panel.options.cellHeight | null
+		if #cellHeight != null {
 			density: [
-				if #panel.options.cellHeight == "sm" {"compact"},
-				if #panel.options.cellHeight == "lg" {"comfortable"},
+				if #cellHeight == "sm" {"compact"},
+				if #cellHeight == "lg" {"comfortable"},
 				"standard",
 			][0]
 		}
@@ -87,7 +88,11 @@ if #panel.type != _|_ if #panel.type == "table" {
 
 		// Bringing back the old logic from before #2273 + some adjustments due to using cue v0.11.0 + corner case uncovered with unit test added since:
 
-		_excludedColumns: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName if value {
+		_excludedColumns: [if #panel.transformations != _|_
+								for transformation in #panel.transformations
+									if transformation.id == "organize"
+										for excludedColumn, value in transformation.options.excludeByName
+											if value {
 			name: excludedColumn
 			hide: true
 		}]
@@ -95,10 +100,19 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// Build intermediary maps to be able to merge settings coming from different places
 		// We use the future 'header' information as a key for both maps here, because this is the common denominator between the two sources
 		// Indeed in grafana the fieldconfig's overrides are matched against the final column name (thus potentially renamed))
-		_renamedMap: {if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for technicalName, prettyName in transformation.options.renameByName if _renamedMap[prettyName] == _|_ {
+		_renamedMap: {if #panel.transformations != _|_
+						for transformation in #panel.transformations
+							if transformation.id == "organize"
+								for technicalName, prettyName in transformation.options.renameByName 
+									if _renamedMap[prettyName] == _|_ {
 			"\(prettyName)": technicalName
 		}}
-		_customWidthMap: {if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" if _customWidthMap[override.matcher.options] == _|_ {
+		_customWidthMap: {if #panel.fieldConfig.overrides != _|_
+							for override in #panel.fieldConfig.overrides
+								if override.matcher.id == "byName" && override.matcher.options != _|_
+									for property in override.properties
+										if property.id == "custom.width"
+										if _customWidthMap[override.matcher.options] == _|_ {
 			"\(override.matcher.options)": property.value
 		}}
 
@@ -118,7 +132,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 		// Using flatten to avoid having an array of arrays with "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
 		let x = list.FlattenN([
-			if #panel.fieldConfig != _|_ && #panel.fieldConfig.defaults != _|_ && #panel.fieldConfig.defaults.mappings != _|_ for mapping in #panel.fieldConfig.defaults.mappings {
+			if (*#panel.fieldConfig.defaults.mappings | null) != null for mapping in #panel.fieldConfig.defaults.mappings {
 				if mapping.type == "value" {
 					[for key, option in mapping.options {
 						condition: {
@@ -131,10 +145,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 							text: option.text
 						}
 						if option.color != _|_ {
-							backgroundColor: [// switch
-								if #mapping.color[option.color] != _|_ {#mapping.color[option.color]},
-								option.color,
-							][0]
+							backgroundColor: *#mapping.color[option.color] | option.color
 						}
 					}]
 				}
@@ -170,12 +181,11 @@ if #panel.type != _|_ if #panel.type == "table" {
 						},
 					][0]
 
-					if mapping.options.result.text != _|_ {text: mapping.options.result.text}
+					if mapping.options.result.text != _|_ {
+						text: mapping.options.result.text
+					}
 					if mapping.options.result.color != _|_ {
-						backgroundColor: [// switch
-							if #mapping.color[mapping.options.result.color] != _|_ {#mapping.color[mapping.options.result.color]},
-							mapping.options.result.color,
-						][0]
+						backgroundColor: *#mapping.color[mapping.options.result.color] | mapping.options.result.color
 					}
 				}
 			},
@@ -197,10 +207,7 @@ if #panel.type != _|_ if #panel.type == "table" {
 					if transformation.id == "joinByField" {
 						kind: "JoinByColumnValue"
 						spec: {
-							[// switch
-								if transformation.options.byField != _|_ {columns: [transformation.options.byField]},
-								{columns: []},
-							][0]
+							columns: *transformation.options.byField | []
 							if transformation.disabled != _|_ {
 								disabled: transformation.disabled
 							}
@@ -208,11 +215,13 @@ if #panel.type != _|_ if #panel.type == "table" {
 					}
 				},
 			]
-			if len(#transforms) > 0 {transforms: #transforms}
+			if len(#transforms) > 0 {
+				transforms: #transforms
+			}
 		}
 	}
 },
-if #panel.type != _|_ if #panel.type == "table-old" {
+if (*#panel.type | null) == "table-old" {
 	kind: "Table"
 	spec: {
 		if #panel.styles != _|_ {
@@ -224,7 +233,8 @@ if #panel.type != _|_ if #panel.type == "table-old" {
 				if style.alias != _|_ {
 					header: style.alias
 				}
-				if style.align != _|_ if style.align != "auto" {
+				#align: *style.align | "auto"
+				if #align != "auto" {
 					align: style.align
 				}
 			}]
