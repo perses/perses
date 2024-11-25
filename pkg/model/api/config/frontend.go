@@ -37,6 +37,7 @@ type Explorer struct {
 
 type TimeRange struct {
 	DisableCustomTimeRange bool `json:"disable_custom" yaml:"disable_custom"`
+	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=array
 	// +kubebuilder:validation:Items.Type=string
 	// +kubebuilder:validation:Items.Format=duration
@@ -61,5 +62,8 @@ type Frontend struct {
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 }

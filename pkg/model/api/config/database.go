@@ -75,10 +75,19 @@ type SQL struct {
 	// Server public key name
 	ServerPubKey string `json:"server_pub_key" yaml:"server_pub_key"`
 	// Dial timeout
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	Timeout model.Duration `json:"timeout" yaml:"timeout"`
 	// I/O read timeout
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	ReadTimeout model.Duration `json:"read_timeout" yaml:"read_timeout"`
 	// I/O write timeout
+	// +kubebuilder:validation:Schemaless
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Format=duration
 	WriteTimeout model.Duration `json:"write_timeout" yaml:"write_timeout"`
 	// Allow all files to be used with LOAD DATA LOCAL INFILE
 	AllowAllFiles bool `json:"allow_all_files" yaml:"allow_all_files"`
