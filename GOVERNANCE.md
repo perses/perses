@@ -40,6 +40,7 @@ The current team members are:
 | Antoine Thebaud   | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus      |
 | Augustin Husson   | [nexucis](https://github.com/Nexucis)               | Amadeus      |
 | Celian Garcia     | [celian-garcia](https://github.com/celian-garcia)   | Amadeus      |
+| Gabriel Bernal    | [jgbernalp](https://github.com/jgbernalp)           | Red Hat      |
 | Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus      |
 | Steven Cobb       | [sjcobb](https://github.com/sjcobb)                 | Chronosphere |
 
