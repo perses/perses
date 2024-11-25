@@ -40,7 +40,7 @@ type TimeRange struct {
 	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=array
 	// +kubebuilder:validation:Items:Type=string
-	// +kubebuilder:validation:Items:Format=string
+	// +kubebuilder:validation:Items:Format=duration
 	Options []model.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
