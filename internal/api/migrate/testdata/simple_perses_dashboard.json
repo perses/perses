@@ -455,6 +455,7 @@
                   "hide": true
                 },
                 {
+<<<<<<< HEAD
                   "header": "ValueCustomHeader",
                   "name": "value"
                 },
@@ -465,6 +466,10 @@
                 {
                   "hide": true,
                   "name": "__name__"
+=======
+                  "name": "__name__",
+                  "hide": true
+>>>>>>> 5a02970d (wip)
                 },
                 {
                   "name": "API server",

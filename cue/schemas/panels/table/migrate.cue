@@ -21,20 +21,18 @@ if (*#panel.type | null) == "table" {
 		}
 
 		columnSettings: list.Concat([
-			for transformation in (*#panel.transformations | [])
-				if transformation.id == "organize" {
-					list.Concat([
-						[for columnName, displayName in (*transformation.options.renameByName | {}) {
+			[for transformation in (*#panel.transformations | [])
+				if transformation.id == "organize"
+					for desiredIndex, _ in [for k in transformation.options.indexByName {}] for columnName, index in transformation.options.indexByName if desiredIndex == index {
 							name: {_nameBuilder & {#var: columnName}}.output
-							header: displayName
-						}],
-						[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
-							name: {_nameBuilder & {#var: columnName}}.output
-							hide: isExcluded
-						}]
-					])
-				}
-			,
+							if (*transformation.options.renameByName[columnName] | null) != null {
+								header: transformation.options.renameByName[columnName]
+							}
+							if (*transformation.options.excludeByName[columnName] | null) != null {
+								hide: transformation.options.excludeByName[columnName]
+							}
+					}
+			],
 			[for override in (*#panel.fieldConfig.overrides | [])
 				if override.matcher.id == "byName" && override.matcher.options != _|_ {
 					name: {_nameBuilder & {#var: override.matcher.options}}.output
