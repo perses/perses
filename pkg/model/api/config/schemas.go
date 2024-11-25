@@ -32,6 +32,7 @@ type Schemas struct {
 	QueriesPath     string `json:"queries_path,omitempty" yaml:"queries_path,omitempty"`
 	DatasourcesPath string `json:"datasources_path,omitempty" yaml:"datasources_path,omitempty"`
 	VariablesPath   string `json:"variables_path,omitempty" yaml:"variables_path,omitempty"`
+	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=duration
 	Interval model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`

@@ -80,6 +80,7 @@ type GlobalDatasourceDiscovery struct {
 	// The name of the discovery config. It is used for logging purposes only
 	DiscoveryName string `json:"discovery_name" yaml:"discovery_name"`
 	// Refresh interval to re-query the endpoint.
+	// +kubebuilder:validation:Schemaless
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Format=duration
 	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
