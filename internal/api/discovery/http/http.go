@@ -24,11 +24,11 @@ import (
 	"github.com/perses/perses/pkg/client/perseshttp"
 	"github.com/perses/perses/pkg/model/api/config"
 	v1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 )
 
-func NewDiscovery(Name string, refreshInterval model.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
+func NewDiscovery(Name string, refreshInterval common.Duration, cfg *config.HTTPDiscovery, svc *service.ApplyService) (taskhelper.Helper, error) {
 	client, err := clientConfig.NewRESTClient(cfg.RestConfigClient)
 	if err != nil {
 		return nil, err

@@ -17,7 +17,7 @@ import (
 	"time"
 
 	promDatasource "github.com/perses/perses/go-sdk/prometheus/datasource"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 func Expr(expr string) Option {
@@ -43,7 +43,7 @@ func SeriesNameFormat(format string) Option {
 
 func MinStep(step time.Duration) Option {
 	return func(builder *Builder) error {
-		builder.MinStep = model.Duration(step)
+		builder.MinStep = common.Duration(step)
 		return nil
 	}
 }

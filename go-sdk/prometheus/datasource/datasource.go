@@ -18,8 +18,8 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	"github.com/prometheus/common/model"
 )
 
 const (
@@ -27,12 +27,9 @@ const (
 )
 
 type PluginSpec struct {
-	DirectURL string      `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy     *http.Proxy `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	ScrapeInterval model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL      string          `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {

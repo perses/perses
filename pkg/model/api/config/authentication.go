@@ -20,7 +20,6 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/model"
 )
 
 const (
@@ -47,16 +46,13 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 }
 
 type HTTP struct {
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	Timeout   model.Duration    `json:"timeout" yaml:"timeout"`
+	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
 	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
 }
 
 func (h *HTTP) Verify() error {
 	if h.Timeout == 0 {
-		h.Timeout = model.Duration(DefaultProviderTimeout)
+		h.Timeout = common.Duration(DefaultProviderTimeout)
 	}
 	return nil
 }
@@ -151,17 +147,11 @@ func (p *AuthProviders) Verify() error {
 
 type AuthenticationConfig struct {
 	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	AccessTokenTTL model.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	AccessTokenTTL common.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	RefreshTokenTTL model.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	RefreshTokenTTL common.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
 	// DisableSignUp deactivates the Sign-up page in the UI.
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
@@ -171,10 +161,10 @@ type AuthenticationConfig struct {
 
 func (a *AuthenticationConfig) Verify() error {
 	if a.AccessTokenTTL == 0 {
-		a.AccessTokenTTL = model.Duration(DefaultAccessTokenTTL)
+		a.AccessTokenTTL = common.Duration(DefaultAccessTokenTTL)
 	}
 	if a.RefreshTokenTTL == 0 {
-		a.RefreshTokenTTL = model.Duration(DefaultRefreshTokenTTL)
+		a.RefreshTokenTTL = common.Duration(DefaultRefreshTokenTTL)
 	}
 	return nil
 }
