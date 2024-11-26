@@ -19,14 +19,11 @@ import (
 	"reflect"
 
 	modelAPI "github.com/perses/perses/pkg/model/api"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 type EphemeralDashboardSpecBase struct {
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	TTL model.Duration `json:"ttl" yaml:"ttl"`
+	TTL common.Duration `json:"ttl" yaml:"ttl"`
 }
 
 func (edsb *EphemeralDashboardSpecBase) UnmarshalJSON(data []byte) error {

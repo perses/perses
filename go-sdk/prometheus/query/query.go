@@ -16,7 +16,7 @@ package query
 import (
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/query"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 const PluginKind = "PrometheusTimeSeriesQuery"
@@ -25,7 +25,7 @@ type PluginSpec struct {
 	Datasource       *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Query            string               `json:"query" yaml:"query"`
 	SeriesNameFormat string               `json:"seriesNameFormat,omitempty" yaml:"seriesNameFormat,omitempty"`
-	MinStep          model.Duration       `json:"minStep,omitempty" yaml:"minStep,omitempty"`
+	MinStep          common.Duration      `json:"minStep,omitempty" yaml:"minStep,omitempty"`
 	Resolution       int                  `json:"resolution,omitempty" yaml:"resolution,omitempty"`
 }
 

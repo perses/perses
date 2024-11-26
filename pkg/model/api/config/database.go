@@ -18,9 +18,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
 	"github.com/prometheus/common/config"
-	"github.com/prometheus/common/model"
 	"github.com/sirupsen/logrus"
 )
 
@@ -75,20 +75,11 @@ type SQL struct {
 	// Server public key name
 	ServerPubKey string `json:"server_pub_key" yaml:"server_pub_key"`
 	// Dial timeout
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	Timeout model.Duration `json:"timeout" yaml:"timeout"`
+	Timeout common.Duration `json:"timeout" yaml:"timeout"`
 	// I/O read timeout
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	ReadTimeout model.Duration `json:"read_timeout" yaml:"read_timeout"`
+	ReadTimeout common.Duration `json:"read_timeout" yaml:"read_timeout"`
 	// I/O write timeout
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
-	WriteTimeout model.Duration `json:"write_timeout" yaml:"write_timeout"`
+	WriteTimeout common.Duration `json:"write_timeout" yaml:"write_timeout"`
 	// Allow all files to be used with LOAD DATA LOCAL INFILE
 	AllowAllFiles bool `json:"allow_all_files" yaml:"allow_all_files"`
 	// Allows the cleartext client side plugin
