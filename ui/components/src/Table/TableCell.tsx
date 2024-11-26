@@ -125,11 +125,16 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
-      style={{ width: width }}
+      style={{
+        width: width,
+      }}
       sx={{
         borderBottom: isHeader
           ? (theme) => `solid 1px ${theme.palette.grey[100]}`
           : `solid 1px ${theme.palette.grey[50]}`,
+        '&:hover': {
+          width: 'auto !important',
+        },
       }}
       ref={elRef}
     >
