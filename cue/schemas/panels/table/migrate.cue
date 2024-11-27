@@ -20,6 +20,7 @@ if (*#panel.type | null) == "table" {
 			][0]
 		}
 
+<<<<<<< HEAD
 		columnSettings: list.Concat([
 			[for transformation in (*#panel.transformations | [])
 				if transformation.id == "organize"
@@ -47,6 +48,106 @@ if (*#panel.type | null) == "table" {
 				}
 			],
 		])
+=======
+		// columnSettings: [for settingsID, settings in _settingsGatherer {
+		// 	name: settingsID
+		// 	if settings.headers != _|_ if len(settings.headers) > 0 {
+		// 		let headers = [for settingKey, _ in settings.headers { settingKey }]
+		// 		// Why do we take the last element here: it's mostly based on grafana's behavior
+		// 		// - field overrides take precedence over the organize transformation (organize transformation was processed first above)
+		// 		// - if there are multiple overrides for the same field, the last one takes precedence
+		// 		header: headers[len(headers) - 1]
+		// 	}
+		// 	if settings.hide != _|_ {
+		// 		hide: settings.hide
+		// 	}
+		// 	if settings.widths != _|_ if len(settings.widths) > 0 {
+		// 		let widths = [for settingKey, _ in settings.widths { settingKey }]
+		// 		width: strconv.Atoi(widths[len(widths) - 1])
+		// 	}
+		// }]
+
+		// Bringing back the old logic from before #2273 + some adjustments due to using cue v0.11.0 + corner case uncovered with unit test added since:
+
+    // Grafana "organize" transformation allow to reorder columns. In Perses, columns are ordered by they columnSetting index in the
+		_sortableColumns: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for column, entry in transformation.options.indexByName {
+			name: column
+			index: entry
+		}]
+
+		_sortedColumns: list.Sort(_sortableColumns, {x: {}, y: {}, less: x.index < y.index})
+
+		_excludedColumns: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for excludedColumn, value in transformation.options.excludeByName {
+			name: excludedColumn
+			hide: true
+		}]
+
+		// We use the future 'header' information as a key for both maps here, because this is the common denominator between the two sources
+		// Indeed in grafana the fieldconfig's overrides are matched against the final column name (thus potentially renamed))
+		_renamedMap: [if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" for technicalName, prettyName in transformation.options.renameByName {
+			name: prettyName
+			technicalName: technicalName
+		}]
+		_customWidthMap: [if #panel.fieldConfig.overrides != _|_ for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ for property in override.properties if property.id == "custom.width" {
+			name: override.matcher.options
+			width: property.value
+		}]
+
+		// Only keep one value per column name
+		_gatherExcludedSettings: {
+			name: string
+
+			return: "\(name)": list.Concat([
+				[for item in _excludedColumns if item.name == name {
+					cItem.hide
+				}]
+			])
+		}
+
+		_gatherRenamedSettings: {
+			name: string
+
+			return: "\(name)": list.Concat([
+				[for item in _renamedMap if item.name == name {
+					cItem.technicalName
+				}]
+			])
+		}
+
+		_gatherCustomWidthSettings: {
+			name: string
+
+			return: "\(name)": list.Concat([
+				[for item in _renamedMap if item.name == name {
+					cItem.width
+				}]
+			])
+		}
+
+
+
+		columnSettings: [for column in _sortedColumns {
+			name: column.name
+
+			_prettyName: [for prettyName, technicalName in _renamedMap if technicalName == column.name { prettyName	}]
+
+			if len(_prettyName) > 0 {header: _prettyName[0]}
+
+			if _excludedColumns[column.name] != _|_ {
+				hide: true
+			}
+
+			if len(_prettyName) == 0 {
+				_customWidth: [for prettyName, customWidth in _customWidthMap if prettyName == column.name {customWidth}]
+				if len(_customWidth) > 0 {width: _customWidth[0]}
+			}
+
+			if len(_prettyName) > 0 {
+				_customWidth: [for prettyName, customWidth in _customWidthMap if prettyName == _prettyName[0] {customWidth}]
+				if len(_customWidth) > 0 { width: _customWidth[0]}
+			}
+		}]
+>>>>>>> 9b197ad9 (wip)
 
 		// Using flatten to avoid having an array of arrays with "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
