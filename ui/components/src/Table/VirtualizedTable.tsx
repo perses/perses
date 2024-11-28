@@ -120,7 +120,7 @@ export function VirtualizedTable<TableData>({
   }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
 
   return (
-    <Box sx={{ width, height }}>
+    <Box style={{ width, height }}>
       <TableVirtuoso
         ref={virtuosoRef}
         totalCount={rows.length}

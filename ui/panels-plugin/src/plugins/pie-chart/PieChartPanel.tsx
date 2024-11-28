@@ -185,7 +185,7 @@ export function PieChartPanel(props: PieChartPanelProps) {
       >
         {({ height, width }) => {
           return (
-            <Box sx={{ height, width }}>
+            <Box style={{ height, width }}>
               <PieChart
                 data={pieChartData}
                 width={contentDimensions.width - PADDING * 2}
