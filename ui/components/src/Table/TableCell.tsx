@@ -129,11 +129,13 @@ export function TableCell({
         width: width,
       }}
       sx={{
-        borderBottom: isHeader
-          ? (theme) => `solid 1px ${theme.palette.grey[100]}`
-          : `solid 1px ${theme.palette.grey[50]}`,
-        '&:hover': {
-          width: 'auto !important',
+        position: 'relative',
+        borderBottom: isHeader ? `solid 1px ${theme.palette.grey[100]}` : `solid 1px ${theme.palette.grey[50]}`,
+        '& #hovered-cell': {
+          display: 'none',
+        },
+        '&:hover #hovered-cell': {
+          display: 'block',
         },
       }}
       ref={elRef}
@@ -153,12 +155,40 @@ export function TableCell({
           // that the `TableSortLabel` uses to determine the location of the icon
           // in headers.
           flexDirection: 'inherit',
+          margin: '1px',
         }}
         style={{
           backgroundColor: backgroundColor ?? 'inherit',
           color: color ?? 'inherit',
         }}
-        title={description}
+        aria-label={description}
+        textAlign={align}
+      >
+        {children}
+      </Box>
+      <Box
+        id="hovered-cell"
+        sx={{
+          ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          width: 'fit-content',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+
+          // Need to inherit from the MUI cell because this manages some ordering
+          // that the `TableSortLabel` uses to determine the location of the icon
+          // in headers.
+          flexDirection: 'inherit',
+          border: `solid 1px ${theme.palette.info.main}`,
+        }}
+        style={{
+          minWidth: '-webkit-fill-available',
+          backgroundColor: backgroundColor ?? theme.palette.background.default,
+          color: color ?? 'inherit',
+        }}
         aria-label={description}
         textAlign={align}
       >
