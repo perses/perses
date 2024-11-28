@@ -140,6 +140,7 @@ export function TableCell({
           overflow: 'visible',
           backgroundColor: `${backgroundColor ?? theme.palette.background.default} !important`,
           outline: `solid 1px ${theme.palette.info.main}`,
+          outlineOffset: '-1px',
         },
         '& #hovered-placeholder-cell': {
           display: 'none',
