@@ -125,22 +125,33 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
-      style={{
-        width: width,
-      }}
+      style={{ width: width }}
       sx={{
         position: 'relative',
         borderBottom: isHeader ? `solid 1px ${theme.palette.grey[100]}` : `solid 1px ${theme.palette.grey[50]}`,
-        '& #hovered-cell': {
+        '&:hover #original-cell': {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          width: 'fit-content',
+          minWidth: '-webkit-fill-available',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          backgroundColor: `${backgroundColor ?? theme.palette.background.default} !important`,
+          outline: `solid 1px ${theme.palette.info.main}`,
+        },
+        '& #hovered-placeholder-cell': {
           display: 'none',
         },
-        '&:hover #hovered-cell': {
+        '&:hover #hovered-placeholder-cell': {
           display: 'block',
         },
       }}
       ref={elRef}
     >
       <Box
+        id="original-cell"
         sx={{
           ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
           position: 'relative',
@@ -155,7 +166,6 @@ export function TableCell({
           // that the `TableSortLabel` uses to determine the location of the icon
           // in headers.
           flexDirection: 'inherit',
-          margin: '1px',
         }}
         style={{
           backgroundColor: backgroundColor ?? 'inherit',
@@ -168,35 +178,14 @@ export function TableCell({
       </Box>
 
       {/* This is the hover cell that will be displayed when the cell is hovered */}
-      {/* We are not changing original one in order to not change column size with header cells */}
+      {/* In order to not change column size with header cells */}
       <Box
-        id="hovered-cell"
+        id="hovered-placeholder-cell"
         sx={{
-          ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          zIndex: 10,
-          width: 'fit-content',
-          whiteSpace: 'nowrap',
-          overflow: 'visible',
-
-          // Need to inherit from the MUI cell because this manages some ordering
-          // that the `TableSortLabel` uses to determine the location of the icon
-          // in headers.
-          flexDirection: 'inherit',
-          border: `solid 1px ${theme.palette.info.main}`,
+          content: '""',
+          width: width,
         }}
-        style={{
-          minWidth: '-webkit-fill-available',
-          backgroundColor: backgroundColor ?? theme.palette.background.default,
-          color: color ?? 'inherit',
-        }}
-        aria-label={description}
-        textAlign={align}
-      >
-        {children}
-      </Box>
+      ></Box>
     </StyledMuiTableCell>
   );
 }
