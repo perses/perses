@@ -135,7 +135,7 @@ export function TableCell({
           left: 0,
           zIndex: 10,
           width: 'fit-content',
-          minWidth: '-webkit-fill-available',
+          minWidth: '100%',
           whiteSpace: 'nowrap',
           overflow: 'visible',
           backgroundColor: `${backgroundColor ?? theme.palette.background.default} !important`,
