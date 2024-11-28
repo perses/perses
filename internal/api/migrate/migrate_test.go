@@ -66,7 +66,7 @@ func TestMigrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
-			title:                       "dashboard with simple table panels, focused on validating the migration of column settings",
+			title:                       "dashboard with table panels, focused on validating the migration of column settings",
 			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
 			expectedPersesDashboardFile: "tables_perses_dashboard.json",
 			expectedErrorStr:            "",

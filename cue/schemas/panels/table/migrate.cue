@@ -10,124 +10,45 @@ if (*#panel.type | null) == "table" {
 			][0]
 		}
 
-		// /!\ Disabling the improved migration logic from #2273 for columnSettings for now, because it triggers a bug with the new CUE evaluator.
-		// Would need the resolution of this issue to consider bringing it back: https://github.com/cue-lang/cue/issues/3178#issuecomment-2399694260
-		// NB: the commit that appended this comment should be revert since it removed some unit tests.
-		//
-		// intermediary object to gather all the settings/overrides we can find, before taking decisions about which ones to assign to columnSettings
-		// Because CUE doesn't allow to override values, we have to do some tricky stuff like creating unique fields for each "candidate" to avoid conflicts.
-		// _settingsGatherer: {}
-		// _nameBuilder: {
-		// 	#var: string
-		// 	output: [
-		// 		// Rename anonymous fields that Perses names differently than Grafana
-		// 		if #var == "Time" { "timestamp" },
-		// 		if #var == "Value" { "value" },
-		// 		#var
-		// 	][0]
-		// }
-		//if #panel.transformations != _|_ for transformation in #panel.transformations if transformation.id == "organize" {
-		//	if transformation.options.excludeByName != _|_ {
-		//		for excludedColumn, value in transformation.options.excludeByName if value {
-		//			let name = {_nameBuilder & {#var: excludedColumn}}.output
-		//			_settingsGatherer: "\(name)": hide: true
-		//		}}
-		//	if transformation.options.renameByName != _|_ {
-		//		for technicalName, displayName in transformation.options.renameByName {
-		//			let name = {_nameBuilder & {#var: technicalName}}.output
-		//			_settingsGatherer: "\(name)": headers: "\(displayName)": true
-		//		}
-		//	}
-		//}
-		// if #panel.fieldConfig.overrides != _|_ {
-		// 	for override in #panel.fieldConfig.overrides if override.matcher.id == "byName" && override.matcher.options != _|_ {
-		// 		for property in override.properties {
-		// 			let name = {_nameBuilder & {#var: override.matcher.options}}.output
-		// 			if property.id == "displayName" {
-		// 				// Grafana's field overrides can be defined on fields already renamed via the Organize transformation,
-		// 				// hence why we go through the map here to try gathering the renames in the same "place".
-		// 				// NB: this is best effort. E.g if there are several organize transformations chained this wont work, but a settings
-		// 				// object will still get created, thus it could still be arranged manually by the user after the migration.
-		// 				for k, v in _settingsGatherer {
-		// 					if v.headers[name] != _|_ {
-		// 						_settingsGatherer: "\(k)": headers: "\(property.value)": true
-		// 					}
-		// 				}
-		// 				_settingsGatherer: "\(name)": headers: "\(property.value)": true
-		// 			}
-		// 			if property.id == "custom.width" {
-		// 				// same as above
-		// 				for k, v in _settingsGatherer {
-		// 					if v.headers[name] != _|_ {
-		// 						_settingsGatherer: "\(k)": widths: "\(property.value)": true
-		// 					}
-		// 				}
-		// 				_settingsGatherer: "\(name)": widths: "\(property.value)": true
-		// 			}
-		// 		}
-		// 	}
-		// }
+		_nameBuilder: {
+			#var: string
+			output: [
+				// Rename anonymous fields that Perses names differently than Grafana
+				if #var == "Time" { "timestamp" },
+				if #var == "Value" { "value" },
+				#var
+			][0]
+		}
 
-		// columnSettings: [for settingsID, settings in _settingsGatherer {
-		// 	name: settingsID
-		// 	if settings.headers != _|_ if len(settings.headers) > 0 {
-		// 		let headers = [for settingKey, _ in settings.headers { settingKey }]
-		// 		// Why do we take the last element here: it's mostly based on grafana's behavior
-		// 		// - field overrides take precedence over the organize transformation (organize transformation was processed first above)
-		// 		// - if there are multiple overrides for the same field, the last one takes precedence
-		// 		header: headers[len(headers) - 1]
-		// 	}
-		// 	if settings.hide != _|_ {
-		// 		hide: settings.hide
-		// 	}
-		// 	if settings.widths != _|_ if len(settings.widths) > 0 {
-		// 		let widths = [for settingKey, _ in settings.widths { settingKey }]
-		// 		width: strconv.Atoi(widths[len(widths) - 1])
-		// 	}
-		// }]
-
-		// Bringing back the old logic from before #2273 + some adjustments due to using cue v0.11.0 + corner case uncovered with unit test added since:
-
-		_excludedColumns: [if #panel.transformations != _|_
-								for transformation in #panel.transformations
-									if transformation.id == "organize"
-										for excludedColumn, value in transformation.options.excludeByName
-											if value {
-			name: excludedColumn
-			hide: true
-		}]
-
-		// Build intermediary maps to be able to merge settings coming from different places
-		// We use the future 'header' information as a key for both maps here, because this is the common denominator between the two sources
-		// Indeed in grafana the fieldconfig's overrides are matched against the final column name (thus potentially renamed))
-		_renamedMap: {if #panel.transformations != _|_
-						for transformation in #panel.transformations
-							if transformation.id == "organize"
-								for technicalName, prettyName in transformation.options.renameByName 
-									if _renamedMap[prettyName] == _|_ {
-			"\(prettyName)": technicalName
-		}}
-		_customWidthMap: {if #panel.fieldConfig.overrides != _|_
-							for override in #panel.fieldConfig.overrides
-								if override.matcher.id == "byName" && override.matcher.options != _|_
-									for property in override.properties
-										if property.id == "custom.width"
-										if _customWidthMap[override.matcher.options] == _|_ {
-			"\(override.matcher.options)": property.value
-		}}
-
-		_prettifiedColumns: list.Concat([[for rKey, rVal in _renamedMap {
-			name:   rVal
-			header: rKey
-			if _customWidthMap[rKey] != _|_ {
-				width: _customWidthMap[rKey]
-			}
-		}], [for cwKey, cwVal in _customWidthMap if _renamedMap[cwKey] == _|_ {
-			name:  cwKey
-			width: cwVal
-		}]])
-
-		columnSettings: list.Concat([_excludedColumns, _prettifiedColumns])
+		columnSettings: list.Concat([
+			for transformation in (*#panel.transformations | [])
+				if transformation.id == "organize" {
+					list.Concat([
+						[for columnName, displayName in (*transformation.options.renameByName | {}) {
+							name: {_nameBuilder & {#var: columnName}}.output
+							header: displayName
+						}],
+						[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
+							name: {_nameBuilder & {#var: columnName}}.output
+							hide: isExcluded
+						}]
+					])
+				}
+			,
+			[for override in (*#panel.fieldConfig.overrides | [])
+				if override.matcher.id == "byName" && override.matcher.options != _|_ {
+					name: {_nameBuilder & {#var: override.matcher.options}}.output
+					for property in override.properties {
+						if property.id == "displayName" {
+							header: property.value
+						}
+						if property.id == "custom.width" {
+							width: property.value
+						}
+					},
+				}
+			],
+		])
 
 		// Using flatten to avoid having an array of arrays with "value" mappings
 		// (https://cuelang.org/docs/howto/use-list-flattenn-to-flatten-lists/)
@@ -191,7 +112,11 @@ if (*#panel.type | null) == "table" {
 			},
 		], 1)
 
-		if len(x) > 0 {cellSettings: x}
+		if len(x) > 0 {
+			cellSettings: x
+		}
+
+		// Logic to build transforms:
 
 		if #panel.transformations != _|_ {
 			#transforms: [
