@@ -142,12 +142,6 @@ export function TableCell({
           outline: `solid 1px ${theme.palette.info.main}`,
           outlineOffset: '-1px',
         },
-        '& #hovered-placeholder-cell': {
-          display: 'none',
-        },
-        '&:hover #hovered-placeholder-cell': {
-          display: 'block',
-        },
       }}
       ref={elRef}
     >
@@ -178,16 +172,6 @@ export function TableCell({
       >
         {children}
       </Box>
-
-      {/* This is the hover cell that will be displayed when the cell is hovered */}
-      {/* In order to not change column size with header cells */}
-      <Box
-        id="hovered-placeholder-cell"
-        sx={{
-          content: '""',
-          width: width,
-        }}
-      ></Box>
     </StyledMuiTableCell>
   );
 }
