@@ -172,6 +172,7 @@ export function TableCell({
           backgroundColor: backgroundColor ?? 'inherit',
           color: color ?? 'inherit',
         }}
+        title={description}
         aria-label={description}
         textAlign={align}
       >
