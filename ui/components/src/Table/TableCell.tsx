@@ -166,6 +166,9 @@ export function TableCell({
       >
         {children}
       </Box>
+
+      {/* This is the hover cell that will be displayed when the cell is hovered */}
+      {/* We are not changing original one in order to not change column size with header cells */}
       <Box
         id="hovered-cell"
         sx={{
