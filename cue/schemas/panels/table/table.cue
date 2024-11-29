@@ -21,6 +21,7 @@ import (
 kind: "Table"
 spec: close({
 	density?: "compact" | "standard" | "comfortable"
+	defaultColumnWidth?: "auto" | number
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
 	transforms?: [...common.#transform]
