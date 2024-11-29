@@ -20,7 +20,7 @@ import (
 
 kind: "Table"
 spec: close({
-	density?: "compact" | "standard" | "comfortable"
+	density?:            "compact" | "standard" | "comfortable"
 	defaultColumnWidth?: "auto" | number
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
