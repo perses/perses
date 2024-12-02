@@ -16,7 +16,7 @@
  */
 export async function fetch(...args: Parameters<typeof global.fetch>): Promise<Response> {
   const response = await global.fetch(...args);
-  if (!response.ok) {
+  if (response.ok === false) {
     const contentType = response.headers.get('content-type');
     if (contentType?.includes('application/json')) {
       const json = await response.json();
