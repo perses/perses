@@ -7,10 +7,6 @@
     "links": [],
     "panels": [
         {
-            "datasource": {
-                "type": "datasource",
-                "uid": "-- Mixed --"
-            },
             "fieldConfig": {
                 "defaults": {
                     "color": {
@@ -56,19 +52,11 @@
             "pluginVersion": "11.3.0-pre",
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "$datasource"
-                    },
                     "expr": "matching{job=\"abc\"}",
                     "legendFormat": "matching roles",
                     "refId": "A"
                 },
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "$datasource"
-                    },
                     "expr": "nonmatching{job=\"abc2\"}",
                     "legendFormat": "non-matching roles",
                     "refId": "B"
