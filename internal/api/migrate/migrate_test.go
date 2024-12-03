@@ -83,6 +83,12 @@ func TestMigrate(t *testing.T) {
 			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a piechart",
+			inputGrafanaDashboardFile:   "piechart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "piechart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 
 	for _, test := range testSuite {
