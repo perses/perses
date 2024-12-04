@@ -94,6 +94,12 @@ import (
         "purple": "#b877d9"
         "light-purple": "#b877d9"
         "super-light-purple": "#deb6f2"
+
+        "dark-yellow": "#e0b400"
+        "semi-dark-yellow": "#f2cc0c"
+        "yellow": "#fade2a"
+        "light-yellow": "#ffee52"
+        "super-light-yellow": "#fff899"
     }
 }
 #defaultCalc: "last"
