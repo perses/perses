@@ -17,7 +17,7 @@ import { StatusHistoryData } from './StatusHistoryChart';
 
 interface CustomTooltipProps {
   data: StatusHistoryData;
-  label: string;
+  label: string | undefined;
   marker: string;
   xAxisCategories: number[];
   yAxisCategories: string[];
