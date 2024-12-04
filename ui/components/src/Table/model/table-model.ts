@@ -23,6 +23,8 @@ import {
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
+export const DEFAULT_COLUMN_WIDTH = 150;
+
 export type TableDensity = 'compact' | 'standard' | 'comfortable';
 export type SortDirection = 'asc' | 'desc' | undefined;
 
@@ -74,6 +76,12 @@ export interface TableProps<TableData> {
    * by content in the table (e.g. font size, padding).
    */
   density?: TableDensity;
+
+  /**
+   *  When using "auto", the table will try to automatically adjust the width of columns to fit without overflowing.
+   *  If there is not enough width for each column, the display can unreadable.
+   */
+  defaultColumnWidth?: 'auto' | number;
 
   /**
    * When `true`, the first column of the table will include checkboxes.

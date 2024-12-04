@@ -26,7 +26,7 @@ import { useTheme } from '@mui/material';
 import { useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
-import { TableProps, persesColumnsToTanstackColumns } from './model/table-model';
+import { TableProps, persesColumnsToTanstackColumns, DEFAULT_COLUMN_WIDTH } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
   return `${index}`;
@@ -49,6 +49,7 @@ export function Table<TableData>({
   columns,
   cellConfigs,
   density = 'standard',
+  defaultColumnWidth = DEFAULT_COLUMN_WIDTH,
   checkboxSelection,
   onRowSelectionChange,
   onSortingChange,
@@ -179,6 +180,7 @@ export function Table<TableData>({
     <VirtualizedTable
       {...otherProps}
       density={density}
+      defaultColumnWidth={defaultColumnWidth}
       onRowClick={handleRowClick}
       rows={table.getRowModel().rows}
       columns={table.getAllFlatColumns()}

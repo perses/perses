@@ -231,6 +231,7 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
       height={contentDimensions.height}
       width={contentDimensions.width}
       density={spec.density}
+      defaultColumnWidth={spec.defaultColumnWidth}
       sorting={sorting}
       onSortingChange={setSorting}
     />
