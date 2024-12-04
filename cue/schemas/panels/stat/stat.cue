@@ -24,7 +24,7 @@ spec: close({
 	thresholds?:    common.#thresholds
 	sparkline?:     #sparkline
 	valueFontSize?: number
-	mappings?:      [...common.#mappings]
+	mappings?: [...common.#mappings]
 
 	#sparkline: {
 		color?: string

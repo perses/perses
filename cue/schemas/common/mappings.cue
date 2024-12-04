@@ -28,8 +28,8 @@ import (
 #rangeCondition: {
 	kind: "Range"
 	spec: {
-		from?: number
-		to?: number
+		from?:  number
+		to?:    number
 		result: #mappingResult
 	}
 }
@@ -38,21 +38,21 @@ import (
 	kind: "Regex"
 	spec: {
 		pattern: strings.MinRunes(1)
-		result: #mappingResult
+		result:  #mappingResult
 	}
 }
 
 #miscCondition: {
 	kind: "Misc"
 	spec: {
-		value: "empty" | "null" | "NaN" | "true" | "false"
+		value:  "empty" | "null" | "NaN" | "true" | "false"
 		result: #mappingResult
 	}
 }
 
 #mappingResult: {
-	value:            string
-  	color?:           =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+	value:  string
+	color?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }
 
 #mappings: #valueCondition | #rangeCondition | #regexCondition | #miscCondition
