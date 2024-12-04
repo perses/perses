@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,23 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+import { FormatOptions, formatValue } from '@perses-dev/core';
 
-import (
-	"github.com/perses/perses/cue/schemas/common"
-)
-
-kind: "StatChart"
-spec: close({
-	calculation:    common.#calculation
-	format?:        common.#format
-	thresholds?:    common.#thresholds
-	sparkline?:     #sparkline
-	valueFontSize?: number
-	mappings?:      [...common.#mappings]
-
-	#sparkline: {
-		color?: string
-		width?: number
-	}
-})
+export const formatStatChartValue = (value?: string | number | null, format?: FormatOptions) => {
+  if (value === null) {
+    return 'null';
+  } else if (typeof value === 'number') {
+    return formatValue(value, format);
+  } else if (value === undefined) {
+    return '';
+  } else {
+    return value;
+  }
+};

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
-import { formatValue, FormatOptions } from '@perses-dev/core';
+import { useMemo } from 'react';
+import { FormatOptions } from '@perses-dev/core';
 import { Box, Typography, styled } from '@mui/material';
 import merge from 'lodash/merge';
 import { use, EChartsCoreOption } from 'echarts/core';
@@ -24,6 +24,7 @@ import { EChart } from '../EChart';
 import { GraphSeries } from '../model';
 import { FontSizeOption } from '../FontSizeSelector';
 import { useOptimalFontSize } from './calculateFontSize';
+import { formatStatChartValue } from './utils/formatStatChartValue';
 
 use([EChartsLineChart, GridComponent, DatasetComponent, TitleComponent, TooltipComponent, CanvasRenderer]);
 
@@ -33,6 +34,7 @@ const SERIES_NAME_FONT_WEIGHT = 400;
 const VALUE_FONT_WEIGHT = 700;
 
 export interface StatChartData {
+  color: string;
   calculatedValue?: string | number | null | undefined;
   seriesData?: GraphSeries;
 }
@@ -42,26 +44,17 @@ export interface StatChartProps {
   height: number;
   data: StatChartData;
   format?: FormatOptions;
-  color?: string;
   sparkline?: LineSeriesOption;
   showSeriesName?: boolean;
   valueFontSize?: FontSizeOption;
 }
 
 export function StatChart(props: StatChartProps) {
-  const { width, height, data, color, sparkline, showSeriesName, format, valueFontSize } = props;
+  const { width, height, data, sparkline, showSeriesName, format, valueFontSize } = props;
   const chartsTheme = useChartsTheme();
+  const color = data.color;
 
-  let formattedValue = '';
-  if (data.calculatedValue === null) {
-    formattedValue = 'null';
-  } else if (typeof data.calculatedValue === 'number') {
-    formattedValue = formatValue(data.calculatedValue, format);
-  } else if (data.calculatedValue === undefined) {
-    formattedValue = '';
-  } else {
-    formattedValue = data.calculatedValue;
-  }
+  const formattedValue = formatStatChartValue(data.calculatedValue, format);
 
   const containerPadding = chartsTheme.container.padding.default;
 
@@ -74,6 +67,7 @@ export function StatChart(props: StatChartProps) {
     lineHeight: LINE_HEIGHT,
     maxSize: SERIES_NAME_MAX_FONT_SIZE,
   });
+
   const seriesNameHeight = showSeriesName ? seriesNameFontSize * LINE_HEIGHT + containerPadding : 0;
 
   // calculate value font size and height
@@ -112,19 +106,7 @@ export function StatChart(props: StatChartProps) {
         animation: false,
         silent: true,
       };
-
-      const sparklineConfig = {
-        lineStyle: {
-          width: sparkline.width ?? chartsTheme.sparkline.width,
-          color,
-          opacity: 1,
-        },
-        areaStyle: {
-          color,
-          opacity: 0.4,
-        },
-      };
-      const mergedSeries = merge(lineSeries, sparklineConfig);
+      const mergedSeries = merge(lineSeries, sparkline);
       statSeries.push(mergedSeries);
     }
 

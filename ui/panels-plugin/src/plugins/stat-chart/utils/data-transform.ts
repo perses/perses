@@ -12,47 +12,53 @@
 // limitations under the License.
 
 import { PersesChartsTheme } from '@perses-dev/components';
-import { ThresholdOptions } from '@perses-dev/core';
 import { LineSeriesOption } from 'echarts/charts';
-import { StatChartSparklineOptions } from '../stat-chart-model';
+import { applyValueMapping } from '@perses-dev/core';
+import { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
 
-export function getColorFromThresholds(
+export function getStatChartColor(
   chartsTheme: PersesChartsTheme,
-  thresholds?: ThresholdOptions,
+  spec?: StatChartOptions,
   value?: number | string | null
 ) {
+  const { mappings, thresholds } = spec ?? {};
+
   // thresholds color takes priority over other colors
   const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
 
-  if (thresholds === undefined) {
+  if (!value || (!thresholds?.steps && !mappings)) {
     return defaultColor;
   }
 
-  let color = defaultColor;
-  if (thresholds.steps && value && typeof value === 'number') {
-    thresholds.steps.forEach((step, index) => {
-      if (value > step.value) {
-        color = step.color ?? chartsTheme.thresholds.palette[index] ?? defaultColor;
-      } else {
-        // thresholds.steps should be in ascending order, so return if value is less than step.value
-        return;
-      }
-    });
+  // Check thresholds first (they take priority)
+  if (thresholds?.steps && typeof value === 'number') {
+    const matchingColors = thresholds.steps
+      .map((step, index) => {
+        if (value > step.value) {
+          return step.color ?? chartsTheme.thresholds.palette[index] ?? defaultColor;
+        }
+        return null;
+      })
+      .filter((color): color is string => color !== null);
+
+    // Return last matching color or default
+    return matchingColors[matchingColors.length - 1] ?? defaultColor;
   }
-  return color;
+
+  if (mappings?.length) {
+    const { color } = applyValueMapping(value, mappings);
+    return color || defaultColor;
+  }
+
+  return defaultColor;
 }
 
 export function convertSparkline(
   chartsTheme: PersesChartsTheme,
-  sparkline?: StatChartSparklineOptions,
-  thresholds?: ThresholdOptions,
-  value?: number | string | null
+  color: string,
+  sparkline?: StatChartSparklineOptions
 ): LineSeriesOption | undefined {
   if (sparkline === undefined) return;
-
-  // sparkline color should always derive from thresholds
-  // ignore sparkline.color since you can always change the thresholds default color
-  const color = getColorFromThresholds(chartsTheme, thresholds, value);
 
   return {
     lineStyle: {
