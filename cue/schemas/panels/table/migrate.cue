@@ -132,7 +132,7 @@ if (*#panel.type | null) == "table" {
 					if transformation.id == "joinByField" {
 						kind: "JoinByColumnValue"
 						spec: {
-							columns: *transformation.options.byField | []
+							columns: *[transformation.options.byField] | []
 							if transformation.disabled != _|_ {
 								disabled: transformation.disabled
 							}
