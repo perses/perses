@@ -23,12 +23,31 @@ import (
 	"sync/atomic"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/build"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/load"
 	"github.com/fsnotify/fsnotify"
 	"github.com/perses/common/async"
 	"github.com/sirupsen/logrus"
 )
+
+func Load(schemaPath string) (*build.Instance, error) {
+	// load the cue files into build.Instances slice
+	// package `model` is imposed so that we don't mix model-related files with migration-related files
+	buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: "model"})
+	// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
+	// TODO can probably be improved
+	if len(buildInstances) != 1 {
+		return nil, fmt.Errorf("the number of build instances is != 1")
+	}
+	buildInstance := buildInstances[0]
+
+	// check for errors on the instances
+	if buildInstance.Err != nil {
+		return nil, buildInstance.Err
+	}
+	return buildInstance, nil
+}
 
 type Loader interface {
 	Load() (int, int, error)
@@ -70,23 +89,10 @@ func (c *cueDefs) Load() (successfulLoadsCount, failedLoadsCount int, err error)
 		}
 
 		schemaPath := filepath.Join(c.schemasPath, file.Name())
-
-		// load the cue files into build.Instances slice
-		// package `model` is imposed so that we don't mix model-related files with migration-related files
-		buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: "model"})
-		// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
-		// TODO can probably be improved
-		if len(buildInstances) != 1 {
+		buildInstance, loadErr := Load(schemaPath)
+		if loadErr != nil {
 			failedLoadsCount++
-			logrus.Errorf("Plugin %s will not be loaded: The number of build instances is != 1", schemaPath)
-			continue
-		}
-		buildInstance := buildInstances[0]
-
-		// check for errors on the instances (these are typically parsing errors)
-		if buildInstance.Err != nil {
-			failedLoadsCount++
-			logrus.WithError(buildInstance.Err).Errorf("Plugin %s will not be loaded: file loading error", schemaPath)
+			logrus.WithError(loadErr).Errorf("plugin %q will no be loaded.", schemaPath)
 			continue
 		}
 
