@@ -21,6 +21,20 @@ if (*#panel.type | null) == "table" {
         }
 
         columnSettings: list.Concat([
+							for transformation in (*#panel.transformations | [])
+								if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
+									list.Concat([
+										[for columnName, displayName in (*transformation.options.renameByName | {}) {
+											name: {_nameBuilder & {#var: columnName}}.output
+											header: displayName
+										}],
+										[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
+											name: {_nameBuilder & {#var: columnName}}.output
+											hide: isExcluded
+										}]
+									])
+								}
+							,
             [for transformation in (*#panel.transformations | [])
                 if transformation.id == "organize" && len((*transformation.options.indexByName | {})) > 0
                 		// very smart trick going on here:
@@ -35,20 +49,6 @@ if (*#panel.type | null) == "table" {
 																		hide: transformation.options.excludeByName[columnName]
 																}
 												}
-            ],
-            [for transformation in (*#panel.transformations | [])
-                if transformation.id == "organize"  && len((*transformation.options.indexByName | {})) == 0 {
-									list.Concat([
-										[for columnName, displayName in (*transformation.options.renameByName | {}) {
-											name: {_nameBuilder & {#var: columnName}}.output
-											header: displayName
-										}],
-										[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
-											name: {_nameBuilder & {#var: columnName}}.output
-											hide: isExcluded
-										}]
-									])
-								}
             ],
             [for override in (*#panel.fieldConfig.overrides | [])
                 if override.matcher.id == "byName" && override.matcher.options != _|_ {

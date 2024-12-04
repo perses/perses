@@ -102,22 +102,20 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Rename using Transform \u003e Organize fields"
+            "name": "Rename using Transform > Organize fields"
           },
           "plugin": {
             "kind": "Table",
             "spec": {
               "columnSettings": [
-                [
-                  {
-                    "header": "bonjour",
-                    "name": "value"
-                  },
-                  {
-                    "header": "family",
-                    "name": "job"
-                  }
-                ]
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                }
               ],
               "density": "compact"
             }
@@ -151,16 +149,14 @@
             "kind": "Table",
             "spec": {
               "columnSettings": [
-                [
-                  {
-                    "header": "bonjour",
-                    "name": "value"
-                  },
-                  {
-                    "header": "family",
-                    "name": "job"
-                  }
-                ],
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
                 {
                   "header": "group",
                   "name": "family"
@@ -202,20 +198,18 @@
             "kind": "Table",
             "spec": {
               "columnSettings": [
-                [
-                  {
-                    "header": "hello",
-                    "name": "value"
-                  },
-                  {
-                    "hide": true,
-                    "name": "timestamp"
-                  },
-                  {
-                    "hide": false,
-                    "name": "value"
-                  }
-                ],
+                {
+                  "header": "hello",
+                  "name": "value"
+                },
+                {
+                  "hide": true,
+                  "name": "timestamp"
+                },
+                {
+                  "hide": false,
+                  "name": "value"
+                },
                 {
                   "name": "hello",
                   "width": 100
@@ -372,32 +366,28 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Duplicated rename using Transform \u003e Organize fields"
+            "name": "Duplicated rename using Transform > Organize fields"
           },
           "plugin": {
             "kind": "Table",
             "spec": {
               "columnSettings": [
-                [
-                  {
-                    "header": "bonjour",
-                    "name": "value"
-                  },
-                  {
-                    "header": "family",
-                    "name": "job"
-                  }
-                ],
-                [
-                  {
-                    "header": "Timestamp",
-                    "name": "timestamp"
-                  },
-                  {
-                    "header": "group",
-                    "name": "family"
-                  }
-                ]
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
+                {
+                  "header": "Timestamp",
+                  "name": "timestamp"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                }
               ],
               "density": "compact"
             }
@@ -425,32 +415,28 @@
         "kind": "Panel",
         "spec": {
           "display": {
-            "name": "Duplicated rename using Transform \u003e Organize fields + width using overrides"
+            "name": "Duplicated rename using Transform > Organize fields + width using overrides"
           },
           "plugin": {
             "kind": "Table",
             "spec": {
               "columnSettings": [
-                [
-                  {
-                    "header": "bonjour",
-                    "name": "value"
-                  },
-                  {
-                    "header": "family",
-                    "name": "job"
-                  }
-                ],
-                [
-                  {
-                    "header": "Timestamp",
-                    "name": "timestamp"
-                  },
-                  {
-                    "header": "group",
-                    "name": "family"
-                  }
-                ],
+                {
+                  "header": "bonjour",
+                  "name": "value"
+                },
+                {
+                  "header": "family",
+                  "name": "job"
+                },
+                {
+                  "header": "Timestamp",
+                  "name": "timestamp"
+                },
+                {
+                  "header": "group",
+                  "name": "family"
+                },
                 {
                   "name": "group",
                   "width": 150
