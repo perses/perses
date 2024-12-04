@@ -92,6 +92,12 @@ func TestMig_Migrate(t *testing.T) {
 			expectedPersesDashboardFile: "grafana_user_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a statushistory",
+			inputGrafanaDashboardFile:   "statushistory_grafana_dashboard.json",
+			expectedPersesDashboardFile: "statushistory_perses_dashboard.json",
+			expectedErrorStr:            "",
+		}
 	}
 	projectPath := testUtils.GetRepositoryPath()
 
