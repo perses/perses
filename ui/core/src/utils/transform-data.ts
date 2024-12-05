@@ -88,7 +88,7 @@ export function applyMergeColumnsTransform(
   data: Array<Record<string, unknown>>,
   selectedColumns: string[],
   outputName: string
-) {
+): Array<Record<string, unknown>> {
   const result: Array<Record<string, unknown>> = [];
 
   for (const row of data) {
@@ -137,7 +137,10 @@ export function applyMergeColumnsTransform(
  * |              | 1630000000   | 20    |             | titi        |
  * |              | 1630000000   | 10    |             | titi        |
  */
-export function applyMergeIndexedColumnsTransform(data: Array<Record<string, unknown>>, column: string) {
+export function applyMergeIndexedColumnsTransform(
+  data: Array<Record<string, unknown>>,
+  column: string
+): Array<Record<string, unknown>> {
   const result: Array<Record<string, unknown>> = [];
 
   for (const entry of data) {

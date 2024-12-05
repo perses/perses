@@ -52,3 +52,4 @@ export * from './theme';
 export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
 export * from './PieChart';
+export * from './StatusHistoryChart';

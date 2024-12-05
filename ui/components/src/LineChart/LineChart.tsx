@@ -216,7 +216,7 @@ export const LineChart = forwardRef<ChartInstance, LineChartProps>(function Line
 
   return (
     <Box
-      sx={{ height }}
+      style={{ height }}
       onClick={(e) => {
         // Pin and unpin when clicking on chart canvas but not tooltip text.
         if (tooltipConfig.enablePinning && e.target instanceof HTMLCanvasElement) {

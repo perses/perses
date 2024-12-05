@@ -14,14 +14,12 @@
 import {
   DatasourceSpec,
   DurationString,
-  formatDuration,
-  msToPrometheusDuration,
   Notice,
   parseDurationString,
   TimeSeries,
   TimeSeriesData,
 } from '@perses-dev/core';
-import { TimeSeriesQueryPlugin, replaceVariables, replaceVariable } from '@perses-dev/plugin-system';
+import { TimeSeriesQueryPlugin, replaceVariables } from '@perses-dev/plugin-system';
 import { fromUnixTime, milliseconds } from 'date-fns';
 import {
   parseValueTuple,
@@ -37,6 +35,7 @@ import {
 import { getFormattedPrometheusSeriesName } from '../../utils';
 import { DEFAULT_SCRAPE_INTERVAL, PrometheusDatasourceSpec } from '../types';
 import { PrometheusTimeSeriesQuerySpec } from './time-series-query-model';
+import { replacePromBuiltinVariables } from './replace-prom-builtin-variables';
 
 export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQuerySpec>['getTimeSeriesData'] = async (
   spec,
@@ -75,16 +74,9 @@ export const getTimeSeriesData: TimeSeriesQueryPlugin<PrometheusTimeSeriesQueryS
   end = alignedEnd;
 
   // Replace variable placeholders in PromQL query
-  const intervalMs = step * 1000; // step is in seconds
-  let query = replaceVariable(spec.query, '__interval_ms', intervalMs.toString());
-  query = replaceVariable(spec.query, '__interval', formatDuration(msToPrometheusDuration(intervalMs)));
-
-  const scrapeIntervalMs = minStep * 1000;
-  // The $__rate_interval variable is meant to be used in the rate function.
-  // It is defined as max($__interval + Scrape interval, 4 * Scrape interval), where Scrape interval is the Min step setting (a setting per PromQL query),
-  // if any is set, and otherwise the Scrape interval as set in the Prometheus datasource
-  const rateIntervalMs = Math.max(intervalMs + scrapeIntervalMs, 4 * scrapeIntervalMs);
-  query = replaceVariable(query, '__rate_interval', formatDuration(msToPrometheusDuration(rateIntervalMs)));
+  const intervalMs = step * 1000;
+  const minStepMs = minStep * 1000;
+  let query = replacePromBuiltinVariables(spec.query, minStepMs, intervalMs);
   query = replaceVariables(query, context.variableState);
 
   let seriesNameFormat = spec.seriesNameFormat;

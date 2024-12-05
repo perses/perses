@@ -16,19 +16,19 @@ package config
 import (
 	"time"
 
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-var defaultTimeRangeOptions = []model.Duration{
-	model.Duration(5 * time.Minute),
-	model.Duration(15 * time.Minute),
-	model.Duration(30 * time.Minute),
-	model.Duration(1 * time.Hour),
-	model.Duration(6 * time.Hour),
-	model.Duration(12 * time.Hour),
-	model.Duration(24 * time.Hour),
-	model.Duration(7 * 24 * time.Hour),
-	model.Duration(14 * 24 * time.Hour),
+var defaultTimeRangeOptions = []common.Duration{
+	common.Duration(5 * time.Minute),
+	common.Duration(15 * time.Minute),
+	common.Duration(30 * time.Minute),
+	common.Duration(1 * time.Hour),
+	common.Duration(6 * time.Hour),
+	common.Duration(12 * time.Hour),
+	common.Duration(24 * time.Hour),
+	common.Duration(7 * 24 * time.Hour),
+	common.Duration(14 * 24 * time.Hour),
 }
 
 type Explorer struct {
@@ -36,12 +36,8 @@ type Explorer struct {
 }
 
 type TimeRange struct {
-	DisableCustomTimeRange bool `json:"disable_custom" yaml:"disable_custom"`
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=array
-	// +kubebuilder:validation:Items.Type=string
-	// +kubebuilder:validation:Items.Format=duration
-	Options []model.Duration `json:"options,omitempty" yaml:"options,omitempty"`
+	DisableCustomTimeRange bool              `json:"disable_custom" yaml:"disable_custom"`
+	Options                []common.Duration `json:"options,omitempty" yaml:"options,omitempty"`
 }
 
 func (t *TimeRange) Verify() error {
@@ -62,8 +58,5 @@ type Frontend struct {
 	// ImportantDashboards contains important dashboard selectors
 	ImportantDashboards []dashboardSelector `json:"important_dashboards,omitempty" yaml:"important_dashboards,omitempty"`
 	// TimeRange contains the time range configuration for the dropdown
-	// +kubebuilder:validation:Schemaless
-	// +kubebuilder:validation:Type=string
-	// +kubebuilder:validation:Format=duration
 	TimeRange TimeRange `json:"time_range,omitempty" yaml:"time_range,omitempty"`
 }

@@ -21,6 +21,7 @@ import { ErrorAlert } from '@perses-dev/components';
 import CloseIcon from 'mdi-material-ui/Close';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PrometheusDatasourceSelector } from '../model';
+import { replacePromBuiltinVariables } from '../plugins/prometheus-time-series-query/replace-prom-builtin-variables';
 import { useParseQuery } from './parse';
 import TreeNode from './TreeNode';
 
@@ -50,7 +51,14 @@ export function PromQLEditor({ completeConfig, datasource, ...rest }: PromQLEdit
     return new PromQLExtension().activateLinter(false).setComplete(completeConfig).asExtension();
   }, [completeConfig]);
 
-  const queryExpr = useReplaceVariablesInString(rest.value);
+  let queryExpr = useReplaceVariablesInString(rest.value);
+  if (queryExpr) {
+    // TODO placeholder values for steps to be replaced with actual values
+    // Looks like providing proper values involves some refactoring: currently we'd need to rely on the timeseries query context,
+    // but these step values are actually computed independently / before the queries are getting fired, so it's useless to fire
+    // queries here, so maybe we should extract this part to independant hook(s), to be reused here?
+    queryExpr = replacePromBuiltinVariables(queryExpr, 12345, 12345);
+  }
 
   const { data: parseQueryResponse, isLoading, error } = useParseQuery(queryExpr ?? '', datasource, isTreeViewVisible);
   const errorMessage = useMemo(() => getErrMessage(error), [error]);

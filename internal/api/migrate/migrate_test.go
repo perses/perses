@@ -66,7 +66,7 @@ func TestMigrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
-			title:                       "dashboard with simple table panels, focused on validating the migration of column settings",
+			title:                       "dashboard with table panels, focused on validating the migration of column settings",
 			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
 			expectedPersesDashboardFile: "tables_perses_dashboard.json",
 			expectedErrorStr:            "",
@@ -81,6 +81,12 @@ func TestMigrate(t *testing.T) {
 			title:                       "dashboard with a bar gauge",
 			inputGrafanaDashboardFile:   "barchart_grafana_dashboard.json",
 			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with a piechart",
+			inputGrafanaDashboardFile:   "piechart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "piechart_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
 	}

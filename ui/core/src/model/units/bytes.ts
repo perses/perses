@@ -46,7 +46,7 @@ export const BYTES_UNIT_CONFIG: Readonly<Record<BytesUnit, UnitConfig>> = {
   },
 };
 
-export function formatBytes(bytes: number, { shortValues, decimalPlaces }: BytesFormatOptions) {
+export function formatBytes(bytes: number, { shortValues, decimalPlaces }: BytesFormatOptions): string {
   // If we're showing the entire value, we can use Intl.NumberFormat.
   if (!shouldShortenValues(shortValues) || Math.abs(bytes) < 1000) {
     const formatterOptions: Intl.NumberFormatOptions = {

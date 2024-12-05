@@ -12,5 +12,4 @@
 // limitations under the License.
 
 export * from './Table';
-export { getTableCellLayout } from './model/table-model';
-export type { TableColumnConfig, TableProps, TableDensity } from './model/table-model';
+export * from './model/table-model';

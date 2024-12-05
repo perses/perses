@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { PanelProps, QueryData, useDataQueries } from '@perses-dev/plugin-system';
-import { LoadingOverlay, Table, TableColumnConfig } from '@perses-dev/components';
-import { useMemo } from 'react';
+import { LoadingOverlay, Table, TableCellConfig, TableCellConfigs, TableColumnConfig } from '@perses-dev/components';
+import { useMemo, useState } from 'react';
 import { Labels, TimeSeries, TimeSeriesData, useTransformData } from '@perses-dev/core';
-import { TableCellConfig, TableCellConfigs } from '@perses-dev/components/dist/Table/model/table-model';
+import { SortingState } from '@tanstack/react-table';
 import { CellSettings, ColumnSettings, TableOptions } from './table-model';
 
 /*
@@ -213,6 +213,8 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return result;
   }, [data, keys, spec.cellSettings]);
 
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   if (isLoading || isFetching) {
     return <LoadingOverlay />;
   }
@@ -229,6 +231,9 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
       height={contentDimensions.height}
       width={contentDimensions.width}
       density={spec.density}
+      defaultColumnWidth={spec.defaultColumnWidth}
+      sorting={sorting}
+      onSortingChange={setSorting}
     />
   );
 }

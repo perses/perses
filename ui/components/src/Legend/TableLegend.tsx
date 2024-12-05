@@ -91,6 +91,7 @@ export function TableLegend({
       data={items}
       columns={columns}
       density="compact"
+      defaultColumnWidth="auto"
       getRowId={getRowId}
       getCheckboxColor={getCheckboxColor}
       checkboxSelection

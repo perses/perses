@@ -63,9 +63,10 @@ const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).m
 export interface LegendOptionsEditorProps {
   value?: LegendSpecOptions;
   onChange: (legend?: LegendSpecOptions) => void;
+  showValuesEditor?: boolean;
 }
 
-export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProps) {
+export function LegendOptionsEditor({ value, onChange, showValuesEditor = true }: LegendOptionsEditorProps) {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
     const legendValue = checked === true ? { position: DEFAULT_LEGEND.position } : undefined;
@@ -178,27 +179,29 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           ></SettingsAutocomplete>
         }
       />
-      <OptionsEditorControl
-        label="Values"
-        control={
-          // For some reason, the inferred option type doesn't always seem to work
-          // quite right when `multiple` is true. Explicitly setting the generics
-          // to work around this.
-          <SettingsAutocomplete<LegendValueOption, true, true>
-            multiple={true}
-            disableCloseOnSelect
-            disableClearable
-            value={legendValuesConfig}
-            options={VALUE_OPTIONS}
-            onChange={handleLegendValueChange}
-            disabled={value === undefined || currentMode !== 'table'}
-            limitTags={1}
-            ChipProps={{
-              size: 'small',
-            }}
-          />
-        }
-      />
+      {showValuesEditor && (
+        <OptionsEditorControl
+          label="Values"
+          control={
+            // For some reason, the inferred option type doesn't always seem to work
+            // quite right when `multiple` is true. Explicitly setting the generics
+            // to work around this.
+            <SettingsAutocomplete<LegendValueOption, true, true>
+              multiple={true}
+              disableCloseOnSelect
+              disableClearable
+              value={legendValuesConfig}
+              options={VALUE_OPTIONS}
+              onChange={handleLegendValueChange}
+              disabled={value === undefined || currentMode !== 'table'}
+              limitTags={1}
+              ChipProps={{
+                size: 'small',
+              }}
+            />
+          }
+        />
+      )}
     </OptionsEditorGroup>
   );
 }
