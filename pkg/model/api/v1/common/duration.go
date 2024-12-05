@@ -115,7 +115,8 @@ func ParseDuration(s string) (Duration, error) {
 			return 0, errors.New("duration out of range")
 		}
 	}
-	return Duration(dur), nil
+	// Conversion is safe as overflows has been verified in a previous step.
+	return Duration(dur), nil // nolint: gosec
 }
 
 func (d Duration) String() string {

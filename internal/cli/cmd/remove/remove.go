@@ -33,7 +33,7 @@ import (
 )
 
 // keyCombination is a struct that contains a combination of the project name and the name of the resource.
-// These two information are used to delete a unique resource.
+// The two information are used to delete a unique resource.
 // kind is used to instantiate the correct client.
 type keyCombination struct {
 	kind    modelV1.Kind
@@ -59,9 +59,9 @@ func (o *option) Complete(args []string) error {
 		o.Project = config.Global.Project
 	}
 	if len(o.File) == 0 {
-		// Then the user need to specify the resource type and the name of the resource to delete
+		// Then the user needs to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
-			return fmt.Errorf(resource.FormatMessage())
+			return errors.New(resource.FormatMessage())
 		}
 		var err error
 		o.kind, err = resource.GetKind(args[0])
@@ -72,7 +72,7 @@ func (o *option) Complete(args []string) error {
 			return fmt.Errorf("you have to specify the resource name you would like to delete")
 		}
 	}
-	// Set the API Client to used
+	// Set the API Client to use
 	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
@@ -168,9 +168,9 @@ func (o *option) setNamesFromFile() error {
 }
 
 func (o *option) setNamesFromDirectory() error {
-	entities, errors := file.UnmarshalEntitiesFromDirectory(o.Directory)
-	if len(errors) > 0 {
-		return errors[0]
+	entities, errs := file.UnmarshalEntitiesFromDirectory(o.Directory)
+	if len(errs) > 0 {
+		return errs[0]
 	}
 	o.setNames(entities)
 	return nil

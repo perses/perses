@@ -14,6 +14,7 @@
 package get
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -40,11 +41,11 @@ type option struct {
 }
 
 func (o *option) Complete(args []string) error {
-	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
+	// First, let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
 	if len(args) == 0 {
-		return fmt.Errorf(resource.FormatMessage())
+		return errors.New(resource.FormatMessage())
 	} else if len(args) == 2 {
-		// In second position in the arguments, you can have a prefix that will be used to filter the resources.
+		// In the second position in the arguments, you can have a prefix that will be used to filter the resources.
 		o.prefix = args[1]
 	} else if len(args) > 2 {
 		return fmt.Errorf("you cannot have more than two arguments for the command 'get'")

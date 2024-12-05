@@ -38,7 +38,7 @@ func Thresholds(thresholds common.Thresholds) Option {
 	}
 }
 
-func Max(max float64) Option {
+func Max(max float64) Option { // nolint: revive
 	return func(builder *Builder) error {
 		builder.Max = max
 		return nil
