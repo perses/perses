@@ -27,6 +27,9 @@ if (*#panel.type | null) == "stat" {
 			}
 		}
 
-		// nothing to map to the `sparkline` field yet
+		#sparkline: *#panel.options.graphMode | "none"
+		if #sparkline == "area" {
+			sparkline: {}
+		}
 	}
 },

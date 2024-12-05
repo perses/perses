@@ -298,6 +298,7 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last-number",
+              "sparkline": {},
               "format": {
                 "unit": "bytes/sec",
                 "decimalPlaces": 2
