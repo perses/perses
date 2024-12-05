@@ -32,8 +32,7 @@ datasources:
 variables:
   - <Variable specification> # Optional
 
-# `panels` is a map where the key is the reference of the panel. The value is the actual panel definition that describes
-# the kind of chart this panel is using. A panel can only hold one chart.
+# `panels` is a map where the key is the reference of the panel, and the value is the actual panel definition
 panels:
   <string>: <Panel specification> # Optional
 
@@ -81,11 +80,11 @@ kind: "Panel"
 spec:
   display: <Display specification>
 
-  # `plugin` is where you define the chart type to use.
-  # The chart type chosen should match one of the chart plugins known to the Perses instance.
+  # `plugin` is where you define the panel type to use.
+  # The panel type chosen should match one of the panel plugins known to the Perses instance.
   plugin: <Panel Plugin specification>
 
-  # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of chart & the type of datasource used.
+  # `queries` is the list of queries to be executed by the panel. The available types of query are conditioned by the type of panel & the type of datasource used.
   queries:
     - <Query specification> # Optional
 ```

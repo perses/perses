@@ -26,7 +26,7 @@ Perses aims to tackle multiple goals:
 1. Become a **standard** dashboard visualization tool for Prometheus and other datasources. It will focus on being
    GitOps-compatible and thus enabling a smooth Dashboard-as-Code workflow, via a new and well-defined dashboard
    definition model.
-2. Provide different npm packages, so that anyone that would like to embed charts and dashboards in their own UI could
+2. Provide different npm packages, so that anyone that would like to embed panels and dashboards in their own UI could
    benefit from the work achieved here. For example, these packages might be used in the future to improve the display
    of the data in the Prometheus UI.
 3. Offer a Kubernetes-native mode in which dashboard definitions can be deployed into and read from individual
