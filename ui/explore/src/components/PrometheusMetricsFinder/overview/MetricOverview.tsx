@@ -175,15 +175,17 @@ export function MetricOverview({
           }
           iconPosition="end"
         />
-        <Tab
-          label="Similar metrics"
-          icon={
-            <Tooltip title="All metrics matching current filters" placement="top">
-              <HelpCircleOutlineIcon />
-            </Tooltip>
-          }
-          iconPosition="end"
-        />
+        {filters.length > 0 && (
+          <Tab
+            label="Similar metrics"
+            icon={
+              <Tooltip title="All metrics matching current filters" placement="top">
+                <HelpCircleOutlineIcon />
+              </Tooltip>
+            }
+            iconPosition="end"
+          />
+        )}
       </Tabs>
       <Stack gap={1}>
         {tab === 0 && (
