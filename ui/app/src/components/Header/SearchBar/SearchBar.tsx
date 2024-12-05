@@ -118,7 +118,7 @@ export function SearchBar() {
       <Button size="small" fullWidth sx={{ display: 'flex', justifyContent: 'space-between' }} onClick={handleOpen}>
         <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
-          <Typography>Search ...</Typography>
+          <Typography>Search...</Typography>
         </Box>
         {!isMobileSize && <Chip label={`${shortcutCTRL()}+k`} size="small" />}
       </Button>

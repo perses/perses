@@ -112,6 +112,7 @@ export interface MetricOverviewProps extends StackProps {
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
+  isPanelEnabled?: boolean;
   onExplore?: (metricName: string) => void;
   onFiltersChange: (filters: LabelFilter[]) => void;
 }
@@ -121,6 +122,7 @@ export function MetricOverview({
   datasource,
   filters,
   isMetadataEnabled,
+  isPanelEnabled,
   onExplore,
   onFiltersChange,
   ...props
@@ -147,14 +149,16 @@ export function MetricOverview({
 
   return (
     <Stack sx={{ width: '100%' }} {...props}>
-      <OverviewPanel
-        metricName={metricName}
-        filters={filters}
-        datasource={datasource}
-        type={metadata?.type}
-        height="250px"
-        isLoading={isMetadataEnabled && isMetadataLoading}
-      />
+      {isPanelEnabled && (
+        <OverviewPanel
+          metricName={metricName}
+          filters={filters}
+          datasource={datasource}
+          type={metadata?.type}
+          height="250px"
+          isLoading={isMetadataEnabled && isMetadataLoading}
+        />
+      )}
       <Tabs
         value={tab}
         onChange={(_, state) => setTab(state)}

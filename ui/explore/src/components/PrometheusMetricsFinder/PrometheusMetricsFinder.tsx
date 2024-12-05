@@ -65,7 +65,15 @@ export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
             control={<Checkbox />}
             label="Enable Metadata"
             checked={value.isMetadataEnabled}
-            onClick={() => onChange({ isMetadataEnabled: !value.isMetadataEnabled })}
+            onClick={() => onChange({ ...value, isMetadataEnabled: !value.isMetadataEnabled })}
+          />
+        </MenuItem>
+        <MenuItem onClick={(e) => e.preventDefault()}>
+          <FormControlLabel
+            control={<Checkbox />}
+            label="Enable Time Series Chart"
+            checked={value.isPanelEnabled}
+            onClick={() => onChange({ ...value, isPanelEnabled: !value.isPanelEnabled })}
           />
         </MenuItem>
       </Menu>
@@ -113,7 +121,7 @@ export interface PrometheusMetricsFinderProps extends Omit<StackProps, 'onChange
   value: {
     datasource: DatasourceSelector;
     filters: LabelFilter[];
-    exploredMetric: string | undefined;
+    exploredMetric?: string;
   };
   onChange: ({
     datasource,
@@ -122,7 +130,7 @@ export interface PrometheusMetricsFinderProps extends Omit<StackProps, 'onChange
   }: {
     datasource: DatasourceSelector;
     filters: LabelFilter[];
-    exploredMetric: string | undefined;
+    exploredMetric?: string;
   }) => void;
   onExplore?: (metricName: string) => void;
 }
@@ -200,6 +208,7 @@ export function PrometheusMetricsFinder({
           datasource={datasource ?? DEFAULT_PROM}
           filters={filteredFilters}
           isMetadataEnabled={settings.isMetadataEnabled}
+          isPanelEnabled={settings.isPanelEnabled}
           onFiltersChange={setFilters}
           onExplore={onExplore}
         />

@@ -27,6 +27,7 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
+    "@nexucis/fuzzy": "^0.5.1",
     "@perses-dev/components": "0.49.0",
     "@perses-dev/core": "0.49.0",
     "@perses-dev/dashboards": "0.49.0",
