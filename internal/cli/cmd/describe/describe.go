@@ -57,10 +57,10 @@ func (o *option) Complete(args []string) error {
 	}
 	o.name = args[1]
 
-	// Complete the output
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
 	}
+
 	if !modelV1.IsGlobal(o.kind) {
 		// Complete the project only if the user want to get project resources
 		if projectErr := o.ProjectOption.Complete(); projectErr != nil {

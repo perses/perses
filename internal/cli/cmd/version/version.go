@@ -47,7 +47,6 @@ type option struct {
 }
 
 func (o *option) Complete(_ []string) error {
-	// Complete the output
 	if outputErr := o.OutputOption.Complete(); outputErr != nil {
 		return outputErr
 	}
