@@ -14,6 +14,7 @@
 package describe
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -40,7 +41,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf(resource.FormatMessage())
+		return errors.New(resource.FormatMessage())
 	}
 
 	var err error
