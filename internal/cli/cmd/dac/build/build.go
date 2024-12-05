@@ -51,17 +51,9 @@ func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'build'")
 	}
-
-	// Complete the output only if it has been set by the user
-	if len(o.Output) > 0 {
-		if outputErr := o.OutputOption.Complete(); outputErr != nil {
-			return outputErr
-		}
-	} else {
-		// Put explicitely a value when not provided, as we use it for file generation in Execute()
-		o.Output = output.YAMLOutput
+	if outputErr := o.OutputOption.Complete(); outputErr != nil {
+		return outputErr
 	}
-
 	return nil
 }
 
