@@ -109,7 +109,7 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
             maxHeight="80vh"
             value={panelDefinition}
             onChange={(json) => {
-              field.onChange(json);
+              field.onChange(JSON.parse(json));
               onJSONChange(json);
             }}
           />

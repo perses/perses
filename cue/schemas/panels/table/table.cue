@@ -13,13 +13,18 @@
 
 package model
 
-import "strings"
+import (
+	"strings"
+	"github.com/perses/perses/cue/schemas/common"
+)
 
 kind: "Table"
 spec: close({
-	density?: "compact" | "standard" | "comfortable"
+	density?:            "compact" | "standard" | "comfortable"
+	defaultColumnWidth?: "auto" | number
 	columnSettings?: [...#columnSettings]
 	cellSettings?: [...#cellSettings]
+	transforms?: [...common.#transform]
 })
 
 #columnSettings: {

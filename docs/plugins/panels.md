@@ -8,9 +8,9 @@ This documentation provides an exhaustive list of the panel plugins supported by
 kind: "BarChart"
 spec:
   calculation: <Calculation specification>
-  [ format: <Format specification> ]
-  [ sort: <enum = "asc" | "desc"> ]
-  [ mode: <enum = "value" | "percentage"> ]
+  format: <Format specification> # Optional
+  sort: <enum = "asc" | "desc"> # Optional
+  mode: <enum = "value" | "percentage"> # Optional
 ```
 
 ## GaugeChart
@@ -19,9 +19,9 @@ spec:
 kind: "GaugeChart"
 spec:
   calculation: <Calculation specification>
-  [ format: <Format specification> ]
-  [ thresholds: <Thresholds specification> ]
-  [ max: <int> ]
+  format: <Format specification> # Optional
+  thresholds: <Thresholds specification> # Optional
+  max: <int> # Optional
 ```
 
 ## Markdown
@@ -45,17 +45,17 @@ kind: "PieChart"
 kind: "StatChart"
 spec:
   calculation: <Calculation specification>
-  [ format: <Format specification> ]
-  [ thresholds: <Thresholds specification> ]
-  [ sparkline: <Sparkline specification> ]
-  [ valueFontSize: <int> ]
+  format: <Format specification> # Optional
+  thresholds: <Thresholds specification> # Optional
+  sparkline: <Sparkline specification> # Optional
+  valueFontSize: <int> # Optional
 ```
 
 ### Sparkline specification
 
 ```yaml
-[ color: <string> ]
-[ width: <int> ]
+color: <string> # Optional
+width: <int> # Optional
 ```
 
 ## ScatterChart
@@ -70,21 +70,21 @@ spec: # TODO document the spec of ScatterChart
 ```yaml
 kind: "Table"
 spec:
-  [ density: <enum = "compact" | "standard" | "comfortable"> ]
-  [ columnSettings: <Column Settings specification> ]
+  density: <enum = "compact" | "standard" | "comfortable"> # Optional
+  columnSettings: <Column Settings specification> # Optional
 ```
 
 ### Column Settings specification
 
 ```yaml
 name:  <string>
-[ header:  <string> ]
-[ headerDescription:  <string> ]
-[ cellDescription: <string> ]
-[ align: <enum = "left" | "center" | "right"> ]
-[ enableSorting: <boolean> ]
-[ width: <number | "auto"> ]
-[ hide: <boolean> ]
+header:  <string> # Optional
+headerDescription:  <string> # Optional
+cellDescription: <string> # Optional
+align: <enum = "left" | "center" | "right"> # Optional
+enableSorting: <boolean> # Optional
+width: <number | "auto"> # Optional
+hide: <boolean> # Optional
 ```
 
 ## TimeSeriesChart
@@ -92,55 +92,55 @@ name:  <string>
 ```yaml
 kind: "TimeSeriesChart"
 spec:
-  [ legend: <Legend specification> ]
-  [ tooltip: <Tooltip specification> ]
-  [ yAxis: <YAxis specification> ]
-  [ thresholds: <Thresholds specification> ]
-  [ visual: <Visual specification> ]
+  legend: <Legend specification> # Optional
+  tooltip: <Tooltip specification> # Optional
+  yAxis: <YAxis specification> # Optional
+  thresholds: <Thresholds specification> # Optional
+  visual: <Visual specification> # Optional
   querySettings:
-  - [ <Query Settings specification> ]
+  - <Query Settings specification> # Optional
 ```
 
 ### Legend specification
 
 ```yaml
 position: <enum = "bottom" | "right">
-[ mode: <enum = "list" | "table"> ]
-[ size: <enum = "small" | "medium"> ]
+mode: <enum = "list" | "table"> # Optional
+size: <enum = "small" | "medium"> # Optional
 values:
-  - [ <calculation> ]
+  - <calculation> # Optional
 ```
 
 ### Tooltip specification
 
 ```yaml
-[ enablePinning: <boolean | default = false> ]
+enablePinning: <boolean | default = false> # Optional
 ```
 
 ### YAxis specification
 
 ```yaml
-[ show: <boolean> ]
-[ label: <string> ]
-[ format: <format_spec> ]
-[ min: <int> ]
-[ max: <int> ]
+show: <boolean> # Optional
+label: <string> # Optional
+format: <format_spec> # Optional
+min: <int> # Optional
+max: <int> # Optional
 ```
 
 ### Visual specification
 
 ```yaml
-[ display: <enum = "line" | "bar"> ]
+display: <enum = "line" | "bar"> # Optional
 # Must be between 0.25 and 3
-[ lineWidth: <int> ]
+lineWidth: <int> # Optional
 # Must be between 0 and 1
-[ areaOpacity: <int> ]
-[ showPoints: <enum = "auto" | "always"> ]
-[ palette: <Palette specification> ]
+areaOpacity: <int> # Optional
+showPoints: <enum = "auto" | "always"> # Optional
+palette: <Palette specification> # Optional
 # Must be between 0 and 6
-[ pointRadius: <number> ]
-[ stack: <enum = "all" | "percent"> ]
-[ connectNulls: boolean | default = false ]
+pointRadius: <number> # Optional
+stack: <enum = "all" | "percent"> # Optional
+connectNulls: boolean | default = false # Optional
 ```
 
 #### Palette specification
@@ -206,53 +206,53 @@ The format spec is one of the following:
 
 ```yaml
 unit: <enum = "milliseconds" | "seconds" | "minutes" | "hours" | "days" | "weeks" | "months" | "years">
-[ decimalPlaces: <int> ]
+decimalPlaces: <int> # Optional
 ```
 
 #### Percent format
 
 ```yaml
 unit: <enum =  "percent" | "percent-decimal">
-[ decimalPlaces: <int> ]
+decimalPlaces: <int> # Optional
 ```
 
 #### Decimal format
 
 ```yaml
 unit: "decimal"
-[ decimalPlaces: <int> ]
-[ shortValues: <boolean> | default = false ]
+decimalPlaces: <int> # Optional
+shortValues: <boolean> | default = false # Optional
 ```
 
 #### Bytes format
 
 ```yaml
 unit: "bytes"
-[ decimalPlaces: <int> ]
-[ shortValues: <boolean> | default = false ]
+decimalPlaces: <int> # Optional
+shortValues: <boolean> | default = false # Optional
 ```
 
 #### Throughput format
 
 ```yaml
 unit: < enum = "counts/sec" | "events/sec" | "messages/sec" | "ops/sec" | "packets/sec" | "reads/sec" | "records/sec" | "requests/sec" | "rows/sec" | "writes/sec">
-[ decimalPlaces: <int> ]
-[ shortValues: <boolean> | default = false ]
+decimalPlaces: <int> # Optional
+shortValues: <boolean> | default = false # Optional
 ```
 
 ### Thresholds specification
 
 ```yaml
-[ mode: <enum = "percent" | "absolute"> ]
-[ defaultColor: string ]
+mode: <enum = "percent" | "absolute"> # Optional
+defaultColor: string # Optional
 steps:
-  - [ <Step specification> ]
+  - <Step specification> # Optional
 ```
 
 #### Step specification
 
 ```yaml
 value: <int>
-[ color: <string> ]
-[ name: <string> ]
+color: <string> # Optional
+name: <string> # Optional
 ```

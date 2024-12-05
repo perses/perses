@@ -64,11 +64,11 @@ spec: <Text Variable specification>
 # It is a mandatory attribute when you are defining a variable directly in a dashboard.
 # If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
 # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
-[ name: <string> ]
+name: <string> # Optional
 
-[ display: <Display specification> ]
+display: <Display specification> # Optional
 value: <string>
-[ constant: <boolean> | default = false ]
+constant: <boolean> | default = false # Optional
 ```
 
 #### Example
@@ -107,29 +107,29 @@ spec: <List Variable specification>
 # It is a mandatory attribute when you are defining a variable directly in a dashboard.
 # If you are creating a GlobalVariable or a Variable, you don't have to use this attribute as it is replaced by metadata.name.
 # This is the unique name of the variable that can be used in another variable or in the different dashboard to use
-[ name: <string> ]
+name: <string>
 
-[ display: <Display specification> ]
+display: <Display specification> # Optional
 
 # It's a value from the list to be selected by default
 # It can be a single value or a list.
-[ defaultValue: <string> | <array of string> ]
+defaultValue: <string> | <array of string> # Optional
 
 # Whether to append the "All" value that allows selecting all available values at once.
-[ allowAllValue: <boolean> | default = false ]
+allowAllValue: <boolean> | default = false # Optional
 
 # Whether to allow multi-selection of values.
-[ allMultiple: <boolean> | default = false ]
+allMultiple: <boolean> | default = false # Optional
 
 # It is a custom value that will be used if allowAllValue is true and if then `all` is selected
-[ customAllValue: <string> ]
+customAllValue: <string> # Optional
 
 # CapturingRegexp is the regexp used to catch and filter the result of the query.
 # If empty, then nothing is filtered. This is the equivalent of setting capturingRegexp with (.*)
-[ capturingRegexp: <string> ]
+capturingRegexp: <string> # Optional
 
 # The method to apply when rendering the list of values
-[ sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" ]
+sort: <enum = "none" | "alphabetical-asc" | "alphabetical-desc" | "numerical-asc" | "numerical-desc" | "alphabetical-ci-asc" | "alphabetical-ci-desc"> | default = "none" # Optional
 
 # The definition of the plugin variable
 plugin: <Plugin specification>
@@ -141,13 +141,13 @@ plugin: <Plugin specification>
 # The new name of the variable. If set, it will replace `metadata.name` in the variable title in the UI.
 # Note that it cannot be used when you are querying the API. Only `metadata.name` can be used to reference the variable.
 # This is just for display purpose.
-[ name: <string> ]
+name: <string> # Optional
 
 # The description of the variable
-[ description: <string> ]
+description: <string> # Optional
 
 # If true, the variable won't be displayed above the dashboard.
-[ hidden: <boolean> | default = false ]
+hidden: <boolean> | default = false # Optional
 ```
 
 #### Plugin definition

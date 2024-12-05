@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
+import { Definition, Transform } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -98,9 +98,17 @@ export interface TableDefinition extends Definition<TableOptions> {
  * The Options object type supported by the Table panel plugin.
  */
 export interface TableOptions {
+  // Change row height.
   density?: TableDensity;
+  // When true, the table will try to automatically adjust the width of columns to fit without overflowing.
+  // Only for column without custom width specified in columnSettings.
+  defaultColumnWidth?: 'auto' | number;
+  // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
+  // Customize cell display based on their value.
   cellSettings?: CellSettings[];
+  // Apply transforms to the data before rendering the table.
+  transforms?: Transform[];
 }
 
 /**

@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/perses/perses/go-sdk/common"
 	"github.com/perses/perses/go-sdk/datasource"
 	"github.com/perses/perses/go-sdk/panel"
 	panelgroup "github.com/perses/perses/go-sdk/panel-group"
@@ -81,7 +82,7 @@ func buildTargetStatusPanel() panelgroup.Option {
 			table.WithCellSettings([]table.CellSettings{
 				{
 					Condition: table.Condition{
-						Kind: "Value",
+						Kind: table.ValueConditionKind,
 						Spec: table.ValueConditionSpec{
 							Value: "1",
 						},
@@ -91,7 +92,7 @@ func buildTargetStatusPanel() panelgroup.Option {
 				},
 				{
 					Condition: table.Condition{
-						Kind: "Value",
+						Kind: table.ValueConditionKind,
 						Spec: table.ValueConditionSpec{
 							Value: "0",
 						},
@@ -100,6 +101,16 @@ func buildTargetStatusPanel() panelgroup.Option {
 					BackgroundColor: "#FF0000",
 				},
 			}),
+			table.Transform(
+				[]common.Transform{
+					{
+						Kind: common.JoinByColumValueKind,
+						Spec: common.JoinByColumnValueSpec{
+							Columns: []string{"instance"},
+						},
+					},
+				},
+			),
 		),
 		panel.AddQuery(
 			query.PromQL(fmt.Sprintf("up{%s}", filter)),
@@ -200,7 +211,6 @@ func TestDashboardBuilder(t *testing.T) {
 	)
 
 	builderOutput, marshErr := json.Marshal(builder.Dashboard)
-
 	outputJSONFilePath := filepath.Join("..", "..", "internal", "test", "dac", "expected_output.json")
 	expectedOutput, readErr := os.ReadFile(outputJSONFilePath)
 

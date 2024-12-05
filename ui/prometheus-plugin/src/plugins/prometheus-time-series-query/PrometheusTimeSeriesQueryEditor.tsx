@@ -110,7 +110,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         <TextField
           label="Min Step"
           placeholder={minStepPlaceholder}
-          helperText="Step parameter of the query. Used by $__interval and $__rate_interval too."
+          helperText="Lower bound for the step. If not provided, the scrape interval of the datasource is used."
           value={minStep}
           onChange={(e) => handleMinStepChange(e.target.value as DurationString)}
           onBlur={handleMinStepBlur}

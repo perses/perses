@@ -181,9 +181,10 @@ export function RoleList<T extends Role>(props: ListPropertiesWithCallbacks<T>) 
         <>
           <RoleDrawer
             role={targetedRole}
-            isOpen={isRoleDrawerOpened}
             action={action}
+            isOpen={isRoleDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleRoleSave}
             onDelete={(v) => onDelete(v).then(() => setRoleDrawerOpened(false))}
             onClose={() => setRoleDrawerOpened(false)}

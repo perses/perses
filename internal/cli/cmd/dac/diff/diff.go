@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/pkg/client/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -91,8 +92,12 @@ func (o *option) Execute() error {
 		if err != nil {
 			return err
 		}
-		if writeErr := os.WriteFile(path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name)), []byte(d), 0644); writeErr != nil { // nolint: gosec
+		filePath := path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name))
+		if writeErr := os.WriteFile(filePath, []byte(d), 0644); writeErr != nil { // nolint: gosec
 			return fmt.Errorf("unable to write the diff file: %w", writeErr)
+		}
+		if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s successfully created", filePath)); outputErr != nil {
+			return outputErr
 		}
 	}
 	return nil

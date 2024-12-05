@@ -125,15 +125,28 @@ export function TableCell({
       onFocus={handleFocus}
       onClick={handleInteractionFocusTrigger}
       onKeyUp={handleInteractionFocusTrigger}
+      style={{ width: width }}
       sx={{
-        width: width,
-        borderBottom: isHeader
-          ? (theme) => `solid 1px ${theme.palette.grey[100]}`
-          : `solid 1px ${theme.palette.grey[50]}`,
+        position: 'relative',
+        borderBottom: isHeader ? `solid 1px ${theme.palette.grey[100]}` : `solid 1px ${theme.palette.grey[50]}`,
+        '&:hover #original-cell': {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 10,
+          width: 'fit-content',
+          minWidth: '100%',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          backgroundColor: `${backgroundColor ?? theme.palette.background.default} !important`,
+          outline: `solid 1px ${theme.palette.info.main}`,
+          outlineOffset: '-1px',
+        },
       }}
       ref={elRef}
     >
       <Box
+        id="original-cell"
         sx={{
           ...getTableCellLayout(theme, density, { isLastColumn, isFirstColumn }),
           position: 'relative',

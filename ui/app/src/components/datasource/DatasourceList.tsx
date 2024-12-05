@@ -204,9 +204,10 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         <>
           <DatasourceDrawer
             datasource={targetedDatasource}
-            isOpen={isDatasourceDrawerOpened}
             action={action}
+            isOpen={isDatasourceDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleDatasourceSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
             onClose={() => setDatasourceDrawerOpened(false)}

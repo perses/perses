@@ -11,14 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, DispatchWithPromise } from '@perses-dev/core';
-import { Dispatch, DispatchWithoutAction } from 'react';
-
-export interface DrawerProps<T> {
-  isOpen: boolean;
-  action: Action;
-  isReadonly?: boolean;
-  onSave: Dispatch<T>;
-  onDelete?: DispatchWithPromise<T>;
-  onClose: DispatchWithoutAction;
-}
+export * from './FormActions';

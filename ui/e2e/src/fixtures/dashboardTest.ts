@@ -92,9 +92,6 @@ const IGNORE_CONSOLE_ERRORS = [
   // care about at this time. We track those here, so they can be ignored.
   // See https://github.com/emotion-js/emotion/issues/1105
   'potentially unsafe when doing server-side rendering',
-  // Ignore 404 not found errors that are likely raised by the tree view feature, that depends on a new endpoint potentially not available.
-  // TODO: Remove this once Prometheus 3.0 & compatible backends are widely available.
-  '404 (Not Found)',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage) {
   const msgText = message.text();

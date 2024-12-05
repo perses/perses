@@ -240,6 +240,7 @@ export function SecretList<T extends Secret>({
             isOpen={isSecretDrawerOpened}
             action={action}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleSecretSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteSecretDialogOpened(false))}
             onClose={() => setSecretDrawerOpened(false)}

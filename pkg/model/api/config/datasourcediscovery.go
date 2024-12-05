@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"github.com/perses/perses/pkg/client/config"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
-const defaultRefreshInterval = model.Duration(time.Minute * 5)
+const defaultRefreshInterval = common.Duration(time.Minute * 5)
 
 type HTTPDiscovery struct {
 	config.RestConfigClient `json:",inline" yaml:",inline"`
@@ -80,7 +80,7 @@ type GlobalDatasourceDiscovery struct {
 	// The name of the discovery config. It is used for logging purposes only
 	DiscoveryName string `json:"discovery_name" yaml:"discovery_name"`
 	// Refresh interval to re-query the endpoint.
-	RefreshInterval model.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
+	RefreshInterval common.Duration `json:"refresh_interval,omitempty" yaml:"refresh_interval,omitempty"`
 	// HTTP-based service discovery provides a more generic way to generate a set of global datasource and serves as an interface to plug in custom service discovery mechanisms.
 	// It fetches an HTTP endpoint containing a list of zero or more global datasources.
 	// The target must reply with an HTTP 200 response.

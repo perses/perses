@@ -188,11 +188,17 @@ func Write(cfg *Config) error {
 				if restConfig.Authorization != nil {
 					previousConf.RestClientConfig.Authorization = restConfig.Authorization
 				}
+				if restConfig.OAuth != nil {
+					previousConf.RestClientConfig.OAuth = restConfig.OAuth
+				}
+				if restConfig.BasicAuth != nil {
+					previousConf.RestClientConfig.BasicAuth = restConfig.BasicAuth
+				}
+				if restConfig.NativeAuth != nil {
+					previousConf.RestClientConfig.NativeAuth = restConfig.NativeAuth
+				}
 				if len(restConfig.Headers) > 0 {
 					previousConf.RestClientConfig.Headers = restConfig.Headers
-				}
-				if restConfig.Auth != nil {
-					previousConf.RestClientConfig.Auth = restConfig.Auth
 				}
 			}
 			if len(cfg.Project) > 0 {
@@ -207,6 +213,29 @@ func Write(cfg *Config) error {
 	}
 
 	data, err := json.Marshal(previousConf)
+
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(filePath, data, 0600)
+}
+
+func WriteFromScratch(cfg *Config) error {
+	// this value has been set by the root command, and that will be the path where the config must be saved
+	filePath := Global.filePath
+	directory := filepath.Dir(filePath)
+
+	if _, err := os.Stat(directory); os.IsNotExist(err) {
+		mkdirError := os.Mkdir(directory, 0700)
+		if mkdirError != nil {
+			return err
+		}
+	} else if err != nil {
+		return err
+	}
+
+	data, err := json.Marshal(cfg)
 
 	if err != nil {
 		return err

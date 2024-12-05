@@ -13,6 +13,10 @@
 
 package table
 
+import (
+	"github.com/perses/perses/go-sdk/common"
+)
+
 func WithDensity(density Density) Option {
 	return func(builder *Builder) error {
 		builder.Density = density
@@ -32,5 +36,11 @@ func WithCellSettings(settings []CellSettings) Option {
 		builder.CellSettings = settings
 		return nil
 	}
+}
 
+func Transform(transforms []common.Transform) Option {
+	return func(builder *Builder) error {
+		builder.Transforms = transforms
+		return nil
+	}
 }

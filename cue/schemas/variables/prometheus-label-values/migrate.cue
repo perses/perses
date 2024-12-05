@@ -3,16 +3,16 @@
 if #var.type == "query" if (#var.query & string) != _|_ if #var.query =~ "^label_values\\(.*\\)$" {
 	kind: "PrometheusLabelValuesVariable"
 	spec: {
-		#matches: regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query)
+		#matches:  regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query)
 		labelName: #matches[3]
-		matchers: [ if #matches[2] != "" { #matches[2] } ]
+		matchers: [if #matches[2] != "" {#matches[2]}]
 	}
 },
 if #var.type == "query" if (#var.query & {}) != _|_ if #var.query.query =~ "^label_values\\(.*\\)$" {
 	kind: "PrometheusLabelValuesVariable"
 	spec: {
-		#matches: regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query.query)
+		#matches:  regexp.FindSubmatch("^label_values\\(((.*),)?\\s*?([a-zA-Z0-9-_]+)\\)$", #var.query.query)
 		labelName: #matches[3]
-		matchers: [ if #matches[2] != "" { #matches[2] } ]
+		matchers: [if #matches[2] != "" {#matches[2]}]
 	}
 },

@@ -29,7 +29,7 @@ import (
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -40,7 +40,7 @@ type previewResponse struct {
 	Preview   string `json:"preview" yaml:"preview"`
 }
 
-func newEphemeralDashboard(project string, name string, ttl model.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
+func newEphemeralDashboard(project string, name string, ttl common.Duration, dashboard *modelV1.Dashboard) *modelV1.EphemeralDashboard {
 	return &modelV1.EphemeralDashboard{
 		Kind: modelV1.KindEphemeralDashboard,
 		Metadata: modelV1.ProjectMetadata{
@@ -64,7 +64,7 @@ type option struct {
 	writer       io.Writer
 	errWriter    io.Writer
 	apiClient    api.ClientInterface
-	ttl          model.Duration
+	ttl          common.Duration
 	ttlAsAString string
 	prefix       string
 }
@@ -84,7 +84,7 @@ func (o *option) Complete(args []string) error {
 		return err
 	}
 	o.apiClient = apiClient
-	ttl, err := model.ParseDuration(o.ttlAsAString)
+	ttl, err := common.ParseDuration(o.ttlAsAString)
 	if err != nil {
 		return err
 	}
@@ -101,6 +101,9 @@ func (o *option) Execute() error {
 	for _, dashboard := range o.dashboards {
 		project := resource.GetProject(dashboard.GetMetadata(), o.Project)
 		name := o.computeEphemeralDashboardName(dashboard.Metadata.Name)
+		if dashboard.Spec.Display != nil && len(o.prefix) > 0 {
+			dashboard.Spec.Display.Name = fmt.Sprintf("%s-", dashboard.Spec.Display.Name)
+		}
 		ephemeralDashboard := newEphemeralDashboard(project, name, o.ttl, dashboard)
 		svc, svcErr := service.New(modelV1.KindEphemeralDashboard, project, o.apiClient)
 		if svcErr != nil {

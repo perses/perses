@@ -2,7 +2,7 @@ FROM alpine AS build-env
 RUN apk add --update --no-cache mailcap
 RUN mkdir /perses
 
-FROM gcr.io/distroless/static-debian11:debug
+FROM gcr.io/distroless/static-debian12:debug
 
 LABEL maintainer="The Perses Authors <perses-team@googlegroups.com>"
 

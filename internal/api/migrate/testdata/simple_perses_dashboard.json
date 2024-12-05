@@ -20,6 +20,7 @@
             "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
             "hidden": false
           },
+          "defaultValue": "one",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -149,6 +150,7 @@
             "description": "ad hoc filter",
             "hidden": false
           },
+          "defaultValue": "1m",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -297,7 +299,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "bytes/sec"
+                "unit": "bytes/sec",
+                "decimalPlaces": 2
               },
               "thresholds": {
                 "steps": [
@@ -344,7 +347,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "hours"
+                "unit": "hours",
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [
@@ -403,6 +407,11 @@
                   "sum"
                 ]
               },
+              "yAxis": {
+                "format": {
+                  "decimalPlaces": 3
+                }
+              },
               "visual": {
                 "areaOpacity": 0,
                 "connectNulls": true,
@@ -441,12 +450,32 @@
             "spec": {
               "columnSettings": [
                 {
+                  "header": "",
+                  "name": "timestamp"
+                },
+                {
+                  "header": "ValueCustomHeader",
+                  "name": "value"
+                },
+                {
+                  "header": "API server",
+                  "name": "apiserver"
+                },
+                {
                   "hide": true,
-                  "name": "Time"
+                  "name": "timestamp"
                 },
                 {
                   "hide": true,
                   "name": "__name__"
+                },
+                {
+                  "name": "API server",
+                  "width": 300
+                },
+                {
+                  "name": "endpoint",
+                  "width": 75
                 }
               ],
               "density": "compact"

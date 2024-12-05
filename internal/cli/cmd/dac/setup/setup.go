@@ -23,16 +23,17 @@ import (
 
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
 	"github.com/perses/perses/internal/cli/config"
+	"github.com/perses/perses/internal/cli/cue"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/perses/perses/internal/cli/sources"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"golang.org/x/mod/semver"
 )
 
 const (
-	minVersion  = "v0.47.0"
-	cueLanguage = "cue"
-	goLanguage  = "go"
+	cueLanguage    = "cue"
+	goLanguage     = "go"
+	cueSchemasPath = "cue/"
 )
 
 func addOutputDirToGitignore() error {
@@ -85,26 +86,11 @@ func (o *option) Complete(args []string) error {
 		return fmt.Errorf("no args are supported by the command 'setup'")
 	}
 
-	// If no version provided, let's try to get the version from the Perses server
-	if o.version == "" {
-		logrus.Debug("version flag not provided, retrieving version from Perses server..")
-		apiClient, err := config.Global.GetAPIClient()
-		if err != nil {
-			return fmt.Errorf("you need to either provide a version or be connected to a Perses server")
-		}
-
-		health, err := apiClient.V1().Health().Check()
-		if err != nil {
-			logrus.WithError(err).Debug("can't reach Perses server")
-			return fmt.Errorf("can't retrieve version from Perses server")
-		}
-		o.version = health.Version
+	version, err := sources.GetProperVersion(o.version)
+	if err != nil {
+		return err
 	}
-
-	// Add "v" prefix to the version if not present
-	if !strings.HasPrefix(o.version, "v") {
-		o.version = fmt.Sprintf("v%s", o.version)
-	}
+	o.version = version
 
 	o.language = strings.ToLower(o.language)
 
@@ -112,14 +98,8 @@ func (o *option) Complete(args []string) error {
 }
 
 func (o *option) Validate() error {
-	// Validate the format of the provided version
-	if !semver.IsValid(o.version) {
-		return fmt.Errorf("invalid version: %s", o.version)
-	}
-
-	// Verify that it is >= to the minimum required version
-	if semver.Compare(o.version, minVersion) == -1 {
-		return fmt.Errorf("version should be at least %s or higher", minVersion)
+	if err := sources.EnsureMinValidVersion(o.version); err != nil {
+		return err
 	}
 
 	if o.language != cueLanguage && o.language != goLanguage {
@@ -146,12 +126,22 @@ func (o *option) Execute() error {
 		logrus.WithError(err).Warningf("unable to add the '%s' folder to .gitignore", config.Global.Dac.OutputFolder)
 	}
 
+	// Install dependencies
 	if o.language == cueLanguage {
-		if err := o.setupCue(); err != nil {
+		if err := cue.InstallCueDepsFromSources(cueSchemasPath, o.version); err != nil {
+			return fmt.Errorf("error installing the Perses CUE schemas as dependencies: %v", err)
+		}
+	} else if o.language == goLanguage {
+		if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
+			return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
+		} else if err != nil {
 			return err
 		}
-	} else if err := o.setupGo(); err != nil {
-		return err
+		if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
+			return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
+		}
+	} else {
+		return fmt.Errorf("language %q is not supported", o.language)
 	}
 
 	return output.HandleString(o.writer, "DaC setup finished")

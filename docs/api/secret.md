@@ -33,55 +33,55 @@ See the next section to get details about the `<secret_specification>`
 ## Secret specification
 
 ```yaml
-[ basicAuth: <Basic Auth specification> ]
+basicAuth: <Basic Auth specification> # Optional
 
 # The HTTP authorization credentials for the targets.
 # Basic Auth and authorization are mutually exclusive. Use one or the other not both at the same time.
-[ authorization: <Authorization specification> ]
+authorization: <Authorization specification> # Optional
 
 # Config used to connect to the targets.
-[ tlsConfig: <TLS Config specification> ]
+tlsConfig: <TLS Config specification> # Optional
 ```
 
 ### Basic Auth specification
 
 ```yaml
 username: <string>
-[ password: <string> ]
-[ passwordFile: <filename> ]
+password: <string> # Optional
+passwordFile: <filename> # Optional
 ```
 
 ### Authorization specification
 
 ```yaml
-[ type: <string> | default = "Bearer" ]
+type: <string> | default = "Bearer" # Optional
 
 # The HTTP credentials like a Bearer token
-[ credentials: <string> ]
-[ credentialsFile: <filename> ]
+credentials: <string> # Optional
+credentialsFile: <filename> # Optional
 ```
 
 ### TLS Config specification
 
 ```yaml
 # CA certificate to validate API server certificate with. At most one of ca and ca_file is allowed.
-[ ca: <secret> ]
-[ caFile: <filename> ]
+ca: <secret> # Optional
+caFile: <filename> # Optional
 
 # Certificate and key for client cert authentication to the server.
 # At most one of cert and cert_file is allowed.
 # At most one of key and key_file is allowed.
-[ cert: <secret> ]
-[ certFile: <filename> ]
-[ key: <secret> ]
-[ keyFile: <filename> ]
+cert: <secret> # Optional
+certFile: <filename> # Optional
+key: <secret> # Optional
+keyFile: <filename> # Optional
 
 # ServerName extension to indicate the name of the server.
 # https://tools.ietf.org/html/rfc4366#section-3.1
-[ serverName: <string> ]
+serverName: <string> # Optional
 
 # Disable validation of the server certificate.
-[ insecureSkipVerify: <boolean> | default = false ]
+insecureSkipVerify: <boolean> | default = false # Optional
 ```
 
 ### Example

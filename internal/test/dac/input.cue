@@ -31,13 +31,13 @@ import (
 )
 
 #myVarsBuilder: varGroupBuilder & {
+	#input: [for i in #input {#datasourceName: "promDemo"}]
 	#input: [
 		labelValuesVarBuilder & {
 			#name: "stack"
 			#display: name: "PaaS"
 			#metric:          "thanos_build_info"
 			#label:           "stack"
-			#datasourceName:  "promDemo"
 			#capturingRegexp: "(.+)"
 		},
 		textVarBuilder & {
@@ -51,22 +51,19 @@ import (
 			#values: ["observability", "monitoring"]
 		},
 		promQLVarBuilder & {
-			#name:           "namespace"
-			#metric:         "kube_namespace_labels"
-			#allowMultiple:  true
-			#datasourceName: "promDemo"
+			#name:          "namespace"
+			#metric:        "kube_namespace_labels"
+			#allowMultiple: true
 		},
 		labelNamesVarBuilder & {
-			#name:           "namespaceLabels"
-			#metric:         "kube_namespace_labels"
-			#datasourceName: "promDemo"
+			#name:   "namespaceLabels"
+			#metric: "kube_namespace_labels"
 		},
 		promQLVarBuilder & {
-			#name:           "pod"
-			#query:          "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})"
-			#allowAllValue:  true
-			#allowMultiple:  true
-			#datasourceName: "promDemo"
+			#name:          "pod"
+			#query:         "group by (pod) (kube_pod_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\"})"
+			#allowAllValue: true
+			#allowMultiple: true
 		},
 		promQLVarBuilder & {
 			#name:           "container"
@@ -74,7 +71,6 @@ import (
 			#allowAllValue:  true
 			#allowMultiple:  true
 			#customAllValue: ".*"
-			#datasourceName: "promDemo"
 		},
 		labelNamesVarBuilder & {
 			#name: "containerLabels"
@@ -82,9 +78,8 @@ import (
 				description: "simply the list of labels for the considered metric"
 				hidden:      true
 			}
-			#query:          "kube_pod_container_info{stack=~\"$stack\",prometheus=~\"$prometheus\",prometheus_namespace=~\"$prometheus_namespace\",namespace=~\"$namespace\",pod=~\"$pod\",container=~\"$container\"}"
-			#datasourceName: "promDemo"
-			#sort:           "alphabetical-ci-desc"
+			#query: "kube_pod_container_info{\(#filter)}"
+			#sort:  "alphabetical-ci-desc"
 		},
 	]
 }
@@ -142,28 +137,38 @@ import (
 	spec: {
 		display: name: "Target status"
 		plugin: table & {
-			spec: cellSettings: [
-				{
-					condition: {
-						kind: "Value"
-						spec: {
-							value: "1"
+			spec: {
+				cellSettings: [
+					{
+						condition: {
+							kind: "Value"
+							spec: {
+								value: "1"
+							}
 						}
-					}
-					text:            "UP"
-					backgroundColor: "#00FF00"
-				},
-				{
-					condition: {
-						kind: "Value"
-						spec: {
-							value: "0"
+						text:            "UP"
+						backgroundColor: "#00FF00"
+					},
+					{
+						condition: {
+							kind: "Value"
+							spec: {
+								value: "0"
+							}
 						}
-					}
-					text:            "DOWN"
-					backgroundColor: "#FF0000"
-				},
-			]
+						text:            "DOWN"
+						backgroundColor: "#FF0000"
+					},
+				]
+				transforms: [
+					{
+						kind: "JoinByColumnValue"
+						spec: {
+							columns: ["instance"]
+						}
+					},
+				]
+			}
 		}
 		queries: [
 			{

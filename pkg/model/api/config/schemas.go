@@ -16,7 +16,7 @@ package config
 import (
 	"time"
 
-	"github.com/prometheus/common/model"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 )
 
 const (
@@ -28,11 +28,11 @@ const (
 )
 
 type Schemas struct {
-	PanelsPath      string         `json:"panels_path,omitempty" yaml:"panels_path,omitempty"`
-	QueriesPath     string         `json:"queries_path,omitempty" yaml:"queries_path,omitempty"`
-	DatasourcesPath string         `json:"datasources_path,omitempty" yaml:"datasources_path,omitempty"`
-	VariablesPath   string         `json:"variables_path,omitempty" yaml:"variables_path,omitempty"`
-	Interval        model.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
+	PanelsPath      string          `json:"panels_path,omitempty" yaml:"panels_path,omitempty"`
+	QueriesPath     string          `json:"queries_path,omitempty" yaml:"queries_path,omitempty"`
+	DatasourcesPath string          `json:"datasources_path,omitempty" yaml:"datasources_path,omitempty"`
+	VariablesPath   string          `json:"variables_path,omitempty" yaml:"variables_path,omitempty"`
+	Interval        common.Duration `json:"interval,omitempty" yaml:"interval,omitempty"`
 }
 
 func (s *Schemas) Verify() error {
@@ -49,7 +49,7 @@ func (s *Schemas) Verify() error {
 		s.VariablesPath = DefaultVariablesPath
 	}
 	if s.Interval <= 0 {
-		s.Interval = model.Duration(defaultInterval)
+		s.Interval = common.Duration(defaultInterval)
 	}
 	return nil
 }

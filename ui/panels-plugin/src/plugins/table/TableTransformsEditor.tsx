@@ -11,23 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package setup
+import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { Transform } from '@perses-dev/core';
+import { TransformsEditor } from '@perses-dev/components';
+import { TableOptions } from './table-model';
 
-import (
-	"fmt"
-	"os"
-	"os/exec"
-)
+export type TableSettingsEditorProps = OptionsEditorProps<TableOptions>;
 
-func (o *option) setupGo() error {
-	if _, err := os.Stat("go.mod"); os.IsNotExist(err) {
-		return fmt.Errorf("unable to find the file 'go.mod'. Please run 'go mod init'")
-	} else if err != nil {
-		return err
-	}
+export function TableTransformsEditor({ value, onChange }: TableSettingsEditorProps) {
+  function handleTransformsChange(transforms: Transform[]): void {
+    onChange({ ...value, transforms: transforms });
+  }
 
-	if err := exec.Command("go", "get", fmt.Sprintf("github.com/perses/perses@%s", o.version)).Run(); err != nil { // nolint: gosec
-		return fmt.Errorf("unable to get the go dependencies github.com/perses/perses@%s : %w", o.version, err)
-	}
-	return nil
+  return <TransformsEditor value={value.transforms ?? []} onChange={handleTransformsChange} />;
 }
