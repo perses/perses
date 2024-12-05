@@ -109,7 +109,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6.1.1
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.56.2
+          version: v1.62.2
           args: --timeout 5m
   cue-eval:
     name: cue
