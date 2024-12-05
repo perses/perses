@@ -12,30 +12,19 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import {
-  Button,
-  Divider,
-  InputAdornment,
-  Skeleton,
-  Stack,
-  StackProps,
-  TableCell,
-  TextField,
-  Typography,
-} from '@mui/material';
+import { Button, Divider, Skeleton, Stack, StackProps, TableCell, Typography } from '@mui/material';
 import { TableVirtuoso } from 'react-virtuoso';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
-import React, { ReactNode, useMemo, useState } from 'react';
-import Magnify from 'mdi-material-ui/Magnify';
-import { Fuzzy } from '@nexucis/fuzzy';
+import React, { ReactNode, useMemo } from 'react';
+import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
 import { LabelFilter } from '../../types';
 import { useMetricMetadata } from '../../utils';
 import { useExplorerQueryParams } from '../../../ExploreManager/query-params';
 import { MetricChip } from '../MetricChip';
 
 export interface MetricRowProps {
-  children: ReactNode;
+  children?: ReactNode;
   metricName: string;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
@@ -53,7 +42,7 @@ export function MetricRow({ children, metricName, datasource, filters, isMetadat
   return (
     <>
       <TableCell style={{ width: '300px' }}>
-        <Typography sx={{ fontFamily: 'monospace' }}>{children}</Typography>
+        <Typography sx={{ fontFamily: 'monospace' }}>{children ?? metricName}</Typography>
       </TableCell>
 
       <TableCell style={{ width: 115, textAlign: 'center' }}>
@@ -91,6 +80,7 @@ export function MetricRow({ children, metricName, datasource, filters, isMetadat
 
 export interface MetricListProps extends StackProps {
   metricNames: string[];
+  filteredResults?: Array<{ original: string; intervals?: FuzzyMatchingInterval[] }>;
   datasource: DatasourceSelector;
   filters: LabelFilter[];
   isMetadataEnabled?: boolean;
@@ -99,43 +89,30 @@ export interface MetricListProps extends StackProps {
 
 export function MetricList({
   metricNames,
+  filteredResults,
   datasource,
   filters,
   isMetadataEnabled,
   onExplore,
   ...props
 }: MetricListProps) {
-  const [search, setSearch] = useState('');
+  const fuzzy = new Fuzzy();
 
-  const fuzzy = useMemo(() => new Fuzzy({ includeMatches: true, excludedChars: [' '] }), []);
-
-  const filteredMetricNames = useMemo(() => {
-    if (!search) {
-      return metricNames.map((metricName) => ({ original: metricName, intervals: [] }));
+  const fuzzyMetrics: Array<{ original: string; intervals?: FuzzyMatchingInterval[] }> = useMemo(() => {
+    if (filteredResults) {
+      return filteredResults;
     }
-    return fuzzy.filter(search, metricNames).sort((a, b) => b.score - a.score);
-  }, [fuzzy, metricNames, search]);
+    return metricNames.map((metricName) => ({ original: metricName }));
+  }, [filteredResults, metricNames]);
 
   return (
     <Stack gap={2} width="100%" divider={<Divider orientation="horizontal" flexItem />} {...props}>
-      <TextField
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Search metric name..."
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Magnify />
-            </InputAdornment>
-          ),
-        }}
-      />
       <TableVirtuoso
         style={{ height: '70vh', width: '100%' }}
-        totalCount={filteredMetricNames.length}
+        totalCount={fuzzyMetrics.length}
         itemContent={(index) => (
           <MetricRow
-            metricName={filteredMetricNames[index]!.original}
+            metricName={fuzzyMetrics[index]!.original}
             datasource={datasource}
             filters={filters}
             isMetadataEnabled={isMetadataEnabled}
@@ -143,7 +120,7 @@ export function MetricList({
           >
             <span
               dangerouslySetInnerHTML={{
-                __html: fuzzy.render(filteredMetricNames[index]!.original, filteredMetricNames[index]!.intervals!, {
+                __html: fuzzy.render(fuzzyMetrics[index]!.original, fuzzyMetrics[index]!.intervals ?? [], {
                   pre: '<strong style="color:darkorange">',
                   post: '</strong>',
                   escapeHTML: true,

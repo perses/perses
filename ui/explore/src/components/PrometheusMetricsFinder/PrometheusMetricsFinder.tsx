@@ -17,19 +17,23 @@ import {
   CircularProgress,
   FormControlLabel,
   IconButton,
+  InputAdornment,
   Menu,
   MenuItem,
   Stack,
   StackProps,
+  TextField,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
-import { MouseEvent, useMemo, useState } from 'react';
+import React, { MouseEvent, useMemo, useState } from 'react';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
 import { Link as RouterLink } from 'react-router-dom';
+import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
+import Magnify from 'mdi-material-ui/Magnify';
 import { useExplorerQueryParams } from '../ExploreManager/query-params';
 import { LabelFilter, Settings } from './types';
 import { FinderFilters } from './filter/FinderFilters';
@@ -96,6 +100,15 @@ export function MetricNameExplorer({
   ...props
 }: MetricNameExplorerProps) {
   const { data, isLoading } = useLabelValues('__name__', filters, datasource);
+  const [search, setSearch] = useState('');
+  const fuzzy = useMemo(() => new Fuzzy({ includeMatches: true, excludedChars: [' '] }), []);
+
+  const filteredResults: Array<{ original: string; intervals?: FuzzyMatchingInterval[] }> | undefined = useMemo(() => {
+    if (search && data?.data) {
+      return fuzzy.filter(search, data.data).sort((a, b) => b.score - a.score);
+    }
+    return undefined;
+  }, [data, fuzzy, search]);
 
   if (isLoading) {
     return (
@@ -106,14 +119,28 @@ export function MetricNameExplorer({
   }
 
   return (
-    <MetricList
-      metricNames={data?.data ?? []}
-      datasource={datasource}
-      filters={filters}
-      isMetadataEnabled={isMetadataEnabled}
-      onExplore={onExplore}
-      {...props}
-    />
+    <Stack {...props}>
+      <TextField
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search metric name..."
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Magnify />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <MetricList
+        metricNames={data?.data ?? []}
+        filteredResults={filteredResults}
+        datasource={datasource}
+        filters={filters}
+        isMetadataEnabled={isMetadataEnabled}
+        onExplore={onExplore}
+      />
+    </Stack>
   );
 }
 
