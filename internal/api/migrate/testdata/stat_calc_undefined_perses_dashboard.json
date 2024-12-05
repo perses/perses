@@ -23,6 +23,7 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last",
+              "sparkline": {},
               "thresholds": {
                 "steps": [
                   {

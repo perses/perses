@@ -1,4 +1,4 @@
-if (*#panel.type | null) == "stat" {
+ if (*#panel.type | null) == "stat" {
 	kind: "StatChart"
 	spec: {
 		calculation: *#mapping.calc[#panel.options.reduceOptions.calcs[0]] | #defaultCalc // only consider [0] here as Perses's GaugeChart doesn't support individual calcs
@@ -27,6 +27,9 @@ if (*#panel.type | null) == "stat" {
 			}
 		}
 
-		// nothing to map to the `sparkline` field yet
+		#sparkline: *#panel.options.graphMode | "none"
+		if #sparkline == "area" {
+			sparkline: {}
+		}
 	}
-},
+}
