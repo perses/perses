@@ -22,6 +22,9 @@ if (*#panel.type | null) == "table" {
 
 		columnSettings: list.Concat([
 			for transformation in (*#panel.transformations | [])
+			// In Grafana, when ordering column at least one column, it will give an index to all columns (in indexByName map).
+			// And Perses, columns are sorted by their index in the array of columnSettings.
+			// However, if indexByName map is empty, we can just iterate over renameByName and excludeByName maps "randomly".
 			if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
 				list.Concat([
 					[for columnName, displayName in (*transformation.options.renameByName | {}) {
@@ -34,6 +37,7 @@ if (*#panel.type | null) == "table" {
 					}],
 				])
 			},
+			// If indexByName map is not empty, we need can reorder columns based on the index correctly.
 			[for transformation in (*#panel.transformations | [])
 				if transformation.id == "organize" && len((*transformation.options.indexByName | {})) > 0
 				// very smart trick going on here:
@@ -159,7 +163,7 @@ if (*#panel.type | null) == "table" {
 			}
 		}
 	}
-}
+},
 if (*#panel.type | null) == "table-old" {
 	kind: "Table"
 	spec: {
@@ -179,4 +183,4 @@ if (*#panel.type | null) == "table-old" {
 			}]
 		}
 	}
-}
+},
