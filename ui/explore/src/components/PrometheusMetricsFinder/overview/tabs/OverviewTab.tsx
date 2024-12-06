@@ -144,11 +144,11 @@ export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: 
             <Stack key={`${label}-${labelValueCounter.labelValue}`} direction="row" gap={2}>
               <Typography
                 sx={{
+                  color: (theme) => theme.palette.success.main,
                   fontFamily: 'monospace',
                   ':hover': { backgroundColor: 'rgba(127,127,127,0.35)', cursor: 'pointer' },
                   textWrap: isMobileSize ? 'nowrap' : 'unset',
                 }}
-                color={(theme) => theme.palette.success.main}
                 onClick={() => onFilterAdd({ label, labelValues: [labelValueCounter.labelValue], operator: '=' })}
               >
                 {labelValueCounter.labelValue}

@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Button, Divider, Stack, Typography } from '@mui/material';
-import Grid from '@mui/material/Unstable_Grid2';
+import { Button, Divider, Stack, Typography, Grid2 as Grid } from '@mui/material';
 
 import AddIcon from 'mdi-material-ui/Plus';
 import { CellSettings } from '../table-model';
@@ -45,19 +44,19 @@ export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
   return (
     <Stack spacing={1}>
       <Grid container spacing={2}>
-        <Grid xs={5}>
+        <Grid size={{ xs: 5 }}>
           <Typography variant="subtitle1">Condition</Typography>
         </Grid>
-        <Grid xs={4}>
+        <Grid size={{ xs: 4 }}>
           <Typography variant="subtitle1">Display Text</Typography>
         </Grid>
-        <Grid xs={1} textAlign="center">
+        <Grid size={{ xs: 1 }} textAlign="center">
           <Typography variant="subtitle1">Color</Typography>
         </Grid>
-        <Grid xs={1} textAlign="center">
+        <Grid size={{ xs: 1 }} textAlign="center">
           <Typography variant="subtitle1">Background</Typography>
         </Grid>
-        <Grid xs={1}></Grid>
+        <Grid size={{ xs: 1 }}></Grid>
       </Grid>
       <Stack gap={1.5} divider={<Divider flexItem orientation="horizontal" />}>
         {cellSettings.map((cell, i) => (

@@ -93,15 +93,15 @@ export function SettingsAutocomplete<
       getOptionLabel={getOptionLabel}
       options={options}
       renderInput={renderInput}
-      renderOption={(props, option) => {
+      renderOption={({ key, ...props }, option) => {
         return (
-          <li {...props}>
+          <li key={key} {...props}>
             <div>
               <Typography variant="body1" component="div">
                 {getOptionLabel(option)}
               </Typography>
               {option.description && (
-                <Typography variant="body2" component="div" color={(theme) => theme.palette.text.secondary}>
+                <Typography variant="body2" component="div" sx={{ color: (theme) => theme.palette.text.secondary }}>
                   {option.description}
                 </Typography>
               )}
