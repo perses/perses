@@ -57,19 +57,19 @@ function generateCellConfig(value: unknown, settings: CellSettings[]): TableCell
     if (setting.condition.kind === 'Range' && !Number.isNaN(Number(value))) {
       const numericValue = Number(value);
       if (
-        setting.condition.spec?.min &&
-        setting.condition.spec?.max &&
+        setting.condition.spec?.min !== undefined &&
+        setting.condition.spec?.max !== undefined &&
         numericValue >= +setting.condition.spec?.min &&
         numericValue <= +setting.condition.spec?.max
       ) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.min && numericValue >= +setting.condition.spec?.min) {
+      if (setting.condition.spec?.min !== undefined && numericValue >= +setting.condition.spec?.min) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
 
-      if (setting.condition.spec?.max && numericValue <= +setting.condition.spec?.max) {
+      if (setting.condition.spec?.max !== undefined && numericValue <= +setting.condition.spec?.max) {
         return { text: setting.text, textColor: setting.textColor, backgroundColor: setting.backgroundColor };
       }
     }
