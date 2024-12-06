@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React, { forwardRef, useState } from 'react';
-import { Box, ListItemText, ListItem, ListItemProps } from '@mui/material';
+import { Box, ListItemText, ListItemProps, ListItemButton } from '@mui/material';
 import { combineSx } from '../utils';
 import { LegendColorBadge } from './LegendColorBadge';
 import { LegendItem } from './legend-model';
@@ -78,9 +78,8 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
   };
 
   return (
-    <ListItem
+    <ListItemButton
       {...others}
-      component="div"
       role="listitem"
       sx={combineSx(
         {
@@ -90,7 +89,6 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
         sx
       )}
       dense={true}
-      key={item.id}
       onClick={handleClick}
       onMouseOver={(e: React.MouseEvent) => onMouseOver?.(e, { id: item.id, index })}
       onMouseOut={(e: React.MouseEvent) => onMouseOut?.(e, { id: item.id, index })}
@@ -106,7 +104,7 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
         onMouseOver={handleTextMouseOver}
         onMouseOut={handleTextMouseOut}
       ></ListItemText>
-    </ListItem>
+    </ListItemButton>
   );
 });
 
