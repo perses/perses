@@ -25,8 +25,9 @@ import { useMemo } from 'react';
 import { applyValueMapping, TimeSeriesData, ValueMapping } from '@perses-dev/core';
 import { useDataQueries, UseDataQueryResults, PanelProps } from '@perses-dev/plugin-system';
 import { StatChartOptions } from './stat-chart-model';
-import { convertSparkline, getStatChartColor } from './utils/data-transform';
+import { convertSparkline } from './utils/data-transform';
 import { calculateValue } from './utils/calculate-value';
+import { getStatChartColor } from './utils/get-color';
 
 const MIN_WIDTH = 100;
 const SPACING = 2;

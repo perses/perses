@@ -13,45 +13,7 @@
 
 import { PersesChartsTheme } from '@perses-dev/components';
 import { LineSeriesOption } from 'echarts/charts';
-import { applyValueMapping } from '@perses-dev/core';
-import { StatChartOptions, StatChartSparklineOptions } from '../stat-chart-model';
-
-export function getStatChartColor(
-  chartsTheme: PersesChartsTheme,
-  spec?: StatChartOptions,
-  value?: number | string | null
-) {
-  const { mappings, thresholds } = spec ?? {};
-
-  // thresholds color takes priority over other colors
-  const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
-
-  if (!value || (!thresholds?.steps && !mappings)) {
-    return defaultColor;
-  }
-
-  // Check thresholds first (they take priority)
-  if (thresholds?.steps && typeof value === 'number') {
-    const matchingColors = thresholds.steps
-      .map((step, index) => {
-        if (value > step.value) {
-          return step.color ?? chartsTheme.thresholds.palette[index] ?? defaultColor;
-        }
-        return null;
-      })
-      .filter((color): color is string => color !== null);
-
-    // Return last matching color or default
-    return matchingColors[matchingColors.length - 1] ?? defaultColor;
-  }
-
-  if (mappings?.length) {
-    const { color } = applyValueMapping(value, mappings);
-    return color || defaultColor;
-  }
-
-  return defaultColor;
-}
+import { StatChartSparklineOptions } from '../stat-chart-model';
 
 export function convertSparkline(
   chartsTheme: PersesChartsTheme,
