@@ -14,7 +14,6 @@
 package migrate
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -114,7 +113,6 @@ func TestMigrate(t *testing.T) {
 			assert.Equal(t, test.expectedErrorStr, actualErrorStr)
 
 			actualPersesDashboardRaw := testUtils.JSONMarshalStrict(actualPersesDashboard)
-			fmt.Print(string(actualPersesDashboardRaw))
 			require.JSONEq(t, string(expectedPersesDashboardRaw), string(actualPersesDashboardRaw))
 		})
 	}

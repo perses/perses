@@ -14,27 +14,45 @@ if (*#panel.type | null) == "table" {
 			#var: string
 			output: [
 				// Rename anonymous fields that Perses names differently than Grafana
-				if #var == "Time" { "timestamp" },
-				if #var == "Value" { "value" },
-				#var
+				if #var == "Time" {"timestamp"},
+				if #var == "Value" {"value"},
+				#var,
 			][0]
 		}
 
 		columnSettings: list.Concat([
 			for transformation in (*#panel.transformations | [])
-				if transformation.id == "organize" {
-					list.Concat([
-						[for columnName, displayName in (*transformation.options.renameByName | {}) {
-							name: {_nameBuilder & {#var: columnName}}.output
-							header: displayName
-						}],
-						[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
-							name: {_nameBuilder & {#var: columnName}}.output
-							hide: isExcluded
-						}]
-					])
-				}
-			,
+			// In Grafana, when ordering column at least one column, it will give an index to all columns (in indexByName map).
+			// And Perses, columns are sorted by their index in the array of columnSettings.
+			// However, if indexByName map is empty, we can just iterate over renameByName and excludeByName maps "randomly".
+			if transformation.id == "organize" && len((*transformation.options.indexByName | {})) == 0 {
+				list.Concat([
+					[for columnName, displayName in (*transformation.options.renameByName | {}) {
+						name: {_nameBuilder & {#var: columnName}}.output
+						header: displayName
+					}],
+					[for columnName, isExcluded in (*transformation.options.excludeByName | {}) {
+						name: {_nameBuilder & {#var: columnName}}.output
+						hide: isExcluded
+					}],
+				])
+			},
+			// If indexByName map is not empty, we need can reorder columns based on the index correctly.
+			[for transformation in (*#panel.transformations | [])
+				if transformation.id == "organize" && len((*transformation.options.indexByName | {})) > 0
+				// very smart trick going on here:
+				// since column order in Perses is based on the order of items in the array (and not on a index field like Grafana), we have to reorder the items.
+				// To do that we need first to iterate from 0 to the length of the map (= first loop) and then to find (= inner loop) the map item whose index equals the current value of the loop variable.
+				for desiredIndex, _ in [for k in transformation.options.indexByName {}] for columnName, index in transformation.options.indexByName if desiredIndex == index {
+					name: {_nameBuilder & {#var: columnName}}.output
+					if (*transformation.options.renameByName[columnName] | null) != null {
+						header: transformation.options.renameByName[columnName]
+					}
+					if (*transformation.options.excludeByName[columnName] | null) != null {
+						hide: transformation.options.excludeByName[columnName]
+					}
+				},
+			],
 			[for override in (*#panel.fieldConfig.overrides | [])
 				if override.matcher.id == "byName" && override.matcher.options != _|_ {
 					name: {_nameBuilder & {#var: override.matcher.options}}.output
@@ -45,8 +63,8 @@ if (*#panel.type | null) == "table" {
 						if property.id == "custom.width" {
 							width: property.value
 						}
-					},
-				}
+					}
+				},
 			],
 		])
 
@@ -74,7 +92,7 @@ if (*#panel.type | null) == "table" {
 				if mapping.type == "range" || mapping.type == "regex" || mapping.type == "special" {
 					condition: [//switch
 						if mapping.type == "range" {
-							kind: "Range",
+							kind: "Range"
 							spec: {
 								if mapping.options.from != _|_ {
 									min: mapping.options.from
@@ -85,13 +103,13 @@ if (*#panel.type | null) == "table" {
 							}
 						},
 						if mapping.type == "regex" {
-							kind: "Regex",
+							kind: "Regex"
 							spec: {
 								expr: mapping.options.pattern
 							}
 						},
 						if mapping.type == "special" {
-							kind: "Misc",
+							kind: "Misc"
 							spec: {
 								value: [//switch
 									if mapping.options.match == "nan" {"NaN"},

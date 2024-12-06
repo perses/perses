@@ -448,7 +448,12 @@
               "Time": true,
               "__name__": true
             },
-            "indexByName": {},
+            "indexByName": {
+              "__name__": 1,
+              "Time": 0,
+              "Value": 3,
+              "apiserver": 2
+            },
             "renameByName": {
               "Time": "",
               "Value": "ValueCustomHeader",

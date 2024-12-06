@@ -452,23 +452,20 @@
               "columnSettings": [
                 {
                   "header": "",
-                  "name": "timestamp"
+                  "name": "timestamp",
+                  "hide": true
                 },
                 {
-                  "header": "ValueCustomHeader",
-                  "name": "value"
+                  "hide": true,
+                  "name": "__name__"
                 },
                 {
                   "header": "API server",
                   "name": "apiserver"
                 },
                 {
-                  "hide": true,
-                  "name": "timestamp"
-                },
-                {
-                  "hide": true,
-                  "name": "__name__"
+                  "header": "ValueCustomHeader",
+                  "name": "value"
                 },
                 {
                   "name": "API server",
