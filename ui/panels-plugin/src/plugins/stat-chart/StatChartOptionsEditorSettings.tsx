@@ -13,7 +13,12 @@
 
 import { produce } from 'immer';
 import { Switch, SwitchProps } from '@mui/material';
-import { CalculationSelector, CalculationSelectorProps } from '@perses-dev/plugin-system';
+import {
+  CalculationSelector,
+  CalculationSelectorProps,
+  MetricLabelInput,
+  MetricLabelInputProps,
+} from '@perses-dev/plugin-system';
 import {
   FormatControls,
   FormatControlsProps,
@@ -38,10 +43,18 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
   // ensures decimalPlaces defaults to correct value
   const format = merge({}, DEFAULT_FORMAT, value.format);
 
-  const handleCalculationChange: CalculationSelectorProps['onChange'] = (newCalculation) => {
+  const handleCalculationChange: CalculationSelectorProps['onChange'] = (metricLabel) => {
     onChange(
       produce(value, (draft: StatChartOptions) => {
-        draft.calculation = newCalculation;
+        draft.calculation = metricLabel;
+      })
+    );
+  };
+
+  const handleMetricLabelChange: MetricLabelInputProps['onChange'] = (newCalculation) => {
+    onChange(
+      produce(value, (draft: StatChartOptions) => {
+        draft.metricLabel = newCalculation;
       })
     );
   };
@@ -91,6 +104,7 @@ export function StatChartOptionsEditorSettings(props: StatChartOptionsEditorProp
           />
           <FormatControls value={format} onChange={handleUnitChange} />
           <CalculationSelector value={value.calculation} onChange={handleCalculationChange} />
+          <MetricLabelInput value={value.metricLabel} onChange={handleMetricLabelChange} />
           <FontSizeSelector value={value.valueFontSize} onChange={handleFontSizeChange} />
         </OptionsEditorGroup>
       </OptionsEditorColumn>
