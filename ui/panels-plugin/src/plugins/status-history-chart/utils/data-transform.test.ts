@@ -18,12 +18,13 @@ import { useStatusHistoryDataModel } from './data-transform';
 
 describe('useStatusHistoryDataModel', () => {
   it('should return empty model for empty query results', () => {
-    const { result } = renderHook(() => useStatusHistoryDataModel([], []));
+    const { result } = renderHook(() => useStatusHistoryDataModel([], [], {}));
     expect(result.current).toEqual({
       legendItems: [],
       statusHistoryData: [],
       xAxisCategories: [],
       yAxisCategories: [],
+      colors: [],
     });
   });
 
@@ -57,15 +58,16 @@ describe('useStatusHistoryDataModel', () => {
       },
     ];
     const colors = ['#ff0000', '#00ff00'];
-    const { result } = renderHook(() => useStatusHistoryDataModel(queryResults, colors));
+    const { result } = renderHook(() => useStatusHistoryDataModel(queryResults, colors, {}));
 
     expect(result.current.legendItems).toEqual([
       { id: '0-1', label: '1', color: '#ff0000' },
       { id: '1-2', label: '2', color: '#00ff00' },
     ]);
+
     expect(result.current.statusHistoryData).toEqual([
-      [0, 0, 1],
-      [1, 0, 2],
+      { value: [0, 0, 1], label: '1' },
+      { value: [1, 0, 2], label: '2' },
     ]);
     expect(result.current.xAxisCategories).toEqual([1609459200000, 1609459260000]);
     expect(result.current.yAxisCategories).toEqual(['instance1']);
