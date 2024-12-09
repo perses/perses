@@ -16,6 +16,7 @@ import { StatChart, StatChartData, StatChartProps } from '@perses-dev/components
 
 const DEFAULT_DATA: StatChartData = {
   calculatedValue: 7.57037037037037,
+  color: '#1976d2',
   seriesData: {
     name: 'prometheus_http_requests_total{code="302",handler="/",instance="demo.do.prometheus.io:9090",job="prometheus"}',
     values: [
