@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	manifestFileName = "mf-manifest.json"
-	packageJSONFile  = "package.json"
+	ManifestFileName = "mf-manifest.json"
+	PackageJSONFile  = "package.json"
 )
 
 type NPMPerses struct {
@@ -50,13 +50,13 @@ type NPMManifest struct {
 }
 
 func ReadManifest(pluginPath string) (*NPMManifest, error) {
-	manifestFilePath := path.Join(pluginPath, manifestFileName)
+	manifestFilePath := path.Join(pluginPath, ManifestFileName)
 	manifestData := &NPMManifest{}
 	return manifestData, readFile(manifestFilePath, manifestData)
 }
 
 func ReadPackage(pluginPath string) (*NPMPackage, error) {
-	packageFilePath := path.Join(pluginPath, packageJSONFile)
+	packageFilePath := path.Join(pluginPath, PackageJSONFile)
 	packageData := &NPMPackage{}
 	return packageData, readFile(packageFilePath, packageData)
 }

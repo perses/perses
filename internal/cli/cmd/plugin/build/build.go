@@ -15,6 +15,7 @@ package build
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -42,7 +43,7 @@ type option struct {
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
-		return fmt.Errorf("no args are supported by the command 'update'")
+		return fmt.Errorf("no args are supported by the command 'build'")
 	}
 	return nil
 }
@@ -50,6 +51,15 @@ func (o *option) Complete(args []string) error {
 func (o *option) Validate() error {
 	if !archive.IsValidFormat(o.archiveFormat) {
 		return fmt.Errorf("archive format %q not managed", o.archiveFormat)
+	}
+	if _, err := os.Stat("cue.mod"); os.IsNotExist(err) {
+		return errors.New("cue modules not found")
+	}
+	if _, err := os.Stat(path.Join(o.frontendFolder, plugin.PackageJSONFile)); os.IsNotExist(err) {
+		return errors.New("package.json not found")
+	}
+	if _, err := os.Stat(path.Join(o.distFolder, plugin.ManifestFileName)); os.IsNotExist(err) {
+		return fmt.Errorf("%s not found", plugin.ManifestFileName)
 	}
 	return nil
 }
@@ -94,6 +104,9 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 	if _, err := os.Stat(license); err == nil {
 		list[license] = license
 	}
+	// add the package.json file required to get the type of the plugin.
+	list[path.Join(o.frontendFolder, "package.json")] = "package.json"
+
 	// Add the dist content at the root of the archive (saying differently, dist folder should not appear in the archive)
 	distFiles, err := os.ReadDir(o.distFolder)
 	if err != nil {
@@ -111,6 +124,9 @@ func (o *option) computeArchiveFiles() ([]archives.FileInfo, error) {
 	for _, f := range cueFiles {
 		list[path.Join(o.schemaFolder, f.Name())] = path.Join("schemas", f.Name())
 	}
+
+	// Add the cue.mod folder at the root of the archive
+	list["cue.mod"] = ""
 
 	return archives.FilesFromDisk(context.Background(), nil, list)
 }
