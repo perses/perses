@@ -53,26 +53,27 @@ export function DashboardDataGrid(props: DataGridProperties<Row>) {
   }, [initialState]);
 
   return (
-    <DataGrid
-      autoHeight={true}
-      onRowClick={(params) => navigate(`/projects/${params.row.project}/dashboards/${params.row.name}`)}
-      rows={rows}
-      columns={columns}
-      getRowId={(row) => row.name}
-      loading={isLoading}
-      slots={
-        hideToolbar
-          ? { noRowsOverlay: NoDashboardRowOverlay }
-          : {
-              toolbar: GridToolbar,
-              row: MemoizedRow,
-              columnHeaders: MemoizedColumnHeaders,
-              noRowsOverlay: NoDashboardRowOverlay,
-            }
-      }
-      pageSizeOptions={PAGE_SIZE_OPTIONS}
-      initialState={mergedInitialState}
-      sx={DATA_GRID_STYLES}
-    ></DataGrid>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <DataGrid
+        onRowClick={(params) => navigate(`/projects/${params.row.project}/dashboards/${params.row.name}`)}
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.name}
+        loading={isLoading}
+        slots={
+          hideToolbar
+            ? { noRowsOverlay: NoDashboardRowOverlay }
+            : {
+                toolbar: GridToolbar,
+                row: MemoizedRow,
+                columnHeaders: MemoizedColumnHeaders,
+                noRowsOverlay: NoDashboardRowOverlay,
+              }
+        }
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        initialState={mergedInitialState}
+        sx={DATA_GRID_STYLES}
+      />
+    </div>
   );
 }

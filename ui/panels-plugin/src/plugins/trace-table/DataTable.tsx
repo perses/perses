@@ -167,19 +167,20 @@ export function DataTable(props: DataTableProps) {
   );
 
   return (
-    <DataGrid
-      sx={{ borderWidth: 0 }}
-      columns={columns}
-      rows={rows}
-      getRowHeight={() => 'auto'}
-      getEstimatedRowHeight={() => 66}
-      autoHeight={true}
-      disableRowSelectionOnClick={true}
-      pageSizeOptions={[10, 20, 50, 100]}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
-      }}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <DataGrid
+        sx={{ borderWidth: 0 }}
+        columns={columns}
+        rows={rows}
+        getRowHeight={() => 'auto'}
+        getEstimatedRowHeight={() => 66}
+        disableRowSelectionOnClick={true}
+        pageSizeOptions={[10, 20, 50, 100]}
+        initialState={{
+          pagination: { paginationModel: { pageSize: 20 } },
+        }}
+      />
+    </div>
   );
 }
 
