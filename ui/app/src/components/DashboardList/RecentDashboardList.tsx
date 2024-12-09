@@ -204,24 +204,22 @@ export function RecentDashboardList(props: RecentDashboardListProperties) {
         }}
         hideToolbar={hideToolbar}
         isLoading={isLoading}
-      ></DashboardDataGrid>
-      <Box>
-        {targetedDashboard && (
-          <Box>
-            <RenameDashboardDialog
-              open={isRenameDashboardDialogStateOpened}
-              onClose={() => setRenameDashboardDialogStateOpened(false)}
-              dashboard={targetedDashboard}
-            />
-            <DeleteResourceDialog
-              open={isDeleteDashboardDialogStateOpened}
-              resource={targetedDashboard}
-              onSubmit={() => handleDashboardDelete(targetedDashboard)}
-              onClose={() => setDeleteDashboardDialogStateOpened(false)}
-            />
-          </Box>
-        )}
-      </Box>
+      />
+      {targetedDashboard && (
+        <Box>
+          <RenameDashboardDialog
+            open={isRenameDashboardDialogStateOpened}
+            onClose={() => setRenameDashboardDialogStateOpened(false)}
+            dashboard={targetedDashboard}
+          />
+          <DeleteResourceDialog
+            open={isDeleteDashboardDialogStateOpened}
+            resource={targetedDashboard}
+            onSubmit={() => handleDashboardDelete(targetedDashboard)}
+            onClose={() => setDeleteDashboardDialogStateOpened(false)}
+          />
+        </Box>
+      )}
     </Stack>
   );
 }

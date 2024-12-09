@@ -53,29 +53,30 @@ export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>) {
   }, [initialState]);
 
   return (
-    <DataGrid
-      disableRowSelectionOnClick
-      autoHeight={true}
-      onRowClick={(params) => {
-        onRowClick(params.row.name, params.row.project);
-      }}
-      rows={rows}
-      columns={columns}
-      getRowId={(row) => row.name}
-      loading={isLoading}
-      slots={
-        hideToolbar
-          ? { noRowsOverlay: NoDatasourceRowOverlay }
-          : {
-              toolbar: GridToolbar,
-              row: MemoizedRow,
-              columnHeaders: MemoizedColumnHeaders,
-              noRowsOverlay: NoDatasourceRowOverlay,
-            }
-      }
-      pageSizeOptions={PAGE_SIZE_OPTIONS}
-      initialState={mergedInitialState}
-      sx={DATA_GRID_STYLES}
-    ></DataGrid>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <DataGrid
+        disableRowSelectionOnClick
+        onRowClick={(params) => {
+          onRowClick(params.row.name, params.row.project);
+        }}
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.name}
+        loading={isLoading}
+        slots={
+          hideToolbar
+            ? { noRowsOverlay: NoDatasourceRowOverlay }
+            : {
+                toolbar: GridToolbar,
+                row: MemoizedRow,
+                columnHeaders: MemoizedColumnHeaders,
+                noRowsOverlay: NoDatasourceRowOverlay,
+              }
+        }
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        initialState={mergedInitialState}
+        sx={DATA_GRID_STYLES}
+      />
+    </div>
   );
 }

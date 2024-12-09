@@ -173,7 +173,6 @@ export function DataTable(props: DataTableProps) {
       rows={rows}
       getRowHeight={() => 'auto'}
       getEstimatedRowHeight={() => 66}
-      autoHeight={true}
       disableRowSelectionOnClick={true}
       pageSizeOptions={[10, 20, 50, 100]}
       initialState={{

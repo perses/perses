@@ -92,6 +92,7 @@ const IGNORE_CONSOLE_ERRORS = [
   // care about at this time. We track those here, so they can be ignored.
   // See https://github.com/emotion-js/emotion/issues/1105
   'potentially unsafe when doing server-side rendering',
+  'MUI X: useResizeContainer - The parent DOM element of the Data Grid has an empty height.',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage) {
   const msgText = message.text();

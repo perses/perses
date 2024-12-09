@@ -52,26 +52,27 @@ export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>) {
   }, [initialState]);
 
   return (
-    <DataGrid
-      autoHeight={true}
-      onRowClick={(params) => onRowClick(params.row.name, params.row.project)}
-      rows={rows}
-      columns={columns}
-      getRowId={(row) => row.name}
-      loading={isLoading}
-      slots={
-        hideToolbar
-          ? { noRowsOverlay: NoVariableRowOverlay }
-          : {
-              toolbar: GridToolbar,
-              row: MemoizedRow,
-              columnHeaders: MemoizedColumnHeaders,
-              noRowsOverlay: NoVariableRowOverlay,
-            }
-      }
-      pageSizeOptions={PAGE_SIZE_OPTIONS}
-      initialState={mergedInitialState}
-      sx={DATA_GRID_STYLES}
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <DataGrid
+        onRowClick={(params) => onRowClick(params.row.name, params.row.project)}
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.name}
+        loading={isLoading}
+        slots={
+          hideToolbar
+            ? { noRowsOverlay: NoVariableRowOverlay }
+            : {
+                toolbar: GridToolbar,
+                row: MemoizedRow,
+                columnHeaders: MemoizedColumnHeaders,
+                noRowsOverlay: NoVariableRowOverlay,
+              }
+        }
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        initialState={mergedInitialState}
+        sx={DATA_GRID_STYLES}
+      />
+    </div>
   );
 }

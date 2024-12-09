@@ -18,7 +18,7 @@ import {
   EphemeralDashboardInfo,
   getResourceExtendedDisplayName,
 } from '@perses-dev/core';
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -220,32 +220,30 @@ export function DashboardList(props: DashboardListProperties) {
         hideToolbar={hideToolbar}
         isLoading={isLoading}
       />
-      <Box>
-        {targetedDashboard && (
-          <>
-            <RenameDashboardDialog
-              open={isRenameDashboardDialogStateOpened}
-              dashboard={targetedDashboard}
-              onClose={() => setRenameDashboardDialogStateOpened(false)}
-            />
-            <CreateDashboardDialog
-              open={isDuplicateDashboardDialogStateOpened}
-              projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
-              hideProjectSelect={true}
-              mode="duplicate"
-              name={getResourceDisplayName(targetedDashboard)}
-              onSuccess={handleDashboardDuplication}
-              onClose={() => setDuplicateDashboardDialogStateOpened(false)}
-            />
-            <DeleteResourceDialog
-              open={isDeleteDashboardDialogStateOpened}
-              resource={targetedDashboard}
-              onSubmit={(v) => handleDashboardDelete(v).then(() => setDeleteDashboardDialogStateOpened(false))}
-              onClose={() => setDeleteDashboardDialogStateOpened(false)}
-            />
-          </>
-        )}
-      </Box>
+      {targetedDashboard && (
+        <>
+          <RenameDashboardDialog
+            open={isRenameDashboardDialogStateOpened}
+            dashboard={targetedDashboard}
+            onClose={() => setRenameDashboardDialogStateOpened(false)}
+          />
+          <CreateDashboardDialog
+            open={isDuplicateDashboardDialogStateOpened}
+            projects={[{ kind: 'Project', metadata: { name: targetedDashboard.metadata.project }, spec: {} }]}
+            hideProjectSelect={true}
+            mode="duplicate"
+            name={getResourceDisplayName(targetedDashboard)}
+            onSuccess={handleDashboardDuplication}
+            onClose={() => setDuplicateDashboardDialogStateOpened(false)}
+          />
+          <DeleteResourceDialog
+            open={isDeleteDashboardDialogStateOpened}
+            resource={targetedDashboard}
+            onSubmit={(v) => handleDashboardDelete(v).then(() => setDeleteDashboardDialogStateOpened(false))}
+            onClose={() => setDeleteDashboardDialogStateOpened(false)}
+          />
+        </>
+      )}
     </Stack>
   );
 }
