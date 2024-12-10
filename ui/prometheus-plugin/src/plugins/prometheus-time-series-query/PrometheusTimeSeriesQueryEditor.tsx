@@ -14,6 +14,8 @@
 import { produce } from 'immer';
 import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { CompleteConfiguration } from '@prometheus-io/codemirror-promql';
+import { HTTPProxy } from '@perses-dev/core';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -41,8 +43,17 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
   const datasourceSelectLabelID = `prom-datasource-label-${selectedDatasource.name || 'default'}`;
 
   const { data: client } = useDatasourceClient<PrometheusClient>(selectedDatasource);
-  const promURL = client?.options.datasourceUrl;
   const { data: datasourceResource } = useDatasource(selectedDatasource);
+
+  const promURL = client?.options.datasourceUrl;
+  let completeConfig: CompleteConfiguration;
+  if (datasourceResource && (datasourceResource.plugin.spec.proxy as HTTPProxy)?.spec.headers) {
+    const promHeaders = (datasourceResource.plugin.spec.proxy as HTTPProxy).spec.headers;
+    const headers = new Headers(promHeaders);
+    completeConfig = { remote: { url: promURL, requestHeaders: headers } };
+  } else {
+    completeConfig = { remote: { url: promURL } };
+  }
 
   const { handleQueryChange, handleQueryBlur } = useQueryState(props);
   const { format, handleFormatChange, handleFormatBlur } = useFormatState(props);
@@ -80,7 +91,7 @@ export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQuery
         />
       </FormControl>
       <PromQLEditor
-        completeConfig={{ remote: { url: promURL } }}
+        completeConfig={completeConfig}
         value={value.query} // here we are passing `value.query` and not `query` from useQueryState in order to get updates only on onBlur events
         datasource={selectedDatasource}
         onChange={handleQueryChange}
