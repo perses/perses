@@ -78,15 +78,58 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-type Option struct {
-	Value string `json:"value"`
+type TemplateVar struct {
+	Name        string          `json:"name"`
+	Type        string          `json:"type"`
+	Description string          `json:"description"`
+	Label       string          `json:"label"`
+	Hide        int             `json:"hide"`
+	IncludeAll  bool            `json:"includeAll"`
+	Multi       bool            `json:"multi"`
+	Query       json.RawMessage `json:"query"`
+	json.RawMessage
 }
 
-type TemplateVar struct {
-	Name    string      `json:"name"`
-	Type    string      `json:"type"`
-	Query   interface{} `json:"query"`
-	Options []Option    `json:"options"`
+func (v *TemplateVar) UnmarshalJSON(data []byte) error {
+	var tmp map[string]json.RawMessage
+	if err := json.Unmarshal(data, &tmp); err != nil {
+		return err
+	}
+	variable := TemplateVar{}
+	if name, ok := tmp["name"]; ok {
+		_ = json.Unmarshal(name, &variable.Name)
+	}
+	if t, ok := tmp["type"]; ok {
+		_ = json.Unmarshal(t, &variable.Type)
+	}
+	if description, ok := tmp["description"]; ok {
+		_ = json.Unmarshal(description, &variable.Description)
+	}
+	if label, ok := tmp["label"]; ok {
+		_ = json.Unmarshal(label, &variable.Label)
+	}
+	if hide, ok := tmp["hide"]; ok {
+		_ = json.Unmarshal(hide, &variable.Hide)
+	}
+	if includeAll, ok := tmp["includeAll"]; ok {
+		_ = json.Unmarshal(includeAll, &variable.IncludeAll)
+	}
+	if multi, ok := tmp["multi"]; ok {
+		_ = json.Unmarshal(multi, &variable.Multi)
+	}
+	if query, ok := tmp["query"]; ok {
+		if err := json.Unmarshal(query, &variable.Query); err != nil {
+			return err
+		}
+		delete(tmp, "query")
+	}
+	var err error
+	variable.RawMessage, err = json.Marshal(tmp)
+	if err != nil {
+		return err
+	}
+	*v = variable
+	return nil
 }
 
 type SimplifiedDashboard struct {

@@ -14,7 +14,6 @@
 package migratev2
 
 import (
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -27,19 +26,48 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
+	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/sirupsen/logrus"
 )
 
 var (
 	defaultPanelPlugin = common.Plugin{
 		Kind: "Markdown",
-		Spec: struct {
+		Spec: &struct {
 			Text string `json:"text"`
 		}{
 			Text: "**Migration from Grafana not supported !**",
 		},
 	}
+	defaultQueryPlugin = common.Plugin{
+		Kind: "PrometheusTimeSeriesQuery",
+		Spec: &struct {
+			Query string `json:"query"`
+		}{
+			Query: "migration_from_grafana_not_supported",
+		},
+	}
+	defaultVariablePlugin = common.Plugin{
+		Kind: "StaticListVariable",
+		Spec: &struct {
+			Values []string `json:"values"`
+		}{
+			Values: []string{"grafana", "migration", "not", "supported"},
+		},
+	}
 )
+
+func buildDefaultVariable(v TemplateVar) dashboard.Variable {
+	return dashboard.Variable{
+		Kind: variable.KindList,
+		Spec: &dashboard.ListVariableSpec{
+			ListSpec: variable.ListSpec{
+				Plugin: defaultVariablePlugin,
+			},
+			Name: v.Name,
+		},
+	}
+}
 
 func create(schemas config.Schemas) (*mig, error) {
 	panels, err := loadPanels(schemas.PanelsPath)
@@ -89,6 +117,11 @@ func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, err
 		return nil, err
 	}
 	result.Spec.Panels = panels
+	variables, err := m.migrateVariables(grafanaDashboard)
+	if err != nil {
+		return nil, err
+	}
+	result.Spec.Variables = variables
 	result.Spec.Layouts = m.migrateGrid(grafanaDashboard)
 	return result, nil
 }
@@ -154,83 +187,7 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 	return result
 }
 
-func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
-	panels := make(map[string]*v1.Panel)
-	for i, p := range grafanaDashboard.Panels {
-		if p.Type == "row" {
-			for j, innerPanel := range p.Panels {
-				panel, err := m.migratePanel(innerPanel)
-				if err != nil {
-					return nil, err
-				}
-				panels[fmt.Sprintf("%d_%d", i, j)] = panel
-			}
-		} else {
-			panel, err := m.migratePanel(p)
-			if err != nil {
-				return nil, err
-			}
-			panels[fmt.Sprintf("%d", i)] = panel
-		}
-	}
-	return panels, nil
-}
-
-func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
-	result := &v1.Panel{
-		Kind: "Panel",
-		Spec: v1.PanelSpec{
-			Display: v1.PanelDisplay{
-				Name:        "empty",
-				Description: grafanaPanel.Description,
-			},
-		},
-	}
-	if len(grafanaPanel.Title) > 0 {
-		result.Spec.Display.Name = grafanaPanel.Title
-	}
-	migrateScriptInstance, ok := m.panels[grafanaPanel.Type]
-	if !ok {
-		result.Spec.Plugin = defaultPanelPlugin
-		return result, nil
-	}
-	plugin, err := executePanelMigrationScript(migrateScriptInstance, grafanaPanel.RawMessage)
-	if err != nil {
-		return nil, err
-	}
-	result.Spec.Plugin = *plugin
-
-	for _, target := range grafanaPanel.Targets {
-		// For the moment, we are only supporting the migration of the TimeSeriesQuery.
-		// That's something we will need to change at some point.
-		// TODO This should be improved
-		for _, script := range m.queries {
-			queryPlugin, pluginErr := executeQueryMigrationScript(script, target)
-			if pluginErr != nil {
-				return nil, pluginErr
-			}
-			result.Spec.Queries = append(result.Spec.Queries, v1.Query{
-				Kind: "TimeSeriesQuery",
-				Spec: v1.QuerySpec{
-					Plugin: *queryPlugin,
-				},
-			})
-			break
-		}
-	}
-
-	return result, nil
-}
-
-func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaQueryData, "#target")
-}
-
-func executePanelMigrationScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel")
-}
-
-func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string) (*common.Plugin, error) {
+func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -242,23 +199,29 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 	// Otherwise, we won't be able to unmarshal the grafana dashboard.
 	if err := grafanaValue.Validate(cue.Final()); err != nil {
 		logrus.WithError(err).Trace("Unable to wrap the received json into a CUE definition")
-		return nil, apiinterface.HandleBadRequestError(err.Error())
+		return nil, true, apiinterface.HandleBadRequestError(err.Error())
 	}
 
 	// Finally, execute the cuelang script with the static mapping and the Grafana Panel as a scope.
 	finalVal := grafanaValue.Unify(ctx.BuildInstance(cueScript))
 	if err := finalVal.Err(); err != nil {
 		logrus.WithError(err).Debug("Unable to compile the migration schema for the panel")
-		return nil, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses panel: %s", err))
+		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses panel: %s", err))
 	}
 	return convertToPlugin(finalVal)
 }
 
-func convertToPlugin(migrateValue cue.Value) (*common.Plugin, error) {
+func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
+	if migrateValue.IsNull() {
+		return nil, true, nil
+	}
 	data, err := migrateValue.MarshalJSON()
 	if err != nil {
-		return nil, err
+		return nil, true, err
+	}
+	if string(data) == "" {
+		return nil, true, nil
 	}
 	plugin := &common.Plugin{}
-	return plugin, json.Unmarshal(data, plugin)
+	return plugin, false, json.Unmarshal(data, plugin)
 }

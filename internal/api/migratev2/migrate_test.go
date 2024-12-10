@@ -34,6 +34,18 @@ func TestMig_Migrate(t *testing.T) {
 			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
+		{
+			title:                       "dashboard with a piechart",
+			inputGrafanaDashboardFile:   "piechart_grafana_dashboard.json",
+			expectedPersesDashboardFile: "piechart_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with table panels, focused on validating the migration of column settings",
+			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
+			expectedPersesDashboardFile: "tables_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
 	}
 	projectPath := testUtils.GetRepositoryPath()
 
