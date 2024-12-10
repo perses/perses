@@ -66,19 +66,6 @@ if (*#panel.type | null) == "table" {
 					}
 				},
 			],
-			[for sortBy in (*#panel.options.sortBy | [])
-				if sortBy.displayName.id == "byName" && override.matcher.options != _|_ {
-					name: {_nameBuilder & {#var: override.matcher.options}}.output
-					for property in override.properties {
-						if property.id == "displayName" {
-							header: property.value
-						}
-						if property.id == "custom.width" {
-							width: property.value
-						}
-					}
-				},
-			],
 		])
 
 		// Using flatten to avoid having an array of arrays with "value" mappings
