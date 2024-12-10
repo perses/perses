@@ -25,15 +25,15 @@ export function SortSelectorButtons({ onChange, value, ...props }: SortSelectorB
   };
 
   return (
-    <ButtonGroup aria-label="Sort" sx={{ margin: 1 }} {...props}>
+    <ButtonGroup aria-label="Sort" {...props}>
       <Button onClick={() => handleSortChange(undefined)} variant={value === undefined ? 'contained' : 'outlined'}>
         None
       </Button>
       <Button onClick={() => handleSortChange('asc')} variant={value === 'asc' ? 'contained' : 'outlined'}>
-        Ascending
+        Asc
       </Button>
       <Button onClick={() => handleSortChange('desc')} variant={value === 'desc' ? 'contained' : 'outlined'}>
-        Descending
+        Desc
       </Button>
     </ButtonGroup>
   );
