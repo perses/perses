@@ -34,7 +34,7 @@ spec: close({
 	cellDescription?:   string
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
-	sort?:							"asc" | "desc"
+	sort?:              "asc" | "desc"
 	width?:             number | "auto"
 	hide?:              bool
 }
