@@ -107,13 +107,20 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
 
           <FormControlLabel
             label="Default Sort"
-            sx={{ width: '100%', alignItems: 'start', margin: 0 }}
+            sx={{
+              width: '100%',
+              alignItems: 'start',
+              margin: 0,
+              visibility: column.enableSorting ? 'visible' : 'hidden',
+            }}
             labelPlacement="top"
             control={
               <SortSelectorButtons
                 size="medium"
                 value={column.sort}
-                sx={{ margin: 0.5 }}
+                sx={{
+                  margin: 0.5,
+                }}
                 onChange={(sort) => onChange({ ...column, sort: sort })}
               />
             }
