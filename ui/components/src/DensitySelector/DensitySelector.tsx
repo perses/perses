@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
@@ -27,8 +28,8 @@ export interface DensitySelectorProps {
   value?: DensityOption;
 }
 
-export function DensitySelector({ onChange, value = 'standard' }: DensitySelectorProps) {
-  const handleSortChange = (_: unknown, { id }: { id: DensityOption }) => {
+export function DensitySelector({ onChange, value = 'standard' }: DensitySelectorProps): ReactElement {
+  const handleSortChange = (_: unknown, { id }: { id: DensityOption }): void => {
     onChange(id);
   };
 

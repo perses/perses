@@ -13,7 +13,7 @@
 
 import { Transform } from '@perses-dev/core';
 import { Button, Stack, StackProps } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { TransformEditorContainer } from './TransformEditorContainer';
 
@@ -22,7 +22,7 @@ export interface TransformsEditorProps extends Omit<StackProps, 'onChange'> {
   onChange: (transforms: Transform[]) => void;
 }
 
-export function TransformsEditor({ value, onChange, ...props }: TransformsEditorProps) {
+export function TransformsEditor({ value, onChange, ...props }: TransformsEditorProps): ReactElement {
   const [transformsCollapsed, setTransformsCollapsed] = useState(value.map(() => true));
 
   function handleTransformChange(index: number, transform: Transform): void {

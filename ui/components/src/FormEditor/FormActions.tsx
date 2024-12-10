@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, Divider, Stack, StackProps } from '@mui/material';
-import React from 'react';
+import { ReactElement } from 'react';
 import { Action } from '@perses-dev/core';
 
 export interface FormActionsProps extends StackProps {
@@ -38,7 +38,7 @@ export function FormActions({
   onDelete,
   onCancel,
   ...props
-}: FormActionsProps) {
+}: FormActionsProps): ReactElement {
   return (
     <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }} {...props}>
       {action === 'read' ? (

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { SeriesMarker } from './SeriesMarker';
 import { SeriesLabelsStack } from './SeriesLabelsStack';
 import { TOOLTIP_LABELS_MAX_WIDTH, EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
@@ -26,7 +27,7 @@ export interface SeriesInfoProps {
   wrapLabels?: boolean;
 }
 
-export function SeriesInfo(props: SeriesInfoProps) {
+export function SeriesInfo(props: SeriesInfoProps): ReactElement {
   const { seriesName, formattedY, markerColor, totalSeries, emphasizeText = false, wrapLabels = true } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated

@@ -28,13 +28,17 @@ import {
   MergeSeriesTransform,
   Transform,
 } from '@perses-dev/core';
+import { ReactElement } from 'react';
 
 interface TransformSpecEditorProps<Spec> {
   value: Spec;
   onChange: (transform: Spec) => void;
 }
 
-function JoinByColumnValueTransformEditor({ value, onChange }: TransformSpecEditorProps<JoinByColumnValueTransform>) {
+function JoinByColumnValueTransformEditor({
+  value,
+  onChange,
+}: TransformSpecEditorProps<JoinByColumnValueTransform>): ReactElement {
   return (
     <Stack direction="row">
       <Autocomplete
@@ -75,7 +79,10 @@ function JoinByColumnValueTransformEditor({ value, onChange }: TransformSpecEdit
   );
 }
 
-function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeColumnsTransform>) {
+function MergeColumnsTransformEditor({
+  value,
+  onChange,
+}: TransformSpecEditorProps<MergeColumnsTransform>): ReactElement {
   return (
     <Stack direction="row" gap={1} alignItems="center">
       <Autocomplete
@@ -137,7 +144,7 @@ function MergeColumnsTransformEditor({ value, onChange }: TransformSpecEditorPro
 function MergeIndexedColumnsTransformEditor({
   value,
   onChange,
-}: TransformSpecEditorProps<MergeIndexedColumnsTransform>) {
+}: TransformSpecEditorProps<MergeIndexedColumnsTransform>): ReactElement {
   return (
     <Stack direction="row">
       <TextField
@@ -175,7 +182,7 @@ function MergeIndexedColumnsTransformEditor({
   );
 }
 
-function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransform>) {
+function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransform>): ReactElement {
   return (
     <Stack direction="row">
       <FormControlLabel
@@ -203,7 +210,7 @@ export interface TransformEditorProps extends Omit<StackProps, 'children' | 'val
   onChange: (transform: Transform) => void;
 }
 
-export function TransformEditor({ value, onChange, ...props }: TransformEditorProps) {
+export function TransformEditor({ value, onChange, ...props }: TransformEditorProps): ReactElement {
   return (
     <Stack gap={2} sx={{ width: '100%' }} mt={1} {...props}>
       <TextField

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Button } from '@mui/material';
+import { ReactElement } from 'react';
 import { Dialog } from './Dialog';
 
 interface DiscardChangesConfirmationDialogProps {
@@ -21,7 +22,7 @@ interface DiscardChangesConfirmationDialogProps {
   onDiscardChanges: () => void;
 }
 
-export const DiscardChangesConfirmationDialog = (props: DiscardChangesConfirmationDialogProps) => {
+export const DiscardChangesConfirmationDialog = (props: DiscardChangesConfirmationDialogProps): ReactElement => {
   const { description, isOpen, onCancel, onDiscardChanges } = props;
 
   return (

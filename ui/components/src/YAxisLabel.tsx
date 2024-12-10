@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { Box, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 
 interface YAxisLabelProps {
   name: string;
   height: number;
 }
 
-export function YAxisLabel({ name, height }: YAxisLabelProps) {
+export function YAxisLabel({ name, height }: YAxisLabelProps): ReactElement {
   return (
     <Box
       style={{

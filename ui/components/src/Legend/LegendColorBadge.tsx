@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import { memo, ReactElement } from 'react';
 import { Box, BoxProps } from '@mui/material';
 import { combineSx } from '../utils';
 
@@ -19,7 +19,11 @@ export interface LegendColorBadgeProps extends BoxProps<'div'> {
   color: string;
 }
 
-export const LegendColorBadge = React.memo(function LegendColorBadge({ color, sx, ...others }: LegendColorBadgeProps) {
+export const LegendColorBadge = memo(function LegendColorBadge({
+  color,
+  sx,
+  ...others
+}: LegendColorBadgeProps): ReactElement {
   return (
     <Box
       {...others}

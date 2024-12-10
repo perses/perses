@@ -14,7 +14,7 @@
 import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
 import { Box } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, ReactElement } from 'react';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -56,7 +56,7 @@ export function VirtualizedTable<TableData>({
   columns,
   headers,
   cellConfigs,
-}: VirtualizedTableProps<TableData>) {
+}: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   // Use a ref for these values because they are only needed for keyboard
@@ -90,12 +90,12 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
-      Table: (props) => {
+      Table: (props): ReactElement => {
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      TableRow: ({ item, ...props }) => {
+      TableRow: ({ item, ...props }): ReactElement | null => {
         const index = props['data-index'];
         const row = rows[index];
         if (!row) {

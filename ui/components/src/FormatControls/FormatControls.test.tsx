@@ -17,7 +17,7 @@ import { FormatOptions } from '@perses-dev/core';
 import { FormatControls } from './FormatControls';
 
 describe('FormatControls', () => {
-  const renderFormatControls = (value: FormatOptions, onChange = jest.fn()) => {
+  const renderFormatControls = (value: FormatOptions, onChange = jest.fn()): void => {
     render(
       <div>
         <FormatControls value={value} onChange={onChange} />
@@ -25,15 +25,15 @@ describe('FormatControls', () => {
     );
   };
 
-  const getUnitSelector = () => {
+  const getUnitSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Unit' });
   };
 
-  const getDecimalPlacesSelector = () => {
+  const getDecimalPlacesSelector = (): HTMLElement => {
     return screen.getByRole('combobox', { name: 'Decimals' });
   };
 
-  const getShortValuesSwitch = () => {
+  const getShortValuesSwitch = (): HTMLElement => {
     return screen.getByRole('checkbox', { name: 'Short values' });
   };
 

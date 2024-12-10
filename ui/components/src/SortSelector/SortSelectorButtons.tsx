@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Button, ButtonGroup, ButtonGroupProps } from '@mui/material';
+import { ReactElement } from 'react';
 import { SortOption } from './SortSelector';
 
 export interface SortSelectorButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {
@@ -19,8 +20,8 @@ export interface SortSelectorButtonsProps extends Omit<ButtonGroupProps, 'onChan
   onChange: (sort?: SortOption) => void;
 }
 
-export function SortSelectorButtons({ onChange, value, ...props }: SortSelectorButtonsProps) {
-  const handleSortChange = (sort?: SortOption) => {
+export function SortSelectorButtons({ onChange, value, ...props }: SortSelectorButtonsProps): ReactElement {
+  const handleSortChange = (sort?: SortOption): void => {
     onChange(sort);
   };
 

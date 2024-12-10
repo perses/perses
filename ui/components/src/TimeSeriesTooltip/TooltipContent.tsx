@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Box } from '@mui/material';
 import { NearbySeriesArray } from './nearby-series';
 import { SeriesInfo } from './SeriesInfo';
@@ -21,7 +21,7 @@ export interface TooltipContentProps {
   wrapLabels?: boolean;
 }
 
-export function TooltipContent(props: TooltipContentProps) {
+export function TooltipContent(props: TooltipContentProps): ReactElement | null {
   const { series, wrapLabels } = props;
 
   const sortedFocusedSeries = useMemo(() => {

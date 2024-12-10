@@ -14,7 +14,7 @@
 import { Box, Portal, Stack } from '@mui/material';
 import { FormatOptions } from '@perses-dev/core';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { memo, useRef, useState } from 'react';
+import { memo, MutableRefObject, ReactElement, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { EChartsDataFormat } from '../model';
 import { TooltipContent } from './TooltipContent';
@@ -32,7 +32,7 @@ import {
 import { assembleTransform } from './utils';
 
 export interface TimeSeriesTooltipProps {
-  chartRef: React.MutableRefObject<EChartsInstance | undefined>;
+  chartRef: MutableRefObject<EChartsInstance | undefined>;
   chartData: EChartsDataFormat;
   enablePinning?: boolean;
   wrapLabels?: boolean;
@@ -55,7 +55,7 @@ export const LineChartTooltip = memo(function LineChartTooltip({
   onUnpinClick,
   pinnedPos,
   containerId,
-}: TimeSeriesTooltipProps) {
+}: TimeSeriesTooltipProps): ReactElement | null {
   const [showAllSeries, setShowAllSeries] = useState(false);
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver();

@@ -299,7 +299,9 @@ export interface TableColumnConfig<TableData>
 /**
  * Takes in a perses table column and transforms it into a tanstack column.
  */
-export function persesColumnsToTanstackColumns<TableData>(columns: Array<TableColumnConfig<TableData>>) {
+export function persesColumnsToTanstackColumns<TableData>(
+  columns: Array<TableColumnConfig<TableData>>
+): Array<ColumnDef<TableData>> {
   const tableCols: Array<ColumnDef<TableData>> = columns.map(
     ({ width, align, headerDescription, cellDescription, enableSorting, ...otherProps }) => {
       // Tanstack Table does not support an "auto" value to naturally size to fit
