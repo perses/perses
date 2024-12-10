@@ -175,9 +175,8 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="Start Time"
-              // @ts-expect-error: because the value is a Date, but the component expects a string
               value={new Date(timeRangeInputs.start)}
-              onChange={(event: string | null) => {
+              onChange={(event: Date | null) => {
                 if (event) {
                   onChangeStartTime(event);
                 }
@@ -189,9 +188,8 @@ export const DateTimeRangePicker = ({ initialTimeRange, onChange, onCancel }: Ab
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="End Time"
-              // @ts-expect-error: because the value is a Date, but the component expects a string
               value={new Date(timeRangeInputs.end)}
-              onChange={(event: string | null) => {
+              onChange={(event: Date | null) => {
                 if (event) {
                   onChangeEndTime(event);
                 }
