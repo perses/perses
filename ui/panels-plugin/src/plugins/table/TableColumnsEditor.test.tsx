@@ -15,10 +15,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableOptions } from '@perses-dev/panels-plugin';
 import { TableColumnsEditor } from './TableColumnsEditor';
 
+function renderTableColumnsEditor(value: TableOptions, onChange = jest.fn()): void {
+  render(<TableColumnsEditor value={value} onChange={onChange} />);
+}
+
 describe('TableColumnsEditor', () => {
-  function renderTableColumnsEditor(value: TableOptions, onChange = jest.fn()): void {
-    render(<TableColumnsEditor value={value} onChange={onChange} />);
-  }
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   it('can add a new column settings', () => {
     const onChange = jest.fn();
@@ -50,6 +57,7 @@ describe('TableColumnsEditor', () => {
 
     const nameInput = screen.getByRole('textbox', { name: /Name/i });
     fireEvent.change(nameInput, { target: { value: 'MySuperName' } });
+    jest.advanceTimersByTime(500);
     expect(onChange).toHaveBeenCalledWith({ columnSettings: [{ name: 'MySuperName' }] });
   });
 });

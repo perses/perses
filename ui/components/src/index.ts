@@ -15,6 +15,7 @@ export * from './AlignSelector';
 export * from './BarChart';
 export * from './ColorPicker';
 export * from './ContentWithLegend';
+export * from './controls';
 export * from './Dialog';
 export * from './DensitySelector';
 export * from './DragAndDrop';
