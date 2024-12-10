@@ -63,6 +63,11 @@ func buildDefaultVariable(v TemplateVar) dashboard.Variable {
 		Spec: &dashboard.ListVariableSpec{
 			ListSpec: variable.ListSpec{
 				Plugin: defaultVariablePlugin,
+				Display: &variable.Display{
+					Name:        v.Label,
+					Description: v.Description,
+					Hidden:      v.Hide > 0,
+				},
 			},
 			Name: v.Name,
 		},
@@ -187,7 +192,7 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 	return result
 }
 
-func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string) (*common.Plugin, bool, error) {
+func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte, defID string, typeOfDataToMigrate string) (*common.Plugin, bool, error) {
 	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
 	grafanaValue := ctx.CompileString(fmt.Sprintf("%s: _", defID))
 	grafanaValue = grafanaValue.FillPath(
@@ -205,8 +210,8 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 	// Finally, execute the cuelang script with the static mapping and the Grafana Panel as a scope.
 	finalVal := grafanaValue.Unify(ctx.BuildInstance(cueScript))
 	if err := finalVal.Err(); err != nil {
-		logrus.WithError(err).Debug("Unable to compile the migration schema for the panel")
-		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses panel: %s", err))
+		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)
+		return nil, true, apiinterface.HandleBadRequestError(fmt.Sprintf("unable to convert to Perses %s: %s", typeOfDataToMigrate, err))
 	}
 	return convertToPlugin(finalVal)
 }
@@ -219,7 +224,7 @@ func convertToPlugin(migrateValue cue.Value) (*common.Plugin, bool, error) {
 	if err != nil {
 		return nil, true, err
 	}
-	if string(data) == "" {
+	if string(data) == "" || string(data) == "{}" {
 		return nil, true, nil
 	}
 	plugin := &common.Plugin{}

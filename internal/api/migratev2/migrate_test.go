@@ -29,6 +29,12 @@ func TestMig_Migrate(t *testing.T) {
 		expectedErrorStr            string
 	}{
 		{
+			title:                       "dashboard with simple vars & panels",
+			inputGrafanaDashboardFile:   "simple_grafana_dashboard.json",
+			expectedPersesDashboardFile: "simple_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
 			title:                       "dashboard with a bar gauge",
 			inputGrafanaDashboardFile:   "barchart_grafana_dashboard.json",
 			expectedPersesDashboardFile: "barchart_perses_dashboard.json",

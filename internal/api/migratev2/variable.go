@@ -71,6 +71,7 @@ func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 	if i == len(m.variables) {
 		return buildDefaultVariable(v)
 	}
+	result.Spec = spec
 	return result
 }
 
@@ -103,5 +104,5 @@ func migrateTextVariable(v TemplateVar) *dashboard.Variable {
 }
 
 func executeVariableMigrationScript(cueScript *build.Instance, grafanaVariableData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaVariableData, "#var")
+	return executeCuelangMigrationScript(cueScript, grafanaVariableData, "#var", "variable")
 }

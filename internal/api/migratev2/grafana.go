@@ -121,7 +121,6 @@ func (v *TemplateVar) UnmarshalJSON(data []byte) error {
 		if err := json.Unmarshal(query, &variable.Query); err != nil {
 			return err
 		}
-		delete(tmp, "query")
 	}
 	var err error
 	variable.RawMessage, err = json.Marshal(tmp)

@@ -107,9 +107,9 @@ func (m *mig) migratePanel(grafanaPanel Panel) (*v1.Panel, error) {
 }
 
 func executeQueryMigrationScript(cueScript *build.Instance, grafanaQueryData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaQueryData, "#target")
+	return executeCuelangMigrationScript(cueScript, grafanaQueryData, "#target", "query")
 }
 
 func executePanelMigrationScript(cueScript *build.Instance, grafanaPanelData []byte) (*common.Plugin, bool, error) {
-	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel")
+	return executeCuelangMigrationScript(cueScript, grafanaPanelData, "#panel", "panel")
 }
