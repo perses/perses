@@ -1,0 +1,56 @@
+{
+  "kind": "Dashboard",
+  "metadata": {
+    "name": "a5867867-7a6f-4834-8247-51844c4b975f",
+    "createdAt": "0001-01-01T00:00:00Z",
+    "updatedAt": "0001-01-01T00:00:00Z",
+    "version": 0,
+    "project": ""
+  },
+  "spec": {
+    "display": {
+      "name": "Perses testing / Dashboard with library panel"
+    },
+    "panels": {
+      "0_0": {
+        "kind": "Panel",
+        "spec": {
+          "display": {
+            "name": "Point of Contact"
+          },
+          "plugin": {
+            "kind": "Markdown",
+            "spec": {
+              "text": "**Migration from Grafana not supported !**"
+            }
+          }
+        }
+      }
+    },
+    "layouts": [
+      {
+        "kind": "Grid",
+        "spec": {
+          "display": {
+            "title": "Dashboard Information",
+            "collapse": {
+              "open": true
+            }
+          },
+          "items": [
+            {
+              "x": 0,
+              "y": 1,
+              "width": 12,
+              "height": 8,
+              "content": {
+                "$ref": "#/spec/panels/0_0"
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "duration": "1h"
+  }
+}
