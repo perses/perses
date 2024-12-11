@@ -131,8 +131,12 @@ func (o *option) onlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Das
 }
 
 func (o *option) offlineExecution(grafanaDashboard json.RawMessage) (*modelV1.Dashboard, error) {
-	finalGrafanaDashboard := migrate.ReplaceInputValue(o.input, string(grafanaDashboard))
-	return o.mig.Migrate([]byte(finalGrafanaDashboard))
+	rowGrafanaDashboard := []byte(migrate.ReplaceInputValue(o.input, string(grafanaDashboard)))
+	dash := &migrate.SimplifiedDashboard{}
+	if err := json.Unmarshal(rowGrafanaDashboard, dash); err != nil {
+		return nil, err
+	}
+	return o.mig.Migrate(dash)
 }
 
 func (o *option) SetWriter(writer io.Writer) {
