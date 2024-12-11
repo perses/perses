@@ -128,8 +128,15 @@ const useStatChartData = (
   }, [queryResults, spec, chartsTheme]);
 };
 
-const getValueOrLabel = (value?: number | null, mappings?: ValueMapping[]): string | number | undefined | null => {
-  if (mappings?.length && value) {
+const getValueOrLabel = (
+  value?: number | null,
+  mappings?: ValueMapping[],
+  label?: string
+): string | number | undefined | null => {
+  if (label) {
+    return label;
+  }
+  if (mappings?.length && value !== undefined && value !== null) {
     return applyValueMapping(value, mappings).value;
   } else {
     return value;
