@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Box, Stack } from '@mui/material';
+import { ReactElement } from 'react';
 
-export function DropIndicator() {
+export function DropIndicator(): ReactElement {
   return (
     <Stack direction="row" alignItems="center">
       <Box

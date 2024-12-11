@@ -144,7 +144,8 @@ func (o *option) processFile(file string, extension string) error {
 	if o.Mode == modeStdout {
 		return output.HandleString(o.writer, string(cmdOutput))
 	}
-	// Otherwise, create an output file under the "built" directory:
+
+	// Otherwise, create an output file under the output directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
 	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), os.ModePerm)

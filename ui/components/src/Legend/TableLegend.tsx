@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Table, TableProps, TableColumnConfig } from '../Table';
 import { LegendItem } from './legend-model';
 
@@ -58,7 +58,7 @@ export function TableLegend({
   columns: additionalColumns = [],
   sorting,
   onSortingChange,
-}: TableLegendProps) {
+}: TableLegendProps): ReactElement {
   const rowSelection = useMemo(() => {
     return typeof initRowSelection !== 'string'
       ? initRowSelection

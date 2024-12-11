@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ForwardedRef, forwardRef } from 'react';
+import { ForwardedRef, forwardRef, ReactElement } from 'react';
 import { Button, styled, ButtonProps } from '@mui/material';
 
 type ToolbarIconButtonProps = ButtonProps;
 
-function IconButton(props: ToolbarIconButtonProps, ref: ForwardedRef<HTMLButtonElement>) {
+function IconButton(props: ToolbarIconButtonProps, ref: ForwardedRef<HTMLButtonElement>): ReactElement {
   return <StyledIconButton ref={ref} variant="outlined" color="secondary" {...props} />;
 }
 

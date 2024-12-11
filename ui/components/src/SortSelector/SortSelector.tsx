@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
@@ -26,8 +27,8 @@ export interface SortSelectorProps {
   value?: SortOption;
 }
 
-export function SortSelector({ onChange, value = 'desc' }: SortSelectorProps) {
-  const handleSortChange = (_: unknown, { id }: { id: SortOption }) => {
+export function SortSelector({ onChange, value = 'desc' }: SortSelectorProps): ReactElement {
+  const handleSortChange = (_: unknown, { id }: { id: SortOption }): void => {
     onChange(id);
   };
 

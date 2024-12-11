@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, Divider, Stack, Typography } from '@mui/material';
+import { ReactElement } from 'react';
 import { SeriesMarker } from './SeriesMarker';
 
 export interface SeriesLabelsStackProps {
@@ -21,7 +22,7 @@ export interface SeriesLabelsStackProps {
   markerColor: string;
 }
 
-export function SeriesLabelsStack(props: SeriesLabelsStackProps) {
+export function SeriesLabelsStack(props: SeriesLabelsStackProps): ReactElement {
   const { formattedY, markerColor, metricName, metricLabels } = props;
   return (
     <Stack spacing={0.5}>

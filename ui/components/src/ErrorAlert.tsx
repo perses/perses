@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Alert } from '@mui/material';
+import { ReactElement } from 'react';
 
 export interface ErrorAlertProps {
   error: Error;
@@ -20,7 +21,7 @@ export interface ErrorAlertProps {
 /**
  * Shows an MUI Alert with the `Error.message` as its contents.
  */
-export function ErrorAlert(props: ErrorAlertProps) {
+export function ErrorAlert(props: ErrorAlertProps): ReactElement {
   const { error } = props;
   return <Alert severity="error">{error.message}</Alert>;
 }

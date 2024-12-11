@@ -213,7 +213,20 @@ export function TablePanel({ contentDimensions, spec }: TableProps) {
     return result;
   }, [data, keys, spec.cellSettings]);
 
-  const [sorting, setSorting] = useState<SortingState>([]);
+  function generateDefaultSortingState(): SortingState {
+    return (
+      spec.columnSettings
+        ?.filter((column) => column.sort !== undefined)
+        .map((column) => {
+          return {
+            id: column.name,
+            desc: column.sort === 'desc',
+          };
+        }) ?? []
+    );
+  }
+
+  const [sorting, setSorting] = useState<SortingState>(generateDefaultSortingState());
 
   if (isLoading || isFetching) {
     return <LoadingOverlay />;

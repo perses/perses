@@ -13,7 +13,7 @@
 
 import { Box, FormControl, MenuItem, Select } from '@mui/material';
 import { DurationString } from '@perses-dev/core';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { TimeOption } from '../model';
 
 interface RefreshIntervalPickerProps {
@@ -23,7 +23,7 @@ interface RefreshIntervalPickerProps {
   height?: string;
 }
 
-export function RefreshIntervalPicker(props: RefreshIntervalPickerProps) {
+export function RefreshIntervalPicker(props: RefreshIntervalPickerProps): ReactElement {
   const { value, onChange, timeOptions, height } = props;
   const formattedValue = value;
 

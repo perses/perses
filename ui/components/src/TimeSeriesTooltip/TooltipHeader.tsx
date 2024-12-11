@@ -14,7 +14,7 @@
 import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
-import { memo } from 'react';
+import { memo, ReactElement } from 'react';
 import { getDateAndTime } from '../utils';
 import { NearbySeriesArray } from './nearby-series';
 import {
@@ -48,7 +48,7 @@ export const TooltipHeader = memo(function TooltipHeader({
     return null;
   }
 
-  const formatTimeSeriesHeader = (timeMs: number) => {
+  const formatTimeSeriesHeader = (timeMs: number): ReactElement => {
     const { formattedTime, formattedDate } = getDateAndTime(timeMs);
     return (
       <Box>

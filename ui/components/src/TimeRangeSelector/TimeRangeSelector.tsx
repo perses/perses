@@ -14,7 +14,7 @@
 import { Box, MenuItem, Popover, Select } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
-import { useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { useTimeZone } from '../context';
 import { TimeOption } from '../model';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
@@ -57,7 +57,7 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
-}: TimeRangeSelectorProps) {
+}: TimeRangeSelectorProps): ReactElement {
   const { timeZone } = useTimeZone();
 
   const anchorEl = useRef(); // Used to position the absolute time range picker

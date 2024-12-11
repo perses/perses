@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
 import { reorderWithEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge';
 import {
   monitorForElements,
@@ -40,7 +40,12 @@ interface MonitorElementsProps {
  * @param axis - The axis to monitor the drag and drop on
  * @param onChange - The function to call when a drop is detected
  */
-export function useDragAndDropMonitor({ elements, accessKey, axis = 'vertical', onChange }: MonitorElementsProps) {
+export function useDragAndDropMonitor({
+  elements,
+  accessKey,
+  axis = 'vertical',
+  onChange,
+}: MonitorElementsProps): void {
   return useEffect(() => {
     return monitorForElements({
       onDrop({ location, source }) {
@@ -83,7 +88,7 @@ export interface DragAndDropElementProps {
 /*
  * This component wraps the children that should be draggable
  */
-export function DragAndDropElement({ children, data }: DragAndDropElementProps) {
+export function DragAndDropElement({ children, data }: DragAndDropElementProps): ReactElement {
   const ref = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<State>(idle);
 

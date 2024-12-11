@@ -304,7 +304,7 @@ export function getNearbySeriesData({
   chart?: EChartsInstance;
   format?: FormatOptions;
   showAllSeries?: boolean;
-}) {
+}): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
@@ -364,7 +364,7 @@ export function legacyGetNearbySeriesData({
   chart?: EChartsInstance;
   format?: FormatOptions;
   showAllSeries?: boolean;
-}) {
+}): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return [];
 
   // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
@@ -435,7 +435,7 @@ export function getYBuffer({
   yInterval: number;
   totalSeries: number;
   showAllSeries?: boolean;
-}) {
+}): number {
   if (showAllSeries) {
     return yInterval * 10; // roughly correlates with grid so entire canvas is searched
   }
