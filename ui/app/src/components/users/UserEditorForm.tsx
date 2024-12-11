@@ -13,7 +13,7 @@
 
 import { Action, UserEditorSchemaType, UserResource, userSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { Fragment, useMemo, useState } from 'react';
+import React, { Fragment, ReactElement, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm } from 'react-hook-form';
 import { Alert, Box, Divider, FormControl, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
@@ -35,7 +35,7 @@ export function UserEditorForm({
   onSave,
   onClose,
   onDelete,
-}: UserEditorFormProps) {
+}: UserEditorFormProps): ReactElement {
   const externalProvidersEnabled = useIsExternalProviderEnabled();
   const nativeProviderEnabled = useIsNativeProviderEnabled();
 
@@ -73,7 +73,7 @@ export function UserEditorForm({
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialUserClean) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -286,7 +286,15 @@ export function UserEditorForm({
   );
 }
 
-function OAuthProvider({ control, index, action }: { control: Control<UserResource>; index: number; action: Action }) {
+function OAuthProvider({
+  control,
+  index,
+  action,
+}: {
+  control: Control<UserResource>;
+  index: number;
+  action: Action;
+}): ReactElement {
   return (
     <Stack direction="row" width="100%" gap={2}>
       <Stack gap={1} width="100%">

@@ -13,7 +13,7 @@
 
 import { Action, ACTIONS, GLOBAL_SCOPES, PROJECT_SCOPES, Role, rolesEditorSchema } from '@perses-dev/core';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
-import React, { Fragment, useMemo, useState } from 'react';
+import React, { Fragment, ReactElement, useMemo, useState } from 'react';
 import { Control, Controller, FormProvider, SubmitHandler, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Box, Divider, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
@@ -33,7 +33,7 @@ export function RoleEditorForm({
   onSave,
   onClose,
   onDelete,
-}: RoleEditorFormProps) {
+}: RoleEditorFormProps): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
   const titleAction = getTitleAction(action, isDraft);
@@ -58,7 +58,7 @@ export function RoleEditorForm({
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialValue) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -170,7 +170,7 @@ interface PermissionControl {
   action: Action;
 }
 
-function PermissionControl({ control, index, action }: PermissionControl) {
+function PermissionControl({ control, index, action }: PermissionControl): ReactElement {
   const kind = useWatch({ control, name: 'kind' });
   // Role and GlobalRole don't have same scopes
   const availableScopes = useMemo(() => {

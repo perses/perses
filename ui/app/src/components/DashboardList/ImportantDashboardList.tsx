@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { useImportantDashboardList } from '../../model/dashboard-client';
 import { DashboardList } from './DashboardList';
 
-export function ImportantDashboardList() {
+export function ImportantDashboardList(): ReactElement {
   const { data, isLoading } = useImportantDashboardList();
 
   return (

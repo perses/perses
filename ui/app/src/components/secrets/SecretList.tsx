@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Action, getMetadataProject, Secret } from '@perses-dev/core';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -52,7 +52,7 @@ export function SecretList<T extends Secret>({
   onCreate,
   onUpdate,
   onDelete,
-}: ListPropertiesWithCallbacks<T>) {
+}: ListPropertiesWithCallbacks<T>): ReactElement {
   const { infoSnackbar } = useSnackbar();
   const isReadonly = useIsReadonly();
 

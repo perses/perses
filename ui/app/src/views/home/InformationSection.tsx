@@ -13,12 +13,13 @@
 
 import { Card, CardContent, Stack } from '@mui/material';
 import InformationIcon from 'mdi-material-ui/Information';
+import { ReactElement } from 'react';
 import { useInformation } from '../../context/Config';
 
 /*
  * Information section is displayed if there is information provided by the config
  */
-export function InformationSection() {
+export function InformationSection(): ReactElement {
   const data = useInformation();
 
   if (!data) {

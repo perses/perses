@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, useMemo } from 'react';
+import { memo, ReactElement, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
@@ -35,11 +35,11 @@ export interface Row extends CommonRow {
   expireAt: string;
 }
 
-function NoEphemeralDashboardRowOverlay() {
+function NoEphemeralDashboardRowOverlay(): ReactElement {
   return <NoDataOverlay resource="ephemeral dashboards" />;
 }
 
-export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>) {
+export function EphemeralDashboardDataGrid(props: DataGridProperties<Row>): ReactElement {
   const { columns, rows, initialState, hideToolbar, isLoading } = props;
 
   const navigate = useNavigate();

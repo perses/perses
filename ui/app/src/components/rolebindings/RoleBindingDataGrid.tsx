@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, useMemo } from 'react';
+import { memo, ReactElement, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import {
@@ -33,11 +33,11 @@ export interface Row extends CommonRow {
   viewedAt?: string;
 }
 
-function NoRoleBindingRowOverlay() {
+function NoRoleBindingRowOverlay(): ReactElement {
   return <NoDataOverlay resource="role bindings" />;
 }
 
-export function RoleBindingDataGrid(props: DataGridPropertiesWithCallback<Row>) {
+export function RoleBindingDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)

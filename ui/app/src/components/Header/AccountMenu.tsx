@@ -11,21 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, ReactElement, useState } from 'react';
 import { Divider, IconButton, ListItemIcon, Menu, MenuItem } from '@mui/material';
 import AccountCircle from 'mdi-material-ui/AccountCircle';
 import Logout from 'mdi-material-ui/Logout';
 import { useAuthToken } from '../../model/auth-client';
 import { ThemeSwitch } from './ThemeSwitch';
 
-export function AccountMenu() {
+export function AccountMenu(): ReactElement {
   const { data: decodedToken } = useAuthToken();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+  const handleMenu = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  const handleCloseMenu = () => {
+  const handleCloseMenu = (): void => {
     setAnchorEl(null);
   };
   return (

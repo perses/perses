@@ -22,7 +22,7 @@ import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useSnackbar } from '@perses-dev/components';
@@ -50,7 +50,7 @@ export interface DashboardListProperties extends ListProperties {
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DashboardList(props: DashboardListProperties) {
+export function DashboardList(props: DashboardListProperties): ReactElement {
   const navigate = useNavigate();
   const { dashboardList, hideToolbar, isLoading, initialState } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();

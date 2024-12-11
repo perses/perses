@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Secret } from '@perses-dev/core';
-import { Dispatch, useState } from 'react';
+import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
@@ -31,12 +31,12 @@ export function SecretDrawer<T extends Secret>({
   onSave,
   onClose,
   onDelete,
-}: SecretDrawerProps<T>) {
+}: SecretDrawerProps<T>): ReactElement {
   const [isDeleteSecretDialogStateOpened, setDeleteSecretDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -52,7 +52,7 @@ export function SecretDrawer<T extends Secret>({
             onActionChange={onActionChange}
             onSave={onSave as Dispatch<Secret>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteSecretDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? (): void => setDeleteSecretDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (

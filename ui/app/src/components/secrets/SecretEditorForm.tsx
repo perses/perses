@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Secret, secretsEditorSchema, SecretsEditorSchemaType } from '@perses-dev/core';
-import React, { SyntheticEvent, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, SyntheticEvent, useEffect, useMemo, useState } from 'react';
 import { getSubmitText, getTitleAction } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -49,7 +49,7 @@ export function SecretEditorForm({
   onSave,
   onClose,
   onDelete,
-}: SecretEditorFormProps) {
+}: SecretEditorFormProps): ReactElement {
   // Reset all attributes that are "hidden" by the API and are returning <secret> as value
   const initialSecretClean: Secret = useMemo(() => {
     const result = { ...initialValue };
@@ -82,7 +82,7 @@ export function SecretEditorForm({
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialSecretClean) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
@@ -101,7 +101,7 @@ export function SecretEditorForm({
     initialSecretClean.spec.basicAuth ? basicAuthIndex : authorizationIndex
   );
 
-  const handleTabChange = (event: SyntheticEvent, newValue: string) => {
+  const handleTabChange = (event: SyntheticEvent, newValue: string): void => {
     if (newValue === basicAuthIndex) {
       form.setValue('spec.basicAuth', { username: '', password: '', passwordFile: '' });
     } else if (newValue === authorizationIndex) {
@@ -564,7 +564,7 @@ interface TabPanelProps extends BoxProps {
   value: string;
 }
 
-function TabPanel({ children, value, index, ...props }: TabPanelProps) {
+function TabPanel({ children, value, index, ...props }: TabPanelProps): ReactElement {
   return (
     <Box
       role="tabpanel"

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Card, CardProps } from '@mui/material';
+import { ReactElement } from 'react';
 import { useDashboardList } from '../../../model/dashboard-client';
 import { DashboardList } from '../../../components/DashboardList/DashboardList';
 
@@ -20,7 +21,7 @@ interface ProjectDashboardsProps extends CardProps {
   hideToolbar?: boolean;
 }
 
-export function ProjectDashboards({ projectName, hideToolbar, ...props }: ProjectDashboardsProps) {
+export function ProjectDashboards({ projectName, hideToolbar, ...props }: ProjectDashboardsProps): ReactElement {
   const { data, isLoading } = useDashboardList({ project: projectName });
 
   return (

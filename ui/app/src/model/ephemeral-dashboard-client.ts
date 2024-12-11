@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { EphemeralDashboardResource } from '@perses-dev/core';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import buildURL from './url-builder';
@@ -25,7 +25,7 @@ export const resource = 'ephemeraldashboards';
  */
 export function useCreateEphemeralDashboardMutation(
   onSuccess?: (data: EphemeralDashboardResource, variables: EphemeralDashboardResource) => Promise<unknown> | unknown
-) {
+): UseMutationResult<EphemeralDashboardResource, Error, EphemeralDashboardResource> {
   const queryClient = useQueryClient();
 
   return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
@@ -44,7 +44,11 @@ export function useCreateEphemeralDashboardMutation(
  * Used to update an ephemeral dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useUpdateEphemeralDashboardMutation() {
+export function useUpdateEphemeralDashboardMutation(): UseMutationResult<
+  EphemeralDashboardResource,
+  Error,
+  EphemeralDashboardResource
+> {
   const queryClient = useQueryClient();
 
   return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
@@ -62,7 +66,11 @@ export function useUpdateEphemeralDashboardMutation() {
  * Used to delete an ephemeral dashboard in the API.
  * Will automatically invalidate dashboards and force the get query to be executed again.
  */
-export function useDeleteEphemeralDashboardMutation() {
+export function useDeleteEphemeralDashboardMutation(): UseMutationResult<
+  EphemeralDashboardResource,
+  Error,
+  EphemeralDashboardResource
+> {
   const queryClient = useQueryClient();
   return useMutation<EphemeralDashboardResource, Error, EphemeralDashboardResource>({
     mutationKey: [resource],
@@ -84,7 +92,7 @@ export function useDeleteEphemeralDashboardMutation() {
  * Used to get an ephemeral dashboard from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useEphemeralDashboard(project: string, name: string) {
+export function useEphemeralDashboard(project: string, name: string): UseQueryResult<EphemeralDashboardResource> {
   return useQuery<EphemeralDashboardResource, Error>({
     queryKey: [resource, project, name],
     queryFn: () => {
@@ -97,7 +105,7 @@ export function useEphemeralDashboard(project: string, name: string) {
  * Used to get ephemeral dashboards from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useEphemeralDashboardList(project?: string) {
+export function useEphemeralDashboardList(project?: string): UseQueryResult<EphemeralDashboardResource[]> {
   return useQuery<EphemeralDashboardResource[], Error>({
     queryKey: [resource, project],
     queryFn: () => {
@@ -106,7 +114,7 @@ export function useEphemeralDashboardList(project?: string) {
   });
 }
 
-export function createEphemeralDashboard(entity: EphemeralDashboardResource) {
+export function createEphemeralDashboard(entity: EphemeralDashboardResource): Promise<EphemeralDashboardResource> {
   const url = buildURL({ resource: resource, project: entity.metadata.project });
   return fetchJson<EphemeralDashboardResource>(url, {
     method: HTTPMethodPOST,
@@ -115,7 +123,7 @@ export function createEphemeralDashboard(entity: EphemeralDashboardResource) {
   });
 }
 
-export function getEphemeralDashboard(project: string, name: string) {
+export function getEphemeralDashboard(project: string, name: string): Promise<EphemeralDashboardResource> {
   const url = buildURL({ resource: resource, project: project, name: name });
   return fetchJson<EphemeralDashboardResource>(url, {
     method: HTTPMethodGET,
@@ -123,7 +131,7 @@ export function getEphemeralDashboard(project: string, name: string) {
   });
 }
 
-export function getEphemeralDashboards(project?: string) {
+export function getEphemeralDashboards(project?: string): Promise<EphemeralDashboardResource[]> {
   const url = buildURL({ resource: resource, project: project });
   return fetchJson<EphemeralDashboardResource[]>(url, {
     method: HTTPMethodGET,
@@ -131,7 +139,7 @@ export function getEphemeralDashboards(project?: string) {
   });
 }
 
-export function updateEphemeralDashboard(entity: EphemeralDashboardResource) {
+export function updateEphemeralDashboard(entity: EphemeralDashboardResource): Promise<EphemeralDashboardResource> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetchJson<EphemeralDashboardResource>(url, {
     method: HTTPMethodPUT,
@@ -140,7 +148,7 @@ export function updateEphemeralDashboard(entity: EphemeralDashboardResource) {
   });
 }
 
-export function deleteEphemeralDashboard(entity: EphemeralDashboardResource) {
+export function deleteEphemeralDashboard(entity: EphemeralDashboardResource): Promise<Response> {
   const url = buildURL({ resource: resource, project: entity.metadata.project, name: entity.metadata.name });
   return fetch(url, {
     method: HTTPMethodDELETE,

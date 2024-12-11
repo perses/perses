@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { DashboardResource, getResourceDisplayName, getResourceExtendedDisplayName } from '@perses-dev/core';
@@ -34,7 +34,7 @@ interface RenameDashboardDialogProps {
  * @param props.onConfirm Action to perform when user confirmed.
  * @param props.dashboard The dashboard resource to rename.
  */
-export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
+export const RenameDashboardDialog = (props: RenameDashboardDialogProps): ReactElement => {
   const { dashboard, open, onClose, onSuccess } = props;
   const form = useForm<RenameDashboardValidationType>({
     resolver: zodResolver(renameDashboardDialogValidationSchema),
@@ -66,7 +66,7 @@ export const RenameDashboardDialog = (props: RenameDashboardDialogProps) => {
     });
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onClose();
     form.reset();
   };

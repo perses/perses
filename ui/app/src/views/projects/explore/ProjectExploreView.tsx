@@ -13,7 +13,7 @@
 
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry, ProjectStoreProvider, useProjectStore } from '@perses-dev/plugin-system';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { ExternalVariableDefinition } from '@perses-dev/dashboards';
 import { ViewExplore } from '@perses-dev/explore';
 import { CircularProgress, Stack } from '@mui/material';
@@ -27,7 +27,7 @@ export interface ProjectExploreViewProps {
   exploreTitleComponent?: React.ReactNode;
 }
 
-function ProjectExploreView(props: ProjectExploreViewProps) {
+function ProjectExploreView(props: ProjectExploreViewProps): ReactElement {
   return (
     <ProjectStoreProvider enabledURLParams={true}>
       <HelperExploreView {...props} />
@@ -35,7 +35,7 @@ function ProjectExploreView(props: ProjectExploreViewProps) {
   );
 }
 
-function HelperExploreView(props: ProjectExploreViewProps) {
+function HelperExploreView(props: ProjectExploreViewProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { project } = useProjectStore();
   const projectName = project?.metadata.name === 'none' ? '' : project?.metadata.name;

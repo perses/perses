@@ -16,7 +16,7 @@ import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@per
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
-import { useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
@@ -37,7 +37,7 @@ export interface GenericDashboardViewProps {
 /**
  * The View for displaying a Dashboard.
  */
-export function HelperDashboardView(props: GenericDashboardViewProps) {
+export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));

@@ -16,7 +16,7 @@ import { Box, Stack, Tooltip } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PencilIcon from 'mdi-material-ui/Pencil';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import { intlFormatDistance } from 'date-fns';
 import { useSnackbar } from '@perses-dev/components';
 import { DeleteResourceDialog, RenameDashboardDialog } from '../dialogs';
@@ -31,7 +31,7 @@ export interface RecentDashboardListProperties {
   isLoading?: boolean;
 }
 
-export function RecentDashboardList(props: RecentDashboardListProperties) {
+export function RecentDashboardList(props: RecentDashboardListProperties): ReactElement {
   const { dashboardList, hideProject, hideToolbar, isLoading } = props;
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
   const deleteDashboardMutation = useDeleteDashboardMutation();

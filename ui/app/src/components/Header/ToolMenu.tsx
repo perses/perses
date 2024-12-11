@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { MouseEvent, useState } from 'react';
+import React, { MouseEvent, ReactElement, useState } from 'react';
 import { Box, IconButton, ListItemIcon, Menu as MUIMenu, MenuItem, Typography } from '@mui/material';
 import Menu from 'mdi-material-ui/Menu';
 import { Link as RouterLink } from 'react-router-dom';
@@ -21,7 +21,7 @@ import Compass from 'mdi-material-ui/Compass';
 import { AdminRoute, ConfigRoute, ExploreRoute } from '../../model/route';
 import { GlobalProject, useHasPartialPermission } from '../../context/Authorization';
 
-export function ToolMenu() {
+export function ToolMenu(): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const hasPartialPermission = useHasPartialPermission(['read'], GlobalProject, [
@@ -33,10 +33,10 @@ export function ToolMenu() {
     'User',
   ]);
 
-  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+  const handleMenu = (event: MouseEvent<HTMLElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  const handleCloseMenu = () => {
+  const handleCloseMenu = (): void => {
     setAnchorEl(null);
   };
   return (
