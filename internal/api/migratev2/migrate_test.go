@@ -35,6 +35,42 @@ func TestMig_Migrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
+			title:                       "dashboard with old-formatted elements (text panels without `options` field & a legacy graph panel)",
+			inputGrafanaDashboardFile:   "old_grafana_panels_grafana_dashboard.json",
+			expectedPersesDashboardFile: "old_grafana_panels_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard embedding a library panel",
+			inputGrafanaDashboardFile:   "library_panel_grafana_dashboard.json",
+			expectedPersesDashboardFile: "library_panel_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with old query format used (i.e query string instead of struct with query + refId)",
+			inputGrafanaDashboardFile:   "old_grafana_query_grafana_dashboard.json",
+			expectedPersesDashboardFile: "old_grafana_query_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard without panels should be migrated without error",
+			inputGrafanaDashboardFile:   "empty_panels_list_grafana_dashboard.json",
+			expectedPersesDashboardFile: "empty_panels_list_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with table panels, focused on validating the migration of column settings",
+			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
+			expectedPersesDashboardFile: "tables_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
+			title:                       "dashboard with a stat panel that has undefined reduceOptions",
+			inputGrafanaDashboardFile:   "stat_calc_undefined_grafana_dashboard.json",
+			expectedPersesDashboardFile: "stat_calc_undefined_perses_dashboard.json",
+			expectedErrorStr:            "",
+		},
+		{
 			title:                       "dashboard with a bar gauge",
 			inputGrafanaDashboardFile:   "barchart_grafana_dashboard.json",
 			expectedPersesDashboardFile: "barchart_perses_dashboard.json",
@@ -47,9 +83,9 @@ func TestMig_Migrate(t *testing.T) {
 			expectedErrorStr:            "",
 		},
 		{
-			title:                       "dashboard with table panels, focused on validating the migration of column settings",
-			inputGrafanaDashboardFile:   "tables_grafana_dashboard.json",
-			expectedPersesDashboardFile: "tables_perses_dashboard.json",
+			title:                       "dashboard from user",
+			inputGrafanaDashboardFile:   "grafana_user_grafana_dashboard.json",
+			expectedPersesDashboardFile: "grafana_user_perses_dashboard.json",
 			expectedErrorStr:            "",
 		},
 	}

@@ -33,6 +33,37 @@ var mappingSort = []variable.Sort{
 	variable.SortAlphabeticalCaseInsensitiveDesc,
 }
 
+var defaultVariablePlugin = common.Plugin{
+	Kind: "StaticListVariable",
+	Spec: &struct {
+		Values []string `json:"values"`
+	}{
+		Values: []string{"grafana", "migration", "not", "supported"},
+	},
+}
+
+func buildDefaultVariable(v TemplateVar) dashboard.Variable {
+	return dashboard.Variable{
+		Kind: variable.KindList,
+		Spec: &dashboard.ListVariableSpec{
+			ListSpec: variable.ListSpec{
+				Plugin: defaultVariablePlugin,
+				Display: &variable.Display{
+					Name:        v.Label,
+					Description: v.Description,
+					Hidden:      v.Hide > 0,
+				},
+				AllowAllValue:  v.IncludeAll,
+				AllowMultiple:  v.Multi,
+				CustomAllValue: v.AllValue,
+				DefaultValue:   v.getDefaultValue(),
+				Sort:           grafanaMappingSort(v.Sort),
+			},
+			Name: v.Name,
+		},
+	}
+}
+
 func grafanaMappingSort(sort *int) *variable.Sort {
 	if sort == nil {
 		return nil

@@ -26,53 +26,8 @@ import (
 	v1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/dashboard"
-	"github.com/perses/perses/pkg/model/api/v1/variable"
 	"github.com/sirupsen/logrus"
 )
-
-var (
-	defaultPanelPlugin = common.Plugin{
-		Kind: "Markdown",
-		Spec: &struct {
-			Text string `json:"text"`
-		}{
-			Text: "**Migration from Grafana not supported !**",
-		},
-	}
-	defaultQueryPlugin = common.Plugin{
-		Kind: "PrometheusTimeSeriesQuery",
-		Spec: &struct {
-			Query string `json:"query"`
-		}{
-			Query: "migration_from_grafana_not_supported",
-		},
-	}
-	defaultVariablePlugin = common.Plugin{
-		Kind: "StaticListVariable",
-		Spec: &struct {
-			Values []string `json:"values"`
-		}{
-			Values: []string{"grafana", "migration", "not", "supported"},
-		},
-	}
-)
-
-func buildDefaultVariable(v TemplateVar) dashboard.Variable {
-	return dashboard.Variable{
-		Kind: variable.KindList,
-		Spec: &dashboard.ListVariableSpec{
-			ListSpec: variable.ListSpec{
-				Plugin: defaultVariablePlugin,
-				Display: &variable.Display{
-					Name:        v.Label,
-					Description: v.Description,
-					Hidden:      v.Hide > 0,
-				},
-			},
-			Name: v.Name,
-		},
-	}
-}
 
 func create(schemas config.Schemas) (*mig, error) {
 	panels, err := loadPanels(schemas.PanelsPath)
@@ -178,8 +133,14 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 					},
 				})
 			}
-			result = append(result, layout)
+			if len(spec.Items) > 0 {
+				result = append(result, layout)
+			}
 		}
+	}
+	if len(defaultSpec.Items) == 0 {
+		// Since there are no items, we should remove the default layout
+		result = result[1:]
 	}
 	return result
 }

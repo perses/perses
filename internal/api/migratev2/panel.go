@@ -22,6 +22,25 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	defaultPanelPlugin = common.Plugin{
+		Kind: "Markdown",
+		Spec: &struct {
+			Text string `json:"text"`
+		}{
+			Text: "**Migration from Grafana not supported !**",
+		},
+	}
+	defaultQueryPlugin = common.Plugin{
+		Kind: "PrometheusTimeSeriesQuery",
+		Spec: &struct {
+			Query string `json:"query"`
+		}{
+			Query: "migration_from_grafana_not_supported",
+		},
+	}
+)
+
 func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
