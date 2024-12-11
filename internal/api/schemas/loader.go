@@ -31,10 +31,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func LoadMigrateSchema(schemaPath string) (*build.Instance, error) {
+	return loadSchemaInstance(schemaPath, "migrate")
+}
+
 func Load(schemaPath string) (*build.Instance, error) {
+	return loadSchemaInstance(schemaPath, "model")
+}
+
+func loadSchemaInstance(schemaPath string, pkg string) (*build.Instance, error) {
 	// load the cue files into build.Instances slice
 	// package `model` is imposed so that we don't mix model-related files with migration-related files
-	buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: "model"})
+	buildInstances := load.Instances([]string{}, &load.Config{Dir: schemaPath, Package: pkg})
 	// we strongly assume that only 1 buildInstance should be returned, otherwise we skip it
 	// TODO can probably be improved
 	if len(buildInstances) != 1 {

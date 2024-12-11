@@ -200,6 +200,9 @@
       {
         "kind": "ListVariable",
         "spec": {
+          "display": {
+            "hidden": false
+          },
           "allowAllValue": false,
           "allowMultiple": false,
           "sort": "none",
@@ -452,20 +455,23 @@
               "columnSettings": [
                 {
                   "header": "",
-                  "name": "timestamp",
-                  "hide": true
+                  "name": "timestamp"
                 },
                 {
-                  "hide": true,
-                  "name": "__name__"
+                  "header": "ValueCustomHeader",
+                  "name": "value"
                 },
                 {
                   "header": "API server",
                   "name": "apiserver"
                 },
                 {
-                  "header": "ValueCustomHeader",
-                  "name": "value"
+                  "hide": true,
+                  "name": "timestamp"
+                },
+                {
+                  "hide": true,
+                  "name": "__name__"
                 },
                 {
                   "name": "API server",
