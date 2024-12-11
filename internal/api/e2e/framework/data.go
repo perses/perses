@@ -472,7 +472,7 @@ func NewUser(name string, password string) *v1.User {
 		Kind:     v1.KindUser,
 		Metadata: newMetadata(name),
 		Spec: v1.UserSpec{
-			NativeProvider: v1.NativeProvider{
+			NativeProvider: &v1.NativeProvider{
 				Password: password,
 			},
 		},
