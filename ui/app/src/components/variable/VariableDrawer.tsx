@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Variable, VariableDefinition, getVariableProject } from '@perses-dev/core';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useState } from 'react';
 import { DatasourceStoreProvider, VariableProviderWithQueryParams } from '@perses-dev/dashboards';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
@@ -40,7 +40,7 @@ export function VariableDrawer<T extends Variable>({
   onSave,
   onDelete,
   onClose,
-}: VariableDrawerProps<T>) {
+}: VariableDrawerProps<T>): ReactElement {
   const projectName = getVariableProject(variable);
   const [isDeleteVariableDialogStateOpened, setDeleteVariableDialogStateOpened] = useState<boolean>(false);
 
@@ -57,7 +57,7 @@ export function VariableDrawer<T extends Variable>({
     return result;
   }, [variable]);
 
-  const handleSave = (definition: VariableDefinition) => {
+  const handleSave = (definition: VariableDefinition): void => {
     variable.spec = definition;
     variable.metadata.name = definition.spec.name;
     if (onSave) {
@@ -69,7 +69,7 @@ export function VariableDrawer<T extends Variable>({
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -89,7 +89,7 @@ export function VariableDrawer<T extends Variable>({
                     onActionChange={onActionChange}
                     onSave={handleSave}
                     onClose={onClose}
-                    onDelete={onDelete ? () => setDeleteVariableDialogStateOpened(true) : undefined}
+                    onDelete={onDelete ? (): void => setDeleteVariableDialogStateOpened(true) : undefined}
                   />
                 </VariableProviderWithQueryParams>
               </TimeRangeProviderWithQueryParams>

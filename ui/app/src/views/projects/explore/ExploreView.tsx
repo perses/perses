@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import Compass from 'mdi-material-ui/Compass';
+import { ReactElement } from 'react';
 import AppBreadcrumbs from '../../../components/breadcrumbs/AppBreadcrumbs';
 import ProjectExploreView from './ProjectExploreView';
 
-function ExploreView() {
+function ExploreView(): ReactElement {
   return (
     <ProjectExploreView
       exploreTitleComponent={<AppBreadcrumbs rootPageName="Explore" icon={<Compass fontSize="large" />} />}

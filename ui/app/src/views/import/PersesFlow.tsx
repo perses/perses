@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Alert, Autocomplete, Button, Stack, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import Import from 'mdi-material-ui/Import';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,7 +26,7 @@ interface PersesFlowProps {
   dashboard: DashboardResource;
 }
 
-function PersesFlow({ dashboard }: PersesFlowProps) {
+function PersesFlow({ dashboard }: PersesFlowProps): ReactElement {
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
   const { exceptionSnackbar } = useSnackbar();
@@ -36,7 +36,7 @@ function PersesFlow({ dashboard }: PersesFlowProps) {
     navigate(`/projects/${data.metadata.project}/dashboards/${data.metadata.name}`);
   });
 
-  const importOnClick = () => {
+  const importOnClick = (): void => {
     dashboard.metadata.project = projectName;
     dashboardMutation.mutate(dashboard);
   };

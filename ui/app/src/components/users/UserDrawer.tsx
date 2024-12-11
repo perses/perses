@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, useState } from 'react';
+import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { UserResource } from '@perses-dev/core';
 import { DeleteResourceDialog } from '../dialogs';
@@ -31,12 +31,12 @@ export function UserDrawer({
   onSave,
   onClose,
   onDelete,
-}: UserDrawerProps) {
+}: UserDrawerProps): ReactElement {
   const [isDeleteUserDialogStateOpened, setDeleteUserDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -52,7 +52,7 @@ export function UserDrawer({
             onActionChange={onActionChange}
             onSave={onSave as Dispatch<UserResource>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteUserDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? (): void => setDeleteUserDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (

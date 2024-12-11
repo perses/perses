@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Role } from '@perses-dev/core';
-import { Dispatch, useState } from 'react';
+import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
@@ -31,12 +31,12 @@ export function RoleDrawer<T extends Role>({
   onSave,
   onClose,
   onDelete,
-}: RoleDrawerProps<T>) {
+}: RoleDrawerProps<T>): ReactElement {
   const [isDeleteRoleDialogStateOpened, setDeleteRoleDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -52,7 +52,7 @@ export function RoleDrawer<T extends Role>({
             onActionChange={onActionChange}
             onSave={onSave as Dispatch<Role>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteRoleDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? (): void => setDeleteRoleDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (

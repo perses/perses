@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { Await, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { Suspense, useEffect, useState } from 'react';
+import { ReactElement, Suspense, useEffect, useState } from 'react';
 import { LinearProgress } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 import { ProjectResource } from '@perses-dev/core';
 import { getProject } from '../model/project-client';
 
-function GuardedProjectRoute() {
+function GuardedProjectRoute(): ReactElement {
   const { projectName } = useParams();
   const navigate = useNavigate();
   const { exceptionSnackbar } = useSnackbar();

@@ -13,10 +13,10 @@
 
 import { useMediaQuery, useTheme } from '@mui/material';
 
-export function useIsLaptopSize() {
+export function useIsLaptopSize(): boolean {
   return useMediaQuery(useTheme().breakpoints.up('md'));
 }
 
-export function useIsMobileSize() {
+export function useIsMobileSize(): boolean {
   return useMediaQuery(useTheme().breakpoints.down('md'));
 }

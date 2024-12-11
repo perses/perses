@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, useMemo } from 'react';
+import { memo, ReactElement, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import {
@@ -36,11 +36,11 @@ export interface Row extends CommonRow {
   updatedAt: string;
 }
 
-function NoVariableRowOverlay() {
+function NoVariableRowOverlay(): ReactElement {
   return <NoDataOverlay resource="variables" />;
 }
 
-export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>) {
+export function VariableDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const { columns, rows, onRowClick, initialState, hideToolbar, isLoading } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)

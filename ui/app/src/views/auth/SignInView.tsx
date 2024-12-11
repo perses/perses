@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, LinearProgress, Link, TextField, Typography } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { useSnackbar } from '@perses-dev/components';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useNativeAuthMutation, useIsAccessTokenExist } from '../../model/auth-client';
@@ -20,7 +20,7 @@ import { SignUpRoute } from '../../model/route';
 import { useIsSignUpDisable } from '../../context/Config';
 import { SignWrapper } from './SignWrapper';
 
-function SignInView() {
+function SignInView(): ReactElement {
   const isSignUpDisable = useIsSignUpDisable();
   const isAccessTokenExist = useIsAccessTokenExist();
   const authMutation = useNativeAuthMutation();
@@ -29,7 +29,7 @@ function SignInView() {
   const [login, setLogin] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const handleLogin = () => {
+  const handleLogin = (): void => {
     authMutation.mutate(
       { login: login, password: password },
       {
@@ -44,11 +44,11 @@ function SignInView() {
     );
   };
 
-  const isSignInDisabled = () => {
+  const isSignInDisabled = (): boolean => {
     return authMutation.isLoading || login === '' || password === '';
   };
 
-  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeypress = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (isSignInDisabled()) {
       return;
     }

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Action, getResourceDisplayName, getVariableProject, Variable } from '@perses-dev/core';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
 import { IconButton, Stack, Tooltip } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -46,7 +46,7 @@ import { VariableDrawer } from './VariableDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>) {
+export function VariableList<T extends Variable>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, isLoading, initialState, onCreate, onUpdate, onDelete } = props;
   const isReadonly = useIsReadonly();
   const { infoSnackbar } = useSnackbar();

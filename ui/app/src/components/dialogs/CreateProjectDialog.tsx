@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement } from 'react';
 import { Button, TextField } from '@mui/material';
 import { Dialog, useSnackbar } from '@perses-dev/components';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +33,7 @@ interface CreateProjectDialogProps {
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  */
-export function CreateProjectDialog(props: CreateProjectDialogProps) {
+export function CreateProjectDialog(props: CreateProjectDialogProps): ReactElement {
   const { open, onClose, onSuccess } = props;
   const validationSchema = useProjectValidationSchema();
 
@@ -65,7 +65,7 @@ export function CreateProjectDialog(props: CreateProjectDialogProps) {
     );
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onClose();
     form.reset();
   };

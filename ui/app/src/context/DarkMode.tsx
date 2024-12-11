@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, ReactElement, useContext, useMemo } from 'react';
 import { CssBaseline, ThemeProvider, useMediaQuery } from '@mui/material';
 import { ChartsProvider, generateChartsTheme, PersesChartsTheme, getTheme } from '@perses-dev/components';
 import { useLocalStorage } from '../utils/browser-storage';
@@ -32,7 +32,7 @@ export const DarkModeContext = createContext<DarkModeContext | undefined>(undefi
 /**
  * Acts as theme provider for MUI and allows switching to dark mode.
  */
-export function DarkModeContextProvider(props: { children: React.ReactNode }) {
+export function DarkModeContextProvider(props: { children: React.ReactNode }): ReactElement {
   const browserPrefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   const [isDarkModeEnabled, setDarkMode] = useLocalStorage<boolean>(DARK_MODE_PREFERENCE_KEY, browserPrefersDarkMode);
