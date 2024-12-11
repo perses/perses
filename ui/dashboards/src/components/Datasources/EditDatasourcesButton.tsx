@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
@@ -21,22 +21,22 @@ import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboard } from '../../context';
 import { DatasourceEditor } from './DatasourceEditor';
 
-export function EditDatasourcesButton() {
+export function EditDatasourcesButton(): ReactElement {
   const [isDatasourceEditorOpen, setIsDatasourceEditorOpen] = useState(false);
   const { getLocalDatasources, setLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
   const localDatasources: Record<string, DatasourceSpec> = getLocalDatasources();
   const savedDatasources: Record<string, DatasourceSpec> = getSavedDatasources();
   const { dashboard, setDashboard } = useDashboard();
 
-  const openDatasourceEditor = () => {
+  const openDatasourceEditor = (): void => {
     setIsDatasourceEditorOpen(true);
   };
 
-  const closeDatasourceEditor = () => {
+  const closeDatasourceEditor = (): void => {
     setIsDatasourceEditorOpen(false);
   };
 
-  const handleChangeDatasources = (datasources: Record<string, DatasourceSpec>) => {
+  const handleChangeDatasources = (datasources: Record<string, DatasourceSpec>): void => {
     // Calculates the new list of datasources that are allowed to be used.
     const newSavedDatasources: Record<string, DatasourceSpec> = Object.keys(datasources)
       .filter((key) => {

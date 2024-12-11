@@ -22,6 +22,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { PanelGroupId } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, useDeletePanelGroupDialog } from '../../context';
 
@@ -38,7 +39,7 @@ export interface GridTitleProps {
  * Renders the title for a Grid section, optionally also supporting expanding
  * and collapsing
  */
-export function GridTitle(props: GridTitleProps) {
+export function GridTitle(props: GridTitleProps): ReactElement {
   const { panelGroupId, title: rawTitle, collapse } = props;
 
   const title = useReplaceVariablesInString(rawTitle) as string;

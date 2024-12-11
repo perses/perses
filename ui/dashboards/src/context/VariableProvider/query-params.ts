@@ -16,11 +16,11 @@ import { QueryParamConfig, useQueryParams } from 'use-query-params';
 
 const variableQueryParameterPrefix = 'var-';
 
-export function getURLQueryParamName(name: string) {
+export function getURLQueryParamName(name: string): string {
   return `${variableQueryParameterPrefix}${name}`;
 }
 
-export function encodeVariableValue(value: VariableValue) {
+export function encodeVariableValue(value: VariableValue): string | null {
   if (Array.isArray(value)) {
     return value.join(',');
   }
@@ -48,7 +48,7 @@ const VariableValueParam: QueryParamConfig<VariableValue> = {
   },
 };
 
-export function useVariableQueryParams(defs: VariableDefinition[]) {
+export function useVariableQueryParams(defs: VariableDefinition[]): ReturnType<typeof useQueryParams> {
   const config: Record<string, typeof VariableValueParam> = {};
   defs.forEach((def) => {
     const name = getURLQueryParamName(def.spec.name);

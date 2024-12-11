@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
-export const DashboardDiscardChangesConfirmationDialog = () => {
+export const DashboardDiscardChangesConfirmationDialog = (): ReactElement | null => {
   const { discardChangesConfirmationDialog: dialog } = useDiscardChangesConfirmationDialog();
   if (dialog === undefined) {
     return null;

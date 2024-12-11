@@ -26,13 +26,15 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { InfoTooltip } from '@perses-dev/components';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 
 type BuiltinVariableAccordionsProps = {
   builtinVariableDefinitions: BuiltinVariableDefinition[];
 };
 
-export function BuiltinVariableAccordions({ builtinVariableDefinitions }: BuiltinVariableAccordionsProps) {
+export function BuiltinVariableAccordions({
+  builtinVariableDefinitions,
+}: BuiltinVariableAccordionsProps): ReactElement {
   const builtinVariablesBySource = useMemo(() => {
     const result: Record<string, BuiltinVariableDefinition[]> = {};
     for (const definition of builtinVariableDefinitions) {

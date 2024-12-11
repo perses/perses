@@ -29,7 +29,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/core';
 import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { useImmer } from 'use-immer';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
@@ -37,7 +37,7 @@ export function DatasourceEditor(props: {
   datasources: Record<string, DatasourceSpec>;
   onChange: (datasources: Record<string, DatasourceSpec>) => void;
   onCancel: () => void;
-}) {
+}): ReactElement {
   const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
   const [datasourceEdit, setDatasourceEdit] = useState<DatasourceDefinition | null>(null);
@@ -53,7 +53,7 @@ export function DatasourceEditor(props: {
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
-  const handleCancel = () => {
+  const handleCancel = (): void => {
     if (JSON.stringify(props.datasources) !== JSON.stringify(datasources)) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
@@ -71,13 +71,13 @@ export function DatasourceEditor(props: {
     }
   };
 
-  const removeDatasource = (name: string) => {
+  const removeDatasource = (name: string): void => {
     setDatasources((draft) => {
       delete draft[name];
     });
   };
 
-  const addDatasource = () => {
+  const addDatasource = (): void => {
     setDatasourceFormAction('create');
     setDatasourceEdit({
       name: 'NewDatasource',
@@ -85,7 +85,7 @@ export function DatasourceEditor(props: {
     });
   };
 
-  const editDatasource = (name: string) => {
+  const editDatasource = (name: string): void => {
     setDatasourceFormAction('update');
     setDatasourceEdit({
       name: name,
