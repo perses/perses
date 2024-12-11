@@ -24,7 +24,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const grafanaType = "#grafanaType"
+const (
+	grafanaType     = "#grafanaType"
+	migrationFolder = "migrate"
+)
 
 func loadSliceOfInstance(path string) ([]*build.Instance, error) {
 	var result []*build.Instance
@@ -37,7 +40,7 @@ func loadSliceOfInstance(path string) ([]*build.Instance, error) {
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
 			continue
 		}
-		schemaPath := filepath.Join(path, file.Name())
+		schemaPath := filepath.Join(path, file.Name(), "migrate")
 		if _, fileErr := os.Stat(filepath.Join(schemaPath, "migrate.cue")); os.IsNotExist(fileErr) {
 			// migration file doesn't exist
 			continue
@@ -63,7 +66,7 @@ func loadPanels(panelSchemaPath string) (map[string]*build.Instance, error) {
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
 			continue
 		}
-		schemaPath := filepath.Join(panelSchemaPath, file.Name())
+		schemaPath := filepath.Join(panelSchemaPath, file.Name(), "migrate")
 		if _, fileErr := os.Stat(filepath.Join(schemaPath, "migrate.cue")); os.IsNotExist(fileErr) {
 			// migration file doesn't exist
 			continue
