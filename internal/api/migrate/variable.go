@@ -75,7 +75,7 @@ func grafanaMappingSort(sort *int) *variable.Sort {
 	return &mappingSort[i]
 }
 
-func (m *mig) migrateVariables(grafanaDashboard *SimplifiedDashboard) ([]dashboard.Variable, error) {
+func (m *mig) migrateVariables(grafanaDashboard *SimplifiedDashboard) []dashboard.Variable {
 	var result []dashboard.Variable
 	for _, v := range grafanaDashboard.Templating.List {
 		if v.Type == "constant" || v.Type == "textbox" {
@@ -89,7 +89,7 @@ func (m *mig) migrateVariables(grafanaDashboard *SimplifiedDashboard) ([]dashboa
 			result = append(result, m.migrateListVariable(v))
 		}
 	}
-	return result, nil
+	return result
 }
 
 func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {

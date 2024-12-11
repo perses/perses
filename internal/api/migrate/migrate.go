@@ -59,6 +59,9 @@ func New(schemas config.Schemas) (Migration, error) {
 		return nil, err
 	}
 	variables, err := loadSliceOfInstance(schemas.VariablesPath)
+	if err != nil {
+		return nil, err
+	}
 	return &mig{
 		panels:    panels,
 		queries:   queries,
@@ -97,11 +100,7 @@ func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, err
 		return nil, err
 	}
 	result.Spec.Panels = panels
-	variables, err := m.migrateVariables(grafanaDashboard)
-	if err != nil {
-		return nil, err
-	}
-	result.Spec.Variables = variables
+	result.Spec.Variables = m.migrateVariables(grafanaDashboard)
 	result.Spec.Layouts = m.migrateGrid(grafanaDashboard)
 	return result, nil
 }
