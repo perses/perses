@@ -179,7 +179,7 @@ func executeCuelangMigrationScript(cueScript *build.Instance, grafanaData []byte
 		return nil, true, apiinterface.HandleBadRequestError(err.Error())
 	}
 
-	// Finally, execute the cuelang script with the static mapping and the Grafana Panel as a scope.
+	// Finally, unify the JSON files with the cue schema. Result should give only concrete value that can be marshaled in JSON.
 	finalVal := grafanaValue.Unify(ctx.BuildInstance(cueScript))
 	if err := finalVal.Err(); err != nil {
 		logrus.WithError(err).Debugf("Unable to compile the migration schema for the %s", typeOfDataToMigrate)

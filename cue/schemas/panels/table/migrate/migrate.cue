@@ -187,7 +187,7 @@ if (*#panel.type | null) == "table" {
 			}
 		}
 	}
-},
+}
 if (*#panel.type | null) == "table-old" {
 	kind: "Table"
 	spec: {
@@ -207,4 +207,4 @@ if (*#panel.type | null) == "table-old" {
 			}]
 		}
 	}
-},
+}

@@ -185,6 +185,30 @@ func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// This function addresses an issue we have with Grafana datamodel when it comes to migrating dashboards to Perses: When
+// a row is expanded in Grafana, its children panels are moved up in the main panels list, thus become siblings of the row.
+// When it comes to Perses migration, we need to recompose the parent->children relationships.
+// However, in its current state, the CUE language doesn't permit us to achieve this recomposition, hence this processing in the backend code.
+//
+// So what this function does is basically the following: whenever such pattern is encountered in the panel list:
+// ...
+// row1,
+// panelA,
+// panelB,
+// panelC,
+// row2,
+// ...
+// the objects gets rearranged like:
+// ...
+//
+//	row1: {
+//	  panelA,
+//	  panelB,
+//	  panelC,
+//	},
+//
+// row2,
+// ...
 func (d *SimplifiedDashboard) rearrangeGrafanaPanelsWithinExpandedRows() {
 	var newPanelList []Panel
 	var parentRow *Panel
