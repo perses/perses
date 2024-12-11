@@ -23,6 +23,27 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var mappingSort = []variable.Sort{
+	variable.SortNone,
+	variable.SortAlphabeticalAsc,
+	variable.SortAlphabeticalDesc,
+	variable.SortNumericalAsc,
+	variable.SortNumericalDesc,
+	variable.SortAlphabeticalCaseInsensitiveAsc,
+	variable.SortAlphabeticalCaseInsensitiveDesc,
+}
+
+func grafanaMappingSort(sort *int) *variable.Sort {
+	if sort == nil {
+		return nil
+	}
+	i := *sort
+	if i >= len(mappingSort) {
+		return nil
+	}
+	return &mappingSort[i]
+}
+
 func (m *mig) migrateVariables(grafanaDashboard *SimplifiedDashboard) ([]dashboard.Variable, error) {
 	var result []dashboard.Variable
 	for _, v := range grafanaDashboard.Templating.List {
@@ -51,11 +72,15 @@ func (m *mig) migrateListVariable(v TemplateVar) dashboard.Variable {
 				Description: v.Description,
 				Hidden:      v.Hide > 0,
 			},
-			AllowAllValue: v.IncludeAll,
-			AllowMultiple: v.Multi,
+			AllowAllValue:  v.IncludeAll,
+			AllowMultiple:  v.Multi,
+			CustomAllValue: v.AllValue,
+			DefaultValue:   v.getDefaultValue(),
+			Sort:           grafanaMappingSort(v.Sort),
 		},
 		Name: v.Name,
 	}
+
 	i := 0
 	for ; i < len(m.variables); i++ {
 		plugin, variableMigrationIsEmpty, err := executeVariableMigrationScript(m.variables[i], v.RawMessage)

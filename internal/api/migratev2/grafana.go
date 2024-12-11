@@ -13,7 +13,15 @@
 
 package migratev2
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/perses/perses/pkg/model/api/v1/variable"
+)
+
+const (
+	grafanaPanelRowType = "row"
+)
 
 type GrisPosition struct {
 	Height int `json:"h"`
@@ -78,14 +86,21 @@ func (p *Panel) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type CurrentValue struct {
+	Value *variable.DefaultValue `json:"value,omitempty"`
+}
+
 type TemplateVar struct {
 	Name        string          `json:"name"`
 	Type        string          `json:"type"`
 	Description string          `json:"description"`
 	Label       string          `json:"label"`
 	Hide        int             `json:"hide"`
+	Sort        *int            `json:"sort,omitempty"`
 	IncludeAll  bool            `json:"includeAll"`
+	AllValue    string          `json:"allValue"`
 	Multi       bool            `json:"multi"`
+	Current     *CurrentValue   `json:"current,omitempty"`
 	Query       json.RawMessage `json:"query"`
 	json.RawMessage
 }
@@ -95,40 +110,59 @@ func (v *TemplateVar) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
 	}
-	variable := TemplateVar{}
+	grafanaVariable := TemplateVar{}
 	if name, ok := tmp["name"]; ok {
-		_ = json.Unmarshal(name, &variable.Name)
+		_ = json.Unmarshal(name, &grafanaVariable.Name)
 	}
 	if t, ok := tmp["type"]; ok {
-		_ = json.Unmarshal(t, &variable.Type)
+		_ = json.Unmarshal(t, &grafanaVariable.Type)
 	}
 	if description, ok := tmp["description"]; ok {
-		_ = json.Unmarshal(description, &variable.Description)
+		_ = json.Unmarshal(description, &grafanaVariable.Description)
 	}
 	if label, ok := tmp["label"]; ok {
-		_ = json.Unmarshal(label, &variable.Label)
+		_ = json.Unmarshal(label, &grafanaVariable.Label)
 	}
 	if hide, ok := tmp["hide"]; ok {
-		_ = json.Unmarshal(hide, &variable.Hide)
+		_ = json.Unmarshal(hide, &grafanaVariable.Hide)
+	}
+	if sort, ok := tmp["sort"]; ok {
+		_ = json.Unmarshal(sort, &grafanaVariable.Sort)
 	}
 	if includeAll, ok := tmp["includeAll"]; ok {
-		_ = json.Unmarshal(includeAll, &variable.IncludeAll)
+		_ = json.Unmarshal(includeAll, &grafanaVariable.IncludeAll)
+	}
+	if allValue, ok := tmp["allValue"]; ok {
+		_ = json.Unmarshal(allValue, &grafanaVariable.AllValue)
 	}
 	if multi, ok := tmp["multi"]; ok {
-		_ = json.Unmarshal(multi, &variable.Multi)
+		_ = json.Unmarshal(multi, &grafanaVariable.Multi)
+	}
+	if current, ok := tmp["current"]; ok {
+		if err := json.Unmarshal(current, &grafanaVariable.Current); err != nil {
+			return err
+		}
+		delete(tmp, "current")
 	}
 	if query, ok := tmp["query"]; ok {
-		if err := json.Unmarshal(query, &variable.Query); err != nil {
+		if err := json.Unmarshal(query, &grafanaVariable.Query); err != nil {
 			return err
 		}
 	}
 	var err error
-	variable.RawMessage, err = json.Marshal(tmp)
+	grafanaVariable.RawMessage, err = json.Marshal(tmp)
 	if err != nil {
 		return err
 	}
-	*v = variable
+	*v = grafanaVariable
 	return nil
+}
+
+func (v *TemplateVar) getDefaultValue() *variable.DefaultValue {
+	if v.Current == nil {
+		return nil
+	}
+	return v.Current.Value
 }
 
 type SimplifiedDashboard struct {
@@ -138,4 +172,74 @@ type SimplifiedDashboard struct {
 	Templating struct {
 		List []TemplateVar `json:"list"`
 	} `json:"templating"`
+}
+
+func (d *SimplifiedDashboard) UnmarshalJSON(data []byte) error {
+	tmp := &SimplifiedDashboard{}
+	type plain SimplifiedDashboard
+	if err := json.Unmarshal(data, (*plain)(tmp)); err != nil {
+		return err
+	}
+	tmp.rearrangeGrafanaPanelsWithinExpandedRows()
+	*d = *tmp
+	return nil
+}
+
+func (d *SimplifiedDashboard) rearrangeGrafanaPanelsWithinExpandedRows() {
+	var newPanelList []Panel
+	var parentRow *Panel
+	for _, panel := range d.Panels {
+		if panel.Type == grafanaPanelRowType {
+			if parentRow != nil {
+				// situation corresponding to this case:
+				// row1,   <- current parentRow
+				// panelA,
+				// panelB,
+				// panelC,
+				// row2,   <- current iterated panel
+				// ...
+				// -> in this case, we should stop appending panels to the previously-registered parentRow,
+				// because we encountered a new row (we don't care if it is expanded or collapsed), thus we
+				// append parentRow to our new panel list.
+				// We also reset its value afterward.
+				// (parentRow will eventually be set to the newly encountered row if it matches the expanded condition below)
+				newPanelList = append(newPanelList, *parentRow)
+				parentRow = nil
+			}
+			if panel.Collapsed {
+				// any collapsed row should be appended as-is to our new panel list, without modifications.
+				newPanelList = append(newPanelList, panel)
+			} else {
+				// In this case, we save the newly encountered expanded row for the next iteration(s) as it is expanded.
+				// We'll eventually have to append the next panel within it.
+				parentRow = &panel
+			}
+		} else {
+			if parentRow != nil {
+				// situation corresponding to this case:
+				// row1,   <- current parentRow
+				// panelA,
+				// panelB, <- current iterated panel
+				// ...
+				// -> in this case we have to move this non-row panel inside the saved parentRow
+				// add empty panels array to row if missing
+				parentRow.Panels = append(parentRow.Panels, panel)
+			} else {
+				// Situation corresponding to this case:
+				// panelA,
+				// panelB, <- current iterated panel
+				// row1,
+				// ...
+				// -> in this case, we append the panel as-is.
+				// Technically, this case applies only when there are panels placed before any row
+				newPanelList = append(newPanelList, panel)
+			}
+		}
+	}
+	// once the loop is over, it's possible that the last row we iterated over was expanded, but the loop finished,
+	// thus we need to append it here
+	if parentRow != nil {
+		newPanelList = append(newPanelList, *parentRow)
+	}
+	d.Panels = newPanelList
 }

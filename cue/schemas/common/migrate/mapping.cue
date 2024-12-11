@@ -65,8 +65,6 @@ package migrate
         total: "sum"
         sum: "sum"
     }
-    // mapping array for the sort attribute (index = grafana sort id, value = perses equivalent)
-    sort: ["none", "alphabetical-asc", "alphabetical-desc", "numerical-asc", "numerical-desc", "alphabetical-ci-asc", "alphabetical-ci-desc"]
     color: {
         // mapping array for some color attributes (index = color name in Grafana, value = hexadecimal equivalent that Perses can deal with)
         "dark-red": "#c4162a"

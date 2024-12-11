@@ -58,7 +58,7 @@ func TestMig_Migrate(t *testing.T) {
 	for _, test := range testSuite {
 		t.Run(test.title, func(t *testing.T) {
 			inputGrafanaDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.inputGrafanaDashboardFile))
-			expectedPersesDashboard := unmarshalStrictPersesDashboard(testUtils.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile)))
+			expectedPersesDashboardRaw := testUtils.ReadFile(filepath.Join(testDataFolder, test.expectedPersesDashboardFile))
 			m, err := create(config.Schemas{
 				PanelsPath:    filepath.Join(projectPath, "cue", config.DefaultPanelsPath),
 				QueriesPath:   filepath.Join(projectPath, "cue", config.DefaultQueriesPath),
@@ -75,7 +75,8 @@ func TestMig_Migrate(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			assert.Equal(t, expectedPersesDashboard, dashboard)
+			raw := testUtils.JSONMarshalStrict(dashboard)
+			assert.JSONEq(t, string(expectedPersesDashboardRaw), string(raw))
 		})
 	}
 }

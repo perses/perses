@@ -133,15 +133,17 @@ func (m *mig) Migrate(grafanaDashboard *SimplifiedDashboard) (*v1.Dashboard, err
 
 func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Layout {
 	var result []dashboard.Layout
+	defaultSpec := &dashboard.GridLayoutSpec{}
+	defaultLayout := dashboard.Layout{
+		Kind: dashboard.KindGridLayout,
+		Spec: defaultSpec,
+	}
 
-	// create a first grid to gather standalone panels if there are some (= only if the first encountered panel is not a row)
-	if len(grafanaDashboard.Panels) > 0 && grafanaDashboard.Panels[0].Type != "row" {
-		layout := dashboard.Layout{
-			Kind: dashboard.KindGridLayout,
-		}
-		var items []dashboard.GridItem
-		for i, panel := range grafanaDashboard.Panels {
-			items = append(items, dashboard.GridItem{
+	result = append(result, defaultLayout)
+
+	for i, panel := range grafanaDashboard.Panels {
+		if panel.Type != grafanaPanelRowType {
+			defaultSpec.Items = append(defaultSpec.Items, dashboard.GridItem{
 				Width:  panel.GridPosition.Width,
 				Height: panel.GridPosition.Height,
 				X:      panel.GridPosition.X,
@@ -151,43 +153,33 @@ func (m *mig) migrateGrid(grafanaDashboard *SimplifiedDashboard) []dashboard.Lay
 					Path: []string{"spec", "panels", fmt.Sprintf("%d", i)},
 				},
 			})
-		}
-		layout.Spec = &dashboard.GridLayoutSpec{
-			Items: items,
-		}
-		result = append(result, layout)
-	}
-
-	// go through the top-level panels a 3rd time and match only the rows, to create the corresponding grids
-	for i, panel := range grafanaDashboard.Panels {
-		if panel.Type != "row" {
-			continue
-		}
-		layout := dashboard.Layout{
-			Kind: dashboard.KindGridLayout,
-			Spec: &dashboard.GridLayoutSpec{
+		} else {
+			spec := &dashboard.GridLayoutSpec{
 				Display: &dashboard.GridLayoutDisplay{
 					Title: panel.Title,
 					Collapse: &dashboard.GridLayoutCollapse{
 						Open: !panel.Collapsed,
 					},
 				},
-			},
+			}
+			layout := dashboard.Layout{
+				Kind: dashboard.KindGridLayout,
+				Spec: spec,
+			}
+			for j, innerPanel := range panel.Panels {
+				spec.Items = append(spec.Items, dashboard.GridItem{
+					Width:  innerPanel.GridPosition.Width,
+					Height: innerPanel.GridPosition.Height,
+					X:      innerPanel.GridPosition.X,
+					Y:      innerPanel.GridPosition.Y,
+					Content: &common.JSONRef{
+						Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
+						Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
+					},
+				})
+			}
+			result = append(result, layout)
 		}
-		var items []dashboard.GridItem
-		for j, innerPanel := range panel.Panels {
-			items = append(items, dashboard.GridItem{
-				Width:  innerPanel.GridPosition.Width,
-				Height: innerPanel.GridPosition.Height,
-				X:      innerPanel.GridPosition.X,
-				Y:      innerPanel.GridPosition.Y,
-				Content: &common.JSONRef{
-					Ref:  fmt.Sprintf("#/spec/panels/%d_%d", i, j),
-					Path: []string{"spec", "panels", fmt.Sprintf("%d_%d", i, j)},
-				},
-			})
-		}
-		result = append(result, layout)
 	}
 	return result
 }

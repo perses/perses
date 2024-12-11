@@ -25,7 +25,7 @@ import (
 func (m *mig) migratePanels(grafanaDashboard *SimplifiedDashboard) (map[string]*v1.Panel, error) {
 	panels := make(map[string]*v1.Panel)
 	for i, p := range grafanaDashboard.Panels {
-		if p.Type == "row" {
+		if p.Type == grafanaPanelRowType {
 			for j, innerPanel := range p.Panels {
 				panel, err := m.migratePanel(innerPanel)
 				if err != nil {
