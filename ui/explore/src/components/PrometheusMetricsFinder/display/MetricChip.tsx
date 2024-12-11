@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Chip, ChipProps } from '@mui/material';
+import { ReactElement } from 'react';
 
-export function MetricChip({ label, ...props }: ChipProps) {
+export function MetricChip({ label, ...props }: ChipProps): ReactElement {
   if (label === 'gauge') {
     return <Chip label={label} color="success" {...props} />;
   }

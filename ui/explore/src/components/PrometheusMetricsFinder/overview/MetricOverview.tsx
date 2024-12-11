@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Checkbox, FormControlLabel, Skeleton, Stack, StackProps, Tab, Tabs, Tooltip } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { DatasourceSelector, Definition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Panel } from '@perses-dev/dashboards';
 import useResizeObserver from 'use-resize-observer';
@@ -32,7 +32,14 @@ export interface OverviewPanelProps extends StackProps {
   isLoading?: boolean;
 }
 
-export function OverviewPanel({ metricName, datasource, filters, type, isLoading, ...props }: OverviewPanelProps) {
+export function OverviewPanel({
+  metricName,
+  datasource,
+  filters,
+  type,
+  isLoading,
+  ...props
+}: OverviewPanelProps): ReactElement {
   const { width, ref: panelRef } = useResizeObserver();
   const suggestedStepMs = useSuggestedStepMs(width);
 
@@ -126,7 +133,7 @@ export function MetricOverview({
   onExplore,
   onFiltersChange,
   ...props
-}: MetricOverviewProps) {
+}: MetricOverviewProps): ReactElement {
   const [tab, setTab] = useState(0);
   const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
 
@@ -136,11 +143,11 @@ export function MetricOverview({
     return result;
   }, [filters, metricName]);
 
-  function handleFilterAdd(filter: LabelFilter) {
+  function handleFilterAdd(filter: LabelFilter): void {
     onFiltersChange([...filters, filter]);
   }
 
-  function handleExplore(metricName: string, tab?: number) {
+  function handleExplore(metricName: string, tab?: number): void {
     onExplore?.(metricName);
     if (tab !== undefined) {
       setTab(tab);

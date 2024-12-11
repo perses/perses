@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector } from '@perses-dev/core';
-import { useMemo, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
   Autocomplete,
   Button,
@@ -45,7 +45,7 @@ export interface LabelValuesRowProps extends StackProps {
   orderBy?: 'asc' | 'amount';
 }
 
-export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: LabelValuesRowProps) {
+export function LabelValuesRow({ label, valueCounters, onFilterAdd, ...props }: LabelValuesRowProps): ReactElement {
   const [isAddingFilter, setIsAddingFilter] = useState(false);
   const [operator, setOperator] = useState<Operator>('=');
   const [value, setValue] = useState('');
@@ -183,7 +183,12 @@ export interface LabelValuesTableProps extends StackProps {
   onFilterAdd: (filter: LabelFilter) => void;
 }
 
-export function LabelValuesTable({ labelValueCounters, isLoading, onFilterAdd, ...props }: LabelValuesTableProps) {
+export function LabelValuesTable({
+  labelValueCounters,
+  isLoading,
+  onFilterAdd,
+  ...props
+}: LabelValuesTableProps): ReactElement {
   const labels: string[] = useMemo(() => {
     return [...labelValueCounters.keys()].sort();
   }, [labelValueCounters]);
@@ -225,7 +230,13 @@ export interface OverviewTabProps extends StackProps {
   onFilterAdd: (filter: LabelFilter) => void;
 }
 
-export function OverviewTab({ metricName, datasource, filters, onFilterAdd, ...props }: OverviewTabProps) {
+export function OverviewTab({
+  metricName,
+  datasource,
+  filters,
+  onFilterAdd,
+  ...props
+}: OverviewTabProps): ReactElement {
   const { metadata, isLoading: isMetadataLoading } = useMetricMetadata(metricName, datasource);
   const { series, labelValueCounters, isLoading } = useSeriesStates(metricName, filters, datasource);
 
