@@ -16,7 +16,7 @@ import { Button, Divider, Skeleton, Stack, StackProps, TableCell, Typography } f
 import { TableVirtuoso } from 'react-virtuoso';
 import { Link as RouterLink } from 'react-router-dom';
 import CompassIcon from 'mdi-material-ui/Compass';
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactElement, ReactNode, useMemo } from 'react';
 import { Fuzzy, FuzzyMatchingInterval } from '@nexucis/fuzzy';
 import { LabelFilter } from '../../types';
 import { useMetricMetadata } from '../../utils';
@@ -32,7 +32,14 @@ export interface MetricRowProps {
   onExplore?: (metricName: string) => void;
 }
 
-export function MetricRow({ children, metricName, datasource, filters, isMetadataEnabled, onExplore }: MetricRowProps) {
+export function MetricRow({
+  children,
+  metricName,
+  datasource,
+  filters,
+  isMetadataEnabled,
+  onExplore,
+}: MetricRowProps): ReactElement {
   const { metadata, isLoading } = useMetricMetadata(metricName, datasource, isMetadataEnabled);
 
   const searchParams = useExplorerQueryParams({
@@ -95,7 +102,7 @@ export function MetricList({
   isMetadataEnabled,
   onExplore,
   ...props
-}: MetricListProps) {
+}: MetricListProps): ReactElement {
   const fuzzy = new Fuzzy();
 
   const fuzzyMetrics: Array<{ original: string; intervals?: FuzzyMatchingInterval[] }> = useMemo(() => {

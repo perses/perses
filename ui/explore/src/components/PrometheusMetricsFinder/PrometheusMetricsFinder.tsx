@@ -28,7 +28,7 @@ import {
 } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
 import { DEFAULT_PROM } from '@perses-dev/prometheus-plugin';
-import React, { MouseEvent, useMemo, useState } from 'react';
+import React, { MouseEvent, ReactElement, useMemo, useState } from 'react';
 import ArrowLeftIcon from 'mdi-material-ui/ArrowLeft';
 import CogIcon from 'mdi-material-ui/Cog';
 import { Link as RouterLink } from 'react-router-dom';
@@ -48,13 +48,13 @@ export interface SettingsMenuProps {
   onChange: (value: Settings) => void;
 }
 
-export function SettingsMenu({ value, onChange }: SettingsMenuProps) {
+export function SettingsMenu({ value, onChange }: SettingsMenuProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = () => {
+  const handleClose = (): void => {
     setAnchorEl(null);
   };
 
@@ -98,7 +98,7 @@ export function MetricNameExplorer({
   isMetadataEnabled,
   onExplore,
   ...props
-}: MetricNameExplorerProps) {
+}: MetricNameExplorerProps): ReactElement {
   const { data, isLoading } = useLabelValues('__name__', filters, datasource);
   const [search, setSearch] = useState('');
   const fuzzy = useMemo(() => new Fuzzy({ includeMatches: true, excludedChars: [' '] }), []);
@@ -167,13 +167,13 @@ export function PrometheusMetricsFinder({
   onChange,
   onExplore,
   ...props
-}: PrometheusMetricsFinderProps) {
+}: PrometheusMetricsFinderProps): ReactElement {
   const settingsStored = localStorage.getItem(PERSES_METRICS_FINDER_SETTINGS);
   const [settings, setSettings] = useState<Settings>(
     settingsStored ? JSON.parse(settingsStored) : { isMetadataEnabled: true }
   );
 
-  function handleSettingsUpdate(value: Settings) {
+  function handleSettingsUpdate(value: Settings): void {
     setSettings(value);
     localStorage.setItem(PERSES_METRICS_FINDER_SETTINGS, JSON.stringify(value));
   }
@@ -189,11 +189,11 @@ export function PrometheusMetricsFinder({
     data: { tab: 'finder', datasource, filters, exploredMetric: undefined },
   });
 
-  function setDatasource(value: DatasourceSelector) {
+  function setDatasource(value: DatasourceSelector): void {
     onChange({ datasource: value, filters, exploredMetric });
   }
 
-  function setFilters(value: LabelFilter[]) {
+  function setFilters(value: LabelFilter[]): void {
     onChange({ datasource, filters: value, exploredMetric });
   }
 

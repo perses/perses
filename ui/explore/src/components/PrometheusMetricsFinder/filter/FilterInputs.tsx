@@ -38,7 +38,13 @@ export interface LabelFilterInputProps {
 }
 
 // TODO: fix when a filter is deleted => refresh data
-export function LabelFilterInput({ datasource, value, filters, onChange, onDelete }: LabelFilterInputProps) {
+export function LabelFilterInput({
+  datasource,
+  value,
+  filters,
+  onChange,
+  onDelete,
+}: LabelFilterInputProps): ReactElement {
   const filtersWithoutCurrent = useMemo(
     () => filters.filter((filter) => filter.label !== value.label),
     [filters, value.label]
@@ -119,16 +125,16 @@ export function RawFilterInput({
   isLabelValuesOptionsLoading,
   onChange,
   onDelete,
-}: RawFilterInputProps) {
+}: RawFilterInputProps): ReactElement {
   const [isEditingLabelName, setIsEditingLabelName] = useState(value.labelValues.length === 0);
   const [labelName, setLabelName] = useState(value.label);
 
-  function handleLabelConfirmation() {
+  function handleLabelConfirmation(): void {
     setIsEditingLabelName(false);
     onChange({ label: labelName, labelValues: value.labelValues, operator: value.operator });
   }
 
-  function handleKeyPress(event: { key: string }) {
+  function handleKeyPress(event: { key: string }): void {
     if (isEditingLabelName && event.key === 'Enter') {
       handleLabelConfirmation();
     }

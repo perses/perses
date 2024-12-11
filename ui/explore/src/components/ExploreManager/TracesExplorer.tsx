@@ -16,6 +16,7 @@ import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
@@ -27,7 +28,7 @@ interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
 
-function SearchResultsPanel({ queries }: SearchResultsPanelProps) {
+function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
@@ -76,7 +77,7 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps) {
   );
 }
 
-function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
+function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   return (
     <Panel
       panelOptions={{
@@ -90,7 +91,7 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-export function TracesExplorer() {
+export function TracesExplorer(): ReactElement {
   const {
     data: { queries = [] },
     setData,

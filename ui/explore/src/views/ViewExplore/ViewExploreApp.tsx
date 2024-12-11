@@ -13,15 +13,15 @@
 
 import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
-import { ReactNode } from 'react';
-import { ExploreManager } from '../../components/ExploreManager';
+import { ReactElement, ReactNode } from 'react';
+import { ExploreManager } from '../../components';
 import { ExplorerManagerProviderWithQueryParams } from '../../components/ExploreManager/ExplorerManagerProviderWithQueryParams';
 
 export interface ViewAppProps {
   exploreTitleComponent?: ReactNode;
 }
 
-export function ViewExploreApp(props: ViewAppProps) {
+export function ViewExploreApp(props: ViewAppProps): ReactElement {
   const { exploreTitleComponent } = props;
 
   const chartsTheme = useChartsTheme();
