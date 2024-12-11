@@ -13,7 +13,7 @@
 
 import { IconButton, IconButtonProps, Menu, MenuItem, MenuProps } from '@mui/material';
 import DragIcon from 'mdi-material-ui/Drag';
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, ReactElement } from 'react';
 
 export function handleMoveUp<T>(element: T, elements: T[]): T[] {
   const index = elements.indexOf(element);
@@ -47,15 +47,15 @@ export interface DragButtonProps extends IconButtonProps {
   menuSx?: MenuProps['sx'];
 }
 
-export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx }: DragButtonProps) {
+export function DragButton({ onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx }: DragButtonProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
-  function handleClick(event: MouseEvent<HTMLElement>) {
+  function handleClick(event: MouseEvent<HTMLElement>): void {
     setAnchorEl(event.currentTarget);
   }
 
-  function handleMove(callback?: () => void) {
+  function handleMove(callback?: () => void): void {
     setAnchorEl(null);
     callback?.();
   }

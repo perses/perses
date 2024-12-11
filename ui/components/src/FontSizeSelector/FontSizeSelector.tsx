@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
@@ -42,8 +43,8 @@ export interface FontSizeSelectorProps {
   onChange: (fontSize: FontSizeOption) => void;
 }
 
-export function FontSizeSelector({ value, onChange }: FontSizeSelectorProps) {
-  const handleFontSizeChange = (_: unknown, { value }: { value: FontSizeOption }) => {
+export function FontSizeSelector({ value, onChange }: FontSizeSelectorProps): ReactElement {
+  const handleFontSizeChange = (_: unknown, { value }: { value: FontSizeOption }): void => {
     onChange(value);
   };
 

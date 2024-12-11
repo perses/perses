@@ -24,9 +24,8 @@ import {
 import { EChartsCoreOption, use } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
 import { TimeScale } from '@perses-dev/core';
-import { useMemo } from 'react';
-import { useChartsTheme } from '../context/ChartsProvider';
-import { useTimeZone } from '../context/TimeZoneProvider';
+import { ReactElement, useMemo } from 'react';
+import { useChartsTheme, useTimeZone } from '../context';
 import { EChart } from '../EChart';
 import { getColorsForValues } from './utils/get-color';
 import { getFormattedStatusHistoryAxisLabel } from './get-formatted-axis-label';
@@ -53,7 +52,7 @@ export interface StatusHistoryChartProps {
   timeScale?: TimeScale;
 }
 
-export function StatusHistoryChart(props: StatusHistoryChartProps) {
+export function StatusHistoryChart(props: StatusHistoryChartProps): ReactElement {
   const { height, data, xAxisCategories, yAxisCategories, timeScale } = props;
   const { timeZone } = useTimeZone();
   const chartsTheme = useChartsTheme();

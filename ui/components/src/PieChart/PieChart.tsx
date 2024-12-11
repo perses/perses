@@ -22,6 +22,7 @@ import {
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { EChart } from '../EChart';
 
@@ -41,7 +42,7 @@ export interface PieChartProps {
   legend?: LegendComponentOption;
 }
 
-export function PieChart(props: PieChartProps) {
+export function PieChart(props: PieChartProps): ReactElement {
   const { width, height, data } = props;
   const chartsTheme = useChartsTheme();
 

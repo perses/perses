@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Virtuoso } from 'react-virtuoso';
+import { ReactElement } from 'react';
 import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
 
@@ -39,7 +40,7 @@ export function ListLegend({
   onLegendItemClick,
   onItemMouseOver,
   onItemMouseOut,
-}: ListLegendProps) {
+}: ListLegendProps): ReactElement {
   // show full labels on hover when there are many total series
   const truncateLabels = items.length > 5;
 

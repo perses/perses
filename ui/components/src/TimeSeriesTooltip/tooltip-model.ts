@@ -99,7 +99,7 @@ export const useMousePosition = (): CursorData['coords'] => {
   const [coords, setCoords] = useState<CursorData['coords']>(null);
 
   useEffect(() => {
-    const setFromEvent = (e: ZRRawMouseEvent) => {
+    const setFromEvent = (e: ZRRawMouseEvent): void => {
       return setCoords({
         page: {
           x: e.pageX,

@@ -85,7 +85,7 @@ export const RefApi: Story = {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const chartRef = useRef<ChartInstance>(null);
 
-    const handleOnClickHighlightSeries = () => {
+    const handleOnClickHighlightSeries = (): void => {
       const highlightSeriesId = args.data.timeSeries[0]?.id;
       if (!highlightSeriesId || !chartRef.current) {
         return;
@@ -99,7 +99,7 @@ export const RefApi: Story = {
       chartRef.current.highlightSeries(highlightSeriesOpts);
     };
 
-    const handleOnClickClearHighlightedSeries = () => {
+    const handleOnClickClearHighlightedSeries = (): void => {
       if (!chartRef.current) {
         return;
       }

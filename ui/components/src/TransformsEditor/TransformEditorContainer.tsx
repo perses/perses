@@ -18,6 +18,7 @@ import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { Transform, TRANSFORM_TEXT } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { TransformEditor, TransformEditorProps } from './TransformEditor';
 
 export interface TransformEditorContainerProps extends TransformEditorProps {
@@ -35,8 +36,8 @@ export function TransformEditorContainer({
   onCollapse,
   onDelete,
   ...props
-}: TransformEditorContainerProps) {
-  function handleTransformDisable() {
+}: TransformEditorContainerProps): ReactElement {
+  function handleTransformDisable(): void {
     onChange({ ...value, spec: { ...value.spec, disabled: !value.spec?.disabled } } as Transform);
   }
 

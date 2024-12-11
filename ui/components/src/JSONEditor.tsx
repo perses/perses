@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter, lintGutter } from '@codemirror/lint';
@@ -24,7 +24,7 @@ type JSONEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'exten
   onChange?: (next: string) => void;
 };
 
-export function JSONEditor<T>(props: JSONEditorProps<T>) {
+export function JSONEditor<T>(props: JSONEditorProps<T>): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 

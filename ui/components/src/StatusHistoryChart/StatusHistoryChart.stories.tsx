@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
+import { ReactElement } from 'react';
 import { StatusHistoryChart, StatusHistoryChartProps, StatusHistoryData } from './StatusHistoryChart';
 
 const DEFAULT_DATA: StatusHistoryData[] = [
@@ -38,7 +39,7 @@ export default meta;
 
 type Story = StoryObj<typeof StatusHistoryChart>;
 
-const StatusHistoryChartWrapper = (props: StatusHistoryChartProps) => {
+const StatusHistoryChartWrapper = (props: StatusHistoryChartProps): ReactElement => {
   // This wrapper is needed or the status history chart does not size as expected.
   return (
     <div

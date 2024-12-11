@@ -14,7 +14,10 @@
 import { formatInTimeZone } from 'date-fns-tz';
 import { format } from 'date-fns';
 
-export function dateFormatOptionsWithTimeZone(dateFormatOptions: Intl.DateTimeFormatOptions, timeZone?: string) {
+export function dateFormatOptionsWithTimeZone(
+  dateFormatOptions: Intl.DateTimeFormatOptions,
+  timeZone?: string
+): Intl.DateTimeFormatOptions {
   /*
    * if timeZone is provided, and is not local|browser,
    * then set timeZone option (recognize UTC regardless of uppercase/lowercase)
@@ -32,7 +35,7 @@ export function dateFormatOptionsWithTimeZone(dateFormatOptions: Intl.DateTimeFo
   return dateFormatOptions;
 }
 
-export function formatWithTimeZone(date: Date, formatString: string, timeZone?: string) {
+export function formatWithTimeZone(date: Date, formatString: string, timeZone?: string): string {
   /*
    * if timeZone is provided, and is not local|browser,
    * then format using timeZone option (recognize UTC regardless of uppercase/lowercase)
@@ -49,7 +52,7 @@ export function formatWithTimeZone(date: Date, formatString: string, timeZone?: 
 /*
  * Determines time granularity for axis labels, defaults to hh:mm
  */
-export function getFormattedDate(value: number, rangeMs: number, timeZone?: string) {
+export function getFormattedDate(value: number, rangeMs: number, timeZone?: string): string {
   const dateFormatOptions: Intl.DateTimeFormatOptions = dateFormatOptionsWithTimeZone(
     {
       hour: 'numeric',
@@ -72,7 +75,13 @@ export function getFormattedDate(value: number, rangeMs: number, timeZone?: stri
 }
 
 // https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
-export function getFormattedAxisLabel(rangeMs: number) {
+export function getFormattedAxisLabel(rangeMs: number):
+  | string
+  | {
+      month: '{MMM}';
+      year: '{yearStyle|{yyyy}}\n{monthStyle|{MMM}}';
+      day: '{MM}/{dd}';
+    } {
   const dayMs = 86400000;
   const monthMs = 2629440000;
   const yearMs = 31536000000;

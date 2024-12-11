@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { Fragment, HTMLAttributes } from 'react';
+import { Fragment, HTMLAttributes, ReactElement } from 'react';
 import { Checkbox, Divider, FormControlLabel, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { Controller, useFieldArray, Control } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -22,7 +22,7 @@ export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {
   control: Control<PanelEditorValues>;
 }
 
-export function LinksEditor({ control, ...props }: LinksEditorProps) {
+export function LinksEditor({ control, ...props }: LinksEditorProps): ReactElement {
   const { fields, append, remove } = useFieldArray({
     control: control,
     name: 'panelDefinition.spec.links',
@@ -54,7 +54,7 @@ export function LinksEditor({ control, ...props }: LinksEditorProps) {
   );
 }
 
-function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }) {
+function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
   return (
     <Stack gap={2} flexGrow={1}>
       <Stack direction="row" gap={2}>

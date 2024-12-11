@@ -20,7 +20,7 @@ import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {
-  const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = jest.fn()) => {
+  const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = jest.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <ThresholdsEditor thresholds={thresholds} onChange={onChange} />

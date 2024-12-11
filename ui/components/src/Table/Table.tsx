@@ -23,12 +23,12 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import { useTheme } from '@mui/material';
-import { useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo } from 'react';
 import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
 import { TableProps, persesColumnsToTanstackColumns, DEFAULT_COLUMN_WIDTH } from './model/table-model';
 
-const DEFAULT_GET_ROW_ID = (data: unknown, index: number) => {
+const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
 };
 
@@ -59,7 +59,7 @@ export function Table<TableData>({
   sorting = DEFAULT_SORTING,
   rowSelectionVariant = 'standard',
   ...otherProps
-}: TableProps<TableData>) {
+}: TableProps<TableData>): ReactElement {
   const theme = useTheme();
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
@@ -111,7 +111,7 @@ export function Table<TableData>({
     return {
       id: 'checkboxRowSelect',
       size: 28,
-      header: ({ table }) => {
+      header: ({ table }): ReactElement => {
         return (
           <TableCheckbox
             checked={table.getIsAllRowsSelected()}
@@ -122,7 +122,7 @@ export function Table<TableData>({
           />
         );
       },
-      cell: ({ row, table }) => {
+      cell: ({ row, table }): ReactElement => {
         return (
           <TableCheckbox
             checked={row.getIsSelected()}

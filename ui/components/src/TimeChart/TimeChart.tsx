@@ -135,7 +135,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   useImperativeHandle(ref, () => {
     return {
-      highlightSeries({ name }: ChartInstanceFocusOpts) {
+      highlightSeries({ name }: ChartInstanceFocusOpts): void {
         if (!chartRef.current) {
           // when chart undef, do not highlight series when hovering over legend
           return;
@@ -143,7 +143,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
         chartRef.current.dispatchAction({ type: 'highlight', seriesId: name });
       },
-      clearHighlightedSeries: () => {
+      clearHighlightedSeries: (): void => {
         if (!chartRef.current) {
           // when chart undef, do not clear highlight series
           return;
@@ -155,7 +155,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
 
   const handleEvents: OnEventsType<LineSeriesOption['data'] | unknown> = useMemo(() => {
     return {
-      datazoom: (params) => {
+      datazoom: (params): void => {
         if (onDataZoom === undefined) {
           setTimeout(() => {
             // workaround so unpin happens after click event
@@ -173,7 +173,7 @@ export const TimeChart = forwardRef<ChartInstance, TimeChartProps>(function Time
           onDataZoom(zoomEvent);
         }
       },
-      finished: () => {
+      finished: (): void => {
         if (chartRef.current !== undefined) {
           enableDataZoom(chartRef.current);
         }

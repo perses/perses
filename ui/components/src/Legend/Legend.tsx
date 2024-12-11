@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import { produce } from 'immer';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { getLegendMode } from '@perses-dev/core';
 import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
@@ -73,8 +73,8 @@ export function Legend({
   onItemMouseOver,
   onItemMouseOut,
   tableProps,
-}: LegendProps) {
-  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string) => {
+}: LegendProps): ReactElement {
+  const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string): void => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
     const newSelected = produce(selectedItems, (draft) => {

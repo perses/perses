@@ -15,7 +15,7 @@ import { formatWithTimeZone } from '../utils';
 
 // https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
 export function getFormattedStatusHistoryAxisLabel(rangeMs: number, timezone: string) {
-  return function (value: number) {
+  return function (value: number): string {
     const dayMs = 86400000;
     const monthMs = 2629440000;
     const yearMs = 31536000000;

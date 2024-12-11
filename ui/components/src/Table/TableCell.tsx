@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
-import { useEffect, useRef } from 'react';
+import { ReactElement, useEffect, useRef } from 'react';
 import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
@@ -80,7 +80,7 @@ export function TableCell({
   color,
   backgroundColor,
   ...otherProps
-}: TableCellProps) {
+}: TableCellProps): ReactElement {
   const theme = useTheme();
 
   const elRef = useRef<HTMLTableCellElement>();
