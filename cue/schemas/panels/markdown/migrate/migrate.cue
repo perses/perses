@@ -11,7 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module: "github.com/perses/perses@v0"
-language: {
-	version: "v0.11.0"
+package migrate
+
+#grafanaType: "text"
+#panel:       _
+
+// NB: Convert text panels with mode=html as markdown panels as best effort while we dont provide a proper panel type for this
+kind: "Markdown"
+if #panel.mode != _|_ {
+	spec: {
+		text: #panel.content
+	}
+}
+if #panel.options != _|_ {
+	spec: {
+		text: #panel.options.content
+	}
+}
+if #panel.options == _|_ && #panel.mode == _|_ {
+	spec: {
+		text: ""
+	}
 }

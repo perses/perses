@@ -1,3 +1,27 @@
+// Copyright 2024 The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package migrate
+
+import (
+	"list"
+
+	commonMigrate "github.com/perses/perses/cue/schemas/common/migrate"
+)
+
+#grafanaType: "table" | "table-old"
+#panel: _
+
 if (*#panel.type | null) == "table" {
 	kind: "Table"
 	spec: {
@@ -84,7 +108,7 @@ if (*#panel.type | null) == "table" {
 							text: option.text
 						}
 						if option.color != _|_ {
-							backgroundColor: *#mapping.color[option.color] | option.color
+							backgroundColor: *commonMigrate.#mapping.color[option.color] | option.color
 						}
 					}]
 				}
@@ -124,7 +148,7 @@ if (*#panel.type | null) == "table" {
 						text: mapping.options.result.text
 					}
 					if mapping.options.result.color != _|_ {
-						backgroundColor: *#mapping.color[mapping.options.result.color] | mapping.options.result.color
+						backgroundColor: *commonMigrate.#mapping.color[mapping.options.result.color] | mapping.options.result.color
 					}
 				}
 			},
@@ -163,7 +187,7 @@ if (*#panel.type | null) == "table" {
 			}
 		}
 	}
-},
+}
 if (*#panel.type | null) == "table-old" {
 	kind: "Table"
 	spec: {
@@ -183,4 +207,4 @@ if (*#panel.type | null) == "table-old" {
 			}]
 		}
 	}
-},
+}

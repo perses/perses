@@ -11,7 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module: "github.com/perses/perses@v0"
-language: {
-	version: "v0.11.0"
+package migrate
+
+import (
+	"regexp"
+	"strings"
+)
+
+#var: _
+
+if #var.type == "custom" || #var.type == "interval" {
+	kind: "StaticListVariable"
+	spec: {
+		_valuesArray:        strings.Split(#var.query, ",")
+		_aliasedValueRegexp: "^(.*) : (.*)$"
+		values: [for val in _valuesArray {
+			[// switch
+				if val =~ _aliasedValueRegexp {
+					label: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[1])
+					value: strings.TrimSpace(regexp.FindSubmatch(_aliasedValueRegexp, val)[2])
+				},
+				strings.TrimSpace(val),
+			][0]
+		}]
+	}
 }

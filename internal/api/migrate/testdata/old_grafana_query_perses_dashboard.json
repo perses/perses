@@ -15,6 +15,9 @@
       {
         "kind": "ListVariable",
         "spec": {
+          "display": {
+            "hidden": false
+          },
           "defaultValue": "argos-world",
           "allowAllValue": false,
           "allowMultiple": false,
