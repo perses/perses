@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { styled, SxProps, Theme } from '@mui/material';
 
 export interface GridContainerProps {
@@ -19,7 +19,7 @@ export interface GridContainerProps {
   sx?: SxProps<Theme>;
 }
 
-export function GridContainer(props: GridContainerProps) {
+export function GridContainer(props: GridContainerProps): ReactElement {
   const [isFirstRender, setIsFirstRender] = useState(true);
   useEffect(() => {
     if (isFirstRender) {

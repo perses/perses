@@ -59,7 +59,7 @@ export function createDeletePanelSlice(): StateCreator<
 > {
   // Return the state creator function for Zustand that uses the panels provided as intitial state
   return (set, get) => ({
-    deletePanel(panelGroupItemId: PanelGroupItemId) {
+    deletePanel(panelGroupItemId: PanelGroupItemId): void {
       set((draft) => {
         const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
         const existingGroup = draft.panelGroups[panelGroupId];
@@ -83,7 +83,7 @@ export function createDeletePanelSlice(): StateCreator<
       });
     },
 
-    openDeletePanelDialog(panelGroupItemId: PanelGroupItemId) {
+    openDeletePanelDialog(panelGroupItemId: PanelGroupItemId): void {
       const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
 
       const { panels, panelGroups } = get();
@@ -111,7 +111,7 @@ export function createDeletePanelSlice(): StateCreator<
       });
     },
 
-    closeDeletePanelDialog() {
+    closeDeletePanelDialog(): void {
       set((state) => {
         state.deletePanelDialog = undefined;
       });
@@ -120,7 +120,7 @@ export function createDeletePanelSlice(): StateCreator<
 }
 
 // Helper function to determine if a panel key is still being used somewhere in Panel Groups
-function isPanelKeyStillUsed(panelGroups: PanelGroupSlice['panelGroups'], panelKey: string) {
+function isPanelKeyStillUsed(panelGroups: PanelGroupSlice['panelGroups'], panelKey: string): boolean {
   for (const group of Object.values(panelGroups)) {
     const found = Object.values(group.itemPanelKeys).find((key) => key === panelKey);
     if (found !== undefined) {

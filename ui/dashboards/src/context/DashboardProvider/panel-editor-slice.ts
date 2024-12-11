@@ -86,7 +86,7 @@ export function createPanelEditorSlice(): StateCreator<
   return (set, get) => ({
     panelEditor: undefined,
 
-    openEditPanel(panelGroupItemId) {
+    openEditPanel(panelGroupItemId): void {
       const { panels, panelGroups } = get();
 
       // Figure out the panel key at that location
@@ -163,7 +163,7 @@ export function createPanelEditorSlice(): StateCreator<
       });
     },
 
-    openAddPanel(panelGroupId) {
+    openAddPanel(panelGroupId): void {
       // If a panel group isn't supplied, add to the first group or create a group if there aren't any
       let newGroup: PanelGroupDefinition | undefined = undefined;
       panelGroupId ??= get().panelGroupOrder[0];

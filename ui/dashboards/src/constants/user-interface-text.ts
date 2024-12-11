@@ -39,15 +39,15 @@ export const TOOLTIP_TEXT = {
 
 export const ARIA_LABEL_TEXT = {
   // Group buttons
-  addPanelToGroup: (groupName: string) => `add panel to group ${groupName}`,
-  deleteGroup: (groupName: string) => `delete group ${groupName}`,
-  editGroup: (groupName: string) => `edit group ${groupName}`,
-  moveGroupDown: (groupName: string) => `move group ${groupName} down`,
-  moveGroupUp: (groupName: string) => `move group ${groupName} up`,
+  addPanelToGroup: (groupName: string): string => `add panel to group ${groupName}`,
+  deleteGroup: (groupName: string): string => `delete group ${groupName}`,
+  editGroup: (groupName: string): string => `edit group ${groupName}`,
+  moveGroupDown: (groupName: string): string => `move group ${groupName} down`,
+  moveGroupUp: (groupName: string): string => `move group ${groupName} up`,
   // Panel buttons
-  viewPanel: (panelName: string) => `toggle panel ${panelName} view mode`,
-  editPanel: (panelName: string) => `edit panel ${panelName}`,
-  duplicatePanel: (panelName: string) => `duplicate panel ${panelName}`,
-  deletePanel: (panelName: string) => `delete panel ${panelName}`,
-  movePanel: (panelName: string) => `move panel ${panelName}`,
+  viewPanel: (panelName: string): string => `toggle panel ${panelName} view mode`,
+  editPanel: (panelName: string): string => `edit panel ${panelName}`,
+  duplicatePanel: (panelName: string): string => `duplicate panel ${panelName}`,
+  deletePanel: (panelName: string): string => `delete panel ${panelName}`,
+  movePanel: (panelName: string): string => `move panel ${panelName}`,
 };

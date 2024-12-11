@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent } from 'react';
+import { FormEvent, ReactElement } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { useDeletePanelDialog, DeletePanelDialogState } from '../../context';
 
-export const DeletePanelDialog = () => {
+export const DeletePanelDialog = (): ReactElement => {
   const { deletePanelDialog, closeDeletePanelDialog } = useDeletePanelDialog();
 
   return (
@@ -30,10 +30,10 @@ interface DeletePanelFormProps {
   deletePanelDialog: DeletePanelDialogState;
 }
 
-const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps) => {
+const DeletePanelForm = ({ deletePanelDialog }: DeletePanelFormProps): ReactElement => {
   const { deletePanel, closeDeletePanelDialog } = useDeletePanelDialog();
 
-  const handleDelete = (e: FormEvent) => {
+  const handleDelete = (e: FormEvent): void => {
     e.preventDefault();
     const { panelGroupItemId } = deletePanelDialog;
     deletePanel(panelGroupItemId);

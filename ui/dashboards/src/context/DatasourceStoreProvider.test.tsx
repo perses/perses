@@ -21,7 +21,7 @@ import {
   useListDatasourceSelectItems,
 } from '@perses-dev/plugin-system';
 import { DatasourceStoreProvider } from '@perses-dev/dashboards';
-import { PropsWithChildren } from 'react';
+import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   DashboardResource,
@@ -503,7 +503,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
     const dashboard = {
       spec: { datasources: data.input.datasources.local } as Partial<DashboardSpec>,
     } as DashboardResource;
-    const wrapper = ({ children }: PropsWithChildren) => {
+    const wrapper = ({ children }: PropsWithChildren): ReactElement => {
       return (
         <PluginRegistry {...mockPluginRegistry(MOCK_DS_PLUGIN)}>
           <QueryClientProvider client={queryClient}>

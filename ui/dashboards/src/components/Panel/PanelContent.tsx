@@ -14,6 +14,7 @@
 import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
 import { Skeleton } from '@mui/material';
 import { UnknownSpec, PanelDefinition } from '@perses-dev/core';
+import { ReactElement } from 'react';
 
 export interface PanelContentProps extends PanelProps<UnknownSpec> {
   panelPluginKind: string;
@@ -24,7 +25,7 @@ export interface PanelContentProps extends PanelProps<UnknownSpec> {
  * A small wrapper component that renders the appropriate PanelComponent from a Panel plugin based on the panel
  * definition's kind. Used so that an ErrorBoundary can be wrapped around this.
  */
-export function PanelContent(props: PanelContentProps) {
+export function PanelContent(props: PanelContentProps): ReactElement {
   const { panelPluginKind, contentDimensions, definition, ...others } = props;
   const { data: plugin, isLoading } = usePlugin('Panel', panelPluginKind, { useErrorBoundary: true });
   const PanelComponent = plugin?.PanelComponent;
