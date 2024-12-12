@@ -77,6 +77,6 @@ export const getNodeChildren = (node: ASTNode): ASTNode[] => {
   }
 };
 
-export const escapeString = (str: string) => {
+export const escapeString = (str: string): string => {
   return str.replace(/([\\"])/g, '\\$1');
 };
