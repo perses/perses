@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Link, List, ListItem, ListItemText } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { TraceAttribute, TraceAttributeValue } from '@perses-dev/core';
@@ -23,7 +23,7 @@ export interface AttributeListProps {
   attributes: TraceAttribute[];
 }
 
-export function AttributeList(props: AttributeListProps) {
+export function AttributeList(props: AttributeListProps): ReactElement {
   const { attributeLinks, attributes } = props;
   const attributesMap = useMemo(
     () => Object.fromEntries(attributes.map((attr) => [attr.key, attr.value])),
@@ -48,7 +48,7 @@ interface AttributeItemProps {
   linkTo?: string;
 }
 
-function AttributeItem(props: AttributeItemProps) {
+function AttributeItem(props: AttributeItemProps): ReactElement {
   const { attribute, linkTo } = props;
 
   const value = linkTo ? (

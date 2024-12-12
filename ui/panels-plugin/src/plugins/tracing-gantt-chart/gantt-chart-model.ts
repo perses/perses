@@ -30,6 +30,6 @@ export interface TracingGanttChartPaletteOptions {
 /**
  * Creates the initial/empty options for a TracingGanttChart panel.
  */
-export function createInitialTracingGanttChartOptions() {
+export function createInitialTracingGanttChartOptions(): Record<string, unknown> {
   return {};
 }

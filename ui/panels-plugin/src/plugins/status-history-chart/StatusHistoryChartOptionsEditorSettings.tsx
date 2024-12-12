@@ -15,9 +15,10 @@ import { LegendOptionsEditor, LegendOptionsEditorProps } from '@perses-dev/plugi
 import { produce } from 'immer';
 import { OptionsEditorGroup, OptionsEditorGrid, OptionsEditorColumn } from '@perses-dev/components';
 import { Button } from '@mui/material';
+import { ReactElement } from 'react';
 import { StatusHistoryChartOptions, StatusHistroyChartEditorProps } from './status-history-model.js';
 
-export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChartEditorProps) {
+export function StatusHistoryChartOptionsEditorSettings(props: StatusHistroyChartEditorProps): ReactElement {
   const { onChange, value } = props;
 
   const handleLegendChange: LegendOptionsEditorProps['onChange'] = (newLegend) => {

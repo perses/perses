@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Button, Stack } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
 import { handleMoveDown, handleMoveUp, useDragAndDropMonitor } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
@@ -23,7 +23,7 @@ export interface ColumnsEditorProps {
   onChange: (columnOptions: ColumnSettings[]) => void;
 }
 
-export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps) {
+export function ColumnsEditor({ columnSettings, onChange }: ColumnsEditorProps): ReactElement {
   const [columnsCollapsed, setColumnsCollapsed] = useState(columnSettings.map(() => true));
 
   function handleColumnChange(index: number, column: ColumnSettings): void {

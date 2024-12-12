@@ -16,11 +16,11 @@ import { TimeSeriesChartVisualOptions, VISUAL_CONFIG } from './time-series-chart
 import { VisualOptionsEditor } from './VisualOptionsEditor';
 
 describe('VisualOptionsEditor', () => {
-  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()) => {
+  const renderVisualOptionsEditor = (value: TimeSeriesChartVisualOptions, onChange = jest.fn()): void => {
     render(<VisualOptionsEditor value={value} onChange={onChange} />);
   };
 
-  const getLineWidthSlider = () => {
+  const getLineWidthSlider = (): HTMLElement => {
     return screen.getByTestId(VISUAL_CONFIG.lineWidth.testId);
   };
 
@@ -43,7 +43,7 @@ describe('VisualOptionsEditor', () => {
         width: 550,
         x: 20,
         y: 250,
-        toJSON: () => ({}),
+        toJSON: (): Record<string, unknown> => ({}),
       };
     });
     expect(sliderInput).toBeInTheDocument();

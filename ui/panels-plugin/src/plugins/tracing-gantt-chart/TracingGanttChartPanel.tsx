@@ -14,6 +14,7 @@
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
 import { AttributeLinks } from './TracingGanttChart/DetailPane/Attributes';
@@ -29,7 +30,7 @@ export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChar
   attributeLinks?: AttributeLinks;
 }
 
-export function TracingGanttChartPanel(props: TracingGanttChartPanelProps) {
+export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
   const { spec, attributeLinks } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;

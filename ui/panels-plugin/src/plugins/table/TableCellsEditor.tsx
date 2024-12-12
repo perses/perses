@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { CellsEditor } from './CellsEditor';
 import { CellSettings, TableOptions } from './table-model';
 
 export type TableCellsEditorProps = OptionsEditorProps<TableOptions>;
 
-export function TableCellsEditor({ onChange, value }: TableCellsEditorProps) {
+export function TableCellsEditor({ onChange, value }: TableCellsEditorProps): ReactElement {
   function handleCellsChange(cells: CellSettings[]): void {
     onChange({ ...value, cellSettings: cells });
   }

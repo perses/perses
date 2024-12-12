@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MOCK_GANTT_TRACE } from '../../../../test';
 import { SpanName, SpanNameProps } from './SpanName';
 import { GanttTableProvider } from './GanttTableProvider';
 
 describe('SpanName', () => {
-  const renderComponent = (props: Omit<SpanNameProps, 'nameColumnWidth'>) => {
+  const renderComponent = (props: Omit<SpanNameProps, 'nameColumnWidth'>): RenderResult => {
     return render(
       <GanttTableProvider>
         <SpanName {...props} nameColumnWidth={25} />

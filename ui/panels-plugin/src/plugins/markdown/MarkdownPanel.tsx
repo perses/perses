@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import * as DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import { Box, Theme } from '@mui/material';
@@ -21,7 +21,7 @@ import { MarkdownPanelOptions } from './markdown-panel-model';
 
 export type MarkdownPanelProps = PanelProps<MarkdownPanelOptions>;
 
-function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme) {
+function createMarkdownPanelStyles(theme: Theme, chartsTheme: PersesChartsTheme): Record<string, unknown> {
   return {
     padding: `${chartsTheme.container.padding.default}px`,
     // Make the content scrollable
@@ -75,7 +75,7 @@ function sanitizeHTML(html: string): string {
   return DOMPurify.sanitize(html);
 }
 
-export function MarkdownPanel(props: MarkdownPanelProps) {
+export function MarkdownPanel(props: MarkdownPanelProps): ReactElement {
   const {
     spec: { text },
   } = props;

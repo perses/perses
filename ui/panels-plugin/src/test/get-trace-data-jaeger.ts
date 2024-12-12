@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Span, Trace, TraceAttribute, TraceAttributeValue, TraceResource } from '@perses-dev/core';
+import { Span, SpanEvent, Trace, TraceAttribute, TraceAttributeValue, TraceResource } from '@perses-dev/core';
 
 // the following jaeger data types and parsing function should eventually be moved to a jaeger plugin
 
@@ -82,7 +82,17 @@ function parseProcess(process: JaegerProcess): TraceResource {
   };
 }
 
-function parseSpan(span: JaegerSpan) {
+function parseSpan(span: JaegerSpan): {
+  traceId: string;
+  spanId: string;
+  name: string;
+  kind: string;
+  startTimeUnixMs: number;
+  endTimeUnixMs: number;
+  attributes: TraceAttribute[];
+  events: SpanEvent[];
+  status: Record<string, unknown>;
+} {
   return {
     traceId: span.traceID,
     spanId: span.spanID,

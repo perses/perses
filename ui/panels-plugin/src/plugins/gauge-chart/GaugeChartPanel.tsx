@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { Box, Skeleton, Stack } from '@mui/material';
 import type { GaugeSeriesOption } from 'echarts';
 import merge from 'lodash/merge';
@@ -32,7 +32,7 @@ const PANEL_PADDING_OFFSET = 20;
 
 export type GaugeChartPanelProps = PanelProps<GaugeChartOptions>;
 
-export function GaugeChartPanel(props: GaugeChartPanelProps) {
+export function GaugeChartPanel(props: GaugeChartPanelProps): ReactElement | null {
   const { spec: pluginSpec, contentDimensions } = props;
   const { calculation, max } = pluginSpec;
 

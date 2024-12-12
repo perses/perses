@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { ChartsProvider, testChartsTheme } from '@perses-dev/components';
 import { MOCK_GANTT_TRACE } from '../../../../test';
@@ -19,7 +19,7 @@ import { GanttTableProvider } from './GanttTableProvider';
 import { SpanDuration, SpanDurationProps } from './SpanDuration';
 
 describe('SpanDuration', () => {
-  const renderComponent = (props: SpanDurationProps) => {
+  const renderComponent = (props: SpanDurationProps): RenderResult => {
     return render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <GanttTableProvider>

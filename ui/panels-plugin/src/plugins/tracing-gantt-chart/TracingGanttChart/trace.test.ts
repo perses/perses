@@ -15,7 +15,7 @@ import { MOCK_TRACE, MOCK_TRACE_ASYNC } from '../../../test';
 import { getTraceModel } from './trace';
 
 describe('trace', () => {
-  it('computes a GanttTrace model from a trace', () => {
+  it('computes a GanttTrace model from a trace', (): void => {
     const ganttTrace = getTraceModel(MOCK_TRACE);
     expect(ganttTrace.startTimeUnixMs).toEqual(1000);
     expect(ganttTrace.endTimeUnixMs).toEqual(2000);

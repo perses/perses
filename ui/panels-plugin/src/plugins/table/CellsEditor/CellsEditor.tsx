@@ -14,6 +14,7 @@
 import { Button, Divider, Stack, Typography, Grid2 as Grid } from '@mui/material';
 
 import AddIcon from 'mdi-material-ui/Plus';
+import { ReactElement } from 'react';
 import { CellSettings } from '../table-model';
 import { CellEditor } from './CellEditor';
 
@@ -22,7 +23,7 @@ export interface CellsEditorProps {
   onChange: (cellOptions: CellSettings[]) => void;
 }
 
-export function CellsEditor({ cellSettings, onChange }: CellsEditorProps) {
+export function CellsEditor({ cellSettings, onChange }: CellsEditorProps): ReactElement {
   function handleCellChange(index: number, cell: CellSettings): void {
     const updatedCells = [...cellSettings];
     updatedCells[index] = cell;
