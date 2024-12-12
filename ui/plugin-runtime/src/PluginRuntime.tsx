@@ -101,7 +101,6 @@ export const pluginRuntime = init({
         requiredVersion: '^11.11.0',
       },
     },
-
     '@hookform/resolvers/zod': {
       version: '3.3.4',
       lib: () => require('@hookform/resolvers/zod'),
@@ -110,32 +109,48 @@ export const pluginRuntime = init({
         requiredVersion: '^3.3.4',
       },
     },
+    'use-resize-observer': {
+      version: '9.1.0',
+      lib: () => require('use-resize-observer'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^9.1.0',
+      },
+    },
+    'mdi-material-ui': {
+      version: '7.4.0',
+      lib: () => require('mdi-material-ui'),
+      shareConfig: {
+        singleton: true,
+        requiredVersion: '^7.4.0',
+      },
+    },
   },
 });
 
+const registerRemote = (name: string, baseURL?: string) => {
+  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
+  if (!existingRemote) {
+    const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
+    pluginRuntime.registerRemotes([
+      {
+        name,
+        entry: remoteEntryURL,
+        alias: name,
+      },
+    ]);
+  }
+};
+
+export const loadPlugin = async (pluginName: string, moduleName: string, baseURL?: string) => {
+  registerRemote(pluginName, baseURL);
+
+  return loadRemote<PersesPluginModule>(`${pluginName}/${moduleName}`);
+};
+
 export function usePluginRuntime({ moduleName, baseURL }: { moduleName: string; baseURL?: string }) {
-  const registerRemote = (name: string) => {
-    const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
-    if (!existingRemote) {
-      const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
-      pluginRuntime.registerRemotes([
-        {
-          name,
-          entry: remoteEntryURL,
-          alias: name,
-        },
-      ]);
-    }
-  };
-
-  const load = async (name: string) => {
-    registerRemote(name);
-
-    return loadRemote<PersesPluginModule>(`${name}/${moduleName}`);
-  };
-
   return {
     pluginRuntime,
-    load,
+    load: (name: string) => loadPlugin(name, moduleName, baseURL),
   };
 }

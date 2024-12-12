@@ -56,6 +56,9 @@ export function usePluginIndexes(getInstalledPlugins: PluginLoader['getInstalled
       }
     }
 
+    console.log('pluginResourcesByTypeAndKind', pluginResourcesByTypeAndKind);
+    console.log('pluginMetadataByType', pluginMetadataByType);
+
     return {
       pluginResourcesByTypeAndKind,
       pluginMetadataByType,

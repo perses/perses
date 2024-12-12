@@ -42,13 +42,13 @@ var (
 
 type frontend struct {
 	echoUtils.Register
-	apiPrefix string
+	apiPrefix   string
 	pluginsPath string
 }
 
 func NewPersesFrontend(cfg config.Config) echoUtils.Register {
 	return &frontend{
-		apiPrefix: cfg.APIPrefix,
+		apiPrefix:   cfg.APIPrefix,
 		pluginsPath: cfg.Plugins.Path,
 	}
 }
@@ -57,8 +57,24 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentHandler := echo.WrapHandler(http.FileServer(asts))
 	contentRewrite := middleware.Rewrite(map[string]string{"/*": "/app/dist/$1"})
 
+	// TODO: Make this configurable: host and enabled option. Prod envs should not have this enabled
+	// check if the plugin is availanle in the plugin proxy at localhost:3005, if not serve the plugin from the local folder
+	e.GET(f.apiPrefix+"/plugins/*", func(c echo.Context) error {
+		pluginPath := c.Param("*")
+		proxyURL := "http://localhost:3005/plugins/" + pluginPath
+
+		resp, err := http.Get(proxyURL)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			logrus.Infof("Proxying plugin request: %s", proxyURL)
+			defer resp.Body.Close()
+			return c.Stream(resp.StatusCode, resp.Header.Get("Content-Type"), resp.Body)
+		}
+
+		localPath := f.pluginsPath + "/" + pluginPath
+		return c.File(localPath)
+	})
+
 	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(), contentRewrite)
-	e.Static(f.apiPrefix+"/plugins", f.pluginsPath)
 }
 
 // routerMiddleware is here to serve properly the react app.

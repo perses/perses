@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Datasource, DatasourceDefinition } from '@perses-dev/core';
-import { useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { Datasource, DatasourceDefinition } from '@perses-dev/core';
+import { remotePluginLoader } from '@perses-dev/plugin-runtime';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
-import { bundledPluginLoader } from '../../model/bundled-plugins';
-import { DrawerProps } from '../drawer';
+import { useState } from 'react';
 import { DeleteResourceDialog } from '../dialogs';
+import { DrawerProps } from '../drawer';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
@@ -44,7 +44,7 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
   return (
     <Drawer isOpen={isOpen} onClose={handleClickOut} data-testid="datasource-editor">
       <ErrorBoundary FallbackComponent={ErrorAlert}>
-        <PluginRegistry pluginLoader={bundledPluginLoader}>
+        <PluginRegistry pluginLoader={remotePluginLoader()}>
           <ValidationProvider>
             {isOpen && (
               <DatasourceEditorForm

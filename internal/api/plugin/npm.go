@@ -24,8 +24,19 @@ const (
 	packageJSONFile  = "package.json"
 )
 
+type npmPersesPluginDisplay struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type npmPersesPlugin struct {
+	PluginType string                 `json:"pluginType"`
+	Kind       string                 `json:"kind"`
+	Display    npmPersesPluginDisplay `json:"display"`
+}
+
 type npmPerses struct {
-	PluginType string `json:"pluginType"`
+	Plugins []npmPersesPlugin `json:"plugins"`
 }
 
 type npmPackage struct {

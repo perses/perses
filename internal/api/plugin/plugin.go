@@ -26,9 +26,9 @@ import (
 const pluginFileName = "plugin.json"
 
 type Info struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Type    string `json:"type"`
+	Name    string            `json:"name"`
+	Version string            `json:"version"`
+	Plugins []npmPersesPlugin `json:"plugins"`
 }
 
 type Plugin interface {
@@ -97,12 +97,13 @@ func (p *plugin) generatePluginListFile() error {
 		pluginList = append(pluginList, Info{
 			Name:    manifest.Name,
 			Version: manifest.Metadata.BuildInfo.Version,
-			Type:    npmPackageData.Perses.PluginType,
+			Plugins: npmPackageData.Perses.Plugins,
 		})
 	}
 	if len(pluginList) == 0 {
 		pluginList = make([]Info, 0)
 	}
+
 	marshalData, marshalErr := json.Marshal(pluginList)
 	if marshalErr != nil {
 		return marshalErr

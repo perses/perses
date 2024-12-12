@@ -28,7 +28,8 @@
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^0.1.21"
+    "@module-federation/enhanced": "^0.1.21",
+    "@perses-dev/plugin-system": "0.47.0"
   },
   "peerDependencies": {
     "@emotion/react": "^11.11.3",
