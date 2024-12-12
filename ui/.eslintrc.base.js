@@ -53,15 +53,13 @@ module.exports = {
 
   rules: {
     'prettier/prettier': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/array-type': [
       'error',
       {
         default: 'array-simple',
       },
     ],
-    'eqeqeq': ["error", "always"],
+    eqeqeq: ['error', 'always'],
     'import/order': 'error',
     // you must disable the base rule as it can report incorrect errors
     'no-unused-vars': 'off',

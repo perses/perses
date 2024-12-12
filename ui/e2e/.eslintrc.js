@@ -18,10 +18,4 @@ const baseConfig = require('../.eslintrc.base.js');
 module.exports = {
   ...baseConfig,
   extends: [...baseConfig.extends, 'plugin:playwright/playwright-test'],
-  // TODO: remove when all package are aligned with base config
-  rules: {
-    ...baseConfig.rules,
-    '@typescript-eslint/explicit-function-return-type': 'error',
-    '@typescript-eslint/explicit-module-boundary-types': 'error',
-  },
 };
