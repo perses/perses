@@ -13,8 +13,9 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StoryFn } from '@storybook/react';
+import { ReactElement } from 'react';
 
-export const WithQueryClient = (Story: StoryFn) => {
+export const WithQueryClient = (Story: StoryFn): ReactElement => {
   const queryClient = new QueryClient({});
 
   return (
