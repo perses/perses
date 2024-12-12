@@ -19,6 +19,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/kylelemons/godebug/diff"
 	persesCMD "github.com/perses/perses/internal/cli/cmd"
@@ -82,34 +83,36 @@ func (o *option) Validate() error {
 }
 
 func (o *option) Execute() error {
+	// Create the output folder (+ any parent folder if applicable) where to store the diff files
+	err := os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating the output folder: %v", err)
+	}
+
+	var execResult strings.Builder
 	for _, preview := range o.dashboards {
 		project := resource.GetProject(preview.GetMetadata(), o.Project)
 		dashboard, err := o.apiClient.V1().Dashboard(project).Get(preview.Metadata.Name)
 		if err != nil {
-			return err
+			execResult.WriteString(fmt.Sprintf("No dashboard %s found in project %s, skipping diff generation: %v\n", preview.Metadata.Name, project, err))
+			continue
 		}
 
 		d, err := dashboardDiff(dashboard, preview)
 		if err != nil {
-			return err
-		}
-
-		// Create the folder (+ any parent folder if applicable) where to store the output
-		err = os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("error creating the output folder: %v", err)
+			execResult.WriteString(fmt.Sprintf("Diff generation failed for dashboard %s in project %s: %v", preview.Metadata.Name, project, err))
+			continue
 		}
 
 		filePath := path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name))
 		if writeErr := os.WriteFile(filePath, []byte(d), 0644); writeErr != nil { // nolint: gosec
-			return fmt.Errorf("unable to write the diff file: %w", writeErr)
+			execResult.WriteString(fmt.Sprintf("Unable to write the diff file for dashboard %s in project %s: %v", preview.Metadata.Name, project, writeErr))
+			continue
 		}
 
-		if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s successfully created", filePath)); outputErr != nil {
-			return outputErr
-		}
+		execResult.WriteString(fmt.Sprintf("%s successfully generated\n", filePath))
 	}
-	return nil
+	return output.HandleString(o.writer, execResult.String())
 }
 
 func (o *option) setDashboards() error {
