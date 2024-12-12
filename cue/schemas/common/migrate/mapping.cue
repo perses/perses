@@ -28,8 +28,8 @@ package migrate
 		percent:     "percent"
 		percentunit: "percent-decimal"
 		// decimal units
-        none: "decimal"
-        short: "decimal"
+		none:	"decimal"
+		short:	"decimal"
 		// TODO
 		// bytes units
 		bytes:    "bytes"
