@@ -14,8 +14,9 @@
 import { WindowHistoryAdapter } from 'use-query-params/adapters/window';
 import { QueryParamProvider } from 'use-query-params';
 import { StoryFn } from '@storybook/react';
+import { ReactElement } from 'react';
 
-export const WithQueryParams = (Story: StoryFn) => {
+export const WithQueryParams = (Story: StoryFn): ReactElement => {
   return (
     <QueryParamProvider adapter={WindowHistoryAdapter}>
       <Story />
