@@ -49,7 +49,7 @@ export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
   options?: UsePluginOptions<T>
-): UseQueryResult<PluginImplementation<T>> {
+): UseQueryResult<PluginImplementation<T>, Error> {
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
   options = {
     ...options,
