@@ -52,13 +52,15 @@ func (e *endpoint) view(ctx echo.Context) error {
 		return apiInterface.HandleBadRequestError(err.Error())
 	}
 
-	claims := crypto.ExtractJWTClaims(ctx)
-	if claims == nil {
-		return apiInterface.HandleUnauthorizedError("missing claims")
-	}
+	if e.rbac.IsEnabled() {
+		claims := crypto.ExtractJWTClaims(ctx)
+		if claims == nil {
+			return apiInterface.HandleUnauthorizedError("missing claims")
+		}
 
-	if ok := e.rbac.HasPermission(claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
-		return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
+		if ok := e.rbac.HasPermission(claims.Subject, role.ReadAction, view.Project, role.DashboardScope); !ok {
+			return apiInterface.HandleUnauthorizedError(fmt.Sprintf("missing '%s' permission in '%s' project for '%s' kind", role.ReadAction, view.Project, role.DashboardScope))
+		}
 	}
 
 	if _, err := e.dashboardService.Get(apiInterface.NewPersesContext(ctx), apiInterface.Parameters{

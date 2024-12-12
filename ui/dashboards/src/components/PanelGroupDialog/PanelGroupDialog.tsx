@@ -13,22 +13,22 @@
 
 import { IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { usePanelGroupEditor } from '../../context';
 import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps } from './PanelGroupEditorForm';
 
 /**
  * A dialog for adding or editing a Panel Group. Open and initial state is controlled by the DashboardStore.
  */
-export function PanelGroupDialog() {
+export function PanelGroupDialog(): ReactElement {
   const panelGroupEditor = usePanelGroupEditor();
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
-  const handleClose = () => setIsClosing(true);
+  const handleClose = (): void => setIsClosing(true);
 
   // Don't call close on the store until the Dialog has completely transitioned out
-  const handleExited = () => {
+  const handleExited = (): void => {
     panelGroupEditor?.close();
     setIsClosing(false);
   };

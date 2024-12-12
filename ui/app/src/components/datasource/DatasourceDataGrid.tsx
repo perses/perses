@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DataGrid, GridRow, GridColumnHeaders } from '@mui/x-data-grid';
-import { memo, useMemo } from 'react';
+import { memo, ReactElement, useMemo } from 'react';
 import { GridInitialStateCommunity } from '@mui/x-data-grid/models/gridStateCommunity';
 import { NoDataOverlay } from '@perses-dev/components';
 import {
@@ -37,11 +37,11 @@ export interface Row extends CommonRow {
   viewedAt?: string;
 }
 
-function NoDatasourceRowOverlay() {
+function NoDatasourceRowOverlay(): ReactElement {
   return <NoDataOverlay resource="datasources" />;
 }
 
-export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>) {
+export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>): ReactElement {
   const { columns, rows, initialState, hideToolbar, isLoading, onRowClick } = props;
 
   // Merging default initial state with the props initial state (props initial state will overwrite properties)
@@ -53,29 +53,30 @@ export function DatasourceDataGrid(props: DataGridPropertiesWithCallback<Row>) {
   }, [initialState]);
 
   return (
-    <DataGrid
-      disableRowSelectionOnClick
-      autoHeight={true}
-      onRowClick={(params) => {
-        onRowClick(params.row.name, params.row.project);
-      }}
-      rows={rows}
-      columns={columns}
-      getRowId={(row) => row.name}
-      loading={isLoading}
-      slots={
-        hideToolbar
-          ? { noRowsOverlay: NoDatasourceRowOverlay }
-          : {
-              toolbar: GridToolbar,
-              row: MemoizedRow,
-              columnHeaders: MemoizedColumnHeaders,
-              noRowsOverlay: NoDatasourceRowOverlay,
-            }
-      }
-      pageSizeOptions={PAGE_SIZE_OPTIONS}
-      initialState={mergedInitialState}
-      sx={DATA_GRID_STYLES}
-    ></DataGrid>
+    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
+      <DataGrid
+        disableRowSelectionOnClick
+        onRowClick={(params) => {
+          onRowClick(params.row.name, params.row.project);
+        }}
+        rows={rows}
+        columns={columns}
+        getRowId={(row) => row.name}
+        loading={isLoading}
+        slots={
+          hideToolbar
+            ? { noRowsOverlay: NoDatasourceRowOverlay }
+            : {
+                toolbar: GridToolbar,
+                row: MemoizedRow,
+                columnHeaders: MemoizedColumnHeaders,
+                noRowsOverlay: NoDatasourceRowOverlay,
+              }
+        }
+        pageSizeOptions={PAGE_SIZE_OPTIONS}
+        initialState={mergedInitialState}
+        sx={DATA_GRID_STYLES}
+      />
+    </div>
   );
 }

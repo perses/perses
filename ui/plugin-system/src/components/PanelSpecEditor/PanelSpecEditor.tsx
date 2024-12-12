@@ -103,13 +103,13 @@ export function PanelSpecEditor(props: PanelSpecEditorProps) {
     content: (
       <Controller
         control={control}
-        name="panelDefinition.spec.plugin.spec"
+        name="panelDefinition"
         render={({ field }) => (
           <JSONEditor
             maxHeight="80vh"
             value={panelDefinition}
             onChange={(json) => {
-              field.onChange(json);
+              field.onChange(JSON.parse(json));
               onJSONChange(json);
             }}
           />

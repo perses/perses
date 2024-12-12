@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RefObject, useState } from 'react';
+import { ReactElement, RefObject, useState } from 'react';
 import { Stack, FormLabel, TextField, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { ThresholdOptions } from '@perses-dev/core';
@@ -39,7 +39,7 @@ export function ThresholdInput({
   onColorChange,
   onBlur,
   onDelete,
-}: ThresholdInputProps) {
+}: ThresholdInputProps): ReactElement {
   const [key, setKey] = useState(0); // use key to cause input to lose focus when pressing enter
   return (
     <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>

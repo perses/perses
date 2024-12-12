@@ -11,29 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { Datasource, DatasourceDefinition } from '@perses-dev/core';
+import { ReactElement, useState } from 'react';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { remotePluginLoader } from '@perses-dev/plugin-runtime';
 import { DatasourceEditorForm, PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
-import { useState } from 'react';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
-import { DrawerProps } from '../drawer';
 
 interface DatasourceDrawerProps<T extends Datasource> extends DrawerProps<T> {
   datasource: T;
 }
 
-export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerProps<T>) {
-  const { datasource, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function DatasourceDrawer<T extends Datasource>({
+  datasource,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: DatasourceDrawerProps<T>): ReactElement {
   const [isDeleteDatasourceDialogStateOpened, setDeleteDatasourceDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
-  const handleSave = (def: DatasourceDefinition) => {
+  const handleSave = (def: DatasourceDefinition): void => {
     datasource.spec = def.spec;
     datasource.metadata.name = def.name;
     if (onSave) {
@@ -49,12 +57,13 @@ export function DatasourceDrawer<T extends Datasource>(props: DatasourceDrawerPr
             {isOpen && (
               <DatasourceEditorForm
                 initialDatasourceDefinition={{ name: datasource.metadata.name, spec: datasource.spec }}
-                initialAction={action}
+                action={action}
                 isDraft={false}
                 isReadonly={isReadonly}
+                onActionChange={onActionChange}
                 onSave={handleSave}
                 onClose={onClose}
-                onDelete={onDelete ? () => setDeleteDatasourceDialogStateOpened(true) : undefined}
+                onDelete={onDelete ? (): void => setDeleteDatasourceDialogStateOpened(true) : undefined}
               />
             )}
           </ValidationProvider>

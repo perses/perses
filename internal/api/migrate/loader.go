@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -14,112 +14,89 @@
 package migrate
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
-	"sync/atomic"
 
-	"github.com/fsnotify/fsnotify"
-	"github.com/perses/common/async"
+	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/build"
+	"cuelang.org/go/cue/cuecontext"
 	"github.com/perses/perses/internal/api/schemas"
 	"github.com/sirupsen/logrus"
 )
 
-func NewHotReloaders(service Migration) (async.SimpleTask, async.SimpleTask, error) {
-	fsWatcher, err := fsnotify.NewWatcher()
+const (
+	grafanaType     = "#grafanaType"
+	migrationFolder = "migrate"
+)
+
+func loadSliceOfInstance(path string) ([]*build.Instance, error) {
+	var result []*build.Instance
+	files, err := os.ReadDir(path)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	callback := func() {
-		service.BuildMigrationSchemaString()
-	}
-	loaders := service.GetLoaders()
-
-	return &schemas.Watcher{
-			FSWatcher:      fsWatcher,
-			Loaders:        loaders,
-			LoaderCallback: callback,
-		}, &schemas.Reloader{
-			Loaders:        loaders,
-			LoaderCallback: callback,
-		},
-		nil
-}
-
-type loader interface {
-	schemas.Loader
-	getConditions() string
-	getPlaceholder() string
-}
-
-type migCuePart struct {
-	listOfConditions atomic.Pointer[string]
-	schemasPath      string
-	defaultValue     string
-	placeholderText  string
-}
-
-func (c *migCuePart) GetSchemaPath() string {
-	return c.schemasPath
-}
-
-// Load will load the migration schemas from the filesystem
-func (c *migCuePart) Load() (int, int, error) {
-	var conditions string
-	conditions, successfulLoadsCount, err := c.buildListOfConditions()
-	if err == nil {
-		c.listOfConditions.Store(&conditions)
-	}
-	// NB: There are no relevant case of "failed loads" to monitor in the case of migration schemas
-	// at the moment, so we always return 0 for the failed loads count
-	return successfulLoadsCount, 0, err
-}
-
-func (c *migCuePart) getConditions() string {
-	return *c.listOfConditions.Load()
-}
-
-func (c *migCuePart) getPlaceholder() string {
-	return c.placeholderText
-}
-
-func (c *migCuePart) buildListOfConditions() (string, int, error) {
-	successfulLoadsCount := 0
-
-	files, err := os.ReadDir(c.schemasPath)
-	if err != nil {
-		return "", successfulLoadsCount, err
-	}
-
-	// gather the content of all migration files found
-	var listOfConditions strings.Builder
 	for _, file := range files {
 		if !file.IsDir() {
 			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
 			continue
 		}
-		migFilePath := filepath.Join(c.schemasPath, file.Name(), "migrate.cue")
-		contentStr, readErr := os.ReadFile(migFilePath)
-		if readErr != nil {
-			logrus.WithError(readErr).Debugf("No migration file found at %s, plugin %s will be skipped", migFilePath, file.Name())
+		schemaPath := filepath.Join(path, file.Name(), migrationFolder)
+		if _, fileErr := os.Stat(filepath.Join(schemaPath, "migrate.cue")); os.IsNotExist(fileErr) {
+			// migration file doesn't exist
 			continue
 		}
-		// TODO: validate the content of the migration file (we expect a conditional block, or several ones separated by commas)
-		// and track the amount of validation errors in the schemas load monitoring
-
-		listOfConditions.WriteString(string(contentStr))
-		listOfConditions.WriteString("\n")
-		successfulLoadsCount++
+		buildInstance, loadErr := schemas.LoadMigrateSchema(schemaPath)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		result = append(result, buildInstance)
 	}
+	return result, nil
+}
 
-	// append a default conditional for any Grafana plugin that has no corresponding Perses plugin
-	listOfConditions.WriteString(fmt.Sprintf(`
-	{
-		%s
-	}`, c.defaultValue))
-	listOfConditions.WriteString("\n")
+func loadPanels(panelSchemaPath string) (map[string]*build.Instance, error) {
+	ctx := cuecontext.New(cuecontext.EvaluatorVersion(cuecontext.EvalV3))
+	result := make(map[string]*build.Instance)
+	files, err := os.ReadDir(panelSchemaPath)
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range files {
+		if !file.IsDir() {
+			logrus.Tracef("file %s is ignored since we are looking for directories", file.Name())
+			continue
+		}
+		schemaPath := filepath.Join(panelSchemaPath, file.Name(), migrationFolder)
+		if _, fileErr := os.Stat(filepath.Join(schemaPath, "migrate.cue")); os.IsNotExist(fileErr) {
+			// migration file doesn't exist
+			continue
+		}
+		buildInstance, loadErr := schemas.LoadMigrateSchema(schemaPath)
+		if loadErr != nil {
+			return nil, loadErr
+		}
+		schema := ctx.BuildInstance(buildInstance)
+		kindValue := schema.LookupPath(cue.ParsePath(grafanaType))
+		kind := kindValue.Kind()
 
-	return listOfConditions.String(), successfulLoadsCount, nil
+		if kind == cue.StringKind {
+			kindAsString, _ := kindValue.String()
+			result[kindAsString] = buildInstance
+		} else if kind == cue.BottomKind && kindValue.IncompleteKind() == cue.StringKind {
+			op, values := kindValue.Expr()
+			if op != cue.AndOp && op != cue.OrOp {
+				logrus.Tracef("unable to load migrate script from plugin %q: op in field %q not recognised", schemaPath, grafanaType)
+				continue
+			}
+			for _, value := range values {
+				if value.Kind() != cue.StringKind {
+					logrus.Tracef("in plugin %q value not decoded as it is of type %q ", schemaPath, value.Kind())
+					continue
+				}
+				valueAsString, _ := value.String()
+				result[valueAsString] = buildInstance
+			}
+		}
+	}
+	return result, nil
 }

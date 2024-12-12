@@ -12,17 +12,17 @@
 // limitations under the License.
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { trace1_root } from '../../../test';
+import { MOCK_TRACE } from '../../../test';
 import { TracingGanttChart } from './TracingGanttChart';
 
 const exampleTraces = {
-  Demo: trace1_root,
+  Demo: MOCK_TRACE,
 };
 
 const meta: Meta<typeof TracingGanttChart> = {
   component: TracingGanttChart,
   argTypes: {
-    rootSpan: {
+    trace: {
       options: Object.keys(exampleTraces),
       mapping: exampleTraces,
     },
@@ -35,6 +35,13 @@ type Story = StoryObj<typeof TracingGanttChart>;
 
 export const Primary: Story = {
   args: {
-    rootSpan: trace1_root,
+    options: {
+      visual: {
+        palette: {
+          mode: 'auto',
+        },
+      },
+    },
+    trace: exampleTraces.Demo,
   },
 };

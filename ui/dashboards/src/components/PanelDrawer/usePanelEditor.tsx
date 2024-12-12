@@ -12,13 +12,25 @@
 // limitations under the License.
 
 import { useCallback, useMemo, useState } from 'react';
-import { PanelDefinition, QueryDefinition } from '@perses-dev/core';
+import { Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+
+interface UsePanelEditorResult {
+  setName: (value: string) => void;
+  panelDefinition: PanelDefinition;
+  setPlugin: (value: Definition<UnknownSpec>) => void;
+  setLinks: (value?: Link[]) => void;
+  setDescription: (value?: string) => void;
+  setPanelDefinition: (panelDefinition: PanelDefinition) => void;
+  setQueries: (queries?: QueryDefinition[], hideQueryEditor?: boolean) => void;
+}
 
 /**
  * UsePanelEditor is used in PanelEditorForm
  * This hook stores the states of panel definition and returns the onChange handlers for each state
  */
-export const usePanelEditor = (panelDefinition: PanelDefinition) => {
+export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEditorResult = (
+  panelDefinition: PanelDefinition
+) => {
   const { display, plugin: pluginDefinition, queries: initialQueries, links: initialLinks } = panelDefinition.spec;
   const [name, setName] = useState(display.name);
   const [description, setDescription] = useState(display.description);

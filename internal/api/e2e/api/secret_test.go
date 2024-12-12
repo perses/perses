@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gavv/httpexpect/v2"
@@ -53,7 +54,7 @@ func TestMainScenarioSecret(t *testing.T) {
 	e2eframework.CreateTestScenarioWithProject(t, path, creator)
 
 	t.Run(fmt.Sprintf("Update test (%s)", path), func(t *testing.T) {
-		e2eframework.WithServer(t, func(expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
+		e2eframework.WithServer(t, func(_ *httptest.Server, expect *httpexpect.Expect, manager dependency.PersistenceManager) []api.Entity {
 			parent, entity := creator("myProject", "myResource")
 			e2eframework.CreateAndWaitUntilEntitiesExist(t, manager, parent, entity)
 

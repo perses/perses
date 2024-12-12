@@ -12,30 +12,32 @@
 // limitations under the License.
 
 import { IconButton, Stack, TextField } from '@mui/material';
-import React, { useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import CircleIcon from 'mdi-material-ui/Circle';
+import DeleteIcon from 'mdi-material-ui/Delete';
 
 interface ColorPickerProps {
   color: string;
   onChange?: (color: string) => void;
+  onClear?: () => void;
   /**
    * Preset color palette
    */
   palette?: string[];
 }
 
-export const ColorPicker = ({ color, onChange, palette }: ColorPickerProps) => {
+export const ColorPicker = ({ color, onChange, onClear, palette }: ColorPickerProps): ReactElement => {
   // value is the visible value for the controlled text input
   const [value, setValue] = useState(color);
 
-  const handleColorChange = (color: string) => {
+  const handleColorChange = (color: string): void => {
     setValue(color);
     onChange && onChange(color);
   };
 
   // we should update this if https://github.com/omgovich/react-colorful/issues/157 is resolved
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const inputValue = e.target.value.replace(/([^0-9A-F]+)/gi, '').substring(0, 8);
     setValue(`#${inputValue}`); // always prefix input value with # to indicate hex format
     // only set color if input value is a valid hex color
@@ -46,7 +48,7 @@ export const ColorPicker = ({ color, onChange, palette }: ColorPickerProps) => {
 
   return (
     <Stack spacing={1}>
-      <HexColorPicker color={color} onChange={handleColorChange} />
+      <HexColorPicker color={color} onChange={handleColorChange} style={{ width: '100%' }} />
       <Stack direction="row" flexWrap="wrap" justifyContent="space-evenly" width="200px">
         {palette &&
           palette.map((color, i) => (
@@ -61,12 +63,19 @@ export const ColorPicker = ({ color, onChange, palette }: ColorPickerProps) => {
             </IconButton>
           ))}
       </Stack>
-      <TextField
-        inputProps={{ 'aria-label': 'enter hex color' }}
-        fullWidth
-        value={value}
-        onChange={handleInputChange}
-      />
+      <Stack direction="row" gap={1} alignItems="center">
+        <TextField
+          inputProps={{ 'aria-label': 'enter hex color' }}
+          fullWidth
+          value={value}
+          onChange={handleInputChange}
+        />
+        {onClear && (
+          <IconButton onClick={onClear}>
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </Stack>
     </Stack>
   );
 };

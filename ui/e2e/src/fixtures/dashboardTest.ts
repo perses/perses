@@ -86,12 +86,13 @@ async function deleteDashboard(projectName: string, dashboardName: string) {
   return result;
 }
 
-// We want to throw on console errors that may mean the app is broken.
-// Some of the libraries we use (e.g. emotion) throw console errors we do not
-// care about at this time. We track those here, so they can be ignored.
+// We want to throw on console only errors that may mean the app is broken.
 const IGNORE_CONSOLE_ERRORS = [
+  // Some of the libraries we use (e.g. emotion) throw console errors we do not
+  // care about at this time. We track those here, so they can be ignored.
   // See https://github.com/emotion-js/emotion/issues/1105
   'potentially unsafe when doing server-side rendering',
+  'MUI X: useResizeContainer - The parent DOM element of the Data Grid has an empty height.',
 ];
 function shouldIgnoreConsoleError(message: ConsoleMessage) {
   const msgText = message.text();

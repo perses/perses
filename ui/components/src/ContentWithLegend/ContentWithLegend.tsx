@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import { ReactElement } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { getLegendSize } from '@perses-dev/core';
 import { Legend } from '../Legend';
@@ -33,7 +33,7 @@ export function ContentWithLegend({
   legendSize,
   minChildrenWidth = 100,
   minChildrenHeight = 100,
-}: ContentWithLegendProps) {
+}: ContentWithLegendProps): ReactElement {
   const theme = useTheme();
   const { content, legend, margin } = getContentWithLegendLayout({
     width,
@@ -48,17 +48,21 @@ export function ContentWithLegend({
 
   return (
     <Box
-      sx={{
+      style={{
         width,
         height,
+      }}
+      sx={{
         position: 'relative',
         overflow: 'hidden',
       }}
     >
       <Box
-        sx={{
+        style={{
           width: content.width,
           height: content.height,
+        }}
+        sx={{
           marginRight: `${margin.right}px`,
           marginBottom: `${margin.bottom}px`,
           overflow: 'hidden',

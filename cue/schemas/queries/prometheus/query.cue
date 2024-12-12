@@ -14,6 +14,7 @@
 package model
 
 import (
+	"strings"
 	prometheus "github.com/perses/perses/cue/schemas/datasources/prometheus:model"
 )
 
@@ -22,7 +23,7 @@ spec: close({
 	datasource?: {
 		kind: prometheus.kind
 	}
-	query:             string
+	query:             strings.MinRunes(1)
 	seriesNameFormat?: string
 	minStep?:          =~"^(?:(\\d+)y)?(?:(\\d+)w)?(?:(\\d+)d)?(?:(\\d+)h)?(?:(\\d+)m)?(?:(\\d+)s)?(?:(\\d+)ms)?(?:\\$\\w+)?$"
 	resolution?:       number

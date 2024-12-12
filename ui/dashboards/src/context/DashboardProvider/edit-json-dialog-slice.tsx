@@ -27,7 +27,7 @@ export interface EditJsonDialogState {
 export const createEditJsonDialogSlice: StateCreator<EditJsonDialogSlice, Middleware, [], EditJsonDialogSlice> = (
   set
 ) => ({
-  openEditJsonDialog() {
+  openEditJsonDialog(): void {
     set((state) => {
       state.editJsonDialog = {
         isOpen: true,
@@ -35,7 +35,7 @@ export const createEditJsonDialogSlice: StateCreator<EditJsonDialogSlice, Middle
     });
   },
 
-  closeEditJsonDialog() {
+  closeEditJsonDialog(): void {
     set((state) => {
       state.editJsonDialog = {
         isOpen: false,

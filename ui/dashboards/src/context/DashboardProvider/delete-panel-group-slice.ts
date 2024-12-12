@@ -44,7 +44,7 @@ export const createDeletePanelGroupSlice: StateCreator<
   [],
   DeletePanelGroupSlice
 > = (set, get) => ({
-  deletePanelGroup(panelGroupId) {
+  deletePanelGroup(panelGroupId): void {
     const { panelGroups, panelGroupOrder } = get();
     const group = panelGroups[panelGroupId];
     const idIndex = panelGroupOrder.findIndex((id) => id === panelGroupId);
@@ -73,7 +73,7 @@ export const createDeletePanelGroupSlice: StateCreator<
     });
   },
 
-  openDeletePanelGroupDialog: (panelGroupId) => {
+  openDeletePanelGroupDialog: (panelGroupId): void => {
     const panelGroup = get().panelGroups[panelGroupId];
     if (panelGroup === undefined) {
       throw new Error(`Panel group with Id ${panelGroupId} not found`);

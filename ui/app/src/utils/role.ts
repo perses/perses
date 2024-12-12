@@ -14,7 +14,7 @@
 import { Subject } from '@perses-dev/core';
 
 // subjectsSummary returns a formatted string of a list of subjects where max is the amount of subject to show with their name
-export function subjectsSummary(subjects: Subject[], max: number) {
+export function subjectsSummary(subjects: Subject[], max: number): string {
   if (subjects.length === 0) {
     return 'No subjects';
   }

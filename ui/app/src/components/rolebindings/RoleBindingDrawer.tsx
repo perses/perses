@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { RoleBinding } from '@perses-dev/core';
-import { Dispatch, useState } from 'react';
+import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 import { RoleBindingEditorForm } from './RoleBindingEditorForm';
 
@@ -23,13 +23,22 @@ interface RoleBindingDrawerProps<T extends RoleBinding> extends DrawerProps<T> {
   roleSuggestions?: string[];
 }
 
-export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawerProps<T>) {
-  const { roleBinding, roleSuggestions, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function RoleBindingDrawer<T extends RoleBinding>({
+  roleBinding,
+  roleSuggestions,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleBindingDrawerProps<T>): ReactElement {
   const [isDeleteRoleBindingDialogStateOpened, setDeleteRoleBindingDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -38,14 +47,15 @@ export function RoleBindingDrawer<T extends RoleBinding>(props: RoleBindingDrawe
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <RoleBindingEditorForm
-            initialRoleBinding={roleBinding}
-            initialAction={action}
+            initialValue={roleBinding}
+            action={action}
             roleSuggestions={roleSuggestions ?? []}
             isDraft={false}
             isReadonly={isReadonly}
+            onActionChange={onActionChange}
             onSave={onSave as Dispatch<RoleBinding>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteRoleBindingDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? (): void => setDeleteRoleBindingDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (

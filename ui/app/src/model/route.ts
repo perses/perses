@@ -20,6 +20,7 @@ export const ProjectRoute = '/projects';
 export const ExploreRoute = '/explore';
 
 const paths = [AdminRoute, SignInRoute, SignUpRoute, ConfigRoute, ImportRoute, ProjectRoute, ExploreRoute];
+const prefixPaths = [AdminRoute, ProjectRoute];
 
 export function getBasePathName(): string {
   return extractBasePathName(window.location.pathname);
@@ -34,18 +35,21 @@ export function extractBasePathName(path: string): string {
   if (basePath.endsWith('/')) {
     basePath = basePath.slice(0, -1);
   }
-  for (let i = 0; i < paths.length; i++) {
-    const path = paths[i];
+  for (const path of paths) {
     if (path && basePath.endsWith(path)) {
       basePath = basePath.slice(0, basePath.length - path.length);
       break;
     }
   }
-  // In case we are in a dashboard page, then the route ends with /dashboards/<dashboard_name>.
-  // In that particular case, we can remove everything after /projects
-  const split = basePath.split(ProjectRoute)[0];
-  if (split !== undefined) {
-    return split;
+  return removeAnyRoutePrefix(basePath);
+}
+
+function removeAnyRoutePrefix(basePath: string): string {
+  for (const prefixPath of prefixPaths) {
+    const split = basePath.split(prefixPath)[0];
+    if (split !== undefined && split !== basePath) {
+      return split;
+    }
   }
   return basePath;
 }

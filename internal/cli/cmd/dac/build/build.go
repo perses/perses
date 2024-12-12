@@ -26,6 +26,7 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/opt"
 	"github.com/perses/perses/internal/cli/output"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -41,25 +42,18 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	opt.OutputOption
-	writer io.Writer
-	Mode   string
+	writer    io.Writer
+	errWriter io.Writer
+	Mode      string
 }
 
 func (o *option) Complete(args []string) error {
 	if len(args) > 0 {
 		return fmt.Errorf("no args are supported by the command 'build'")
 	}
-
-	// Complete the output only if it has been set by the user
-	if len(o.Output) > 0 {
-		if outputErr := o.OutputOption.Complete(); outputErr != nil {
-			return outputErr
-		}
-	} else {
-		// Put explicitely a value when not provided, as we use it for file generation in Execute()
-		o.Output = output.YAMLOutput
+	if outputErr := o.OutputOption.Complete(); outputErr != nil {
+		return outputErr
 	}
-
 	return nil
 }
 
@@ -78,6 +72,8 @@ func (o *option) Execute() error {
 	if o.File != "" {
 		return o.processFile(o.File, filepath.Ext(o.File))
 	}
+
+	var errs []error
 	// Else it's a directory, thus walk it and process each file
 	err := filepath.Walk(o.Directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -93,16 +89,26 @@ func (o *option) Execute() error {
 		if extension == goExtension || extension == cueExtension {
 			err = o.processFile(path, extension)
 			if err != nil {
-				// Tell the user about the error but don't stop the processing
-				fmt.Printf("error processing file %s: %v\n", path, err)
+				// Append the error to highlight the issue to the user on a later stage but don't stop the processing
+				errs = append(errs, fmt.Errorf("error processing file %q: %w", path, err))
 			}
+		} else {
+			logrus.Debugf("file %q has been ignored", path)
 		}
 
 		return nil
 	})
 
 	if err != nil {
-		return fmt.Errorf("error processing directory %s: %v", o.Directory, err)
+		return fmt.Errorf("error processing directory %q: %v", o.Directory, err)
+	}
+
+	if len(errs) > 0 {
+		_, _ = fmt.Fprintln(o.errWriter, "  FAILED:")
+		for _, e := range errs {
+			_, _ = fmt.Fprintln(o.errWriter, e.Error())
+		}
+		return fmt.Errorf("processing directory %q failed, see the message(s) above", o.Directory)
 	}
 
 	return nil
@@ -138,7 +144,8 @@ func (o *option) processFile(file string, extension string) error {
 	if o.Mode == modeStdout {
 		return output.HandleString(o.writer, string(cmdOutput))
 	}
-	// Otherwise, create an output file under the "built" directory:
+
+	// Otherwise, create an output file under the output directory:
 
 	// Create the folder (+ any parent folder if applicable) where to store the output
 	err = os.MkdirAll(filepath.Join(config.Global.Dac.OutputFolder, filepath.Dir(file)), os.ModePerm)
@@ -168,11 +175,15 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "build",
-		Short: "Build the given DaC file, or directory containing DaC files",
+		Short: "Build the given DaC file(s)",
 		Long: `
 Generate the final output (YAML by default, or JSON) of the given DaC file - or directory containing DaC files.
 The supported languages for a DaC are:

@@ -13,4 +13,5 @@
 
 export * from './Table';
 export type { TableDefinition, TableOptions } from './table-model';
+export * from './CellsEditor';
 export * from './ColumnsEditor';

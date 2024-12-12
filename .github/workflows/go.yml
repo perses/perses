@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -43,12 +43,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.1"
+          cue_version: "v0.11.0"
       - name: check format
         run: make checkformat
       - name: check go.mod
@@ -59,12 +59,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.9.1"
+          cue_version: "v0.11.0"
       - name: test
         run: make integration-test
   test-mysql:
@@ -83,12 +83,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true # needed for DaC CLI commands unit tests
-          cue_version: "v0.9.1"
+          cue_version: "v0.11.0"
       - name: test
         run: make mysql-integration-test
   golangci:
@@ -97,7 +97,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
@@ -106,10 +106,10 @@ jobs:
       - name: generate files
         run: make assets-compress
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.1.0
+        uses: golangci/golangci-lint-action@v6.1.1
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.56.2
+          version: v1.62.2
           args: --timeout 5m
   cue-eval:
     name: cue
@@ -117,12 +117,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.1"
+          cue_version: "v0.11.0"
       - name: eval cue schema
         run: make cue-eval
       - name: test cue schema
@@ -133,12 +133,12 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-      - uses: perses/github-actions@v0.5.2
+      - uses: perses/github-actions@v0.7.1
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.9.1"
+          cue_version: "v0.11.0"
       - name: generate cue files
         run: make cue-gen
       - name: check for changes

@@ -25,6 +25,7 @@ import (
 	"github.com/perses/perses/internal/cli/config"
 	"github.com/perses/perses/internal/cli/file"
 	"github.com/perses/perses/internal/cli/opt"
+	"github.com/perses/perses/internal/cli/output"
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/pkg/client/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
@@ -53,6 +54,7 @@ type option struct {
 	opt.FileOption
 	opt.DirectoryOption
 	writer     io.Writer
+	errWriter  io.Writer
 	apiClient  api.ClientInterface
 	dashboards []*modelV1.Dashboard
 }
@@ -86,12 +88,25 @@ func (o *option) Execute() error {
 		if err != nil {
 			return err
 		}
+
 		d, err := dashboardDiff(dashboard, preview)
 		if err != nil {
 			return err
 		}
-		if writeErr := os.WriteFile(path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name)), []byte(d), 0644); writeErr != nil { // nolint: gosec
+
+		// Create the folder (+ any parent folder if applicable) where to store the output
+		err = os.MkdirAll(config.Global.Dac.OutputFolder, os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("error creating the output folder: %v", err)
+		}
+
+		filePath := path.Join(config.Global.Dac.OutputFolder, fmt.Sprintf("%s-%s.diff", project, dashboard.Metadata.Name))
+		if writeErr := os.WriteFile(filePath, []byte(d), 0644); writeErr != nil { // nolint: gosec
 			return fmt.Errorf("unable to write the diff file: %w", writeErr)
+		}
+
+		if outputErr := output.HandleString(o.writer, fmt.Sprintf("%s successfully created", filePath)); outputErr != nil {
+			return outputErr
 		}
 	}
 	return nil
@@ -117,11 +132,18 @@ func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
 }
 
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
+}
+
 func NewCMD() *cobra.Command {
 	o := &option{}
 	cmd := &cobra.Command{
 		Use:   "diff (-f [FILENAME] | -d [DIRECTORY_NAME])",
-		Short: "diff between online dashboard and local one",
+		Short: "Generate diff(s) between online dashboard(s) and local one(s)",
+		Example: `
+percli dac diff -d ./build
+`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return persesCMD.Run(o, cmd, args)
 		},

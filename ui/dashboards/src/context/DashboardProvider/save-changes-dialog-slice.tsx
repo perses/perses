@@ -36,7 +36,7 @@ export const createSaveChangesDialogSlice: StateCreator<
 > = (set) => ({
   isOpen: false,
 
-  openSaveChangesConfirmationDialog(dialog) {
+  openSaveChangesConfirmationDialog(dialog): void {
     set(
       (state) => {
         state.saveChangesConfirmationDialog = dialog;
@@ -46,7 +46,7 @@ export const createSaveChangesDialogSlice: StateCreator<
     );
   },
 
-  closeSaveChangesConfirmationDialog() {
+  closeSaveChangesConfirmationDialog(): void {
     set(
       (state) => {
         state.saveChangesConfirmationDialog = undefined;

@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChart, useChartsTheme } from '@perses-dev/components';
+import { useMemo } from 'react';
+import { EChart, OnEventsType, useChartsTheme } from '@perses-dev/components';
 import { use, EChartsCoreOption } from 'echarts/core';
 import { ScatterChart as EChartsScatterChart } from 'echarts/charts';
 import {
@@ -23,7 +24,9 @@ import {
   TooltipComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import { EChartsOption } from 'echarts';
+import { EChartsOption, ScatterSeriesOption } from 'echarts';
+import { formatValue } from '@perses-dev/core';
+import { EChartTraceValue } from './ScatterChartPanel';
 
 use([
   DatasetComponent,
@@ -36,14 +39,20 @@ use([
   CanvasRenderer,
 ]);
 
-interface ScatterplotProps {
+interface ScatterplotProps<T> {
   width: number;
   height: number;
   options: EChartsOption;
+  onClick?: (data: T) => void;
 }
 
-export function Scatterplot(props: ScatterplotProps) {
-  const { width, height, options } = props;
+const DATE_FORMATTER = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'long',
+  timeStyle: 'medium',
+}).format;
+
+export function Scatterplot<T>(props: ScatterplotProps<T>) {
+  const { width, height, options, onClick } = props;
   const chartsTheme = useChartsTheme();
 
   // Apache EChart Options Docs: https://echarts.apache.org/en/option.html
@@ -66,7 +75,7 @@ export function Scatterplot(props: ScatterplotProps) {
       type: 'value',
       name: 'Duration',
       axisLabel: {
-        formatter: '{value} ms',
+        formatter: (durationMs: number) => formatValue(durationMs, { unit: 'milliseconds' }),
       },
     },
     animation: false,
@@ -80,13 +89,13 @@ export function Scatterplot(props: ScatterplotProps) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       formatter: function (params: any) {
         // TODO: import type from ECharts instead of using any
-        params = params[0];
+        const data = params[0].data as EChartTraceValue;
         return [
-          '<b>time</b>: ' + params.data.startTime + '<br/>',
-          '<b>duration (miliseconds)</b>: ' + params.data.durationMs + '<br/>',
-          '<b>spanCount</b>: ' + params.data.spanCount + '<br/>',
-          '<b>errorCount</b>: ' + params.data.errorCount + '<br/>',
-          '<b>name</b>: ' + params.data.name + '<br/>',
+          `<b>Service name</b>: ${data.rootServiceName}<br/>`,
+          `<b>Span name</b>: ${data.rootTraceName}<br/>`,
+          `<b>Time</b>: ${DATE_FORMATTER(data.startTime)}<br/>`,
+          `<b>Duration</b>: ${formatValue(data.durationMs, { unit: 'milliseconds' })}<br/>`,
+          `<b>Span count</b>: ${data.spanCount} (${data.errorCount} errors)<br/>`,
         ].join('');
       },
     },
@@ -98,6 +107,14 @@ export function Scatterplot(props: ScatterplotProps) {
     },
   };
 
+  const handleEvents: OnEventsType<ScatterSeriesOption['data'] | unknown> = useMemo(() => {
+    const handlers: OnEventsType<ScatterSeriesOption['data'] | unknown> = {};
+    if (onClick) {
+      handlers.click = (params) => onClick(params.data as T);
+    }
+    return handlers;
+  }, [onClick]);
+
   return (
     <EChart
       sx={{
@@ -106,6 +123,7 @@ export function Scatterplot(props: ScatterplotProps) {
       }}
       option={eChartOptions}
       theme={chartsTheme.echartsTheme}
+      onEvents={handleEvents}
     />
   );
 }

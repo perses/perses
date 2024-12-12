@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Alert, Autocomplete, Button, CircularProgress, Stack, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import Import from 'mdi-material-ui/Import';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,7 +41,7 @@ interface GrafanaFlowProps {
   dashboard: GrafanaLightDashboard;
 }
 
-function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
+function GrafanaFlow({ dashboard }: GrafanaFlowProps): ReactElement {
   const migrateMutation = useMigrate();
   const navigate = useNavigate();
   const isReadonly = useIsReadonly();
@@ -58,12 +58,12 @@ function GrafanaFlow({ dashboard }: GrafanaFlowProps) {
     grafanaInput[input.name] = input.value ?? '';
   });
 
-  const setInput = (key: string, value: string) => {
+  const setInput = (key: string, value: string): void => {
     grafanaInput[key] = value;
     setGrafanaInput(grafanaInput);
   };
 
-  const importOnClick = () => {
+  const importOnClick = (): void => {
     const dashboard = migrateMutation.data;
     if (dashboard === undefined) {
       return;

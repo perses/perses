@@ -8,3 +8,12 @@ validators:
   # somehow stackoverflow is returning also a status code 403
   - regex: 'stackoverflow\.com'
     type: 'ignore'
+  # context timeout
+  - regex: 'mui\.com'
+    type: 'ignore'
+  # code 500
+  - regex: 'slack\.com'
+    type: 'ignore'
+  # code 502
+  - regex: 'storybook\.js\.com'
+    type: 'ignore'

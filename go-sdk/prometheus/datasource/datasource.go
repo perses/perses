@@ -18,18 +18,18 @@ import (
 	"fmt"
 
 	"github.com/perses/perses/go-sdk/datasource"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/datasource/http"
-	"github.com/prometheus/common/model"
 )
 
 const (
-	Kind = "PrometheusDatasource"
+	PluginKind = "PrometheusDatasource"
 )
 
 type PluginSpec struct {
-	DirectURL      string         `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
-	Proxy          *http.Proxy    `json:"proxy,omitempty" yaml:"proxy,omitempty"`
-	ScrapeInterval model.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
+	DirectURL      string          `json:"directUrl,omitempty" yaml:"directUrl,omitempty"`
+	Proxy          *http.Proxy     `json:"proxy,omitempty" yaml:"proxy,omitempty"`
+	ScrapeInterval common.Duration `json:"scrapeInterval,omitempty" yaml:"scrapeInterval,omitempty"`
 }
 
 func (s *PluginSpec) UnmarshalJSON(data []byte) error {
@@ -97,7 +97,7 @@ func Prometheus(options ...Option) datasource.Option {
 			return err
 		}
 
-		builder.Spec.Plugin.Kind = Kind
+		builder.Spec.Plugin.Kind = PluginKind
 		builder.Spec.Plugin.Spec = plugin.PluginSpec
 		return nil
 	}
@@ -105,7 +105,7 @@ func Prometheus(options ...Option) datasource.Option {
 
 func Selector(datasourceName string) *datasource.Selector {
 	return &datasource.Selector{
-		Kind: Kind,
+		Kind: PluginKind,
 		Name: datasourceName,
 	}
 }

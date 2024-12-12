@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import produce from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -32,7 +32,12 @@ export interface ThresholdsEditorProps {
 
 const DEFAULT_STEP = 10;
 
-export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePercentMode }: ThresholdsEditorProps) {
+export function ThresholdsEditor({
+  thresholds,
+  onChange,
+  hideDefault,
+  disablePercentMode,
+}: ThresholdsEditorProps): ReactElement {
   const chartsTheme = useChartsTheme();
   const {
     thresholds: { defaultColor, palette },
@@ -53,7 +58,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     focusRef.current = false;
   }, [steps?.length]);
 
-  const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number) => {
+  const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     setSteps(
       produce(steps, (draft) => {
         const step = draft?.[i];
@@ -64,7 +69,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     );
   };
 
-  const handleThresholdColorChange = (color: string, i: number) => {
+  const handleThresholdColorChange = (color: string, i: number): void => {
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
@@ -79,7 +84,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
     }
   };
 
-  const handleDefaultColorChange = (color: string) => {
+  const handleDefaultColorChange = (color: string): void => {
     if (thresholds !== undefined) {
       onChange(
         produce(thresholds, (draft) => {
@@ -94,7 +99,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
   };
 
   // sort thresholds in ascending order every time an input blurs
-  const handleThresholdBlur = () => {
+  const handleThresholdBlur = (): void => {
     if (steps !== undefined) {
       const sortedSteps = [...steps];
       sortedSteps.sort((a, b) => a.value - b.value);
@@ -223,7 +228,7 @@ export function ThresholdsEditor({ thresholds, onChange, hideDefault, disablePer
 }
 
 // https://www.paulirish.com/2009/random-hex-color-code-snippets/
-const getRandomColor = () => {
+const getRandomColor = (): string => {
   return (
     '#' +
     Math.floor(Math.random() * 16777216)

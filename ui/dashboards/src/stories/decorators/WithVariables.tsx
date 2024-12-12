@@ -13,6 +13,7 @@
 
 import { StoryFn, StoryContext } from '@storybook/react';
 import { VariableProvider, VariableProviderProps } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -29,7 +30,7 @@ function isWithVariableParameter(parameter: unknown | WithVariableParameter): pa
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithVariables = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithVariables = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withVariables;
   const parameter = isWithVariableParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;

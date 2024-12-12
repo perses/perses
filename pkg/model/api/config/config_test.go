@@ -22,9 +22,9 @@ import (
 	"time"
 
 	"github.com/perses/common/config"
+	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/role"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -272,7 +272,7 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					QueriesPath:     path.Join("cue", DefaultQueriesPath),
 					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
 					VariablesPath:   path.Join("cue", DefaultVariablesPath),
-					Interval:        model.Duration(5 * time.Minute),
+					Interval:        common.Duration(5 * time.Minute),
 				},
 				Frontend: Frontend{
 					ImportantDashboards: []dashboardSelector{
@@ -299,9 +299,9 @@ func TestUnmarshalJSONConfig(t *testing.T) {
 					Folders: []string{
 						"dev/data",
 					},
-					Interval: model.Duration(defaultInterval),
+					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
+				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
 			},
 		},
 	}
@@ -386,7 +386,7 @@ plugins:
 					EncryptionKey: secret.Hidden(hex.EncodeToString([]byte("=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"))),
 					EnableAuth:    true,
 					Authorization: AuthorizationConfig{
-						CheckLatestUpdateInterval: model.Duration(defaultCacheInterval),
+						CheckLatestUpdateInterval: common.Duration(defaultCacheInterval),
 						GuestPermissions: []*role.Permission{
 							{
 								Actions: []role.Action{
@@ -407,8 +407,8 @@ plugins:
 						},
 					},
 					Authentication: AuthenticationConfig{
-						AccessTokenTTL:  model.Duration(DefaultAccessTokenTTL),
-						RefreshTokenTTL: model.Duration(DefaultRefreshTokenTTL),
+						AccessTokenTTL:  common.Duration(DefaultAccessTokenTTL),
+						RefreshTokenTTL: common.Duration(DefaultRefreshTokenTTL),
 						DisableSignUp:   false,
 						Providers: AuthProviders{
 							EnableNative: true,
@@ -426,7 +426,7 @@ plugins:
 					QueriesPath:     path.Join("cue", DefaultQueriesPath),
 					DatasourcesPath: path.Join("cue", DefaultDatasourcesPath),
 					VariablesPath:   path.Join("cue", DefaultVariablesPath),
-					Interval:        model.Duration(5 * time.Minute),
+					Interval:        common.Duration(5 * time.Minute),
 				},
 				Frontend: Frontend{
 					ImportantDashboards: []dashboardSelector{
@@ -457,12 +457,12 @@ plugins:
 					Folders: []string{
 						"dev/data",
 					},
-					Interval: model.Duration(defaultInterval),
+					Interval: common.Duration(defaultInterval),
 				},
-				EphemeralDashboardsCleanupInterval: model.Duration(2 * time.Hour),
+				EphemeralDashboardsCleanupInterval: common.Duration(2 * time.Hour),
 				EphemeralDashboard: EphemeralDashboard{
 					Enable:          true,
-					CleanupInterval: model.Duration(2 * time.Hour),
+					CleanupInterval: common.Duration(2 * time.Hour),
 				},
 			},
 		},

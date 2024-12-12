@@ -13,6 +13,7 @@
 
 import { Box } from '@mui/material';
 import { VariableDefinition, VariableSpec } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import {
   ExternalVariableDefinition,
   useExternalVariableDefinitions,
@@ -22,7 +23,7 @@ import {
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
 import { Variable } from './Variable';
 
-export function VariableList() {
+export function VariableList(): ReactElement {
   const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
   const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
 
@@ -43,7 +44,7 @@ export function VariableList() {
   );
 }
 
-export function VariableListItem({ spec, source }: { spec: VariableSpec; source?: string }) {
+export function VariableListItem({ spec, source }: { spec: VariableSpec; source?: string }): ReactElement | null {
   const ctx = useVariableDefinitionAndState(spec.name, source);
   if (ctx.state?.overridden) {
     return null;

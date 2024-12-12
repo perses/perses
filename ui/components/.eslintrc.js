@@ -11,4 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module.exports = require('../.eslintrc.base.js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const baseConf = require('../.eslintrc.base.js');
+
+// TODO: remove when all package are aligned with base config
+module.exports = {
+  ...baseConf,
+  rules: {
+    ...baseConf.rules,
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
+  },
+};

@@ -11,15 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ReactElement, ReactNode } from 'react';
+import { useIsMobileSize } from '../../utils/browser-size';
 import { Breadcrumbs, HomeLinkCrumb, StackCrumb, TitleCrumb } from './breadcrumbs';
 
 interface AppBreadcrumbsProps {
   rootPageName: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
-function AppBreadcrumbs(props: AppBreadcrumbsProps) {
+function AppBreadcrumbs(props: AppBreadcrumbsProps): ReactElement {
   const { rootPageName, icon } = props;
+
+  const isMobileSize = useIsMobileSize();
+  if (isMobileSize) {
+    return (
+      <Breadcrumbs>
+        <StackCrumb>
+          {icon}
+          <TitleCrumb>{rootPageName}</TitleCrumb>
+        </StackCrumb>
+      </Breadcrumbs>
+    );
+  }
+
   return (
     <Breadcrumbs>
       <HomeLinkCrumb />

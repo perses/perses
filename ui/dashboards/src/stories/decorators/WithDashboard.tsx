@@ -13,6 +13,7 @@
 
 import { StoryFn, StoryContext } from '@storybook/react';
 import { DashboardProvider, DashboardProviderProps } from '@perses-dev/dashboards';
+import { ReactElement } from 'react';
 import { EMPTY_DASHBOARD_RESOURCE } from './constants';
 
 declare module '@storybook/react' {
@@ -30,7 +31,7 @@ function isWithDashboardParameter(parameter: unknown | WithDashboardParameter): 
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithDashboard = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withDashboard;
   const parameter = isWithDashboardParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;

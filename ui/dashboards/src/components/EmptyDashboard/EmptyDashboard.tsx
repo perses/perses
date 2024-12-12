@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Typography, Box } from '@mui/material';
+import { ReactElement, ReactNode } from 'react';
 import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { EditVariablesButton } from '../Variables';
@@ -26,7 +27,7 @@ export interface EmptyDashboardProps {
   /**
    * Imagery to display above the title.
    */
-  image?: React.ReactNode;
+  image?: ReactNode;
 
   /**
    * Descriptive text, which can be a bit longer.
@@ -74,7 +75,11 @@ type EmptyDashboardActionsProps = Pick<EmptyDashboardProps, 'actions' | 'onEditB
   isEditMode: boolean;
 };
 
-const EmptyDashboardActions = ({ actions, isEditMode, onEditButtonClick }: EmptyDashboardActionsProps) => {
+const EmptyDashboardActions = ({
+  actions,
+  isEditMode,
+  onEditButtonClick,
+}: EmptyDashboardActionsProps): ReactElement | null => {
   if (actions && typeof actions !== 'boolean') {
     // Custom actions
     return actions;
@@ -113,7 +118,7 @@ export const EmptyDashboard = ({
   additionalText,
   actions,
   onEditButtonClick,
-}: EmptyDashboardProps) => {
+}: EmptyDashboardProps): ReactElement => {
   const { isEditMode } = useEditMode();
 
   const defaultDescription = isEditMode ? DEFAULT_DESCRIPTION.edit : DEFAULT_DESCRIPTION.view;

@@ -3,8 +3,8 @@
 This little documentation aims to provide you the minimum code needed to have a Perses panel into your React
 application.
 
-> Disclaimer: We are working actively on reducing this amount of required dependencies/providers
-> working on some default values or opt-in/opt-out mechanisms.
+!!! info
+    We are working actively on reducing this amount of required dependencies/providers working on some default values or opt-in/opt-out mechanisms.
 
 ## Getting started (npm example)
 
@@ -24,28 +24,28 @@ npm i --save @perses-dev/components \
 
 Here replacing your App.tsx
 
-```tsx
+```typescript
 import React from 'react';
 import './App.css';
 
-import { ChartsProvider, generateChartsTheme, getTheme, SnackbarProvider } from "@perses-dev/components";
+import { ChartsProvider, generateChartsTheme, getTheme, SnackbarProvider } from '@perses-dev/components';
 import {
   DataQueriesProvider,
-  dynamicImportPluginLoader, PluginModuleResource,
+  dynamicImportPluginLoader,
+  PluginModuleResource,
   PluginRegistry,
-  TimeRangeProvider
-} from "@perses-dev/plugin-system";
+  TimeRangeProvider,
+} from '@perses-dev/plugin-system';
 import { TimeSeriesChart } from '@perses-dev/panels-plugin';
-import { ThemeProvider } from "@mui/material";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { DatasourceStoreProvider, VariableProvider } from "@perses-dev/dashboards";
+import { ThemeProvider } from '@mui/material';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DatasourceStoreProvider, VariableProvider } from '@perses-dev/dashboards';
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
-import { DashboardResource, GlobalDatasource, ProjectDatasource } from '@perses-dev/core';
+import { DashboardResource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core';
 import { DatasourceApi } from '@perses-dev/dashboards';
 
-
-const fakeDatasource: GlobalDatasource = {
+const fakeDatasource: GlobalDatasourceResource = {
   kind: 'GlobalDatasource',
   metadata: { name: 'hello' },
   spec: {
@@ -53,26 +53,26 @@ const fakeDatasource: GlobalDatasource = {
     plugin: {
       kind: 'PrometheusDatasource',
       spec: {
-        directUrl: "https://prometheus.demo.do.prometheus.io"
+        directUrl: 'https://prometheus.demo.do.prometheus.io',
       },
     },
   },
 };
 
 class DatasourceApiImpl implements DatasourceApi {
-  getDatasource(): Promise<ProjectDatasource | undefined> {
+  getDatasource(): Promise<DatasourceResource | undefined> {
     return Promise.resolve(undefined);
   }
 
-  getGlobalDatasource(): Promise<GlobalDatasource | undefined> {
+  getGlobalDatasource(): Promise<GlobalDatasourceResource | undefined> {
     return Promise.resolve(fakeDatasource);
   }
 
-  listDatasources(): Promise<ProjectDatasource[]> {
+  listDatasources(): Promise<DatasourceResource[]> {
     return Promise.resolve([]);
   }
 
-  listGlobalDatasources(): Promise<GlobalDatasource[]> {
+  listGlobalDatasources(): Promise<GlobalDatasourceResource[]> {
     return Promise.resolve([fakeDatasource]);
   }
 
@@ -81,7 +81,11 @@ class DatasourceApiImpl implements DatasourceApi {
   }
 }
 export const fakeDatasourceApi = new DatasourceApiImpl();
-export const fakeDashboard = { kind: 'Dashboard', metadata: {}, spec: {} } as DashboardResource;
+export const fakeDashboard = {
+  kind: 'Dashboard',
+  metadata: {},
+  spec: {},
+} as DashboardResource;
 
 function App() {
   const muiTheme = getTheme('light');
@@ -152,9 +156,7 @@ function App() {
   );
 }
 
-
 export default App;
-
 ```
 
 You should see a perses panel going to your browser

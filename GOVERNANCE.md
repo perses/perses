@@ -35,14 +35,14 @@ Upon death of a member, they leave the team automatically.
 
 The current team members are:
 
-| Team Member     | GitHub ID                                           | Affiliation      |
-|-----------------|-----------------------------------------------------|------------------|
-| Augustin Husson | [nexucis](https://github.com/Nexucis)               | Amadeus IT Group |
-| Antoine Thebaud | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus IT Group |
-| Eunice Wong     | [eunicorn](https://github.com/eunicorn)             | Chronosphere     |
-| Julie Pagano    | [juliepagano](https://github.com/juliepagano)       | Chronosphere     |
-| Luke Tillman    | [luketillman](https://github.com/LukeTillman)       | Chronosphere     |
-| Steven Cobb     | [sjcobb](https://github.com/sjcobb)                 | Chronosphere     |
+| Team Member       | GitHub ID                                           | Affiliation  |
+|-------------------|-----------------------------------------------------|--------------|
+| Antoine Thebaud   | [AntoineThebaud](https://github.com/AntoineThebaud) | Amadeus      |
+| Augustin Husson   | [nexucis](https://github.com/Nexucis)               | Amadeus      |
+| Celian Garcia     | [celian-garcia](https://github.com/celian-garcia)   | Amadeus      |
+| Gabriel Bernal    | [jgbernalp](https://github.com/jgbernalp)           | Red Hat      |
+| Guillaume Ladorme | [gladorme](https://github.com/Gladorme)             | Amadeus      |
+| Steven Cobb       | [sjcobb](https://github.com/sjcobb)                 | Chronosphere |
 
 ## Maintainers
 
@@ -63,7 +63,7 @@ the project succeed.
 
 ## Becoming a Maintainer
 
-To become a Maintainer you need to demonstrate the following:
+To become a Maintainer, you need to demonstrate the following:
 
 * commitment to the project:
   * participate in discussions, contributions, code and documentation reviews
