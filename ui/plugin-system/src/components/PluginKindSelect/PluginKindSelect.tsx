@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
-import { forwardRef, useCallback } from 'react';
+import { forwardRef, ReactElement, useCallback } from 'react';
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -30,14 +30,14 @@ export interface PluginKindSelectProps extends Omit<TextFieldProps, 'value' | 'o
  * The value of the select is the kind of the plugin, but you can also listen to the `onPluginTypeChange` event to know
  * when the user changes the plugin type (it fires at start for the default value.)
  */
-export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref) => {
+export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): ReactElement => {
   const { pluginTypes, value: propValue, onChange, ...others } = props;
   const { data, isLoading } = useListPluginMetadata(pluginTypes);
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = !propValue || isLoading ? '' : selectionToOptionValue(propValue);
 
-  const handleChange = (event: { target: { value: string } }) => {
+  const handleChange = (event: { target: { value: string } }): void => {
     onChange?.(optionValueToSelection(event.target.value));
   };
 

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
@@ -28,7 +28,7 @@ import {
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
 
-export function useDataQueriesContext() {
+export function useDataQueriesContext(): DataQueriesContextType {
   const ctx = useContext(DataQueriesContext);
   if (ctx === undefined) {
     throw new Error('No DataQueriesContext found. Did you forget a Provider?');
@@ -59,7 +59,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
   return filteredCtx;
 }
 
-export function DataQueriesProvider(props: DataQueriesProviderProps) {
+export function DataQueriesProvider(props: DataQueriesProviderProps): ReactElement {
   const { definitions, options, children, queryOptions } = props;
 
   // Returns a query kind, for example "TimeSeriesQuery" = getQueryType("PrometheusTimeSeriesQuery")

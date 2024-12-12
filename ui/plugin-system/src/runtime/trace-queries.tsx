@@ -12,15 +12,15 @@
 // limitations under the License.
 
 import { getUnixTime } from 'date-fns';
-import { QueryDefinition, UnknownSpec, AbsoluteTimeRange } from '@perses-dev/core';
-import { useQueries } from '@tanstack/react-query';
+import { QueryDefinition, UnknownSpec, AbsoluteTimeRange, TraceData } from '@perses-dev/core';
+import { useQueries, UseQueryResult } from '@tanstack/react-query';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
-export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
+export function getUnixTimeRange(timeRange: AbsoluteTimeRange): { start: number; end: number } {
   const { start, end } = timeRange;
   return {
     start: Math.ceil(getUnixTime(start)),
@@ -30,10 +30,10 @@ export function getUnixTimeRange(timeRange: AbsoluteTimeRange) {
 
 /**
  * Run a trace query using a TraceQuery plugin and return the results
- * @param definition: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
+ * @param definitions: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
  * Documentation for TraceQL: https://grafana.com/docs/tempo/latest/traceql/
  */
-export function useTraceQueries(definitions: TraceQueryDefinition[]) {
+export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQueryResult<TraceData>> {
   const { getPlugin } = usePluginRegistry();
   const datasourceStore = useDatasourceStore();
   const { absoluteTimeRange } = useTimeRange();
@@ -51,7 +51,7 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]) {
       const traceQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,
-        queryFn: async () => {
+        queryFn: async (): Promise<TraceData> => {
           const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context);
           return data;

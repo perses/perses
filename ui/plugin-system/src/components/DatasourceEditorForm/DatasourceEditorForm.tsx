@@ -13,7 +13,7 @@
 
 import { Action, DatasourceDefinition } from '@perses-dev/core';
 import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import React, { DispatchWithoutAction, useState } from 'react';
+import React, { DispatchWithoutAction, ReactElement, useState } from 'react';
 import { DiscardChangesConfirmationDialog, FormActions } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,7 +32,7 @@ interface DatasourceEditorFormProps {
   onDelete?: DispatchWithoutAction;
 }
 
-export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
+export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactElement {
   const { initialDatasourceDefinition, action, isDraft, isReadonly, onActionChange, onSave, onClose, onDelete } = props;
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
@@ -65,7 +65,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialDatasourceDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {

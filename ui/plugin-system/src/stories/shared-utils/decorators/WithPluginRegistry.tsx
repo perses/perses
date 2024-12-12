@@ -21,6 +21,7 @@ import {
 
 import prometheusResource from '@perses-dev/prometheus-plugin/plugin.json';
 import panelsResource from '@perses-dev/panels-plugin/plugin.json';
+import { ReactElement } from 'react';
 
 const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   {
@@ -41,7 +42,7 @@ const bundledPluginLoader: PluginLoader = dynamicImportPluginLoader([
   },
 ]);
 
-export const WithPluginRegistry = (Story: StoryFn) => {
+export const WithPluginRegistry = (Story: StoryFn): ReactElement => {
   return (
     <PluginRegistry
       pluginLoader={bundledPluginLoader}

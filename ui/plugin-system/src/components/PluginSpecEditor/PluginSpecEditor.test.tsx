@@ -17,7 +17,7 @@ import { renderWithContext } from '../../test';
 import { PluginSpecEditor, PluginSpecEditorProps } from './PluginSpecEditor';
 
 describe('PluginSpecEditor', () => {
-  const renderComponent = (props: PluginSpecEditorProps) => {
+  const renderComponent = (props: PluginSpecEditorProps): void => {
     renderWithContext(<PluginSpecEditor {...props} />);
   };
 

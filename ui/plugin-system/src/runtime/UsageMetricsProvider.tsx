@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { fetch, QueryDefinition } from '@perses-dev/core';
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, ReactElement, ReactNode, useContext } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';
 
@@ -37,7 +37,7 @@ interface UseUsageMetricsResults {
 
 export const UsageMetricsContext = createContext<UsageMetrics | undefined>(undefined);
 
-export const useUsageMetricsContext = () => {
+export const useUsageMetricsContext = (): UsageMetrics | undefined => {
   return useContext(UsageMetricsContext);
 };
 
@@ -45,7 +45,7 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
   const ctx = useUsageMetricsContext();
 
   return {
-    markQuery: (definition: QueryDefinition, newState: QueryState) => {
+    markQuery: (definition: QueryDefinition, newState: QueryState): void => {
       if (ctx === undefined) {
         return;
       }
@@ -72,7 +72,7 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
   };
 };
 
-const submitMetrics = async (stats: UsageMetrics) => {
+const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
   await fetch('/api/v1/view', {
     method: 'POST',
     headers: {
@@ -87,7 +87,7 @@ const submitMetrics = async (stats: UsageMetrics) => {
   });
 };
 
-export const UsageMetricsProvider = ({ project, dashboard, children }: UsageMetricsProps) => {
+export const UsageMetricsProvider = ({ project, dashboard, children }: UsageMetricsProps): ReactElement => {
   const ctx = {
     project: project,
     dashboard: dashboard,

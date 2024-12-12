@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { DispatchWithoutAction, useState } from 'react';
+import React, { DispatchWithoutAction, ReactElement, useState } from 'react';
 import {
   Box,
   Typography,
@@ -34,7 +34,7 @@ import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 
-function FallbackPreview() {
+function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;
 }
 
@@ -43,7 +43,7 @@ interface KindVariableEditorFormProps {
   control: Control<VariableDefinition>;
 }
 
-function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps) {
+function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   return (
     <>
       <Typography py={1} variant="subtitle1">
@@ -101,14 +101,14 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
   );
 }
 
-function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps) {
+function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   const form = useFormContext<VariableDefinition>();
   /** We use `previewSpec` to know when to explicitly update the
    * spec that will be used for preview. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
    */
   const [previewSpec, setPreviewSpec] = useState<ListVariableDefinition>(form.getValues() as ListVariableDefinition);
-  const refreshPreview = () => {
+  const refreshPreview = (): void => {
     setPreviewSpec(form.getValues() as ListVariableDefinition);
   };
 
@@ -354,7 +354,7 @@ export function VariableEditorForm({
   onSave,
   onClose,
   onDelete,
-}: VariableEditorFormProps) {
+}: VariableEditorFormProps): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -389,7 +389,7 @@ export function VariableEditorForm({
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialVariableDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {
