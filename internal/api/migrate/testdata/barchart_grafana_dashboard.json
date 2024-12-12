@@ -28,7 +28,7 @@
                   "max": 100,
                   "min": 0,
                   "unit": "percent",
-                  "decimal": 2
+                  "decimals": 2
               },
               "overrides": []
           },
