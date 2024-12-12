@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { InputLabel, Stack, useTheme } from '@mui/material';
 import CodeMirror, { EditorView, ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { isValidTraceId } from '@perses-dev/core';
@@ -21,7 +21,7 @@ export interface TraceQLEditorProps extends Omit<ReactCodeMirrorProps, 'theme' |
   completeConfig: CompletionConfig;
 }
 
-export function TraceQLEditor({ completeConfig, ...rest }: TraceQLEditorProps) {
+export function TraceQLEditor({ completeConfig, ...rest }: TraceQLEditorProps): ReactElement {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
 
