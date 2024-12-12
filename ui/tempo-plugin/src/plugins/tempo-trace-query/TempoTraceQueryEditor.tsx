@@ -14,6 +14,7 @@
 import { DatasourceSelect, DatasourceSelectProps, useDatasourceClient } from '@perses-dev/plugin-system';
 import { produce } from 'immer';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { ReactElement } from 'react';
 import {
   DEFAULT_TEMPO,
   isDefaultTempoSelector,
@@ -24,7 +25,7 @@ import { TempoClient } from '../../model/tempo-client';
 import { TraceQLEditor } from '../../components';
 import { TraceQueryEditorProps, useLimitState, useQueryState } from './query-editor-model';
 
-export function TempoTraceQueryEditor(props: TraceQueryEditorProps) {
+export function TempoTraceQueryEditor(props: TraceQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_TEMPO;

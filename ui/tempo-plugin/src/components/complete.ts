@@ -238,7 +238,7 @@ async function completeTagName(client: TempoClient, scope: 'resource' | 'span' |
  * { name="x
  * { name="x" where cursor is after the 'x'
  */
-function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number) {
+function applyQuotedCompletion(view: EditorView, completion: Completion, from: number, to: number): void {
   let insertText = completion.label;
   if (view.state.sliceDoc(from - 1, from) !== '"') {
     insertText = '"' + insertText;
