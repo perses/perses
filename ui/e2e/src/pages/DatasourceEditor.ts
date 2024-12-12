@@ -43,22 +43,22 @@ export class DatasourceEditor {
     this.urlInput = container.getByLabel('URL');
   }
 
-  async setName(name: string) {
+  async setName(name: string): Promise<void> {
     await this.nameInput.clear();
     await this.nameInput.type(name);
   }
 
-  async setDisplayLabel(displayLabel: string) {
+  async setDisplayLabel(displayLabel: string): Promise<void> {
     await this.displayLabelInput.clear();
     await this.displayLabelInput.type(displayLabel);
   }
 
-  async setDescription(description: string) {
+  async setDescription(description: string): Promise<void> {
     await this.descriptionInput.clear();
     await this.descriptionInput.type(description);
   }
 
-  async setDefault(isDefault: boolean) {
+  async setDefault(isDefault: boolean): Promise<void> {
     if (isDefault) {
       await this.isDefaultSwitch.check();
     } else {
@@ -66,12 +66,12 @@ export class DatasourceEditor {
     }
   }
 
-  async setScrapeInterval(scrapeInterval: string) {
+  async setScrapeInterval(scrapeInterval: string): Promise<void> {
     await this.scrapeIntervalInput.clear();
     await this.scrapeIntervalInput.type(scrapeInterval);
   }
 
-  async setURL(url: string) {
+  async setURL(url: string): Promise<void> {
     await this.urlInput.clear();
     await this.urlInput.type(url);
   }

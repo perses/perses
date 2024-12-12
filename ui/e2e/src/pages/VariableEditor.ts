@@ -47,55 +47,55 @@ export class VariableEditor {
     this.displayLabelInput = container.getByLabel('Display Label');
   }
 
-  async isVisible() {
+  async isVisible(): Promise<void> {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates in.
     await waitForAnimations(this.container);
     await this.container.isVisible();
   }
 
-  async isClosed() {
+  async isClosed(): Promise<void> {
     // Wait for all animations to complete to avoid misclicking as the panel
     // animates out.
     await waitForAnimations(this.container);
     await expect(this.container).toHaveCount(0);
   }
 
-  async startAddingVariable() {
+  async startAddingVariable(): Promise<void> {
     await this.addVariableButton.click();
   }
 
-  async applyChanges() {
+  async applyChanges(): Promise<void> {
     await this.applyButton.click();
     await this.isClosed();
   }
 
-  async setName(name: string) {
+  async setName(name: string): Promise<void> {
     await this.nameInput.clear();
     await this.nameInput.fill(name);
   }
 
-  async setDisplayLabel(displayLabel: string) {
+  async setDisplayLabel(displayLabel: string): Promise<void> {
     await this.displayLabelInput.clear();
     await this.displayLabelInput.fill(displayLabel);
   }
 
-  async selectType(typeName: string) {
+  async selectType(typeName: string): Promise<void> {
     await selectMenuItem(this.container, 'Type', typeName);
   }
 
-  async selectSource(source: string) {
+  async selectSource(source: string): Promise<void> {
     await selectMenuItem(this.container, 'Source', source);
   }
 
-  async setListValue(value: string) {
+  async setListValue(value: string): Promise<void> {
     const input = this.container.getByLabel('Values', { exact: true });
     await input.clear();
     await input.fill(value);
     await input.press('Enter');
   }
 
-  async setTextValue(value: string) {
+  async setTextValue(value: string): Promise<void> {
     const input = this.container.getByLabel('Value');
     await input.clear();
     await input.fill(value);
