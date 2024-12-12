@@ -38,7 +38,7 @@ export function getTraceModel(trace: Trace): GanttTrace {
  * Compute the start and end of a trace.
  * In most cases (but not all) this is rootSpan.startTime / rootSpan.endTime.
  */
-function getStartAndEndTime(span: Span, limits: { startTimeUnixMs: number; endTimeUnixMs: number }) {
+function getStartAndEndTime(span: Span, limits: { startTimeUnixMs: number; endTimeUnixMs: number }): void {
   if (span.startTimeUnixMs < limits.startTimeUnixMs) {
     limits.startTimeUnixMs = span.startTimeUnixMs;
   }

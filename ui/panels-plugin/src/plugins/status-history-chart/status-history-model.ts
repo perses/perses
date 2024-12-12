@@ -13,7 +13,7 @@
 
 import { LegendSpecOptions, OptionsEditorProps } from '@perses-dev/plugin-system';
 
-export function createInitialStatusHistoryChartOptions() {
+export function createInitialStatusHistoryChartOptions(): Record<string, unknown> {
   return {};
 }
 

@@ -13,7 +13,7 @@
 
 import { Box, Divider, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
 import { GanttTrace } from '../trace';
 import { AttributeLinks, AttributeList } from './Attributes';
@@ -29,7 +29,7 @@ export interface DetailPaneProps {
 /**
  * DetailPane renders a sidebar showing the span attributes etc.
  */
-export function DetailPane(props: DetailPaneProps) {
+export function DetailPane(props: DetailPaneProps): ReactElement {
   const { attributeLinks, trace, span, onCloseBtnClick } = props;
   const [tab, setTab] = useState<'attributes' | 'events'>('attributes');
 

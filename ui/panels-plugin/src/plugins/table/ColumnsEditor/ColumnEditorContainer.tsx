@@ -18,6 +18,7 @@ import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import { DragAndDropElement, DragButton } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { ColumnEditor, ColumnEditorProps } from './ColumnEditor';
 
 export interface ColumnEditorContainerProps extends ColumnEditorProps {
@@ -36,8 +37,8 @@ export function ColumnEditorContainer({
   onDelete,
   onMoveUp,
   onMoveDown,
-}: ColumnEditorContainerProps) {
-  function handleHideColumn() {
+}: ColumnEditorContainerProps): ReactElement {
+  function handleHideColumn(): void {
     onChange({ ...column, hide: !column.hide });
   }
 

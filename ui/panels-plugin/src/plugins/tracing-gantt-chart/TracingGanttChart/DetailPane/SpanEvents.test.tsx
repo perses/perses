@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
+import { render, RenderResult } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
 import { MOCK_GANTT_TRACE } from '../../../../test';
 import { SpanEventList, SpanEventListProps } from './SpanEvents';
 
 describe('SpanEvents', () => {
-  const renderComponent = (props: SpanEventListProps) => {
+  const renderComponent = (props: SpanEventListProps): RenderResult => {
     return render(<SpanEventList {...props} />);
   };
 

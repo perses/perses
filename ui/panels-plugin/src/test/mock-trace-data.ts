@@ -15,7 +15,7 @@ import { Span, Trace, TraceData } from '@perses-dev/core';
 import { GanttTrace } from '../plugins/tracing-gantt-chart/TracingGanttChart/trace';
 import { JaegerTrace, parseJaegerTrace } from './get-trace-data-jaeger';
 
-function addParentReferences(span: Span) {
+function addParentReferences(span: Span): void {
   for (const child of span.childSpans) {
     child.parentSpan = span;
     addParentReferences(child);

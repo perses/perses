@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Box, styled } from '@mui/material';
+import { ReactElement } from 'react';
 import { Viewport, formatDuration } from './utils';
 import { GanttTrace } from './trace';
 
@@ -23,7 +24,7 @@ export interface TicksHeaderProps {
 /**
  * TicksHeader renders all tick labels in the header
  */
-export function TicksHeader(props: TicksHeaderProps) {
+export function TicksHeader(props: TicksHeaderProps): ReactElement {
   const { trace, viewport } = props;
 
   const duration = viewport.endTimeUnixMs - viewport.startTimeUnixMs;
@@ -45,7 +46,7 @@ export function TicksHeader(props: TicksHeaderProps) {
 /**
  * Ticks renders all ticks in the span duration
  */
-export function Ticks() {
+export function Ticks(): ReactElement {
   return (
     <>
       <TickBox style={{ left: '25%' }} />

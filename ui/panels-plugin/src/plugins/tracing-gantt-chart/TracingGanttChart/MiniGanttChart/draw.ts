@@ -18,7 +18,7 @@ import { minSpanWidthPx } from '../utils';
 const MIN_BAR_HEIGHT = 1;
 const MAX_BAR_HEIGHT = 7;
 
-function countSpans(span: Span) {
+function countSpans(span: Span): number {
   let n = 1;
   for (const childSpan of span.childSpans) {
     n += countSpans(childSpan);
@@ -32,7 +32,7 @@ export function drawSpans(
   height: number,
   trace: GanttTrace,
   spanColorGenerator: (span: Span) => string
-) {
+): void {
   // calculate optimal height, enforce min and max bar height and finally round to an integer
   const numSpans = countSpans(trace.rootSpan);
   const barHeight = Math.round(Math.min(Math.max(height / numSpans, MIN_BAR_HEIGHT), MAX_BAR_HEIGHT));
@@ -41,7 +41,7 @@ export function drawSpans(
   const yChange = height / numSpans;
   let y = 0;
 
-  const drawSpan = (span: Span) => {
+  const drawSpan = (span: Span): void => {
     const spanDuration = span.endTimeUnixMs - span.startTimeUnixMs;
     const relativeDuration = spanDuration / traceDuration;
     const relativeStart = (span.startTimeUnixMs - trace.startTimeUnixMs) / traceDuration;

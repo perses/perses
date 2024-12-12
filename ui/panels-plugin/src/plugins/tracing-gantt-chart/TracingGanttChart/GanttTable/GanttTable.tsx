@@ -13,7 +13,7 @@
 
 import { Virtuoso, ListRange } from 'react-virtuoso';
 import { Span } from '@perses-dev/core';
-import { useMemo, useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { Viewport } from '../utils';
 import { TracingGanttChartOptions } from '../../gantt-chart-model';
@@ -31,7 +31,7 @@ export interface GanttTableProps {
   onSpanClick: (span: Span) => void;
 }
 
-export function GanttTable(props: GanttTableProps) {
+export function GanttTable(props: GanttTableProps): ReactElement {
   const { options, trace, viewport, selectedSpan, onSpanClick } = props;
   const { collapsedSpans, setVisibleSpans } = useGanttTableContext();
   const [nameColumnWidth, setNameColumnWidth] = useState<number>(0.25);
@@ -47,7 +47,7 @@ export function GanttTable(props: GanttTableProps) {
   const divider = <ResizableDivider parentRef={tableRef} onMove={setNameColumnWidth} />;
 
   // update currently visible spans
-  function handleRangeChange({ startIndex, endIndex }: ListRange) {
+  function handleRangeChange({ startIndex, endIndex }: ListRange): void {
     const visibleSpans: string[] = [];
     for (let i = startIndex; i <= endIndex; i++) {
       visibleSpans.push(rows[i]!.spanId);
@@ -90,7 +90,7 @@ export function GanttTable(props: GanttTableProps) {
  * treeToRows recursively transforms the span tree to a list of rows and
  * hides collapsed child spans.
  */
-function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]) {
+function treeToRows(rows: Span[], span: Span, collapsedSpans: string[]): void {
   rows.push(span);
   if (!collapsedSpans.includes(span.spanId)) {
     for (const child of span.childSpans) {

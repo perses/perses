@@ -18,7 +18,7 @@ import { BarChartOptions } from './bar-chart-model';
 import { BarChartOptionsEditorSettings } from './BarChartOptionsEditorSettings';
 
 describe('BarChartOptionsEditorSettings', () => {
-  const renderBarChartOptionsEditorSettings = (value?: BarChartOptions, onChange = jest.fn()) => {
+  const renderBarChartOptionsEditorSettings = (value?: BarChartOptions, onChange = jest.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <BarChartOptionsEditorSettings

@@ -14,6 +14,7 @@
 import { produce } from 'immer';
 import { Slider, Switch, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import {
   DEFAULT_AREA_OPACITY,
   DEFAULT_CONNECT_NULLS,
@@ -32,8 +33,8 @@ export interface VisualOptionsEditorProps {
   onChange: (visual: TimeSeriesChartVisualOptions) => void;
 }
 
-export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps) {
-  const handleLineWidthChange = (_: Event, sliderValue: number | number[]) => {
+export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProps): ReactElement {
+  const handleLineWidthChange = (_: Event, sliderValue: number | number[]): void => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     const symbolSize = newValue !== undefined ? newValue + POINT_SIZE_OFFSET : DEFAULT_POINT_RADIUS;
     onChange(
@@ -44,7 +45,7 @@ export function VisualOptionsEditor({ value, onChange }: VisualOptionsEditorProp
     );
   };
 
-  const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]) => {
+  const handleAreaOpacityChange = (_: Event, sliderValue: number | number[]): void => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue;
     onChange(
       produce(value, (draft) => {

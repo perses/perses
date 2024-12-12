@@ -15,6 +15,7 @@ import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { LoadingOverlay, NoDataOverlay, useChartsTheme } from '@perses-dev/components';
 import { QueryDefinition } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { DataTable, TraceLink } from './DataTable';
 import { TraceTableOptions } from './trace-table-model';
 
@@ -27,7 +28,13 @@ export interface TraceTablePanelProps extends PanelProps<TraceTableOptions> {
   traceLink?: TraceLink | null;
 }
 
-export function defaultTraceLink({ query: originalQuery, traceId }: { query: QueryDefinition; traceId: string }) {
+export function defaultTraceLink({
+  query: originalQuery,
+  traceId,
+}: {
+  query: QueryDefinition;
+  traceId: string;
+}): string {
   // clone the original query spec (including the datasource) and replace the query value with the trace id
   const query: QueryDefinition = JSON.parse(JSON.stringify(originalQuery));
   query.spec.plugin.spec.query = traceId;
@@ -40,7 +47,7 @@ export function defaultTraceLink({ query: originalQuery, traceId }: { query: Que
   return `/explore?${traceLinkParams}`;
 }
 
-export function TraceTablePanel(props: TraceTablePanelProps) {
+export function TraceTablePanel(props: TraceTablePanelProps): ReactElement {
   const { spec, traceLink } = props;
 
   const chartsTheme = useChartsTheme();

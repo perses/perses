@@ -19,11 +19,12 @@ import {
   TimeSeriesQueryPlugin,
   useDataQueries,
 } from '@perses-dev/plugin-system';
-import { TimeRangeValue, TimeSeriesData, toAbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import { TimeRangeValue, TimeSeriesData, toAbsoluteTimeRange } from '@perses-dev/core';
 import { TimeSeriesTableProps } from '@perses-dev/panels-plugin';
 import { render, screen } from '@testing-library/react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import {
   MOCK_TIME_SERIES_DATA_MULTIVALUE,
   MOCK_TIME_SERIES_DATA_SINGLEVALUE,
@@ -41,12 +42,12 @@ jest.mock('@perses-dev/plugin-system', () => {
 
 const TEST_TIME_RANGE: TimeRangeValue = { pastDuration: '1h' };
 
-function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin<UnknownSpec> {
+function buildFakeTimeSeriesQuery(data: TimeSeriesData): TimeSeriesQueryPlugin {
   return {
-    getTimeSeriesData: async () => {
+    getTimeSeriesData: async (): Promise<TimeSeriesData> => {
       return data;
     },
-    OptionsEditorComponent: () => {
+    OptionsEditorComponent: (): ReactElement => {
       return <div>Edit options here</div>;
     },
     createInitialOptions: () => ({}),
@@ -71,12 +72,12 @@ const TEST_TIME_SERIES_TABLE_PROPS: TimeSeriesTableProps = {
 
 describe('TimeSeriesTablePanel', () => {
   // Helper to render the panel with some context set
-  const renderPanel = (data: TimeSeriesData) => {
+  const renderPanel = (data: TimeSeriesData): void => {
     const mockTimeRangeContext = {
       refreshIntervalInMs: 0,
-      setRefreshInterval: () => ({}),
+      setRefreshInterval: (): Record<string, unknown> => ({}),
       timeRange: TEST_TIME_RANGE,
-      setTimeRange: () => ({}),
+      setTimeRange: (): Record<string, unknown> => ({}),
       absoluteTimeRange: toAbsoluteTimeRange(TEST_TIME_RANGE),
       refresh: jest.fn(),
       refreshKey: `${TEST_TIME_RANGE.pastDuration}:0`,
