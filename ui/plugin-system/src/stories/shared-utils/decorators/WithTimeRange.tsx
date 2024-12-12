@@ -13,6 +13,7 @@
 
 import { StoryFn, StoryContext } from '@storybook/react';
 import { TimeRangeProvider, TimeRangeFromQueryProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 
 declare module '@storybook/react' {
   interface Parameters {
@@ -29,7 +30,7 @@ function isWithTimeRangeParameter(parameter: unknown | WithTimeRangeParameter): 
   return !!parameter && typeof parameter === 'object' && 'props' in parameter;
 }
 
-export const WithTimeRange = (Story: StoryFn, context: StoryContext<unknown>) => {
+export const WithTimeRange = (Story: StoryFn, context: StoryContext<unknown>): ReactElement => {
   const initParameter = context.parameters.withTimeRange;
   const parameter = isWithTimeRangeParameter(initParameter) ? initParameter : undefined;
   const props = parameter?.props;

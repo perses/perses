@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DurationString, TimeRangeValue } from '@perses-dev/core';
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { TimeRangeProvider } from './TimeRangeProvider';
 import { useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
 
@@ -22,7 +22,7 @@ export interface TimeRangeFromQueryProps {
   children?: React.ReactNode;
 }
 
-export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps) {
+export function TimeRangeProviderWithQueryParams(props: TimeRangeFromQueryProps): ReactElement {
   const { initialTimeRange, initialRefreshInterval, children } = props;
 
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);

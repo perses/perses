@@ -13,6 +13,7 @@
 
 import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { OptionsEditorProps } from '../../model';
 import { usePlugin } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -22,7 +23,7 @@ export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   isEditor?: boolean;
 }
 
-export function PluginSpecEditor(props: PluginSpecEditorProps) {
+export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | null {
   const {
     pluginSelection: { type: pluginType, kind: pluginKind },
     ...others

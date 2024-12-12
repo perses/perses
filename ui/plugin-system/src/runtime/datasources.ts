@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { DatasourceSelector, DatasourceSpec } from '@perses-dev/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
@@ -77,7 +77,7 @@ export interface DatasourceSelectItemSelector extends DatasourceSelector {
 
 export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
 
-export function useDatasourceStore() {
+export function useDatasourceStore(): DatasourceStore {
   const ctx = useContext(DatasourceStoreContext);
   if (ctx === undefined) {
     throw new Error('No DatasourceStoreContext found. Did you forget a Provider?');
@@ -89,7 +89,10 @@ export function useDatasourceStore() {
  * Lists all available Datasource selection items for a given datasource plugin kind.
  * Returns a list, with all information that can be used in a datasource selection context (group, name, selector, kind, ...)
  */
-export function useListDatasourceSelectItems(datasourcePluginKind: string, project?: string) {
+export function useListDatasourceSelectItems(
+  datasourcePluginKind: string,
+  project?: string
+): UseQueryResult<DatasourceStore> {
   const { listDatasourceSelectItems } = useDatasourceStore();
   return useQuery({
     queryKey: ['listDatasourceSelectItems', datasourcePluginKind, project],
@@ -100,7 +103,7 @@ export function useListDatasourceSelectItems(datasourcePluginKind: string, proje
 /**
  * Provides a convenience hook for getting a DatasourceClient for a given DatasourceSelector.
  */
-export function useDatasourceClient<Client>(selector: DatasourceSelector) {
+export function useDatasourceClient<Client>(selector: DatasourceSelector): UseQueryResult<Client> {
   const store = useDatasourceStore();
   return useQuery<Client>({
     queryKey: ['getDatasourceClient', selector],
@@ -108,7 +111,7 @@ export function useDatasourceClient<Client>(selector: DatasourceSelector) {
   });
 }
 
-export function useDatasource(selector: DatasourceSelector) {
+export function useDatasource(selector: DatasourceSelector): UseQueryResult<DatasourceStore> {
   const store = useDatasourceStore();
   return useQuery({ queryKey: ['getDatasource', selector], queryFn: () => store.getDatasource(selector) });
 }

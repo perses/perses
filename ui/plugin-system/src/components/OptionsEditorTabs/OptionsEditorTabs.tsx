@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Tab, Tabs, TabsProps, Box } from '@mui/material';
-import { useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import { OptionsEditorTabPanel } from '../OptionsEditorTabPanel';
 
 export type OptionsEditorTab = {
@@ -20,14 +20,14 @@ export type OptionsEditorTab = {
   /**
    * Content rendered when the tab is active.
    */
-  content: React.ReactNode;
+  content: ReactNode;
 };
 
 export type OptionsEditorTabsProps = {
   tabs: OptionsEditorTab[];
 };
 
-export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps) => {
+export const OptionsEditorTabs = ({ tabs }: OptionsEditorTabsProps): ReactElement => {
   const [activeTab, setActiveTab] = useState(0);
 
   const handleChange: TabsProps['onChange'] = (_, newValue) => {

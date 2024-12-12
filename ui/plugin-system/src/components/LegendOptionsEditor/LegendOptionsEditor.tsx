@@ -14,6 +14,7 @@
 import { Switch, SwitchProps } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
 import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
@@ -66,21 +67,25 @@ export interface LegendOptionsEditorProps {
   showValuesEditor?: boolean;
 }
 
-export function LegendOptionsEditor({ value, onChange, showValuesEditor = true }: LegendOptionsEditorProps) {
+export function LegendOptionsEditor({
+  value,
+  onChange,
+  showValuesEditor = true,
+}: LegendOptionsEditorProps): ReactElement {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
     const legendValue = checked === true ? { position: DEFAULT_LEGEND.position } : undefined;
     onChange(legendValue);
   };
 
-  const handleLegendPositionChange = (_: unknown, newValue: LegendPositionOption) => {
+  const handleLegendPositionChange = (_: unknown, newValue: LegendPositionOption): void => {
     onChange({
       ...value,
       position: newValue.id,
     });
   };
 
-  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption) => {
+  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption): void => {
     onChange({
       ...value,
       position: currentPosition,
@@ -88,7 +93,7 @@ export function LegendOptionsEditor({ value, onChange, showValuesEditor = true }
     });
   };
 
-  const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption) => {
+  const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption): void => {
     onChange({
       ...value,
       position: currentPosition,
@@ -96,7 +101,7 @@ export function LegendOptionsEditor({ value, onChange, showValuesEditor = true }
     });
   };
 
-  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]) => {
+  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]): void => {
     onChange({
       ...value,
       position: currentPosition,
