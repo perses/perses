@@ -13,10 +13,14 @@
 
 import { useDatasourceClient } from '@perses-dev/plugin-system';
 import { DatasourceSelector } from '@perses-dev/core';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { ParseQueryRequestParameters, ParseQueryResponse, PrometheusClient } from '../model';
 
-export function useParseQuery(content: string, datasource: DatasourceSelector, enabled?: boolean) {
+export function useParseQuery(
+  content: string,
+  datasource: DatasourceSelector,
+  enabled?: boolean
+): UseQueryResult<ParseQueryResponse> {
   const { data: client } = useDatasourceClient<PrometheusClient>(datasource);
 
   return useQuery<ParseQueryResponse>({

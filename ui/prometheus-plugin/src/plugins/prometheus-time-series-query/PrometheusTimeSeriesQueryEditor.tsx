@@ -14,6 +14,7 @@
 import { produce } from 'immer';
 import { DatasourceSelect, DatasourceSelectProps, useDatasource, useDatasourceClient } from '@perses-dev/plugin-system';
 import { FormControl, InputLabel, Stack, TextField } from '@mui/material';
+import { ReactElement } from 'react';
 import {
   DEFAULT_PROM,
   DurationString,
@@ -34,7 +35,7 @@ import {
 /**
  * The options editor component for editing a PrometheusTimeSeriesQuery's spec.
  */
-export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps) {
+export function PrometheusTimeSeriesQueryEditor(props: PrometheusTimeSeriesQueryEditorProps): ReactElement {
   const { onChange, value } = props;
   const { datasource } = value;
   const selectedDatasource = datasource ?? DEFAULT_PROM;

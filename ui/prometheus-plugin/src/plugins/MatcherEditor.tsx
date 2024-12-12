@@ -14,6 +14,7 @@
 import { Stack, TextField, Button, Box, IconButton } from '@mui/material';
 import { produce } from 'immer';
 import TrashIcon from 'mdi-material-ui/TrashCan';
+import { ReactElement } from 'react';
 
 type MatcherEditorProps = {
   matchers: string[];
@@ -21,7 +22,7 @@ type MatcherEditorProps = {
   isReadonly?: boolean;
 };
 
-export function MatcherEditor({ matchers, onChange, isReadonly }: MatcherEditorProps) {
+export function MatcherEditor({ matchers, onChange, isReadonly }: MatcherEditorProps): ReactElement {
   return (
     <Stack spacing={1} mb={2}>
       {matchers.map((matcher, index) => (
