@@ -19,6 +19,7 @@ Thumbs.db
 /bin
 /built
 /dist
+tsconfig.build.tsbuildinfo
 
 coverage.txt
 
