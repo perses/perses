@@ -52,6 +52,9 @@ module.exports = {
   },
 
   rules: {
+    '@typescript-eslint/explicit-function-return-type': 'error',
+    '@typescript-eslint/explicit-module-boundary-types': 'error',
+
     'prettier/prettier': 'error',
     '@typescript-eslint/array-type': [
       'error',
