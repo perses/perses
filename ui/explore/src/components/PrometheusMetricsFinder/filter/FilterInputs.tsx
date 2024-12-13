@@ -215,7 +215,7 @@ export function RawFilterInput({
             />
           );
         }}
-        onChange={(_: SyntheticEvent, newValue: string[] | string | null) => {
+        onChange={(_, newValue) => {
           if (typeof newValue === 'string') {
             onChange({ label: value.label, labelValues: [newValue], operator: value.operator });
           }
