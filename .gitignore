@@ -38,3 +38,5 @@ dev/extra/tempo-data
 /.github/perses-ci/
 
 *.ignore.*
+
+tsconfig.build.tsbuildinfo
