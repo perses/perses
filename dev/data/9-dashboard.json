@@ -3234,7 +3234,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Example"
               }
@@ -3360,7 +3360,7 @@
               "description": "This is a markdown panel"
             },
             "plugin": {
-              "kind": "Markdown",
+              "kind": "MarkdownChart",
               "spec": {
                 "text": "## Example"
               }
