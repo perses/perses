@@ -107,5 +107,5 @@ func (p *plugin) generatePluginListFile() error {
 	if marshalErr != nil {
 		return marshalErr
 	}
-	return os.WriteFile(path.Join(p.path, pluginFileName), marshalData, os.ModePerm)
+	return os.WriteFile(path.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
 }

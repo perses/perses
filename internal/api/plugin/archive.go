@@ -115,7 +115,7 @@ func (a *archive) extractArchiveFileHandler(_ context.Context, f archiver.File) 
 	if err != nil {
 		return fmt.Errorf("unable to read the file %q: %w", f.NameInArchive, err)
 	}
-	if writeErr := os.WriteFile(path.Join(a.targetFolder, f.NameInArchive), respBytes, os.ModePerm); writeErr != nil {
+	if writeErr := os.WriteFile(path.Join(a.targetFolder, f.NameInArchive), respBytes, 0644); writeErr != nil { // nolint: gosec
 		return fmt.Errorf("unable to write the file %q: %w", f.NameInArchive, writeErr)
 	}
 	return nil
