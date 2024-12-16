@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEventHandler, useState } from 'react';
+import { FormEventHandler, ReactElement, useState } from 'react';
 import { FormControl, InputLabel, TextField, Select, SelectProps, MenuItem } from '@mui/material';
 import { PanelGroupEditorValues } from '../../context';
 
@@ -22,7 +22,7 @@ export interface PanelGroupEditorFormProps {
   onSubmit: (next: PanelGroupEditorValues) => void;
 }
 
-export function PanelGroupEditorForm(props: PanelGroupEditorFormProps) {
+export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactElement {
   const { initialValues, onSubmit } = props;
 
   const [title, setTitle] = useState(initialValues.title);

@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import { OptionsEditorProps } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { ColumnSettings, TableOptions } from './table-model';
 import { ColumnsEditor } from './ColumnsEditor';
 
 export type TableColumnsEditorProps = OptionsEditorProps<TableOptions>;
 
-export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps) {
-  function handleColumnChange(columns: ColumnSettings[]): void {
+export function TableColumnsEditor({ onChange, value }: TableColumnsEditorProps): ReactElement {
+  function handleColumnsChange(columns: ColumnSettings[]): void {
     onChange({ ...value, columnSettings: columns });
   }
 
-  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnChange} />;
+  return <ColumnsEditor columnSettings={value.columnSettings ?? []} onChange={handleColumnsChange} />;
 }

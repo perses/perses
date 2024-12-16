@@ -28,7 +28,7 @@ import { getBasePathName } from './model/route';
 /**
  * Renders the Perses application in the target container.
  */
-export function renderApp(container: Element | null) {
+export function renderApp(container: Element | null): void {
   if (container === null) {
     return;
   }

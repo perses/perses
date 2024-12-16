@@ -29,7 +29,7 @@ export function buildCustomTimeOption(value: AbsoluteTimeRange | undefined, time
 /**
  * Date validation and check if end is after start
  */
-export function validateDateRange(startDate: Date, endDate: Date) {
+export function validateDateRange(startDate: Date, endDate: Date): boolean {
   // TODO: display error as helperText
   if (!isValid(startDate) || !isValid(endDate)) {
     console.error('Invalid Date');
@@ -48,7 +48,7 @@ export function validateDateRange(startDate: Date, endDate: Date) {
  * @param dateFormat date format string
  * @param timeZone
  */
-export function formatAbsoluteRange(timeRange: AbsoluteTimeRange, dateFormat: string, timeZone?: string) {
+export function formatAbsoluteRange(timeRange: AbsoluteTimeRange, dateFormat: string, timeZone?: string): string {
   const formattedStart = formatWithTimeZone(timeRange.start, dateFormat, timeZone);
   const formattedEnd = formatWithTimeZone(timeRange.end, dateFormat, timeZone);
   return `${formattedStart} - ${formattedEnd}`;
@@ -59,7 +59,7 @@ export function formatAbsoluteRange(timeRange: AbsoluteTimeRange, dateFormat: st
  * @param value
  * @param timeZone
  */
-export function formatTimeRange(value: TimeRangeValue | undefined, timeZone: string) {
+export function formatTimeRange(value: TimeRangeValue | undefined, timeZone: string): string {
   if (!value) {
     return 'Custom Time Range';
   }

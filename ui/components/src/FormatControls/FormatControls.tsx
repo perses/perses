@@ -19,6 +19,7 @@ import {
   isUnitWithDecimalPlaces,
   isUnitWithShortValues,
 } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
@@ -39,7 +40,7 @@ const KIND_OPTIONS: AutocompleteUnitOption[] = Object.entries(UNIT_CONFIG)
   })
   .filter((config) => !config.disableSelectorOption);
 
-const DECIMAL_PLACES_OPTIONS = [
+const DECIMAL_PLACES_OPTIONS: Array<{ id: string; label: string; decimalPlaces?: number }> = [
   { id: 'default', label: 'Default', decimalPlaces: undefined },
   { id: '0', label: '0', decimalPlaces: 0 },
   { id: '1', label: '1', decimalPlaces: 1 },
@@ -48,21 +49,29 @@ const DECIMAL_PLACES_OPTIONS = [
   { id: '4', label: '4', decimalPlaces: 4 },
 ];
 
-function getOptionByDecimalPlaces(decimalPlaces?: number) {
+function getOptionByDecimalPlaces(
+  decimalPlaces?: number
+): { id: string; label: string; decimalPlaces?: number } | undefined {
   return DECIMAL_PLACES_OPTIONS.find((o) => o.decimalPlaces === decimalPlaces);
 }
 
-export function FormatControls({ value, onChange, disabled = false }: FormatControlsProps) {
+export function FormatControls({ value, onChange, disabled = false }: FormatControlsProps): ReactElement {
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
   const hasShortValues = isUnitWithShortValues(value);
 
-  const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption) => {
+  const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption): void => {
     onChange({
       unit: newValue.id,
     });
   };
 
-  const handleDecimalPlacesChange = (_: unknown, { decimalPlaces }: { decimalPlaces: number | undefined }) => {
+  const handleDecimalPlacesChange = ({
+    decimalPlaces,
+  }: {
+    id: string;
+    label: string;
+    decimalPlaces?: number;
+  }): void => {
     if (hasDecimalPlaces) {
       onChange({
         ...value,
@@ -104,7 +113,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
             onChange={handleKindChange}
             disableClearable
             disabled={disabled}
-          ></SettingsAutocomplete>
+          />
         }
       />
       <OptionsEditorControl
@@ -114,7 +123,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
             value={getOptionByDecimalPlaces(value.decimalPlaces)}
             options={DECIMAL_PLACES_OPTIONS}
             getOptionLabel={(o) => o.label}
-            onChange={handleDecimalPlacesChange}
+            onChange={(_, value) => handleDecimalPlacesChange(value)}
             disabled={!hasDecimalPlaces}
             disableClearable
           />

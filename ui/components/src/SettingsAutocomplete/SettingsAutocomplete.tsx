@@ -19,7 +19,7 @@ import {
   UseAutocompleteProps,
   createFilterOptions,
 } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 /**
  * Interface to extend from for `options` when using `SettingsAutocomplete`.
@@ -73,9 +73,9 @@ export function SettingsAutocomplete<
   DisableClearable extends boolean | undefined = false,
 >({
   options,
-  renderInput = (params) => <TextField {...params} />,
+  renderInput = (params): ReactElement => <TextField {...params} />,
   ...otherProps
-}: SettingsAutocompleteProps<OptionType, Multiple, DisableClearable>) {
+}: SettingsAutocompleteProps<OptionType, Multiple, DisableClearable>): ReactElement {
   const getOptionLabel: UseAutocompleteProps<OptionType, undefined, boolean, undefined>['getOptionLabel'] = (
     option
   ) => {
@@ -93,15 +93,15 @@ export function SettingsAutocomplete<
       getOptionLabel={getOptionLabel}
       options={options}
       renderInput={renderInput}
-      renderOption={(props, option) => {
+      renderOption={({ key, ...props }, option) => {
         return (
-          <li {...props}>
+          <li key={key} {...props}>
             <div>
               <Typography variant="body1" component="div">
                 {getOptionLabel(option)}
               </Typography>
               {option.description && (
-                <Typography variant="body2" component="div" color={(theme) => theme.palette.text.secondary}>
+                <Typography variant="body2" component="div" sx={{ color: (theme) => theme.palette.text.secondary }}>
                   {option.description}
                 </Typography>
               )}

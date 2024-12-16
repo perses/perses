@@ -14,7 +14,7 @@
 import { getMetadataProject, RoleBinding, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import { useCallback, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -43,7 +43,7 @@ import { RoleBindingDrawer } from './RoleBindingDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWithCallbacks<T>) {
+export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -186,9 +186,10 @@ export function RoleBindingList<T extends RoleBinding>(props: ListPropertiesWith
         <>
           <RoleBindingDrawer
             roleBinding={targetedRoleBinding}
-            isOpen={isRoleBindingDrawerOpened}
             action={action}
+            isOpen={isRoleBindingDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleRoleBindingSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteRoleBindingDialogOpened(false))}
             onClose={() => setRoleBindingDrawerOpened(false)}

@@ -32,15 +32,15 @@ export interface LegendOptionsBase {
   size?: LegendSize;
 }
 
-export function isValidLegendPosition(position: LegendPositions) {
+export function isValidLegendPosition(position: LegendPositions): boolean {
   return (legendPositions as readonly string[]).includes(position);
 }
 
-export function isValidLegendMode(mode: LegendMode) {
+export function isValidLegendMode(mode: LegendMode): boolean {
   return (legendModes as readonly string[]).includes(mode);
 }
 
-export function isValidLegendSize(size: LegendSize) {
+export function isValidLegendSize(size: LegendSize): boolean {
   return (legendSizes as readonly string[]).includes(size);
 }
 
@@ -50,7 +50,7 @@ export const DEFAULT_LEGEND: Required<LegendOptionsBase> = {
   size: 'medium',
 };
 
-export function getLegendPosition(position?: LegendPositions) {
+export function getLegendPosition(position?: LegendPositions): 'bottom' | 'right' {
   if (position === undefined) {
     return DEFAULT_LEGEND.position;
   }
@@ -60,7 +60,7 @@ export function getLegendPosition(position?: LegendPositions) {
   return DEFAULT_LEGEND.position;
 }
 
-export function getLegendMode(mode?: LegendMode) {
+export function getLegendMode(mode?: LegendMode): 'list' | 'table' {
   if (!mode || !isValidLegendMode(mode)) {
     return DEFAULT_LEGEND.mode;
   }
@@ -68,7 +68,7 @@ export function getLegendMode(mode?: LegendMode) {
   return mode;
 }
 
-export function getLegendSize(size?: LegendSize) {
+export function getLegendSize(size?: LegendSize): 'small' | 'medium' {
   if (!size || !isValidLegendSize(size)) {
     return DEFAULT_LEGEND.size;
   }

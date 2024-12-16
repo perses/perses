@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { SecretResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 export const resource = 'secrets';
 
-export function createSecret(entity: SecretResource) {
+export function createSecret(entity: SecretResource): Promise<SecretResource> {
   const project = entity.metadata.project;
   const url = buildURL({ resource, project });
   return fetchJson<SecretResource>(url, {
@@ -30,7 +30,7 @@ export function createSecret(entity: SecretResource) {
   });
 }
 
-function getSecret(name: string, project: string) {
+function getSecret(name: string, project: string): Promise<SecretResource> {
   const url = buildURL({ resource, project, name });
   return fetchJson<SecretResource>(url, {
     method: HTTPMethodGET,
@@ -38,7 +38,7 @@ function getSecret(name: string, project: string) {
   });
 }
 
-function getSecrets(project?: string) {
+function getSecrets(project?: string): Promise<SecretResource[]> {
   const url = buildURL({ resource, project });
   return fetchJson<SecretResource[]>(url, {
     method: HTTPMethodGET,
@@ -46,7 +46,7 @@ function getSecrets(project?: string) {
   });
 }
 
-export function updateSecret(entity: SecretResource) {
+export function updateSecret(entity: SecretResource): Promise<SecretResource> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -57,7 +57,7 @@ export function updateSecret(entity: SecretResource) {
   });
 }
 
-export function deleteSecret(entity: SecretResource) {
+export function deleteSecret(entity: SecretResource): Promise<Response> {
   const name = entity.metadata.name;
   const project = entity.metadata.project;
   const url = buildURL({ resource, project, name });
@@ -71,7 +71,7 @@ export function deleteSecret(entity: SecretResource) {
  * Used to get a secret from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useSecret(name: string, project: string) {
+export function useSecret(name: string, project: string): UseQueryResult<SecretResource> {
   return useQuery<SecretResource, Error>({
     queryKey: buildQueryKey({ resource, name, parent: project }),
     queryFn: () => {
@@ -84,7 +84,7 @@ export function useSecret(name: string, project: string) {
  * Used to get secrets from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useSecretList(project?: string) {
+export function useSecretList(project?: string): UseQueryResult<SecretResource[], Error> {
   return useQuery<SecretResource[], Error>({
     queryKey: buildQueryKey({ resource, parent: project }),
     queryFn: () => {
@@ -100,7 +100,7 @@ export function useSecretList(project?: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useCreateSecretMutation(project: string) {
+export function useCreateSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 
@@ -122,7 +122,7 @@ export function useCreateSecretMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useUpdateSecretMutation(project: string) {
+export function useUpdateSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
   return useMutation<SecretResource, Error, SecretResource>({
@@ -146,7 +146,7 @@ export function useUpdateSecretMutation(project: string) {
  * Note: the project input shouldn't be mandatory according to the API, but it is here for cache considerations.
  * @param project
  */
-export function useDeleteSecretMutation(project: string) {
+export function useDeleteSecretMutation(project: string): UseMutationResult<SecretResource, Error, SecretResource> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource, parent: project });
 

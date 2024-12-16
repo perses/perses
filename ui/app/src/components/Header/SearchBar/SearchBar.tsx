@@ -16,7 +16,7 @@ import Magnify from 'mdi-material-ui/Magnify';
 import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import Archive from 'mdi-material-ui/Archive';
 import DatabaseIcon from 'mdi-material-ui/Database';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactElement, useCallback, useEffect, useState } from 'react';
 import { isProjectMetadata } from '@perses-dev/core';
 import { useIsMobileSize } from '../../../utils/browser-size';
 import { isAppleDevice } from '../../../utils/os';
@@ -27,7 +27,7 @@ import { AdminRoute, ProjectRoute } from '../../../model/route';
 import { useDatasourceList } from '../../../model/datasource-client';
 import { SearchList } from './SearchList';
 
-function shortcutCTRL() {
+function shortcutCTRL(): string {
   return isAppleDevice() ? '⌘' : 'ctrl';
 }
 
@@ -36,7 +36,7 @@ interface ResourceListProps {
   onClick: () => void;
 }
 
-function SearchProjectList(props: ResourceListProps) {
+function SearchProjectList(props: ResourceListProps): ReactElement {
   const projectsQueryResult = useProjectList({ refetchOnMount: false });
   return SearchList({
     list: projectsQueryResult.data ?? [],
@@ -46,7 +46,7 @@ function SearchProjectList(props: ResourceListProps) {
   });
 }
 
-function SearchGlobalDatasource(props: ResourceListProps) {
+function SearchGlobalDatasource(props: ResourceListProps): ReactElement {
   const globalDatasourceQueryResult = useGlobalDatasourceList({ refetchOnMount: false });
   return SearchList({
     list: globalDatasourceQueryResult.data ?? [],
@@ -57,7 +57,7 @@ function SearchGlobalDatasource(props: ResourceListProps) {
   });
 }
 
-function SearchDashboardList(props: ResourceListProps) {
+function SearchDashboardList(props: ResourceListProps): ReactElement {
   const dashboardQueryResult = useDashboardList({ metadataOnly: true, refetchOnMount: false });
   return SearchList({
     list: dashboardQueryResult.data ?? [],
@@ -68,7 +68,7 @@ function SearchDashboardList(props: ResourceListProps) {
   });
 }
 
-function SearchDatasourceList(props: ResourceListProps) {
+function SearchDatasourceList(props: ResourceListProps): ReactElement {
   const datasourceQueryResult = useDatasourceList({ refetchOnMount: false });
   return SearchList({
     list: datasourceQueryResult.data ?? [],
@@ -81,7 +81,7 @@ function SearchDatasourceList(props: ResourceListProps) {
   });
 }
 
-function useHandleShortCut(handleOpen: () => void) {
+function useHandleShortCut(handleOpen: () => void): void {
   // handle what happens on key press
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -105,12 +105,12 @@ function useHandleShortCut(handleOpen: () => void) {
   }, [handleKeyPress]);
 }
 
-export function SearchBar() {
+export function SearchBar(): ReactElement {
   const isMobileSize = useIsMobileSize();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = (): void => setOpen(true);
+  const handleClose = (): void => setOpen(false);
   useHandleShortCut(handleOpen);
 
   return (
@@ -118,7 +118,7 @@ export function SearchBar() {
       <Button size="small" fullWidth sx={{ display: 'flex', justifyContent: 'space-between' }} onClick={handleOpen}>
         <Box sx={{ display: 'flex' }} flexDirection="row" alignItems="center">
           <Magnify sx={{ marginRight: 0.5 }} fontSize="medium" />
-          <Typography>Search ...</Typography>
+          <Typography>Search...</Typography>
         </Box>
         {!isMobileSize && <Chip label={`${shortcutCTRL()}+k`} size="small" />}
       </Button>

@@ -14,6 +14,7 @@
 package remove
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -25,13 +26,14 @@ import (
 	"github.com/perses/perses/internal/cli/resource"
 	"github.com/perses/perses/internal/cli/service"
 	"github.com/perses/perses/pkg/client/api"
+	"github.com/perses/perses/pkg/client/perseshttp"
 	modelAPI "github.com/perses/perses/pkg/model/api"
 	modelV1 "github.com/perses/perses/pkg/model/api/v1"
 	"github.com/spf13/cobra"
 )
 
 // keyCombination is a struct that contains a combination of the project name and the name of the resource.
-// These two information are used to delete a unique resource.
+// The two information are used to delete a unique resource.
 // kind is used to instantiate the correct client.
 type keyCombination struct {
 	kind    modelV1.Kind
@@ -45,6 +47,7 @@ type option struct {
 	opt.DirectoryOption
 	opt.ProjectOption
 	writer    io.Writer
+	errWriter io.Writer
 	kind      modelV1.Kind
 	all       bool
 	names     []keyCombination
@@ -56,9 +59,9 @@ func (o *option) Complete(args []string) error {
 		o.Project = config.Global.Project
 	}
 	if len(o.File) == 0 {
-		// Then the user need to specify the resource type and the name of the resource to delete
+		// Then the user needs to specify the resource type and the name of the resource to delete
 		if len(args) == 0 {
-			return fmt.Errorf(resource.FormatMessage())
+			return errors.New(resource.FormatMessage())
 		}
 		var err error
 		o.kind, err = resource.GetKind(args[0])
@@ -69,7 +72,7 @@ func (o *option) Complete(args []string) error {
 			return fmt.Errorf("you have to specify the resource name you would like to delete")
 		}
 	}
-	// Set the API Client to used
+	// Set the API Client to use
 	apiClient, err := config.Global.GetAPIClient()
 	if err != nil {
 		return err
@@ -98,6 +101,12 @@ func (o *option) Execute() error {
 			return svcErr
 		}
 		if err := svc.DeleteResource(name); err != nil {
+			if errors.Is(err, perseshttp.RequestNotFoundError) {
+				if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q is not found", kind, name)); outputError != nil {
+					return outputError
+				}
+				continue
+			}
 			return err
 		}
 		if outputError := resource.HandleSuccessMessage(o.writer, kind, project, fmt.Sprintf("object %q %q has been deleted", kind, name)); outputError != nil {
@@ -159,9 +168,9 @@ func (o *option) setNamesFromFile() error {
 }
 
 func (o *option) setNamesFromDirectory() error {
-	entities, errors := file.UnmarshalEntitiesFromDirectory(o.Directory)
-	if len(errors) > 0 {
-		return errors[0]
+	entities, errs := file.UnmarshalEntitiesFromDirectory(o.Directory)
+	if len(errs) > 0 {
+		return errs[0]
 	}
 	o.setNames(entities)
 	return nil
@@ -181,6 +190,10 @@ func (o *option) setNames(entities []modelAPI.Entity) {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { DispatchWithoutAction, useState } from 'react';
+import React, { DispatchWithoutAction, ReactElement, useState } from 'react';
 import {
   Box,
   Typography,
@@ -20,13 +20,12 @@ import {
   Grid,
   FormControlLabel,
   MenuItem,
-  Button,
   Stack,
   ClickAwayListener,
   Divider,
 } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
-import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getSubmitText, getTitleAction } from '../../../utils';
@@ -35,7 +34,7 @@ import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VariableListPreview, VariablePreview } from './VariablePreview';
 
-function FallbackPreview() {
+function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;
 }
 
@@ -44,7 +43,7 @@ interface KindVariableEditorFormProps {
   control: Control<VariableDefinition>;
 }
 
-function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps) {
+function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   return (
     <>
       <Typography py={1} variant="subtitle1">
@@ -102,14 +101,14 @@ function TextVariableEditorForm({ action, control }: KindVariableEditorFormProps
   );
 }
 
-function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps) {
+function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps): ReactElement {
   const form = useFormContext<VariableDefinition>();
   /** We use `previewSpec` to know when to explicitly update the
    * spec that will be used for preview. The reason why we do this is to avoid
    * having to re-fetch the values when the user is still editing the spec.
    */
   const [previewSpec, setPreviewSpec] = useState<ListVariableDefinition>(form.getValues() as ListVariableDefinition);
-  const refreshPreview = () => {
+  const refreshPreview = (): void => {
     setPreviewSpec(form.getValues() as ListVariableDefinition);
   };
 
@@ -337,19 +336,26 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
 
 interface VariableEditorFormProps {
   initialVariableDefinition: VariableDefinition;
-  initialAction: Action;
+  action: Action;
   isDraft: boolean;
   isReadonly?: boolean;
+  onActionChange?: (action: Action) => void;
   onSave: (def: VariableDefinition) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
-export function VariableEditorForm(props: VariableEditorFormProps) {
-  const { initialVariableDefinition, initialAction, isDraft, isReadonly, onSave, onClose, onDelete } = props;
-
+export function VariableEditorForm({
+  initialVariableDefinition,
+  action,
+  isDraft,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: VariableEditorFormProps): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
-  const [action, setAction] = useState(initialAction);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
 
@@ -383,7 +389,7 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
   // - create action: ask for discard approval
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
-  function handleCancel() {
+  function handleCancel(): void {
     if (JSON.stringify(initialVariableDefinition) !== JSON.stringify(clearFormData(form.getValues()))) {
       setDiscardDialogOpened(true);
     } else {
@@ -402,46 +408,16 @@ export function VariableEditorForm(props: VariableEditorFormProps) {
         }}
       >
         <Typography variant="h2">{titleAction} Variable</Typography>
-        <Stack direction="row" spacing={1} sx={{ marginLeft: 'auto' }}>
-          {action === 'read' ? (
-            <>
-              <Button disabled={isReadonly} variant="contained" onClick={() => setAction('update')}>
-                Edit
-              </Button>
-              <Button color="error" disabled={isReadonly} variant="outlined" onClick={onDelete}>
-                Delete
-              </Button>
-              <Divider
-                orientation="vertical"
-                flexItem
-                sx={(theme) => ({
-                  borderColor: theme.palette.grey['500'],
-                  '&.MuiDivider-root': {
-                    marginLeft: 2,
-                    marginRight: 1,
-                  },
-                })}
-              />
-              <Button color="secondary" variant="outlined" onClick={onClose}>
-                Close
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={!form.formState.isValid}
-                onClick={form.handleSubmit(processForm)}
-              >
-                {submitText}
-              </Button>
-              <Button color="secondary" variant="outlined" onClick={handleCancel}>
-                Cancel
-              </Button>
-            </>
-          )}
-        </Stack>
+        <FormActions
+          action={action}
+          submitText={submitText}
+          isReadonly={isReadonly}
+          isValid={form.formState.isValid}
+          onActionChange={onActionChange}
+          onSubmit={form.handleSubmit(processForm)}
+          onDelete={onDelete}
+          onCancel={handleCancel}
+        />
       </Box>
       <Box padding={2} sx={{ overflowY: 'scroll' }}>
         <Grid container spacing={2} mb={2}>

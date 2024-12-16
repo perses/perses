@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, ReactElement } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 // Default route is eagerly loaded
@@ -46,7 +46,7 @@ const ExploreView = lazy(() => import('./views/projects/explore/ExploreView'));
 const CreateEphemeralDashboardView = lazy(() => import('./views/projects/dashboards/CreateEphemeralDashboardView'));
 const EphemeralDashboardView = lazy(() => import('./views/projects/dashboards/EphemeralDashboardView'));
 
-function Router() {
+function Router(): ReactElement {
   const isAuthEnabled = useIsAuthEnabled();
   const isSignUpDisable = useIsSignUpDisable();
   const isEphemeralDashboardEnabled = useIsEphemeralDashboardEnabled();

@@ -17,7 +17,7 @@ import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
 import { PIN_TOOLTIP_HELP_TEXT, UNPIN_TOOLTIP_HELP_TEXT } from './tooltip-model';
 
 describe('TooltipHeader', () => {
-  const renderComponent = (props: TooltipHeaderProps) => {
+  const renderComponent = (props: TooltipHeaderProps): void => {
     render(<TooltipHeader {...props} />);
   };
 

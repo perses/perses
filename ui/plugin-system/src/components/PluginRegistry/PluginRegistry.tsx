@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec, useEvent } from '@perses-dev/core';
-import { useRef, useCallback, useMemo, ReactNode } from 'react';
+import { useRef, useCallback, useMemo, ReactNode, ReactElement } from 'react';
 import {
   PluginModuleResource,
   PluginType,
@@ -34,7 +34,7 @@ export interface PluginRegistryProps {
  * PluginRegistryContext provider that keeps track of all available plugins and provides an API for getting them or
  * querying the metadata about them.
  */
-export function PluginRegistry(props: PluginRegistryProps) {
+export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   const {
     pluginLoader: { getInstalledPlugins, importPluginModule },
     children,

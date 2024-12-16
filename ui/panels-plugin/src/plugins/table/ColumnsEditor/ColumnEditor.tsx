@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Divider, FormControlLabel, Stack, StackProps, Switch, TextField } from '@mui/material';
-import { useState } from 'react';
-import { AlignSelector } from '@perses-dev/components';
+import { ReactElement, useState } from 'react';
+import { AlignSelector, SortSelectorButtons } from '@perses-dev/components';
 import { ColumnSettings } from '../table-model';
 
 type OmittedMuiProps = 'children' | 'value' | 'onChange';
@@ -23,7 +23,7 @@ export interface ColumnEditorProps extends Omit<StackProps, OmittedMuiProps> {
   onChange: (column: ColumnSettings) => void;
 }
 
-export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps) {
+export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps): ReactElement {
   const [width, setWidth] = useState<number>(
     column.width === undefined || column.width === 'auto' ? 100 : column.width
   );
@@ -63,23 +63,10 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
       <Divider orientation="vertical" flexItem />
 
       <Stack gap={2} justifyContent="space-between" alignItems="start">
-        <FormControlLabel
-          label="Alignment"
-          sx={{ width: '100%', alignItems: 'start' }}
-          labelPlacement="top"
-          control={
-            <AlignSelector
-              size="medium"
-              value={column.align ?? 'left'}
-              onChange={(align) => onChange({ ...column, align: align })}
-            />
-          }
-        />
-
-        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
           <FormControlLabel
             label="Hide column"
-            sx={{ width: '100%', alignItems: 'start' }}
+            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap' }}
             labelPlacement="top"
             control={
               <Switch
@@ -89,10 +76,25 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
+          <FormControlLabel
+            label="Alignment"
+            sx={{ width: '100%', alignItems: 'start', margin: 0 }}
+            labelPlacement="top"
+            control={
+              <AlignSelector
+                size="medium"
+                value={column.align ?? 'left'}
+                sx={{ margin: 0.5 }}
+                onChange={(align) => onChange({ ...column, align: align })}
+              />
+            }
+          />
+        </Stack>
 
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
           <FormControlLabel
             label="Enable sorting"
-            sx={{ width: '100%', alignItems: 'start' }}
+            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap' }}
             labelPlacement="top"
             control={
               <Switch
@@ -102,12 +104,33 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
               />
             }
           />
+
+          <FormControlLabel
+            label="Default Sort"
+            sx={{
+              width: '100%',
+              alignItems: 'start',
+              margin: 0,
+              visibility: column.enableSorting ? 'visible' : 'hidden',
+            }}
+            labelPlacement="top"
+            control={
+              <SortSelectorButtons
+                size="medium"
+                value={column.sort}
+                sx={{
+                  margin: 0.5,
+                }}
+                onChange={(sort) => onChange({ ...column, sort: sort })}
+              />
+            }
+          />
         </Stack>
 
-        <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ width: '100%' }} gap={1}>
           <FormControlLabel
             label="Custom width"
-            sx={{ width: '100%', alignItems: 'start' }}
+            sx={{ width: '100%', alignItems: 'start', textWrap: 'nowrap', flex: 1 }}
             labelPlacement="top"
             control={
               <Switch
@@ -122,7 +145,7 @@ export function ColumnEditor({ column, onChange, ...others }: ColumnEditorProps)
             value={width}
             fullWidth
             // set visibility instead of wrapping in a if condition, in order to keep same layout
-            sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible' }}
+            sx={{ visibility: column.width === 'auto' || column.width === undefined ? 'hidden' : 'visible', flex: 2 }}
             InputProps={{ inputProps: { min: 1 } }}
             onChange={(e) => {
               setWidth(+e.target.value);

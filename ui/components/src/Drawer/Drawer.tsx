@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Drawer as MuiDrawer, DrawerProps as MuiDrawerProps, useMediaQuery } from '@mui/material';
+import { ReactElement } from 'react';
 import { combineSx } from '../utils';
 
 export interface DrawerProps extends MuiDrawerProps {
@@ -22,7 +23,14 @@ export interface DrawerProps extends MuiDrawerProps {
 
 const DRAWER_DEFAULT_WIDTH = 1080;
 
-export const Drawer = ({ anchor = 'right', isOpen, onClose, PaperProps, children, ...rest }: DrawerProps) => {
+export const Drawer = ({
+  anchor = 'right',
+  isOpen,
+  onClose,
+  PaperProps,
+  children,
+  ...rest
+}: DrawerProps): ReactElement => {
   const isSmaller = useMediaQuery(`(max-width:${DRAWER_DEFAULT_WIDTH}px)`);
 
   return (

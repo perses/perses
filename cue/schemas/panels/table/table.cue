@@ -13,12 +13,18 @@
 
 package model
 
-import "strings"
+import (
+	"strings"
+	"github.com/perses/perses/cue/schemas/common"
+)
 
 kind: "Table"
 spec: close({
-	density?: "compact" | "standard" | "comfortable"
+	density?:            "compact" | "standard" | "comfortable"
+	defaultColumnWidth?: "auto" | number
 	columnSettings?: [...#columnSettings]
+	cellSettings?: [...#cellSettings]
+	transforms?: [...common.#transform]
 })
 
 #columnSettings: {
@@ -28,6 +34,47 @@ spec: close({
 	cellDescription?:   string
 	align?:             "left" | "center" | "right"
 	enableSorting?:     bool
+	sort?:              "asc" | "desc"
 	width?:             number | "auto"
 	hide?:              bool
+}
+
+#valueCondition: {
+	kind: "Value"
+	spec: {
+		value: strings.MinRunes(1)
+	}
+}
+
+#rangeCondition: {
+	kind: "Range"
+	spec: {
+		min?: number
+		max?: number
+	}
+}
+
+#regexCondition: {
+	kind: "Regex"
+	spec: {
+		expr: strings.MinRunes(1)
+	}
+}
+
+#miscCondition: {
+	kind: "Misc"
+	spec: {
+		value: "empty" | "null" | "NaN" | "true" | "false"
+	}
+}
+
+#condition: {
+	#valueCondition | #rangeCondition | #regexCondition | #miscCondition
+}
+
+#cellSettings: {
+	condition:        #condition
+	text?:            string
+	textColor?:       =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
+	backgroundColor?: =~"^#(?:[0-9a-fA-F]{3}){1,2}$"
 }

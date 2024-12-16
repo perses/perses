@@ -11,18 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useRef, useState } from 'react';
+import { ReactElement, useMemo, useRef, useState } from 'react';
 import { Box, Stack, useTheme } from '@mui/material';
-import { Span } from '@perses-dev/core';
+import { Span, Trace } from '@perses-dev/core';
+import { TracingGanttChartOptions } from '../gantt-chart-model';
 import { MiniGanttChart } from './MiniGanttChart/MiniGanttChart';
 import { DetailPane } from './DetailPane/DetailPane';
 import { Viewport } from './utils';
 import { GanttTable } from './GanttTable/GanttTable';
 import { GanttTableProvider } from './GanttTable/GanttTableProvider';
 import { ResizableDivider } from './GanttTable/ResizableDivider';
+import { AttributeLinks } from './DetailPane/Attributes';
+import { getTraceModel } from './trace';
 
 export interface TracingGanttChartProps {
-  rootSpan: Span;
+  options: TracingGanttChartOptions;
+  attributeLinks?: AttributeLinks;
+  trace: Trace;
 }
 
 /**
@@ -31,15 +36,19 @@ export interface TracingGanttChartProps {
  * The UI/UX of this panel is based on Jaeger UI, licensed under Apache License, Version 2.0.
  * https://github.com/jaegertracing/jaeger-ui
  */
-export function TracingGanttChart(props: TracingGanttChartProps) {
-  const { rootSpan } = props;
+export function TracingGanttChart(props: TracingGanttChartProps): ReactElement {
+  const { options, attributeLinks, trace: coreTrace } = props;
 
   const theme = useTheme();
-  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
+  const trace = useMemo(() => {
+    // calculate (and memoize) common properties, for example start and end time of the trace
+    return getTraceModel(coreTrace);
+  }, [coreTrace]);
   const [viewport, setViewport] = useState<Viewport>({
-    startTimeUnixMs: rootSpan.startTimeUnixMs,
-    endTimeUnixMs: rootSpan.endTimeUnixMs,
+    startTimeUnixMs: trace.startTimeUnixMs,
+    endTimeUnixMs: trace.endTimeUnixMs,
   });
+  const [selectedSpan, setSelectedSpan] = useState<Span | undefined>(undefined);
 
   const ganttChart = useRef<HTMLDivElement>(null);
   // tableWidth only comes to effect if the detail pane is visible.
@@ -50,16 +59,27 @@ export function TracingGanttChart(props: TracingGanttChartProps) {
   return (
     <Stack ref={ganttChart} direction="row" sx={{ height: '100%', minHeight: '240px', gap }}>
       <Stack sx={{ flexGrow: 1, gap }}>
-        <MiniGanttChart rootSpan={rootSpan} viewport={viewport} setViewport={setViewport} />
+        <MiniGanttChart options={options} trace={trace} viewport={viewport} setViewport={setViewport} />
         <GanttTableProvider>
-          <GanttTable rootSpan={rootSpan} viewport={viewport} onSpanClick={setSelectedSpan} />
+          <GanttTable
+            options={options}
+            trace={trace}
+            viewport={viewport}
+            selectedSpan={selectedSpan}
+            onSpanClick={setSelectedSpan}
+          />
         </GanttTableProvider>
       </Stack>
       {selectedSpan && (
         <>
           <ResizableDivider parentRef={ganttChart} spacing={parseInt(theme.spacing(gap))} onMove={setTableWidth} />
           <Box sx={{ width: `${(1 - tableWidth) * 100}%`, overflow: 'auto' }}>
-            <DetailPane rootSpan={rootSpan} span={selectedSpan} onCloseBtnClick={() => setSelectedSpan(undefined)} />
+            <DetailPane
+              attributeLinks={attributeLinks}
+              trace={trace}
+              span={selectedSpan}
+              onCloseBtnClick={() => setSelectedSpan(undefined)}
+            />
           </Box>
         </>
       )}

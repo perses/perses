@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Dispatch, DispatchWithoutAction, useState } from 'react';
+import { Dispatch, DispatchWithoutAction, ReactElement, useState } from 'react';
 import { Button, FormControlLabel, MenuItem, Stack, Switch, TextField } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
@@ -42,7 +42,7 @@ interface CreateDashboardProps {
  * @param props.onClose Provides the function to close itself.
  * @param props.onSuccess Action to perform when user confirmed.
  */
-export const CreateDashboardDialog = (props: CreateDashboardProps) => {
+export const CreateDashboardDialog = (props: CreateDashboardProps): ReactElement => {
   const { open, projects, hideProjectSelect, mode, name, onClose, onSuccess } = props;
 
   const [isTempCopyChecked, setTempCopyChecked] = useState<boolean>(false);
@@ -50,7 +50,7 @@ export const CreateDashboardDialog = (props: CreateDashboardProps) => {
 
   // Disables closing on click out. This is a quick-win solution to make sure the currently-existing form
   // will be reset by the related child DuplicationForm component before closing.
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -90,7 +90,7 @@ interface DuplicationFormProps {
   onSuccess?: Dispatch<DashboardSelector | EphemeralDashboardInfo>;
 }
 
-const DashboardDuplicationForm = (props: DuplicationFormProps) => {
+const DashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => {
   const { projects, hideProjectSelect, onClose, onSuccess } = props;
 
   const dashboardSchemaValidation = useDashboardValidationSchema();
@@ -108,7 +108,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onClose();
     dashboardForm.reset();
   };
@@ -177,7 +177,7 @@ const DashboardDuplicationForm = (props: DuplicationFormProps) => {
   );
 };
 
-const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
+const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps): ReactElement => {
   const { projects, hideProjectSelect, onClose, onSuccess } = props;
 
   const ephemeralDashboardSchemaValidation = useEphemeralDashboardValidationSchema();
@@ -199,7 +199,7 @@ const EphemeralDashboardDuplicationForm = (props: DuplicationFormProps) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (): void => {
     onClose();
     ephemeralDashboardForm.reset();
   };

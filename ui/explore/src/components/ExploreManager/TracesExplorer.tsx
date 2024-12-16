@@ -16,14 +16,19 @@ import { Box, Stack } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, LoadingOverlay, NoDataOverlay } from '@perses-dev/components';
 import { Panel } from '@perses-dev/dashboards';
 import { QueryDefinition, isValidTraceId } from '@perses-dev/core';
+import { ReactElement } from 'react';
 import { PANEL_PREVIEW_HEIGHT } from './constants';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
+
+interface TracesExplorerQueryParams {
+  queries?: QueryDefinition[];
+}
 
 interface SearchResultsPanelProps {
   queries: QueryDefinition[];
 }
 
-function SearchResultsPanel({ queries }: SearchResultsPanelProps) {
+function SearchResultsPanel({ queries }: SearchResultsPanelProps): ReactElement {
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
 
   // no query executed, show empty panel
@@ -72,7 +77,7 @@ function SearchResultsPanel({ queries }: SearchResultsPanelProps) {
   );
 }
 
-function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
+function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }): ReactElement {
   return (
     <Panel
       panelOptions={{
@@ -86,12 +91,15 @@ function TracingGanttChartPanel({ queries }: { queries: QueryDefinition[] }) {
   );
 }
 
-export function TracesExplorer() {
-  const { queries, setQueries } = useExplorerManagerContext();
+export function TracesExplorer(): ReactElement {
+  const {
+    data: { queries = [] },
+    setData,
+  } = useExplorerManagerContext<TracesExplorerQueryParams>();
 
   // map TraceQueryDefinition to Definition<UnknownSpec>
   const definitions = queries.length
-    ? queries.map((query) => {
+    ? queries.map((query: QueryDefinition) => {
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
@@ -108,7 +116,11 @@ export function TracesExplorer() {
 
   return (
     <Stack gap={2} sx={{ width: '100%' }}>
-      <MultiQueryEditor queryTypes={['TraceQuery']} onChange={setQueries} queries={queries} />
+      <MultiQueryEditor
+        queryTypes={['TraceQuery']}
+        onChange={(newQueries) => setData({ queries: newQueries })}
+        queries={queries}
+      />
 
       <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[queries]}>
         <DataQueriesProvider definitions={definitions}>

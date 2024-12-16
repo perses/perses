@@ -14,6 +14,7 @@
 import { Switch, SwitchProps } from '@mui/material';
 import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
 import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,
@@ -63,23 +64,28 @@ const VALUE_OPTIONS: LegendValueOption[] = Object.entries(LEGEND_VALUE_CONFIG).m
 export interface LegendOptionsEditorProps {
   value?: LegendSpecOptions;
   onChange: (legend?: LegendSpecOptions) => void;
+  showValuesEditor?: boolean;
 }
 
-export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProps) {
+export function LegendOptionsEditor({
+  value,
+  onChange,
+  showValuesEditor = true,
+}: LegendOptionsEditorProps): ReactElement {
   const handleLegendShowChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
     // legend is hidden when legend obj is undefined
     const legendValue = checked === true ? { position: DEFAULT_LEGEND.position } : undefined;
     onChange(legendValue);
   };
 
-  const handleLegendPositionChange = (_: unknown, newValue: LegendPositionOption) => {
+  const handleLegendPositionChange = (_: unknown, newValue: LegendPositionOption): void => {
     onChange({
       ...value,
       position: newValue.id,
     });
   };
 
-  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption) => {
+  const handleLegendModeChange = (_: unknown, newValue: LegendModeOption): void => {
     onChange({
       ...value,
       position: currentPosition,
@@ -87,7 +93,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
-  const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption) => {
+  const handleLegendSizeChange = (_: unknown, newValue: LegendSizeOption): void => {
     onChange({
       ...value,
       position: currentPosition,
@@ -95,7 +101,7 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
     });
   };
 
-  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]) => {
+  const handleLegendValueChange = (_: unknown, newValue: LegendValueOption[]): void => {
     onChange({
       ...value,
       position: currentPosition,
@@ -178,27 +184,29 @@ export function LegendOptionsEditor({ value, onChange }: LegendOptionsEditorProp
           ></SettingsAutocomplete>
         }
       />
-      <OptionsEditorControl
-        label="Values"
-        control={
-          // For some reason, the inferred option type doesn't always seem to work
-          // quite right when `multiple` is true. Explicitly setting the generics
-          // to work around this.
-          <SettingsAutocomplete<LegendValueOption, true, true>
-            multiple={true}
-            disableCloseOnSelect
-            disableClearable
-            value={legendValuesConfig}
-            options={VALUE_OPTIONS}
-            onChange={handleLegendValueChange}
-            disabled={value === undefined || currentMode !== 'table'}
-            limitTags={1}
-            ChipProps={{
-              size: 'small',
-            }}
-          />
-        }
-      />
+      {showValuesEditor && (
+        <OptionsEditorControl
+          label="Values"
+          control={
+            // For some reason, the inferred option type doesn't always seem to work
+            // quite right when `multiple` is true. Explicitly setting the generics
+            // to work around this.
+            <SettingsAutocomplete<LegendValueOption, true, true>
+              multiple={true}
+              disableCloseOnSelect
+              disableClearable
+              value={legendValuesConfig}
+              options={VALUE_OPTIONS}
+              onChange={handleLegendValueChange}
+              disabled={value === undefined || currentMode !== 'table'}
+              limitTags={1}
+              ChipProps={{
+                size: 'small',
+              }}
+            />
+          }
+        />
+      )}
     </OptionsEditorGroup>
   );
 }

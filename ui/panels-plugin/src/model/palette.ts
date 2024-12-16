@@ -21,7 +21,7 @@ const ERROR_HUE_CUTOFF = 20;
 const colorGenerator = new ColorHash({ hue: { min: ERROR_HUE_CUTOFF, max: 360 } });
 const redColorGenerator = new ColorHash({ hue: { min: 0, max: ERROR_HUE_CUTOFF } });
 
-function computeConsistentColor(name: string, error: boolean) {
+function computeConsistentColor(name: string, error: boolean): string {
   const [hue, saturation, lightness] = error ? redColorGenerator.hsl(name) : colorGenerator.hsl(name);
   const saturationPercent = `${(saturation * 100).toFixed(0)}%`;
   const lightnessPercent = `${(lightness * 100).toFixed(0)}%`;
@@ -35,7 +35,7 @@ const colorLookup: Record<string, string> = {};
 /**
  * Return a consistent color for (name, error) tuple
  */
-export function getConsistentColor(name: string, error: boolean) {
+export function getConsistentColor(name: string, error: boolean): string {
   const key = `${name}_____${error}`;
   let value = colorLookup[key];
   if (!value) {
@@ -43,4 +43,24 @@ export function getConsistentColor(name: string, error: boolean) {
     colorLookup[key] = value;
   }
   return value;
+}
+
+export function getConsistentCategoricalColor(
+  name: string,
+  error: boolean,
+  categoricalPalette: string[],
+  errorPalette: string[]
+): string {
+  const palette = error ? errorPalette : categoricalPalette;
+  if (palette.length === 0) {
+    console.warn('getConsistentCategoricalColor() called with empty color palette, fallback to #000');
+    return '#000';
+  }
+
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  return palette[Math.abs(hash) % palette.length] ?? '#000';
 }

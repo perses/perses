@@ -14,7 +14,7 @@
 import { Button, Container, Divider, Stack, Typography } from '@mui/material';
 import AutoFix from 'mdi-material-ui/AutoFix';
 import Upload from 'mdi-material-ui/Upload';
-import { ChangeEvent, useState } from 'react';
+import { ChangeEvent, ReactElement, useState } from 'react';
 import { JSONEditor } from '@perses-dev/components';
 import { DashboardResource } from '@perses-dev/core';
 import { useIsMobileSize } from '../../utils/browser-size';
@@ -35,7 +35,7 @@ interface PersesDashboard {
   data: DashboardResource;
 }
 
-function ImportView() {
+function ImportView(): ReactElement {
   const [dashboard, setDashboard] = useState<Dashboard>();
   const isMobileSize = useIsMobileSize();
 
@@ -47,7 +47,7 @@ function ImportView() {
     return 'grafana';
   };
 
-  const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
+  const fileUploadOnChange = async (event: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const files = event.target.files;
     if (files === null) {
       return;
@@ -58,7 +58,7 @@ function ImportView() {
     }
   };
 
-  const completeDashboard = (dashboard: string | undefined) => {
+  const completeDashboard = (dashboard: string | undefined): void => {
     try {
       const json = JSON.parse(dashboard ?? '{}');
       const type = getDashboardType(json);

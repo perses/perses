@@ -79,17 +79,17 @@ func (p *plugin) generatePluginListFile() error {
 			continue
 		}
 		// now we need to read the manifest file to extract the info we are interested
-		if _, osErr := os.Stat(path.Join(p.path, file.Name(), manifestFileName)); errors.Is(osErr, os.ErrNotExist) {
+		if _, osErr := os.Stat(path.Join(p.path, file.Name(), ManifestFileName)); errors.Is(osErr, os.ErrNotExist) {
 			// The manifest doesn't exist, so we can ignore this folder, it's not a plugin, or the plugin is invalid.
 			logrus.Debugf("folder %q does not contain file mf-manifest.json, skipping it as it does not match the plugin architecture", file.Name())
 			continue
 		}
-		manifest, readErr := readManifest(path.Join(p.path, file.Name()))
+		manifest, readErr := ReadManifest(path.Join(p.path, file.Name()))
 		if readErr != nil {
 			logrus.WithError(readErr).Error("unable to read plugin manifest")
 			continue
 		}
-		npmPackageData, readErr := readPackage(path.Join(p.path, file.Name()))
+		npmPackageData, readErr := ReadPackage(path.Join(p.path, file.Name()))
 		if readErr != nil {
 			logrus.WithError(readErr).Error("unable to read plugin package.json")
 			continue
@@ -107,5 +107,5 @@ func (p *plugin) generatePluginListFile() error {
 	if marshalErr != nil {
 		return marshalErr
 	}
-	return os.WriteFile(path.Join(p.path, pluginFileName), marshalData, os.ModePerm)
+	return os.WriteFile(path.Join(p.path, pluginFileName), marshalData, 0644) // nolint: gosec
 }

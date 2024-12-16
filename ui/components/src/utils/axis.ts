@@ -18,13 +18,13 @@ import { formatValue, FormatOptions } from '@perses-dev/core';
 /*
  * Populate yAxis or xAxis properties, returns an Array since multiple axes will be supported in the future
  */
-export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOption, unit?: FormatOptions) {
+export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOption, unit?: FormatOptions): unknown[] {
   // TODO: support alternate yAxis that shows on right side
   const AXIS_DEFAULT = {
     type: 'value',
     boundaryGap: [0, '10%'],
     axisLabel: {
-      formatter: (value: number) => {
+      formatter: (value: number): string => {
         return formatValue(value, unit);
       },
     },
@@ -35,7 +35,7 @@ export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOpt
 /**
  * Calculate date range, used as a fallback when xAxis time range not passed as prop
  */
-export function getDateRange(data: number[]) {
+export function getDateRange(data: number[]): number {
   const defaultRange = 3600000; // hour in ms
   if (data.length === 0) return defaultRange;
   const lastDatum = data[data.length - 1];

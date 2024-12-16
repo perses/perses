@@ -40,10 +40,10 @@ export function dynamicImportPluginLoader(plugins: DynamicImportPlugin[]): Plugi
   );
 
   return {
-    async getInstalledPlugins() {
+    async getInstalledPlugins(): Promise<PluginModuleResource[]> {
       return Promise.resolve(Array.from(importMap.keys()));
     },
-    importPluginModule(resource) {
+    importPluginModule(resource): Promise<unknown> {
       const importFn = importMap.get(resource);
       if (importFn === undefined) {
         throw new Error('Plugin not found');

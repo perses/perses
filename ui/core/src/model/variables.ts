@@ -82,7 +82,7 @@ export interface GlobalVariableResource {
 
 export type Variable = VariableResource | GlobalVariableResource;
 
-export function getVariableProject(variable: Variable) {
+export function getVariableProject(variable: Variable): string | undefined {
   return 'project' in variable.metadata ? variable.metadata.project : undefined;
 }
 

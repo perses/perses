@@ -14,9 +14,9 @@
 import { Box, CircularProgress, Stack } from '@mui/material';
 import { ExternalVariableDefinition, OnSaveDashboard, ViewDashboard } from '@perses-dev/dashboards';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PluginRegistry, ValidationProvider } from '@perses-dev/plugin-system';
+import { PluginRegistry, UsageMetricsProvider, ValidationProvider } from '@perses-dev/plugin-system';
 import { DashboardResource, EphemeralDashboardResource, getResourceDisplayName } from '@perses-dev/core';
-import { useEffect, useMemo, useState } from 'react';
+import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { bundledPluginLoader } from '../../../model/bundled-plugins';
 import { CachedDatasourceAPI, HTTPDatasourceAPI } from '../../../model/datasource-api';
 import { buildGlobalVariableDefinition, buildProjectVariableDefinition } from '../../../utils/variables';
@@ -37,7 +37,7 @@ export interface GenericDashboardViewProps {
 /**
  * The View for displaying a Dashboard.
  */
-export function HelperDashboardView(props: GenericDashboardViewProps) {
+export function HelperDashboardView(props: GenericDashboardViewProps): ReactElement {
   const { dashboardResource, onSave, onDiscard, isReadonly, isEditing, isCreating } = props;
 
   const [datasourceApi] = useState(() => new CachedDatasourceAPI(new HTTPDatasourceAPI()));
@@ -89,23 +89,25 @@ export function HelperDashboardView(props: GenericDashboardViewProps) {
         >
           <ValidationProvider>
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <ViewDashboard
-                dashboardResource={dashboardResource}
-                datasourceApi={datasourceApi}
-                externalVariableDefinitions={externalVariableDefinitions}
-                dashboardTitleComponent={
-                  <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
-                }
-                emptyDashboardProps={{
-                  additionalText: 'In order to save this dashboard, you need to add at least one panel!',
-                }}
-                onSave={onSave}
-                onDiscard={onDiscard}
-                initialVariableIsSticky={true}
-                isReadonly={isReadonly}
-                isEditing={isEditing}
-                isCreating={isCreating}
-              />
+              <UsageMetricsProvider project={project.metadata.name} dashboard={dashboardResource.metadata.name}>
+                <ViewDashboard
+                  dashboardResource={dashboardResource}
+                  datasourceApi={datasourceApi}
+                  externalVariableDefinitions={externalVariableDefinitions}
+                  dashboardTitleComponent={
+                    <ProjectBreadcrumbs dashboardName={getResourceDisplayName(dashboardResource)} project={project} />
+                  }
+                  emptyDashboardProps={{
+                    additionalText: 'In order to save this dashboard, you need to add at least one panel!',
+                  }}
+                  onSave={onSave}
+                  onDiscard={onDiscard}
+                  initialVariableIsSticky={true}
+                  isReadonly={isReadonly}
+                  isEditing={isEditing}
+                  isCreating={isCreating}
+                />
+              </UsageMetricsProvider>
             </ErrorBoundary>
           </ValidationProvider>
         </PluginRegistry>

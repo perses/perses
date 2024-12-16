@@ -88,6 +88,9 @@ func TestPreviewCMD(t *testing.T) {
 - project: perses
   dashboard: NodeExporter
   preview: http://localhost:8080/projects/perses/ephemeraldashboards/NodeExporter
+- project: testing
+  dashboard: tracing
+  preview: http://localhost:8080/projects/testing/ephemeraldashboards/tracing
 
 `,
 		},
@@ -142,6 +145,9 @@ func TestPreviewCMD(t *testing.T) {
 - project: perses
   dashboard: NodeExporter
   preview: http://localhost:8080/projects/perses/ephemeraldashboards/pr-1664-NodeExporter
+- project: testing
+  dashboard: tracing
+  preview: http://localhost:8080/projects/testing/ephemeraldashboards/pr-1664-tracing
 
 `,
 		},
@@ -151,7 +157,7 @@ func TestPreviewCMD(t *testing.T) {
 			APIClient:       fakeapi.New(),
 			Config:          config.Config{Dac: config.Dac{OutputFolder: "../../../../../dev/data/9-dashboard.json"}},
 			IsErrorExpected: false,
-			ExpectedMessage: `[{"project":"perses","dashboard":"Demo","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Demo"},{"project":"perses","dashboard":"Benchmark","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Benchmark"},{"project":"testing","dashboard":"PanelGroups","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/PanelGroups"},{"project":"testing","dashboard":"Panels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Panels"},{"project":"testing","dashboard":"Variables","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Variables"},{"project":"testing","dashboard":"MarkdownPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/MarkdownPanel"},{"project":"testing","dashboard":"TimeSeriesChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartPanel"},{"project":"testing","dashboard":"GaugeChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/GaugeChartPanel"},{"project":"testing","dashboard":"StatChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/StatChartPanel"},{"project":"testing","dashboard":"DuplicatePanels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/DuplicatePanels"},{"project":"testing","dashboard":"EditJson","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/EditJson"},{"project":"testing","dashboard":"Defaults","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Defaults"},{"project":"testing","dashboard":"TimeSeriesChartLegends","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartLegends"},{"project":"testing","dashboard":"table","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/table"},{"project":"perses","dashboard":"NodeExporter","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/NodeExporter"}]
+			ExpectedMessage: `[{"project":"perses","dashboard":"Demo","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Demo"},{"project":"perses","dashboard":"Benchmark","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/Benchmark"},{"project":"testing","dashboard":"PanelGroups","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/PanelGroups"},{"project":"testing","dashboard":"Panels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Panels"},{"project":"testing","dashboard":"Variables","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Variables"},{"project":"testing","dashboard":"MarkdownPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/MarkdownPanel"},{"project":"testing","dashboard":"TimeSeriesChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartPanel"},{"project":"testing","dashboard":"GaugeChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/GaugeChartPanel"},{"project":"testing","dashboard":"StatChartPanel","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/StatChartPanel"},{"project":"testing","dashboard":"DuplicatePanels","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/DuplicatePanels"},{"project":"testing","dashboard":"EditJson","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/EditJson"},{"project":"testing","dashboard":"Defaults","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/Defaults"},{"project":"testing","dashboard":"TimeSeriesChartLegends","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/TimeSeriesChartLegends"},{"project":"testing","dashboard":"table","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/table"},{"project":"perses","dashboard":"NodeExporter","preview":"http://localhost:8080/projects/perses/ephemeraldashboards/NodeExporter"},{"project":"testing","dashboard":"tracing","preview":"http://localhost:8080/projects/testing/ephemeraldashboards/tracing"}]
 `,
 		},
 	}

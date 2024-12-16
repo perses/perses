@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, UseMutationResult } from '@tanstack/react-query';
 import { DashboardResource, fetchJson } from '@perses-dev/core';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodPOST } from './http';
@@ -23,7 +23,7 @@ export interface MigrateBodyRequest {
   grafanaDashboard: Record<string, unknown>;
 }
 
-export function useMigrate() {
+export function useMigrate(): UseMutationResult<DashboardResource, Error, MigrateBodyRequest> {
   return useMutation<DashboardResource, Error, MigrateBodyRequest>({
     mutationKey: [resource],
     mutationFn: (body) => {

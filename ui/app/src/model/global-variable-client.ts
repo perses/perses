@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { GlobalVariableResource } from '@perses-dev/core';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import buildURL from './url-builder';
 import { HTTPHeader, HTTPMethodDELETE, HTTPMethodGET, HTTPMethodPOST, HTTPMethodPUT } from './http';
 import { buildQueryKey } from './querykey-builder';
@@ -20,7 +20,7 @@ import { fetch, fetchJson } from './fetch';
 
 const resource = 'globalvariables';
 
-export function createGlobalVariable(entity: GlobalVariableResource) {
+export function createGlobalVariable(entity: GlobalVariableResource): Promise<GlobalVariableResource> {
   const url = buildURL({ resource });
   return fetchJson<GlobalVariableResource>(url, {
     method: HTTPMethodPOST,
@@ -29,7 +29,7 @@ export function createGlobalVariable(entity: GlobalVariableResource) {
   });
 }
 
-function getGlobalVariable(name: string) {
+function getGlobalVariable(name: string): Promise<GlobalVariableResource> {
   const url = buildURL({ resource, name });
   return fetchJson<GlobalVariableResource>(url, {
     method: HTTPMethodGET,
@@ -37,7 +37,7 @@ function getGlobalVariable(name: string) {
   });
 }
 
-function getGlobalVariables() {
+function getGlobalVariables(): Promise<GlobalVariableResource[]> {
   const url = buildURL({ resource });
   return fetchJson<GlobalVariableResource[]>(url, {
     method: HTTPMethodGET,
@@ -45,7 +45,7 @@ function getGlobalVariables() {
   });
 }
 
-export function updateGlobalVariable(entity: GlobalVariableResource) {
+export function updateGlobalVariable(entity: GlobalVariableResource): Promise<GlobalVariableResource> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetchJson<GlobalVariableResource>(url, {
@@ -55,7 +55,7 @@ export function updateGlobalVariable(entity: GlobalVariableResource) {
   });
 }
 
-export function deleteGlobalVariable(entity: GlobalVariableResource) {
+export function deleteGlobalVariable(entity: GlobalVariableResource): Promise<Response> {
   const name = entity.metadata.name;
   const url = buildURL({ resource, name });
   return fetch(url, {
@@ -68,7 +68,7 @@ export function deleteGlobalVariable(entity: GlobalVariableResource) {
  * Used to get a global variable from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalVariable(name: string) {
+export function useGlobalVariable(name: string): UseQueryResult<GlobalVariableResource> {
   return useQuery<GlobalVariableResource, Error>({
     queryKey: buildQueryKey({ resource, name }),
     queryFn: () => {
@@ -81,7 +81,7 @@ export function useGlobalVariable(name: string) {
  * Used to get global variables from the API.
  * Will automatically be refreshed when cache is invalidated
  */
-export function useGlobalVariableList() {
+export function useGlobalVariableList(): UseQueryResult<GlobalVariableResource[]> {
   return useQuery<GlobalVariableResource[], Error>({
     queryKey: buildQueryKey({ resource }),
     queryFn: () => {
@@ -94,7 +94,11 @@ export function useGlobalVariableList() {
  * Returns a mutation that can be used to create a global variable.
  * Will automatically refresh the cache for all the list.
  */
-export function useCreateGlobalVariableMutation() {
+export function useCreateGlobalVariableMutation(): UseMutationResult<
+  GlobalVariableResource,
+  Error,
+  GlobalVariableResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
@@ -113,7 +117,11 @@ export function useCreateGlobalVariableMutation() {
  * Returns a mutation that can be used to update a global variable.
  * Will automatically refresh the cache for all the list.
  */
-export function useUpdateGlobalVariableMutation() {
+export function useUpdateGlobalVariableMutation(): UseMutationResult<
+  GlobalVariableResource,
+  Error,
+  GlobalVariableResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 
@@ -135,7 +143,11 @@ export function useUpdateGlobalVariableMutation() {
  * Returns a mutation that can be used to delete a global variable.
  * Will automatically refresh the cache for all the list.
  */
-export function useDeleteGlobalVariableMutation() {
+export function useDeleteGlobalVariableMutation(): UseMutationResult<
+  GlobalVariableResource,
+  Error,
+  GlobalVariableResource
+> {
   const queryClient = useQueryClient();
   const queryKey = buildQueryKey({ resource });
 

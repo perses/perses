@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { Role } from '@perses-dev/core';
-import { Dispatch, useState } from 'react';
+import { Dispatch, ReactElement, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { DrawerProps } from '../drawer';
+import { DrawerProps } from '../form-drawers';
 import { DeleteResourceDialog } from '../dialogs';
 import { RoleEditorForm } from './RoleEditorForm';
 
@@ -22,13 +22,21 @@ interface RoleDrawerProps<T extends Role> extends DrawerProps<T> {
   role: T;
 }
 
-export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
-  const { role, isOpen, action, isReadonly, onSave, onClose, onDelete } = props;
+export function RoleDrawer<T extends Role>({
+  role,
+  action,
+  isOpen,
+  isReadonly,
+  onActionChange,
+  onSave,
+  onClose,
+  onDelete,
+}: RoleDrawerProps<T>): ReactElement {
   const [isDeleteRoleDialogStateOpened, setDeleteRoleDialogStateOpened] = useState<boolean>(false);
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = () => {
+  const handleClickOut = (): void => {
     /* do nothing */
   };
 
@@ -37,13 +45,14 @@ export function RoleDrawer<T extends Role>(props: RoleDrawerProps<T>) {
       <ErrorBoundary FallbackComponent={ErrorAlert}>
         {isOpen && (
           <RoleEditorForm
-            initialRole={role}
-            initialAction={action}
+            initialValue={role}
+            action={action}
             isDraft={false}
             isReadonly={isReadonly}
+            onActionChange={onActionChange}
             onSave={onSave as Dispatch<Role>}
             onClose={onClose}
-            onDelete={onDelete ? () => setDeleteRoleDialogStateOpened(true) : undefined}
+            onDelete={onDelete ? (): void => setDeleteRoleDialogStateOpened(true) : undefined}
           />
         )}
         {onDelete && (

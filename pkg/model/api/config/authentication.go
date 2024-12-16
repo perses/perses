@@ -20,12 +20,12 @@ import (
 
 	"github.com/perses/perses/pkg/model/api/v1/common"
 	"github.com/perses/perses/pkg/model/api/v1/secret"
-	"github.com/prometheus/common/model"
 )
 
 const (
 	DefaultAccessTokenTTL  = time.Minute * 15
 	DefaultRefreshTokenTTL = time.Hour * 24
+	DefaultProviderTimeout = time.Minute * 1
 )
 
 type OAuthOverride struct {
@@ -45,16 +45,28 @@ func appendIfMissing[T comparable](slice []T, value T) ([]T, bool) {
 	return append(slice, value), true
 }
 
+type HTTP struct {
+	Timeout   common.Duration   `json:"timeout" yaml:"timeout"`
+	TLSConfig *secret.TLSConfig `json:"tls_config" yaml:"tls_config"`
+}
+
+func (h *HTTP) Verify() error {
+	if h.Timeout == 0 {
+		h.Timeout = common.Duration(DefaultProviderTimeout)
+	}
+	return nil
+}
+
 type Provider struct {
 	SlugID            string         `json:"slug_id" yaml:"slug_id"`
 	Name              string         `json:"name" yaml:"name"`
 	ClientID          secret.Hidden  `json:"client_id" yaml:"client_id"`
-	ClientSecret      secret.Hidden  `json:"client_secret" yaml:"client_secret"`
+	ClientSecret      secret.Hidden  `json:"client_secret,omitempty" yaml:"client_secret,omitempty"`
 	DeviceCode        *OAuthOverride `json:"device_code,omitempty" yaml:"device_code,omitempty"`
 	ClientCredentials *OAuthOverride `json:"client_credentials,omitempty" yaml:"client_credentials,omitempty"`
 	RedirectURI       common.URL     `json:"redirect_uri,omitempty" yaml:"redirect_uri,omitempty"`
 	Scopes            []string       `json:"scopes,omitempty" yaml:"scopes,omitempty"`
-	DisablePKCE       bool           `json:"disable_pkce" yaml:"disable_pkce"`
+	HTTP              HTTP           `json:"http" yaml:"http"`
 }
 
 func (p *Provider) Verify() error {
@@ -67,9 +79,6 @@ func (p *Provider) Verify() error {
 	if p.ClientID == "" {
 		return errors.New("provider's `client_id` is mandatory")
 	}
-	if p.ClientSecret == "" {
-		return errors.New("provider's `client_secret` is mandatory")
-	}
 	return nil
 }
 
@@ -78,6 +87,7 @@ type OIDCProvider struct {
 	Issuer       common.URL        `json:"issuer" yaml:"issuer"`
 	DiscoveryURL common.URL        `json:"discovery_url,omitempty" yaml:"discovery_url,omitempty"`
 	URLParams    map[string]string `json:"url_params,omitempty" yaml:"url_params,omitempty"`
+	DisablePKCE  bool              `json:"disable_pkce" yaml:"disable_pkce"`
 }
 
 func (p *OIDCProvider) Verify() error {
@@ -137,11 +147,11 @@ func (p *AuthProviders) Verify() error {
 
 type AuthenticationConfig struct {
 	// AccessTokenTTL is the time to live of the access token. By default, it is 15 minutes.
-	AccessTokenTTL model.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
+	AccessTokenTTL common.Duration `json:"access_token_ttl,omitempty" yaml:"access_token_ttl,omitempty"`
 	// RefreshTokenTTL is the time to live of the refresh token.
 	// The refresh token is used to get a new access token when it is expired.
 	// By default, it is 24 hours.
-	RefreshTokenTTL model.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
+	RefreshTokenTTL common.Duration `json:"refresh_token_ttl,omitempty" yaml:"refresh_token_ttl,omitempty"`
 	// DisableSignUp deactivates the Sign-up page in the UI.
 	// It also disables the endpoint that gives the possibility to create a user.
 	DisableSignUp bool `json:"disable_sign_up" yaml:"disable_sign_up"`
@@ -151,10 +161,10 @@ type AuthenticationConfig struct {
 
 func (a *AuthenticationConfig) Verify() error {
 	if a.AccessTokenTTL == 0 {
-		a.AccessTokenTTL = model.Duration(DefaultAccessTokenTTL)
+		a.AccessTokenTTL = common.Duration(DefaultAccessTokenTTL)
 	}
 	if a.RefreshTokenTTL == 0 {
-		a.RefreshTokenTTL = model.Duration(DefaultRefreshTokenTTL)
+		a.RefreshTokenTTL = common.Duration(DefaultRefreshTokenTTL)
 	}
 	return nil
 }

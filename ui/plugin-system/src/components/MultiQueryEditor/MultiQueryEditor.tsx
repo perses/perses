@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
@@ -60,14 +60,14 @@ function useDefaultQueryDefinition(queryTypes: QueryPluginType[]): QueryDefiniti
  * @param onChange The callback to call when the queries are modified
  * @constructor
  */
-export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps) {
+export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQueryEditorProps): ReactElement {
   const defaultInitialQueryDefinition = useDefaultQueryDefinition(queryTypes);
 
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
 
   // Query handlers
-  const handleQueryChange = (index: number, queryDef: QueryDefinition) => {
+  const handleQueryChange = (index: number, queryDef: QueryDefinition): void => {
     onChange(
       produce(queries, (draft) => {
         if (draft) {
@@ -79,7 +79,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
     );
   };
 
-  const handleQueryAdd = () => {
+  const handleQueryAdd = (): void => {
     onChange(
       produce(queries, (draft) => {
         if (draft) {
@@ -95,7 +95,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
     });
   };
 
-  const handleQueryDelete = (index: number) => {
+  const handleQueryDelete = (index: number): void => {
     onChange(
       produce(queries, (draft) => {
         draft.splice(index, 1);
@@ -107,7 +107,7 @@ export function MultiQueryEditor({ queryTypes, queries = [], onChange }: MultiQu
     });
   };
 
-  const handleQueryCollapseExpand = (index: number) => {
+  const handleQueryCollapseExpand = (index: number): void => {
     setQueriesCollapsed((queriesCollapsed) => {
       queriesCollapsed[index] = !queriesCollapsed[index];
       return [...queriesCollapsed];

@@ -12,7 +12,9 @@
 // limitations under the License.
 
 import { Span, SpanStatusError } from '@perses-dev/core';
-import { getConsistentColor } from '../../../model/palette';
+import { PersesChartsTheme } from '@perses-dev/components';
+import { Theme } from '@mui/material';
+import { getConsistentCategoricalColor, getConsistentColor } from '../../../model/palette';
 
 /**
  * Viewport contains the current zoom, i.e. which timeframe of the trace should be visible
@@ -22,17 +24,46 @@ export interface Viewport {
   endTimeUnixMs: number;
 }
 
+/** minimum span width, i.e. increase width if the calculated width is too small to be visible */
+export const minSpanWidthPx = 2;
 export const rowHeight = '2rem';
-export const spanHasError = (span: Span) => span.status?.code === SpanStatusError;
-export const getConsistentServiceColor = (serviceName: string) => getConsistentColor(serviceName, false);
-export const getConsistentSpanColor = (span: Span) => getConsistentColor(span.resource.serviceName, spanHasError(span));
+export const spanHasError = (span: Span): boolean => span.status?.code === SpanStatusError;
 
-export function formatDuration(timeMs: number) {
+export function getServiceColor(
+  muiTheme: Theme,
+  chartsTheme: PersesChartsTheme,
+  paletteMode: 'auto' | 'categorical' | undefined,
+  serviceName: string,
+  error = false
+): string {
+  switch (paletteMode) {
+    case 'categorical': {
+      // ECharts type for color is not always an array but it is always an array in ChartsProvider
+      const categoricalPalette = chartsTheme.echartsTheme.color as string[];
+      const errorPalette = [muiTheme.palette.error.light, muiTheme.palette.error.main, muiTheme.palette.error.dark];
+      return getConsistentCategoricalColor(serviceName, error, categoricalPalette, errorPalette);
+    }
+
+    default:
+      return getConsistentColor(serviceName, error);
+  }
+}
+
+export function getSpanColor(
+  muiTheme: Theme,
+  chartsTheme: PersesChartsTheme,
+  paletteMode: 'auto' | 'categorical' | undefined,
+  span: Span
+): string {
+  return getServiceColor(muiTheme, chartsTheme, paletteMode, span.resource.serviceName, spanHasError(span));
+}
+
+export function formatDuration(timeMs: number): string {
   if (timeMs < 1) {
     return `${Math.round(timeMs * 1000)}μs`;
   }
   if (timeMs < 1000) {
-    return `${timeMs.toFixed(0)}ms`;
+    return `${+timeMs.toFixed(2)}ms`;
   }
   return `${+(timeMs / 1000).toFixed(2)}s`;
 }

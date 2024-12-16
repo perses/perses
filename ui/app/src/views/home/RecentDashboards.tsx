@@ -13,10 +13,11 @@
 
 import { Card, Stack } from '@mui/material';
 import HistoryIcon from 'mdi-material-ui/History';
+import { ReactElement } from 'react';
 import { RecentDashboardList } from '../../components/DashboardList/RecentDashboardList';
 import { useRecentDashboardList } from '../../model/dashboard-client';
 
-export function RecentDashboards() {
+export function RecentDashboards(): ReactElement {
   const { data, isLoading } = useRecentDashboardList();
 
   return (

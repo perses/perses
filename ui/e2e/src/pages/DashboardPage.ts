@@ -118,39 +118,39 @@ export class DashboardPage {
     this.alert = page.getByRole('alert');
   }
 
-  async startEditing() {
+  async startEditing(): Promise<void> {
     await this.editButton.click();
     await this.cancelButton.isVisible();
   }
 
-  async saveChanges() {
+  async saveChanges(): Promise<void> {
     await this.saveButton.click();
     await this.editButton.isVisible();
     await expect(this.alert).toContainText('success');
   }
 
-  getDialog(name: string) {
+  getDialog(name: string): Locator {
     return this.page.getByRole('dialog', {
       name: name,
     });
   }
 
-  getVariable(name: string) {
+  getVariable(name: string): Locator {
     return this.page.getByTestId('variable-' + name).getByRole('combobox');
   }
 
   /**
    * THEME HELPERS
    */
-  isDarkMode() {
+  isDarkMode(): void {
     expect(this.themeToggle.locator('#dark')).toBeDefined();
   }
 
-  isLightMode() {
+  isLightMode(): void {
     expect(this.themeToggle.locator('#light')).toBeDefined();
   }
 
-  async toggleTheme() {
+  async toggleTheme(): Promise<void> {
     await this.themeToggle.click();
     await this.page.mouse.move(-200, -200);
   }
@@ -161,7 +161,7 @@ export class DashboardPage {
    * before taking a screenshot because the dashboard reloads on changing the
    * theme.
    */
-  async forEachTheme(callback: (themeName: ThemeName) => Promise<void>) {
+  async forEachTheme(callback: (themeName: ThemeName) => Promise<void>): Promise<void> {
     this.isLightMode();
     await callback('light');
 
@@ -174,7 +174,7 @@ export class DashboardPage {
    * PANEL EDITOR HELPERS
    */
 
-  getPanelEditor() {
+  getPanelEditor(): PanelEditor {
     return new PanelEditor(this.panelEditor);
   }
 
@@ -182,12 +182,12 @@ export class DashboardPage {
    * PANEL GROUP HELPERS
    */
 
-  getPanelGroup(panelGroupName: string) {
+  getPanelGroup(panelGroupName: string): PanelGroup {
     const container = this.panelGroups.filter({ hasText: panelGroupName });
     return new PanelGroup(container);
   }
 
-  async addPanelGroup(panelGrouName: string) {
+  async addPanelGroup(panelGrouName: string): Promise<void> {
     await this.addPanelGroupButton.click();
     const dialog = this.getDialog('add panel group');
     const nameInput = dialog.getByLabel('Name');
@@ -195,7 +195,7 @@ export class DashboardPage {
     await dialog.getByRole('button', { name: 'Add' }).click();
   }
 
-  async editPanelGroup(panelGrouName: string, { name }: PanelGroupConfig) {
+  async editPanelGroup(panelGrouName: string, { name }: PanelGroupConfig): Promise<void> {
     const panelGroup = this.getPanelGroup(panelGrouName);
     await panelGroup.startEditing();
     const dialog = this.getDialog('edit panel group');
@@ -205,14 +205,14 @@ export class DashboardPage {
     await dialog.getByRole('button', { name: 'Apply' }).click();
   }
 
-  async deletePanelGroup(panelGroupName: string) {
+  async deletePanelGroup(panelGroupName: string): Promise<void> {
     const panelGroup = this.getPanelGroup(panelGroupName);
     await panelGroup.delete();
     const dialog = this.getDialog('delete panel group');
     await dialog.getByRole('button', { name: 'Delete' }).click();
   }
 
-  async addPanelToGroup(panelGroupName: string) {
+  async addPanelToGroup(panelGroupName: string): Promise<void> {
     const panelGroup = this.getPanelGroup(panelGroupName);
     await panelGroup.addPanel();
   }
@@ -221,11 +221,11 @@ export class DashboardPage {
    * PANEL HELPERS
    */
 
-  async addPanel() {
+  async addPanel(): Promise<void> {
     await this.addPanelButton.click();
   }
 
-  async addMarkdownPanel(panelName: string) {
+  async addMarkdownPanel(panelName: string): Promise<void> {
     await this.editNewPanel(async (panelEditor) => {
       await panelEditor.nameInput.type(panelName);
       await panelEditor.selectType('Markdown');
@@ -237,7 +237,7 @@ export class DashboardPage {
    * up by name. Useful for internal helper functions that can support taking
    * a name or a panel.
    */
-  private getPanelByNameOrSelf(panelNameOrPanel: PanelNameOrPanel) {
+  private getPanelByNameOrSelf(panelNameOrPanel: PanelNameOrPanel): Panel {
     // If the passed value is already a panel, return it. Useful for internal
     // helper functions that want to support taking a name or a panel.
     if (typeof panelNameOrPanel !== 'string') {
@@ -247,7 +247,7 @@ export class DashboardPage {
     return this.getPanelByName(panelNameOrPanel);
   }
 
-  getPanels(group?: PanelGroup) {
+  getPanels(group?: PanelGroup): Locator {
     const parent = group ? group.container : this.page;
 
     return parent.getByTestId('panel');
@@ -295,7 +295,10 @@ export class DashboardPage {
    * @param callback - Async function that is called after the panel editor is
    * opened and before the changes in the panel editor are applied.
    */
-  async editPanel(panelNameOrPanel: PanelNameOrPanel, callback: (panelEditor: PanelEditor) => Promise<void>) {
+  async editPanel(
+    panelNameOrPanel: PanelNameOrPanel,
+    callback: (panelEditor: PanelEditor) => Promise<void>
+  ): Promise<void> {
     const panel = this.getPanelByNameOrSelf(panelNameOrPanel);
 
     await panel.startEditing();
@@ -318,7 +321,7 @@ export class DashboardPage {
    * @param callback - Async function that is called after the panel editor is
    * opened and before the changes in the panel editor are applied.
    */
-  async editNewPanel(callback: (panelEditor: PanelEditor) => Promise<void>) {
+  async editNewPanel(callback: (panelEditor: PanelEditor) => Promise<void>): Promise<void> {
     const panelEditor = new PanelEditor(this.panelEditor);
     await panelEditor.isVisible();
 
@@ -328,7 +331,7 @@ export class DashboardPage {
     await panelEditor.isClosed();
   }
 
-  async removePanel(panelNameOrPanel: PanelNameOrPanel) {
+  async removePanel(panelNameOrPanel: PanelNameOrPanel): Promise<void> {
     const panel = this.getPanelByNameOrSelf(panelNameOrPanel);
 
     panel.delete();
@@ -340,13 +343,13 @@ export class DashboardPage {
    * VARIABLE HELPERS
    */
 
-  async startEditingVariables() {
+  async startEditingVariables(): Promise<void> {
     await this.editVariablesButton.click();
     const variableEditor = this.getVariableEditor();
     await variableEditor.isVisible();
   }
 
-  getVariableEditor() {
+  getVariableEditor(): VariableEditor {
     return new VariableEditor(this.variableEditor);
   }
 
@@ -358,7 +361,7 @@ export class DashboardPage {
    * Mock responses from '/api/v1/query_range' by the query parameter in the
    * request. Useful for stabilizing charts when taking screenshots.
    */
-  async mockQueryRangeRequests({ queries }: MockQueryRangeConfig) {
+  async mockQueryRangeRequests({ queries }: MockQueryRangeConfig): Promise<void> {
     // Mock data response, so we can make assertions on consistent response data.
     await this.page.route('**/api/v1/query_range', (route) => {
       const request = route.request();
@@ -377,20 +380,20 @@ export class DashboardPage {
     });
   }
 
-  async cleanupMockRequests() {
+  async cleanupMockRequests(): Promise<void> {
     await this.page.unroute('**/api/v1/query_range');
   }
 
   /**
    * Beadcrumbs Helper
    */
-  async goBackToHomePage() {
+  async goBackToHomePage(): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.page.getByRole('link', { name: 'Home' }).click();
     await navigationPromise;
   }
 
-  async goBackToProjectPage(projectName: string) {
+  async goBackToProjectPage(projectName: string): Promise<void> {
     const navigationPromise = this.page.waitForNavigation();
     await this.page.getByRole('link', { name: projectName }).first().click();
     await navigationPromise;

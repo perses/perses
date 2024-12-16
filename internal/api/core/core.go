@@ -24,7 +24,6 @@ import (
 	"github.com/perses/perses/internal/api/dashboard"
 	"github.com/perses/perses/internal/api/dependency"
 	"github.com/perses/perses/internal/api/discovery"
-	"github.com/perses/perses/internal/api/migrate"
 	"github.com/perses/perses/internal/api/provisioning"
 	"github.com/perses/perses/internal/api/rbac"
 	"github.com/perses/perses/internal/api/schemas"
@@ -59,11 +58,7 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 	if err != nil {
 		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of schemas: %w", err)
 	}
-	// enable hot reload of the migration schemas
-	migrateWatcher, migrateReloader, err := migrate.NewHotReloaders(serviceManager.GetMigration())
-	if err != nil {
-		return nil, nil, fmt.Errorf("unable to instantiate the tasks for hot reload of migration schema: %w", err)
-	}
+
 	// enable cleanup of the ephemeral dashboards once their ttl is reached
 	if conf.EphemeralDashboard.Enable {
 		ephemeralDashboardsCleaner, err := dashboard.NewEphemeralDashboardCleaner(persistenceManager.GetEphemeralDashboard())
@@ -73,10 +68,10 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		runner.WithTimerTasks(time.Duration(conf.EphemeralDashboard.CleanupInterval), ephemeralDashboardsCleaner)
 	}
 
-	runner.WithTasks(watcher, migrateWatcher)
+	runner.WithTasks(watcher)
 	// The Cuelang context used to validate the data is keeping in memory something when it validates a JSON.
 	// So to keep the memory low, we need sometime to flush the Cuelang context and that's what is done naturally with the reloader.
-	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader, migrateReloader)
+	runner.WithTimerTasks(time.Duration(conf.Schemas.Interval), reloader)
 
 	if len(conf.Provisioning.Folders) > 0 {
 		provisioningTask := provisioning.New(serviceManager, conf.Provisioning.Folders, persesDAO.IsCaseSensitive())
@@ -109,6 +104,9 @@ func New(conf config.Config, enablePprof bool, registry *prometheus.Registry, ba
 		Middleware(middleware.CheckProject(serviceManager.GetProject()))
 	if !conf.Frontend.Disable {
 		runner.HTTPServerBuilder().APIRegistration(persesFrontend)
+	}
+	if len(conf.APIPrefix) > 0 {
+		runner.HTTPServerBuilder().PreMiddleware(middleware.HandleAPIPrefix(conf.APIPrefix))
 	}
 	return runner, persistenceManager, nil
 }

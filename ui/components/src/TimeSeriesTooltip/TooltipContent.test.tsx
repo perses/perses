@@ -17,7 +17,7 @@ import { TooltipContent, TooltipContentProps } from './TooltipContent';
 import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
 describe('TooltipContent', () => {
-  const renderComponent = (props: TooltipContentProps) => {
+  const renderComponent = (props: TooltipContentProps): void => {
     render(<TooltipContent {...props} />);
   };
 

@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useLayoutEffect, useState } from 'react';
-import { render, RenderOptions } from '@testing-library/react';
+import { ReactElement, useLayoutEffect, useState } from 'react';
+import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory, MemoryHistory } from 'history';
 import { QueryParamProvider } from 'use-query-params';
@@ -60,13 +60,13 @@ export function renderWithContext(
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
   history?: MemoryHistory
-) {
+): RenderResult {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
   const customHistory = history ?? createMemoryHistory();
 
-  const BaseRender = () => (
+  const BaseRender = (): ReactElement => (
     <CustomRouter history={customHistory}>
       <QueryClientProvider client={queryClient}>
         <QueryParamProvider adapter={ReactRouter6Adapter}>

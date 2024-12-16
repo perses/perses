@@ -16,7 +16,7 @@ import { Legend, LegendProps } from '@perses-dev/components';
 import { action } from '@storybook/addon-actions';
 import { Box, Stack } from '@mui/material';
 import { red, orange, yellow, green, blue, indigo, purple } from '@mui/material/colors';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { StorySection } from '@perses-dev/storybook';
 import { legendModes } from '@perses-dev/core';
 
@@ -53,7 +53,7 @@ function generateMockLegendData(count: number, labelPrefix = 'legend item'): Leg
 // Wrapper that manages the controlled legend selection state, so the individual
 // story does not need to. Useful for stories that are not focused on explaining
 // how this state works.
-const UncontrolledLegendWrapper = (props: LegendProps) => {
+const UncontrolledLegendWrapper = (props: LegendProps): ReactElement => {
   const [selectedItems, setSelectedItems] = useState<LegendProps['selectedItems']>(props.selectedItems);
   const [sorting, setSorting] = useState<NonNullable<LegendProps['tableProps']>['sorting']>();
 
@@ -83,7 +83,7 @@ const UncontrolledLegendWrapper = (props: LegendProps) => {
 
 // Simple wrapper to try to help visualize that the legend is positioned absolutely
 // inside a relative ancestor.
-const LegendWrapper = (props: LegendProps) => {
+const LegendWrapper = (props: LegendProps): ReactElement => {
   const {
     options: { position },
   } = props;

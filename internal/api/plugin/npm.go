@@ -20,44 +20,44 @@ import (
 )
 
 const (
-	manifestFileName = "mf-manifest.json"
-	packageJSONFile  = "package.json"
+	ManifestFileName = "mf-manifest.json"
+	PackageJSONFile  = "package.json"
 )
 
-type npmPerses struct {
+type NPMPerses struct {
 	PluginType string `json:"pluginType"`
 }
 
-type npmPackage struct {
+type NPMPackage struct {
 	Author  string    `json:"author"`
 	Version string    `json:"version"`
-	Perses  npmPerses `json:"perses"`
+	Perses  NPMPerses `json:"perses"`
 }
 
-type buildInfo struct {
+type BuildInfo struct {
 	Version string `json:"buildVersion"`
 	Name    string `json:"buildName"`
 }
 
-type metadata struct {
-	BuildInfo buildInfo `json:"buildInfo"`
+type Metadata struct {
+	BuildInfo BuildInfo `json:"buildInfo"`
 }
 
-type npmManifest struct {
+type NPMManifest struct {
 	ID       string   `json:"id"`
 	Name     string   `json:"name"`
-	Metadata metadata `json:"metaData"`
+	Metadata Metadata `json:"metaData"`
 }
 
-func readManifest(pluginPath string) (*npmManifest, error) {
-	manifestFilePath := path.Join(pluginPath, manifestFileName)
-	manifestData := &npmManifest{}
+func ReadManifest(pluginPath string) (*NPMManifest, error) {
+	manifestFilePath := path.Join(pluginPath, ManifestFileName)
+	manifestData := &NPMManifest{}
 	return manifestData, readFile(manifestFilePath, manifestData)
 }
 
-func readPackage(pluginPath string) (*npmPackage, error) {
-	packageFilePath := path.Join(pluginPath, packageJSONFile)
-	packageData := &npmPackage{}
+func ReadPackage(pluginPath string) (*NPMPackage, error) {
+	packageFilePath := path.Join(pluginPath, PackageJSONFile)
+	packageData := &NPMPackage{}
 	return packageData, readFile(packageFilePath, packageData)
 }
 

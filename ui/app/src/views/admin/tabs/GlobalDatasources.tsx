@@ -14,7 +14,7 @@
 import { Card } from '@mui/material';
 import { getResourceDisplayName, GlobalDatasourceResource } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
-import { useCallback } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { DatasourceList } from '../../../components/datasource/DatasourceList';
 import {
   useCreateGlobalDatasourceMutation,
@@ -28,7 +28,7 @@ interface GlobalDatasourcesProps {
   id?: string;
 }
 
-export function GlobalDatasources(props: GlobalDatasourcesProps) {
+export function GlobalDatasources(props: GlobalDatasourcesProps): ReactElement {
   const { hideToolbar, id } = props;
   const { data, isLoading } = useGlobalDatasourceList({});
   const { successSnackbar, exceptionSnackbar } = useSnackbar();

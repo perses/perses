@@ -14,7 +14,7 @@
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import { Select, SelectProps, MenuItem, Stack, Divider, ListItemText, Chip, IconButton, Box } from '@mui/material';
 import { DatasourceSelector } from '@perses-dev/core';
-import { useMemo } from 'react';
+import { ReactElement, useMemo } from 'react';
 import { DatasourceSelectItemSelector, useListDatasourceSelectItems } from '../runtime';
 
 // Props on MUI Select that we don't want people to pass because we're either redefining them or providing them in
@@ -32,7 +32,7 @@ export interface DatasourceSelectProps extends Omit<SelectProps<string>, Omitted
  * Displays a MUI input for selecting a Datasource of a particular kind. Note: The 'value' and `onChange` handler for
  * the input deal with a `DatasourceSelector`.
  */
-export function DatasourceSelect(props: DatasourceSelectProps) {
+export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, onChange, ...others } = props;
   const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
   // Rebuild the group of the value if not provided
@@ -74,7 +74,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
   // This is because the href link action is on the `deleteIcon` property already, but the `onDelete` property
   // controls its visibility.
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  const fakeActionEvent = () => {};
+  const fakeActionEvent = (): void => {};
 
   // TODO:
   //  - Does this need a loading indicator of some kind?
@@ -121,7 +121,7 @@ export function DatasourceSelect(props: DatasourceSelectProps) {
   );
 }
 
-export function DatasourceName(props: { name: string; overridden?: boolean; overriding?: boolean }) {
+export function DatasourceName(props: { name: string; overridden?: boolean; overriding?: boolean }): ReactElement {
   const { name, overridden, overriding } = props;
   return (
     <>

@@ -20,6 +20,7 @@
             "description": "This Custom variable should be translated into a ListVariable > StaticListVariable in Perses",
             "hidden": false
           },
+          "defaultValue": "one",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -46,7 +47,7 @@
             "description": "This Custom variable should be translated into a TextVariable in Perses, with constant flag set to true",
             "hidden": true
           },
-          "value": "const_val",
+          "value": "${VAR_MYCONST}",
           "constant": true,
           "name": "MyConst"
         }
@@ -146,10 +147,10 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "interval",
             "description": "ad hoc filter",
             "hidden": false
           },
+          "defaultValue": "1m",
           "allowAllValue": false,
           "allowMultiple": false,
           "plugin": {
@@ -199,6 +200,9 @@
       {
         "kind": "ListVariable",
         "spec": {
+          "display": {
+            "hidden": false
+          },
           "allowAllValue": false,
           "allowMultiple": false,
           "sort": "none",
@@ -236,7 +240,6 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "queryResVarVolatile",
             "description": "query result var for volatile series (relies $__range global var)",
             "hidden": false
           },
@@ -257,7 +260,6 @@
         "kind": "ListVariable",
         "spec": {
           "display": {
-            "name": "queryResVarOther",
             "description": "query result var with no <aggr> by clause",
             "hidden": false
           },
@@ -299,8 +301,10 @@
             "kind": "StatChart",
             "spec": {
               "calculation": "last-number",
+              "sparkline": {},
               "format": {
-                "unit": "bytes/sec"
+                "unit": "bytes/sec",
+                "decimalPlaces": 2
               },
               "thresholds": {
                 "steps": [
@@ -323,6 +327,10 @@
                 "plugin": {
                   "kind": "PrometheusTimeSeriesQuery",
                   "spec": {
+                    "datasource": {
+                      "kind": "PrometheusDatasource",
+                      "name": "${DS_PROM}"
+                    },
                     "query": "vector(4)"
                   }
                 }
@@ -343,7 +351,8 @@
             "spec": {
               "calculation": "last-number",
               "format": {
-                "unit": "hours"
+                "unit": "hours",
+                "decimalPlaces": 1
               },
               "thresholds": {
                 "steps": [
@@ -368,7 +377,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(2)"
                   }
@@ -402,6 +411,11 @@
                   "sum"
                 ]
               },
+              "yAxis": {
+                "format": {
+                  "decimalPlaces": 3
+                }
+              },
               "visual": {
                 "areaOpacity": 0,
                 "connectNulls": true,
@@ -419,7 +433,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(1)"
                   }
@@ -440,20 +454,24 @@
             "spec": {
               "columnSettings": [
                 {
-                  "hide": true,
-                  "name": "Time"
+                  "header": "",
+                  "name": "timestamp",
+                  "hide": true
                 },
                 {
                   "hide": true,
                   "name": "__name__"
                 },
                 {
-                  "header": "",
-                  "name": "Time"
+                  "header": "API server",
+                  "name": "apiserver"
                 },
                 {
-                  "header": "API server",
-                  "name": "apiserver",
+                  "header": "ValueCustomHeader",
+                  "name": "value"
+                },
+                {
+                  "name": "API server",
                   "width": 300
                 },
                 {
@@ -473,7 +491,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "up{stack=\"ccp-ne-ogob01a\", prometheus=\"platform\"}"
                   }
@@ -510,7 +528,7 @@
                   "spec": {
                     "datasource": {
                       "kind": "PrometheusDatasource",
-                      "name": "argos-world"
+                      "name": "${DS_PROM}"
                     },
                     "query": "vector(3)"
                   }

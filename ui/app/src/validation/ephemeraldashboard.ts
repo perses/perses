@@ -31,7 +31,7 @@ export const updateEphemeralDashboardDialogValidationSchema = z.object({
 });
 export type UpdateEphemeralDashboardValidationType = z.infer<typeof updateEphemeralDashboardDialogValidationSchema>;
 
-export function useEphemeralDashboardValidationSchema(projectName?: string) {
+export function useEphemeralDashboardValidationSchema(projectName?: string): z.ZodSchema {
   const dashboards = useEphemeralDashboardList(projectName);
 
   return useMemo(() => {

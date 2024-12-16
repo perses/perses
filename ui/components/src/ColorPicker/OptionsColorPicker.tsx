@@ -11,27 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
+import { ReactElement, useState, MouseEvent } from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
-import { useChartsTheme } from '../context/ChartsProvider';
+import { useChartsTheme } from '../context';
 import { ColorPicker } from './ColorPicker';
 
 export interface OptionsColorPickerProps {
   label: string;
   color: string;
   onColorChange: (color: string) => void;
+  onClear?: () => void;
 }
 
-export function OptionsColorPicker({ color, onColorChange, label }: OptionsColorPickerProps) {
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+export function OptionsColorPicker({ label, color, onColorChange, onClear }: OptionsColorPickerProps): ReactElement {
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
-  const openColorPicker = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const openColorPicker = (event: MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
 
-  const closeColorPicker = () => {
+  const closeColorPicker = (): void => {
     setAnchorEl(null);
   };
 
@@ -55,7 +56,7 @@ export function OptionsColorPicker({ color, onColorChange, label }: OptionsColor
         open={isOpen}
         anchorEl={anchorEl}
         onClose={closeColorPicker}
-        PaperProps={{ sx: { padding: (theme) => theme.spacing(2) } }}
+        slotProps={{ paper: { sx: { padding: (theme) => theme.spacing(2) } } }}
         anchorOrigin={{
           vertical: 'top',
           horizontal: 'left',
@@ -65,7 +66,7 @@ export function OptionsColorPicker({ color, onColorChange, label }: OptionsColor
           horizontal: 'right',
         }}
       >
-        <ColorPicker color={color} onChange={onColorChange} palette={[defaultColor, ...palette]} />
+        <ColorPicker color={color} palette={[defaultColor, ...palette]} onChange={onColorChange} onClear={onClear} />
       </Popover>
     </>
   );

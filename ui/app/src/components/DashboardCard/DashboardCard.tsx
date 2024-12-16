@@ -16,13 +16,14 @@ import ViewDashboardIcon from 'mdi-material-ui/ViewDashboard';
 import { DashboardResource, getResourceDisplayName } from '@perses-dev/core';
 import Archive from 'mdi-material-ui/Archive';
 import { Link as RouterLink } from 'react-router-dom';
+import { ReactElement } from 'react';
 
 interface DashboardCardProps {
   dashboard: DashboardResource;
   hideIcon?: boolean;
 }
 
-export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps) {
+export function DashboardCard({ dashboard, hideIcon }: DashboardCardProps): ReactElement {
   return (
     <Button
       variant="contained"

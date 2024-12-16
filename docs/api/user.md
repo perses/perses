@@ -10,19 +10,25 @@ metadata:
   # User name for login
   name: <string>
 spec:
-  [ firstName: <string> ]
-  [ lastName: <string> ]
+  firstName: <string> # Optional
+  lastName: <string> # Optional
 
-  # Password when provided is hashed and salted before going to the database
-  # Password is optional because depending on the Perses configuration, you might be able to login with external
-  # authentication provider or not be able to create a user at all.
-  # It can happen when the Perses server relies on a ldap database for authentication.
-  [ nativeProvider: [ password: <string>]] 
+  nativeProvider: <Native Provider specification> # Optional
 
   # Save the context of the oauth provider used if the user has been created from an external OIDC or OAuth
   # authentication provider.
   oauthProviders:  
-  - [ <OAuth Provider specification> ]
+  - <OAuth Provider specification> # Optional
+```
+
+### Native Provider specification
+
+```yaml
+# Password when provided is hashed and salted before going to the database
+# Password is optional because depending on the Perses configuration, you might be able to login with external
+# authentication provider or not be able to create a user at all.
+# It can happen when the Perses server relies on a ldap database for authentication.
+password: <string> # Optional
 ```
 
 ### OAuth Provider specification

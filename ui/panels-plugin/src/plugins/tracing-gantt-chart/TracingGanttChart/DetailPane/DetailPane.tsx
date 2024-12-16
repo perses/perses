@@ -13,13 +13,15 @@
 
 import { Box, Divider, IconButton, Tab, Tabs, Typography } from '@mui/material';
 import { Span } from '@perses-dev/core';
-import { useState } from 'react';
+import { ReactElement, useState } from 'react';
 import CloseIcon from 'mdi-material-ui/Close';
-import { AttributeList } from './Attributes';
+import { GanttTrace } from '../trace';
+import { AttributeLinks, AttributeList } from './Attributes';
 import { SpanEventList } from './SpanEvents';
 
 export interface DetailPaneProps {
-  rootSpan: Span;
+  attributeLinks?: AttributeLinks;
+  trace: GanttTrace;
   span: Span;
   onCloseBtnClick: () => void;
 }
@@ -27,8 +29,8 @@ export interface DetailPaneProps {
 /**
  * DetailPane renders a sidebar showing the span attributes etc.
  */
-export function DetailPane(props: DetailPaneProps) {
-  const { rootSpan, span, onCloseBtnClick } = props;
+export function DetailPane(props: DetailPaneProps): ReactElement {
+  const { attributeLinks, trace, span, onCloseBtnClick } = props;
   const [tab, setTab] = useState<'attributes' | 'events'>('attributes');
 
   // if the events tab is selected, and then a span without events is clicked,
@@ -54,12 +56,12 @@ export function DetailPane(props: DetailPaneProps) {
       </Box>
       {tab === 'attributes' && (
         <>
-          {span.attributes.length > 0 && <AttributeList attributes={span.attributes} />}
+          {span.attributes.length > 0 && <AttributeList attributeLinks={attributeLinks} attributes={span.attributes} />}
           {span.attributes.length > 0 && <Divider />}
-          <AttributeList attributes={span.resource.attributes} />
+          <AttributeList attributeLinks={attributeLinks} attributes={span.resource.attributes} />
         </>
       )}
-      {tab === 'events' && <SpanEventList rootSpan={rootSpan} span={span} />}
+      {tab === 'events' && <SpanEventList trace={trace} span={span} />}
     </Box>
   );
 }

@@ -21,7 +21,7 @@ import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
 import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
-import { ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { Link } from '@perses-dev/core';
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { PanelLinks } from './PanelLinks';
@@ -54,7 +54,7 @@ export function PanelHeader({
   sx,
   extra,
   ...rest
-}: PanelHeaderProps) {
+}: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 

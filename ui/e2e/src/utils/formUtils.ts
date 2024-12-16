@@ -19,7 +19,11 @@ import { Locator } from '@playwright/test';
  * @param selectName - Name of the select.
  * @param itemName - Name of the menu item to pick within the select.
  */
-export async function selectMenuItem(container: Locator, selectName: string | RegExp, itemName: string | RegExp) {
+export async function selectMenuItem(
+  container: Locator,
+  selectName: string | RegExp,
+  itemName: string | RegExp
+): Promise<void> {
   await container
     .getByRole('combobox', {
       name: selectName,

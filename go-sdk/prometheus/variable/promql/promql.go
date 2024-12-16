@@ -18,6 +18,8 @@ import (
 	list_variable "github.com/perses/perses/go-sdk/variable/list-variable"
 )
 
+const PluginKind = "PrometheusPromQLVariable"
+
 type PluginSpec struct {
 	Datasource *datasource.Selector `json:"datasource,omitempty" yaml:"datasource,omitempty"`
 	Expr       string               `json:"expr" yaml:"expr"`
@@ -50,7 +52,7 @@ func PrometheusPromQL(expr string, options ...Option) list_variable.Option {
 		if err != nil {
 			return err
 		}
-		builder.ListVariableSpec.Plugin.Kind = "PrometheusPromQLVariable"
+		builder.ListVariableSpec.Plugin.Kind = PluginKind
 		builder.ListVariableSpec.Plugin.Spec = t
 		return nil
 	}

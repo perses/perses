@@ -21,7 +21,7 @@ declare global {
 /**
  * Generates a unique (stable) ID for a component. Should be replaced with React.useId once we support only React 18.
  */
-export function useId(prefix: string) {
+export function useId(prefix: string): string {
   if (globalThis.useIdValue === undefined) {
     globalThis.useIdValue = 0;
   }

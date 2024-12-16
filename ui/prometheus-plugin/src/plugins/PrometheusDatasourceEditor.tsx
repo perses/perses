@@ -14,7 +14,7 @@
 import { DurationString, RequestHeaders } from '@perses-dev/core';
 import { OptionsEditorRadios } from '@perses-dev/plugin-system';
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Controller } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
@@ -27,14 +27,18 @@ export interface PrometheusDatasourceEditorProps {
   isReadonly?: boolean;
 }
 
-export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProps) {
+export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProps): ReactElement {
   const { value, onChange, isReadonly } = props;
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
   // utilitary function used for headers when renaming a property
   // -> TODO it would be cleaner to manipulate headers as an intermediary list instead, to avoid doing this.
-  const buildNewHeaders = (oldHeaders: RequestHeaders | undefined, oldName: string, newName: string) => {
+  const buildNewHeaders = (
+    oldHeaders: RequestHeaders | undefined,
+    oldName: string,
+    newName: string
+  ): RequestHeaders | undefined => {
     if (oldHeaders === undefined) return oldHeaders;
     const keys = Object.keys(oldHeaders);
     const newHeaders = keys.reduce<Record<string, string>>((acc, val) => {
@@ -460,6 +464,10 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
             endpointPattern: '/api/v1/label/([a-zA-Z0-9_-]+)/values',
             method: 'GET',
           },
+          {
+            endpointPattern: '/api/v1/parse_query',
+            method: 'POST',
+          },
         ],
         url: '',
       },
@@ -472,7 +480,7 @@ export function PrometheusDatasourceEditor(props: PrometheusDatasourceEditorProp
   const [previousSpecProxy, setPreviousSpecProxy] = useState(initialSpecProxy);
 
   // When changing mode, remove previous mode's config + append default values for the new mode.
-  const handleModeChange = (v: number) => {
+  const handleModeChange = (v: number): void => {
     if (tabs[v]?.label === strDirect) {
       setPreviousSpecProxy(value);
       onChange(previousSpecDirect);

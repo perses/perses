@@ -19,9 +19,9 @@ textVarBuilder & {} // input parameters expected
 | Parameter   | Type                                                      | Mandatory/Optional | Default | Description                                                                      |
 |-------------|-----------------------------------------------------------|--------------------|---------|----------------------------------------------------------------------------------|
 | `#name`     | string                                                    | Mandatory          |         | The name of this variable.                                                       |
-| `#display`  | [Display](../../../api/variable.md#display-specification) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
-| `#value`    | string                                                    | Mandatory          |         | The value of this variable.                                                      |
 | `#constant` | bool                                                      | Mandatory          | false   | Whether this variable is a constant.                                             |
+| `#value`    | string                                                    | Mandatory          |         | The value of this variable.                                                      |
+| `#display`  | [Display](../../../api/variable.md#display-specification) | Optional           |         | Display object to tune the display name, description and visibility (show/hide). |
 
 ## Output
 

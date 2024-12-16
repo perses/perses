@@ -20,7 +20,7 @@ export function getColorFromThresholds(
   chartsTheme: PersesChartsTheme,
   thresholds?: ThresholdOptions,
   value?: number | null
-) {
+): string {
   // thresholds color takes priority over other colors
   const defaultColor = thresholds?.defaultColor ?? chartsTheme.thresholds.defaultColor;
 

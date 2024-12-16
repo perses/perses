@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/core';
+import { Definition, Transform } from '@perses-dev/core';
 import { TableDensity } from '@perses-dev/components';
 
 export interface ColumnSettings {
@@ -37,7 +37,8 @@ export interface ColumnSettings {
   // When `true`, the column will be sortable.
   enableSorting?: boolean;
 
-  // TODO: Allow user to set default sort => sort?: 'asc' | 'desc';
+  // Default sort order for the column.
+  sort?: 'asc' | 'desc';
 
   /**
    * Width of the column when rendered in a table. It should be a number in pixels
@@ -47,6 +48,44 @@ export interface ColumnSettings {
   width?: number | 'auto';
   // When `true`, the column will not be displayed.
   hide?: boolean;
+}
+
+export interface ValueCondition {
+  kind: 'Value';
+  spec: {
+    value: string;
+  };
+}
+
+export interface RangeCondition {
+  kind: 'Range';
+  spec: {
+    min?: number;
+    max?: number;
+  };
+}
+
+export interface RegexCondition {
+  kind: 'Regex';
+  spec: {
+    expr: string;
+  };
+}
+
+export interface MiscCondition {
+  kind: 'Misc';
+  spec: {
+    value: 'empty' | 'null' | 'NaN' | 'true' | 'false';
+  };
+}
+
+export type Condition = ValueCondition | RangeCondition | RegexCondition | MiscCondition;
+
+export interface CellSettings {
+  condition: Condition;
+  text?: string;
+  textColor?: `#${string}`;
+  backgroundColor?: `#${string}`;
 }
 
 /**
@@ -60,8 +99,17 @@ export interface TableDefinition extends Definition<TableOptions> {
  * The Options object type supported by the Table panel plugin.
  */
 export interface TableOptions {
+  // Change row height.
   density?: TableDensity;
+  // When true, the table will try to automatically adjust the width of columns to fit without overflowing.
+  // Only for column without custom width specified in columnSettings.
+  defaultColumnWidth?: 'auto' | number;
+  // Customize column display and order them by their index in the array.
   columnSettings?: ColumnSettings[];
+  // Customize cell display based on their value.
+  cellSettings?: CellSettings[];
+  // Apply transforms to the data before rendering the table.
+  transforms?: Transform[];
 }
 
 /**

@@ -15,11 +15,21 @@
  * The Options object type supported by the TracingGanttChart panel plugin.
  */
 // Note: The interface attributes must match cue/schemas/panels/tracing-gantt-chart/tracing-gantt-chart.cue
-export interface TracingGanttChartOptions {}
+export interface TracingGanttChartOptions {
+  visual?: TracingGanttChartVisualOptions;
+}
+
+export interface TracingGanttChartVisualOptions {
+  palette?: TracingGanttChartPaletteOptions;
+}
+
+export interface TracingGanttChartPaletteOptions {
+  mode: 'auto' | 'categorical';
+}
 
 /**
  * Creates the initial/empty options for a TracingGanttChart panel.
  */
-export function createInitialTracingGanttChartOptions() {
+export function createInitialTracingGanttChartOptions(): Record<string, unknown> {
   return {};
 }

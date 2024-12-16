@@ -14,6 +14,7 @@
 import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import { ReactElement } from 'react';
 import { PanelGroupItemId, useEditMode, usePanel, usePanelActions, useViewPanel } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { isPanelGroupItemIdEqual } from '../../context/DashboardProvider/panel-group-slice';
@@ -27,7 +28,7 @@ export interface GridItemContentProps {
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
-export function GridItemContent(props: GridItemContentProps) {
+export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { panelGroupItemId, width } = props;
   const panelDefinition = usePanel(panelGroupItemId);
   const {
@@ -44,7 +45,7 @@ export function GridItemContent(props: GridItemContentProps) {
 
   const readHandlers = {
     isPanelViewed: isPanelGroupItemIdEqual(viewPanelGroupItemId, panelGroupItemId),
-    onViewPanelClick: function () {
+    onViewPanelClick: function (): void {
       if (viewPanelGroupItemId === undefined) {
         viewPanel(panelGroupItemId);
       } else {

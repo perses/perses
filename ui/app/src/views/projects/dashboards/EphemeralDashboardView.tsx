@@ -15,7 +15,7 @@ import { CircularProgress, Stack } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource, getResourceExtendedDisplayName } from '@perses-dev/core';
-import { useCallback, useEffect } from 'react';
+import { ReactElement, useCallback, useEffect } from 'react';
 import { useEphemeralDashboard, useUpdateEphemeralDashboardMutation } from '../../../model/ephemeral-dashboard-client';
 import { useIsReadonly } from '../../../context/Config';
 import { useNavHistoryDispatch } from '../../../context/DashboardNavHistory';
@@ -24,7 +24,7 @@ import { HelperDashboardView } from './HelperDashboardView';
 /**
  * The View for displaying an existing EphemeralDashboard.
  */
-function EphemeralDashboardView() {
+function EphemeralDashboardView(): ReactElement | null {
   const { projectName, ephemeralDashboardName } = useParams();
 
   if (projectName === undefined || ephemeralDashboardName === undefined) {

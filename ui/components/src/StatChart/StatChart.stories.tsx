@@ -13,6 +13,7 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import { StatChart, StatChartData, StatChartProps } from '@perses-dev/components';
+import { ReactElement } from 'react';
 
 const DEFAULT_DATA: StatChartData = {
   calculatedValue: 7.57037037037037,
@@ -444,7 +445,7 @@ export default meta;
 
 type Story = StoryObj<typeof StatChart>;
 
-const StatChartWrapper = (props: StatChartProps) => {
+const StatChartWrapper = (props: StatChartProps): ReactElement => {
   // This wrapper is needed or the stat chart does not size as expected.
   return (
     <div

@@ -13,6 +13,7 @@
 
 import CodeIcon from 'mdi-material-ui/CodeBraces';
 import { InfoTooltip, ToolbarIconButton } from '@perses-dev/components';
+import { ReactElement } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import { useEditJsonDialog } from '../../context';
 
@@ -20,7 +21,7 @@ export interface EditJsonButtonProps {
   isReadonly: boolean;
 }
 
-export const EditJsonButton = (props: EditJsonButtonProps) => {
+export const EditJsonButton = (props: EditJsonButtonProps): ReactElement => {
   const { isReadonly } = props;
   const { openEditJsonDialog } = useEditJsonDialog();
 

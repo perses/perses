@@ -14,7 +14,7 @@
 import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
 import { Box } from '@mui/material';
 import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, ReactElement } from 'react';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -22,7 +22,7 @@ import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableCell, TableCellProps } from './TableCell';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableProps, TableRowEventOpts } from './model/table-model';
+import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 
 type TableCellPosition = {
@@ -30,12 +30,15 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<Pick<TableProps<TableData>, 'height' | 'width' | 'density'>> &
+export type VirtualizedTableProps<TableData> = Required<
+  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth'>
+> &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
     rows: Array<Row<TableData>>;
     columns: Array<Column<TableData, unknown>>;
     headers: Array<HeaderGroup<TableData>>;
+    cellConfigs?: TableCellConfigs;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -45,13 +48,15 @@ export function VirtualizedTable<TableData>({
   width,
   height,
   density,
+  defaultColumnWidth,
   onRowClick,
   onRowMouseOver,
   onRowMouseOut,
   rows,
   columns,
   headers,
-}: VirtualizedTableProps<TableData>) {
+  cellConfigs,
+}: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
   // Use a ref for these values because they are only needed for keyboard
@@ -85,12 +90,12 @@ export function VirtualizedTable<TableData>({
   const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
-      Table: (props) => {
+      Table: (props): ReactElement => {
         return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
       },
       TableHead,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      TableRow: ({ item, ...props }) => {
+      TableRow: ({ item, ...props }): ReactElement | null => {
         const index = props['data-index'];
         const row = rows[index];
         if (!row) {
@@ -118,7 +123,7 @@ export function VirtualizedTable<TableData>({
   }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
 
   return (
-    <Box sx={{ width, height }}>
+    <Box style={{ width, height }}>
       <TableVirtuoso
         ref={virtuosoRef}
         totalCount={rows.length}
@@ -149,7 +154,7 @@ export function VirtualizedTable<TableData>({
                           onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
                           sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
                           nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
-                          width={column.getSize() || 'auto'}
+                          width={column.getSize() || defaultColumnWidth}
                           align={column.columnDef.meta?.align}
                           variant="head"
                           density={density}
@@ -185,6 +190,8 @@ export function VirtualizedTable<TableData>({
                 };
 
                 const cellContext = cell.getContext();
+                const cellConfig = cellConfigs?.[cellContext.cell.id];
+
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
 
@@ -204,7 +211,9 @@ export function VirtualizedTable<TableData>({
                 return (
                   <TableCell
                     key={cell.id}
-                    width={cell.column.getSize() || 'auto'}
+                    data-testid={cell.id}
+                    title={description || cellConfig?.text || cellContent}
+                    width={cell.column.getSize() || defaultColumnWidth}
                     align={cell.column.columnDef.meta?.align}
                     density={density}
                     focusState={getFocusState(position)}
@@ -212,8 +221,10 @@ export function VirtualizedTable<TableData>({
                     isFirstColumn={i === 0}
                     isLastColumn={i === cells.length - 1}
                     description={description}
+                    color={cellConfig?.textColor ?? undefined}
+                    backgroundColor={cellConfig?.backgroundColor ?? undefined}
                   >
-                    {cellContent}
+                    {cellConfig?.text || cellContent}
                   </TableCell>
                 );
               })}

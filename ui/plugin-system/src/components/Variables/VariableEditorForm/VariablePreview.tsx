@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Alert, Box, Card, Chip, CircularProgress, IconButton, Stack, Typography } from '@mui/material';
 import { InfoTooltip, useSnackbar } from '@perses-dev/components';
 import Refresh from 'mdi-material-ui/Refresh';
@@ -29,11 +29,11 @@ interface VariablePreviewProps {
   error?: string;
 }
 
-export function VariablePreview(props: VariablePreviewProps) {
+export function VariablePreview(props: VariablePreviewProps): ReactElement {
   const { values, onRefresh, isLoading, error } = props;
   const [maxValues, setMaxValues] = useState<number | undefined>(DEFAULT_MAX_PREVIEW_VALUES);
   const { infoSnackbar } = useSnackbar();
-  const showAll = () => {
+  const showAll = (): void => {
     setMaxValues(undefined);
   };
   let notShown = 0;
@@ -89,7 +89,7 @@ interface VariableListPreviewProps {
   onRefresh: () => void;
 }
 
-export function VariableListPreview(props: VariableListPreviewProps) {
+export function VariableListPreview(props: VariableListPreviewProps): ReactElement {
   const { definition, onRefresh } = props;
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;

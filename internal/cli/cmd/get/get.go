@@ -14,6 +14,7 @@
 package get
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
@@ -32,6 +33,7 @@ type option struct {
 	opt.ProjectOption
 	opt.OutputOption
 	writer          io.Writer
+	errWriter       io.Writer
 	kind            modelV1.Kind
 	allProject      bool
 	prefix          string
@@ -39,11 +41,11 @@ type option struct {
 }
 
 func (o *option) Complete(args []string) error {
-	// first let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
+	// First, let's analyze the args to get what kind of resource we should get and if there is a prefix to use for the filtering.
 	if len(args) == 0 {
-		return fmt.Errorf(resource.FormatMessage())
+		return errors.New(resource.FormatMessage())
 	} else if len(args) == 2 {
-		// In second position in the arguments, you can have a prefix that will be used to filter the resources.
+		// In the second position in the arguments, you can have a prefix that will be used to filter the resources.
 		o.prefix = args[1]
 	} else if len(args) > 2 {
 		return fmt.Errorf("you cannot have more than two arguments for the command 'get'")
@@ -56,6 +58,8 @@ func (o *option) Complete(args []string) error {
 	}
 
 	// Complete the output only if it has been set by the user
+	// NB: In the case of the `get` command, the default output format is/should be a table, not json
+	// or yaml, hence why we need to skip OutputOption.Complete() if the output flag is not set.
 	if len(o.Output) > 0 {
 		if outputErr := o.OutputOption.Complete(); outputErr != nil {
 			return outputErr
@@ -102,6 +106,10 @@ func (o *option) Execute() error {
 
 func (o *option) SetWriter(writer io.Writer) {
 	o.writer = writer
+}
+
+func (o *option) SetErrWriter(errWriter io.Writer) {
+	o.errWriter = errWriter
 }
 
 func NewCMD() *cobra.Command {

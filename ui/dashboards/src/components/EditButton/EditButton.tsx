@@ -13,6 +13,7 @@
 
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
+import { ReactElement } from 'react';
 
 export interface EditButtonProps {
   /**
@@ -26,7 +27,7 @@ export interface EditButtonProps {
   onClick: () => void;
 }
 
-export const EditButton = ({ label = 'Edit', onClick }: EditButtonProps) => {
+export const EditButton = ({ label = 'Edit', onClick }: EditButtonProps): ReactElement => {
   return (
     <Button
       onClick={onClick}

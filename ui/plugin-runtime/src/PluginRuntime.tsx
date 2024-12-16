@@ -113,8 +113,11 @@ export const pluginRuntime = init({
   },
 });
 
-export function usePluginRuntime({ moduleName, baseURL }: { moduleName: string; baseURL?: string }) {
-  const registerRemote = (name: string) => {
+export function usePluginRuntime({ moduleName, baseURL }: { moduleName: string; baseURL?: string }): {
+  pluginRuntime: typeof pluginRuntime;
+  load: (name: string) => Promise<PersesPluginModule | null>;
+} {
+  const registerRemote = (name: string): void => {
     const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
     if (!existingRemote) {
       const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
@@ -128,7 +131,7 @@ export function usePluginRuntime({ moduleName, baseURL }: { moduleName: string; 
     }
   };
 
-  const load = async (name: string) => {
+  const load = async (name: string): Promise<PersesPluginModule | null> => {
     registerRemote(name);
 
     return loadRemote<PersesPluginModule>(`${name}/${moduleName}`);

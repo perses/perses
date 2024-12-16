@@ -19,7 +19,7 @@ interface DynamicPanelContentProps {
   contentDimensions?: { width: number; height: number };
 }
 
-export function DynamicPanelContent({ definition, contentDimensions }: DynamicPanelContentProps) {
+export function DynamicPanelContent({ definition, contentDimensions }: DynamicPanelContentProps): React.ReactNode {
   if (!definition?.spec.plugin.kind) {
     throw new Error('Missing plugin kind in panel definition');
   }

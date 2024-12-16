@@ -15,9 +15,11 @@ package tracingganttchart
 
 import "github.com/perses/perses/go-sdk/panel"
 
+const PluginKind = "TracingGanttChart"
+
 func Chart() panel.Option {
 	return func(builder *panel.Builder) error {
-		builder.Spec.Plugin.Kind = "TracingGanttChart"
+		builder.Spec.Plugin.Kind = PluginKind
 		return nil
 	}
 }

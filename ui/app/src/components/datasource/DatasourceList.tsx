@@ -14,7 +14,7 @@
 import { getResourceDisplayName, getMetadataProject, Datasource, Action } from '@perses-dev/core';
 import { Stack } from '@mui/material';
 import { GridColDef, GridRowParams } from '@mui/x-data-grid';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { ReactElement, useCallback, useMemo, useState } from 'react';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
@@ -43,7 +43,7 @@ import { DatasourceDrawer } from './DatasourceDrawer';
  * @param props.initialState Provide a way to override default initialState
  * @param props.isLoading Display a loading circle if enabled
  */
-export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCallbacks<T>) {
+export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCallbacks<T>): ReactElement {
   const { data, hideToolbar, onCreate, onUpdate, onDelete, initialState, isLoading } = props;
   const isReadonly = useIsReadonly();
 
@@ -204,9 +204,10 @@ export function DatasourceList<T extends Datasource>(props: ListPropertiesWithCa
         <>
           <DatasourceDrawer
             datasource={targetedDatasource}
-            isOpen={isDatasourceDrawerOpened}
             action={action}
+            isOpen={isDatasourceDrawerOpened}
             isReadonly={isReadonly}
+            onActionChange={setAction}
             onSave={handleDatasourceSave}
             onDelete={(v) => onDelete(v).then(() => setDeleteDatasourceDialogOpened(false))}
             onClose={() => setDatasourceDrawerOpened(false)}

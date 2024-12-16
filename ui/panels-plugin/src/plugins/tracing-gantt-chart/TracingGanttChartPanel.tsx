@@ -14,12 +14,24 @@
 import { PanelProps, useDataQueries } from '@perses-dev/plugin-system';
 import { LoadingOverlay, NoDataOverlay, TextOverlay, useChartsTheme } from '@perses-dev/components';
 import { Box } from '@mui/material';
+import { ReactElement } from 'react';
 import { TracingGanttChartOptions } from './gantt-chart-model';
 import { TracingGanttChart } from './TracingGanttChart/TracingGanttChart';
+import { AttributeLinks } from './TracingGanttChart/DetailPane/Attributes';
 
-export type TracingGanttChartPanelProps = PanelProps<TracingGanttChartOptions>;
+export interface TracingGanttChartPanelProps extends PanelProps<TracingGanttChartOptions> {
+  /**
+   * Allows custom links for each attribute in the detail pane.
+   * Example:
+   * {
+   *   'k8s.pod.name': (attrs) => `/my/console/namespace/${attrs['k8s.namespace.name']?.stringValue}/${attrs['k8s.pod.name']?.stringValue}/detail`
+   * }
+   */
+  attributeLinks?: AttributeLinks;
+}
 
-export function TracingGanttChartPanel() {
+export function TracingGanttChartPanel(props: TracingGanttChartPanelProps): ReactElement {
+  const { spec, attributeLinks } = props;
   const chartsTheme = useChartsTheme();
   const contentPadding = chartsTheme.container.padding.default;
   const { isFetching, isLoading, queryResults } = useDataQueries('TraceQuery');
@@ -44,7 +56,7 @@ export function TracingGanttChartPanel() {
 
   return (
     <Box sx={{ height: '100%', padding: `${contentPadding}px` }}>
-      <TracingGanttChart rootSpan={trace.rootSpan} />
+      <TracingGanttChart options={spec} attributeLinks={attributeLinks} trace={trace} />
     </Box>
   );
 }
