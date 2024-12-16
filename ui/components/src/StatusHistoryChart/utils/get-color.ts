@@ -53,7 +53,7 @@ export function getColorForValue(value: number | string, baseColor: string): str
     }
 
     return color;
-  } catch (error) {
+  } catch (_) {
     return fallbackColor;
   }
 }

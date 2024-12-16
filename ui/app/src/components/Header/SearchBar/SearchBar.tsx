@@ -99,7 +99,7 @@ function useHandleShortCut(handleOpen: () => void): void {
     document.addEventListener('keydown', handleKeyPress);
 
     // remove the event listener
-    return () => {
+    return (): void => {
       document.removeEventListener('keydown', handleKeyPress);
     };
   }, [handleKeyPress]);
