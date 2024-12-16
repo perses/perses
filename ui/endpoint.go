@@ -58,6 +58,7 @@ func (f *frontend) RegisterRoute(e *echo.Echo) {
 	contentRewrite := middleware.Rewrite(map[string]string{f.apiPrefix + "/*": "/app/dist/$1"})
 	e.GET(f.apiPrefix, serveASTFiles)
 	e.GET(f.apiPrefix+"/*", contentHandler, routerMiddleware(f.apiPrefix), contentRewrite)
+	e.Static(f.apiPrefix+"/plugins", f.pluginsPath)
 }
 
 // routerMiddleware is here to serve properly the react app.
